@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+    <h2>Llamadas Pendientes</h2>
+    <br />
+
+    <h3>Primeras llamadas</h3>
+	<form action="" method="POST">
+        {% csrf_token %}
+    
+        <table id="miembros_primera" class="simple" cellspacing="0">
+            <thead>
+                <tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('miembros_primera');" /></div></th>
+		            <th>Nombre</th>
+		       	</tr>
+            </thead>
+            <tbody>
+                {% for mp in miembrosPrimera %}
+                    <tr>
+						<td><input type="checkbox" name="seleccionados" value="{{mp.id}}"/></td>
+						<td>{{mp.nombre|capfirst}} {{mp.primerApellido|capfirst}} {{mp.segundoApellido|capfirst}}</td>
+					</tr>
+                {% empty %}
+                    <tr><td colspan="2" class="centrarTexto">No hay primeras llamadas pendientes</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br/>
+		<input class="button blue smallB" type="submit" value="Registrar Primera Llamada" name="primeraLlamada">
+	</form>
+    <br />
+    <h3>Segundas llamadas</h3>
+    <form action="" method="POST">
+        {% csrf_token %}
+
+        <table id="miembros_segunda" class="simple" cellspacing="0">
+            <thead>
+                <tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('miembros_segunda');" /></div></th>
+		            <th>Nombre</th>
+		       	</tr>
+            </thead>
+            <tbody>
+                {% for ms in miembrosSegunda %}
+                    <tr>
+						<td><input type="checkbox" name="seleccionados" value="{{ms.id}}"/></td>
+						<td>{{ms.nombre|capfirst}} {{ms.primerApellido|capfirst}} {{ms.segundoApellido|capfirst}}</td>
+					</tr>
+                {% empty %}
+                    <tr><td colspan="2" class="centrarTexto">No hay segundas llamadas pendientes</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br/>
+		<input class="button blue smallB" type="submit" value="Registrar Segunda Llamada" name="segundaLlamada">
+	</form>
+	
+{% endblock %}  

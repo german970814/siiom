@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block js %}
+<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    //dibujando el grafico
+    {% if sw %}
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart(){
+            var data = google.visualization.arrayToDataTable({{ values|safe }});
+            var options = {width: 700, height: 500};
+            var chart = new google.visualization.LineChart(document.getElementById('out'));
+            chart.draw(data, options);
+        }
+    {% endif %}
+    
+    $(document).ready(function(){
+        var dates = $("#id_fechai, #id_fechaf").datepicker({
+                                    maxDate: new Date(),
+                                    beforeShowDay: function(date){
+                                        var day = date.getDay();
+                                        var d = this.id == "id_fechai" ? [(day == 1), ""] : [(day == 0), ""];
+                                        return d;
+                                    },
+                                    onSelect: function(selectedDate){
+                                        var option = this.id == "id_fechai" ? "minDate" : "maxDate";
+                                        dates.not(this).datepicker("option", option, selectedDate);
+                                    }
+								});
+
+        $("#idGrupo_i").change(function(){
+            if($(this).val() != -1){
+                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){agregarOpciones(data, 'idGrupo_f');}, "json");
+            }
+            else{
+                $("#idGrupo_f").html('');
+            }
+        });
+
+        $("#idCheck").click(function(){
+            if($(this).is(':checked')){
+                $("#idGrupo_f").attr('disabled', 'disabled');
+            }
+            else{
+                $("#idGrupo_f").removeAttr('disabled');
+            }
+        });
+
+        $("input[name='ofrenda']").click(function(){
+            if($(this).is(':checked')){
+                $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
+            }
+            else{
+                $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").removeAttr('disabled');
+            }
+        });
+
+        $("#form_pasosTotal").submit(function(){
+            if($("#idGrupo_i").val() == -1){
+                alert("Por favor seleccione un grupo inicial.");
+            }
+            else{
+                if(!$("#idCheck").is(':checked')){
+                    if($("#idGrupo_f").val() == -1){
+                        alert("Por favor seleccione un grupo final o seleccione o la casilla de los descendientes.");
+                    }
+                    else{
+                       return true;
+                    }
+                }
+                else{
+                    return true;
+                }
+            }
+            return false;
+        });
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+
+    <h2>Estadistico de reuniones GAR</h2>
+    <br />
+
+    <form action="" id="form_pasosTotal" method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        <label for="idGrupo_i">Grupo inicial:</label>
+        <select id="idGrupo_i" name="menuGrupo_i">
+            <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
+            {% for g_i in listaGrupo_i %}
+                <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="idGrupo_f">Grupo final:</label>
+        <select id="idGrupo_f" name="menuGrupo_f">
+             {% if  grupo_f %}
+           	    <option value="-1" >------</option>
+       		    {% for g_f in listaGrupo_f %}
+            	    <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
+                {% endfor %}
+             {% endif %}
+        </select>
+        <br />
+        <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if descendientes %}checked="checked"{% endif %}/>Mostrar todos los descendientes del grupo inicial
+        <br />
+        <input type="checkbox" name="lid_asis"  value="S" {% if lid_asis %}checked="checked"{% endif %}/>N&uacute;mero de lideres asistentes
+        <input type="checkbox" name="visitas"  value="S" {% if visitas %}checked="checked"{% endif %}/>N&uacute;mero de visitas
+        <br />
+        <input type="checkbox" name="asis_reg" value="S" {% if asis_reg %}checked="checked"{% endif %}/>N&uacute;mero asistentes regulares
+        <input type="checkbox" name="ofrenda" value="S" {% if ofrenda %}checked="checked"{% endif %}/>Ofrenda
+        <br />
+        <input type="submit" name="verReporte" value="Ver" class="button blue smallB">
+        <input type="submit" name="reportePDF" value="Generar PDF" class="button blue smallB">
+    </form>
+    <br /><br />
+    
+    <div id="out"></div>
+
+{% endblock %}

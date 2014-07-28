@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>{{grupo.nombre}} de la Red {{grupo.red.nombre}}</h2>
+
+<p><span class="bold">Zona:</span> {{grupo.barrio.zona.nombre}}</p>
+<p><span class="bold">Barrio:</span> {{grupo.barrio.nombre}}</p>
+<p><span class="bold">Direcci&oacute;n:</span> {{grupo.direccion}}</p>
+<p><span class="bold">D&iacute;a GAR:</span> {{grupo.diaGAR}}</p>
+<p><span class="bold">Hora GAR:</span> {{grupo.horaGAR}}</p>
+<p><span class="bold">D&iacute;a Discipulado:</span> {{grupo.diaDiscipulado}}</p>
+<p><span class="bold">Hora Discipulado:</span> {{grupo.horaDiscipulado}}</p>
+<p><span class="bold">Fecha de Apertura:</span> {{grupo.fechaApertura}}</p>
+<p><span class="bold">L&iacute;deres:</span>
+	<ul>
+		<li><span class="bold">Lider 1:</span> {{grupo.lider1.nombre}}</li>
+		{% if grupo.lider2 %}
+			<li><span class="bold">Lider 2:</span> {{grupo.lider2.nombre}}</li>
+		{% endif %}
+	</ul>
+</p>
+
+{% endblock %}

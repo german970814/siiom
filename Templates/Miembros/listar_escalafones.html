@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Escalafones</h2>
+
+	{% if okElim == 1 %}
+		<p class="ok">Se eliminaron los escalafones seleccionadas.</p>
+	{% else %}
+		{% if okElim == 2%}
+			<p class="error">Hubo un error al eliminar escalafones.</p>
+		{% endif %}
+	{% endif %}
+    
+	{% if escalafones %}
+		<form action="" method="POST" enctype="multipart/form-data" >
+			{% csrf_token %}
+			<a alt="Agregar Escalaf&oacute;n" href="/miembro/crear_escalafon/">Agregar Escalaf&oacute;n <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+			<br/>
+			<table id="escalafones" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('escalafones');" /></div></th>
+		            <th>Rango</th>
+		            <th>C&eacute;lulas</th>
+		            <th>Descripci&oacute;n</th>
+		            <th>Logro</th>
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for escalafon in escalafones %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{escalafon.id}}"/></td>
+						<td>{{escalafon.rango|capfirst}}</td>
+						<td>{{escalafon.celulas|capfirst}}</td>
+						<td>{{escalafon.descripcion|capfirst}}</td>
+						<td>{{escalafon.logro|capfirst}}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<input class="button blue smallB" type="submit" value="Editar" name="editar">
+            <input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">
+		</form>
+		<br />
+	{% else %}
+		<p>No existen escalafones a&uacute;n. Haga <a alt="Agregar Escalaf&oacute;n" href="/miembro/crear_escalafon/"click aqu&iacute;></a> para agregar uno.</p>
+	{% endif %}
+{% endblock %}  

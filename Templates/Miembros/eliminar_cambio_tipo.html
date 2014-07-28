@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+	<h2>Eliminar Cambio Tipo de Mimebro de {{cambio.miembro.nombre|capfirst}} {{cambio.autorizacion.primerApelldio|capfirst}} </h2>
+	
+	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+		<P>
+			Tipo de miembro previo: {{cambio.anteriorTipo}}
+			Tipo de miembro actualizado: {{cambio.nuevoTipo}}
+			Autorizo el cambio: {{cambio.autorizacion.nombre|capfirst}} {{cambio.autorizacion.primerApellido|capfirst}}
+			fecha del cambio: {{cambio.fecha}} 
+		</P>
+	<p><input class="button blue smallB" type="submit" value="eliminar" name="aceptar"></p>
+	</form>
+{% endblock %}

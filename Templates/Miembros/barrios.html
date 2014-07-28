@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Barrios de la zona {{zona}}</h2>
+
+	{% if okElim == 1 %}
+		<p class="ok">Se eliminaron los barrios seleccionadas.</p>
+	{% else %}
+		{% if okElim == 2%}
+			<p class="error">Hubo un error al eliminar barrios.</p>
+		{% endif %}
+	{% endif %}
+	
+	<form action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		<a alt="Agregar Barrio" href="/miembro/crear_barrio/{{zona.id}}">Agregar Barrio <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+		<br/>
+		{% if barrios %}
+			<table id="barrios" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('barrios');" /></div></th>
+		            <th>Nombre</th>
+		            
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for barrio in barrios %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{barrio.id}}"/></td>
+						<td>{{barrio.nombre|capfirst}}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<input class="button blue smallB" type="submit" value="Editar" name="editar">
+			<input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">
+			{% else %}
+			<p>A&uacute;n no se han agregado barrios a esta zona.</p>
+		{% endif %}
+{% endblock %} 

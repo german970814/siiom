@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Casa del Rey - Login</title>
+<link type="text/css" rel="stylesheet" media="all" href="{{ MEDIA_URL }}style.css" />
+</head>
+<body class="login">
+    <div id="container">
+        {% if not valido %}
+            <p class="error">Nombre de usuario o contrase&ntilde;a inv&aacute;lidos.</p>
+        {% endif %}
+        <div class="loginForm ie-shadow">
+          <form action="/iniciar_sesion/" method="POST">
+          	{% csrf_token %}
+            <p>
+              <label for="username">Usuario (e-mail)<br />
+              </label>
+              <input type="text" name="username" value="" id="username">
+            </p>
+            <p>
+              <label for="password">Contrase&ntilde;a<br />
+              </label>
+              <input type="password" name="password" value="" id="password">
+            </p>
+            <p class="center noMargin">
+              <input class="button blue" type="submit" value="Login" />
+              <input type="hidden" name="next" value="{{ next|escape }}" />
+			</p>
+          </form>
+        </div><!--login-->   
+    </div><!--container-->
+</body>
+</html>
+        

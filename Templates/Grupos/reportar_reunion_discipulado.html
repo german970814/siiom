@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block js %}
+<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#id_fecha").datepicker();
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+	
+	<h2>Reporte Reunion: Discipulado</h2>
+
+    {% if ok %}
+        <p class="ok">Se ha registrado el reporte correctamente.</p>
+    {% endif %}
+    {% if ya_reportada %}
+        <p class="error">Ya ha sido reportada una reunion en esta semana.</p>
+    {% endif %}
+    {% if grupo %}
+        <form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+            {% csrf_token %}
+            {{ form.as_p }}
+            <table id="miembros" class="simple alinearForm" cellspacing="0">
+                <caption><span class="bold">Asistencia</span></caption>
+                <thead>
+                <tr>
+                    <th class="checkboxBoton"><div class="button gray smallB checkBoton">
+                    <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('miembros');"/></div></th>
+                    <th>Nombre</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for mg in discipulos %}
+                    <tr>
+                        <td><input type="checkbox" name="seleccionados" value="{{mg.id}}"/></td>
+                        <td>{{mg.nombre|capfirst}} {{mg.primerApellido|capfirst}} {% if mg.segundoApellido %} {{mg.segundoApellido|capfirst}} {% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br/>
+        <input class="button blue smallB" type="submit" value="aceptar" name="aceptar">
+        </form>
+    {% else %}
+        <p>No tiene ningun grupo asignado</p>
+    {% endif %}
+{% endblock %}  

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+	 {% if visitantes %}
+	<div class="notificaciones">
+		<ul>
+		{% for visita in visitantes %}
+			<li>Llamada pendiente al visitante {{visita.nombre|capfirst}} {{visita.primerApellido|capfirst}} para informarle de las reuniones de G.A.R <span class="bold"><a href="/miembro/registrar_llamada/lider/">Registrar Llamada</a></span></li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	{% if perms.custom_perm %} 
+	 	do something 
+	{% endif %} 
+{% endblock %} 
+

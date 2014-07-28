@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+	<h2>Promover Estudiante</h2>
+	{{est.moduloReportado}} {{est.moduloActual}} {{est.nombre}}
+	{% if ok %}
+		<p class="ok">Se ha editado correctamente el registro anterior.</p>
+	{% endif %}	
+	<h3>Seleccione el m&oacute;dulo al que se va a promover el estudiante {{estudiante.estudiante.nombre|capfirst}} {{estudiante.estudiante.primerApellido|capfirst}}</h3>
+	{% if not puedeVer %}
+		<p class="error">El estudiante actual no ha asistido a todas las sesiones.</p>
+	{% endif %}
+	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		{%if puedeVer %}{{ form.as_p }}{% endif %}
+	<p><input class="button blue smallB" type="submit" value="{% if not puedeVer %}siguiente{% else %}aceptar{% endif %}" name="aceptar"></p>
+	</form>
+{% endblock %}

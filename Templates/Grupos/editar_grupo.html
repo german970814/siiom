@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+	<h2>Editar Grupo</h2>
+	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.nombre.errors }}
+        <p class="requerido">
+        	<label>{{ form.nombre.label }}:</label>
+        	{{ form.nombre }}
+        </p>
+        {{ form.direccion.errors }}
+        <p class="requerido">
+        	<label for="id_direccion">{{ form.direccion.label }}:</label>
+        	{{ form.direccion }}
+        </p>
+        <fieldset class="mediano">
+        	<legend><h3>Reunion Grupo de Amistad</h3></legend>
+            {{ form.diaGAR.errors }}
+        	<p class="requerido">
+            	<label for="id_diaGAR">{{ form.diaGAR.label }}:</label>
+        		{{ form.diaGAR }}
+            </p>
+            {{ form.horaGAR.errors }}
+        	<p class="requerido">
+            	<label for="id_horaGAR">{{ form.horaGAR.label }}:</label>
+        		{{ form.horaGAR }}
+            </p>
+        </fieldset>
+        <fieldset class="mediano">
+        	<legend><h3>Reunion Discipulado</h3></legend>
+            {{ form.diaDiscipulado.errors }}
+        	<p class="requerido">
+            	<label for="id_diaDiscipulado">{{ form.diaDiscipulado.label }}:</label>
+        		{{ form.diaDiscipulado }}
+            </p>
+            {{ form.horaDiscipulado.errors }}
+        	<p class="requerido">
+            	<label for="id_horaDiscipulado">{{ form.horaDiscipulado.label }}:</label>
+        		{{ form.horaDiscipulado }}
+            </p>
+        </fieldset>     
+		<!--{{ form.as_p }}-->
+		<br>
+	<input class="button blue smallB" type="submit" value="aceptar" name="aceptar">
+	</form>	
+{% endblock %}  

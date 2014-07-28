@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Detalles de Llamada</h2>
+
+	{% if okElim == 1 %}
+		<p class="ok">Se eliminaron los detalles de llamada seleccionadas.</p>
+	{% else %}
+		{% if okElim == 2%}
+			<p class="error">Hubo un error al eliminar detalles de llamada.</p>
+		{% endif %}
+	{% endif %}
+    
+	{% if detallesLlamada %}
+		<form action="" method="POST" enctype="multipart/form-data" >
+			{% csrf_token %}
+			<a alt="Agregar Detalle de llamada" href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada<img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+			<br/>
+			<table id="detallesLlamada" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('detallesLlamada');" /></div></th>
+		            <th>Nombre</th>
+		            <th>Descripci&oacute;n</th>
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for detalle in detallesLlamada %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{detalle.id}}"/></td>
+						<td>{{detalle.nombre|capfirst}}</td>
+						<td>{{detalle.descripcion|capfirst}}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<input class="button blue smallB" type="submit" value="Editar" name="editar">
+            <input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">
+		</form>
+		<br />
+	{% else %}
+		<p>No existen detalles de llamada a&uacute;n. Haga <a alt="Agregar Detalles de Llamada" href="/miembro/agregar_detalle_llamada/">click aqu&iacute;</a> para agregar uno.</p>
+	{% endif %}
+{% endblock %}  

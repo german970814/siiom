@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div id="perfil">
+	{% if ok %} <p class="ok"></p>{% endif %}
+	{% if perms.miembros.es_administrador %}
+		<fieldset>
+			<legend><h3>Tipos de Miembro</h3></legend>
+			{% for cambio in tipos %}
+				<p>
+					{{cambio.nuevoTipo}}
+					{% if cambio.nuevoTipo.nombre|lower != 'visita' %}
+                        <a alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"><img alt="Eliminar" src="{{MEDIA_URL}}Imagenes/vcard_delete.png" /></a>
+                    {% endif %}
+				</p> 
+			{% endfor %}
+			<p>
+				<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro <img alt="Agregar" src="{{MEDIA_URL}}Imagenes/vcard_edit.png" /></a>
+			</p>
+		</fieldset> 
+	{% endif %}
+	<fieldset>
+		<legend><h3>Informaci&oacute;n General</h3></legend>
+		<p><span class="bold">Nombre completo:</span> {{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}} {{miembro.segundoApellido|capfirst}}</p>
+		<p><span class="bold">C&eacute;dula:</span> {{miembro.cedula}}</p>
+		<p><span class="bold">Fecha de Nacimiento:</span> {{miembro.fechaNacimiento}}</p>
+		<p><span class="bold">G&eacute;nero:</span> {% if miembro.genero == 'F' %}Femenino{% else %}Masculino{% endif %}</p>
+		{% if miembro.profesion %}
+			<p><span class="bold">Profesi&oacute;n:</span> {{miembro.profesion}}</p>
+		{% endif %}
+		{% if miembro.estadoCivil %}
+			<p><span class="bold">Estado Civil:</span> {% if miembro.estadoCivil == 'C' %}Casado{% if miembro.conyugue %} con <a href="/miembro/perfil/{{miembro.conyugue.id}}">{{miembro.conyugue.nombre|capfirst}} {{miembro.conyugue.primerApellido|capfirst}}</a>{% endif %} {% else %}{{miembro.get_estadoCivil_display}}{% endif%}</p>
+		{% endif %}
+	</fieldset>
+	
+	<fieldset>
+		<legend><h3>Informaci&oacute;n de Contacto</h3></legend>
+		
+		<p><span class="bold">e-mail:</span> {{miembro.email}}</p>
+		{% if miembro.telefono %}
+			<p><span class="bold">Tel&eacute;fono:</span> {{miembro.telefono}}</p>
+		{% endif %}
+		{% if miembro.celular %}
+			<p><span class="bold">Celular:</span> {{miembro.celular}}</p>
+		{% endif %}
+		{% if miembro.direccion %}
+			<p><span class="bold">Direcci&oacute;n:</span> {{miembro.direccion}}</p>
+		{% endif %}
+		<p><span class="bold">Barrio:</span> {{miembro.barrio}}</p>
+	</fieldset>
+	
+	<fieldset>
+		<legend><h3>Informaci&oacute;n General de la Iglesia</h3></legend>
+		<p><span class="bold">Estado del miembro:</span> {{miembro.get_estado_display}}</p>
+		{% if miembro.convertido %}
+			<p>El miembro <span class="bold">est&aacute; convertido</span></p>
+		{% endif %}
+		
+		{% if escalafon %}
+			<p><span class="bold">Escalaf&oacute;n:</span> {{escalafon}}</p>
+		{% endif %}
+		
+		{% if grupoLidera %}
+			<p><span class="bold">Grupo que lidera:</span> {{grupoLidera}}</p>
+		{% endif %}
+		
+		{% if miembro.grupo %}
+			<p><span class="bold">Grupo al que pertenece:</span> {{miembro.grupo}}</p>
+		{% endif %}
+		
+		{% if miembro.lider %}
+			<p><span class="bold">L&iacute;der del miembro:</span> {{miembro.lider.nombre|capfirst}} {{miembro.lider.primerApellido|capfirst}}</p>
+		{% endif %}
+	</fieldset>
+	
+	<fieldset>
+		<legend><h3>Informaci&oacute;n de consolidaci&oacute;n de G.A.R</h3></legend>
+		{% if miembro.fechaAsignacionGAR %}
+			<p><span class="bold">Fecha de asignaci&oacute;n a G.A.R:</span> {{miembro.fechaAsignacionGAR}}</p>
+		{% endif %}
+		{% if miembro.asisteGAR %}
+			<p>El miembro asiste a G.A.R</p> 
+		{% else %}
+			{%if miembro.noInteresadoGAR %}
+				<p>El miembro no est&aacute; interesado en G.A.R</p>
+			{% endif %}
+		{% endif %}
+		{% if not miembro.asisteGAR and not miembro.noInteresadoGAR %}
+			{% if miembro.fechaPrimeraLlamada %}
+				<h4>Primera Llamada</h4>
+				<p><span class="bold">Fecha de la primera llamada:</span> {{miembro.fechaPrimeraLlamada}}<br />
+				{% if miembro.detallePrimeraLlamada %}
+					<span class="bold">Detalle de la primera llamada:</span> {{miembro.detallePrimeraLlamada}}<br />
+				{% endif %}
+				{% if miembro.observacionPrimeraLlamada %}
+					<span class="bold">Observaci&oacute;n de la primera llamada:</span> {{miembro.observacionPrimeraLlamada}}
+				{% endif %}
+				</p>
+			{% else %}
+				<p class="alerta">A&uacute;n no se ha realizado la primera llamada</p>
+			{% endif %}
+			
+			{% if miembro.fechaSegundaLlamada %}
+				<h4>Segunda Llamada</h4>
+				<p><span class="bold">Fecha de la segunda llamada:</span> {{miembro.fechaSegundaLlamada}}<br />
+				{% if miembro.detallePrimeraLlamada %}
+					<span class="bold">Detalle de la Segunda llamada:</span> {{miembro.detalleSegundaLlamada}}<br />
+				{% endif %}
+				{% if miembro.observacionSegundaLlamada %}
+					<span class="bold">Observaci&oacute;n de la segunda llamada:</span> {{miembro.observacionSegundaLlamada}}
+				{% endif %}
+				</p>
+			{% else %}
+				<p class="alerta">A&uacute;n no se ha realizado la segunda llamada</p>
+			{% endif %}
+			
+			{% if miembro.fechaLlamadaLider %}
+				<h4>Llamada de L&iacute;der</h4>
+				<p><span class="bold">Fecha de llamada del L&iacute;der:</span> {{miembro.fechaLlamadaLider}}<br />
+				{% if miembro.detalleLlamadaLider %}
+					<span class="bold">Detalle de la llamada del L&iacute;der:</span> {{miembro.detalleLlamadaLider}}<br />
+				{% endif %}
+				{% if miembro.observacionLlamadaLider %}
+					<span class="bold">Observaci&oacute;n de la llamada del L&iacute;der:</span> {{miembro.observacionLlamadaLider}}
+				{% endif %}
+				</p>
+			{% else %}
+				<p class="alerta">A&uacute;n no se ha realizado la llamada del l&iacute;der</p>
+			{% endif %}		
+		{% endif %}
+	</fieldset>
+	<fieldset>
+		<legend><h3>Pasos</h3></legend>
+			{% if pasos %}
+				<ul>
+				{% for paso in pasos %}
+					<li>{{paso.paso}}</li>
+				{% endfor %}
+				</ul>
+			{% else %}
+				<p>El miembro a&uacute;n no ha completado ning&uacute;n paso</p>
+			{% endif %}
+	</fieldset>
+	
+</div><!--perfil-->
+{% endblock %}
+
+{% block derContenido2%}
+	{% if perms.grupos.puede_confirmar_ofrenda_GAR or perms.grupos.puede_confirmar_ofrenda_discipulado %}
+		<div class="caja">
+   			<h3>Reportar Ofrendas de {{miembro.nombre|capfirst}}</h3>
+    			<ul>
+	    			{% if perms.grupos.puede_confirmar_ofrenda_GAR %}
+	    				<li><a href="/miembro/confirmar_ofrenda_gar/{{miembro.id}}">Confirmar Ofrenda de G.A.R</a></li>
+    				{% endif %}
+    				{% if perms.grupos.puede_confirmar_ofrenda_discipulado %}<li><a href="/miembro/confirmar_ofrenda_discipulado/{{miembro.id}}">Reportar Ofrenda de Reunion de Discipulado</a></li>{% endif %}
+    			</ul>
+   		</div>  
+   	{% endif %}  			    			
+{% endblock %}

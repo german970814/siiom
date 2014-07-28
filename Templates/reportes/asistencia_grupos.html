@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block js %}
+    <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+		var dates = $("#id_fechai, #id_fechaf").datepicker({
+                                   onSelect: function(selectedDate){
+                                        var option = this.id == "id_fechai" ? "minDate" : "maxDate";
+                                        dates.not(this).datepicker("option", option, selectedDate);
+                                   }
+								});
+
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+    <h2>Asistencia de Grupos</h2>
+    <br />
+
+    <form id="form_asistencia" class="alinearForm" action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" name="verReporte" value="Ver Reporte" class="button blue smallB">
+    </form>
+    <br /><br />
+
+    <table id="asistencia" class="simple" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Miembros\Reuniones</th>
+                {% for r in reuniones %}
+                    <th>{{ r.fecha }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in miembros_grupo %}
+                <tr>
+                    <td>{{ m.nombre|capfirst }} {{ m.primerApellido|capfirst }}</td>
+                    {% for a in m.asis %}
+                        {% if a %}
+                            <td><img src="{{ MEDIA_URL }}Imagenes/accept.png" ></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

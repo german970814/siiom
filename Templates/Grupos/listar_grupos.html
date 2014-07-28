@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Grupos de la Red {{red.nombre|capfirst}}</h2>
+	
+	<form action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		<a alt="Agregar Grupo" href="/grupo/crear_grupo/{{red.id}}">Agregar Grupos <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+		<br/>
+		{% if grupos %}
+			<table id="grupos" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('grupos');" /></div></th>
+		            <th>Nombre</th>
+		            <th>Lider1</th>
+		            <th>Lider2</th>
+		            <th>Estado</th>
+		            <th>Fecha de Apertura</th>
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for grupo in grupos %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{grupo.id}}"/></td>
+						<td>{{grupo.nombre|capfirst}}</td>
+						<td>{{grupo.lider1.nombre|capfirst}}</td>
+						<td>{{grupo.lider2.nombre|capfirst}}</td>
+						<td>{{grupo.get_estado_display}}</td>
+						<td>{{grupo.fechaApertura|capfirst}}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<input class="button blue smallB" type="submit" value="Editar" name="editar">
+			{% else %}
+			<p>A&uacute;n no se han agregado grupos a esta red.</p>
+		{% endif %}
+{% endblock %} 

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript"  src="{{ MEDIA_URL }}Scripts/jstree1.0/jquery.jstree.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#arbol").jstree({"plugins": ["themes", "html_data"]});
+    });
+</script>
+{% endblock %}
+
+{% load reportes_filters %}
+
+{% block contenido %}
+
+    <h2>Desarrollo grupo</h2>
+    <br />
+
+    <div id="arbol"><ul>{{ arbol|unordered_list_grupos }}</ul></div>
+
+{% endblock %}
