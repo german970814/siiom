@@ -8,6 +8,8 @@ from django.db.models import Q
 from django.forms.models import ModelForm
 from Iglesia.grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from Iglesia.miembros.models import CambioTipo, Miembro
+from grupos.models import Predica
+
 
 class FormularioEditarGrupo(ModelForm):
     required_css_class = 'requerido'
@@ -104,3 +106,10 @@ class FormularioReportesSinEnviar(forms.Form):
     reunion = forms.TypedChoiceField(choices = REUNION_CHOICES, coerce = int, required = True, widget = forms.RadioSelect)
     fechai = forms.DateField(label = 'Fecha inicial', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
     fechaf = forms.DateField(label = 'Fecha final', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
+
+class FormularioCrearPredica(ModelForm):
+    required_css_class = 'requerido'
+
+    class Meta:
+        model = Predica
+        exclude = ('miembro',)

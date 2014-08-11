@@ -115,3 +115,12 @@ class AsistenciaDiscipulado(models.Model):
     def __unicode__(self):
         return self.miembro.nombre + " - " + self.reunion.grupo.nombre
 
+
+class Predica(models.Model):
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField(max_length=500, blank=True)
+    miembro = models.ForeignKey('miembros.Miembro')
+    fecha = models.DateField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.nombre
