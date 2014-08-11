@@ -819,7 +819,7 @@ def cambiarMiembroDeTipoMiembro(request, id):
 
             if (nuevoCambioTipo.nuevoTipo.nombre.lower() == "lider" or nuevoCambioTipo.nuevoTipo.nombre.lower() == "agente" or  \
                 nuevoCambioTipo.nuevoTipo.nombre.lower() == "maestro" or nuevoCambioTipo.nuevoTipo.nombre.lower() == "receptor" or \
-                nuevoCambioTipo.nuevoTipo.nombre.lower() == "administrador"):
+                nuevoCambioTipo.nuevoTipo.nombre.lower() == "administrador" or nuevoCambioTipo.nuevoTipo.nombre.lower() == "pastor"):
 
                 if miembroCambio.usuario == None or miembroCambio.usuario == '':
                     request.session['tipo'] = nuevoCambioTipo.nuevoTipo.nombre
@@ -835,6 +835,8 @@ def cambiarMiembroDeTipoMiembro(request, id):
                         miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
                     if nuevoCambioTipo.nuevoTipo.nombre.lower() == "administrador":
                         miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
+                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "pastor":
+                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
     else:
         form = FormularioCambioTipoMiembro(idm = int(id))    
     return render_to_response('Miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
@@ -925,6 +927,8 @@ def eliminarCambioTipoMiembro(request, id):
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Receptor'))
     if cambio.nuevoTipo.nombre.lower() == "administrador": 
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Administrador'))
+    if cambio.nuevoTipo.nombre.lower() == "pastor":
+        cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Pastor'))
             
     try:
         if len(cambio.miembro.usuario.groups.all()) == 0:
