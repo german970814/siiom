@@ -129,6 +129,31 @@ class Miembro(models.Model):
             return grupo.miembro_set.filter(id__in = lideres)
         else:
             return []
+
+    def pastores(self):
+        """Devuelve los indices de los pastores que se encuentran por encima del miembro."""
+
+        grupo_actual = self.grupo
+        tipo_pastor = TipoMiembro.objects.get(nombre__ixact = 'pastor')
+        pastores = []
+
+        sw = True
+
+        while sw:
+
+            lideres = Miembro.objects.filter(id__in = grupo_actual.listaLideres())
+
+            for lider in lideres:
+                tipos = CambioTipo.objects.filter(miembro = lider, nuevoTipo = tipo_pastor)
+                if len(tipos) > 0:
+                    pastores.append(lider.id)
+
+            if grupo_actual.lider1.grupo is None:
+                sw = False
+            else:
+                grupo_actual = grupo_actual.lider1.grupo
+
+        return pastores
     
     class Meta:
         permissions = (

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 from django.db import models
-from Iglesia.miembros.models import Miembro, CambioTipo
+from miembros.models import Miembro, CambioTipo
 
 class Red(models.Model):
 
