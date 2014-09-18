@@ -61,6 +61,15 @@ class Grupo(models.Model):
         miembros = CambioTipo.objects.filter(nuevoTipo__nombre__iexact = 'miembro').values('miembro')
         return self.miembro_set.filter(id__in = miembros).exclude(id__in = lideres)
 
+class Predica(models.Model):
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField(max_length=500, blank=True)
+    miembro = models.ForeignKey('miembros.Miembro')
+    fecha = models.DateField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.nombre
+
 class ReunionGAR(models.Model):
     fecha = models.DateField()
     grupo = models.ForeignKey(Grupo)
@@ -89,9 +98,9 @@ class AsistenciaMiembro(models.Model):
         return self.miembro.nombre + " - " + self.reunion.grupo.nombre
     
 class ReunionDiscipulado(models.Model):
-    fecha = models.DateField()
+    fecha = models.DateField(auto_now_add=True)
     grupo = models.ForeignKey(Grupo)
-    predica = models.CharField(max_length=100, verbose_name=u'prédica')
+    predica = models.ForeignKey(Predica, verbose_name=u'prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
     novedades = models.TextField(max_length=500)
@@ -114,13 +123,3 @@ class AsistenciaDiscipulado(models.Model):
     
     def __unicode__(self):
         return self.miembro.nombre + " - " + self.reunion.grupo.nombre
-
-
-class Predica(models.Model):
-    nombre = models.CharField(max_length=200)
-    descripcion = models.TextField(max_length=500, blank=True)
-    miembro = models.ForeignKey('miembros.Miembro')
-    fecha = models.DateField(auto_now_add=True)
-
-    def __unicode__(self):
-        return self.nombre

@@ -98,6 +98,14 @@ def reunionReportada(fecha, grupo, tipo):
     else:
         return False
 
+def reunionDiscipuladoReportada(predica, grupo):
+    reunion = grupo.reuniondiscipulado_set.filter(predica=predica)
+
+    if reunion:
+        return True
+    else:
+        return False
+
 @user_passes_test(liderTest, login_url="/iniciar_sesion/")
 def reportarReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
@@ -134,10 +142,10 @@ def reportarReunionDiscipulado(request):
         discipulos = miembro.discipulos()
         asistentesId = request.POST.getlist('seleccionados')
         if request.method == 'POST':
-            form = FormularioReportarReunionDiscipulado(data=request.POST)
+            form = FormularioReportarReunionDiscipulado(miembro=miembro, data=request.POST)
             if form.is_valid():
                 r = form.save(commit=False)
-                if not reunionReportada(r.fecha, grupo, 1):
+                if not reunionDiscipuladoReportada(r.predica, grupo):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
@@ -150,7 +158,7 @@ def reportarReunionDiscipulado(request):
                 else:
                     ya_reportada = True
         else:
-            form = FormularioReportarReunionDiscipulado()
+            form = FormularioReportarReunionDiscipulado(miembro=miembro)
     return render_to_response('Grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(receptorAdminTest, login_url="/iniciar_sesion/")

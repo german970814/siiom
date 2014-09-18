@@ -28,6 +28,12 @@ class FormularioReportarReunionGrupo(ModelForm):
         
 class FormularioReportarReunionDiscipulado(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self, miembro='', *args, **kwargs):
+        super(FormularioReportarReunionDiscipulado, self).__init__(*args, **kwargs) #populates the post
+        if miembro != '':
+            query = Predica.objects.filter(miembro__id__in = miembro.pastores())
+            self.fields['predica'].queryset = query
     
     class Meta:
         model = ReunionDiscipulado

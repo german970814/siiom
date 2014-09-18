@@ -134,8 +134,14 @@ class Miembro(models.Model):
         """Devuelve los indices de los pastores que se encuentran por encima del miembro."""
 
         grupo_actual = self.grupo
-        tipo_pastor = TipoMiembro.objects.get(nombre__ixact = 'pastor')
+        tipo_pastor = TipoMiembro.objects.get(nombre__iexact = 'pastor')
         pastores = []
+
+        lideres = Miembro.objects.filter(id__in = self.grupoLidera().listaLideres())
+        for lider in lideres:
+            tipos = CambioTipo.objects.filter(miembro = lider, nuevoTipo = tipo_pastor)
+            if len(tipos) > 0:
+                pastores.append(lider.id)
 
         sw = True
 
