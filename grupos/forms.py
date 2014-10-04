@@ -33,11 +33,12 @@ class FormularioReportarReunionGrupo(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupo, self).__init__(*args, **kwargs)
-        self.fields['fecha'].widget.attrs.update({'class' : 'form-control'})
-        self.fields['predica'].widget.attrs.update({'class' : 'form-control'})   
-        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'}) 
-        self.fields['numeroVisitas'].widget.attrs.update({'class' : 'form-control'})
-        self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['fecha'].widget.attrs.update({'class': 'form-control'})
+        self.fields['predica'].widget.attrs.update({'class': 'form-control'})
+        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class': 'form-control'})
+        self.fields['numeroVisitas'].widget.attrs.update({'class': 'form-control'})
+        self.fields['novedades'].widget.attrs.update({'class': 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
         
 class FormularioReportarReunionDiscipulado(ModelForm):
     required_css_class = 'requerido'
