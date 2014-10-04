@@ -39,6 +39,11 @@ class FormularioReportesSinEnviar(forms.Form):
     fechai = forms.DateField(label = 'Fecha inicial', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
     fechaf = forms.DateField(label = 'Fecha final', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
 
+    def __init__(self, *args, **kwargs):
+        super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
+        self.fields['fechai'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['fechaf'].widget.attrs.update({'class' : 'form-control'}) 
+
 class FormularioPredicas(forms.Form):
     required_css_class = 'requerido'
 

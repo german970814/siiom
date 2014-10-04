@@ -2,48 +2,52 @@
 
 {% block contenido %}
 
-	<h2>Editar Grupo</h2>
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-        {{ form.non_field_errors }}
-        {{ form.nombre.errors }}
-        <p class="requerido">
-        	<label>{{ form.nombre.label }}:</label>
-        	{{ form.nombre }}
-        </p>
-        {{ form.direccion.errors }}
-        <p class="requerido">
-        	<label for="id_direccion">{{ form.direccion.label }}:</label>
-        	{{ form.direccion }}
-        </p>
-        <fieldset class="mediano">
-        	<legend><h3>Reunion Grupo de Amistad</h3></legend>
-            {{ form.diaGAR.errors }}
-        	<p class="requerido">
-            	<label for="id_diaGAR">{{ form.diaGAR.label }}:</label>
-        		{{ form.diaGAR }}
-            </p>
-            {{ form.horaGAR.errors }}
-        	<p class="requerido">
-            	<label for="id_horaGAR">{{ form.horaGAR.label }}:</label>
-        		{{ form.horaGAR }}
-            </p>
-        </fieldset>
-        <fieldset class="mediano">
-        	<legend><h3>Reunion Discipulado</h3></legend>
-            {{ form.diaDiscipulado.errors }}
-        	<p class="requerido">
-            	<label for="id_diaDiscipulado">{{ form.diaDiscipulado.label }}:</label>
-        		{{ form.diaDiscipulado }}
-            </p>
-            {{ form.horaDiscipulado.errors }}
-        	<p class="requerido">
-            	<label for="id_horaDiscipulado">{{ form.horaDiscipulado.label }}:</label>
-        		{{ form.horaDiscipulado }}
-            </p>
-        </fieldset>     
-		<!--{{ form.as_p }}-->
-		<br>
-	<input class="button blue smallB" type="submit" value="aceptar" name="aceptar">
-	</form>	
+    <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Editar Datos de mi Grupo de Amistad</h1>
+            </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <i class="fa fa-pencil"></i> 
+                    Escribe aqui la información de tu Grupo
+                </div>
+                <div class="panel-body">
+                    <form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        <div class="row">
+                            <div class="col-lg-4"><p class="requerido">
+                            <label for="id_direccion">{{ form.direccion.label }}:</label>
+                            {{ form.direccion }}</p></div>
+                        </div> 
+                        <br>
+                        <fieldset class="mediano">
+                            <legend><h3>Reunion Grupo de Amistad</h3></legend>
+                            {{ form.diaGAR.errors }}
+                            <div class="row">
+                                <div class="col-lg-4"><p class="requerido">
+                                    <label for="id_diaGAR">{{ form.diaGAR.label }}:</label>
+                                    {{ form.diaGAR }}
+                                </p></div>
+                            </div>    
+                            {{ form.horaGAR.errors }}
+                            <div class="row">
+                                <div class="col-lg-4"><p class="requerido">
+                                    <label for="id_horaGAR">{{ form.horaGAR.label }}:</label>
+                                    {{ form.horaGAR }}
+                                </p></div>
+                            </div>      
+                        </fieldset>  
+                        <!--{{ form.as_p }}-->
+                        <br>
+                    <input class="btn btn-primary" type="submit" value="aceptar" name="aceptar">
+                    </form> 
+                </div>
+            </div>
+        </div>
+    </div>                
 {% endblock %}  
