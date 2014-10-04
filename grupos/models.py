@@ -77,7 +77,7 @@ class ReunionGAR(models.Model):
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
     numeroVisitas = models.PositiveIntegerField(verbose_name = u'Número de visitas:')
-    novedades = models.TextField(max_length=500)
+    novedades = models.TextField(max_length=500, default="nada",null= True, blank = True)
     ofrenda = models.PositiveIntegerField()
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
     
