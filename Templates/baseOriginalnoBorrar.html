@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="{{ MEDIA_URL }}style.css" rel="stylesheet" type="text/css" />
+<title>Casa Del Rey</title>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-1.5.2.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$(".extender").click(function(){
+			var padre = $(this).parent().get(0).id;
+			$("#"+padre+" > .submenu").slideToggle();
+		});
+	});
+</script>
+{% block js %}
+{% endblock %}
+</head>
+
+<body>
+
+<div id="contenedor">
+	<div id="envSup">
+	   <div id="superior">
+	    <div id="encabezado">
+	    	<h1><a href="/miembro">Casa Del Rey</a></h1>
+	    </div><!--encabezado-->	
+	    <div id="nav">
+			<div id="buscador">
+		    	<form action="/resultado/miembro/" method="POST">
+		    		{% csrf_token %}
+		        	<input name="buscar" type="text" value="" size="30" maxlength="300" />
+		            <input class="button smallB gray" name="buscar" type="submit" value="Buscar" />
+		        </form>
+		    </div><!--buscador-->
+		    <div id="menu">
+			    <ul>
+					<li><a href="/miembro">Inicio</a></li>
+					<li><a href="/miembro/editar_perfil/">Editar Perfil</a></li>
+					<li><a href="/salir/">Salir</a></li>
+				</ul>
+				{% block menu %}
+				{% endblock %}
+		    </div><!--menu-->
+	    </div><!--nav-->
+	   </div><!--superior-->
+	</div><!--envSup -->
+    <div id="contenido">
+    	<div id="izqContenido">
+            <img src="{{ MEDIA_URL }}Imagenes/logo.jpg" width=155px><br /><br />
+    		<h2><a href="/miembro/perfil/{{miembro.id}}">{{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}}</a></h2>
+		<ul id="menuLateral">
+		
+			{% if perms.miembros.es_administrador %}	
+				<li id="c">
+					<div class="extender"></div>
+	                <a href="/administracion/">Administraci&oacute;n</a>                
+					<div class="submenu">
+	                    <ul>
+	                    	<li id="ca">
+	                    	<div class="extender noBorder"></div>
+	                    		Academia
+		                    	<div class="submenu">
+		                    		<ul>
+			                            <li><a href="/academia/listar_cursos/">Listar Cursos</a></li>
+			                            <li><a href="/academia/crear_curso/">Crear Curso</a></li>
+			                            <li><a href="/academia/listar_modulos/">Listar M&oacute;dulos</a></li>
+			                            <li><a href="/academia/crear_modulo/">Crear M&oacute;dulo</a></li>
+			                            <li><a href="/miembro/graduar_alumno/">Graduar Alumno</a></li>
+			                            <li><a href="/academia/listar_pagos/">Listar Pagos de Academia</a></li>
+		                    		</ul>
+	                    	</div>
+	                    	</li>
+	                    	<li id="cb">
+	                    	<div class="extender noBorder"></div>
+	                    		Miembro
+		                    	<div class="submenu">
+		                    		<ul>
+		                    			<li><a href="/miembro/listar_zonas/">Listar Zonas</a></li>	
+		                   				<li><a href="/miembro/crear_zona/">Crear Zona</a></li>
+		                    			<li><a href="/miembro/listar_escalafones/">Listar Escalafones</a></li>
+				                    	<li><a href="/miembro/crear_escalafon/">Crear Escalaf&oacute;n</a></li>
+				                    	<li><a href="/miembro/promover_escalafon/">Promover Miembro de Escalaf&oacute;n</a></li>
+				                    	<li><a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a></li>
+				                    	<li><a href="/miembro/crear_tipo_miembro/">Agregar Tipos de Miembro</a></li>
+				                    	<li><a href="/miembro/listar_pasos/">Listar Pasos</a></li>
+				                    	<li><a href="/miembro/agregar_paso/">Agregar Paso</a></li>
+				                    	<li><a href="/miembro/detalles_llamada/">Listar Detalles de Llamada</a></li>
+		                    			<li><a href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada</a></li>
+                                        {% if perms.miembros.cumplimiento_pasos %}
+                                        	<li><a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a></li>
+                                        {% endif %}
+		                    		</ul>
+	                    		</div>
+	                    	</li>
+	                    	<li id="cc">
+	                    	<div class="extender noBorder"></div>
+	                    		Grupo
+		                    	<div class="submenu">
+		                    		<ul>
+                                        <li><a href="/grupo/grupo_padre/">Grupo Padre</a></li>
+		                    			<li><a href="/grupo/listar_redes/">Listar Redes</a></li>
+	                    				<li><a href="/grupo/crear_red/">Crear Red</a></li>
+		                    		</ul>
+	                    		</div>
+	                    	</li>	
+	                    </ul>
+	                </div>
+				</li>
+			{% endif %}
+			
+			{% if perms.miembros.puede_agregar_visitante or perms.miembros.es_lider or perms.miembros.llamada_lider or perms.miembros.llamada_agente %}
+			<li id="a">
+				<div class="extender"></div>
+                {% if perms.miembros.es_lider %}
+                    <a href="/miembro/listar_miembros/">Grupo</a>
+                {% else %}
+                    <a>Grupo</a>
+                {% endif %}
+				<div class="submenu">
+                    <ul>
+                        {% if perms.miembros.puede_agregar_visitante %}<li><a href="/miembro/agregar_miembro/">Agregar Visitante</a></li>{% endif %}
+                        {% if perms.miembros.es_lider %}<li><a href="/miembro/promover_visitantes/">Promover Visitantes</a></li> {% endif %}
+                        {% if perms.miembros.llamada_lider %}	<li><a href="/miembro/llamadas_pendientes/lider">Llamadas Pendientes G.A.R</a></li>	{% endif %}
+                        {% if perms.miembros.llamada_agente %}	<li><a href="/miembro/llamadas_pendientes/agente">Llamadas Pendientes Iglesia</a></li>	{% endif %}
+                        {% if perms.miembros.es_lider %}<li><a href="/miembro/editar_grupo/">Editar Grupo</a></li> {% endif %}
+                        {% if perms.miembros.es_lider %}<li><a href="/miembro/reportar_reunion_grupo/">Reportar reunion G.A.R</a></li>{% endif %}
+                        {% if perms.miembros.es_lider %}<li><a href="/miembro/reportar_reunion_discipulado/">Reportar reunion discipulado</a></li>{% endif %}
+                    </ul>
+                </div>
+			</li>
+			{% endif %}
+			
+			{% if perms.miembros.es_maestro %}	
+	            <li id="b">
+					<div class="extender"></div>
+	                <a href="/academia/cursos/">Academia</a>                
+					<div class="submenu">
+	                    <ul>
+	                    	<li><a href="/academia/asistencia/">Asistencia</a></li>	
+	                    	<li><a href="/academia/registrar_entrega_tarea/">Entrega de tarea</a></li>	
+	                    </ul>
+	                </div>
+				</li>
+			{% endif %}
+
+            {# TODO: que solo salga a los que pueden hacer reportes   #}
+            <li id="d">
+            	<div class="extender"></div>
+                <a>Reportes</a>
+                <div class="submenu">
+                	<ul>
+                    	{% if perms.miembros.es_lider or perms.miembros.es_administrador %}
+                        	<li><a href="/reportes/desarrollo_grupos/">Desarrollo de grupo</a></li>
+                            <li><a href="/reportes/miembros_y_pasos/">Miembros y sus pasos</a></li>
+                            <li><a href="/reportes/pasos_totales/">Estadistico de pasos por totales</a></li>
+                            <li><a href="/reportes/pasos_rango_fechas/">Estadistico de pasos por un rango de fechas</a></li>
+                            <li><a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a></li>
+                            <li><a href="/reportes/estadistico_reunionesGAR/">Estadistico de reuniones GAR</a></li>
+                            <li><a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discipulado</a></li>
+                            <li><a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones GAR</a></li>
+                            <li><a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Estadistico totalizado de reuniones Discipulado</a></li>
+                            <li><a href="/reportes/reportes_reuniones_sin_enviar/">Faltantes de entrega de reportes de reuniones</a></li>
+                        {% endif %}
+                        {% if perms.miembros.es_agente or perms.miembros.es_administrador %}
+                            <li><a href="/reportes/asignacion_gar/">Control de asignaci&oacute;n a GAR</a></li>
+                            <li><a href="/reportes/primera_llamada/">1ra llamada</a></li>
+                            <li><a href="/reportes/segunda_llamada/">2da llamada</a></li>
+                            <li><a href="/reportes/visitas_por_red/">Visitas asignadas por redes</a></li>
+                            <li><a href="/reportes/visitas_por_mes/">Visitas registradas por mes</a></li>
+                            <li><a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a></li>
+                        {% endif %}
+                    </ul>
+                </div>                
+            </li>
+			
+		</ul>
+    		{% block izqContenido%}
+
+    		{% endblock %}
+    	</div><!--izqContenido-->
+    	<div id="envContenido">
+	    	<div id="derContenido">
+	    		<div class="caja">
+	    			<h3>Links de Inter&eacute;s</h3>
+		    			<ul>
+			    			{% if perms.miembros.es_lider %}
+			    				<li><a href="/miembro/reportar_reunion_grupo/">Reportar Reunion G.A.R</a></li>
+			    				<li><a href="/miembro/reportar_reunion_discipulado/">Reportar Reunion Discipulado</a></li>
+		    				{% endif %}
+		    				{% if perms.miembros.puede_agregar_visitante %}<li><a href="/miembro/agregar_miembro/">Agregar Visitante</a></li>{% endif %}
+		    				{% if perms.miembros.cumplimiento_pasos %}<li><a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a></li>{% endif %}
+		    			</ul>
+		    			{% block derContenido%}
+		    			    			
+		    			{% endblock %}
+	    		</div>
+	    		{% block derContenido2%}
+		    			    			
+		    	{% endblock %}
+	    	</div><!--derContenido-->
+	    	<div id="centroContenido">
+	    	{% block contenido %}
+	    		
+	    	{% endblock %}
+	    	</div><!--centroContenido-->
+	    </div><!--envContenido-->
+    	<div id="pieDePagina">
+			<p>Aplicaci&oacute;n realizada por DeWeb para la iglesia Casa del Rey.</p>
+		</div><!--pieDePagina-->
+    </div><!--contenido-->
+    
+</div><!--contenedor-->
+
+</body>
+</html>
