@@ -27,7 +27,7 @@ class FormularioReportarReunionGrupo(ModelForm):
     
     class Meta:
         model = ReunionGAR
-        exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia')
+        exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia', 'novedades')
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupo, self).__init__(*args, **kwargs)
@@ -35,7 +35,6 @@ class FormularioReportarReunionGrupo(ModelForm):
         self.fields['predica'].widget.attrs.update({'class' : 'form-control'})   
         self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'}) 
         self.fields['numeroVisitas'].widget.attrs.update({'class' : 'form-control'})
-        self.fields['novedades'].widget.attrs.update({'class' : 'form-control'}) 
         self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
         
 class FormularioReportarReunionDiscipulado(ModelForm):
