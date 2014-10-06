@@ -802,61 +802,69 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     asis_reg = False
 
     if request.method == 'POST':
-        form = FormularioRangoFechas(request.POST)
+        # form = FormularioRangoFechas(request.POST)
+        form = FormularioPredicas(miembro=miembro, data=request.POST)
         if form.is_valid():
-            fechai = form.cleaned_data['fechai']
-            fechaf = form.cleaned_data['fechaf']
+            # fechai = form.cleaned_data['fechai']
+            # fechaf = form.cleaned_data['fechaf']
+            predica = form.cleaned_data['predica']
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
             discipulos = Miembro.objects.get(id = grupo_i.listaLideres()[0]).discipulos()
             grupoDis = Grupo.objects.filter(Q(lider1__in = discipulos) | Q(lider2__in = discipulos))
-            opciones = {'fi': fechai, 'ff': fechaf, 'g': capitalize(grupo_i.nombre)}
+            # opciones = {'fi': fechai, 'ff': fechaf, 'g': capitalize(grupo_i.nombre)}
+            opciones = {'predica': capitalize(predica.nombre), 'gi': capitalize(grupo_i.nombre)}
             sw = True
 
-            n = ['Dates']
+            # n = ['Dates']
+            n = [['Predica']]
             n.extend(["%s" % (nom.encode('ascii', 'ignore')) for nom in grupoDis.values_list('nombre', flat=True)])
             values = [n]
             sw_while = True
-            while sw_while:
-                sig = fechai + datetime.timedelta(days = 6)
-                l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
+            # while sw_while:
+            #     sig = fechai + datetime.timedelta(days = 6)
+            #     l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
+            l = [predica.nombre.encode('ascii', 'ignore')]
 
-                for g in grupoDis:
-                    d = Miembro.objects.get(id = g.listaLideres()[0])
-                    grupos = listaGruposDescendientes(d)
+            for g in grupoDis:
+                d = Miembro.objects.get(id = g.listaLideres()[0])
+                grupos = listaGruposDescendientes(d)
 
-                    if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
-                        ofrenda = True
-                        opciones['opt'] = 'Ofrendas'
-                        titulo = "'Ofrendas'"
-                        sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
-                        if sum_ofrenda['ofrenda__sum'] is None:
-                            sum = 0
-                        else:
-                            sum = sum_ofrenda['ofrenda__sum']
-                        l.append(sum)
+                if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
+                    ofrenda = True
+                    opciones['opt'] = 'Ofrendas'
+                    titulo = "'Ofrendas'"
+                    # sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
+                    sum_ofrenda = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('ofrenda'))
+                    if sum_ofrenda['ofrenda__sum'] is None:
+                        sum = 0
                     else:
-                        if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
-                            lid_asis = True
-                            opciones['opt'] = 'Lideres Asistentes'
-                            titulo = "'Lideres Asistentes'"
-                            numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
-                            if numlid['numeroLideresAsistentes__sum'] is None:
-                                sumLid = 0
-                            else:
-                                sumLid = numlid['numeroLideresAsistentes__sum']
-                            l.append(sumLid)
+                        sum = sum_ofrenda['ofrenda__sum']
+                    l.append(sum)
+                else:
+                    if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
+                        lid_asis = True
+                        opciones['opt'] = 'Lideres Asistentes'
+                        titulo = "'Lideres Asistentes'"
+                        # numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
+                        numlid = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
+                        if numlid['numeroLideresAsistentes__sum'] is None:
+                            sumLid = 0
                         else:
-                            if 'asis_reg' in request.POST and request.POST['asis_reg']=='S': #discipulos
-                                asis_reg = True
-                                opciones['opt'] = 'Asistentes Regulares'
-                                titulo = "'Asistentes Regulares'"
-                                reg = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
-                                numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
-                                l.append(numAsis)
-                values.append(l)
-                fechai = sig + datetime.timedelta(days=1)
-                if sig >= fechaf:
-                    sw_while = False
+                            sumLid = numlid['numeroLideresAsistentes__sum']
+                        l.append(sumLid)
+                    else:
+                        if 'asis_reg' in request.POST and request.POST['asis_reg']=='S': #discipulos
+                            asis_reg = True
+                            opciones['opt'] = 'Asistentes Regulares'
+                            titulo = "'Asistentes Regulares'"
+                            # reg = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
+                            reg = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos)
+                            numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
+                            l.append(numAsis)
+            values.append(l)
+                # fechai = sig + datetime.timedelta(days=1)
+                # if sig >= fechaf:
+                #     sw_while = False
 
             if 'reportePDF' in request.POST:
                 response = HttpResponse(mimetype='application/pdf')
@@ -864,7 +872,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                 PdfTemplate(response, 'Estadistico de reuniones Discipulado totalizadas por discipulo', opciones, values, 2)
                 return response
     else:
-        form = FormularioRangoFechas()
+        form = FormularioPredicas(miembro=miembro)
         sw = False
 
     return render_to_response('reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request))
