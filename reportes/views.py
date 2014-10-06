@@ -16,7 +16,9 @@ from django.utils.datetime_safe import strftime
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from reportes.charts import PdfTemplate
-from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, FormularioReportesSinEnviar
+from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, FormularioReportesSinEnviar, \
+    FormularioPredicas
+
 
 def liderAdminTest(user):
     return user.is_authenticated() \
@@ -609,12 +611,15 @@ def estadisticoReunionesDiscipulado(request):
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
             return HttpResponse(data, mimetype="application/javascript")
         else:
-            form = FormularioRangoFechas(request.POST)
+            # form = FormularioRangoFechas(request.POST)
+            form = FormularioPredicas(miembro=miembro, data=request.POST)
             if form.is_valid():
-                fechai = form.cleaned_data['fechai']
-                fechaf = form.cleaned_data['fechaf']
+                # fechai = form.cleaned_data['fechai']
+                # fechaf = form.cleaned_data['fechaf']
+                predica = form.cleaned_data['predica']
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
-                opciones = {'fi': fechai, 'ff': fechaf, 'gi': capitalize(grupo_i.nombre)}
+                # opciones = {'fi': fechai, 'ff': fechaf, 'gi': capitalize(grupo_i.nombre)}
+                opciones = {'predica': capitalize(predica.nombre), 'gi': capitalize(grupo_i.nombre)}
                 sw = True
 
                 if 'descendientes' in request.POST and request.POST['descendientes']=='S':
@@ -627,51 +632,59 @@ def estadisticoReunionesDiscipulado(request):
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
-                values = [['Dates']]
+                # values = [['Dates']]
+                values = [['Predica']]
                 sw_while = True
-                while sw_while:
-                    sig = fechai + datetime.timedelta(days = 6)
+                # while sw_while:
+                #     sig = fechai + datetime.timedelta(days = 6)
 
-                    if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
-                        ofrenda = True
-                        if 'Ofrenda' not in values[0]:
-                            values[0].append('Ofrenda')
-                        sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
-                        if sum_ofrenda['ofrenda__sum'] is None:
-                            sum = 0
-                        else:
-                            sum = sum_ofrenda['ofrenda__sum']
-                        values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
+                if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
+                    ofrenda = True
+                    if 'Ofrenda' not in values[0]:
+                        values[0].append('Ofrenda')
+                    # sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
+                    sum_ofrenda = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('ofrenda'))
+                    if sum_ofrenda['ofrenda__sum'] is None:
+                        sum = 0
                     else:
-                        l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
-                        if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
-                            lid_asis = True
-                            if 'Lideres asistentes' not in values[0]:
-                                values[0].append('Lideres asistentes')
-                            numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
-                            if numlid['numeroLideresAsistentes__sum'] is None:
-                                sumLid = 0
-                            else:
-                                sumLid = numlid['numeroLideresAsistentes__sum']
-                            l.append(sumLid)
-                        if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
-                            asis_reg = True
-                            if 'Asistentes regulares' not in values[0]:
-                                values[0].append('Asistentes regulares')
-                            reg = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
-                            numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
-                            l.append(numAsis)
-                        values.append(l)
-                    fechai = sig + datetime.timedelta(days=1)
-                    if sig >= fechaf:
-                        sw_while = False
+                        sum = sum_ofrenda['ofrenda__sum']
+                    # values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
+                    values.append([predica.nombre.encode('ascii', 'ignore'), sum])
+                else:
+                    # l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
+                    l = [predica.nombre.encode('ascii', 'ignore')]
+                    if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
+                        lid_asis = True
+                        if 'Lideres asistentes' not in values[0]:
+                            values[0].append('Lideres asistentes')
+                        # numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
+                        numlid = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
+                        if numlid['numeroLideresAsistentes__sum'] is None:
+                            sumLid = 0
+                        else:
+                            sumLid = numlid['numeroLideresAsistentes__sum']
+                        l.append(sumLid)
+                    if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
+                        asis_reg = True
+                        if 'Asistentes regulares' not in values[0]:
+                            values[0].append('Asistentes regulares')
+                        # reg = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
+                        reg = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos)
+                        numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
+                        l.append(numAsis)
+                    values.append(l)
+                    # fechai = sig + datetime.timedelta(days=1)
+                    # if sig >= fechaf:
+                    #     sw_while = False
+                # print l
                 if 'reportePDF' in request.POST:
                     response = HttpResponse(mimetype='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                    PdfTemplate(response, 'Estadistico de reuniones Discipulado', opciones, values, 3)
+                    PdfTemplate(response, 'Estadistico de reuniones Discipulado', opciones, values, 2)
                     return response
     else:
-        form = FormularioRangoFechas()
+        # form = FormularioRangoFechas()
+        form = FormularioPredicas(miembro=miembro)
         sw = False
 
     return render_to_response('reportes/estadistico_discipulado.html', locals(), context_instance=RequestContext(request))

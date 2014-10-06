@@ -32,8 +32,7 @@ class FormularioReportarReunionDiscipulado(ModelForm):
     def __init__(self, miembro='', *args, **kwargs):
         super(FormularioReportarReunionDiscipulado, self).__init__(*args, **kwargs) #populates the post
         if miembro != '':
-            query = Predica.objects.filter(miembro__id__in = miembro.pastores())
-            self.fields['predica'].queryset = query
+            self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in = miembro.pastores())
     
     class Meta:
         model = ReunionDiscipulado
