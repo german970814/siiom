@@ -37,7 +37,6 @@ class FormularioReportarReunionGrupo(ModelForm):
         self.fields['predica'].widget.attrs.update({'class': 'form-control'})
         self.fields['numeroLideresAsistentes'].widget.attrs.update({'class': 'form-control'})
         self.fields['numeroVisitas'].widget.attrs.update({'class': 'form-control'})
-        self.fields['novedades'].widget.attrs.update({'class': 'form-control'})
         self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
         
 class FormularioReportarReunionDiscipulado(ModelForm):
