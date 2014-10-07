@@ -129,6 +129,8 @@ class PdfTemplate(SimpleDocTemplate):
             op = op + u'<b>Año:</b> %s<br />' % opciones['ano']
         if 'red' in opciones:
             op = op + '<b>Red:</b> %s<br />' % opciones['red']
+        if 'predica' in opciones:
+            op = op + '<b>Predica:</b> %s<br />' % opciones['predica']
         op_p = Paragraph(op, style['Normal'])
 
         #Tabla

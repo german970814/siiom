@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from grupos.models import Red
+from grupos.models import Red, Predica
 from miembros.models import Miembro
 
 __author__ = 'Tania'
@@ -48,3 +48,16 @@ class FormularioReportesSinEnviar(forms.Form):
         super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
         self.fields['fechai'].widget.attrs.update({'class' : 'form-control'})
         self.fields['fechaf'].widget.attrs.update({'class' : 'form-control'})         
+
+class FormularioPredicas(forms.Form):
+    required_css_class = 'requerido'
+
+    predica = forms.ModelChoiceField(queryset=Predica.objects.none(), empty_label=None)
+
+    def __init__(self, miembro, *args, **kwargs):
+        super(FormularioPredicas, self).__init__(*args, **kwargs)
+
+        if miembro.usuario.has_perm("miembros.es_administrador"):
+            self.fields['predica'].queryset = Predica.objects.all()
+        else:
+            self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in = miembro.pastores())
