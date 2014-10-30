@@ -1047,6 +1047,64 @@ def ConsultarReportesSinEnviar(request, sobres=False):
 
     return render_to_response('reportes/morososGAR.html', locals(), context_instance=RequestContext(request))
 
+@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
+    """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de reuniones de discipulado para una predica
+        especificada. El usuario escoge la predica Luego podra enviar un mail a los lideres que no han ingresado los reportes y a sus lideres.
+        Para el lider solo muestra su arbol."""
+
+    miembro = Miembro.objects.get(usuario=request.user)
+    if request.method == 'POST':
+        if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
+            grupos = request.session['grupos_sin_reporte']
+            sobres = request.session['sobres']
+
+            from_mail = 'iglesia@mail.webfaction.com'
+            mensaje = "Lideres de la iglesia,\n\n"
+            if sobres: #Si es reporte de sobres
+                asunto = 'Recordatorio entrega de ofrendas de reunion discipulado'
+                mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones de discipulado de las siguientes fechas:\n\n"
+            else: #Si es reporte reuniones
+                asunto = 'Recordatorio ingreso de reportes de reunion discipulado'
+                mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones de discipulado de las siguientes fechas:\n\n"
+
+            correos = []
+            for g in grupos:
+                receptores = list()
+                mailLideres = g.lideres.values('email')
+                receptores.extend(["%s" % (k['email']) for k in mailLideres])
+                msj = mensaje + '\n'.join(map(str, g.fecha_reunion)) + "\n\nCordialmente,\n Admin"
+                correos.append((asunto, msj, from_mail, receptores))
+            print tuple(correos)
+
+            sendMassMail(tuple(correos))
+
+        form = FormularioPredicas(miembro, request.POST)
+        if 'verMorosos' in request.POST:
+            if form.is_valid():
+                predica = form.cleaned_data['predica']
+                sw = True
+
+                if miembro.usuario.has_perm("miembros.es_administrador"):
+                    gr = Grupo.objects.filter(id__in = listaGruposDescendientes_id(Miembro.objects.get(id = Grupo.objects.get(red = None).listaLideres()[0])))
+                else:
+                    gr = Grupo.objects.filter(id__in = listaGruposDescendientes_id(miembro))
+
+                if sobres: #Entra si se escoge el reporte de entregas de sobres
+                    grupos = gr.filter(estado = 'A').exclude(reuniondiscipulado__predica = predica, reuniondiscipulado__confirmacionentregaofrenda = True)
+                else: #Entra si se escoge el reporte de reuniones
+                    grupos = gr.filter(estado = 'A').exclude(reuniondiscipulado__predica = predica)
+
+                for g in grupos:
+                    g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
+
+                request.session['grupos_sin_reporte'] = grupos
+                request.session['sobres'] = sobres
+    else:
+        form = FormularioPredicas(miembro)
+
+    return render_to_response('reportes/morososDiscipulado.html', locals(), context_instance=RequestContext(request))
+
 def sendMail(camposMail):
     subject = camposMail[0]
     mensaje = camposMail[1]
