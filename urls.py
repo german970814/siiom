@@ -91,7 +91,9 @@ urlpatterns = patterns('',
     (r'^reportes/estadistico__totalizado_reunionesDiscipulado/$', estadisticoTotalizadoReunionesDiscipulado),
     (r'^reportes/desarrollo_grupos/$', desarrolloGrupo),
     (r'^reportes/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar, {}),
+    (r'^reportes/reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}),
     (r'^reportes/consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}),
+    (r'^reportes/consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}),
 )
 
 urlpatterns += patterns('',
