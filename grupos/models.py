@@ -75,6 +75,7 @@ class ReunionGAR(models.Model):
     grupo = models.ForeignKey(Grupo)
     predica = models.CharField(max_length=100, verbose_name=u'prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
+    numeroTotalAsistentes = models.PositiveIntegerField(verbose_name = u'Número total de asistentes')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
     numeroVisitas = models.PositiveIntegerField(verbose_name = u'Número de visitas:')
     novedades = models.TextField(max_length=500, default="nada",null= True, blank = True)

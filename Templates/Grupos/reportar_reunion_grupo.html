@@ -6,9 +6,9 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
 <script type="text/javascript">
-	$(document).ready(function(){
-		$("#id_fecha").datepicker();
-	});
+{#	$(document).ready(function(){#}
+{#		$("#id_fecha").datepicker();#}
+{#	});#}
 </script>
 {% endblock %}
 
@@ -35,28 +35,31 @@
                     Digita aqui los datos de tu Grupo
                 </div>
                 <div class="panel-body">
+
+                    {{ form.errors }}
+
                     <form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
                         {% csrf_token %}
                         <div class="row">
-                            <div class="col-lg-4"><p><label for="id_fecha">Fecha en que se realiz&oacute; el grupo:</label> {{form.fecha}}</p></div>
+                            <div class="col-lg-4"><p><label for="id_fecha">Fecha en que se realiz&oacute; el grupo:</label> {{ form.fecha }}</p></div>
                             <div class="col-lg-6"><p><label for="id_snombre">Nombre de la Pr&eacute;dica:</label> {{form.predica}}</p></div>
-                        </div> 
+                        </div>
                         <div class="row">
                             <div class="col-lg-3"><p><label for="id_ofrenda">Ofrenda GAR</label> {{form.ofrenda}}</p></div>
                         </div>
                         <div class="row">
                             <div class="col-lg-6"><br><p><label>¿Cu&aacute;l fue la asistencia total de tu grupo incluyendo visitas y l&iacute;deres?:</label></p></div>
-                            <div class="col-lg-1"><p><label for="id_numeroLideresAsistentes"></label> {{form.numeroLideresAsistentes}}</p></div>
+                            <div class="col-lg-1"><p><label for="id_numeroLideresAsistentes"></label> {{form.numeroTotalAsistentes}}</p></div>
                         </div>
                         <div class="row">
                             <div class="col-lg-6"><br><p><label>¿Cu&aacute;ntos de ese total de asistentes eran visitas?:</label></p></div>
                             <div class="col-lg-1"><p><label for="id_numeroVisitas"></label> {{form.numeroVisitas}}</p></div>
-                        </div> 
+                        </div>
                         <div class="row">
                             <div class="col-lg-6"><br><p><label>¿Cu&aacute;ntos de ese total de asistentes eran los l&iacute;deres del grupo?:</label></p></div>
                             <div class="col-lg-1"><p><label for="id_numeroLideresAsistentes"></label> {{form.numeroLideresAsistentes}}</p></div>
                         </div>
-                        <!-- /.nav-third-level 
+                        <!-- /.nav-third-level
                         <table id="miembros" class="simple alinearForm" cellspacing="0">
                             <caption><span class="bold">Asistencia</span></caption>
                             <thead>

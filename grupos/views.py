@@ -117,6 +117,7 @@ def reportarReunionGrupo(request):
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
+                print 'entro valid'
                 r = form.save(commit=False)
                 if not reunionReportada(r.fecha, grupo, 1):
                     r.grupo = grupo
