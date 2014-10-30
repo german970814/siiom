@@ -16,7 +16,8 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponseRedirect, Http404
 from Iglesia.academia.views import adminTest
-from grupos.forms import FormularioReportesSinEnviar, FormularioCrearGrupoRaiz, FormularioCrearPredica
+from grupos.forms import FormularioReportesSinEnviar, FormularioCrearGrupoRaiz, FormularioCrearPredica, \
+    FormularioReportarReunionGrupoAdmin
 from grupos.models import Predica
 
 
@@ -122,18 +123,34 @@ def reportarReunionGrupo(request):
                 if not reunionReportada(r.fecha, grupo, 1):
                     r.grupo = grupo
                     r.save()
-                    for m in miembrosGrupo:
-                        if unicode(m.id) in asistentesId:
-                            am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=True)
-                        else:
-                            am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=False)
-                        am.save()
+                    # for m in miembrosGrupo:
+                    #     if unicode(m.id) in asistentesId:
+                    #         am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=True)
+                    #     else:
+                    #         am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=False)
+                    #     am.save()
                     ok = True
                 else:
                     ya_reportada = True
         else:
             form = FormularioReportarReunionGrupo()    
     return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
+
+@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+def reportarReunionGrupoAdmin(request):
+    miembro = Miembro.objects.get(usuario = request.user)
+    if request.method == 'POST':
+        form = FormularioReportarReunionGrupoAdmin(data=request.POST)
+        if form.is_valid():
+            r = form.save(commit=False)
+            if not reunionReportada(r.fecha, r.grupo, 1):
+                r.save()
+                ok = True
+            else:
+                ya_reportada = True
+    else:
+        form = FormularioReportarReunionGrupoAdmin()
+    return render_to_response('Grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(liderTest, login_url="/iniciar_sesion/")
 def reportarReunionDiscipulado(request):

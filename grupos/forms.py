@@ -39,6 +39,23 @@ class FormularioReportarReunionGrupo(ModelForm):
         self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'})
         self.fields['numeroVisitas'].widget.attrs.update({'class' : 'form-control'})
         self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
+
+class FormularioReportarReunionGrupoAdmin(ModelForm):
+    required_css_class = 'requerido'
+
+    class Meta:
+        model = ReunionGAR
+        exclude = ('confirmacionEntregaOfrenda', 'asistentecia', 'novedades')
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['fecha'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['predica'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroTotalAsistentes'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroVisitas'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
         
 class FormularioReportarReunionDiscipulado(ModelForm):
     required_css_class = 'requerido'

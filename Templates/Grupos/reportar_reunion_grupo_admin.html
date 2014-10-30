@@ -26,13 +26,12 @@
     {% if ya_reportada %}
         <p class="error">Ya ha sido reportada una reunion en esta semana.</p>
     {% endif %}
-    {% if grupo %}
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <i class="fa fa-pencil"></i> 
-                    Digita aqui los datos de tu Grupo
+                    Digita aqui los datos de la reuni&oacute;n
                 </div>
                 <div class="panel-body">
 
@@ -41,10 +40,11 @@
                     <form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
                         {% csrf_token %}
                         <div class="row">
+                            <div class="col-lg-4"><p><label for="id_grupo">Grupo:</label> {{ form.grupo }}</p></div>
                             <div class="col-lg-4"><p><label for="id_fecha">Fecha en que se realiz&oacute; el grupo:</label> {{ form.fecha }}</p></div>
-                            <div class="col-lg-6"><p><label for="id_snombre">Nombre de la Pr&eacute;dica:</label> {{form.predica}}</p></div>
                         </div>
                         <div class="row">
+                            <div class="col-lg-6"><p><label for="id_snombre">Nombre de la Pr&eacute;dica:</label> {{form.predica}}</p></div>
                             <div class="col-lg-3"><p><label for="id_ofrenda">Ofrenda GAR</label> {{form.ofrenda}}</p></div>
                         </div>
                         <div class="row">
@@ -59,25 +59,6 @@
                             <div class="col-lg-6"><br><p><label>¿Cu&aacute;ntos de ese total de asistentes eran los l&iacute;deres del grupo?:</label></p></div>
                             <div class="col-lg-1"><p><label for="id_numeroLideresAsistentes"></label> {{form.numeroLideresAsistentes}}</p></div>
                         </div>
-                        <!-- /.nav-third-level
-                        <table id="miembros" class="simple alinearForm" cellspacing="0">
-                            <caption><span class="bold">Asistencia</span></caption>
-                            <thead>
-                            <tr>
-                                <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-                                <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('miembros');"/></div></th>
-                                <th>Nombre</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for mg in miembrosGrupo %}
-                                <tr>
-                                    <td><input type="checkbox" name="seleccionados" value="{{mg.id}}"/></td>
-                                    <td>{{mg.nombre|capfirst}} {{mg.primerApellido|capfirst}}  {% if mg.segundoApellido %} {{mg.segundoApellido|capfirst}} {% endif %}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>  -->
                         <br/>
                     <input class="button blue smallB" type="submit" value="aceptar" name="aceptar">
                     </form>
@@ -85,7 +66,4 @@
             </div>        
         </div>
     </div>
-	{% else %}
-    	<p>No tiene ningun grupo de amistad asignado</p>
-    {% endif %}
 {% endblock %}

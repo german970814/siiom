@@ -38,7 +38,12 @@ class Grupo(models.Model):
     barrio = models.ForeignKey('miembros.Barrio')
     
     def __unicode__(self):
-        return self.nombre
+        cad = self.lider1.nombre.capitalize() + " " + self.lider1.primerApellido.capitalize() + "(" + self.lider1.cedula + ")"
+
+        if self.lider2:
+            cad = cad + " - " + self.lider2.nombre.capitalize() + " " + self.lider2.primerApellido.capitalize() + "(" + self.lider2.cedula + ")"
+
+        return cad
     
     def listaLideres(self):
         """Devuelve una lista con los ids de los lideres del grupo. Los lideres estan definidos en los campos lider1, lider2 y sus conyugues siempre y cuando estos sean lideres."""
