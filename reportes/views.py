@@ -547,8 +547,8 @@ def estadisticoReunionesGar(request):
                         l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
                         if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
                             lid_asis = True
-                            if 'Lideres asistentes' not in values[0]:
-                                values[0].append('Lideres asistentes')
+                            if 'Numero de lideres asistentes' not in values[0]:
+                                values[0].append('Numero de lideres asistentes')
                             numlid = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
                             if numlid['numeroLideresAsistentes__sum'] is None:
                                 sumLid = 0
@@ -557,8 +557,8 @@ def estadisticoReunionesGar(request):
                             l.append(sumLid)
                         if 'visitas' in request.POST and request.POST['visitas']=='S':
                             visitas = True
-                            if 'Visitas' not in values[0]:
-                                values[0].append('Visitas')
+                            if 'Numero de visitas' not in values[0]:
+                                values[0].append('Numero de visitas')
                             numVis = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroVisitas'))
                             if numVis['numeroVisitas__sum'] is None:
                                 sumVis = 0
@@ -567,12 +567,29 @@ def estadisticoReunionesGar(request):
                             l.append(sumVis)
                         if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
                             asis_reg = True
-                            if 'Asistentes regulares' not in values[0]:
-                                values[0].append('Asistentes regulares')
-                            reg = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
-                            numAsis = AsistenciaMiembro.objects.filter(reunion__in = reg, asistencia = True).count()
+                            if 'Numero de asistentes regulares' not in values[0]:
+                                values[0].append('Numero de asistentes regulares')
+                            numPer = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'), Sum('numeroVisitas'), Sum('numeroTotalAsistentes'))
+
+                            if numPer['numeroLideresAsistentes__sum'] is None:
+                                sumLid = 0
+                            else:
+                                sumLid = numPer['numeroLideresAsistentes__sum']
+
+                            if numPer['numeroVisitas__sum'] is None:
+                                sumVis = 0
+                            else:
+                                sumVis = numPer['numeroVisitas__sum']
+
+                            if numPer['numeroTotalAsistentes__sum'] is None:
+                                sumTot = 0
+                            else:
+                                sumTot = numPer['numeroTotalAsistentes__sum']
+
+                            numAsis = sumTot-sumVis-sumLid
                             l.append(numAsis)
                         values.append(l)
+                        print(".......... " + str(values))
                     fechai = sig + datetime.timedelta(days = 1)
                     if sig >= fechaf:
                         sw_while = False
