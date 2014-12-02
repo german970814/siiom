@@ -40,7 +40,6 @@ REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 class FormularioReportesSinEnviar(forms.Form):
     required_css_class = 'requerido'
 
-    reunion = forms.TypedChoiceField(choices = REUNION_CHOICES, coerce = int, required = True, widget = forms.RadioSelect)
     fechai = forms.DateField(label = 'Fecha inicial', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
     fechaf = forms.DateField(label = 'Fecha final', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
 

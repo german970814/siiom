@@ -982,22 +982,16 @@ def ConsultarReportesSinEnviar(request, sobres=False):
     if request.method == 'POST':
         if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
             grupos = request.session['grupos_sin_reporte']
-            tipo_reunion = request.session['tipo_reporte']
+            sobres = request.session['sobres']
 
             from_mail = 'iglesia@mail.webfaction.com'
             mensaje = "Lideres de la iglesia,\n\n"
-            if tipo_reunion[0] and sobres: #Si es GAR y reporte de sobres
+            if sobres: #Si es GAR y reporte de sobres
                 asunto = 'Recordatorio entrega de ofrendas de reunion GAR'
                 mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones GAR de las siguientes fechas:\n\n"
-            elif not tipo_reunion[0] and sobres: #Si es discipulado y reporte de sobres
-                asunto = 'Recordatorio entrega de ofrendas de reunion discipulado'
-                mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones de discipulado de las siguientes fechas:\n\n"
-            elif tipo_reunion[0] and not sobres: #Si es GAR y reporte reuniones
+            else: #Si es GAR y reporte reuniones
                 asunto = 'Recordatorio ingreso de reportes de reunion GAR'
                 mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones GAR de las siguientes fechas:\n\n"
-            elif not tipo_reunion[0] and not sobres: #Si es discipulado y reporte reuniones
-                asunto = 'Recordatorio ingreso de reportes de reunion discipulado'
-                mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones de discipulado de las siguientes fechas:\n\n"
 
             correos = []
             for g in grupos:
@@ -1013,7 +1007,6 @@ def ConsultarReportesSinEnviar(request, sobres=False):
         form = FormularioReportesSinEnviar(request.POST)
         if 'verMorosos' in request.POST:
             if form.is_valid():
-                tipoReunion = form.cleaned_data['reunion']
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupos = []
@@ -1028,28 +1021,16 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                     sig = fechai + datetime.timedelta(weeks = 1)
 
                     if sobres: #Entra si se escoge el reporte de entregas de sobres
-                        if tipoReunion == 1:
-                            gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
-                        else:
-                            gru = gr.filter(estado = 'A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig, reuniondiscipulado__confirmacionentregaofrenda = True)
+                        gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
                     else: #Entra si se escoge el reporte de reuniones
-                        if tipoReunion == 1:
-                            gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig)
-                        else:
-                            gru = gr.filter(estado = 'A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig)
+                        gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig)
 
                     for g in gru:
                         try:
                             i = grupos.index(g)
-                            if tipoReunion == 1:
-                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
-                            else:
-                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaDiscipulado)))
+                            grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
                         except:
-                            if tipoReunion == 1:
-                                g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaGAR))]
-                            else:
-                                g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaDiscipulado))]
+                            g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaGAR))]
                             g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
                             grupos.append(g)
 
@@ -1058,7 +1039,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                         sw = False
 
                 request.session['grupos_sin_reporte'] = grupos
-                request.session['tipo_reporte'] = [sobres, tipoReunion]
+                request.session['sobres'] = sobres
     else:
         form = FormularioReportesSinEnviar()
 
