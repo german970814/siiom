@@ -228,10 +228,13 @@
                             <a href="#"><i class="fa fa-graduation-cap fa-fw"></i> Academias<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="flot.html">Flot Charts</a>
+                                    <a href="/academia/cursos/">Cursos</a>
                                 </li>
                                 <li>
-                                    <a href="morris.html">Morris.js Charts</a>
+                                    <a href="/academia/asistencia/">Asistencia</a>
+                                </li>
+                                <li>
+                                    <a href="/academia/registrar_entrega_tarea/">Entrega de tarea</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->
@@ -242,15 +245,48 @@
                             <a href="#"><i class="fa fa-briefcase fa-fw"></i> Informes Generales<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="flot.html">Flot Charts</a>
+                                    <a href="#">Miembros y sus Pasos<span class="fa arrow"></span></a>
+                                    <ul class="nav nav-third-level">
+                                        <li><a href="/reportes/miembros_y_pasos/">Miembros y sus pasos</a></li>
+                                        <li><a href="/reportes/pasos_totales/">Estadistico de pasos por totales</a></li>
+                                        <li><a href="/reportes/pasos_rango_fechas/">Estadistico de pasos por un rango de fechas</a></li>
+                                    </ul>     
                                 </li>
                                 <li>
-                                    <a href="morris.html">Morris.js Charts</a>
+                                    <a href="#">Asistencia Reuniones<span class="fa arrow"></span></a>
+                                    <ul class="nav nav-third-level">
+                                        <li><a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a></li>
+                                        <li><a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discipulado</a></li>
+                                        <li><a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones GAR</a></li>
+                                    </ul>      
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
-                        {% endif %}                          
+                        {% endif %}
+                        {% if perms.miembros.es_agente or perms.miembros.es_administrador %}
+                            <li>
+                                <a href="#"><i class="fa fa-phone-square fa-fw"></i> Consolidaci&oacute;n<span class="fa arrow"></span></a>
+                                <ul class="nav nav-second-level">
+                                    <li>
+                                        <a href="#">Asignacion y Llamadas<span class="fa arrow"></span></a>
+                                        <ul class="nav nav-third-level">
+                                            <li><a href="/reportes/asignacion_gar/">Control de asignaci&oacute;n a GAR</a></li>
+                                            <li><a href="/reportes/primera_llamada/">1ra llamada</a></li>
+                                            <li><a href="/reportes/segunda_llamada/">2da llamada</a></li>
+                                        </ul>     
+                                    </li>
+                                    <li>
+                                        <a href="#">Visitas Asignadas<span class="fa arrow"></span></a>
+                                        <ul class="nav nav-third-level">
+                                            <li><a href="/reportes/visitas_por_red/">Visitas asignadas por redes</a></li>
+                                            <li><a href="/reportes/visitas_por_mes/">Visitas registradas por mes</a></li>
+                                            <li><a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a></li>
+                                        </ul>     
+                                    </li>
+                                </ul>        
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->
