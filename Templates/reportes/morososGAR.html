@@ -35,13 +35,6 @@
     <form id="form_reunion" action="" method="POST">
         {% csrf_token %}
         {{ form.non_field_errors }}
-        <div id="div_reunion">
-            {{ form.reunion.errors }}
-            <div class="requerido">
-                <label>{{ form.reunion.label }}:</label>
-                {{ form.reunion }}
-            </div>
-        </div>
         <div id="id_fechas">
             {{ form.fechai.errors }}
             {{ form.fechaf.errors }}
