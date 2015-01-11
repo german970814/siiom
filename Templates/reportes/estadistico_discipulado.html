@@ -15,7 +15,7 @@
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
             var options = {width: 700, height: 500};
-            var chart = new google.visualization.LineChart(document.getElementById('out'));
+            var chart = new google.visualization.ColumnChart(document.getElementById('out'));
             chart.draw(data, options);
         }
     {% endif %}

@@ -5,6 +5,7 @@ from xml import dom
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
+import sys
 from Iglesia.grupos.forms import FormularioEditarGrupo,\
     FormularioReportarReunionGrupo, FormularioReportarReunionDiscipulado,\
     FormularioCrearRed, FormularioCrearGrupo
@@ -15,7 +16,9 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponseRedirect, Http404
 from Iglesia.academia.views import adminTest
-from grupos.forms import FormularioReportesSinEnviar, FormularioCrearGrupoRaiz
+from grupos.forms import FormularioReportesSinEnviar, FormularioCrearGrupoRaiz, FormularioCrearPredica, \
+    FormularioReportarReunionGrupoAdmin
+from grupos.models import Predica
 
 
 def receptorTest(user):
@@ -38,6 +41,11 @@ def verGrupoTest(user):
 def receptorAdminTest(user):
     return  user.is_authenticated()\
     and (Group.objects.get(name__iexact='Receptor') in user.groups.all()\
+         or Group.objects.get(name__iexact='Administrador') in user.groups.all())
+
+def PastorAdminTest(user):
+    return user.is_authenticated()\
+    and (Group.objects.get(name__iexact='Pastor') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
@@ -91,6 +99,14 @@ def reunionReportada(fecha, grupo, tipo):
     else:
         return False
 
+def reunionDiscipuladoReportada(predica, grupo):
+    reunion = grupo.reuniondiscipulado_set.filter(predica=predica)
+
+    if reunion:
+        return True
+    else:
+        return False
+
 @user_passes_test(liderTest, login_url="/iniciar_sesion/")
 def reportarReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
@@ -102,22 +118,39 @@ def reportarReunionGrupo(request):
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
+                print 'entro valid'
                 r = form.save(commit=False)
                 if not reunionReportada(r.fecha, grupo, 1):
                     r.grupo = grupo
                     r.save()
-                    for m in miembrosGrupo:
-                        if unicode(m.id) in asistentesId:
-                            am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=True)
-                        else:
-                            am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=False)
-                        am.save()
+                    # for m in miembrosGrupo:
+                    #     if unicode(m.id) in asistentesId:
+                    #         am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=True)
+                    #     else:
+                    #         am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=False)
+                    #     am.save()
                     ok = True
                 else:
                     ya_reportada = True
         else:
             form = FormularioReportarReunionGrupo()    
     return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
+
+@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+def reportarReunionGrupoAdmin(request):
+    miembro = Miembro.objects.get(usuario = request.user)
+    if request.method == 'POST':
+        form = FormularioReportarReunionGrupoAdmin(data=request.POST)
+        if form.is_valid():
+            r = form.save(commit=False)
+            if not reunionReportada(r.fecha, r.grupo, 1):
+                r.save()
+                ok = True
+            else:
+                ya_reportada = True
+    else:
+        form = FormularioReportarReunionGrupoAdmin()
+    return render_to_response('Grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(liderTest, login_url="/iniciar_sesion/")
 def reportarReunionDiscipulado(request):
@@ -127,10 +160,10 @@ def reportarReunionDiscipulado(request):
         discipulos = miembro.discipulos()
         asistentesId = request.POST.getlist('seleccionados')
         if request.method == 'POST':
-            form = FormularioReportarReunionDiscipulado(data=request.POST)
+            form = FormularioReportarReunionDiscipulado(miembro=miembro, data=request.POST)
             if form.is_valid():
                 r = form.save(commit=False)
-                if not reunionReportada(r.fecha, grupo, 1):
+                if not reunionDiscipuladoReportada(r.predica, grupo):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
@@ -143,7 +176,7 @@ def reportarReunionDiscipulado(request):
                 else:
                     ya_reportada = True
         else:
-            form = FormularioReportarReunionDiscipulado()
+            form = FormularioReportarReunionDiscipulado(miembro=miembro)
     return render_to_response('Grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(receptorAdminTest, login_url="/iniciar_sesion/")
@@ -245,6 +278,58 @@ def editarRed(request):
             return HttpResponseRedirect('/grupo/listar_redes/')
     else:
         return HttpResponseRedirect('/grupo/listar_redes/')
+
+@user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
+def listarPredicas(request):
+    miembro = Miembro.objects.get(usuario = request.user)
+    if request.method == "POST":
+        if 'editar' in request.POST:
+            request.session['seleccionados'] = request.POST.getlist('seleccionados')
+            return HttpResponseRedirect('/grupo/editar_predica/')
+        if  'eliminar' in request.POST:
+            okElim = eliminar(Predica, request.POST.getlist('seleccionados'))
+    predicas = list(Predica.objects.filter(miembro__id = miembro.id))
+    return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
+
+@user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
+def crearPredica(request):
+    miembro = Miembro.objects.get(usuario = request.user)
+    accion = 'Crear'
+    if request.method == "POST":
+        form = FormularioCrearPredica(data=request.POST)
+        if form.is_valid():
+            nuevaPredica = Predica.objects.create(miembro=miembro, nombre='')
+            nuevaPredica.save()
+            form = FormularioCrearPredica(data=request.POST, instance=nuevaPredica)
+            nuevaPredica = form.save()
+            ok = True
+    else:
+        form = FormularioCrearPredica()
+    return render_to_response('Grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
+
+@user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
+def editarPredica(request):
+    accion = 'Editar'
+    miembro = Miembro.objects.get(usuario=request.user)
+    if request.method == "POST":
+        predica = request.session['actual']
+        form = FormularioCrearPredica(data=request.POST, instance=predica)
+        if form.is_valid():
+            nuevaPredica = form.save()
+            ok = True
+
+    if 'seleccionados' in request.session:
+        faltantes = request.session['seleccionados']
+        if len(faltantes) > 0:
+            predica = Predica.objects.get(id = request.session['seleccionados'].pop())
+            request.session['actual'] = predica
+            form = FormularioCrearPredica(instance=predica)
+            request.session['seleccionados'] = request.session['seleccionados']
+            return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
+        else:
+            return HttpResponseRedirect('/grupo/listar_predicas/')
+    else:
+        return HttpResponseRedirect('/grupo/listar_predicas/')
     
 def eliminar(modelo, lista):
     ok = 0 #No hay nada en la lista

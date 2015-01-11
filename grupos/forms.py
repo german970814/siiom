@@ -8,21 +8,54 @@ from django.db.models import Q
 from django.forms.models import ModelForm
 from Iglesia.grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from Iglesia.miembros.models import CambioTipo, Miembro
+from grupos.models import Predica
+
 
 class FormularioEditarGrupo(ModelForm):
     required_css_class = 'requerido'
     
     class Meta:        
         model = Grupo
-        fields = ('nombre', 'direccion', \
-                  'diaGAR', 'horaGAR', 'diaDiscipulado', 'horaDiscipulado')
+        fields = ('direccion', \
+                  'diaGAR', 'horaGAR')
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarGrupo, self).__init__(*args, **kwargs)
+        self.fields['direccion'].widget.attrs.update({'class' : 'form-control'})   
+        self.fields['diaGAR'].widget.attrs.update({'class' : 'form-control'}) 
+        self.fields['horaGAR'].widget.attrs.update({'class' : 'form-control'})      
         
 class FormularioReportarReunionGrupo(ModelForm):
     required_css_class = 'requerido'
     
     class Meta:
         model = ReunionGAR
-        exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia')
+        exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia', 'novedades')
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioReportarReunionGrupo, self).__init__(*args, **kwargs)
+        self.fields['fecha'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['predica'].widget.attrs.update({'class' : 'form-control'})   
+        self.fields['numeroTotalAsistentes'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroVisitas'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
+
+class FormularioReportarReunionGrupoAdmin(ModelForm):
+    required_css_class = 'requerido'
+
+    class Meta:
+        model = ReunionGAR
+        exclude = ('confirmacionEntregaOfrenda', 'asistentecia', 'novedades')
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['fecha'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['predica'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroTotalAsistentes'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['numeroVisitas'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
         
 class FormularioReportarReunionDiscipulado(ModelForm):
     required_css_class = 'requerido'
@@ -30,6 +63,14 @@ class FormularioReportarReunionDiscipulado(ModelForm):
     class Meta:
         model = ReunionDiscipulado
         exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia')
+
+    def __init__(self, miembro, *args, **kwargs):
+        super(FormularioReportarReunionDiscipulado, self).__init__(*args, **kwargs)
+        self.fields['predica'].widget.attrs.update({'class' : 'form-control'})   
+        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class' : 'form-control'}) 
+        self.fields['novedades'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
+        self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in = miembro.pastores())
         
 class FormularioCrearRed(ModelForm):
     required_css_class = 'requerido'
@@ -104,3 +145,10 @@ class FormularioReportesSinEnviar(forms.Form):
     reunion = forms.TypedChoiceField(choices = REUNION_CHOICES, coerce = int, required = True, widget = forms.RadioSelect)
     fechai = forms.DateField(label = 'Fecha inicial', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
     fechaf = forms.DateField(label = 'Fecha final', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
+
+class FormularioCrearPredica(ModelForm):
+    required_css_class = 'requerido'
+
+    class Meta:
+        model = Predica
+        exclude = ('miembro',)
