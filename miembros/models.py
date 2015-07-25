@@ -147,17 +147,18 @@ class Miembro(models.Model):
 
         while sw:
 
-            lideres = Miembro.objects.filter(id__in = grupo_actual.listaLideres())
+            if grupo_actual is not None:
+                lideres = Miembro.objects.filter(id__in = grupo_actual.listaLideres())
 
-            for lider in lideres:
-                tipos = CambioTipo.objects.filter(miembro = lider, nuevoTipo = tipo_pastor)
-                if len(tipos) > 0:
-                    pastores.append(lider.id)
+                for lider in lideres:
+                    tipos = CambioTipo.objects.filter(miembro = lider, nuevoTipo = tipo_pastor)
+                    if len(tipos) > 0:
+                        pastores.append(lider.id)
 
-            if grupo_actual.lider1.grupo is None:
-                sw = False
-            else:
-                grupo_actual = grupo_actual.lider1.grupo
+                if grupo_actual.lider1.grupo is None:
+                    sw = False
+                else:
+                    grupo_actual = grupo_actual.lider1.grupo
 
         return pastores
     
