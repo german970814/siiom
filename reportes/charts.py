@@ -102,7 +102,7 @@ class LineChart(Drawing):
 
 class PdfTemplate(SimpleDocTemplate):
 
-    def __init__(self, filename, titulo, opciones, datos, tipo, total=False, **kw):
+    def __init__(self, filename, titulo, opciones, datos, tipo, total=False, tabla=None, **kw):
         SimpleDocTemplate.__init__(self, filename, pagesize=letter, **kw)
 
         #Estilos
@@ -131,13 +131,25 @@ class PdfTemplate(SimpleDocTemplate):
             op = op + '<b>Red:</b> %s<br />' % opciones['red']
         if 'predica' in opciones:
             op = op + '<b>Predica:</b> %s<br />' % opciones['predica']
+        if 'total_grupos' in opciones:
+            op = op + '<b>Total de grupos:</b> %s<br />' % opciones['total_grupos']
         op_p = Paragraph(op, style['Normal'])
 
         #Tabla
-        table = Table(datos)
+
+        if tabla is not None:
+            d = tabla
+            f = 7
+        else:
+            d = datos
+            f = 10
+
+        table = Table(d)
         table_style = [('BACKGROUND', (0,0), (-1,0), colors.orange),
             ('ALIGN', (1,1), (-1,-1), 'CENTER'),
-            ('GRID', (0,0), (-1,-1), 1, colors.black)]
+            ('FONTSIZE', (0, 0), (-1, -1), f),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black)]
         if total:
             table_style.append(('BACKGROUND', (0,-1), (-1,-1), colors.orange))
         table.setStyle(TableStyle(table_style))

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 from django.core import serializers
 from django.core.mail import send_mail, send_mass_mail
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -520,7 +520,7 @@ def estadisticoReunionesGar(request):
 
                 if 'descendientes' in request.POST and request.POST['descendientes']=='S':
                     descendientes = True
-                    opciones['gf'] = 'Descendientes'
+                    opciones['gf'] = 'Todos los descendientes'
                     grupos = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                 else:
                     grupo_f = Grupo.objects.get(id = request.POST['menuGrupo_f'])
@@ -528,59 +528,122 @@ def estadisticoReunionesGar(request):
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
-                values = [['Dates']]
+                total_grupos = len(grupos)
+                opciones['total_grupos'] = total_grupos
                 sw_while = True
-                while sw_while:
-                    sig = fechai + datetime.timedelta(days = 6)
 
-                    if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
-                        ofrenda = True
-                        if 'Ofrenda' not in values[0]:
-                            values[0].append('Ofrenda')
-                        sum_ofrenda = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
-                        if sum_ofrenda['ofrenda__sum'] is None:
-                            sum = 0
-                        else:
-                            sum = sum_ofrenda['ofrenda__sum']
-                        values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
-                    else:
-                        l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
-                        if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
-                            lid_asis = True
-                            if 'Lideres asistentes' not in values[0]:
-                                values[0].append('Lideres asistentes')
-                            numlid = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
-                            if numlid['numeroLideresAsistentes__sum'] is None:
-                                sumLid = 0
-                            else:
-                                sumLid = numlid['numeroLideresAsistentes__sum']
-                            l.append(sumLid)
-                        if 'visitas' in request.POST and request.POST['visitas']=='S':
-                            visitas = True
-                            if 'Visitas' not in values[0]:
-                                values[0].append('Visitas')
-                            numVis = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroVisitas'))
-                            if numVis['numeroVisitas__sum'] is None:
-                                sumVis = 0
-                            else:
-                                sumVis = numVis['numeroVisitas__sum']
-                            l.append(sumVis)
-                        if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
-                            asis_reg = True
-                            if 'Asistentes regulares' not in values[0]:
-                                values[0].append('Asistentes regulares')
-                            reg = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
-                            numAsis = AsistenciaMiembro.objects.filter(reunion__in = reg, asistencia = True).count()
-                            l.append(numAsis)
-                        values.append(l)
-                    fechai = sig + datetime.timedelta(days = 1)
-                    if sig >= fechaf:
-                        sw_while = False
                 if 'reportePDF' in request.POST:
+                    values = [['Rango fecha', 'Visitas', 'Regulares', 'Lideres', 'Total asistentes', 'Grupos que reportaron sobres',
+                               'Grupos que no han reportado sobres', 'Porcentaje de utilizacion']]
+
+                    values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
+                    while sw_while:
+                        sig = fechai + datetime.timedelta(days = 6)
+
+                        numPer = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'), Sum('numeroVisitas'), Sum('numeroTotalAsistentes'), Count('id'))
+                        if numPer['numeroLideresAsistentes__sum'] is None:
+                            sumLid = 0
+                        else:
+                            sumLid = numPer['numeroLideresAsistentes__sum']
+
+                        if numPer['numeroVisitas__sum'] is None:
+                            sumVis = 0
+                        else:
+                            sumVis = numPer['numeroVisitas__sum']
+
+                        if numPer['numeroTotalAsistentes__sum'] is None:
+                            sumTot = 0
+                        else:
+                            sumTot = numPer['numeroTotalAsistentes__sum']
+
+                        numReg = sumTot-sumVis-sumLid
+
+                        if numPer['id__count'] is None:
+                            numSobres = 0
+                        else:
+                            numSobres = numPer['id__count']
+
+                        numSobresNo = total_grupos - numSobres
+                        utillizacion = numSobres/total_grupos*100
+
+                        l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid, sumTot, numSobres, numSobresNo, utillizacion]
+                        lg = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid]
+
+                        values.append(l)
+                        values_g.append(lg)
+
+                        fechai = sig + datetime.timedelta(days = 1)
+                        if sig >= fechaf:
+                            sw_while = False
+
                     response = HttpResponse(mimetype='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                    PdfTemplate(response, 'Estadistico de reuniones GAR', opciones, values, 3)
+                    PdfTemplate(response, 'Estadistico de reuniones GAR', opciones, values_g, 3, tabla=values)
                     return response
+                else:
+                    values = [['Dates']]
+                    while sw_while:
+                        sig = fechai + datetime.timedelta(days = 6)
+
+                        if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
+                            ofrenda = True
+                            if 'Ofrenda' not in values[0]:
+                                values[0].append('Ofrenda')
+                            sum_ofrenda = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
+                            if sum_ofrenda['ofrenda__sum'] is None:
+                                sum = 0
+                            else:
+                                sum = sum_ofrenda['ofrenda__sum']
+                            values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
+                        else:
+                            l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
+                            if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
+                                lid_asis = True
+                                if 'Numero de lideres asistentes' not in values[0]:
+                                    values[0].append('Numero de lideres asistentes')
+                                numlid = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
+                                if numlid['numeroLideresAsistentes__sum'] is None:
+                                    sumLid = 0
+                                else:
+                                    sumLid = numlid['numeroLideresAsistentes__sum']
+                                l.append(sumLid)
+                            if 'visitas' in request.POST and request.POST['visitas']=='S':
+                                visitas = True
+                                if 'Numero de visitas' not in values[0]:
+                                    values[0].append('Numero de visitas')
+                                numVis = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroVisitas'))
+                                if numVis['numeroVisitas__sum'] is None:
+                                    sumVis = 0
+                                else:
+                                    sumVis = numVis['numeroVisitas__sum']
+                                l.append(sumVis)
+                            if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
+                                asis_reg = True
+                                if 'Numero de asistentes regulares' not in values[0]:
+                                    values[0].append('Numero de asistentes regulares')
+                                numPer = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'), Sum('numeroVisitas'), Sum('numeroTotalAsistentes'))
+
+                                if numPer['numeroLideresAsistentes__sum'] is None:
+                                    sumLid = 0
+                                else:
+                                    sumLid = numPer['numeroLideresAsistentes__sum']
+
+                                if numPer['numeroVisitas__sum'] is None:
+                                    sumVis = 0
+                                else:
+                                    sumVis = numPer['numeroVisitas__sum']
+
+                                if numPer['numeroTotalAsistentes__sum'] is None:
+                                    sumTot = 0
+                                else:
+                                    sumTot = numPer['numeroTotalAsistentes__sum']
+
+                                numAsis = sumTot-sumVis-sumLid
+                                l.append(numAsis)
+                            values.append(l)
+                        fechai = sig + datetime.timedelta(days = 1)
+                        if sig >= fechaf:
+                            sw_while = False
     else:
         form = FormularioRangoFechas()
         sw = False
@@ -802,21 +865,16 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     asis_reg = False
 
     if request.method == 'POST':
-        # form = FormularioRangoFechas(request.POST)
         form = FormularioPredicas(miembro=miembro, data=request.POST)
         if form.is_valid():
-            # fechai = form.cleaned_data['fechai']
-            # fechaf = form.cleaned_data['fechaf']
             predica = form.cleaned_data['predica']
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
             discipulos = Miembro.objects.get(id = grupo_i.listaLideres()[0]).discipulos()
             grupoDis = Grupo.objects.filter(Q(lider1__in = discipulos) | Q(lider2__in = discipulos))
-            # opciones = {'fi': fechai, 'ff': fechaf, 'g': capitalize(grupo_i.nombre)}
             opciones = {'predica': capitalize(predica.nombre), 'gi': capitalize(grupo_i.nombre)}
             sw = True
 
-            # n = ['Dates']
-            n = [['Predica']]
+            n = ['Predica']
             n.extend(["%s" % (nom.encode('ascii', 'ignore')) for nom in grupoDis.values_list('nombre', flat=True)])
             values = [n]
             sw_while = True
@@ -862,10 +920,8 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                             numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
                             l.append(numAsis)
             values.append(l)
-                # fechai = sig + datetime.timedelta(days=1)
-                # if sig >= fechaf:
-                #     sw_while = False
 
+            print '------------ ' + str(values)
             if 'reportePDF' in request.POST:
                 response = HttpResponse(mimetype='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
@@ -965,22 +1021,16 @@ def ConsultarReportesSinEnviar(request, sobres=False):
     if request.method == 'POST':
         if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
             grupos = request.session['grupos_sin_reporte']
-            tipo_reunion = request.session['tipo_reporte']
+            sobres = request.session['sobres']
 
             from_mail = 'iglesia@mail.webfaction.com'
             mensaje = "Lideres de la iglesia,\n\n"
-            if tipo_reunion[0] and sobres: #Si es GAR y reporte de sobres
+            if sobres: #Si es GAR y reporte de sobres
                 asunto = 'Recordatorio entrega de ofrendas de reunion GAR'
                 mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones GAR de las siguientes fechas:\n\n"
-            elif not tipo_reunion[0] and sobres: #Si es discipulado y reporte de sobres
-                asunto = 'Recordatorio entrega de ofrendas de reunion discipulado'
-                mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones de discipulado de las siguientes fechas:\n\n"
-            elif tipo_reunion[0] and not sobres: #Si es GAR y reporte reuniones
+            else: #Si es GAR y reporte reuniones
                 asunto = 'Recordatorio ingreso de reportes de reunion GAR'
                 mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones GAR de las siguientes fechas:\n\n"
-            elif not tipo_reunion[0] and not sobres: #Si es discipulado y reporte reuniones
-                asunto = 'Recordatorio ingreso de reportes de reunion discipulado'
-                mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones de discipulado de las siguientes fechas:\n\n"
 
             correos = []
             for g in grupos:
@@ -996,7 +1046,6 @@ def ConsultarReportesSinEnviar(request, sobres=False):
         form = FormularioReportesSinEnviar(request.POST)
         if 'verMorosos' in request.POST:
             if form.is_valid():
-                tipoReunion = form.cleaned_data['reunion']
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupos = []
@@ -1011,28 +1060,16 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                     sig = fechai + datetime.timedelta(weeks = 1)
 
                     if sobres: #Entra si se escoge el reporte de entregas de sobres
-                        if tipoReunion == 1:
-                            gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
-                        else:
-                            gru = gr.filter(estado = 'A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig, reuniondiscipulado__confirmacionentregaofrenda = True)
+                        gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
                     else: #Entra si se escoge el reporte de reuniones
-                        if tipoReunion == 1:
-                            gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig)
-                        else:
-                            gru = gr.filter(estado = 'A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig)
+                        gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig)
 
                     for g in gru:
                         try:
                             i = grupos.index(g)
-                            if tipoReunion == 1:
-                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
-                            else:
-                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaDiscipulado)))
+                            grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
                         except:
-                            if tipoReunion == 1:
-                                g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaGAR))]
-                            else:
-                                g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaDiscipulado))]
+                            g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaGAR))]
                             g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
                             grupos.append(g)
 
@@ -1041,7 +1078,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                         sw = False
 
                 request.session['grupos_sin_reporte'] = grupos
-                request.session['tipo_reporte'] = [sobres, tipoReunion]
+                request.session['sobres'] = sobres
     else:
         form = FormularioReportesSinEnviar()
 

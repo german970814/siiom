@@ -82,12 +82,14 @@
                         <li class="sidebar-search">
                             <div class="input-group custom-search-form">
                                 <form action="/resultado/miembro/" method="POST">
-                                    <input type="text" class="form-control" placeholder="Search...">
+                                    {% csrf_token %}
+                                    <input name="buscar" type="text" class="form-control" placeholder="Search...">
                                     <span class="input-group-btn">
                                     <button class="btn btn-default" type="button">
                                         <i class="fa fa-search"></i>
                                     </button>
-                                </form>    
+                                    </span>
+                                </form>
                             </span>
                             </div>
                             <!-- /input-group -->
@@ -119,7 +121,7 @@
                                         </li>
                                         <li>
                                             <a href="/academia/listar_pagos/">Listar Pagos de Academia</a>
-                                        </li>       
+                                        </li>
                                     </ul>
                                     <!-- /.nav-third-level -->
                                 </li>
@@ -177,7 +179,10 @@
                                         </li>
                                         <li>
                                             <a href="/grupo/crear_red/">Crear Red</a>
-                                        </li>      
+                                        </li>
+                                        <li>
+                                            <a href="/miembro/reportar_reunion_grupo_admin/">Reportar reunion GAR</a>
+                                        </li>
                                     </ul>
                                     <!-- /.nav-third-level -->
                                 </li>
