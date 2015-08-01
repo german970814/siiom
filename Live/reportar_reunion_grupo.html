@@ -1,27 +1,13 @@
 {% extends "base.html" %}
 
 {% block js %}
-<!--
 <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
--->
-<!-- 
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script> 
--->
-<!--
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
--->
-<link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
-<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
-		$("#id_fecha").datepicker({
-            dateFormat: 'dd/mm/yy',
-            changeYear: true,
-            changeMonth: true,
-            yearRange: 'c-50:c'
-        });
+		$("#id_fecha").datepicker();
 	});
 </script>
 {% endblock %}
@@ -41,7 +27,7 @@
         <p class="error">Ya ha sido reportada una reunion en esta semana.</p>
     {% endif %}
     {% if grupo %}
-    <br>
+       {{ form.errors }}
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-primary">
@@ -61,7 +47,7 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-6"><br><p><label>¿Cu&aacute;l fue la asistencia total de tu grupo incluyendo visitas y l&iacute;deres?:</label></p></div>
-                            <div class="col-lg-1"><p><label for="id_numeroLideresAsistentes"></label> {{form.numeroLideresAsistentes}}</p></div>
+                            <div class="col-lg-1"><p><label for="id_numeroTotalAsistentes"></label> {{form.numeroTotalAsistentes}}</p></div>
                         </div>
                         <div class="row">
                             <div class="col-lg-6"><br><p><label>¿Cu&aacute;ntos de ese total de asistentes eran visitas?:</label></p></div>

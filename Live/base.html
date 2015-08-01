@@ -21,7 +21,6 @@
     <link href="{{ MEDIA_URL }}Scripts/css/sb-admin-2.css" rel="stylesheet">
 
     <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.tableTools.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2-bootstrap.css" rel="stylesheet">
 
@@ -82,12 +81,14 @@
                         <li class="sidebar-search">
                             <div class="input-group custom-search-form">
                                 <form action="/resultado/miembro/" method="POST">
-                                    <input type="text" class="form-control" placeholder="Search...">
+                                    {% csrf_token %}
+                                    <input name="buscar" type="text" class="form-control" placeholder="Search...">
                                     <span class="input-group-btn">
                                     <button class="btn btn-default" type="button">
                                         <i class="fa fa-search"></i>
                                     </button>
-                                </form>    
+                                    </span>
+                                </form>
                             </span>
                             </div>
                             <!-- /input-group -->
@@ -119,7 +120,7 @@
                                         </li>
                                         <li>
                                             <a href="/academia/listar_pagos/">Listar Pagos de Academia</a>
-                                        </li>       
+                                        </li>
                                     </ul>
                                     <!-- /.nav-third-level -->
                                 </li>
@@ -177,7 +178,10 @@
                                         </li>
                                         <li>
                                             <a href="/grupo/crear_red/">Crear Red</a>
-                                        </li>      
+                                        </li>
+                                        <li>
+                                            <a href="/miembro/reportar_reunion_grupo_admin/">Reportar reunion GAR</a>
+                                        </li>
                                     </ul>
                                     <!-- /.nav-third-level -->
                                 </li>
@@ -305,7 +309,7 @@
     <!-- /#wrapper -->
 
     <!-- jQuery Version 1.11.0 -->
-    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.10.2.js"></script>
+    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.11.0.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="{{ MEDIA_URL }}Scripts/js/bootstrap.min.js"></script>
@@ -316,7 +320,6 @@
     <!-- Page-Level Plugin Scripts - Tables -->
     <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/jquery.dataTables.js"></script>
     <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.bootstrap.js"></script>
-    <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.tableTools.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="{{ MEDIA_URL }}Scripts/js/sb-admin-2.js"></script>
@@ -324,11 +327,7 @@
     <script>
     $(document).ready(function() {
         $('#gruposSinReportes').dataTable( {
-            "iDisplayLength": 25,
-            "dom": 'T<"clear">lfrtip',
-            "tableTools":{
-                "sSwfPath": "{{ MEDIA_URL }}Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf"
-            },
+            "iDisplayLength": 25
         } );
         $('select').select2();       
     });
