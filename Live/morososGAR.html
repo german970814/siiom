@@ -1,22 +1,12 @@
 {% extends "base.html" %}
 
 {% block js %}
-<!--
 <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
--->
-<link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
-<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script>
-
 <script type="text/javascript">
     $(document).ready(function(){
 		var dates = $("#id_fechai, #id_fechaf").datepicker({
-                                    dateFormat: 'dd/mm/yy',
-                                    changeYear: true,
-                                    changeMonth: true,
-                                    yearRange: 'c-50:c',
                                     maxDate: new Date(),
                                     beforeShowDay: function(date){
                                         var day = date.getDay();
@@ -34,36 +24,34 @@
 
 {% block contenido %}
 
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Grupos Faltantes por Enviar Reporte de reunion</h1>
-        </div>
-    </div>
-
+    <h2>Grupos Faltantes por Enviar Reporte de reunion</h2>
     <br />
     
     <form id="form_reunion" action="" method="POST">
         {% csrf_token %}
         {{ form.non_field_errors }}
+        <div id="div_reunion">
+            {{ form.reunion.errors }}
+            <div class="requerido">
+                <label>{{ form.reunion.label }}:</label>
+                {{ form.reunion }}
+            </div>
+        </div>
         <div id="id_fechas">
             {{ form.fechai.errors }}
             {{ form.fechaf.errors }}
             <p class="requerido">
-                <div class="row">
-                    <div class="col-lg-3">
-                        <label>{{ form.fechai.label }}:</label>
-                        {{ form.fechai }}
-                        <label>{{ form.fechaf.label }}:</label>
-                        {{ form.fechaf }}
-                    </div>
-                </div>        
+                <label>{{ form.fechai.label }}:</label>
+                {{ form.fechai }}
+                <label>{{ form.fechaf.label }}:</label>
+                {{ form.fechaf }}
             </p>
         </div>
-        <input type="submit" name="verMorosos" value="Ver Grupos" class="button blue smallB">
+        <input type="submit" name="verMorosos" value="Ver Grupos" class="btn btn-primary">
 
     <br /><br />
-        {% if grupos %}
-        <table id="gruposSinReportes" class="table table-striped table-bordered table-hover" cellspacing="0">
+
+        <table id="gruposSinReportes" class="simple" cellspacing="0">
             <thead>
                 <tr>
                     <th width="22%">Grupo</th>
@@ -97,8 +85,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        {% endif %}
     <br />
-        <input name="Enviar" type="submit" value="Enviar Mail" class="button blue smallB">
+        <input name="Enviar" type="submit" value="Enviar Mail" class="btn btn-primary">
     </form>
 {% endblock %}

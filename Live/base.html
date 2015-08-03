@@ -21,7 +21,6 @@
     <link href="{{ MEDIA_URL }}Scripts/css/sb-admin-2.css" rel="stylesheet">
 
     <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.tableTools.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2-bootstrap.css" rel="stylesheet">
 
@@ -310,7 +309,7 @@
     <!-- /#wrapper -->
 
     <!-- jQuery Version 1.11.0 -->
-    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.10.2.js"></script>
+    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.11.0.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="{{ MEDIA_URL }}Scripts/js/bootstrap.min.js"></script>
@@ -321,7 +320,6 @@
     <!-- Page-Level Plugin Scripts - Tables -->
     <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/jquery.dataTables.js"></script>
     <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.bootstrap.js"></script>
-    <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.tableTools.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="{{ MEDIA_URL }}Scripts/js/sb-admin-2.js"></script>
@@ -329,11 +327,7 @@
     <script>
     $(document).ready(function() {
         $('#gruposSinReportes').dataTable( {
-            "iDisplayLength": 25,
-            "dom": 'T<"clear">lfrtip',
-            "tableTools":{
-                "sSwfPath": "{{ MEDIA_URL }}Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf"
-            },
+            "iDisplayLength": 25
         } );
         $('select').select2();       
     });
