@@ -10,6 +10,9 @@ from miembros.models import CambioTipo
 from miembros.models import CambioEscalafon
 from miembros.models import CumplimientoPasos
 
+class miembroAdmin(admin.ModelAdmin):
+	list_display = ('id','cedula','nombre','primerApellido','segundoApellido')
+	search_fields = ('cedula','nombre','primerApellido','segundoApellido')
 
 admin.site.register(Zona)
 admin.site.register(Barrio)
@@ -17,7 +20,7 @@ admin.site.register(Pasos)
 admin.site.register(TipoMiembro)
 admin.site.register(DetalleLlamada)
 admin.site.register(Escalafon)
-admin.site.register(Miembro)
+admin.site.register(Miembro,miembroAdmin)
 admin.site.register(CambioTipo)
 admin.site.register(CambioEscalafon)
 admin.site.register(CumplimientoPasos)

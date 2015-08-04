@@ -9,11 +9,7 @@
 	$(document).ready(function(){
 		$("#id_fecha").datepicker();
         $('#miembros').dataTable( {
-            "iDisplayLength": 25,
-            "dom": 'T<"clear">lfrtip',
-            "tableTools":{
-                "sSwfPath": "{{ MEDIA_URL }}Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf"
-            },
+            "iDisplayLength": 25
         } );
 	});
 </script>
