@@ -13,8 +13,10 @@ from grupos.models import ReunionDiscipulado
 class GrupoAdmin(admin.ModelAdmin):
     search_fields = ['nombre']
 
+class ReunionGARAdmin(admin.ModelAdmin):
+    search_fields = ['grupo__nombre']
 
 admin.site.register(Red)
 admin.site.register(Grupo, GrupoAdmin)
-admin.site.register(ReunionGAR)
+admin.site.register(ReunionGAR, ReunionGARAdmin)
 admin.site.register(ReunionDiscipulado)
