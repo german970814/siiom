@@ -10,7 +10,7 @@ from miembros.models import CambioTipo
 from miembros.models import CambioEscalafon
 from miembros.models import CumplimientoPasos
 
-class miembroAdmin(admin.ModelAdmin)
+class miembroAdmin(admin.ModelAdmin):
 	list_display = ('id','cedula','nombre','primerApellido','segundoApellido')
 	search_fields = ('cedula','nombre','primerApellido','segundoApellido')
 
