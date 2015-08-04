@@ -564,7 +564,7 @@ def estadisticoReunionesGar(request):
                             numSobres = numPer['id__count']
 
                         numSobresNo = total_grupos - numSobres
-                        utillizacion = numSobres/total_grupos*100
+                        utillizacion = float(numSobres)/total_grupos*100
 
                         l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid, sumTot, numSobres, numSobresNo, utillizacion]
                         lg = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid]
@@ -1060,9 +1060,9 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                     sig = fechai + datetime.timedelta(weeks = 1)
 
                     if sobres: #Entra si se escoge el reporte de entregas de sobres
-                        gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
+                        gru = gr.filter(estado = 'A', fechaApertura__lt = sig).exclude(reuniongar__fecha__range = (fechai, sig), reuniongar__confirmacionentregaofrenda = True)
                     else: #Entra si se escoge el reporte de reuniones
-                        gru = gr.filter(estado = 'A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig)
+                        gru = gr.filter(estado = 'A', fechaApertura__lt = sig).exclude(reuniongar__fecha__range = (fechai, sig))
 
                     for g in gru:
                         try:
