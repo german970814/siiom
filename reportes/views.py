@@ -594,7 +594,7 @@ def estadisticoReunionesGar(request):
                                 sum = 0
                             else:
                                 sum = sum_ofrenda['ofrenda__sum']
-                            values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
+                            values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), float(sum)])
                         else:
                             l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
                             if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
@@ -712,7 +712,7 @@ def estadisticoReunionesDiscipulado(request):
                     else:
                         sum = sum_ofrenda['ofrenda__sum']
                     # values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
-                    values.append([predica.nombre.encode('ascii', 'ignore'), sum])
+                    values.append([predica.nombre.encode('ascii', 'ignore'), float(sum)])
                 else:
                     # l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
                     l = [predica.nombre.encode('ascii', 'ignore')]
@@ -801,7 +801,7 @@ def estadisticoTotalizadoReunionesGar(request):
                             sum = 0
                         else:
                             sum = sum_ofrenda['ofrenda__sum']
-                        l.append(sum)
+                        l.append(float(sum))
                     else:
                         if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
                             lid_asis = True
@@ -897,7 +897,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                         sum = 0
                     else:
                         sum = sum_ofrenda['ofrenda__sum']
-                    l.append(sum)
+                    l.append(float(sum))
                 else:
                     if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
                         lid_asis = True
