@@ -84,7 +84,7 @@ class ReunionGAR(models.Model):
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
     numeroVisitas = models.PositiveIntegerField(verbose_name = u'Número de visitas:')
     novedades = models.TextField(max_length=500, default="nada",null= True, blank = True)
-    ofrenda = models.PositiveIntegerField()
+    ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
     
     def __unicode__(self):
@@ -110,7 +110,7 @@ class ReunionDiscipulado(models.Model):
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
     novedades = models.TextField(max_length=500)
-    ofrenda = models.PositiveIntegerField()
+    ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
     
     def __unicode__(self):
