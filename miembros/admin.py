@@ -14,6 +14,9 @@ class miembroAdmin(admin.ModelAdmin):
 	list_display = ('id','cedula','nombre','primerApellido','segundoApellido')
 	search_fields = ('cedula','nombre','primerApellido','segundoApellido')
 
+class cambioTipoAdmin(admin.ModelAdmin):
+	search_fields = ('miembro__nombre',)
+
 admin.site.register(Zona)
 admin.site.register(Barrio)
 admin.site.register(Pasos)
@@ -21,6 +24,6 @@ admin.site.register(TipoMiembro)
 admin.site.register(DetalleLlamada)
 admin.site.register(Escalafon)
 admin.site.register(Miembro,miembroAdmin)
-admin.site.register(CambioTipo)
+admin.site.register(CambioTipo, cambioTipoAdmin)
 admin.site.register(CambioEscalafon)
 admin.site.register(CumplimientoPasos)
