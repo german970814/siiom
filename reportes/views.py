@@ -494,9 +494,10 @@ def estadisticoReunionesGar(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id = grupoP.listaLideres()[0])
         #listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.all() #filter(estado='A')
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
+
     descendientes = False
     ofrenda = False
     lid_asis = False

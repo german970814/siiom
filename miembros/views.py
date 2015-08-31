@@ -97,7 +97,7 @@ def miembroInicio(request):
         tipo = TipoMiembro.objects.get(nombre__iexact = 'visita')
         visitantes = []
         for mg in miembrosGrupo:
-            ct = list(CambioTipo.objects.filter(miembro = mg).order_by('fecha'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
+            ct = list(CambioTipo.objects.filter(miembro = mg).exclude(nuevoTipo__nombre__iexact = 'lider').order_by('fecha'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
             if len(ct) != 0 and ct != None:
                 ct = ct.pop()
                 if(ct.nuevoTipo ==  tipo and ct.anteriorTipo == tipo and (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider == None)):
