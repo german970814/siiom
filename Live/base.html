@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Celubook: Casa Del Rey</title>
+    <title>Celubook: VPS</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="{{ MEDIA_URL }}Scripts/css/bootstrap.min.css" rel="stylesheet">
@@ -21,6 +21,7 @@
     <link href="{{ MEDIA_URL }}Scripts/css/sb-admin-2.css" rel="stylesheet">
 
     <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.tableTools.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2-bootstrap.css" rel="stylesheet">
 
@@ -49,7 +50,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/miembro">Casa Del Rey</a>
+                <a class="navbar-brand" href="/miembro">Vivimos para Servir</a>
             </div>
             <!-- /.navbar-header -->
 
@@ -274,6 +275,9 @@
                                 <a href="#"><i class="fa fa-phone-square fa-fw"></i> Consolidaci&oacute;n<span class="fa arrow"></span></a>
                                 <ul class="nav nav-second-level">
                                     <li>
+                                        <a href="/miembro/agregar_miembro/">Agregar Visitas y Miembros<span class="fa arrow"></span></a>   
+                                    </li>                                    
+                                    <li>
                                         <a href="#">Asignacion y Llamadas<span class="fa arrow"></span></a>
                                         <ul class="nav nav-third-level">
                                             <li><a href="/reportes/asignacion_gar/">Control de asignaci&oacute;n a GAR</a></li>
@@ -309,7 +313,7 @@
     <!-- /#wrapper -->
 
     <!-- jQuery Version 1.11.0 -->
-    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.11.0.js"></script>
+    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.10.2.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="{{ MEDIA_URL }}Scripts/js/bootstrap.min.js"></script>
@@ -320,6 +324,7 @@
     <!-- Page-Level Plugin Scripts - Tables -->
     <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/jquery.dataTables.js"></script>
     <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.bootstrap.js"></script>
+    <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.tableTools.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="{{ MEDIA_URL }}Scripts/js/sb-admin-2.js"></script>
@@ -327,7 +332,11 @@
     <script>
     $(document).ready(function() {
         $('#gruposSinReportes').dataTable( {
-            "iDisplayLength": 25
+            "iDisplayLength": 25,
+            "dom": 'T<"clear">lfrtip',
+            "tableTools":{
+                "sSwfPath": "{{ MEDIA_URL }}Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf"
+            },
         } );
         $('select').select2();       
     });
