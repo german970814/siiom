@@ -22,10 +22,10 @@ class FormularioLiderAgregarMiembro(ModelForm):
             else:
                 g = 'M'
 
-            if c:
-                self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
-            else:
-                self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
+            # if c:
+            #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
+            # else:
+            #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
 
     class Meta:
         model = Miembro
@@ -34,7 +34,7 @@ class FormularioLiderAgregarMiembro(ModelForm):
                    'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',\
                    'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada', \
                    'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada', \
-                   'noInteresadoGAR', 'convertido', 'estado',)
+                   'noInteresadoGAR', 'convertido', 'estado', 'conyugue')
 
 class FormularioAdminAgregarMiembro(ModelForm):
     required_css_class = 'requerido'
