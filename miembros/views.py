@@ -493,7 +493,7 @@ http://iglesia.webfactional.com/iniciar_sesion\n\n\
 Cordialmente,\n\
 Admin",\
                     receptores] 
-                    sendMail(camposMail)
+                    #sendMail(camposMail)
                     nuevoMiembro.fechaAsignacionGAR = date.today()
             nuevoMiembro.save()
             ok = True            
