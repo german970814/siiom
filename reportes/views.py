@@ -530,7 +530,9 @@ def estadisticoReunionesGar(request):
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
                 total_grupos = len(grupos)
+                total_grupos_inactivos = len([grupo for grupo in grupos if grupo.estado=='I'])
                 opciones['total_grupos'] = total_grupos
+                opciones['total_grupos_inactivos'] = total_grupos_inactivos
                 sw_while = True
 
                 if 'reportePDF' in request.POST:
@@ -564,8 +566,8 @@ def estadisticoReunionesGar(request):
                         else:
                             numSobres = numPer['id__count']
 
-                        numSobresNo = total_grupos - numSobres
-                        utillizacion = float(numSobres)/total_grupos*100
+                        numSobresNo = total_grupos - total_grupos_inactivos - numSobres
+                        utillizacion = round(float(numSobres)/(total_grupos-total_grupos_inactivos)*100, 2)
 
                         l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid, sumTot, numSobres, numSobresNo, utillizacion]
                         lg = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid]
@@ -1068,11 +1070,15 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                     for g in gru:
                         try:
                             i = grupos.index(g)
-                            grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
+                            fecha = fechai + datetime.timedelta(days = int(g.diaGAR))
+                            if fecha <= datetime.date.today():
+                                grupos[i].fecha_reunion.append(fecha)
                         except:
-                            g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaGAR))]
-                            g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
-                            grupos.append(g)
+                            fecha = fechai + datetime.timedelta(days = int(g.diaGAR))
+                            if fecha <= datetime.date.today():
+                                g.fecha_reunion = [fecha]
+                                g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
+                                grupos.append(g)
 
                     fechai = sig
                     if sig >= fechaf:
