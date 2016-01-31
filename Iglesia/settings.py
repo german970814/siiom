@@ -89,7 +89,7 @@ ROOT_URLCONF = 'Iglesia.urls'
 AUTH_PROFILE_MODULE = 'miembros.Miembro'
 
 TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'Templates').replace('\\','/'),
+    os.path.join(os.path.dirname(__file__), '../Templates').replace('\\','/'),
 )
 
 INSTALLED_APPS = (
