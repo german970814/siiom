@@ -102,16 +102,8 @@ INSTALLED_APPS = (
      'grupos',
      # 'googlecharts',
      'reportes',
-     'south',
 )
 
 EMAIL_HOST = 'smtp.webfaction.com'
 EMAIL_HOST_PASSWORD = '46ea33cd'
 EMAIL_HOST_USER = 'iglesia'
-
-SOUTH_MIGRATION_MODULES = {
-    'academia': 'Iglesia.migrations.academia',
-    'grupos':   'Iglesia.migrations.grupos',
-    'miembros': 'Iglesia.migrations.miembros',
-    'reportes': 'ignore',
-}
