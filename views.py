@@ -83,8 +83,8 @@ def depu(request):
     padre = Miembro.objects.get(id = 1)
     miembros = Miembro.objects.all().order_by('id')
     cad = ''
-    print miembros
-    print padre
+    print(miembros)
+    print(padre)
     for m in miembros:
         if m.email!='NN':
             cad = cad+m.email+'<br />'
@@ -103,16 +103,16 @@ def depu(request):
                 m.estadoCivil = 'C'
 
             m.save()
-            print m
+            print(m)
 
             cambioTipo = CambioTipo.objects.create(miembro=m, autorizacion=padre, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider"), anteriorTipo=TipoMiembro.objects.get(nombre__iexact="visita"), fecha=date.today())
-            print cambioTipo
+            print(cambioTipo)
             cambioTipo.save()
 
             m.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
             
             cp = CumplimientoPasos.objects.create(miembro=m, paso=Pasos.objects.get(nombre__iexact = 'Lanzamiento'), fecha=date.today())
-            print cp
+            print(cp)
             cp.save()
 
     return HttpResponse(cad)
@@ -125,5 +125,5 @@ def depu2(request):
             g.nombre = g.nombre + " - " + g.lider2.primerApellido
 
         g.save()
-        print g.nombre
+        print(g.nombre)
     return HttpResponse(grupos)

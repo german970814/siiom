@@ -3,7 +3,6 @@ import calendar
 from copy import copy
 import datetime
 from encodings.utf_8_sig import encode
-from string import capitalize
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 from django.core import serializers
@@ -924,7 +923,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                             l.append(numAsis)
             values.append(l)
 
-            print '------------ ' + str(values)
+            print('------------ ' + str(values))
             if 'reportePDF' in request.POST:
                 response = HttpResponse(mimetype='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
@@ -1042,7 +1041,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                 receptores.extend(["%s" % (k['email']) for k in mailLideres])
                 msj = mensaje + '\n'.join(map(str, g.fecha_reunion)) + "\n\nCordialmente,\n Admin"
                 correos.append((asunto, msj, from_mail, receptores))
-            print tuple(correos)
+            print(tuple(correos))
 
             sendMassMail(tuple(correos))
 
@@ -1119,7 +1118,7 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
                 receptores.extend(["%s" % (k['email']) for k in mailLideres])
                 msj = mensaje + '\n'.join(map(str, g.fecha_reunion)) + "\n\nCordialmente,\n Admin"
                 correos.append((asunto, msj, from_mail, receptores))
-            print tuple(correos)
+            print(tuple(correos))
 
             sendMassMail(tuple(correos))
 
