@@ -6,16 +6,16 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
 import sys
-from Iglesia.grupos.forms import FormularioEditarGrupo,\
+from grupos.forms import FormularioEditarGrupo,\
     FormularioReportarReunionGrupo, FormularioReportarReunionDiscipulado,\
     FormularioCrearRed, FormularioCrearGrupo
-from Iglesia.miembros.models import Miembro
-from Iglesia.grupos.models import Grupo, AsistenciaMiembro, ReunionGAR,\
+from miembros.models import Miembro
+from grupos.models import Grupo, AsistenciaMiembro, ReunionGAR,\
     ReunionDiscipulado, Red, AsistenciaDiscipulado
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponseRedirect, Http404
-from Iglesia.academia.views import adminTest
+from academia.views import adminTest
 from grupos.forms import FormularioReportesSinEnviar, FormularioCrearGrupoRaiz, FormularioCrearPredica, \
     FormularioReportarReunionGrupoAdmin
 from grupos.models import Predica

@@ -6,8 +6,8 @@ Created on Apr 12, 2011
 from django import forms
 from django.db.models import Q
 from django.forms.models import ModelForm
-from Iglesia.grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
-from Iglesia.miembros.models import CambioTipo, Miembro
+from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
+from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
 
 
