@@ -118,7 +118,7 @@ def reportarReunionGrupo(request):
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
-                print 'entro valid'
+                print('entro valid')
                 r = form.save(commit=False)
                 if not reunionReportada(r.fecha, grupo, 1):
                     r.grupo = grupo
@@ -556,7 +556,7 @@ def reporteVisitasPorRed(request):
             visReuniones = ReunionGAR.objects.filter(grupo=grupo.id).values('numeroVisitas')
             if len(visReuniones.values()) > 0:
                 visitas = sum([int(dict['numeroVisitas']) for dict in visReuniones.values('numeroVisitas')])
-                print visitas
+                print(visitas)
                 visRed = visRed + visitas
         l.append(visRed)
         data.append(l)
