@@ -111,7 +111,7 @@ class Miembro(models.Model):
     def grupoLidera(self):
         """Devuelve el grupo al cual lidera el miembro o su conyugue. Si al miembro no se le ha asignado ningun grupo devuelve None."""
         
-        from Iglesia.grupos.models import Grupo
+        from grupos.models import Grupo
         try:
             if self.conyugue:
                 return Grupo.objects.get(Q(lider1 = self) | Q(lider1 = self.conyugue)| Q(lider2 = self) | Q(lider2 = self.conyugue))

@@ -8,9 +8,9 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.decorators import user_passes_test
-from Iglesia.miembros.models import Miembro, TipoMiembro
+from miembros.models import Miembro, TipoMiembro
 from django.template.context import RequestContext
-from Iglesia.grupos.models import Grupo
+from grupos.models import Grupo
 from django.db.models import Q
 from miembros.forms import FormularioCumplimientoPasosMiembro
 from miembros.models import CambioTipo, CumplimientoPasos, Pasos
