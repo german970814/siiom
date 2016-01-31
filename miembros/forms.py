@@ -5,11 +5,11 @@ Created on Apr 4, 2011
 @author: Migue
 '''
 from django.forms import ModelForm
-from Iglesia.miembros.models import Miembro, Zona, Barrio, CumplimientoPasos,\
+from miembros.models import Miembro, Zona, Barrio, CumplimientoPasos,\
     Pasos, Escalafon, CambioEscalafon, TipoMiembro, CambioTipo, DetalleLlamada
 from django.db.models import Q
 from django import forms
-from Iglesia.academia.models import Matricula
+from academia.models import Matricula
 
 class FormularioLiderAgregarMiembro(ModelForm):
     required_css_class = 'requerido'
