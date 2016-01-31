@@ -133,6 +133,8 @@ class PdfTemplate(SimpleDocTemplate):
             op = op + '<b>Predica:</b> %s<br />' % opciones['predica']
         if 'total_grupos' in opciones:
             op = op + '<b>Total de grupos:</b> %s<br />' % opciones['total_grupos']
+        if 'total_grupos_inactivos' in opciones:
+            op = op + '<b>Total de grupos inactivos:</b> %s<br />' % opciones['total_grupos_inactivos']
         op_p = Paragraph(op, style['Normal'])
 
         #Tabla
