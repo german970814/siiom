@@ -77,6 +77,7 @@ class FormularioCrearRed(ModelForm):
     
     class Meta:
         model = Red
+        fields = '__all__'
         
 class FormularioCrearGrupo(ModelForm):
     required_css_class = 'requerido'

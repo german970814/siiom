@@ -130,12 +130,14 @@ class FormularioPasos(ModelForm):
     
     class Meta:
         model = Pasos
+        fields = '__all__'
 
 class FormularioCrearEscalafon(ModelForm):
     required_css_class = 'requerido'
     
     class Meta:
         model = Escalafon
+        fields = '__all__'
 
 class FormularioPromoverEscalafon(ModelForm):
     required_css_class = 'requerido'
@@ -185,4 +187,5 @@ class FormularioDetalleLlamada(ModelForm):
     
     class Meta:
         model = DetalleLlamada
+        fields = '__all__'
 

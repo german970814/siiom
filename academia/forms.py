@@ -40,6 +40,7 @@ class FormularioCrearCurso(ModelForm):
     
     class Meta:
         model = Curso
+        fields = '__all__'
 
 class FormularioEditarCurso(ModelForm):
     required_css_class = 'requerido'
@@ -67,6 +68,7 @@ class FormularioCrearModulo(ModelForm):
     
     class Meta:
         model = Modulo
+        fields = '__all__'
 
 class FormularioCrearSesion(ModelForm):
     required_css_class = 'requerido'
