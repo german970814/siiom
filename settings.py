@@ -16,7 +16,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
    'default': {
-       'ENGINE': 'postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+       'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
        'NAME': 'iglesia_prod',                      # Or path to database file if using sqlite3.
        'USER': 'postgres',                      # Not used with sqlite3.
        'PASSWORD': '123456',                  # Not used with sqlite3.
@@ -87,7 +87,7 @@ ROOT_URLCONF = 'Iglesia.urls'
 AUTH_PROFILE_MODULE = 'miembros.Miembro'
 
 TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'Templates').replace('\\','/')
+    os.path.join(os.path.dirname(__file__), 'Templates').replace('\\','/'),
 )
 
 INSTALLED_APPS = (
@@ -100,10 +100,18 @@ INSTALLED_APPS = (
      'miembros',
      'academia',
      'grupos',
-     #'googlecharts',
+     # 'googlecharts',
      'reportes',
+     'south',
 )
 
 EMAIL_HOST = 'smtp.webfaction.com'
 EMAIL_HOST_PASSWORD = '46ea33cd'
 EMAIL_HOST_USER = 'iglesia'
+
+SOUTH_MIGRATION_MODULES = {
+    'academia': 'Iglesia.migrations.academia',
+    'grupos':   'Iglesia.migrations.grupos',
+    'miembros': 'Iglesia.migrations.miembros',
+    'reportes': 'ignore',
+}
