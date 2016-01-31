@@ -1,8 +1,8 @@
 # Create your views here.
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
-from Iglesia.miembros.models import Miembro, CumplimientoPasos
-from Iglesia.academia.models import Curso, Matricula, AsistenciaSesiones, Modulo,\
+from miembros.models import Miembro, CumplimientoPasos
+from academia.models import Curso, Matricula, AsistenciaSesiones, Modulo,\
     Sesion, Reporte
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -11,7 +11,7 @@ from django.core import serializers
 import datetime
 from django.db.models.aggregates import Sum
 from django.db.models import Q
-from Iglesia.academia.forms import FormularioEvaluarModulo,\
+from academia.forms import FormularioEvaluarModulo,\
     FormularioPromoverModulo, FormularioCrearCurso, FormularioEditarCurso,\
     FormularioMatricula, FormularioCrearModulo, FormularioCrearSesion,\
     FormularioRecibirPago

@@ -6,11 +6,11 @@ from django.contrib.auth.models import Group, User
 from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import user_passes_test
-from Iglesia.miembros.forms import *
-from Iglesia.grupos.models import Grupo
+from miembros.forms import *
+from grupos.models import Grupo
 from datetime import date
-from Iglesia.academia.views import adminTest
-from Iglesia.academia.models import Curso
+from academia.views import adminTest
+from academia.models import Curso
 import datetime
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
