@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import include, patterns
+from django.conf.urls import include, patterns
 from django.contrib import admin
 from grupos.views import *
 from academia.views import *
