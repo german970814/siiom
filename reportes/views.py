@@ -465,7 +465,7 @@ def PasosRangoFecha(request):
                     num_m = CumplimientoPasos.objects.filter(paso=p, miembro__in=miembros, fecha__range = (fechai, fechaf)).count()
                     total = total + num_m
                     values.append([str(p.nombre), num_m])
-                print
+
                 if 'type' in request.POST:
                     if request.POST['type'] == '1':
                         tipo = 1
