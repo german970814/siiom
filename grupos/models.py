@@ -6,7 +6,7 @@ class Red(models.Model):
 
     nombre = models.CharField(max_length=100)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
     
 class Grupo(models.Model):
@@ -37,7 +37,7 @@ class Grupo(models.Model):
     red = models.ForeignKey(Red, null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio')
     
-    def __unicode__(self):
+    def __str__(self):
         cad = self.lider1.nombre.capitalize() + " " + self.lider1.primerApellido.capitalize() + "(" + self.lider1.cedula + ")"
 
         if self.lider2:
@@ -72,22 +72,22 @@ class Predica(models.Model):
     miembro = models.ForeignKey('miembros.Miembro')
     fecha = models.DateField(auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
 
 class ReunionGAR(models.Model):
     fecha = models.DateField()
     grupo = models.ForeignKey(Grupo)
-    predica = models.CharField(max_length=100, verbose_name=u'prédica')
+    predica = models.CharField(max_length=100, verbose_name='prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
-    numeroTotalAsistentes = models.PositiveIntegerField(verbose_name = u'Número total de asistentes')
-    numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
-    numeroVisitas = models.PositiveIntegerField(verbose_name = u'Número de visitas:')
+    numeroTotalAsistentes = models.PositiveIntegerField(verbose_name = 'Número total de asistentes')
+    numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = 'Número de líderes asistentes')
+    numeroVisitas = models.PositiveIntegerField(verbose_name = 'Número de visitas:')
     novedades = models.TextField(max_length=500, default="nada",null= True, blank = True)
     ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.grupo.nombre
         
     class Meta:
@@ -100,20 +100,20 @@ class AsistenciaMiembro(models.Model):
     reunion = models.ForeignKey(ReunionGAR)
     asistencia = models.BooleanField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.miembro.nombre + " - " + self.reunion.grupo.nombre
     
 class ReunionDiscipulado(models.Model):
     fecha = models.DateField(auto_now_add=True)
     grupo = models.ForeignKey(Grupo)
-    predica = models.ForeignKey(Predica, verbose_name=u'prédica')
+    predica = models.ForeignKey(Predica, verbose_name='prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
-    numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = u'Número de líderes asistentes')
+    numeroLideresAsistentes = models.PositiveIntegerField(verbose_name = 'Número de líderes asistentes')
     novedades = models.TextField(max_length=500)
     ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.grupo.nombre
     
     class Meta:
@@ -127,5 +127,5 @@ class AsistenciaDiscipulado(models.Model):
     reunion = models.ForeignKey(ReunionDiscipulado)
     asistencia = models.BooleanField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.miembro.nombre + " - " + self.reunion.grupo.nombre

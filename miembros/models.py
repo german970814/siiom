@@ -7,34 +7,34 @@ from django.db.models import Q
 class Zona(models.Model):
     nombre = models.CharField(max_length=50)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
     
 class Barrio(models.Model):
     nombre = models.CharField(max_length=50)
     zona = models.ForeignKey(Zona, null=False)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre + " - " + self.zona.nombre
     
 class Pasos(models.Model):
     nombre = models.CharField(max_length=20)
     prioridad = models.PositiveIntegerField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
 
 class TipoMiembro(models.Model):
     nombre = models.CharField(max_length=20)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
     
 class DetalleLlamada(models.Model):
     nombre = models.CharField(max_length=20)
     descripcion = models.TextField(max_length=200)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
 
 class Escalafon(models.Model):
@@ -43,7 +43,7 @@ class Escalafon(models.Model):
     logro = models.TextField(max_length=200)
     rango = models.CharField(max_length=50)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.rango
     
 class Miembro(models.Model):
@@ -69,17 +69,17 @@ class Miembro(models.Model):
     nombre = models.CharField(max_length=30)
     primerApellido =  models.CharField(max_length=20, verbose_name="primer apellido")
     segundoApellido = models.CharField(max_length=20, verbose_name="segundo apellido", null=True, blank=True)
-    genero = models.CharField(max_length=1, choices=opcionesGenero, verbose_name=u'género')
-    telefono = models.CharField(max_length=50, null=True, blank=True, verbose_name=u'teléfono')
+    genero = models.CharField(max_length=1, choices=opcionesGenero, verbose_name='género')
+    telefono = models.CharField(max_length=50, null=True, blank=True, verbose_name='teléfono')
     celular = models.CharField(max_length=50, null=True, blank=True)
     fechaNacimiento = models.DateField(verbose_name="fecha de nacimiento", null=True, blank=True)
-    cedula = models.CharField(max_length=25, unique=True, verbose_name=u'cédula')
-    direccion = models.CharField(max_length=50, null=True, blank=True, verbose_name=u'dirección')
+    cedula = models.CharField(max_length=25, unique=True, verbose_name='cédula')
+    direccion = models.CharField(max_length=50, null=True, blank=True, verbose_name='dirección')
     barrio = models.ForeignKey(Barrio, null=True, blank=True)
     email = models.EmailField(unique=True)
-    profesion = models.CharField(max_length=20, null=True, blank=True, verbose_name=u'profesión')
+    profesion = models.CharField(max_length=20, null=True, blank=True, verbose_name='profesión')
     estadoCivil = models.CharField(max_length=1, choices=opcionesEstadoCivil, null=True, blank=True, verbose_name="estado civil")
-    conyugue = models.ForeignKey('self', related_name='casado_con', null=True, blank= True, verbose_name= u'cónyugue')
+    conyugue = models.ForeignKey('self', related_name='casado_con', null=True, blank= True, verbose_name= 'cónyugue')
     #info iglesia
     convertido =  models.BooleanField(default=False)
     estado = models.CharField(max_length=1, choices=opcionesEstado)
@@ -90,22 +90,22 @@ class Miembro(models.Model):
     asignadoGAR = models.BooleanField(default=False, verbose_name="asignado a GAR")
     asisteGAR = models.BooleanField(default=False, verbose_name="asiste a GAR")
     noInteresadoGAR = models.BooleanField(default=False, verbose_name="no interesado en GAR")
-    fechaAsignacionGAR = models.DateField(null=True, blank=True, verbose_name=u'fecha de asignación a GAR')
+    fechaAsignacionGAR = models.DateField(null=True, blank=True, verbose_name='fecha de asignación a GAR')
     #Llamada Lider
-    fechaLlamadaLider = models.DateField(null=True, blank=True, verbose_name=u'fecha de llamada del líder')
-    detalleLlamadaLider = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='llamada_lider', verbose_name=u'detalle de llamada del líder')
-    observacionLlamadaLider = models.TextField(max_length = 300, null=True, blank=True, verbose_name= u'observación de llamada del líder')
+    fechaLlamadaLider = models.DateField(null=True, blank=True, verbose_name='fecha de llamada del líder')
+    detalleLlamadaLider = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='llamada_lider', verbose_name='detalle de llamada del líder')
+    observacionLlamadaLider = models.TextField(max_length = 300, null=True, blank=True, verbose_name= 'observación de llamada del líder')
     #Primera llamada
     fechaPrimeraLlamada = models.DateField(null=True, blank=True, verbose_name="fecha de primera llamada")
     detallePrimeraLlamada = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='primera_llamada', verbose_name="detalle de primera llamada")
-    observacionPrimeraLlamada = models.TextField(max_length = 300, null=True, blank=True, verbose_name= u'observación de primera llamada')
+    observacionPrimeraLlamada = models.TextField(max_length = 300, null=True, blank=True, verbose_name= 'observación de primera llamada')
     #Segunda Llamada
     fechaSegundaLlamada = models.DateField(null=True, blank=True, verbose_name="fecha de segunda llamada")
     detalleSegundaLlamada = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='segunda_llamada', verbose_name="detalle de segunda llamada")
-    observacionSegundaLlamada = models.TextField(max_length = 300, null=True, blank=True, verbose_name = u'observación de segunda llamada')
+    observacionSegundaLlamada = models.TextField(max_length = 300, null=True, blank=True, verbose_name = 'observación de segunda llamada')
     fechaRegistro = models.DateField(auto_now_add=True)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre + " - " + self.primerApellido
     
     def grupoLidera(self):
@@ -182,7 +182,7 @@ class CumplimientoPasos(models.Model):
     paso = models.ForeignKey(Pasos)
     fecha = models.DateField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.miembro.nombre + " - " + self.paso.nombre
     
 class CambioEscalafon(models.Model):
@@ -190,7 +190,7 @@ class CambioEscalafon(models.Model):
     escalafon = models.ForeignKey(Escalafon)
     fecha = models.DateField(default=datetime.datetime.now())
     
-    def __unicode__(self):
+    def __str__(self):
         return self.miembro.nombre + " - " + self.escalafon.rango
     
 class CambioTipo(models.Model):
@@ -200,5 +200,5 @@ class CambioTipo(models.Model):
     anteriorTipo = models.ForeignKey(TipoMiembro, related_name='tipo_anterior', null=True, verbose_name="tipo anterior")
     fecha = models.DateField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.miembro.nombre + " - " + self.nuevoTipo.nombre

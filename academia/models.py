@@ -4,15 +4,15 @@ class Modulo(models.Model):
     nombre = models.CharField(max_length=20)
     porcentaje = models.PositiveIntegerField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre + " - " + str(self.porcentaje)
     
 class Sesion(models.Model):
     nombre = models.CharField(max_length=20)
     modulo = models.ForeignKey(Modulo)
     
-    def __unicode__(self):
-        return self.nombre + " - " + unicode(self.modulo)
+    def __str__(self):
+        return self.nombre + " - " + self.modulo.nombre
 
 class Curso(models.Model):
     opcionesDia = (
@@ -40,7 +40,7 @@ class Curso(models.Model):
     red = models.ForeignKey('grupos.Red')
     modulos = models.ManyToManyField(Modulo)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre + " - " + self.profesor.nombre
     
 
@@ -73,7 +73,7 @@ class Matricula(models.Model):
         except:
             return False
     
-    def __unicode__(self):
+    def __str__(self):
         return self.estudiante.nombre + " - " + self.curso.nombre
     
 class AsistenciaSesiones(models.Model):
@@ -83,7 +83,7 @@ class AsistenciaSesiones(models.Model):
     tarea = models.BooleanField(default=False)
     fecha = models.DateField()
     
-    def __unicode__(self):
+    def __str__(self):
         return self.matricula.estudiante.nombre
     
     class Meta:
@@ -95,12 +95,11 @@ class Reporte(models.Model):
     modulo = models.ForeignKey(Modulo)
     nota = models.DecimalField(max_digits=3, decimal_places=2)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.matricula.estudiante.nombre
     
     class Meta:
         ordering = ['id']
         unique_together = ('matricula', 'modulo')
-    
-    
+
 

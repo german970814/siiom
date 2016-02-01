@@ -63,7 +63,7 @@ def unordered_list_grupos(value, autoescape=None):
             second_item = new_second_item
         return [first_item, second_item], old_style_list
     def _helper(list_, tabs=1):
-        indent = u'\t' * tabs
+        indent = '\t' * tabs
         output = []
 
         list_length = len(list_)

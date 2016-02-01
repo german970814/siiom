@@ -80,9 +80,9 @@ class FormularioSegundaLlamadaAgente(ModelForm):
 class FormularioCambiarContrasena(forms.Form):
     required_css_class = 'requerido'
     
-    contrasenaAnterior = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label=u'Contraseña anterior:')      
-    contrasenaNueva = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label=u'Contraseña nueva:')
-    contrasenaNuevaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label=u'Verifique contraseña nueva:')
+    contrasenaAnterior = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña anterior:')
+    contrasenaNueva = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña nueva:')
+    contrasenaNuevaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña nueva:')
 
 class FormularioAsignarGrupo(ModelForm):
     required_css_class = 'requerido'
@@ -177,9 +177,9 @@ class FormularioCambioTipoMiembro(ModelForm):
 class FormularioAsignarUsuario(forms.Form):
     required_css_class = 'requerido'
     
-    email = forms.EmailField(label=u'Verificar correo:')      
-    contrasena = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label=u'Contraseña:')
-    contrasenaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label=u'Verifique contraseña:')
+    email = forms.EmailField(label='Verificar correo:')
+    contrasena = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña:')
+    contrasenaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña:')
 
 
 class FormularioDetalleLlamada(ModelForm):

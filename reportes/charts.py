@@ -126,7 +126,7 @@ class PdfTemplate(SimpleDocTemplate):
         if 'opt' in opciones:
             op = op + '<b>Opcion:</b> %s<br />' % opciones['opt']
         if 'ano' in opciones:
-            op = op + u'<b>Año:</b> %s<br />' % opciones['ano']
+            op = op + '<b>Año:</b> %s<br />' % opciones['ano']
         if 'red' in opciones:
             op = op + '<b>Red:</b> %s<br />' % opciones['red']
         if 'predica' in opciones:

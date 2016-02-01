@@ -262,7 +262,7 @@ def cambiarContrasena(request):
                 miembroUsuario.save()
                 return HttpResponseRedirect("/miembro/editar_perfil/")
             else:
-                validacionContrasena = u'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
+                validacionContrasena = 'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
                 #return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))      
     else:
         form = FormularioCambiarContrasena()            

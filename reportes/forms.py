@@ -23,7 +23,7 @@ MESES_CHOICES = (('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'
 class FormularioVisitasPorMes(forms.Form):
     required_css_class = 'requerido'
 
-    ano = forms.CharField(label=u'año', required=True)
+    ano = forms.CharField(label='año', required=True)
     meses = forms.TypedMultipleChoiceField(choices=MESES_CHOICES, coerce=int, required=True, widget=forms.CheckboxSelectMultiple(attrs={'class':'check_meses'}))
 
 RED_CHOICES = [(red.id, red.nombre)for red in Red.objects.all()]
@@ -31,7 +31,7 @@ RED_CHOICES = [(red.id, red.nombre)for red in Red.objects.all()]
 class FormularioVisitasRedPorMes(forms.Form):
     required_css_class = 'requerido'
 
-    ano = forms.CharField(label=u'año', required=True)
+    ano = forms.CharField(label='año', required=True)
     red = forms.ChoiceField(choices=RED_CHOICES)
     meses = forms.TypedMultipleChoiceField(choices=MESES_CHOICES, coerce=int, required=True, widget=forms.CheckboxSelectMultiple(attrs={'class':'check_meses'}))
 
