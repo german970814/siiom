@@ -128,7 +128,6 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
-        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__), 'static').replace('\\','/')}),
         (r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__),
                                                                                                    '../Templates').replace('\\','/')}),
 )

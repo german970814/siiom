@@ -2,8 +2,45 @@
 
 import os
 
-DEBUG = True 
-TEMPLATE_DEBUG = DEBUG
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = '@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = []
+
+# Application definition
+
+INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'miembros',
+    'academia',
+    'grupos',
+    # 'googlecharts',
+    'reportes',
+)
+
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+)
+
+ROOT_URLCONF = 'Iglesia.urls'
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -59,51 +96,24 @@ MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'static').replace('\\','/')
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/site_media/'#'http://localhost:8000/static/'
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.8/howto/static-files/
 
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static'))
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/admin/'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-)
-
-ROOT_URLCONF = 'Iglesia.urls'
-
 AUTH_PROFILE_MODULE = 'miembros.Miembro'
 
 TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(__file__), '../Templates').replace('\\','/'),
-)
-
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-     'django.contrib.admin',
-     'miembros',
-     'academia',
-     'grupos',
-     # 'googlecharts',
-     'reportes',
 )
 
 EMAIL_HOST = 'smtp.webfaction.com'
