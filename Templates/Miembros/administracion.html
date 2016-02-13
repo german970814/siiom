@@ -1,6 +1,160 @@
 {% extends "base.html" %}
 
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12" style="text-align:center;">
+            <h1 class="page-header">Resumen de la Iglesia</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="mini-charts">
+            <div class="row">
+                <div class="col-sm-6 col-md-3">
+                    <div class="mini-charts-item bgm-cyan">
+                        <div class="clearfix">
+                            <div class="chart stats-bar"></div>
+                            <div class="count">
+                                <small>Total Grupos</small>
+                                <h2>{{totalGrupos}}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="mini-charts-item bgm-lightgreen">
+                        <div class="clearfix">
+                            <div class="chart stats-bar-2"></div>
+                            <div class="count">
+                                <small>Total Líderes</small>
+                                <h2>{{totalLideres}}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="mini-charts-item bgm-orange">
+                        <div class="clearfix">
+                            <div class="chart stats-line"></div>
+                            <div class="count">
+                                <small>Alguna Acción</small>
+                                <h2>458,778</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <div class="mini-charts-item bgm-bluegray">
+                        <div class="clearfix">
+                            <div class="chart stats-line-2"></div>
+                            <div class="count">
+                                <small>Total Grupos Sin Reportar</small>
+                                <h2>{{totalGruposI}}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+        <!-- Recent Items -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Panel de Notificaciones<small>Notificaciones Génerales de los Miembros</small></h2>
+                    <ul class="actions">
+                        <li class="dropdown">
+                            <a href="" data-toggle="dropdown">
+                                <i class="zmdi zmdi-more-vert"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li>
+                                    <a href="">Actualizar</a>
+                                </li>
+                                <li>
+                                    <a href="">Detalles</a>
+                                </li>
+                                <li>
+                                    <a href="">Configuración</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body m-t-0">
+                    <table class="table table-inner table-vmiddle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th style="width: 60px">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="f-500 c-cyan">Total de Miembros</td>
+                                <td class="f-500 c-cyan">{{totalMiembros}}</td>
+                            </tr>
+                            <tr>
+                                <td class="f-500 c-cyan">Miembros Activos</td>
+                                <td class="f-500 c-cyan">{{totalMiembrosA}}</td>
+                            </tr>
+                            <tr>
+                                <td class="f-500 c-cyan">Miembros en Restauración</td>
+                                <td class="f-500 c-cyan">{{totalMiembrosR}}</td>
+                            </tr>
+                            <tr>
+                                <td class="f-500 c-cyan">Miembros Inactivos</td>
+                                <td class="f-500 c-cyan">{{totalMiembrosI}}</td>
+                            </tr>
+                            <tr>
+                                <td class="f-500 c-cyan">Maestros</td>
+                                <td class="f-500 c-cyan">{{totalMaestros}}</td>
+                            </tr>
+                            <tr>
+                                <td class="f-500 c-cyan">Academia</td>
+                                <td class="f-500 c-cyan">{{totalCursos}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="recent-items-chart" class="flot-chart"></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <div id="pie-charts" class="dash-widget-item">
+                <div class="bgm-pink">
+                    <div class="dash-widget-header">
+                        <div class="dash-widget-title">Estadísticas y Porcentajes</div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="text-center p-20 m-t-25">
+                        <div class="easy-pie main-pie" data-percent="26">
+                            <div class="percent">26</div>
+                            <div class="pie-title">Porcentaje Uso Aplicación</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-t-20 p-b-20 text-center">
+                    <div class="easy-pie sub-pie-1" data-percent="56">
+                        <div class="percent">56</div>
+                        <div class="pie-title">Porcentaje Ingresos</div>
+                    </div>
+                    <div class="easy-pie sub-pie-2" data-percent="84">
+                        <div class="percent">84</div>
+                        <div class="pie-title">Porcentaje Consolidación</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+{% endblock %}
+
 {% block js %}
+
 <!-- Page-Level Plugin Scripts - Morris -->
 <script src="{{ MEDIA_URL }}Scripts/js/plugins/morris/raphael-2.1.0.min.js"></script>
 <script src="{{ MEDIA_URL }}Scripts/js/plugins/morris/morris.js"></script>   
@@ -19,152 +173,5 @@
       });
   });
 </script>
-{% endblock %}
-
-{% block contenido %}
-<div class="row">
-	<div class="col-lg-12">
-	    <h1 class="page-header">Resumen de la Iglesia</h1>
-	</div>
-</div>
-
-<div class="row">
-    <div class="col-lg-3 col-md-6">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <i class="fa fa-check fa-5x"></i>
-                    </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge">{{totalGrupos}}</div>
-                        <div>Grupos de Amistad</div>
-                    </div>
-                </div>
-            </div>
-            <a href="#">
-                <div class="panel-footer">
-                    <span class="pull-left">Ver Detalles</span>
-                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                    <div class="clearfix"></div>
-                </div>
-            </a>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="panel panel-green">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <i class="fa fa-thumbs-o-up fa-5x"></i>
-                    </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge">{{totalGruposA}}</div>
-                        <div>Grupos de Amistad Activos</div>
-                    </div>
-                </div>
-            </div>
-            <a href="#">
-                <div class="panel-footer">
-                    <span class="pull-left">Ver Detalles</span>
-                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                    <div class="clearfix"></div>
-                </div>
-            </a>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="panel panel-yellow">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <i class="fa fa-group fa-5x"></i>
-                    </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge">{{totalLideres}}</div>
-                        <div>L&iacute;deres</div>
-                    </div>
-                </div>
-            </div>
-            <a href="#">
-                <div class="panel-footer">
-                    <span class="pull-left">Ver</span>
-                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                    <div class="clearfix"></div>
-                </div>
-            </a>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="panel panel-red">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <i class="fa fa-tasks fa-5x"></i>
-                    </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge">{{totalGruposI}}</div>
-                        <div>Grupos no han Reportado</div>
-                    </div>
-                </div>
-            </div>
-            <a href="#">
-                <div class="panel-footer">
-                    <span class="pull-left">Ver Detalles</span>
-                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                    <div class="clearfix"></div>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>
-
-<div class="row">	
-	<div class="col-lg-4">
-	    <div class="panel panel-default">
-	        <div class="panel-heading">
-	            <i class="fa fa-bell fa-fw"></i> Panel de Notificationes
-	        </div>
-	        <!-- /.panel-heading -->
-	        <div class="panel-body">
-	            <div class="list-group">
-	                <a href="#" class="list-group-item">
-	                    <i class="fa fa-group fa-fw"></i> Total de Miembros:  {{totalMiembros}}
-	                </a>
-	                <a href="#" class="list-group-item">
-	                    <i class="fa fa-user fa-fw"></i> Miembros Activos:  {{totalMiembrosA}}
-	                </a>
-	                <a href="#" class="list-group-item">
-	                    <i class="fa fa-medkit fa-fw"></i> Miembros en Restauraci&oacute;n:  {{totalMiembrosR}}
-	                </a>
-	                <a href="#" class="list-group-item">
-	                    <i class="fa fa-frown-o fa-fw"></i> Miembros Inactivos:  {{totalMiembrosI}}
-	                </a>
-	                <a href="#" class="list-group-item">
-	                    <i class="fa fa-book fa-fw"></i> Maestros:  {{totalMaestros}}
-	                </a>
-	                <a href="#" class="list-group-item">
-	                    <i class="fa fa-university fa-fw"></i> Academias:  {{totalCursos}}
-	                </a>
-	            </div>
-	            <!-- /.list-group -->
-	            <a href="#" class="btn btn-default btn-block">Ver mas</a>
-	        </div>
-	        <!-- /.panel-body -->
-	    </div>
-	</div>
-	<div class="col-lg-5">
-		<div class="panel panel-default">
-		    <div class="panel-heading">
-		        <i class="fa fa-bar-chart-o fa-fw"></i> Porcentaje de uso Aplicacion
-		    </div>
-		    <div class="panel-body">
-		        <div id="donut-example"></div>
-		        <a href="#" class="btn btn-default btn-block">Ver Detalles</a>
-		    </div>
-		    <!-- /.panel-body -->
-		</div>
-	</div> 
-</div>	
 
 {% endblock %}

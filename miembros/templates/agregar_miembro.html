@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block js %}
+<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#id_fechaNacimiento").datepicker({ 
+									changeYear: true,
+									changeMonth: true,
+									yearRange: 'c-50:c'
+								});
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+	{{a}}
+	<h2>{{accion}} Miembro</h2>
+	{% if ok %}
+		<p class="ok">Se ha agregado el miembro correctamente.</p>
+	{% endif %}	
+	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		{{ form.as_p }}
+	<input class="button blue smallB" type="submit" value="{{accion}}">	
+{% endblock %}
+

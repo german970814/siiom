@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+	<h2>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</h2>
+    <br />
+    <fieldset>
+    	<legend>Informaci&oacute;n personal</legend>
+		<p><b>Telefono:</b> {{ est.estudiante.telefono }}</p>
+    	<p><b>Direcci&oacute;n:</b> {{ est.estudiante.direccion }}</p>
+    	<p><b>Email:</b> {{ est.estudiante.email }}</p>
+	</fieldset>
+    
+    <fieldset>
+        <legend>Informaci&oacute;n del curso</legend>
+        <p><b>Fecha inicio:</b> {{ est.fechaInicio }}</p>
+        <p><b>Nota definitiva:</b> {{ est.notaDefinitiva }}</p>
+        <p><b>Pago:</b> {{ est.pago }}</p>
+        
+        <h3>Modulos</h3>
+        {% for modulo in est.modulosDados %}
+            <h4>{{ modulo.nombre|capfirst }}</h4>
+            
+            <table class="simple" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Sesi&oacute;n</th>
+                        <th class="centrarTexto">Asistencia</th>
+                        <th class="centrarTexto">Tarea</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sesion in modulo.sesiones %}
+                        <tr>
+                          <td>{{ sesion.nombre|capfirst }}</td>
+                          <td class="centrarTexto">{% if sesion.asistencia.asistencia %}<img src="{{ MEDIA_URL }}Imagenes/accept.png" />{% endif %}				 						  </td>
+                          <td class="centrarTexto">{% if sesion.asistencia.tarea %}<img src="{{ MEDIA_URL }}Imagenes/accept.png" />{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr><td colspan="3"><b>Examen Final:</b> {{ modulo.reporte.nota }}</td></tr>
+                </tbody>
+            </table>
+            
+        {% empty %}
+            <p>No ha dado ningun modulo</p>
+        {% endfor %}
+	</fieldset>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block js %}
+<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#id_fechaNacimiento").datepicker({ 
+									changeYear: true,
+									changeMonth: true,
+									yearRange: 'c-50:c'
+								});
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+
+	<h2>Editar Perfil</h2>
+	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		{{ form.as_p }}
+	<p>	
+		<a href="/miembro/cambiar_contrasena/">Cambiar Contrase&ntilde;a</a>
+	</p>
+	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
+	</form>	
+{% endblock %}
+

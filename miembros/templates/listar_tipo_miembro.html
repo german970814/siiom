@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Tipos de Miembro</h2>
+
+	{% if okElim == 1 %}
+		<p class="ok">Se eliminaron los tipos de miembro seleccionadas.</p>
+	{% else %}
+		{% if okElim == 2%}
+			<p class="error">Hubo un error al eliminar tipos de miembro.</p>
+		{% endif %}
+	{% endif %}
+    
+	{% if tipos %}
+		<form action="" method="POST" enctype="multipart/form-data" >
+			{% csrf_token %}
+			<a alt="Agregar tipo" href="/miembro/crear_tipo_miembro/">Agregar tipo de miembro <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+			<br/>
+			<table id="tipos" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('escalafones');" /></div></th>
+		            <th>nombre</th>
+		            
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for tipo in tipos %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{tipo.id}}"/></td>
+						<td>{{tipo.nombre|capfirst}}</td>
+						
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<input class="button blue smallB" type="submit" value="Editar" name="editar">
+            <input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">
+		</form>
+		<br />
+	{% else %}
+		<p>No existen tipos de miembro. Haga <a alt="Agregar tipo de miembro" href="/miembro/crear_tipo_miembro/">click aqu&iacute;></a> para agregar uno.</p>
+	{% endif %}
+{% endblock %}  

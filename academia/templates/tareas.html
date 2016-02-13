@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+<script type="text/javascript">
+		$(document).ready(function(){
+			$("#idCurso").change(function(){
+				if ($(this).val() != -1){
+					$.post("", {combo: 'idCurso', id: $(this).val()}, function(data){agregarOpciones(data, 'idModulo');}, "json");
+				} else {
+					$("#idModulo").html('');
+					$("#idSesion").html('');
+				}
+			});
+			
+			$("#idModulo").change(function(){
+				if ($(this).val() != -1){
+					$.post("", {combo: 'idModulo', id: $(this).val()}, function(data){agregarOpciones(data, 'idSesion');}, "json");
+				} else {
+					$("#idSesion").html('');
+				}
+			});
+		});		
+</script>
+{% endblock %}
+
+{% block contenido %}
+    <h2>Registro de tareas</h2>
+    <br />
+    <form action="" method="post" >
+      {% csrf_token %}
+
+        <label for="idCurso">Curso:</label>
+        <select name="menuCursos" id="idCurso">
+          <option value="-1" {% if not curso %} selected="selected" {% endif %}>Selecciona un curso</option>          
+       		{% for c in cursos %}
+            	<option value="{{ c.id }}" {% if c == curso %} selected="selected" {% endif %}>{{ c.nombre|capfirst }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="idModulo">Modulo:</label>
+        <select name="menuModulos" id="idModulo">
+          {% if  modulos %}
+           	<option value="-1" >-----</option>          
+       		{% for m in modulos %}
+            	<option value="{{ m.id }}" {% if m == modulo %} selected="selected" {% endif %}>{{ m.nombre|capfirst }}</option>
+            {% endfor %}	
+          {% endif %}
+        </select>
+
+        <label for="idSesion">Sesion:</label>
+        <select name="menuSesiones" id="idSesion">
+          {% if  sesiones %}
+           	<option value="-1" >-----</option>          
+       		{% for s in sesiones %}
+            	<option value="{{ s.id }}" {% if s == sesion %} selected="selected" {% endif %}>{{ s.nombre|capfirst }}</option>
+            {% endfor %}	
+          {% endif %}
+        </select>
+        <input type="submit" name="verEstudiantes" value="Ver" class="button blue smallB">
+	</form>
+    <br />
+    {% if ok %}
+		<p class="ok">Se han registrado correctamente la entrega de tareas.</p>
+	{% endif %}
+    <form action="" method="post">
+     	{% csrf_token %}
+        <table id="tareas" class="simple" cellspacing="0">
+          <thead>
+            <tr>              
+              <th class="checkboxBoton"><div class="button gray smallB checkBoton">
+              <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('tareas');"/></div></th>
+              <th>Nombre</th>
+            </tr>
+          </thead>
+          <tbody>      
+            {% for est in estudiantes %}
+               <tr>
+                 <td><input type="checkbox" name="seleccionados" value="{{est.id}}" {% if est.tarea %}checked{% endif %}/></td>
+                 <td>{{est.matricula.estudiante.nombre|capfirst}} {{est.matricula.estudiante.primerApellido|capfirst}} {{est.matricula.estudiante.segundoApellido|capfirst}}</td>
+               </tr>
+            {% empty %}
+            	<tr>
+                	<td class="centrarTexto" colspan="2">No hay estudiantes en esta sesi&oacute;n.</td>
+                </tr>
+            {% endfor %}
+          </tbody>      
+        </table>
+        <br />
+        <input type="hidden" name="menuCursos" value="{{curso.id}}"/>
+        <input type="hidden" name="menuModulos" value="{{modulo.id}}"/>
+        <input type="hidden" name="menuSesiones" value="{{sesion.id}}"/>
+        <input type="submit" name="aceptarTarea" value="Registrar" class="button blue smallB">
+    </form>
+{% endblock %}

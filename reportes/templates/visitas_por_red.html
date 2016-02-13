@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block js %}
+<!--
+<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+-->
+<link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
+<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#id_fecha").datepicker();
+    });
+    //dibujando el grafico
+    {% if sw %}
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart(){
+            var data = google.visualization.arrayToDataTable({{ values|safe }});
+            var options = {width: 700, height: 500};
+        {% if tipo == 1 %}
+            var chart = new google.visualization.PieChart(document.getElementById('out'));
+        {% else %}
+            var chart = new google.visualization.ColumnChart(document.getElementById('out'));
+        {% endif %}
+            chart.draw(data, options);
+        }
+    {% endif %}
+
+    $(document).ready(function(){
+		var dates = $("#id_fechai, #id_fechaf").datepicker({
+                                    dateFormat: 'dd/mm/yy',
+                                   onSelect: function(selectedDate){
+                                        var option = this.id == "id_fechai" ? "minDate" : "maxDate";
+                                        dates.not(this).datepicker("option", option, selectedDate);
+                                   }
+								});
+
+        {% if tipo == 1 %}
+            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie_sel.png");
+            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column.png");
+            $("#type").attr('value', '1');
+        {% else %}
+            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column_sel.png");
+            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie.png");
+            $("#type").attr('value', '2');
+        {% endif %}
+        $("#pie_button, #column_button").click(function(){
+            if(this.id == "pie_button")
+            {   $("#type").attr('value', '1');
+                $("#form_visitasRed").submit();
+            }
+            else
+            {   $("#type").attr('value', '2');
+                $("#form_visitasRed").submit();
+            }
+
+        });
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">{{ titulo_pag }}</h1>
+        </div>
+    </div>
+
+    <br />
+
+    <div class="row">
+        <div class="col-lg-4">
+    <form id="form_visitasRed" class="alinearForm" action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="type" id="type" value="1">
+        <input type="submit" name="verReporte" value="Ver Reporte" class="button blue smallB">
+        <input type="submit" name="reportePDF" value="Generar PDF" class="button blue smallB">
+    </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+    {% if sw %}
+        <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_pie_sel.png" value="pie" name="pie_button" id="pie_button">
+        <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
+        <div id="out"></div>
+    {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

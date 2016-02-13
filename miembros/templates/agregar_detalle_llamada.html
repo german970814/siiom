@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+	<h2>{{accion}} Detalle Llamada</h2>
+	{% if ok %}
+		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" href="/miembro/detalles_llamada"> Volver a la lista de detalles de llamada.</a></p>
+	{% endif %}	
+	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		{{ form.as_p }}
+	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
+	</form>
+{% endblock %}

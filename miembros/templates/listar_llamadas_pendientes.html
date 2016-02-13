@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Llamadas Pendientes</h2>
+<br />
+	{% if grupo %}
+        {% if visitantes %}
+            <form action="" method="POST" enctype="multipart/form-data" >
+                {% csrf_token %}
+                <table id="visitantes" class="simple" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th class="checkboxBoton"><div class="button gray smallB checkBoton">
+                        <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('visitantes');" /></div></th>
+                        <th>Nombre</th>		            
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for visita in visitantes %}
+                        <tr>
+                            <td><input type="checkbox" name="seleccionados" value="{{visita.id}}"/></td>
+                            <td>{{visita.nombre|capfirst}} {{visita.primerApellido|capfirst}} {{visita.segundoApellido|capfirst}}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <br/>
+                <input class="button blue smallB" type="submit" value="Registrar Llamada" name="registrarLlamada"> 
+            </form>
+            <br />
+        {% else %}
+            <p>No tienes llamadas pendientes</p>
+        {% endif %}
+    {% else %}
+    	<p>No estas asignado a ningun grupo.</p>
+    {% endif %}	
+{% endblock %}  

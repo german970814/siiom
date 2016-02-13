@@ -12,21 +12,34 @@
     <title>Celubook: Casa Del Rey</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="{{ MEDIA_URL }}Scripts/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
-    <link href="{{ MEDIA_URL }}Scripts/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
+    <link href="" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="{{ MEDIA_URL }}Scripts/css/sb-admin-2.css" rel="stylesheet">
+    <!-- <link href="{{ MEDIA_URL }}Scripts/css/sb-admin-2.css" rel="stylesheet">
 
-    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet"> -->
     <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.tableTools.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}Scripts/css/select2-bootstrap.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="{{ MEDIA_URL }}Scripts/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+   <link href="{{ MEDIA_URL }}Scripts/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Template CSS -->
+
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/animate.css/animate.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
+        
+    <!-- CSS -->
+    <link href="{{ MEDIA_URL }}template/jquery/css/app.min.1.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/css/app.min.2.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -38,282 +51,322 @@
 </head>
 
 <body>
-
-    <div id="wrapper">
-
-        <!-- Navigation -->
-        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="/miembro">Casa Del Rey</a>
-            </div>
-            <!-- /.navbar-header -->
-
-            <ul class="nav navbar-top-links navbar-right">
-                <!-- /.dropdown -->
-                <a href="/miembro/editar_perfil/">{{ request.user }}</a>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-user">
-                        <li><a href="/miembro/editar_perfil/"><i class="fa fa-user fa-fw"></i> Perfil Usuario</a>
-                        </li>
-                        <li><a href="/miembro/cambiar_contrasena/"><i class="fa fa-gear fa-fw"></i> Cambiar Clave</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li><a href="/salir/"><i class="fa fa-sign-out fa-fw"></i> Salir</a>
-                        </li>
-                    </ul>
-                    <!-- /.dropdown-user -->
-                </li>
-                <!-- /.dropdown -->
-            </ul>
-            <!-- /.navbar-top-links -->
-
-            <div class="navbar-default sidebar" role="navigation">
-                <div class="sidebar-nav navbar-collapse">
-                    <ul class="nav" id="side-menu">
-                        <li class="sidebar-search">
-                            <div class="input-group custom-search-form">
-                                <form action="/resultado/miembro/" method="POST">
-                                    {% csrf_token %}
-                                    <input name="buscar" type="text" class="form-control" placeholder="Search...">
-                                    <span class="input-group-btn">
-                                    <button class="btn btn-default" type="button">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                    </span>
-                                </form>
-                            </span>
-                            </div>
-                            <!-- /input-group -->
-                        </li>
-                        <li>
-                            <a href="/miembro"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                        </li>
-                        {% if perms.miembros.es_administrador %}
-                        <li>
-                            <a href="#"><i class="fa fa-sitemap fa-fw"></i> Administraci&oacute;n<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="#">Academia <span class="fa arrow"></span></a>
-                                    <ul class="nav nav-third-level">
-                                        <li>
-                                            <a href="/academia/listar_cursos/">Listar Cursos</a>
-                                        </li>
-                                        <li>
-                                            <a href="/academia/crear_curso/">Crear Curso</a>
-                                        </li>
-                                        <li>
-                                            <a href="/academia/listar_modulos/">Listar M&oacute;dulos</a>
-                                        </li>
-                                        <li>
-                                            <a href="/academia/crear_modulo/">Crear M&oacute;dulo</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/graduar_alumno/">Graduar Alumno</a>
-                                        </li>
-                                        <li>
-                                            <a href="/academia/listar_pagos/">Listar Pagos de Academia</a>
-                                        </li>
-                                    </ul>
-                                    <!-- /.nav-third-level -->
-                                </li>
-                               <li>
-                                    <a href="#">Miembro<span class="fa arrow"></span></a>
-                                    <ul class="nav nav-third-level">
-                                        <li>
-                                            <a href="/miembro/listar_zonas/">Listar Zonas</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/crear_zona/">Crear Zona</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/listar_escalafones/">Listar Escalafones</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/crear_escalafon/">Crear Escalaf&oacute;n</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/promover_escalafon/">Promover Miembro de Escalaf&oacute;n</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/crear_tipo_miembro/">Agregar Tipos de Miembro</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/listar_pasos/">Listar Pasos</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/agregar_paso/">Agregar Paso</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/detalles_llamada/">Listar Detalles de Llamada</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada</a>
-                                        </li>
-                                        {% if perms.miembros.cumplimiento_pasos %}
-                                        <li>
-                                            <a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a>
-                                        </li>                                                                      {% endif %}                               
-                                    </ul>
-                                    <!-- /.nav-third-level -->
-                                </li>
-                                <li>
-                                    <a href="#">Grupo <span class="fa arrow"></span></a>
-                                    <ul class="nav nav-third-level">
-                                        <li>
-                                            <a href="/grupo/grupo_padre/">Grupo Padre</a>
-                                        </li>
-                                        <li>
-                                            <a href="/grupo/listar_redes/">Listar Redes</a>
-                                        </li>
-                                        <li>
-                                            <a href="/grupo/crear_red/">Crear Red</a>
-                                        </li>
-                                        <li>
-                                            <a href="/miembro/reportar_reunion_grupo_admin/">Reportar reunion GAR</a>
-                                        </li>
-                                        <li>
-                                            <a href="/grupo/listar_predicas/">Listar predicas</a>
-                                        </li>
-                                    </ul>
-                                    <!-- /.nav-third-level -->
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% endif %}
-                        <li>
-                            <a href="#"><i class="fa fa-group fa-fw"></i> Mi GAR<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre GAR</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/editar_grupo/">Editar mi GAR</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Informes GAR<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi GAR</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar GAR</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        <li>
-                            <a href="#"><i class="fa fa-child fa-fw"></i> Discipulado<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="/miembro/reportar_reunion_discipulado/">Ingresar Sobre D12</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Reporte D12</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/desarrollo_grupos/">Organigrama de mi Red</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% if perms.miembros.es_maestro %}  
-                        <li>
-                            <a href="#"><i class="fa fa-graduation-cap fa-fw"></i> Academias<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="/academia/cursos/">Cursos</a>
-                                </li>
-                                <li>
-                                    <a href="/academia/asistencia/">Asistencia</a>
-                                </li>
-                                <li>
-                                    <a href="/academia/registrar_entrega_tarea/">Entrega de tarea</a>
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% endif %}
-                        {% if perms.miembros.es_administrador %}
-                        <li>
-                            <a href="#"><i class="fa fa-briefcase fa-fw"></i> Informes Generales<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="#">Miembros y sus Pasos<span class="fa arrow"></span></a>
-                                    <ul class="nav nav-third-level">
-                                        <li><a href="/reportes/miembros_y_pasos/">Miembros y sus pasos</a></li>
-                                        <li><a href="/reportes/pasos_totales/">Estadistico de pasos por totales</a></li>
-                                        <li><a href="/reportes/pasos_rango_fechas/">Estadistico de pasos por un rango de fechas</a></li>
-                                    </ul>     
-                                </li>
-                                <li>
-                                    <a href="#">Asistencia Reuniones<span class="fa arrow"></span></a>
-                                    <ul class="nav nav-third-level">
-                                        <li><a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a></li>
-                                        <li><a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discipulado</a></li>
-                                        <li><a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones GAR</a></li>
-                                    </ul>      
-                                </li>
-                            </ul>
-                            <!-- /.nav-second-level -->
-                        </li>
-                        {% endif %}
-                        {% if perms.miembros.es_agente or perms.miembros.es_administrador %}
-                            <li>
-                                <a href="#"><i class="fa fa-phone-square fa-fw"></i> Consolidaci&oacute;n<span class="fa arrow"></span></a>
-                                <ul class="nav nav-second-level">
-                                    <li>
-                                        <a href="/miembro/agregar_miembro/">Agregar Visitas y Miembros<span class="fa arrow"></span></a>   
-                                    </li>                                    
-                                    <li>
-                                        <a href="#">Asignacion y Llamadas<span class="fa arrow"></span></a>
-                                        <ul class="nav nav-third-level">
-                                            <li><a href="/reportes/asignacion_gar/">Control de asignaci&oacute;n a GAR</a></li>
-                                            <li><a href="/reportes/primera_llamada/">1ra llamada</a></li>
-                                            <li><a href="/reportes/segunda_llamada/">2da llamada</a></li>
-                                        </ul>     
-                                    </li>
-                                    <li>
-                                        <a href="#">Visitas Asignadas<span class="fa arrow"></span></a>
-                                        <ul class="nav nav-third-level">
-                                            <li><a href="/reportes/visitas_por_red/">Visitas asignadas por redes</a></li>
-                                            <li><a href="/reportes/visitas_por_mes/">Visitas registradas por mes</a></li>
-                                            <li><a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a></li>
-                                        </ul>     
-                                    </li>
-                                </ul>        
-                            </li>
-                        {% endif %}
-                    </ul>
+    <header id="header" class="clearfix" data-current-skin="orange">
+        <ul class="header-inner">
+            <li id="menu-trigger" data-trigger="#sidebar">
+                <div class="line-wrap">
+                    <div class="line top"></div>
+                    <div class="line center"></div>
+                    <div class="line bottom"></div>
                 </div>
-                <!-- /.sidebar-collapse -->
+            </li>
+            <li class="logo hidden-xs">
+                <a href="/miembro">Casa Del Rey</a>
+            </li>
+            <li class="pull-right">
+                <ul class="top-menu">
+                    <li id="toggle-width">
+                        <div class="toggle-switch">
+                            <input id="tw-switch" type="checkbox" hidden="hidden">
+                            <label for="tw-switch" class="ts-helper"></label>
+                        </div>
+                    </li>
+                    <li id="top-search">
+                        <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
+                    </li>
+                    <!-- opciones -->
+                    <li class="dropdown">
+                        <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
+                        <ul class="dropdown-menu dm-icon pull-right">
+                            <li class="hidden-xs">
+                                <a  href="/miembro/editar_perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
+                            </li>
+                            <li>
+                                <a  href=""><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
+                            </li>
+                            <li class="divider hidden-xs"></li>
+                            <li>
+                                <a href=""><i class="zmdi zmdi-power"></i> Salir</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <!-- Top Search Content -->
+        <div id="top-search-wrap">
+            <div class="tsw-inner">
+            <form action="/resultado/miembro/" method="POST">
+                {% csrf_token %}
+                <i id="top-search-close" class="zmdi zmdi-arrow-left"></i>
+                <input name="buscar" type="text" placeholder="Search...">
+            </form>
             </div>
-            <!-- /.navbar-static-side -->
-        </nav>
-
-        <div id="page-wrapper">
+        </div>
+    </header>
+    <!-- start -->
+    <section id="main" data-layout="layout-1">
+        <aside id="sidebar" class="sidebar c-overflow">
+            <div class="profile-menu">
+                <a href="">
+                    <div class="profile-pic">
+                        <img src="img/profile-pics/1.jpg" alt="">
+                    </div>
+                    <div class="profile-info">
+                        {{ request.user }}
+                        <i class="zmdi zmdi-caret-down"></i>
+                    </div>
+                </a>
+                <ul class="main-menu">
+                    <li>
+                        <a href="profile-about.html"><i class="zmdi zmdi-account"></i> Perfil</a>
+                    </li>
+                    <li>
+                        <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
+                    </li>
+                    <li>
+                        <a href="/miembro/editar_perfil/"><i class="zmdi zmdi-settings"></i> Configuración</a>
+                    </li>
+                    <li>
+                        <a href="/salir/"><i class="zmdi zmdi-time-restore"></i> Salir</a>
+                    </li>
+                </ul>
+            </div>
+            <ul class="main-menu">
+                <li class="active">
+                    <a href="/miembro"><i class="zmdi zmdi-home"></i> Dashboard</a>
+                </li>
+                {% if perms.miembros.es_administrador %}
+                <li class="sub-menu">
+                    <a href="#"><i class="zmdi zmdi-accounts-list-alt"></i> Administración</a>
+                    <ul>
+                        <li class="sub-menu">
+                            <a href="#">Academia</a>
+                            <ul>
+                                <li>
+                                    <a href="/academia/listar_cursos/">Listar Cursos</a>
+                                </li>
+                                <li>
+                                    <a href="/academia/crear_curso/">Crear Curso</a>
+                                </li>
+                                <li>
+                                    <a href="/academia/listar_modulos/">Listar Módulos</a>
+                                </li>
+                                <li>
+                                    <a href="/academia/crear_modulo/">Crear Módulo</a>
+                                </li>
+                                <li>
+                                    <a href="/academia/graduar_alumno/">Graduar Alumno</a>
+                                </li>
+                                <li>
+                                    <a href="/academia/listar_pagos/">Listar Pagos de Academia</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sub-menu">
+                            <a href="#">Miembro</a>
+                            <ul>
+                                <li>
+                                    <a href="/miembro/listar_zonas/">Listar Zonas</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/crear_zona/">Crear Zona</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/listar_Escalafones/">Listar Escalafones</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/crear_escalafon/">Crear Escalafón</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/promover_escalafon/">Promover Miembro de Escalafón</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/agregar_tipo_miembro/">Agregar Tipos de Miebro</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/listar_pasos/">Listar Pasos</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/agregar_paso/">Agregar Pasos</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/detalles_llamada/">Listar Detalles de Llamada</a>
+                                </li>
+                                <li>
+                                    <a href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada</a>
+                                </li>
+                                {% if perms.miembros.cumplimiento_pasos %}
+                                <li>
+                                    <a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        <li class="sub-menu">
+                            <a href="#">Grupo</a>
+                            <ul>
+                                <li>
+                                    <a href="/grupo/grupo_padre/">Grupo Padre</a>
+                                </li>
+                                <li>
+                                    <a href="/grupo/listar_redes/">Listar Redes</a>
+                                </li>
+                                <li>
+                                    <a href="/grupo/crear_red/">Crear Red</a>
+                                </li>
+                                <li>
+                                    <a href="/grupo/reportar_reunion_grupo_admin/">Reportar Reunión GAR</a>
+                                </li>
+                                <li>
+                                    <a href="/grupo/listar_pedicas/">Listar Prédicas</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+                <li class="sub-menu">
+                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi GAR</a>
+                    <ul>
+                        <li>
+                            <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre GAR</a>
+                        </li>
+                        <li>
+                            <a href="/miembro/editar_grupo/">Editar mi GAR</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-menu">
+                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes GAR</a>
+                    <ul>
+                        <li>
+                            <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi GAR</a>
+                        </li>
+                        <li>
+                            <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar GAR</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-menu">
+                    <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
+                    <ul>
+                        <li>
+                            <a href="/miembro/reportar_reunion_discipulado/">Ingresar D12</a>
+                        </li>
+                        <li>
+                            <a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Reporte D12</a>
+                        </li>
+                        <li>
+                            <a href="/reportes/desarrollo_grupos/">Organigrama de mi Red</a>
+                        </li>
+                    </ul>
+                </li>
+                {% if perms.miembros.es_maestro %}  
+                <li class="sub-menu">
+                    <a href="#"><i class="zmdi zmdi-graduation-cap"></i> Academias</a>
+                    <ul>
+                        <li>
+                            <a href="/academia/cursos/">Curso</a>
+                        </li>
+                        <li>
+                            <a href="/academia/asistencia/">Asistencia</a>
+                        </li>
+                        <li>
+                            <a href="/academia/registrar_entrega_tarea/">Entrega de Tarea</a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+                {% if perms.miembros.es_administrador %}
+                <li class="sub-menu">
+                    <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
+                    <ul>
+                        <li class="sub-menu">
+                            <a href="#">Miembros y sus Pasos</a>
+                            <ul>
+                                <li>
+                                    <a href="/reportes/miembros_y_pasos/">Miembros y sus pasos</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/pasos_totales/">Estadistico de pasos por totales</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/pasos_rango_fechas/">Estadistico de pasos por un rango de fechas</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sub-menu">
+                            <a href="#">Asistencia Reuniones</a>
+                            <ul>
+                                <li>
+                                    <a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discupulado</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones GAR</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
+                {% if perms.miembros.es_agente or perms.miembros.es_administrador %}
+                <li class="sub-menu">
+                    <a href=""><i class="zmdi zmdi-account-box-mail"></i>Consolidación</a>
+                    <ul>
+                        <li>
+                            <a href="/miembro/agregar_miembro/">Agregar Visitas y Miembros</a>
+                        </li>
+                        <li class="sub-menu">
+                            <a href="#">Asignación y Llamadas</a>
+                            <ul>
+                                <li>
+                                    <a href="/reportes/asignacion_gar/">Control de Asignacion a GAR</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/primera_llamada/">Primera Llamada</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/segunda_llamada/">Segunda Llamada</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sub-menu">
+                            <a href="#">Visitas Asignadas</a>
+                            <ul>
+                                <li>
+                                    <a href="/reportes/visitas_por_red/">Visitas asignadas por redes</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/visitas_por_mes/">Visitas registradas por mes</a>
+                                </li>
+                                <li>
+                                    <a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %} 
+            </ul>
+        </aside>
+        <section id="content">
             {% block contenido %}
             {% endblock %}
-        </div>
-        <!-- /#page-wrapper -->
+        </section>
+    </section>
 
-    </div>
-    <!-- /#wrapper -->
+            <!-- end -->
+
+        
+
+
 
     <!-- jQuery Version 1.11.0 -->
     <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.10.2.js"></script>
@@ -343,9 +396,42 @@
         } );
         $('select').select2();       
     });
-    </script>    
+    </script>
+
     {% block js %}
     {% endblock %}
+
+    <!-- TEMPLATE JS -->
+
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/flot/jquery.flot.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/flot/jquery.flot.resize.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/flot.curvedlines/curvedLines.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/sparklines/jquery.sparkline.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/jquery.easy-pie-chart/dist/jquery.easypiechart.min.js"></script>
+    
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/moment/min/moment.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.js "></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/simpleWeather/jquery.simpleWeather.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/Waves/dist/waves.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bootstrap-growl/bootstrap-growl.min.js"l></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
+    
+    <!-- Placeholder for IE9 -->
+    <!--[if IE 9 ]>
+        <script src="vendors/bower_components/jquery-placeholder/jquery.placeholder.min.js"></script>
+    <![endif]-->
+    
+    <script src="{{ MEDIA_URL }}template/jquery/js/flot-charts/curved-line-chart.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/js/flot-charts/line-chart.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/js/charts.js"></script>
+    
+    <script src="{{ MEDIA_URL }}template/jquery/js/charts.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/js/functions.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/js/demo.js"></script>
 </body>
 
 </html>

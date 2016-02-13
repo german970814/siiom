@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<h2>Sesiones del modulo {{modulo.nombre|capfirst}}</h2>
+	
+    {% if okElim == 1 %}
+		<p class="ok">Se eliminaron las sesiones seleccionadas.</p>
+	{% else %}
+		{% if okElim == 2%}
+			<p class="error">Hubo un error al eliminar sesiones.</p>
+		{% endif %}
+	{% endif %}
+	
+	<form action="" method="POST" enctype="multipart/form-data" >
+		{% csrf_token %}
+		<a alt="Agregar Sesion" href="/academia/crear_sesion/{{modulo.id}}">Agregar Sesi&oacute;n <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+		<br/>
+
+			<table id="sesiones" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('sesiones');" /></div></th>
+		            <th>Nombre</th>
+		            
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for sesion in sesiones %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{sesion.id}}"/></td>
+						<td>{{sesion.nombre|capfirst}}</td>
+					</tr>
+                {% empty %}
+                	<tr>
+                    	<td colspan="2" class="centrarTexto">A&uacute;n no se han agregado sesiones a este modulo.</td>
+                    </tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<input class="button blue smallB" type="submit" value="Editar" name="editar">
+            <input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">
+{% endblock %} 
