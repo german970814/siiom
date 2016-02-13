@@ -1,13 +1,52 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	<h2>{{accion}} Detalle Llamada</h2>
-	{% if ok %}
-		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" href="/miembro/detalles_llamada"> Volver a la lista de detalles de llamada.</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ accion }} Detalles de Llamadas</h2>
+        </div>
+        {% if ok %}
+        	<div class="row">
+        		<div class="col-md-6 col-md-offset-3">
+            		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" href="/miembro/detalles_llamada"> Volver a la lista de detalles de llamada.</a></p>
+            	</div>
+            </div>
+        {% endif %}
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="input-group fg-float input-group-lg">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <input type="text" id="id_nombre" name="nombre" class="form-control input-lg">
+                                <label for="id_nombre" class="fg-label requerido">Nombre</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <div class="card-body card-padding">
+                            <p class="c-black f-500 m-b-20"></p>
+                            <div class="form-group">
+                                <div class="fg-line requerido">
+                                    <textarea class="form-control" name="descripcion" id="id_descripcion" rows="5" placeholder="Detalle de Llamada..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+					<div class="col-md-12 col-md-offset-5">
+						<div class="input-group">
+							<input type="submit" value="Submit" class="btn btn-primary">
+						</div>
+					</div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
