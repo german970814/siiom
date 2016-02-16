@@ -1,14 +1,44 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	<h2>{{accion}} Sesi&oacute;n</h2>
-	{% if ok %}
-		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la sesi&oacute;n correctamente. 
-        <a alt="Listar Sesiones" href="/academia/sesiones/{{ modulo.id }}/">(volver a la lista de sesiones.)</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>
+	<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">{{accion}} Sesi&oacute;n</h1>
+            {% if ok %}
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la sesi&oacute;n correctamente.<a class="alert-link" alt="Listar Sesiones" href="/academia/sesiones/{{ modulo.id }}/">(volver a la lista de sesiones.)</a></p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                	<div class="col-md-12">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
+                                {{form.nombre}}
+                            </div>
+                        </div>
+	                </div>
+	            </div>
+	            <br>
+	            <br>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <input type="submit" name="aceptar" value="Aceptar" class="btn btn-primary btn-block">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

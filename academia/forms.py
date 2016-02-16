@@ -37,6 +37,15 @@ class FormularioCrearCurso(ModelForm):
     def __init__(self, *args, **kwargs):
         super (FormularioCrearCurso, self ).__init__(*args,**kwargs) # populates the post
         self.fields['profesor'].queryset = Miembro.objects.filter(usuario__groups__name__iexact = 'Maestro')
+        self.fields['estado'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['dia'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['profesor'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['red'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['modulos'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['material'].widget.attrs.update({'class':'form-control','placeholder':'Material...'})
+        self.fields['hora'].widget.attrs.update({'class':'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Curso
@@ -73,6 +82,11 @@ class FormularioCrearModulo(ModelForm):
 class FormularioCrearSesion(ModelForm):
     required_css_class = 'requerido'
     
+    def __init__(self,*args,**kwargs):
+        super(FormularioCrearSesion,self).__init__(*args,**kwargs)
+
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+
     class Meta:
         model = Sesion
         fields = ('nombre',)

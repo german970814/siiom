@@ -25,71 +25,135 @@
 {% endblock %}
 
 {% block contenido %}
-    <h2>Asistencia</h2>
-    <br />
-    <form action="" method="post" >
-      {% csrf_token %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">Asistencia Academia</h1>
+            {% if ok %}
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha editado correctamente la asistencia.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idCurso" class="fg-label requerido">Curso:</label>
+                                <select name="menuCursos" id="idCurso" class="selectpicker" data-live-search="true">
+                                    <option value="-1" {% if not curso %} selected="selected" {% endif %}> Selecciona un Curso</option>
+                                    {% for c in cursos %}
+                                        <option value="{{c.id}}" {% if c == curso %} selected="selected" {% endif %}>{{ c.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idModulo" class="fg-label requerido">Modulo:</label>
+                                <select id="idModulo" name="menuModulos" class="selectpicker" data-live-search="true">
+                                {% if  modulos %}
+                                    <option value="-1">------</option>
+                                    {% for m in modulos %}
+                                    <option value="{{ m.id }}" {% if m == modulo %} selected="selected" {% endif %}>{{ m.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idSesion" class="fg-label requerido">Sesion:</label>
+                                <select id="idSesion" name="menuSesiones" class="selectpicker" data-live-search="true">
+                                {% if  sesiones %}
+                                    <option value="-1">------</option>
+                                    {% for s in sesiones %}
+                                    <option value="{{ s.id }}" {% if s == modulo %} selected="selected" {% endif %}>{{ s.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <input type="submit" name="verEstudiantes" value="Ver" class="btn btn-primary btn-block">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 
-        <label for="idCurso">Curso:</label>
-        <select name="menuCursos" id="idCurso">
-          <option value="-1" {% if not curso %} selected="selected" {% endif %} >Selecciona un curso</option>          
-       		{% for c in cursos %}
-            	<option value="{{ c.id }}" {% if c == curso %} selected="selected" {% endif %} >{{ c.nombre|capfirst }}</option>
-            {% endfor %}
-        </select>
-        
-        <label for="idModulo">Modulo:</label>
-        <select name="menuModulos" id="idModulo">
-          {% if  modulos %}
-           	<option value="-1" >------</option>          
-       		{% for m in modulos %}
-            	<option value="{{ m.id }}" {% if m == modulo %} selected="selected" {% endif %} >{{ m.nombre|capfirst }}</option>
-            {% endfor %}	
-          {% endif %}
-        </select>
 
-        <label for="idSesion">Sesion:</label>
-        <select name="menuSesiones" id="idSesion">
-          {% if  sesiones %}
-           	<option value="-1" >-----</option>          
-       		{% for s in sesiones %}
-            	<option value="{{ s.id }}" {% if s == sesion %} selected="selected" {% endif %} >{{ s.nombre|capfirst }}</option>
-            {% endfor %}	
-          {% endif %}
-        </select>
-        <input type="submit" name="verEstudiantes" value="Ver" class="button blue smallB">
-      </form>
-        <br />
-        {% if ok %}
-			<p class="ok">Se ha editado correctamente la asistencia.</p>
-		{% endif %}
-      <form action="" method="post">
-      	{% csrf_token %}
-        <table id="asistencia" class="simple" cellspacing="0">
-          <thead>
-            <tr>              
-              <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-              <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('asistencia');"/></div></th>
-              <th>Nombre</th>
-            </tr>
-          </thead>
-          <tbody>      
-            {% for est in estudiantes %}
-               <tr>
-                 <td><input type="checkbox" name="seleccionados" value="{{est.id}}" {% if est.asistencia %}checked{% endif %}/></td>
-                 <td>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</td>
-               </tr>
-            {% empty %}
-            	<tr>
-                	<td class="centrarTexto" colspan="2">No hay estudiantes en este modulo.</td>
-                </tr>
-            {% endfor %}
-          </tbody>      
-        </table>
-        <br />
-        <input type="hidden" name="menuCursos" value="{{curso.id}}"/>
-        <input type="hidden" name="menuModulos" value="{{modulo.id}}"/>
-        <input type="hidden" name="menuSesiones" value="{{sesion.id}}"/>
-        <input type="submit" name="aceptarAsistencia" value="Aceptar" class="button blue smallB">
-    </form>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="f-700 f-20">Lista</h2>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="asistencia" class="table" cellspacing="0">
+                            <thead>
+                                <tr>              
+                                  <th class="checkboxBoton">
+                                  <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('asistencia');"/></th>
+
+                                  <th>Nombre</th>
+                                </tr>
+                            </thead>
+                            <tbody>      
+                               {% for est in estudiantes %}
+                                <tr>
+                                    <td><input type="checkbox" name="seleccionados" value="{{est.id}}" {% if est.asistencia %}checked{% endif %}/></td>
+                                    <td>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</td>
+                                </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td class="centrarTexto" colspan="2">No hay estudiantes en este modulo.</td>
+                                    </tr>
+                                {% endfor %}
+                              </tbody>  
+                        </table>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <input type="hidden" name="menuCursos" value="{{curso.id}}"/>
+                        <input type="hidden" name="menuModulos" value="{{modulo.id}}"/>
+                        <input type="hidden" name="menuSesiones" value="{{sesion.id}}"/>
+                        <input type="submit" value="Editar" class="btn btn-success btn-block" name ="aceptarAsistencia">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
 {% endblock %}
