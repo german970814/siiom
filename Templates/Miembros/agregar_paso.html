@@ -1,13 +1,54 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	<h2>{{accion}} Paso</h2>
-	{% if ok %}
-		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el paso correctamente.</p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="f-700">{{accion}} Paso</h2>
+            {% if ok %}
+                <p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el paso correctamente.</p>
+            {% endif %} 
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group fg-float">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <input type="text" id="id_nombre" class="form-control" name="nombre">
+                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group fg-float">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-arrow-right-top"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <input type="number" id="id_prioridad" class="form-control" name="prioridad">
+                                <label for="id_prioridad" class="fg-label requerido">Prioridad:</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <input type="submit" value="aceptar" class="btn btn-primary btn-block" name ="aceptar">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

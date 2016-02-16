@@ -1,151 +1,458 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-<div id="perfil">
-	{% if ok %} <p class="ok"></p>{% endif %}
-	{% if perms.miembros.es_administrador %}
-		<fieldset>
-			<legend><h3>Tipos de Miembro</h3></legend>
-			{% for cambio in tipos %}
-				<p>
-					{{cambio.nuevoTipo}}
-					{% if cambio.nuevoTipo.nombre|lower != 'visita' %}
-                        <a alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"><img alt="Eliminar" src="{{MEDIA_URL}}Imagenes/vcard_delete.png" /></a>
-                    {% endif %}
-				</p> 
-			{% endfor %}
-			<p>
-				<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro <img alt="Agregar" src="{{MEDIA_URL}}Imagenes/vcard_edit.png" /></a>
-			</p>
-		</fieldset> 
-	{% endif %}
-	<fieldset>
-		<legend><h3>Informaci&oacute;n General</h3></legend>
-		<p><span class="bold">Nombre completo:</span> {{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}} {{miembro.segundoApellido|capfirst}}</p>
-		<p><span class="bold">C&eacute;dula:</span> {{miembro.cedula}}</p>
-		<p><span class="bold">Fecha de Nacimiento:</span> {{miembro.fechaNacimiento}}</p>
-		<p><span class="bold">G&eacute;nero:</span> {% if miembro.genero == 'F' %}Femenino{% else %}Masculino{% endif %}</p>
-		{% if miembro.profesion %}
-			<p><span class="bold">Profesi&oacute;n:</span> {{miembro.profesion}}</p>
-		{% endif %}
-		{% if miembro.estadoCivil %}
-			<p><span class="bold">Estado Civil:</span> {% if miembro.estadoCivil == 'C' %}Casado{% if miembro.conyugue %} con <a href="/miembro/perfil/{{miembro.conyugue.id}}">{{miembro.conyugue.nombre|capfirst}} {{miembro.conyugue.primerApellido|capfirst}}</a>{% endif %} {% else %}{{miembro.get_estadoCivil_display}}{% endif%}</p>
-		{% endif %}
-	</fieldset>
-	
-	<fieldset>
-		<legend><h3>Informaci&oacute;n de Contacto</h3></legend>
-		
-		<p><span class="bold">e-mail:</span> {{miembro.email}}</p>
-		{% if miembro.telefono %}
-			<p><span class="bold">Tel&eacute;fono:</span> {{miembro.telefono}}</p>
-		{% endif %}
-		{% if miembro.celular %}
-			<p><span class="bold">Celular:</span> {{miembro.celular}}</p>
-		{% endif %}
-		{% if miembro.direccion %}
-			<p><span class="bold">Direcci&oacute;n:</span> {{miembro.direccion}}</p>
-		{% endif %}
-		<p><span class="bold">Barrio:</span> {{miembro.barrio}}</p>
-	</fieldset>
-	
-	<fieldset>
-		<legend><h3>Informaci&oacute;n General de la Iglesia</h3></legend>
-		<p><span class="bold">Estado del miembro:</span> {{miembro.get_estado_display}}</p>
-		{% if miembro.convertido %}
-			<p>El miembro <span class="bold">est&aacute; convertido</span></p>
-		{% endif %}
-		
-		{% if escalafon %}
-			<p><span class="bold">Escalaf&oacute;n:</span> {{escalafon}}</p>
-		{% endif %}
-		
-		{% if grupoLidera %}
-			<p><span class="bold">Grupo que lidera:</span> {{grupoLidera}}</p>
-		{% endif %}
-		
-		{% if miembro.grupo %}
-			<p><span class="bold">Grupo al que pertenece:</span> {{miembro.grupo}}</p>
-		{% endif %}
-		
-		{% if miembro.lider %}
-			<p><span class="bold">L&iacute;der del miembro:</span> {{miembro.lider.nombre|capfirst}} {{miembro.lider.primerApellido|capfirst}}</p>
-		{% endif %}
-	</fieldset>
-	
-	<fieldset>
-		<legend><h3>Informaci&oacute;n de consolidaci&oacute;n de G.A.R</h3></legend>
-		{% if miembro.fechaAsignacionGAR %}
-			<p><span class="bold">Fecha de asignaci&oacute;n a G.A.R:</span> {{miembro.fechaAsignacionGAR}}</p>
-		{% endif %}
-		{% if miembro.asisteGAR %}
-			<p>El miembro asiste a G.A.R</p> 
-		{% else %}
-			{%if miembro.noInteresadoGAR %}
-				<p>El miembro no est&aacute; interesado en G.A.R</p>
-			{% endif %}
-		{% endif %}
-		{% if not miembro.asisteGAR and not miembro.noInteresadoGAR %}
-			{% if miembro.fechaPrimeraLlamada %}
-				<h4>Primera Llamada</h4>
-				<p><span class="bold">Fecha de la primera llamada:</span> {{miembro.fechaPrimeraLlamada}}<br />
-				{% if miembro.detallePrimeraLlamada %}
-					<span class="bold">Detalle de la primera llamada:</span> {{miembro.detallePrimeraLlamada}}<br />
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">
+            	<legend>
+            		<h3>Informaci&oacute;n General</h3>
+	            	<small>Tipos de Miembro</small>
+					{% for cambio in tipos %}
+						<small>
+							{{cambio.nuevoTipo}}
+							{% if cambio.nuevoTipo.nombre|lower != 'visita' %}
+		                        <a alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"><img alt="Eliminar" src="{{MEDIA_URL}}Imagenes/vcard_delete.png" /></a>
+		                    {% endif %}
+						</small> 
+					{% endfor %}
+					<small>
+						<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro <img alt="Agregar" src="{{MEDIA_URL}}Imagenes/vcard_edit.png" /></a>
+					</small>
+				</legend>
+            </h1>			
+            {% if ok %}
+            	<p class="ok"></p>
+            {% endif %}
+        </div>
+            <div class="card-body card-padding">
+				{% if perms.miembros.es_administrador %}
+					<div class="row">
+					</div>
 				{% endif %}
-				{% if miembro.observacionPrimeraLlamada %}
-					<span class="bold">Observaci&oacute;n de la primera llamada:</span> {{miembro.observacionPrimeraLlamada}}
-				{% endif %}
-				</p>
-			{% else %}
-				<p class="alerta">A&uacute;n no se ha realizado la primera llamada</p>
-			{% endif %}
-			
-			{% if miembro.fechaSegundaLlamada %}
-				<h4>Segunda Llamada</h4>
-				<p><span class="bold">Fecha de la segunda llamada:</span> {{miembro.fechaSegundaLlamada}}<br />
-				{% if miembro.detallePrimeraLlamada %}
-					<span class="bold">Detalle de la Segunda llamada:</span> {{miembro.detalleSegundaLlamada}}<br />
-				{% endif %}
-				{% if miembro.observacionSegundaLlamada %}
-					<span class="bold">Observaci&oacute;n de la segunda llamada:</span> {{miembro.observacionSegundaLlamada}}
-				{% endif %}
-				</p>
-			{% else %}
-				<p class="alerta">A&uacute;n no se ha realizado la segunda llamada</p>
-			{% endif %}
-			
-			{% if miembro.fechaLlamadaLider %}
-				<h4>Llamada de L&iacute;der</h4>
-				<p><span class="bold">Fecha de llamada del L&iacute;der:</span> {{miembro.fechaLlamadaLider}}<br />
-				{% if miembro.detalleLlamadaLider %}
-					<span class="bold">Detalle de la llamada del L&iacute;der:</span> {{miembro.detalleLlamadaLider}}<br />
-				{% endif %}
-				{% if miembro.observacionLlamadaLider %}
-					<span class="bold">Observaci&oacute;n de la llamada del L&iacute;der:</span> {{miembro.observacionLlamadaLider}}
-				{% endif %}
-				</p>
-			{% else %}
-				<p class="alerta">A&uacute;n no se ha realizado la llamada del l&iacute;der</p>
-			{% endif %}		
-		{% endif %}
-	</fieldset>
-	<fieldset>
-		<legend><h3>Pasos</h3></legend>
-			{% if pasos %}
-				<ul>
-				{% for paso in pasos %}
-					<li>{{paso.paso}}</li>
-				{% endfor %}
-				</ul>
-			{% else %}
-				<p>El miembro a&uacute;n no ha completado ning&uacute;n paso</p>
-			{% endif %}
-	</fieldset>
-	
-</div><!--perfil-->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="fg-line">
+                        	<div class="col-md-4">
+	                        	<div class="input-group">
+	                            	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-account"></i>
+	                            	</span>
+		                            <h5>Nombre completo:</h5>
+
+		                            <p> {{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}} {{miembro.segundoApellido|capfirst}}</p>
+		                        </div>
+	                        </div>
+							
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-card"></i>
+	                            	</span>
+		                            <h5>C&eacute;dula:</h5>
+		                            <p>{{miembro.cedula}}</p>
+		                        </div>
+	                        </div>
+							
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-calendar"></i>
+	                            	</span>
+		                            <h5>Fecha de Nacimiento:</h5>
+		                            <p>{{miembro.fechaNacimiento}}</p>
+		                        </div>
+	                        </div>
+							
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi {% if miembro.genero == 'F' %}zmdi-female{% else %} zmdi-male {% endif %}"></i>
+	                            	</span>
+		                            <h5>G&eacute;nero:</h5>
+		                            <p>{% if miembro.genero == 'F' %}Femenino{% else %}Masculino{% endif %}</p>
+		                        </div>
+		                    </div>
+
+							{% if miembro.profesion %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-account"></i>
+	                            	</span>
+		                            <h5>Profesi&oacute;n:</h5>
+		                            <p>{{miembro.profesion}}</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+
+							{% if miembro.estadoCivil %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-local-wc"></i>
+	                            	</span>
+		                            <h5>Estado Civil:</h5>
+		                            <p>{% if miembro.estadoCivil == 'C' %}Casado{% if miembro.conyugue %} con <a href="/miembro/perfil/{{miembro.conyugue.id}}">{{miembro.conyugue.nombre|capfirst}} {{miembro.conyugue.primerApellido|capfirst}}</a>{% endif %} {% else %}{{miembro.get_estadoCivil_display}}{% endif%}</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700"><legend><h3>Informaci&oacute;n de Contacto</h3></legend></h1>
+            {% if ok %}
+            	<p class="ok"></p>
+            {% endif %}
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="fg-line">
+	                    <div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-email"></i>
+                            	</span>
+	                            <h5>E-mail:</h5>
+	                            <p>{{miembro.email}}</p>
+	                        </div>
+	                    </div>
+
+						{% if miembro.telefono %}
+	                    <div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-phone"></i>
+                            	</span>
+	                            <h5>Tel&eacute;fono:</h5>
+	                            <p>{{miembro.telefono}}</p>
+	                        </div>
+	                    </div>
+						{% endif %}
+
+						{% if miembro.celular %}
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-smartphone-android"></i>
+                            	</span>
+	                            <h5>Celular:</h5>
+	                            <p>{{miembro.celular}}</p>
+	                        </div>
+	                    </div>
+						{% endif %}
+
+						{% if miembro.direccion %}
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-map"></i>
+                            	</span>
+	                            <h5>Direcci&oacute;n:</h5>
+	                            <p>{{miembro.direccion}}</p>
+	                        </div>
+	                    </div>
+						{% endif %}
+
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-pin"></i>
+                            	</span>
+	                            <h5>Barrio:</h5>
+	                            <p>{{miembro.barrio}}</p>
+	                        </div>
+	                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">
+            <legend><h3>Informaci&oacute;n General de la Iglesia</h3></legend>
+            </h1>
+            {% if ok %}
+            	<p class="ok"></p>
+            {% endif %}
+        </div>
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="fg-line">
+		                    <div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-refresh"></i>
+	                            	</span>
+		                            <h5>Estado del miembro:</h5>
+		                            <p>{{miembro.get_estado_display}}</p>
+		                        </div>
+		                    </div>
+							{% if miembro.convertido %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-check"></i>
+	                            	</span>
+		                            <h5>El miembro</h5>
+		                            <p>Est&aacute; convertido</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+						
+							{% if escalafon %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-layers"></i>
+	                            	</span>
+		                            <h5>Escalaf&oacute;n:</h5>
+		                            <p>{{escalafon}}</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+						
+							{% if grupoLidera %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-male"></i>
+	                            	</span>
+		                            <h5>Grupo que lidera:</h5>
+		                            <p>{{grupoLidera}}</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+						
+							{% if miembro.grupo %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-account-list"></i>
+	                            	</span>
+		                            <h5>Grupo al que pertenece:</h5>
+		                            <p>{{miembro.grupo}}</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+						
+							{% if miembro.lider %}
+							<div class="col-md-4">
+		                        <div class="input-group">
+		                        	<span class="input-group-addon">
+	                            		<i class="zmdi zmdi-accounts-alt"></i>
+	                            	</span>
+		                            <h5>L&iacute;der del miembro:</h5>
+		                            <p>{{miembro.lider.nombre|capfirst}} {{miembro.lider.primerApellido|capfirst}}</p>
+		                        </div>
+		                    </div>
+							{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700"><legend><h3>Informaci&oacute;n de consolidaci&oacute;n de G.A.R</h3></legend></h1>
+            {% if ok %}
+            	<p class="ok"></p>
+            {% endif %}
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="fg-line">
+						{% if miembro.fechaAsignacionGAR %}
+				        <div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-calendar-note"></i>
+				            	</span>
+				                <h5>Fecha de asignaci&oacute;n a G.A.R:</h5>
+				                <p>{{miembro.fechaAsignacionGAR}}</p>
+				            </div>
+				        </div>
+						{% endif %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-check-all"></i>
+				            	</span>
+				                <h5>Asistencia a G.A.R:</h5>
+				                {% if miembro.asisteGAR %}
+				                <p>El miembro asiste a G.A.R</p>
+				                {% else %}
+				                	{%if miembro.noInteresadoGAR %}
+				                	<p>El miembro no est&aacute; interesado en G.A.R</p>
+				                	{% endif %}
+				                {% endif %}
+				            </div>
+				        </div>
+
+						{% if not miembro.asisteGAR and not miembro.noInteresadoGAR %}
+				        <div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-phone-forwarded"></i>
+				            	</span>
+								{% if miembro.fechaPrimeraLlamada %}
+				                <h5>Primera Llamada:</h5>
+				                <p>{{miembro.fechaPrimeraLlamada}}</p>
+				                {% endif %}
+				            </div>
+				        </div>
+				        {% endif %}
+
+				        {% if miembro.detallePrimeraLlamada %}
+				        <div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-phone-in-talk"></i>
+				            	</span>
+				                <h5>Detalle de la primera llamada:</h5>
+				                <p>{{miembro.detallePrimeraLlamada}}</p>
+				            </div>
+				        </div>
+				        {% endif %}
+								
+						{% if miembro.observacionPrimeraLlamada %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-comment-alt-text"></i>
+				            	</span>
+				                <h5>Observaci&oacute;n de la primera llamada:</h5>
+				                <p>{{miembro.observacionPrimeraLlamada}}</p>
+				            </div>
+				        </div>
+						{% endif %}
+
+						{% if miembro.fechaSegundaLlamada %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-phone-forwarded"></i>
+				            	</span>
+				            	<h4>Segunda Llamada</h4>
+				                <h5>Fecha de la segunda llamada:</h5>
+				                <p>{{miembro.fechaSegundaLlamada}}</p>
+				            </div>
+				        </div>
+						{% endif %}
+
+						{% if miembro.detallePrimeraLlamada %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-phone-ring"></i>
+				            	</span>
+				                <h5>Detalle de la Segunda llamada:</h5>
+				                <p>{{miembro.detalleSegundaLlamada}}</p>
+				            </div>
+				        </div>
+						{% endif %}
+
+						{% if miembro.observacionSegundaLlamada %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-comment-alt-text"></i>
+				            	</span>
+				                <h5>Observaci&oacute;n de la segunda llamada:</h5>
+				                <p>{{miembro.observacionSegundaLlamada}}</p>
+				            </div>
+				        </div>
+				        {% endif %}
+
+						{% if miembro.fechaLlamadaLider %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-calendar-note"></i>
+				            	</span>
+								<h4>Llamada de L&iacute;der</h4>
+				                <h5>Fecha de llamada del L&iacute;der:</h5>
+				                <p>{{miembro.fechaLlamadaLider}}</p>
+				            </div>
+				        </div>
+				        {% endif %}
+
+						{% if miembro.detalleLlamadaLider %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-phone-forwarded"></i>
+				            	</span>
+								<h4>Llamada de L&iacute;der</h4>
+				                <h5>Detalle de la llamada del L&iacute;der:</h5>
+				                <p>{{miembro.detalleLlamadaLider}}</p>
+				            </div>
+				        </div>
+						{% endif %}
+
+						{% if miembro.observacionLlamadaLider %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-comment-alt-text"></i>
+				            	</span>
+				                <h5>Observaci&oacute;n de la llamada del L&iacute;der:</h5>
+				                <p>{{miembro.observacionLlamadaLider}}</p>
+				            </div>
+				        </div>
+						{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700"><legend><h3>Pasos</h3></legend></h1>
+            {% if ok %}
+            	<p class="ok"></p>
+            {% endif %}
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="fg-line">
+                    {% if pasos %}
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi zmdi-layers"></i>
+				            	</span>
+				                <h5>Pasos que ha completado:<h5>
+				                {% for paso in pasos %}
+				                <p>{{paso.paso}}</p>
+				                {% endfor %}
+				                {% else %}
+				                <p>El miembro a&uacute;n no ha completado ning&uacute;n paso</p>
+				                {% endif %}
+				            </div>
+				        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
-{% block derContenido2%}
+<!-- {% block derContenido2%}
 	{% if perms.grupos.puede_confirmar_ofrenda_GAR or perms.grupos.puede_confirmar_ofrenda_discipulado %}
 		<div class="caja">
    			<h3>Reportar Ofrendas de {{miembro.nombre|capfirst}}</h3>
@@ -157,4 +464,25 @@
     			</ul>
    		</div>  
    	{% endif %}  			    			
-{% endblock %}
+{% endblock %} -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

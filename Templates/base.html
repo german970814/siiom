@@ -14,17 +14,6 @@
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- MetisMenu CSS -->
-    <link href="" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <!-- <link href="{{ MEDIA_URL }}Scripts/css/sb-admin-2.css" rel="stylesheet">
-
-    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet"> -->
-    <link href="{{ MEDIA_URL }}Scripts/css/plugins/dataTables/dataTables.tableTools.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Scripts/css/select2.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Scripts/css/select2-bootstrap.css" rel="stylesheet">
-
     <!-- Custom Fonts -->
    <link href="{{ MEDIA_URL }}Scripts/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
@@ -36,6 +25,12 @@
     <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
     <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-select/dist/css/bootstrap-select.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/farbtastic/farbtastic.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/chosen/chosen.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}template/jquery/vendors/summernote/dist/summernote.css" rel="stylesheet">
         
     <!-- CSS -->
     <link href="{{ MEDIA_URL }}template/jquery/css/app.min.1.css" rel="stylesheet">
@@ -47,11 +42,20 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+      
+
+        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. -->
+        <style type="text/css">
+            .toggle-switch .ts-label {
+                min-width: 130px;
+            }
+        </style>
+
 
 </head>
 
 <body>
-    <header id="header" class="clearfix" data-current-skin="orange">
+    <header id="header" class="clearfix" data-current-skin="blue">
         <ul class="header-inner">
             <li id="menu-trigger" data-trigger="#sidebar">
                 <div class="line-wrap">
@@ -82,11 +86,11 @@
                                 <a  href="/miembro/editar_perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
                             <li>
-                                <a  href=""><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
+                                <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
                             </li>
                             <li class="divider hidden-xs"></li>
                             <li>
-                                <a href=""><i class="zmdi zmdi-power"></i> Salir</a>
+                                <a href="/salir/"><i class="zmdi zmdi-power"></i> Salir</a>
                             </li>
                         </ul>
                     </li>
@@ -185,7 +189,7 @@
                                     <a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a>
                                 </li>
                                 <li>
-                                    <a href="/miembro/agregar_tipo_miembro/">Agregar Tipos de Miebro</a>
+                                    <a href="/miembro/agregar_tipo_miembro/">Agregar Tipos de Miembro</a>
                                 </li>
                                 <li>
                                     <a href="/miembro/listar_pasos/">Listar Pasos</a>
@@ -362,41 +366,7 @@
         </section>
     </section>
 
-            <!-- end -->
-
-        
-
-
-
-    <!-- jQuery Version 1.11.0 -->
-    <script src="{{ MEDIA_URL }}Scripts/js/jquery-1.10.2.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="{{ MEDIA_URL }}Scripts/js/bootstrap.min.js"></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
-    <script src="{{ MEDIA_URL }}Scripts/js/plugins/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Page-Level Plugin Scripts - Tables -->
-    <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/jquery.dataTables.js"></script>
-    <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.bootstrap.js"></script>
-    <script src="{{ MEDIA_URL }}Scripts/js/plugins/dataTables/dataTables.tableTools.js"></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script src="{{ MEDIA_URL }}Scripts/js/sb-admin-2.js"></script>
-    <script src="{{ MEDIA_URL }}Scripts/js/select2-3.5.1/select2.js"></script>
-    <script>
-    $(document).ready(function() {
-        $('#gruposSinReportes').dataTable( {
-            "iDisplayLength": 25,
-            "dom": 'T<"clear">lfrtip',
-            "tableTools":{
-                "sSwfPath": "{{ MEDIA_URL }}Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf"
-            },
-        } );
-        $('select').select2();       
-    });
-    </script>
+    <!-- end -->
 
     {% block js %}
     {% endblock %}
@@ -416,9 +386,20 @@
     <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.js "></script>
     <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/simpleWeather/jquery.simpleWeather.min.js"></script>
     <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/Waves/dist/waves.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bootstrap-growl/bootstrap-growl.min.js"l></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bootstrap-growl/bootstrap-growl.min.js"></script>
     <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js"></script>
     <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
+
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-select/dist/js/bootstrap-select.js"></script> <!--Uno NUEVO-->
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.all.min.js"></script>
+
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/typeahead.js/dist/typeahead.bundle.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/summernote/dist/summernote-updated.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/fileinput/fileinput.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/input-mask/input-mask.min.js"></script>
+    <script src="{{ MEDIA_URL }}template/jquery/vendors/farbtastic/farbtastic.min.js"></script>
     
     <!-- Placeholder for IE9 -->
     <!--[if IE 9 ]>
@@ -431,7 +412,10 @@
     
     <script src="{{ MEDIA_URL }}template/jquery/js/charts.js"></script>
     <script src="{{ MEDIA_URL }}template/jquery/js/functions.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/js/demo.js"></script>
+    <!--<script src="{{ MEDIA_URL }}template/jquery/js/demo.js"></script>-->
+
+
+        
 </body>
 
 </html>

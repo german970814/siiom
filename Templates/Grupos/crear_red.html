@@ -1,13 +1,45 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	<h2>{{accion}} Red</h2>
-	{% if ok %}
-		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la red correctamente. Haga click en aceptar para editar la zona siguiente o <a alt="Listar Redes" href="/grupo/listar_redes">volver a la lista de redes.</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>
+<div class="container">
+	<div class="card">
+		<div class="card-header">
+			<h1><legend><h3>{{accion}} Red</h3></legend></h1>
+			{% if ok %}
+			<div class="row">
+				<div class="col-md-3 col-md-offset-2">
+					<small>
+						<h3>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la red correctamente. Haga click en aceptar para editar la zona siguiente o <a alt="Listar Redes" href="/grupo/listar_redes">volver a la lista de redes.</a></h3>
+					</small>
+				</div>
+			</div>
+			{% endif %}
+		</div>
+		<form action="" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			<div class="card-body card-padding">
+				<div class="row">
+	                <div class="col-md-8 col-md-offset-2">
+	                    <div class="input-group fg-float">
+	                        <span class="input-group-addon">
+	                            <i class="zmdi zmdi-account"></i>
+	                        </span>
+	                        <div class="fg-line requerido">
+	                            <input type="text" id="id_nombre" class="form-control" name="nombre">
+	                            <label for="id_nombre" class="fg-label requerido">Nombre:</label>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <input type="submit" value="Aceptar" name="aceptar" class="btn btn-primary btn-block">
+                    </div>
+                </div>
+			</div>
+        </form>
+	</div>
+</div>
 {% endblock %}

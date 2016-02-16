@@ -1,13 +1,40 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	<h2>{{accion}} Tipo de Miembro</h2>
-	{% if ok %}
-		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el tipo de miembro correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el tipo de miembro o{% endif %} <a alt="Listar Escalafones" href="/miembro/listar_tipo_miembro/">{% if accion == 'Crear' %}Volver{% else %}volver{% endif %} a la lista de tipos de miembro.</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>{{accion}} Tipo de Miembro</h1>
+            {% if ok %}
+				<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el tipo de miembro correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el tipo de miembro o{% endif %} <a alt="Listar Escalafones" href="/miembro/listar_tipo_miembro/">{% if accion == 'Crear' %}Volver{% else %}volver{% endif %} a la lista de tipos de miembro.</a></p>
+			{% endif %}
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group fg-float input-group-lg">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <input type="text" id="id_nombre" name="nombre" class="form-control input-lg">
+                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+					<div class="col-md-8 col-md-offset-5">
+						<div class="input-group">
+							<input type="submit" value="Aceptar" class="btn btn-primary btn-block">
+						</div>
+					</div>
+				</div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

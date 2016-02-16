@@ -22,6 +22,18 @@ class FormularioLiderAgregarMiembro(ModelForm):
             else:
                 g = 'M'
 
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['primerApellido'].widget.attrs.update({'class':'form-control'})
+        self.fields['segundoApellido'].widget.attrs.update({'class':'form-control'})
+        self.fields['telefono'].widget.attrs.update({'class':'form-control'})
+        self.fields['celular'].widget.attrs.update({'class':'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class':'form-control'})
+        self.fields['fechaNacimiento'].widget.attrs.update({'class':'form-control'})
+        self.fields['cedula'].widget.attrs.update({'class':'form-control'})
+        self.fields['email'].widget.attrs.update({'class':'form-control'})
+        self.fields['estadoCivil'].widget.attrs.update({'class':'form-control'})
+        self.fields['profesion'].widget.attrs.update({'class':'form-control'})
+        self.fields['barrio'].widget.attrs.update({'class':'form-control'})
             # if c:
             #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
             # else:
@@ -47,6 +59,7 @@ class FormularioAdminAgregarMiembro(ModelForm):
             else:
                 g = 'M'
             self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
+        self.fields['barrio'].widget.attrs.update({'class':'form-control'})
 
     class Meta:
         model = Miembro
@@ -86,10 +99,14 @@ class FormularioCambiarContrasena(forms.Form):
 
 class FormularioAsignarGrupo(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioAsignarGrupo,self).__init__(*args,**kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search' : 'true'})
     
     class Meta:
         model = Miembro
-        fields = ('grupo', )
+        fields = ('grupo',)
         
 class FormularioCrearZona(ModelForm):
     required_css_class = 'requerido'
@@ -120,6 +137,7 @@ class FormularioCumplimientoPasosMiembro(ModelForm):
         super (FormularioCumplimientoPasosMiembro, self ).__init__(*args,**kwargs) # populates the post
         estudiantes = Matricula.objects.all().exclude(estudiante__pasos__nombre__iexact = 'lanzamiento').values('estudiante')
         self.fields['miembro'].queryset = Miembro.objects.filter(id__in = estudiantes)
+        self.fields['miembro'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
     
     class Meta:
         model = CumplimientoPasos
@@ -141,6 +159,11 @@ class FormularioCrearEscalafon(ModelForm):
 
 class FormularioPromoverEscalafon(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioPromoverEscalafon, self).__init__(*args, **kwargs)
+        self.fields['miembro'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['escalafon'].widget.attrs.update({'class':'selectpicker'})
     
     class Meta:
         model = CambioEscalafon
@@ -158,6 +181,7 @@ class FormularioCambioTipoMiembro(ModelForm):
     
     def __init__(self, idm = '' ,*args,**kwargs):
         super (FormularioCambioTipoMiembro, self).__init__(*args, **kwargs) # populates the post
+        self.fields['nuevoTipo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search' : 'true'})
         self.idm = idm
         if idm != '':
             m = Miembro.objects.get(id = idm)

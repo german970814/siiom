@@ -1,13 +1,55 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	<h2>Promover Escalaf&oacute;n</h2>
-	{% if ok %}
-		<p class="ok">Se ha promovido el miembro correctamente.<a alt="Listar Escalafones" href="/miembro/listar_escalafones">Volver a la lista de escalafones</a> o <a alt="Ver Perfil" href="/miembro/perfil/{{miembroEditar.id}}">ver perfil del miembro cambiado.</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="f-700">Promover Escalaf&oacute;n</h2>
+            {% if ok %}
+                <p class="ok">Se ha promovido el miembro correctamente.<a alt="Listar Escalafones" href="/miembro/listar_escalafones">Volver a la lista de escalafones</a> o <a alt="Ver Perfil" href="/miembro/perfil/{{miembroEditar.id}}">ver perfil del miembro cambiado.</a></p>
+            {% endif %} 
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_miembro" class="fg-label requerido">Miembro:</label>
+                            	{{form.miembro}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-arrow-right-top"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_escalafon" class="fg-label requerido">Escalaf&oacute;n:</label>
+                            	{{form.escalafon}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <input type="submit" value="aceptar" class="btn btn-primary btn-block" name ="aceptar">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+	
 {% endblock %}

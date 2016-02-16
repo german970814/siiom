@@ -5,43 +5,62 @@
 {% endblock %}
 
 {% block contenido %}
-<h2>Barrios de la zona {{zona}}</h2>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+			<h2 class="f-700 f-20">Barrios de la zona {{zona}}</h2>
+			<a alt="Agregar Barrio" href="/miembro/crear_barrio/{{zona.id}}">Agregar Barrio <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+                {% if okElim == 1 %}
+					<p class="ok">Se eliminaron los barrios seleccionadas.</p>
+				{% else %}
+					{% if okElim == 2%}
+						<p class="error">Hubo un error al eliminar barrios.</p>
+					{% endif %}
+				{% endif %}
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        {% if barrios %}
+						<table id="barrios" class="table" cellspacing="0">
+							<thead>
+						       	<tr>
+						       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+									<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('barrios');" /></div></th>
+						            <th>Nombre</th>    
+						       	</tr>
+						    </thead>
+						    <tbody>
+								{% for barrio in barrios %}
+									<tr>
+										<td><input type="checkbox" name="seleccionados" value="{{barrio.id}}"/></td>
+										<td>{{barrio.nombre|capfirst}}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+						<br/>
+						{% else %}
+						<p>A&uacute;n no se han agregado barrios a esta zona.</p>
+						{% endif %}
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <input type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="eliminar">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
 
-	{% if okElim == 1 %}
-		<p class="ok">Se eliminaron los barrios seleccionadas.</p>
-	{% else %}
-		{% if okElim == 2%}
-			<p class="error">Hubo un error al eliminar barrios.</p>
-		{% endif %}
-	{% endif %}
-	
-	<form action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		<a alt="Agregar Barrio" href="/miembro/crear_barrio/{{zona.id}}">Agregar Barrio <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
-		<br/>
-		{% if barrios %}
-			<table id="barrios" class="simple" cellspacing="0">
-				<thead>
-		       	<tr>
-		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
-					<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('barrios');" /></div></th>
-		            <th>Nombre</th>
-		            
-		       	</tr>
-		    	</thead>
-		    	<tbody>
-				{% for barrio in barrios %}
-					<tr>
-						<td><input type="checkbox" name="seleccionados" value="{{barrio.id}}"/></td>
-						<td>{{barrio.nombre|capfirst}}</td>
-					</tr>
-				{% endfor %}
-				</tbody>
-			</table>
-			<br/>
-			<input class="button blue smallB" type="submit" value="Editar" name="editar">
-			<input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">
-			{% else %}
-			<p>A&uacute;n no se han agregado barrios a esta zona.</p>
-		{% endif %}
-{% endblock %} 

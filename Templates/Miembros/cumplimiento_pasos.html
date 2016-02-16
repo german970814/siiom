@@ -5,46 +5,71 @@
 {% endblock %}
 
 {% block contenido %}
-	<h2>Cumplimiento Pasos</h2>
-    <br />
-    {% if ok %}
-		<p class="ok">Se ha editado correctamente el cumplimiento de pasos.</p>
-	{% endif %}
-    <form action="" method="POST">
-    	{% csrf_token %}
-        
-   	  	<label for="idPasos">Pasos:</label>
-    	<select name="menuPasos" id="idPasos">
-        	<option value="-1" {% if not pasoE %} selected="selected" {% endif %}>Selecciona un paso</option>
-            {% for p in pasos %}
-            	<option value="{{ p.id }}" {% if p == pasoE %} selected="selected" {% endif %}>{{ p.nombre|capfirst }}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" name="verMiembros" value="Ver" class="button blue smallB">
-        <br /><br />
-        <table id="cumplimientoPasos" class="simple" cellspacing="0">
-          <thead>
-            <tr>              
-              <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-              <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('cumplimientoPasos');"/></div></th>
-              <th>Nombre</th>
-            </tr>
-          </thead>
-          <tbody>      
-            {% for m in miembros %}
-               <tr>
-                 <td><input type="checkbox" name="seleccionados" value="{{m.id}}" {% if m.cumplio %} checked="checked" {% endif %} /></td>
-                 <td>{{m.nombre|capfirst}} {{m.primerApellido|capfirst}} {{m.segundoApellido|capfirst}}</td>
-               </tr>
-            {% empty %}
-            	<tr>
-                	<td class="centrarTexto" colspan="2">No hay miembros que puedan cumplir este paso.</td>
-                </tr>
-            {% endfor %}
-          </tbody>      
-        </table>
-        <br />
-        <input type="submit" name="promoverPaso" value="Aceptar" class="button blue smallB">
-    </form>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="f-700 f-20">Cumplimiento Pasos</h2>
+            {% if ok %}
+                <p class="ok">Se ha editado correctamente el cumplimiento de pasos.</p>
+            {% endif %}
+        </div>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-4 col-md-offset-2">
+                    <select name="menuPasos" id="idPasos" class="selectpicker">
+                        <option value="-1" {% if not pasoE %} selected="selected" {% endif %}>Selecciona un paso</option>
+                        {% for p in pasos %}
+                            <option value="{{ p.id }}" {% if p == pasoE %} selected="selected" {% endif %}>{{ p.nombre|capfirst }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="submit" name="verMiembros" value="Ver" class="btn btn-primary btn-block">
+                </div>
+            </div>
+            <br>
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="cumplimientoPasos" class="table" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th class="checkboxBoton">
+                                        <div class="button gray smallB checkBoton">
+                                            <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('cumplimientoPasos');" />
+                                        </div>
+                                    </th>
+                                    <th>Nombre</th>    
+                                </tr>
+                            </thead>
+                            <tbody>      
+                            {% for m in miembros %}
+                                <tr>
+                                    <td><input type="checkbox" name="seleccionados" value="{{m.id}}" {% if m.cumplio %} checked="checked" {% endif %} /></td>
+                                    <td>{{m.nombre|capfirst}} {{m.primerApellido|capfirst}} {{m.segundoApellido|capfirst}}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td class="centrarTexto" colspan="2">No hay miembros que puedan cumplir este paso.</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <br/>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <input type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
- 

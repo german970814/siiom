@@ -211,7 +211,7 @@ def liderTransaldarMiembro(request):
             redireccion = '/miembro/transladar_miembros/'
             nombre = 'Transladar siguiente'
             return render_to_response("error.html", locals(), context_instance=RequestContext(request))
-    
+            
     if request.session['seleccionados'] != None:
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:

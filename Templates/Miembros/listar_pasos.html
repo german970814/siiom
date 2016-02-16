@@ -5,49 +5,65 @@
 {% endblock %}
 
 {% block contenido %}
-<h2>Pasos</h2>
-
-	{% if okElim == 1 %}
-		<p class="ok">Se eliminaron los pasos seleccionadas.</p>
-	{% else %}
-		{% if okElim == 2%}
-			<p class="error">Hubo un error al eliminar pasos.</p>
-		{% endif %}
-	{% endif %}
-    
-	{% if pasos %}
-		<p></p>
-		<form action="" method="POST" enctype="multipart/form-data" >
-			{% csrf_token %}
-			<input class="button blue smallB" type="submit" value="Editar" name="editar">
-			
-			<br/><br/>
-			<table id="pasos" class="simple" cellspacing="0">
-				<thead>
-		       	<tr>
-		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
-	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('pasos');" /></div></th>
-		            <th>Nombre</th>
-		            <th>Prioridad</th>
-		            
-		       	</tr>
-		    	</thead>
-		    	<tbody>
-				{% for paso in pasos %}
-					<tr>
-						<td><input type="checkbox" name="seleccionados" value="{{paso.id}}"/></td>
-						<td>{{paso.nombre|capfirst}}</td>
-						<td>{{paso.prioridad|capfirst}}</td>
-					</tr>
-				{% endfor %}
-				</tbody>
-			</table>
-			<br/>
-			<input class="button blue smallB" type="submit" value="Editar" name="editar">
-            <input class="button blue smallB" type="submit" value="Eliminar" name="eliminar">			
-		</form>
-		<br />
-	{% else %}
-		<p>No existen pasos a&uacute;n. Haga <a alt="Agregar paso" href="/miembro/agregar_paso/">click aqu&iacute;</a> para agregar uno.</p>
-	{% endif %}
+	
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+			<h2 class="f-700 f-20">Pasos</h2>
+                {% if okElim == 1 %}
+					<p class="ok">Se eliminaron los pasos seleccionadas.</p>
+				{% else %}
+					{% if okElim == 2%}
+						<p class="error">Hubo un error al eliminar pasos.</p>
+					{% endif %}
+				{% endif %}
+        </div>
+        {% if pasos %}
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+						<table id="pasos" class="table" cellspacing="0">
+							<thead>
+						       	<tr>
+						       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('pasos');" /></div></th>
+						            <th>Nombre</th>
+						            <th>Prioridad</th>
+						            
+						       	</tr>
+					    	</thead>
+					    	<tbody>
+							{% for paso in pasos %}
+								<tr>
+									<td><input type="checkbox" name="seleccionados" value="{{paso.id}}"/></td>
+									<td>{{paso.nombre|capfirst}}</td>
+									<td>{{paso.prioridad|capfirst}}</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+						<br/>
+						{% else %}
+							<p>No existen pasos a&uacute;n. Haga <a alt="Agregar paso" href="/miembro/agregar_paso/">click aqu&iacute;</a> para agregar uno.</p>
+						{% endif %}
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <input type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="eliminar">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
+
