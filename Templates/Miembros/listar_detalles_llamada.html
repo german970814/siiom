@@ -12,10 +12,20 @@
 			<h2 class="f-700 f-20">Detalles de Llamada</h2>
 			<a alt="Agregar Detalle de llamada" href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada<img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
                 {% if okElim == 1 %}
-					<p class="ok">Se eliminaron los detalles de llamada</p>
+	            <div class="row">
+	                <div class="alert alert-success alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>Se han eliminado los detalles de la llamada.</p>
+	                </div>
+	            </div>
 				{% else %}
 					{% if okElim == 2%}
-						<p class="error">Hubo un error al eliminar detalles de llamada.</p>
+			            <div class="row">
+			                <div class="alert alert-danger alert-dismissible" role="alert">
+			                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+			                    <p>Hubo un error al eliminar los detalles de la llamada</p>
+			                </div>
+			            </div>
 					{% endif %}
 				{% endif %}
         </div>

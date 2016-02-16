@@ -7,10 +7,11 @@
             <h1>{{ accion }} Detalles de Llamadas</h1>
         </div>
         {% if ok %}
-        	<div class="row">
-        		<div class="col-md-6 col-md-offset-3">
-            		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" href="/miembro/detalles_llamada"> Volver a la lista de detalles de llamada.</a></p>
-            	</div>
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Listar Redes" class="alert-link" href="/miembro/listar_detalle_llamada">Volver a la lista de detalles de llamada.</a></p>
+                </div>
             </div>
         {% endif %}
         <form action="" method="POST">

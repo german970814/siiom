@@ -6,7 +6,12 @@
         <div class="card-header">
             <h2 class="f-700">{{accion}} Paso</h2>
             {% if ok %}
-                <p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el paso correctamente.</p>
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el paso correctamente.</p>
+                </div>
+            </div>
             {% endif %} 
         </div>
         <form action="" method="POST" enctype="multipart/form-data">

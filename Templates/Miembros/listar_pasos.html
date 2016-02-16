@@ -11,10 +11,20 @@
         <div class="card-header">
 			<h2 class="f-700 f-20">Pasos</h2>
                 {% if okElim == 1 %}
-					<p class="ok">Se eliminaron los pasos seleccionadas.</p>
+	            <div class="row">
+	                <div class="alert alert-success alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>Se eliminaron los pasos seleccionados</p>
+	                </div>
+	            </div>
 				{% else %}
 					{% if okElim == 2%}
-						<p class="error">Hubo un error al eliminar pasos.</p>
+		            <div class="row">
+		                <div class="alert alert-danger alert-dismissible" role="alert">
+		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+		                    <p>Hubo un error al eliminar los pasos seleccionados.</p>
+		                </div>
+		            </div>
 					{% endif %}
 				{% endif %}
         </div>

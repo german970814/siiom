@@ -3,105 +3,135 @@
 {% block contenido %}
 
 <div class="container">
+                    {% if pasos %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">
+            	<legend>
+            		<h3>Tipo de Miembro:</h3>
+            		<small>
+						<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro</a>
+					</small>
+            	</legend>
+            </h1>
+            {% if ok %}
+            	<p class="ok"></p>
+            {% endif %}
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="fg-line">
+						<div class="col-md-4">
+				            <div class="input-group">
+				            	<span class="input-group-addon">
+				            		<i class="zmdi "></i>
+				            	</span>
+				                <h5><h5>
+				                {% for cambio in tipos %}
+				                {% if cambio.nuevoTipo.nombre|lower != 'visita' %}
+				                <a href="" alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"></a>
+				                {% endif %}
+				                <ul class="clist clist-check">
+				                	<li>{{cambio.nuevoTipo}}</li>
+				                </ul>
+				                {% endfor %}
+				            </div>
+				        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <br>
     <div class="card">
         <div class="card-header">
             <h1 class="f-700">
             	<legend>
             		<h3>Informaci&oacute;n General</h3>
-	            	<small>Tipos de Miembro</small>
-					{% for cambio in tipos %}
-						<small>
-							{{cambio.nuevoTipo}}
-							{% if cambio.nuevoTipo.nombre|lower != 'visita' %}
-		                        <a alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"><img alt="Eliminar" src="{{MEDIA_URL}}Imagenes/vcard_delete.png" /></a>
-		                    {% endif %}
-						</small> 
-					{% endfor %}
-					<small>
-						<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro <img alt="Agregar" src="{{MEDIA_URL}}Imagenes/vcard_edit.png" /></a>
-					</small>
 				</legend>
             </h1>			
             {% if ok %}
             	<p class="ok"></p>
             {% endif %}
         </div>
-            <div class="card-body card-padding">
-				{% if perms.miembros.es_administrador %}
-					<div class="row">
-					</div>
-				{% endif %}
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="fg-line">
-                        	<div class="col-md-4">
-	                        	<div class="input-group">
-	                            	<span class="input-group-addon">
-	                            		<i class="zmdi zmdi-account"></i>
-	                            	</span>
-		                            <h5>Nombre completo:</h5>
+        <div class="card-body card-padding">
+			{% if perms.miembros.es_administrador %}
+				<div class="row">
+				</div>
+			{% endif %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="fg-line">
+                    	<div class="col-md-4">
+                        	<div class="input-group">
+                            	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-account"></i>
+                            	</span>
+	                            <h5>Nombre completo:</h5>
 
-		                            <p> {{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}} {{miembro.segundoApellido|capfirst}}</p>
-		                        </div>
+	                            <p> {{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}} {{miembro.segundoApellido|capfirst}}</p>
 	                        </div>
-							
-							<div class="col-md-4">
-		                        <div class="input-group">
-		                        	<span class="input-group-addon">
-	                            		<i class="zmdi zmdi-card"></i>
-	                            	</span>
-		                            <h5>C&eacute;dula:</h5>
-		                            <p>{{miembro.cedula}}</p>
-		                        </div>
-	                        </div>
-							
-							<div class="col-md-4">
-		                        <div class="input-group">
-		                        	<span class="input-group-addon">
-	                            		<i class="zmdi zmdi-calendar"></i>
-	                            	</span>
-		                            <h5>Fecha de Nacimiento:</h5>
-		                            <p>{{miembro.fechaNacimiento}}</p>
-		                        </div>
-	                        </div>
-							
-							<div class="col-md-4">
-		                        <div class="input-group">
-		                        	<span class="input-group-addon">
-	                            		<i class="zmdi {% if miembro.genero == 'F' %}zmdi-female{% else %} zmdi-male {% endif %}"></i>
-	                            	</span>
-		                            <h5>G&eacute;nero:</h5>
-		                            <p>{% if miembro.genero == 'F' %}Femenino{% else %}Masculino{% endif %}</p>
-		                        </div>
-		                    </div>
-
-							{% if miembro.profesion %}
-							<div class="col-md-4">
-		                        <div class="input-group">
-		                        	<span class="input-group-addon">
-	                            		<i class="zmdi zmdi-account"></i>
-	                            	</span>
-		                            <h5>Profesi&oacute;n:</h5>
-		                            <p>{{miembro.profesion}}</p>
-		                        </div>
-		                    </div>
-							{% endif %}
-
-							{% if miembro.estadoCivil %}
-							<div class="col-md-4">
-		                        <div class="input-group">
-		                        	<span class="input-group-addon">
-	                            		<i class="zmdi zmdi-local-wc"></i>
-	                            	</span>
-		                            <h5>Estado Civil:</h5>
-		                            <p>{% if miembro.estadoCivil == 'C' %}Casado{% if miembro.conyugue %} con <a href="/miembro/perfil/{{miembro.conyugue.id}}">{{miembro.conyugue.nombre|capfirst}} {{miembro.conyugue.primerApellido|capfirst}}</a>{% endif %} {% else %}{{miembro.get_estadoCivil_display}}{% endif%}</p>
-		                        </div>
-		                    </div>
-							{% endif %}
                         </div>
+						
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-card"></i>
+                            	</span>
+	                            <h5>C&eacute;dula:</h5>
+	                            <p>{{miembro.cedula}}</p>
+	                        </div>
+                        </div>
+						
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-calendar"></i>
+                            	</span>
+	                            <h5>Fecha de Nacimiento:</h5>
+	                            <p>{{miembro.fechaNacimiento}}</p>
+	                        </div>
+                        </div>
+						
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi {% if miembro.genero == 'F' %}zmdi-female{% else %} zmdi-male {% endif %}"></i>
+                            	</span>
+	                            <h5>G&eacute;nero:</h5>
+	                            <p>{% if miembro.genero == 'F' %}Femenino{% else %}Masculino{% endif %}</p>
+	                        </div>
+	                    </div>
+
+						{% if miembro.profesion %}
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-account"></i>
+                            	</span>
+	                            <h5>Profesi&oacute;n:</h5>
+	                            <p>{{miembro.profesion}}</p>
+	                        </div>
+	                    </div>
+						{% endif %}
+
+						{% if miembro.estadoCivil %}
+						<div class="col-md-4">
+	                        <div class="input-group">
+	                        	<span class="input-group-addon">
+                            		<i class="zmdi zmdi-local-wc"></i>
+                            	</span>
+	                            <h5>Estado Civil:</h5>
+	                            <p>{% if miembro.estadoCivil == 'C' %}Casado{% if miembro.conyugue %} con <a href="/miembro/perfil/{{miembro.conyugue.id}}">{{miembro.conyugue.nombre|capfirst}} {{miembro.conyugue.primerApellido|capfirst}}</a>{% endif %} {% else %}{{miembro.get_estadoCivil_display}}{% endif%}</p>
+	                        </div>
+	                    </div>
+						{% endif %}
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 
     <div class="card">
@@ -449,6 +479,7 @@
             </div>
         </div>
     </div>
+
 </div>
 {% endblock %}
 

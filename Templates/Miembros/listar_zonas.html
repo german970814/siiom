@@ -13,10 +13,20 @@
 			<a alt="Agregar Zona" href="/miembro/crear_zona/">Agregar Zona <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
 			<br/>
                 {% if okElim == 1 %}
-					<p class="ok">Se eliminaron las zonas seleccionadas.</p>
+	            <div class="row">
+	                <div class="alert alert-success alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>Se eliminaron las zonas seleccionadas</p>
+	                </div>
+	            </div>
 				{% else %}
 					{% if okElim == 2%}
-						<p class="error">Hubo un error al eliminar zonas.</p>
+		            <div class="row">
+		                <div class="alert alert-success alert-dismissible" role="alert">
+		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+		                    <p>Hubo un error al eliminar las zonas</p>
+		                </div>
+		            </div>
 					{% endif %}
 				{% endif %}
         </div>

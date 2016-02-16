@@ -6,8 +6,13 @@
         <div class="card-header">
             <h1 class="f-700 f-20">Graduar Estudiante</h1>
             {% if ok %}
-                <p class="ok">Se ha registrado el lanzamiento del miembro correctamente.</p>
-            {% endif %} 
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha registrado el lanzamiento del miembro correctamente.</p>
+                </div>
+            </div>
+            {% endif %}
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
