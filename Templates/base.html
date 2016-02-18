@@ -12,29 +12,27 @@
     <title>Celubook: Casa Del Rey</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-   <link href="{{ MEDIA_URL }}Scripts/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
 
     <!-- Template CSS -->
 
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/animate.css/animate.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-select/dist/css/bootstrap-select.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/farbtastic/farbtastic.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/bower_components/chosen/chosen.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/vendors/summernote/dist/summernote.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/animate.css/animate.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet">        
         
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap-select/dist/css/bootstrap-select.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/farbtastic/farbtastic.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/chosen/chosen.min.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/vendors/summernote/dist/summernote.css" rel="stylesheet">
     <!-- CSS -->
-    <link href="{{ MEDIA_URL }}template/jquery/css/app.min.1.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}template/jquery/css/app.min.2.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/css/app.min.1.css" rel="stylesheet">
+    <link href="{{ MEDIA_URL }}Template/jquery/css/app.min.2.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -44,17 +42,17 @@
     <![endif]-->
       
 
-        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. -->
+        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. --><!-- 
         <style type="text/css">
             .toggle-switch .ts-label {
                 min-width: 130px;
             }
-        </style>
+        </style> -->
 
 
 </head>
 
-<body>
+<body class="toggled sw-toggled">
     <header id="header" class="clearfix" data-current-skin="blue">
         <ul class="header-inner">
             <li id="menu-trigger" data-trigger="#sidebar">
@@ -112,9 +110,9 @@
     <section id="main" data-layout="layout-1">
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
-                <a href="">
+                <a href="" style="background: url({{MEDIA_URL}}Imagenes/fondo.jpg)!important;">
                     <div class="profile-pic">
-                        <img src="img/profile-pics/1.jpg" alt="">
+                        <img src="{{MEDIA_URL}}Imagenes/logo.jpg" alt="">
                     </div>
                     <div class="profile-info">
                         {{ request.user }}
@@ -368,52 +366,56 @@
 
     <!-- end -->
 
+    <div class="page-loader">
+        <div class="preloader pls-blue">
+            <svg class="pl-circular" viewBox="25 25 50 50">
+                <circle class="plc-path" cx="50" cy="50" r="20" />
+            </svg>
+
+            <p>Espere por favor</p>
+        </div>
+    </div>
+
+
+    <!-- Template JS -->
+
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    
+
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/flot/jquery.flot.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/flot/jquery.flot.resize.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/flot.curvedlines/curvedLines.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/sparklines/jquery.sparkline.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/jquery.easy-pie-chart/dist/jquery.easypiechart.min.js"></script>
+    
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/moment/min/moment.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.js "></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/simpleWeather/jquery.simpleWeather.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/Waves/dist/waves.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bootstrap-growl/bootstrap-growl.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
+
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap-select/dist/js/bootstrap-select.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.all.min.js"></script>
+
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/typeahead.js/dist/typeahead.bundle.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/summernote/dist/summernote-updated.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/fileinput/fileinput.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/input-mask/input-mask.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/vendors/farbtastic/farbtastic.min.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/js/flot-charts/curved-line-chart.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/js/flot-charts/line-chart.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/js/charts.js"></script>
+    
+    <script src="{{ MEDIA_URL }}Template/jquery/js/charts.js"></script>
+    <script src="{{ MEDIA_URL }}Template/jquery/js/functions.js"></script>
+
     {% block js %}
     {% endblock %}
-
-    <!-- TEMPLATE JS -->
-
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/flot/jquery.flot.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/flot/jquery.flot.resize.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/flot.curvedlines/curvedLines.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/sparklines/jquery.sparkline.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/jquery.easy-pie-chart/dist/jquery.easypiechart.min.js"></script>
-    
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/moment/min/moment.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.js "></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/simpleWeather/jquery.simpleWeather.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/Waves/dist/waves.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bootstrap-growl/bootstrap-growl.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
-
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/bootstrap-select/dist/js/bootstrap-select.js"></script> <!--Uno NUEVO-->
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.all.min.js"></script>
-
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/typeahead.js/dist/typeahead.bundle.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/summernote/dist/summernote-updated.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/fileinput/fileinput.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/input-mask/input-mask.min.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/vendors/farbtastic/farbtastic.min.js"></script>
-    
-    <!-- Placeholder for IE9 -->
-    <!--[if IE 9 ]>
-        <script src="vendors/bower_components/jquery-placeholder/jquery.placeholder.min.js"></script>
-    <![endif]-->
-    
-    <script src="{{ MEDIA_URL }}template/jquery/js/flot-charts/curved-line-chart.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/js/flot-charts/line-chart.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/js/charts.js"></script>
-    
-    <script src="{{ MEDIA_URL }}template/jquery/js/charts.js"></script>
-    <script src="{{ MEDIA_URL }}template/jquery/js/functions.js"></script>
-    <!--<script src="{{ MEDIA_URL }}template/jquery/js/demo.js"></script>-->
-
 
         
 </body>

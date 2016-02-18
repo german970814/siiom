@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 
 {% block js %}
-<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
@@ -79,50 +77,111 @@
 {% endblock %}
 
 {% block contenido %}
-
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Reporte Reunion: Discipulado</h1>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">Reporte Reunion: Discipulado</h3>
+                </legend>
+            </h1>
+            {% if messages %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
+        <form action="" method="POST" id="form_totalGAR">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-book"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_predica" class="fg-label requerido">Pr&eacute;dica:</label>
+                                {{form.predica}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-accounts"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idGrupo_i" class="fg-label requerido">Grupo Inicial:</label>
+                                <select class="selectpicker" name="menuGrupo_i" id="idGrupo_i" data-live-search="true">
+                                    <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
+                                    {% for g_i in listaGrupo_i %}
+                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group">
+                            <div class="fg-line">
+                                <label for="" class="checkbox m-r-20">
+                                    <input type="checkbox" id="idCheck" name="lid_asis" value="S" {% if lid_asis %} checked="checked" {% endif %}>
+                                    <i class="input-helper m-r-20"></i>
+                                    N&uacute;mero de L&iacute;deres Asistentes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <div class="fg-line">
+                                <label for="" class="checkbox m-r-20">
+                                    <input type="checkbox" name="asis_reg" value="S" {% if asis_reg %} checked="checked" {% endif %}>
+                                    <i class="input-helper m-r-20"></i>
+                                    N&uacute;mero de Asistentes Regulares
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group">
+                            <div class="fg-line">
+                                <label for="" class="checkbox m-r-20">
+                                    <input type="checkbox" name="ofrenda" value="S" {% if ofrenda %} checked="checked" {% endif %}>
+                                    <i class="input-helper m-r-20"></i>
+                                    Ofrenda
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button type="submit" name ="verReporte" class="btn btn-success btn-block">Ver</button>
+
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" name ="reportePDF" class="btn btn-warning btn-block waves-effect">Reportar PDF</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
     </div>
-    <br />
-
-    <form action="" id="form_totalGAR" method="post">
-        {% csrf_token %}
-        <div class="row">
-            <div class="col-lg-6">
-                {{ form.as_p }}
-            </div>
-        </div>        
-        <label for="idGrupo_i">Grupo inicial:</label>
-        <select id="idGrupo_i" name="menuGrupo_i">
-            <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
-            {% for g_i in listaGrupo_i %}
-                <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
-            {% endfor %}
-        </select>
-
-        <br />
-        <br />
-        <div class="row">
-            <div class="col-lg-3">
-                <input type="checkbox" name="lid_asis" value="S" {% if lid_asis %}checked="checked"{% endif %}/>N&uacute;mero de lideres asistentes
-            </div>
-            <div class="col-lg-3">
-                <input type="checkbox" name="asis_reg" value="S" {% if asis_reg %}checked="checked"{% endif %}/>N&uacute;mero asistentes regulares
-            </div>
-        </div>        
-        <div class="row">
-            <div class="col-lg-3">
-                <input type="checkbox" name="ofrenda" value="S" {% if ofrenda %}checked="checked"{% endif %}/>Ofrenda
-            </div>
-        </div>
-        <br />
-        <input type="submit" name="verReporte" value="Ver" class="button blue smallB">
-        <input type="submit" name="reportePDF" value="Generar PDF" class="button blue smallB">
-    </form>
-    <br /><br />
-
-    <div id="out"></div>
+    <div id="out"></div> 
+</div>   
 
 {% endblock %}

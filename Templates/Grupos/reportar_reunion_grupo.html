@@ -5,11 +5,9 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
-		$("#id_fecha").datepicker({
-            dateFormat: 'dd/mm/yy',
-            changeYear: true,
-            changeMonth: true,
-            yearRange: 'c-50:c'
+		$("#id_fecha").datetimepicker({
+            format: 'DD/MM/YYYY',
+            maxDate: moment(),
         });
 	});
 </script>
@@ -63,7 +61,7 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-addon">
-                                <i class="zmdi zmdi-accounts"></i>
+                                <i class="zmdi zmdi-book"></i>
                             </span>
                             <div class="fg-line requerido">
                                 <label for="id_predica" class="fg-label requerido">Pr&eacute;dica:</label>
@@ -124,7 +122,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <input type="submit" value="Aceptar" class="btn btn-primary btn-block" name ="aceptar">
+                        <button type="submit" class="btn btn-primary btn-block" name ="aceptar">Aceptar</button>
                     </div>
                 </div>
             </div>

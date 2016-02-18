@@ -14,8 +14,8 @@ class FormularioRangoFechas(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(FormularioRangoFechas, self).__init__(*args, **kwargs)
-        self.fields['fechai'].widget.attrs.update({'class' : 'form-control'})
-        self.fields['fechaf'].widget.attrs.update({'class' : 'form-control'})       
+        self.fields['fechai'].widget.attrs.update({'class':'form-control','data-mask':'00/00/00'})
+        self.fields['fechaf'].widget.attrs.update({'class' : 'form-control','data-mask':'00/00/00'})       
 
 MESES_CHOICES = (('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'), ('5', 'Mayo'), ('6', 'Junio'), \
     ('7', 'Julio'), ('8', 'Agosto'), ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre'))
@@ -55,6 +55,7 @@ class FormularioPredicas(forms.Form):
 
     def __init__(self, miembro, *args, **kwargs):
         super(FormularioPredicas, self).__init__(*args, **kwargs)
+        self.fields['predica'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
 
         if miembro.usuario.has_perm("miembros.es_administrador"):
             self.fields['predica'].queryset = Predica.objects.all()
