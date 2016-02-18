@@ -21,6 +21,12 @@
         {% endif %}
 
         $(document).ready(function(){
+
+            $('#id_ano').datetimepicker({
+                format: 'YYYY',
+                maxDate: moment(),
+                });
+
             {% if tipo == 1 %}
                 $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie_sel.png");
                 $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column.png");
@@ -46,8 +52,85 @@
 {% endblock %}
 
 {% block contenido %}
+ <div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">{{ titulo_pag }}</h3>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST" id="form_visitasMes">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <br>
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_ano" class="fg-label requerido">Año:</label>
+                                {{form.ano}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <div class="fg-line requerido">
+                                {% for m in form.meses %}
+                                <label for="{{m.id_for_label}}" class="checkbox">
+                                {{m.tag}}
+                                <i class="input-helper m-r-20"></i>
+                                {{m.choice_label}}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3" style="margin-top: 100px;">
+                        <input type="hidden" name="type" id="type" value="1">
+                        <button class="btn btn-info btn-block" name="verReporte">Ver Reporte</button>
+                        <button style="margin-top: 25px;" class="btn btn-warning btn-block" name="reportePDF">Generar PDF</button>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if sw %}
+    <div class="card">
+        <div class="card-header">
+            
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_pie_sel.png" value="pie" name="pie_button" id="pie_button">
+                <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
+                <div id="out"></div>
+            </div>
+            
+        </div>
+    </div>
+    {% endif %}
+</div>
 
-    <h2>{{ titulo_pag }}</h2>
+
+
+
+
+
+{% endblock %}
+   <h2>{{ titulo_pag }}</h2>
     <br />
 
     <form id="form_visitasMes" class="alinearForm" action="" method="post">
@@ -63,5 +146,3 @@
         <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
         <div id="out"></div>
     {% endif %}
-
-{% endblock %}

@@ -74,7 +74,13 @@ class FormularioMatricula(ModelForm):
 
 class FormularioCrearModulo(ModelForm):
     required_css_class = 'requerido'
-    
+        
+    def __init__(self,*args,**kwargs):
+        super(FormularioCrearModulo,self).__init__(*args,**kwargs)
+
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['porcentaje'].widget.attrs.update({'class':'form-control'})
+
     class Meta:
         model = Modulo
         fields = '__all__'

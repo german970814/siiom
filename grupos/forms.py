@@ -146,6 +146,17 @@ class FormularioCrearGrupoRaiz(ModelForm):
             query2 = Miembro.objects.filter(id__in = lideres).exclude(id__in = lidGrupos)
         self.fields['lider1'].queryset = query1
         self.fields['lider2'].queryset = query2
+        self.fields['lider1'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['lider2'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['barrio'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+        self.fields['direccion'].widget.attrs.update({'class':'form-control'})
+        self.fields['horaGAR'].widget.attrs.update({'class':'form-control time-picker'})
+        self.fields['diaDiscipulado'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['fechaApertura'].widget.attrs.update({'class':'form-control'})
+        self.fields['estado'].widget.attrs.update({'class':'form-control'})
+        self.fields['diaGAR'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['horaDiscipulado'].widget.attrs.update({'class':'form-control time-picker'})
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
 
     class Meta:
         model = Grupo
@@ -162,6 +173,12 @@ class FormularioReportesSinEnviar(forms.Form):
 
 class FormularioCrearPredica(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self,*args,**kwargs):
+        super(FormularioCrearPredica,self).__init__(*args,**kwargs)
+
+        self.fields['descripcion'].widget.attrs.update({'class':'form-control','placeholder':'Descripción...','rows':'3'})
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
 
     class Meta:
         model = Predica

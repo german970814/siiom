@@ -537,7 +537,3 @@ def listarPagosAcademia(request):
     miembro = Miembro.objects.get(usuario = request.user)
     matriculas = Matricula.objects.all()
     return render_to_response('Academia/listar_pago.html', locals(), context_instance=RequestContext(request))
-
-
-def prueba(request):
-    return render_to_response('prueba.html',locals(),context_instance=RequestContext(request))

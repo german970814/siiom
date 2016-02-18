@@ -129,9 +129,9 @@ def detalleLlamada(request, llamada):
 
     tipo = 1
     if llamada==1:
-        titulo_pag = 'Primera lLamada realizada en la iglesia'
+        titulo_pag = 'Primera Llamada realizada en la iglesia'
     else:
-        titulo_pag = 'Segunda lLamada realizada en la iglesia'
+        titulo_pag = 'Segunda Llamada realizada en la iglesia'
     if request.method == 'POST':
         form = FormularioRangoFechas(request.POST)
         if form.is_valid():

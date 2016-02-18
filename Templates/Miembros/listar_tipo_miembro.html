@@ -8,8 +8,12 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-			<h2 class="f-700 f-20">Tipos de Miembro</h2>
-			<a alt="Agregar tipo" href="/miembro/crear_tipo_miembro/">Agregar tipo de miembro <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a>
+			<h1 class="f-700 f-20">
+				<legend>
+					<h3>Tipos de Miembro</h3>
+					<small><a alt="Agregar tipo" href="/miembro/crear_tipo_miembro/">Agregar tipo de miembro</a></small>
+				</legend>
+			</h1>
             {% if okElim == 1 %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -64,10 +68,10 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <input type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">
+                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
                     </div>
                     <div class="col-md-4">
-                        <input type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="eliminar">
+                        <button type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
                     </div>
                 </div>
             </div>

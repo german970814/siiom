@@ -5,7 +5,10 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
-		$("#id_fechaApertura").datepicker();
+		$("#id_fechaApertura").datetimepicker({
+            maxDate : moment(),
+            format: 'DD/MM/YYYY'
+        });
 	});
 </script>
 {% endblock %}
@@ -74,10 +77,10 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-addon">
-                                <i class="zmdi zmdi-phone"></i>
+                                <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_calendar" class="fg-label">Fecha Apertura Grupo:</label>
+                                <label for="id_fechaApertura" class="fg-label">Fecha Apertura Grupo:</label>
                             	{{form.fechaApertura}}
                             </div>
                         </div>
@@ -167,7 +170,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <input type="submit" value="aceptar" name="aceptar" class="btn btn-primary btn-block">
+                        <button type="submit" value="aceptar" name="aceptar" class="btn btn-primary btn-block">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -176,12 +179,3 @@
 </div>
 
 {% endblock %}
-	<h2>{{accion}} Grupo</h2>
-	{% if ok %}
-		<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el grupo correctamente. <a alt="Lista de Grupos" href="/grupo/listar_grupos/{{red.id}}"> Volver a la lista de grupos.</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="aceptar" name="aceptar"></p>
-	</form>

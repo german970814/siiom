@@ -89,43 +89,77 @@
 {% endblock %}
 
 {% block contenido %}
-
-    <h2>Numero de miembros por pasos</h2>
-    <br />
-
-    <form action="" id="form_pasosTotal" method="post">
-        {% csrf_token %}
-
-        <label for="idGrupo_i">Grupo inicial:</label>
-        <select id="idGrupo_i" name="menuGrupo_i">
-            <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
-            {% for g_i in listaGrupo_i %}
-                <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="idGrupo_f">Grupo final:</label>
-        <select id="idGrupo_f" name="menuGrupo_f">
-             {% if  grupo_f %}
-           	    <option value="-1" >------</option>
-       		    {% for g_f in listaGrupo_f %}
-            	    <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
-                {% endfor %}
-             {% endif %}
-        </select>
-        <br />
-        <input type="hidden" name="type" id="type" value="1">
-        <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if descendientes %}checked="checked"{% endif %}/>Mostrar todos los descendientes del grupo inicial
-        <br />
-        <input type="submit" name="verReporte" value="Ver" class="button blue smallB">
-        <input type="submit" name="reportePDF" value="Generar PDF" class="button blue smallB">
-    </form>
-    <br /><br />
-
-    {% if sw %}
-        <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_pie_sel.png" value="pie" name="pie_button" id="pie_button">
-        <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
-        <div id="out"></div>
-    {% endif %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                <h2 class="f-700 f-20">N&uacute;mero de Miembros por Pasos</h2>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST" id="form_pasosTotal" >
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idGrupo_i" class="fg-label requerido">Grupo Inicial:</label>
+                                <select class="selectpicker" data-live-search="true" id="idGrupo_i" name="menuGrupo_i">
+                                    <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
+                                    {% for g_i in listaGrupo_i %}
+                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account-o"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idGrupo_f" class="fg-label requerido">Grupo Final:</label>
+                                <select class="selectpicker" data-live-search="true" id="idGrupo_f" name="menuGrupo_f">
+                                    {% if  grupo_f %}
+                                        <option value="-1" >------</option>
+                                        {% for g_f in listaGrupo_f %}
+                                            <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <label class="checkbox">
+                                <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if lid_asis %}checked="checked"{% endif %}/>
+                                <i class="input-helper m-r-20"></i>
+                                Mostrar Todos Los Descendientes del Grupo Inicial
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <input type="hidden" name="type" id="type" value="1">
+                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="verReporte">Ver</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" value="Editar" class="btn btn-warning btn-block" name ="reportePDF">Generar PDF</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

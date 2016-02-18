@@ -125,7 +125,6 @@ urlpatterns += patterns('',
     (r'^miembro/graduar_alumno/$', graduarAlumno),
      #----------------RECEPTOR-----------------------
      (r'^academia/recibir_pago/(\d+)/$',  recibirPago),
-    (r'^prueba/prueba/$',prueba)
 )
 
 urlpatterns += patterns('',
