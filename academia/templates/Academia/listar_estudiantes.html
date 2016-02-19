@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700 f-20">
+                <legend>
+                    <h3>Estudiantes</h3>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="estudiantes" class="table" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th class="checkboxBoton"><div class="button gray smallB checkBoton">
+                                    <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('estudiantes');"/></div></th>
+                                    <th>Nombre</th>
+                                    <th>Modulo</th>
+                                    <th class="centrarTexto">Sesiones dadas</th>
+                                    <th class="centrarTexto">Sesiones faltantes</th>                   
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in estudiantes %}
+                                    <tr>
+                                        <td><input type="checkbox" name="seleccionados" value="{{est.id}}"/></td>
+                                        <td><a href="/academia/estudiante_detalle/{{est.id}}/">{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</a></td>
+                                        <td>{{ est.moduloActual.nombre }}</td>
+                                        <td class="centrarTexto">{{ est.sesionesDadas }}</td>
+                                        <td class="centrarTexto">{{ est.sesionesFaltantes }}</td>                    
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" style="text-align:center;">A&uacute;n no hay estudiantes matriculados en el curso.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <br>
+                <br>
+                {% if admin %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" class="btn btn-success btn-block" name ="Eliminar">Eliminar</button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">{{ curso.nombre|capfirst }}</h3>
+                    <small><a href="/academia/curso_detalle/{{ curso.id }}/">Ver informaci&oacute;n del curso</a></small>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <br>
+                {% if not admin %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="accion" class="fg-label requerido">Selecciona Una Acción:</label>
+                                <select class="selectpicker" data-live-search="true" name="accion" id="accion">
+                                    <option selected="selected" value="">---------</option>
+                                    <option value="M">Evaluar M&oacute;dulo</option>
+                                    <option value="P">Promover Estudiante</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <input type="hidden" name="curso" value="{{ curso.id }}" />
+                        <button type="submit" name="Aceptar" class="btn btn-success btn-block">Aceptar</button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <div class="fg-line requerido">
+                                <label for="accion" class="fg-label requerido"></label>
+                                <p><a alt="Matricular Estudiante" href="/academia/matricular/{{curso.id}}">Matricular Estudiante</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <br>
+                <br>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

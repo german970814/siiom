@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#buscarDiferente").click(function(){
+			$("#buscarHidden").submit();
+		});
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+	<div class="card">
+		<div class="card-header">
+			<h1>
+				<legend>
+					<h3>Resultado de b&uacute;squeda de {{tipoBus}}</h3>
+					<small><a id="buscarDiferente">Ver resultado de {% ifequal tipoBus 'grupo' %}Miembro{% else %}Grupo{% endifequal %}</a></small>
+				</legend>
+			</h1>
+		</div>
+		{% ifequal tipoBus 'miembro' %}
+		{%for resultado in resultados %}
+		{% ifequal resultado.model_name 'miembro' %}
+	    <div class="card">
+	        <form action="" method="POST" enctype="multipart/form-data">
+	            {% csrf_token %}
+	            <div class="card-body card-padding">
+	                <div class="row">
+	                    <div class="col-md-4 col-md-offset-2">
+	                        <div class="input-group fg-float">
+	                            <div class="fg-line requerido">
+									<h5><a href="/miembro/perfil/{{resultado.resultado.pk}}">{{resultado.resultado.nombre|capfirst}} {{resultado.resultado.primerApellido|capfirst}}</a> {% if perms.miembros.puede_editar_miembro %} <a alt="Editar" href="/miembro/editar_miembro/{{resultado.resultado.pk}}"></a></h5> {% endif %}
+									{% if not resultado.resultado.grupo and perms.miembros.puede_editar_miembro %}<a alt="Asignar Grupo" href="/miembro/asignar_grupo/{{resultado.resultado.pk}}">{% endif %}
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	                <br>
+	                <br>
+	            </div>
+	        </form>
+	    </div>
+				{% endifequal %}
+			{% endfor %}
+		{% else %}
+			{% for resultado in resultados %}
+				{% ifequal resultado.model_name 'grupo' %}
+						<div class="card">
+						    <form action="" method="POST" enctype="multipart/form-data">
+						        {% csrf_token %}
+						            <div class="card-body card-padding">
+						                <div class="row">
+						                    <div class="col-md-4 col-md-offset-2">
+						                        <div class="input-group fg-float">
+						                            <div class="fg-line requerido">
+														<h5><a href="/grupo/{{resultado.resultado.pk}}">{{resultado.resultado.nombre|capfirst}}</a></h5>
+						                            </div>
+						                        </div>
+						                    </div>
+						                </div>
+						                <br>
+						                <br>
+						            </div>
+						        </form>
+						    </div>
+						{% endifequal %}
+					{% endfor %}
+				{% endifequal %}
+
+		<form id="buscarHidden" method="post" action="/resultado/{% ifequal tipoBus 'grupo' %}miembro{% else %}grupo{% endifequal %}/">
+	    	{% csrf_token %}		
+	        <input type="hidden" value="{{ sTerm }}" name="buscar" />
+	    </form>
+	</div>
+</div>
+{% endblock %}

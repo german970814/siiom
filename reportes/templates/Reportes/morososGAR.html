@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block js %}
+
+<!-- <link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" /> -->
+<!-- <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script> -->
+
+<script type="text/javascript">
+    $(document).ready(function(){
+		$('#id_fechai').datetimepicker({
+            format: 'DD/MM/YYYY',
+            daysOfWeekDisabled: [0,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+        $('#id_fechaf').datetimepicker({
+            useCurrent: false,
+            format: 'DD/MM/YY',
+            daysOfWeekDisabled: [1,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+
+        $('#id_fechai').on("dp.change",function(e){
+            console.log(e);
+            $('#id_fechaf').data("DateTimePicker").minDate(e.date);
+        });
+
+        $('#id_fechaf').on("dp.change",function(e){
+            $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+        });
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">Estadistico de reuniones GAR</h3>
+                </legend>
+            </h1>
+            {% if messages %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" id="form_pasosTotal">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="card-body card-padding">
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                    {{ form.fechai.errors }}
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechai" class="fg-label requerido">Fecha Inicial:</label>
+                                {{form.fechai}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                    {{ form.fechaf.errors }}
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar-note"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                {{form.fechaf}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button type="submit" class="btn btn-primary btn-block" name ="verMorosos">Ver Grupos</button>
+                    </div>
+                    <div class="col-md-4">
+                        <Button type="submit" class="btn btn-warning btn-block" name ="Enviar">Enviar E-mail</Button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if grupos %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="f-700 f-20">Escalafones</h2>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="gruposSinReportes" class="table" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th width="22%">Grupo</th>
+                                    <th width="27%">Lideres</th>
+                                    <th width="21%">Fecha de reuni&oacute;n</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grupo in grupos %}
+                                    <tr>
+                                        <td>{{ grupo.nombre|capfirst }}</td>
+                                        <td>
+                                            <ul>
+                                            {% for lider in grupo.lideres %}
+                                                <li>{{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}</li>
+                                            {% endfor %}
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <ul>
+                                            {% for fecha in grupo.fecha_reunion %}
+                                                <li>{{ fecha }}</li>
+                                            {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td class="centrarTexto" colspan="4">Ning&uacute;n grupo debe reporte de reuni&oacute;n.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <br/>
+                    </div>
+                </div>
+                <br>
+                <br>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

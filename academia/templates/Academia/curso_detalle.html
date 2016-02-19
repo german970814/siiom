@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+	<div class="card">
+        <div class="card-header">
+            <h1>
+                <legend><h1>{{ curso.nombre|capfirst }}</h1></legend>
+            </h1>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="estudiantes" class="table" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Modulo</th>
+                                    <th style="text-align: center;">Sesiones</th>
+                                    <th style="text-align: center;">Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for modulo in modulos %}
+                                    <tr>
+                                        <td style="text-align: center;">{{ modulo.nombre|capfirst }}</td>
+                                        <td>
+                                            <ul class="clist clist-check">
+                                                {% for sesion in modulo.sesiones %}
+                                                    <li>{{ sesion.nombre|capfirst }}</li>
+                                                {% empty %}
+                                                    <li>No hay sesiones en el modulo</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                        <td style="text-align: center;">{{ modulo.porcentaje }}%</td>                      
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="2" style="text-align:center;">A&uacute;n no hay modulos asignados al curso.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody> 
+                        </table>
+                    </div>
+                </div>
+                <br>
+                <br>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

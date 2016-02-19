@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block js %}
+<!--
+<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+-->
+<link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
+<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#id_fechai').datetimepicker({
+            format: 'DD/MM/YYYY',
+            daysOfWeekDisabled: [0,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+        $('#id_fechaf').datetimepicker({
+            useCurrent: false,
+            format: 'DD/MM/YY',
+            daysOfWeekDisabled: [1,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+
+        $('#id_fechai').on("dp.change",function(e){
+            console.log(e);
+            $('#id_fechaf').data("DateTimePicker").minDate(e.date);
+        });
+
+        $('#id_fechaf').on("dp.change",function(e){
+            $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+        });
+    });
+    //dibujando el grafico
+    {% if sw %}
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart(){
+            var data = google.visualization.arrayToDataTable({{ values|safe }});
+            var options = {width: 700, height: 500};
+        {% if tipo == 1 %}
+            var chart = new google.visualization.PieChart(document.getElementById('out'));
+        {% else %}
+            var chart = new google.visualization.ColumnChart(document.getElementById('out'));
+        {% endif %}
+            chart.draw(data, options);
+        }
+    {% endif %}
+
+    $(document).ready(function(){
+
+        {% if tipo == 1 %}
+            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie_sel.png");
+            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column.png");
+            $("#type").attr('value', '1');
+        {% else %}
+            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column_sel.png");
+            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie.png");
+            $("#type").attr('value', '2');
+        {% endif %}
+        $("#pie_button, #column_button").click(function(){
+            if(this.id == "pie_button")
+            {   $("#type").attr('value', '1');
+                $("#form_visitasRed").submit();
+            }
+            else
+            {   $("#type").attr('value', '2');
+                $("#form_visitasRed").submit();
+            }
+
+        });
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">{{ titulo_pag }}</h3>
+                </legend>
+            </h1>
+            {% if messages %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" id="form_totalGAR">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechai" class="fg-label requerido">Fecha Inicial:</label>
+                                {{form.fechai}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar-note"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                {{form.fechaf}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button class="btn btn-info btn-block" name="verReporte">Ver Reporte</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-warning btn-block" name="reportePDF">Generar PDF</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if sw %}
+    <div class="card">
+        <div class="card-header">
+            
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_pie_sel.png" value="pie" name="pie_button" id="pie_button">
+                <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
+                <div id="out"></div>
+            </div>
+            
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

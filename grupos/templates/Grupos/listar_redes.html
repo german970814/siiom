@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+        	<h1>
+        		<legend>
+					<h3 class="f-700 f-20">Listado de las Redes</h3>
+					<small><a alt="Agregar Red" href="/grupo/crear_red/">Agregar Red</a></small>
+        		</legend>
+        	</h1>
+        	{% if okElim == 1 %}
+        		<div class="row">
+					<div class="alert alert-success alert-dismissible" role="alert">
+						<button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+						<p>Se han eliminado las redes seleccionadas</p>
+					</div>
+				</div>
+			{% else %}
+				{% if okElim == 2%}
+					<div class="row">
+						<div class="alert alert-danger alert-dismissible" role="alert">
+							<button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+							<p>Hubo un error al eliminar las redes</p>
+						</div>
+					</div>
+				{% endif %}
+			{% endif %}
+        </div>
+        {% if redes %}
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+						<table id="redes" class="table" cellspacing="0">
+							<thead>
+						       	<tr>
+						       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('redes');" /></div></th>
+						            <th>Nombre</th>
+						       	</tr>
+					    	</thead>
+					    	<tbody>
+							{% for red in redes %}
+								<tr>
+									<td><input type="checkbox" name="seleccionados" value="{{red.id}}"/></td>
+									<td><a href="/grupo/listar_grupos/{{red.id}}">{{red.nombre|capfirst}}</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="editar">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% else %}
+			<p>No existen redes a&uacute;n. Haga <a alt="Agregar Red" href="/grupo/crear_red/">click aqu&iacute;</a> para agregar una.</p>
+		{% endif %}
+    </div>
+</div>
+{% endblock %}

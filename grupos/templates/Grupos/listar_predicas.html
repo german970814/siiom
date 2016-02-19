@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+        	<h1>
+        		<legend>
+					<h3 class="f-700 f-20">Predicas</h3>
+					<small><a alt="Agregar Predica" href="/grupo/crear_predica/">Agregar Pr&eacute;dica</a></small>
+        		</legend>
+        	</h1>
+        	{% if okElim == 1 %}
+				<div class="row">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Se eliminaron las predicas seleccionadas.</p>
+                    </div>
+                </div>
+			{% else %}
+				{% if okElim == 2%}
+					<div class="row">
+	                    <div class="alert alert-success alert-dismissible" role="alert">
+	                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                        <p>Hubo un error al eliminar las predicas.</p>
+	                    </div>
+	                </div>
+				{% endif %}
+			{% endif %}
+        </div>
+        {% if predicas %}
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+						<table id="redes" class="table" cellspacing="0">
+							<thead>
+						       	<tr>
+						       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('redes');" /></div></th>
+						            <th>Nombre</th>
+				                    <th>Descripci&oacute;n</th>
+						       	</tr>
+					    	</thead>
+					    	<tbody>
+							{% for predica in predicas %}
+								<tr>
+									<td><input type="checkbox" name="seleccionados" value="{{predica.id}}"/></td>
+									<td>{{predica.nombre|capfirst}}</td>
+			                        <td>{{ predica.descripcion|capfirst }}</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" value="Editar" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% else %}
+        <div class="card-body card-padding">
+        	<div class="row">
+				<div class="row">
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						<button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+						<p>A&uacute;n no se han agregado Prédicas Haga <a alt="Agregar Predica" href="/grupo/crear_predica/">click aqu&iacute;</a> para agregar una.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+<h2>Predicas</h2>
+	{% if okElim == 1 %}
+		<p class="ok">Se eliminaron las predicas seleccionadas.</p>
+	{% else %}
+		{% if okElim == 2%}
+			<p class="error">Hubo un error al eliminar las predicas.</p>
+		{% endif %}
+	{% endif %}
+	{% if predicas %}
+		<form action="" method="POST" enctype="multipart/form-data" >
+			{% csrf_token %}
+			<p><a alt="Agregar Predica" href="/grupo/crear_predica/">Agregar Predica <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a></p>
+			<table id="redes" class="simple" cellspacing="0">
+				<thead>
+		       	<tr>
+		       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+	    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('redes');" /></div></th>
+		            <th>Nombre</th>
+                    <th>Descripci&oacute;n</th>
+		       	</tr>
+		    	</thead>
+		    	<tbody>
+				{% for predica in predicas %}
+					<tr>
+						<td><input type="checkbox" name="seleccionados" value="{{predica.id}}"/></td>
+						<td>{{predica.nombre|capfirst}}</td>
+                        <td>{{ predica.descripcion|capfirst }}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<br/>
+			<button class="button blue smallB" type="submit" value="Editar" name="editar">Editar</button>
+			<button class="button blue smallB" type="submit" value="Eliminar" name="eliminar">Eliminar</button>
+		</form>
+		<br />
+	{% else %}
+		<p>No existen predicas a&uacute;n. Haga <a alt="Agregar Predica" href="/grupo/crear_predica/">click aqu&iacute;</a> para agregar una.</p>
+	{% endif %}

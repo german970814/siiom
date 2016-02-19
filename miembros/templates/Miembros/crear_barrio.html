@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>{{accion}} Barrio</h1>
+            {% if ok %}
+				<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" href="/miembro/barrios/{{zona.id}}"> Volver a la lista de barrios.</a></p>
+			{% endif %}	
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group fg-float input-group-lg">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <input type="text" id="id_nombre" name="nombre" class="form-control input-lg">
+                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+					<div class="col-md-8 col-md-offset-5">
+						<div class="input-group">
+							<button type="submit" value="Aceptar" class="btn btn-primary btn-block">Aceptar</button>
+						</div>
+					</div>
+				</div>
+            </div>
+        </form>
+    </div>
+</div>	
+{% endblock %}
+
+

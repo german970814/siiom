@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</h3>
+                </legend>
+            </h1>
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-phone"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_telefono" class="fg-label requerido">Teléfono:</label>
+                                <p>{{ est.estudiante.telefono }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-pin"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_direccion" class="fg-label requerido">Direcci&oacute;n:</label>
+                                <p>{{ est.estudiante.direccion }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-email"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_email" class="fg-label requerido">E-mail:</label>
+                                <p>{{ est.estudiante.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3>Informaci&oacute;n del Curso</h3>
+                </legend>
+            </h1>
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaInicio" class="fg-label requerido">Fecha Inicio:</label>
+                                <p>{{est.fechaInicio}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_notaDefinitiva" class="fg-label requerido">Nota Definitiva:</label>
+                                <p>{{est.notaDefinitiva}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-money-box"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_pago" class="fg-label requerido">Pago:</label>
+                                <p>{{est.pago}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend><h1>Modulos</h1></legend>
+            </h1>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                    {% for modulo in est.modulosDados %}
+                        <legend><h2 style="text-align:center;">{{ modulo.nombre|capfirst }}</h2></legend>
+                        <table class="table" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Sesi&oacute;n</th>
+                                    <th style="text-align: center;">Asistencia</th>
+                                    <th style="text-align: center;">Tarea</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sesion in modulo.sesiones %}
+                                    <tr>
+                                      <td style="width: 320px;text-align:center;">{{ sesion.nombre|capfirst }}</td>
+                                      <td style="text-align: center;">{% if sesion.asistencia.asistencia %}<img src="{{ MEDIA_URL }}Imagenes/accept.png" />{% endif %}                                       </td>
+                                      <td style="text-align: center;">{% if sesion.asistencia.tarea %}<img src="{{ MEDIA_URL }}Imagenes/accept.png" />{% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr><td colspan="3"><b>Examen Final:</b> {{ modulo.reporte.nota }}</td></tr>
+                            </tbody> 
+                        </table>
+                        {% empty %}
+                            <p>No ha dado ningun modulo</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <br>
+                <br>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

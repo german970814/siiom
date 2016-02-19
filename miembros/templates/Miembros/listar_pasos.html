@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+{% endblock %}
+
+{% block contenido %}
+	
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+			<h1 class="f-700 f-20">
+				<legend><h3>Pasos</h3></legend>
+			</h1>
+                {% if okElim == 1 %}
+	            <div class="row">
+	                <div class="alert alert-success alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>Se eliminaron los pasos seleccionados</p>
+	                </div>
+	            </div>
+				{% else %}
+					{% if okElim == 2%}
+		            <div class="row">
+		                <div class="alert alert-danger alert-dismissible" role="alert">
+		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+		                    <p>Hubo un error al eliminar los pasos seleccionados.</p>
+		                </div>
+		            </div>
+					{% endif %}
+				{% endif %}
+        </div>
+        {% if pasos %}
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+						<table id="pasos" class="table" cellspacing="0">
+							<thead>
+						       	<tr>
+						       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
+					    			<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('pasos');" /></div></th>
+						            <th>Nombre</th>
+						            <th>Prioridad</th>
+						            
+						       	</tr>
+					    	</thead>
+					    	<tbody>
+							{% for paso in pasos %}
+								<tr>
+									<td><input type="checkbox" name="seleccionados" value="{{paso.id}}"/></td>
+									<td>{{paso.nombre|capfirst}}</td>
+									<td>{{paso.prioridad|capfirst}}</td>
+								</tr>
+							{% endfor %}
+							</tbody>
+						</table>
+						<br/>
+						{% else %}
+							<p>No existen pasos a&uacute;n. Haga <a alt="Agregar paso" href="/miembro/agregar_paso/">click aqu&iacute;</a> para agregar uno.</p>
+						{% endif %}
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
