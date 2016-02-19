@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block js %}
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fecha").datepicker();
@@ -9,7 +9,7 @@
             "iDisplayLength": 25,
             "dom": 'T<"clear">lfrtip',
             "tableTools":{
-                "sSwfPath": "{{ MEDIA_URL }}Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf"
+                "sSwfPath": "{% static 'Scripts/js/plugins/dataTables/swf/copy_csv_xls_pdf.swf' %}"
             },
         } );
 	});

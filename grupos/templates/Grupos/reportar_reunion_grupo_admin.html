@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block js %}
 <!--
 <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
@@ -9,7 +9,7 @@
 <!-- <link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
 <link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script> -->
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/funciones.js"></script>
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fecha").datetimepicker({

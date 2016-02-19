@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block contenido %}
 <div class="container">
     <div class="card" style="background: #edecec;box-shadow: none;">
@@ -159,8 +159,8 @@
 {% block js %}
 
 <!-- Page-Level Plugin Scripts - Morris -->
-<script src="{{ MEDIA_URL }}Scripts/js/plugins/morris/raphael-2.1.0.min.js"></script>
-<script src="{{ MEDIA_URL }}Scripts/js/plugins/morris/morris.js"></script>   
+<script src="{% static 'Scripts/js/plugins/morris/raphael-2.1.0.min.js' %}"></script>
+<script src="{% static 'Scripts/js/plugins/morris/morris.js' %}"></script>   
 <script type="text/javascript">
   $(document).ready(function(){
       var numero1 = 6;

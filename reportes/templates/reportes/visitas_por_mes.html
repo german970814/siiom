@@ -52,7 +52,7 @@
 {% endblock %}
 
 {% block contenido %}
- <div class="container">
+<div class="container">
     <div class="card">
         <div class="card-header">
             <h1>
@@ -121,28 +121,5 @@
             
         </div>
     </div>
-    {% endif %}
 </div>
-
-
-
-
-
-
-{% endblock %}
-   <h2>{{ titulo_pag }}</h2>
-    <br />
-
-    <form id="form_visitasMes" class="alinearForm" action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="hidden" name="type" id="type" value="1">
-        <input type="submit" name="verReporte" value="Ver Reporte" class="button blue smallB">
-        <input type="submit" name="reportePDF" value="Generar PDF" class="button blue smallB">
-    </form>
-
-    {% if sw %}
-        <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_pie_sel.png" value="pie" name="pie_button" id="pie_button">
-        <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
-        <div id="out"></div>
-    {% endif %}
+{% endif %}
