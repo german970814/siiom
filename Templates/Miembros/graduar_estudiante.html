@@ -4,7 +4,9 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h1 class="f-700 f-20">Graduar Estudiante</h1>
+            <h1 class="f-700 f-20">
+                <legend><h3>Graduar Estudiante</h3></legend>
+            </h1>
             {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -18,10 +20,12 @@
             {% csrf_token %}
             <div class="card-body card-padding">
             	<div class="row">
+                    <div class="col-sm-6">
             		<p>Seleccione el miembro al que se va a lanzar</p>
             		{% if not puedeVer %}
 						<p class="error">El estudiante actual no ha cumplido con todos los m&oacute;dulos.</p>
 					{% endif %}
+                    </div>
             	</div>
                 <div class="row">
                 	<div class="col-md-4 col-md-offset-4">

@@ -6,21 +6,68 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
-		$("#id_fechaInicio").datepicker();
+		$("#id_fechaInicio").datetimepicker({
+			format: 'DD/MM/YYYY',
+			maxDate: moment(),
+		});
 	});
 </script>
 {% endblock %}
 
 {% block contenido %}
-	<h2>Matricular Estudiante</h2>
-    
-	{% if ok %}
-		<p class="ok">Se ha mariculado el estudiante correctamente. 
-        <a alt="Listar Estudiantes" href="/academia/estudiantes/{{ id }}/">(volver a la lista de estudiantes.)</a></p>
-	{% endif %}	
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{{ form.as_p }}
-	<p><input class="button blue smallB" type="submit" value="matricular" name="matricular"></p>
-	</form>
+<div class="container">
+	<div class="card">
+		<div class="card-header bgm-blue">
+			<h1>
+				<h3 style="color:#fff;">Matricular Estudiante</h3>
+			</h1>
+		</div>
+		<div class="card-body card-padding">
+			<form action="" method="POST" enctype="multipart/form-data">
+			{% if ok %}
+			<div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha mariculado el estudiante correctamente.<a alt="Listar Estudiantes" href="/academia/estudiantes/{{ id }}/">(volver a la lista de estudiantes.)</a></p>
+                </div>
+            </div>
+            {% endif %}
+			{% csrf_token %}
+				<div class="row">
+					<div class="col-md-4 col-md-offset-2">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_estudiante" class="fg-label requerido">Estudiante:</label>
+                                {{form.estudiante}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaInicio" class="fg-label requerido">Fecha Inicial:</label>
+                                {{form.fechaInicio}}
+                            </div>
+                        </div>
+                    </div>
+				</div>
+				<br>
+				<br>
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4">
+						<button name="matricular" class="btn btn-info btn-block" type="submit">
+							Matricular
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 {% endblock %}

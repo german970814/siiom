@@ -67,6 +67,8 @@ class FormularioMatricula(ModelForm):
         mLiderMaestro = CambioTipo.objects.filter(Q(nuevoTipo__nombre__iexact = 'lider') | Q(nuevoTipo__nombre__iexact = 'maestro')).values('miembro')
         mEncuentro = CumplimientoPasos.objects.filter(paso__nombre__iexact = 'encuentro').values('miembro')
         self.fields['estudiante'].queryset = Miembro.objects.filter(id__in = mEncuentro).exclude(id__in = mLiderMaestro).exclude(id__in = mCurso).exclude(grupo=None)
+        self.fields['estudiante'].widget.attrs.update({'class':'form-control selectpicker','data-live-search':'true'})
+        self.fields['fechaInicio'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Matricula
@@ -99,6 +101,10 @@ class FormularioCrearSesion(ModelForm):
         
 class FormularioRecibirPago(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self,*args,**kwargs):
+        super(FormularioRecibirPago,self).__init__(*args,**kwargs)
+        self.fields['pago'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Matricula
