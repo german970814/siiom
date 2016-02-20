@@ -70,6 +70,12 @@ class FormularioAdminAgregarMiembro(ModelForm):
         
 class FormularioLlamadaLider(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self,*args,**kwargs):
+        super(FormularioLlamadaLider,self).__init__(*args,**kwargs)
+
+        self.fields['detalleLlamadaLider'].widget.attrs.update({'class':'form-control'})
+        self.fields['observacionLlamadaLider'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Miembro

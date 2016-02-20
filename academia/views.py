@@ -285,7 +285,7 @@ def evaluarModulo(request):
        este halla asistido a todas las sesiones de dicho modulo."""
         
     if request.method == 'POST':
-        if request.session['actual'] != None:
+        if request.session.get('actual') != None:
             actual = request.session['actual'] #estudiante actual
             try:
                 reporte = Reporte.objects.get(matricula = actual, modulo = actual.moduloActual)
@@ -321,7 +321,7 @@ def evaluarModulo(request):
             else:
                 return HttpResponseRedirect("/academia/estudiantes/" + request.session['curso'] + "/")
     
-    miembro = Miembro.objects.get(usuario = request.user)                         
+    miembro = Miembro.objects.get(usuario = request.user)
     return render_to_response('Academia/evaluar_modulo.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(maestroTest, login_url="/iniciar_sesion/")
@@ -330,7 +330,7 @@ def promoverModulo(request):
        de el modulo actual en el que se encuentra."""
        
     if request.method == 'POST':
-        if request.session['actual'] != None:
+        if request.session.get('actual') != None:
             actual = request.session['actual']
             est = actual
             form = FormularioPromoverModulo(data = request.POST, instance = actual)

@@ -1,5 +1,5 @@
 from django import template
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 
 __author__ = 'Tania'
@@ -87,7 +87,7 @@ def unordered_list_grupos(value, autoescape=None):
                 sublist = '\n%s<ul>\n%s\n%s</ul>\n%s' % (indent, sublist,
                                                          indent, indent)
             output.append('%s<li><a>%s</a>%s</li>' % (indent,
-                    escaper(force_unicode(title)), sublist))
+                    escaper(force_text(title)), sublist))
             i += 1
         return '\n'.join(output)
     value, converted = convert_old_style_list(value)
