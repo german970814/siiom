@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block js %}
 <!--
 <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
@@ -54,12 +54,12 @@
     $(document).ready(function(){
 
         {% if tipo == 1 %}
-            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie_sel.png");
-            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column.png");
+            $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie_sel.png' %}");
+            $("#column_button").attr('src', "{% static 'Imagenes/chart_column.png' %}");
             $("#type").attr('value', '1');
         {% else %}
-            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column_sel.png");
-            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie.png");
+            $("#column_button").attr('src', "{% static 'Imagenes/chart_column_sel.png' %}");
+            $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie.png' %}");
             $("#type").attr('value', '2');
         {% endif %}
         $("#pie_button, #column_button").click(function(){
@@ -143,8 +143,8 @@
         </div>
         <div class="card-body card-padding">
             <div class="row">
-                <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_pie_sel.png" value="pie" name="pie_button" id="pie_button">
-                <input type="image" src="{{ MEDIA_URL }}Imagenes/chart_column.png" value="column" name="column_button" id="column_button">
+                <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
+                <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
                 <div id="out"></div>
             </div>
             

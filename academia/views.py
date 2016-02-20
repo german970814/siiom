@@ -99,7 +99,7 @@ def editarCurso(request, admin, url):
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
             cursoEditar = Curso.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = cursoEditar            
+            request.session['actual'] = cursoEditar
             request.session['seleccionados'] = request.session['seleccionados']
             if admin:
                 form = FormularioCrearCurso(instance = cursoEditar)
@@ -177,7 +177,7 @@ def maestroAsistencia(request):
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
                 data = serializers.serialize('json', sesiones)
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, conten_type="application/javascript")
         
         if 'verEstudiantes' in request.POST or 'aceptarAsistencia' in request.POST:
             try:
@@ -245,7 +245,7 @@ def maestroRegistrarEntregaTareas(request):
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
                 data = serializers.serialize('json', sesiones)
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         
         if 'verEstudiantes' in request.POST or 'aceptarTarea' in request.POST:
             try:
