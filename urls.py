@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import include, patterns
+from django.conf.urls.defaults import include, patterns, url
 from django.contrib import admin
 from grupos.views import *
 from academia.views import *
@@ -95,6 +95,7 @@ urlpatterns = patterns('',
     (r'^reportes/reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}),
     (r'^reportes/consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}),
     (r'^reportes/consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}),
+    url(r'^reportes/consultar_llamadas_lideres_visitas/$', ConsultarVisitasLlamadasLideresRed, name='visitas_llamadas_lideres'),
 )
 
 urlpatterns += patterns('',
