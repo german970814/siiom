@@ -212,7 +212,7 @@ def liderTransaldarMiembro(request):
             nombre = 'Transladar siguiente'
             return render_to_response("error.html", locals(), context_instance=RequestContext(request))
             
-    if request.session['seleccionados'] != None:
+    if request.session.get('seleccionados') != None:
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
             miembroEditar = Miembro.objects.get(id = request.session['seleccionados'].pop())

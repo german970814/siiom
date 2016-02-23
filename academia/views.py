@@ -99,7 +99,7 @@ def editarCurso(request, admin, url):
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
             cursoEditar = Curso.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = cursoEditar            
+            request.session['actual'] = cursoEditar
             request.session['seleccionados'] = request.session['seleccionados']
             if admin:
                 form = FormularioCrearCurso(instance = cursoEditar)
@@ -177,7 +177,7 @@ def maestroAsistencia(request):
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
                 data = serializers.serialize('json', sesiones)
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, conten_type="application/javascript")
         
         if 'verEstudiantes' in request.POST or 'aceptarAsistencia' in request.POST:
             try:
@@ -245,7 +245,7 @@ def maestroRegistrarEntregaTareas(request):
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
                 data = serializers.serialize('json', sesiones)
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         
         if 'verEstudiantes' in request.POST or 'aceptarTarea' in request.POST:
             try:
@@ -285,7 +285,7 @@ def evaluarModulo(request):
        este halla asistido a todas las sesiones de dicho modulo."""
         
     if request.method == 'POST':
-        if request.session['actual'] != None:
+        if request.session.get('actual') != None:
             actual = request.session['actual'] #estudiante actual
             try:
                 reporte = Reporte.objects.get(matricula = actual, modulo = actual.moduloActual)
@@ -321,7 +321,7 @@ def evaluarModulo(request):
             else:
                 return HttpResponseRedirect("/academia/estudiantes/" + request.session['curso'] + "/")
     
-    miembro = Miembro.objects.get(usuario = request.user)                         
+    miembro = Miembro.objects.get(usuario = request.user)
     return render_to_response('Academia/evaluar_modulo.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(maestroTest, login_url="/iniciar_sesion/")
@@ -330,7 +330,7 @@ def promoverModulo(request):
        de el modulo actual en el que se encuentra."""
        
     if request.method == 'POST':
-        if request.session['actual'] != None:
+        if request.session.get('actual') != None:
             actual = request.session['actual']
             est = actual
             form = FormularioPromoverModulo(data = request.POST, instance = actual)

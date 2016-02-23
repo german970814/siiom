@@ -87,6 +87,7 @@ USE_L10N = True
 
 USE_TZ = False
 
+STATIC_URL = '/static/'
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'static').replace('\\','/')
@@ -99,7 +100,6 @@ MEDIA_URL = '/site_media/'#'http://localhost:8000/static/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static'))
 
@@ -119,7 +119,7 @@ AUTH_PROFILE_MODULE = 'miembros.Miembro'
 TEMPLATES = [
   {
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [os.path.join(BASE_DIR,"templates"),],
+    'DIRS': [os.path.join(BASE_DIR,'templates'),],
     'APP_DIRS': True,
     'OPTIONS': {
       'context_processors': [
@@ -131,8 +131,6 @@ TEMPLATES = [
     },
   },
 ]
-
-
 
 EMAIL_HOST = 'smtp.webfaction.com'
 EMAIL_HOST_PASSWORD = '46ea33cd'

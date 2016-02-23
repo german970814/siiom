@@ -1,17 +1,28 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-	 {% if visitantes %}
-	<div class="notificaciones">
-		<ul>
-		{% for visita in visitantes %}
-			<li>Llamada pendiente al visitante {{visita.nombre|capfirst}} {{visita.primerApellido|capfirst}} para informarle de las reuniones de G.A.R <span class="bold"><a href="/miembro/registrar_llamada/lider/">Registrar Llamada</a></span></li>
-		{% endfor %}
-		</ul>
+<div class="container">
+	{% if visitantes %}
+	<div class="card">
+		<div class="card-header">
+			<h1>
+				<legend><h3>Notificaciones</h3></legend>
+			</h1>
+		</div>
+		<div class="card-body card-padding">
+			<div class="row">
+			{% for visita in visitantes %}
+	            <div class="alert bgm-cyan" role="alert">
+	                <p  class="f-15" style="color:#fff;">Llamada pendiente al visitante {{visita.nombre|capfirst}} {{visita.primerApellido|capfirst}} para informarle de las reuniones de G.A.R <a style="color: #fff;" alt="Listar Redes" class="alert-link f-700" href="/miembro/registrar_llamada/lider/">Registrar Llamada</a></p>
+	            </div>
+	        {% endfor %}
+	    	</div>
+		</div>
 	</div>
 	{% endif %}
 	{% if perms.custom_perm %} 
 	 	do something 
 	{% endif %} 
+</div>
 {% endblock %} 
 

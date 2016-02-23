@@ -60,7 +60,7 @@ def visitasAsignadasRedes(request):
 
             if 'reportePDF' in request.POST:
                 values.append(['Total', total])
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
                 return response
@@ -112,7 +112,7 @@ def asignacionGAR(request):
 
             if 'reportePDF' in request.POST:
                 values.append(['Total', total])
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
                 return response
@@ -160,7 +160,7 @@ def detalleLlamada(request, llamada):
 
             if 'reportePDF' in request.POST:
                 values.append(['Total', total])
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
                 return response
@@ -183,9 +183,9 @@ def visitasPorMes(request, por_red):
         titulo_pag = 'Visitas registradas por mes'
     if request.method == 'POST':
         if por_red:
-            form = FormularioVisitasRedPorMes(request.POST)
+            form = FormularioVisitasRedPorMes(request.POST or None)
         else:
-            form = FormularioVisitasPorMes(request.POST)
+            form = FormularioVisitasPorMes(request.POST or None)
         if form.is_valid():
             ano = int(form.cleaned_data['ano'])
             meses = request.POST.getlist('meses')
@@ -218,7 +218,7 @@ def visitasPorMes(request, por_red):
 
             if 'reportePDF' in request.POST:
                 values.append(['Total', total])
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
                 return response
@@ -319,7 +319,7 @@ def pasosPorMiembros(request):
             grupo_i = Grupo.objects.get(id = request.POST['id'])
             lider_i = Miembro.objects.get(id = grupo_i.listaLideres()[0])
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
 
         if 'verReporte' in request.POST:
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
@@ -369,7 +369,7 @@ def PasosTotales(request):
             grupo_i = Grupo.objects.get(id = request.POST['id'])
             lider_i = Miembro.objects.get(id = grupo_i.listaLideres()[0])
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         else:
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
             opciones = {'gi': capitalize(grupo_i.nombre)}
@@ -407,7 +407,7 @@ def PasosTotales(request):
             
             if 'reportePDF' in request.POST:
                 values.append(['Total', total])
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, 'Numero de miembros por pasos', opciones, values, tipo, True)
                 return response
@@ -435,7 +435,7 @@ def PasosRangoFecha(request):
             grupo_i = Grupo.objects.get(id = request.POST['id'])
             lider_i = Miembro.objects.get(id = grupo_i.listaLideres()[0])
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         else:
             form = FormularioRangoFechas(request.POST)
             if form.is_valid():
@@ -474,7 +474,7 @@ def PasosRangoFecha(request):
 
                 if 'reportePDF' in request.POST:
                     values.append(['Total', total])
-                    response = HttpResponse(mimetype='application/pdf')
+                    response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
                     PdfTemplate(response, 'Numero de miembros por pasos en un rango de fecha', opciones, values, tipo, True)
                     return response
@@ -508,7 +508,7 @@ def estadisticoReunionesGar(request):
             grupo_i = Grupo.objects.get(id = request.POST['id'])
             lider_i = Miembro.objects.get(id = grupo_i.listaLideres()[0])
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         else:
             form = FormularioRangoFechas(request.POST)
             if form.is_valid():
@@ -578,7 +578,7 @@ def estadisticoReunionesGar(request):
                         if sig >= fechaf:
                             sw_while = False
 
-                    response = HttpResponse(mimetype='application/pdf')
+                    response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
                     PdfTemplate(response, 'Estadistico de reuniones GAR', opciones, values_g, 3, tabla=values)
                     return response
@@ -674,7 +674,7 @@ def estadisticoReunionesDiscipulado(request):
             grupo_i = Grupo.objects.get(id = request.POST['id'])
             lider_i = Miembro.objects.get(id = grupo_i.listaLideres()[0])
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, mimetype="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         else:
             # form = FormularioRangoFechas(request.POST)
             form = FormularioPredicas(miembro=miembro, data=request.POST)
@@ -743,7 +743,7 @@ def estadisticoReunionesDiscipulado(request):
                     #     sw_while = False
                 # print l
                 if 'reportePDF' in request.POST:
-                    response = HttpResponse(mimetype='application/pdf')
+                    response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
                     PdfTemplate(response, 'Estadistico de reuniones Discipulado', opciones, values, 2)
                     return response
@@ -840,7 +840,7 @@ def estadisticoTotalizadoReunionesGar(request):
                     sw_while = False
 
             if 'reportePDF' in request.POST:
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, 'Estadistico de reuniones GAR totalizadas por discipulo', opciones, values, 2)
                 return response
@@ -925,7 +925,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
 
             print('------------ ' + str(values))
             if 'reportePDF' in request.POST:
-                response = HttpResponse(mimetype='application/pdf')
+                response = HttpResponse(content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
                 PdfTemplate(response, 'Estadistico de reuniones Discipulado totalizadas por discipulo', opciones, values, 2)
                 return response

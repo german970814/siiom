@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -8,21 +9,21 @@
     <title>Casa del Rey - Login</title>
     
     <!-- Vendor CSS -->
-    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/animate.css/animate.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css" rel="stylesheet">
+    <link href="{% static 'Template/jquery/vendors/bower_components/animate.css/animate.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css' %}" rel="stylesheet">
+    <link href="{% static 'Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css' %}" rel="stylesheet">
+    <link href="{% static 'Template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css' %}" rel="stylesheet">
         
     <!-- CSS -->
-    <link href="{{ MEDIA_URL }}Template/jquery/css/app.min.1.css" rel="stylesheet">
-    <link href="{{ MEDIA_URL }}Template/jquery/css/app.min.2.css" rel="stylesheet">
+    <link href="{% static 'Template/jquery/css/app.min.1.css' %}" rel="stylesheet">
+    <link href="{% static 'Template/jquery/css/app.min.2.css' %}" rel="stylesheet">
 </head>
 
 <body class="login-content">
     <!-- Login -->
     <form action="/iniciar_sesion/" method="POST">
     {% csrf_token %}
-        <div class="lc-block toggled" id="l-login">
+        <div class="lc-block toggled" style="padding:100px 40px 70px !important;" id="l-login">
             <div class="input-group m-b-20">
                 <span class="input-group-addon"><i class="zmdi zmdi-account"></i></span>
                 <div class="fg-line">
@@ -51,8 +52,8 @@
             <input type="hidden" name="next" value="{{ next|escape }}" />
             
             <ul class="login-navigation">
-                <li style="padidng:10px !important;" data-block="#l-register" class="bgm-red">Registrarse</li>
-                <li style="padidng:10px !important;" data-block="#l-forget-password" class="bgm-orange">Olvide mi Contraseña</li>
+                <li style="padidng:10px !important;" data-block="#" class="bgm-red">Registrarse</li>
+                <li style="padidng:10px !important;" data-block="#" class="bgm-orange">Olvide mi Contraseña</li>
             </ul>
         </div>
     </form>
@@ -70,11 +71,11 @@
     {% endif %}
 
     <!-- Javascript Libraries -->
-    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/Waves/dist/waves.min.js"></script>
-    <script src="{{ MEDIA_URL }}Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js"></script>
-    <script src="{{ MEDIA_URL }}Template/jquery/js/functions.js"></script>
+    <script src="{% static 'Template/jquery/vendors/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'Template/jquery/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'Template/jquery/vendors/bower_components/Waves/dist/waves.min.js' %}"></script>
+    <script src="{% static 'Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js' %}"></script>
+    <script src="{% static 'Template/jquery/js/functions.js' %}"></script>
     
 </body>
 </html>

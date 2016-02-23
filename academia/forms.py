@@ -11,6 +11,11 @@ from miembros.models import Miembro, CambioTipo, CumplimientoPasos
 class FormularioEvaluarModulo(ModelForm):
     required_css_class = 'requerido'
     
+    def __init__(self,*args,**kwargs):
+        super(FormularioEvaluarModulo,self).__init__(*args,**kwargs)
+
+        self.fields['nota'].widget.attrs.update({'class':'form-control'})
+
     class Meta:
         model = Reporte
         fields = ('nota', )
@@ -20,6 +25,8 @@ class FormularioPromoverModulo(ModelForm):
     
     def __init__(self, est = '', *args, **kwargs):
         super (FormularioPromoverModulo, self ).__init__(*args,**kwargs) # populates the post
+        self.fields['moduloActual'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
+
         if est != '':
             modEst = est.modulos.all()
             if est.moduloActual:

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block js %}
-<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
+<!-- <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script> -->
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fechaAsignacionGAR").datepicker();
@@ -12,18 +12,100 @@
 {% endblock %}
 
 {% block contenido %}
-	<h2>Registrar Llamada {{tipo|capfirst}}</h2>		
-	<form class="alinearForm" action="" method="POST" enctype="multipart/form-data" >
-		{% csrf_token %}
-		{% if tipo == 'primera' %}
-            <p><label>Miembro ingreso:</label>{{ miembroIngreso.nombre|capfirst }} {{miembroIngreso.primerApellido|capfirst}} {{miembroIngreso.segundoApellido|capfirst}} ({{ gMiembroIngreso.nombre }})</p>
-        {% endif %}
-        <p><label>Miembro:</label>{{miembroLlamar.nombre|capfirst}} {{miembroLlamar.primerApellido|capfirst}} {{miembroLlamar.segundoApellido|capfirst}}</p>
-		<p><label>Telefono:</label> {{miembroLlamar.telefono}}</p>
-		<p><label>Celular:</label> {{miembroLlamar.celular}}</p> 
-		{{ form.as_p }}	
-	<button class="button blue smallB" type="submit" value="aceptar" name="aceptar">Aceptar</button>
-	</form>	
+<div class="container">
+	<div class="card">
+		<div class="card-header bgm-blue">
+			<h1>
+				<h3 style="color:#fff;">Registrar Llamada {{tipo|capfirst}}</h3>
+			</h1>
+		</div>
+		<div class="card-body card-padding">
+			<form action="" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			{% if tipo == 'primera' %}
+			<div class="row">
+				<div class="col-md-12">
+					<div class="">
+						<h4>Miembro ingreso: {{ miembroIngreso.nombre|capfirst }} {{miembroIngreso.primerApellido|capfirst}} {{miembroIngreso.segundoApellido|capfirst}} ({{ gMiembroIngreso.nombre }})</h4>
+					</div>
+				</div>
+			</div>
+        	{% endif %}
+			<div class="row">
+				<div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="zmdi zmdi-layers"></i>
+                        </span>
+                        <div class="fg-line requerido">
+                            <label for="id_moduloActual" class="fg-label requerido">Miembro:</label>
+                            <p>{{miembroLlamar.nombre|capfirst}} {{miembroLlamar.primerApellido|capfirst}} {{miembroLlamar.segundoApellido|capfirst}}</p>
+                        </div>
+                    </div>
+                </div>
+				<div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="zmdi zmdi-phone"></i>
+                        </span>
+                        <div class="fg-line requerido">
+                            <label for="id_moduloActual" class="fg-label requerido">Telefono:</label>
+                            <p>{{miembroLlamar.telefono}}</p>
+                        </div>
+                    </div>
+                </div>
+				<div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="zmdi zmdi-smartphone-iphone"></i>
+                        </span>
+                        <div class="fg-line requerido">
+                            <label for="id_moduloActual" class="fg-label requerido">Celular:</label>
+							<p>{{miembroLlamar.celular}}</p> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div class="row">
+	            <div class="col-md-4">
+	                    <div class="input-group">
+	                        <span class="input-group-addon">
+	                            <i class="zmdi zmdi-comment"></i>
+	                        </span>
+	                        <div class="fg-line requerido">
+	                            <label for="id_detalleLlamadaLider" class="fg-label requerido">Detalle Llamada de Lider:</label>
+	                            <p>{{form.detalleLlamadaLider}}</p>
+	                        </div>
+	                    </div>
+	                </div>
+					<div class="col-md-4">
+	                    <div class="input-group">
+	                        <span class="input-group-addon">
+	                            <i class="zmdi zmdi-star"></i>
+	                        </span>
+	                        <div class="fg-line requerido">
+	                            <label for="id_observacionLlamadaLider" class="fg-label requerido">Observacion de Llamada Lider:</label>
+								<p>{{form.observacionLlamadaLider}}</p> 
+	                        </div>
+	                    </div>
+	                </div>
+				</div>
+			<br>
+			<br>
+			<div class="row">
+				<div class="col-md-4 col-md-offset-4">
+					<button name="aceptar" class="btn btn-info btn-block" type="submit">
+						Aceptar
+					</button>
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>
+</div>
+	
 	
 {% endblock %}  
-
+		{{ form.as_p }}	
