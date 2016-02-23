@@ -58,19 +58,20 @@
             <table id="data-table-command" class="table table-striped table-vmiddle">
                 <thead>
                     <tr>
+                        <th data-visible="false" data-identifier="true" data-column-id="id"></th>
                         <th data-column-id="nombre" data-identifier="true">Nombre</th>
-                        <th data-visible="false" data-column-id="id"></th>
                         <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for modulo in modulos %}
 						<tr>
-							<td><a alt="Ver Sesiones" href="/academia/sesiones/{{modulo.id}}/">{{modulo.nombre|capfirst}}</a></td>
 							<td class="hidden">{{modulo.id}}</td>
+                            <td><a alt="Ver Sesiones" href="/academia/sesiones/{{modulo.id}}/">{{modulo.nombre|capfirst}}</a></td>
 						</tr>
 	                {% empty %}
 	                	<tr>
+                            <td></td>
 	                    	<td colspan="2" class="centrarTexto">No existen modulos a&uacute;n.</td>
 	                    </tr>
 					{% endfor %}

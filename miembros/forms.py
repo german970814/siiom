@@ -119,7 +119,7 @@ class FormularioCrearZona(ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormularioCrearZona,self).__init__(*args,**kwargs)
 
-        self.fields['nombre'].widget.attrs.update({'class':'form-control input-lg'})
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Zona
@@ -155,6 +155,12 @@ class FormularioCumplimientoPasosMiembro(ModelForm):
         
 class FormularioPasos(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self, *args, **kwargs):
+        super (FormularioPasos, self ).__init__(*args,**kwargs)
+        
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['prioridad'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Pasos
@@ -166,7 +172,7 @@ class FormularioCrearEscalafon(ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormularioCrearEscalafon,self).__init__(*args,**kwargs)
 
-        self.fields['celulas'].widget.attrs.update({'class':'form-control input-lg'})
+        self.fields['celulas'].widget.attrs.update({'class':'form-control'})
         self.fields['descripcion'].widget.attrs.update({'class':'form-control', 'placeholder':'Descripción...'})
         self.fields['logro'].widget.attrs.update({'class':'form-control','placeholder':'Logros...'})
         self.fields['rango'].widget.attrs.update({'class':'form-control'})
@@ -189,6 +195,9 @@ class FormularioPromoverEscalafon(ModelForm):
         
 class FormularioCrearTipoMiembro(ModelForm):
     required_css_class = 'requerido'
+    def __init__(self, *args, **kwargs):
+        super (FormularioCrearTipoMiembro, self).__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
     
     class Meta:
         model = TipoMiembro
@@ -227,6 +236,11 @@ class FormularioAsignarUsuario(forms.Form):
 class FormularioDetalleLlamada(ModelForm):
     required_css_class = 'requerido'
     
+    def __init__(self, *args, **kwargs):
+        super (FormularioDetalleLlamada, self).__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['descripcion'].widget.attrs.update({'class': 'form-control'})
+
     class Meta:
         model = DetalleLlamada
         fields = '__all__'

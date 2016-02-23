@@ -23,10 +23,7 @@ def eliminar(modelo, lista):
         ok = 1 #Los borro todos
         for e in lista:
             try:
-                if type(e) == int:
-                    modelo.objects.get(id=e).delete()
-                else:
-                    modelo.objects.get(nombre__iexact=e).delete()
+                modelo.objects.get(id=e).delete()
             except:
                 ok = 2 #Hubo un error
     return ok

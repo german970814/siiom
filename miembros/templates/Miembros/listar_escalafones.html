@@ -57,25 +57,26 @@
             <table id="data-table-command" class="table table-striped table-vmiddle">
                 <thead>
                     <tr>
+                        <th data-visible="false" data-column-id="id" data-identifier="true"></th>
                         <th data-column-id="rango" data-identifier="true">Rango</th>
                         <th data-column-id="celulas" data-identifier="true">Células</th>
                         <th data-column-id="descripcion" data-identifier="true">Descripción</th>
                         <th data-column-id="logro" data-identifier="true">Logro</th>
-                        <th data-visible="false" data-column-id="id"></th>
                         <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for escalafon in escalafones %}
 						<tr>
-							<td>{{escalafon.rango|capfirst}}</td>
-							<td>{{escalafon.celulas|capfirst}}</td>
-							<td>{{escalafon.descripcion|capfirst}}</td>
-							<td>{{escalafon.logro|capfirst}}</td>
 							<td class="hidden">{{escalafon.id}}</td>
+                            <td>{{escalafon.rango|capfirst}}</td>
+                            <td>{{escalafon.celulas|capfirst}}</td>
+                            <td>{{escalafon.descripcion|capfirst}}</td>
+                            <td>{{escalafon.logro|capfirst}}</td>
 						</tr>
 	                {% empty %}
 	                	<tr>
+                            <td></td>
 	                    	<td colspan="2" class="centrarTexto">No existen escalafones a&uacute;n.</td>
 	                    </tr>
 					{% endfor %}

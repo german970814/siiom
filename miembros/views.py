@@ -21,11 +21,7 @@ def eliminar(modelo, lista):
         ok = 1 #Los borro todos
         for e in lista:
             try:
-                if type(e) == int:
-                    modelo.objects.get(id=e).delete()
-                else:
-                    modelo.objects.get(nombre__iexact=e).delete()
-
+                modelo.objects.get(id=e).delete()
             except:
                 ok = 2 #Hubo un error
     return ok
@@ -538,16 +534,14 @@ def editarZona(request, pk):
         form = FormularioCrearZona(instance=zona)
         return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
-    # return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
-    return HttpResponseRedirect("/miembro/listar_zonas")
+    return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+    # return HttpResponseRedirect("/miembro/listar_zonas")
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarZonas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/editar_zona/')    
+
         if 'eliminar' in request.POST:
             okElim = eliminar(Zona, request.POST.getlist('seleccionados'))
     zonas = list(Zona.objects.all())
@@ -646,37 +640,34 @@ def  listarPasos(request):
     """
     miembro = Miembro.objects.get(usuario=request.user)    
     if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/editar_paso/')
+
         if 'eliminar' in request.POST:
             okElim = eliminar(Pasos, request.POST.getlist('seleccionados'))
     pasos = Pasos.objects.all().order_by("prioridad")
     return render_to_response('Miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarPaso(request):
+def editarPaso(request, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)    
-    if request.method == "POST":
-        paso = request.session['actual']
-        form = FormularioPasos(data=request.POST, instance=paso)
+
+    try:
+        paso = Pasos.objects.get(pk=pk)
+    except Pasos.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioPasos(request.POST or None, instance=paso)
+
         if form.is_valid():
-            pasoActualizado = form.save()
             ok = True
-            
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            paso = Pasos.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = paso
-            form = FormularioPasos(instance=paso)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/miembro/listar_pasos/')
+            form.save()
+
     else:
-        return HttpResponseRedirect('/miembro/listar_pasos/')
+        form = FormularioPasos(instance=paso)
+        return render_to_response("Miembros/agregar_paso.html",locals(),context_instance=RequestContext(request))
+
+    # return HttpResponseRedirect("/miembro/listar_pasos/")
+    return render_to_response("Miembros/agregar_paso.html",locals(),context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarEscalafones(request):
@@ -684,24 +675,10 @@ def listarEscalafones(request):
         Muestra la lista de escalafones ya creados ordenado por el número de/
         células
     """
-    def eliminarEscalafon(modelo, lista):
-        ok = 0
-        if lista:
-            ok = 1
-            for e in lista:
-                try:
-                    if type(e) == int:
-                        modelo.objects.get(id=e).delete()
-                    else:
-                        modelo.objects.get(rango__iexact=e).delete()
-
-                except:
-                    ok = 2
-        return ok
 
     if request.method == 'POST':
         if 'eliminar' in request.POST:
-            okElim = eliminarEscalafon(Escalafon, request.POST.getlist('seleccionados'))
+            okElim = eliminar(Escalafon, request.POST.getlist('seleccionados'))
 
     escalafones = list(Escalafon.objects.all().order_by('celulas'))
     return render_to_response('Miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
@@ -742,7 +719,8 @@ def editarEscalafon(request, pk):
         form = FormularioCrearEscalafon(instance=escalafon)
         return render_to_response("Miembros/crear_escalafon.html",locals(),context_instance=RequestContext(request))
 
-    return HttpResponseRedirect("/miembro/listar_escalafones/")
+    # return HttpResponseRedirect("/miembro/listar_escalafones/")
+    return render_to_response("Miembros/crear_escalafon.html",locals(),context_instance=RequestContext(request))
 
     
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
@@ -788,28 +766,28 @@ def listarTipoMiembro(request):
     return render_to_response('Miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarTipoMiembro(request):
+def editarTipoMiembro(request, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)    
-    if request.method == "POST":
-        tipo = request.session['actual']
-        form = FormularioCrearTipoMiembro(data=request.POST, instance=tipo)
+
+    try:
+        tipo = TipoMiembro.objects.get(pk=pk)
+    except TipoMiembro.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioCrearTipoMiembro(request.POST or None, instance=tipo)
+
         if form.is_valid():
-            nuevoTipo = form.save()
             ok = True
-            
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            tipo = TipoMiembro.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = tipo
-            form = FormularioCrearTipoMiembro(instance=tipo)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/miembro/listar_tipo_miembro/')
+            form.save()
+
     else:
-        return HttpResponseRedirect('/miembro/listar_tipo_miembro/')
+        form = FormularioCrearTipoMiembro(instance=tipo)
+        return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+
+    # return HttpResponseRedirect("/miembro/listar_tipo_miembro/")
+    return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+
     
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def cambiarMiembroDeTipoMiembro(request, id):
@@ -1001,39 +979,39 @@ def AgregarDetalleLlamada(request):
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarDetallesLlamada(request):
-    miembro = Miembro.objects.get(usuario=request.user)    
+    miembro = Miembro.objects.get(usuario=request.user)  
+
     if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/editar_detalle_llamada/')
+
         if 'eliminar' in request.POST:
+            print(request.POST.getlist('seleccionados'))
             okElim = eliminar(DetalleLlamada, request.POST.getlist('seleccionados'))
+
     detallesLlamada = list(DetalleLlamada.objects.all())
+
     return render_to_response('Miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarDetalleLlamada(request):
+def editarDetalleLlamada(request, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        detalle = request.session['actual']
-        form = FormularioDetalleLlamada(data=request.POST, instance=detalle)
+
+    try:
+        detalle = DetalleLlamada.objects.get(pk=pk)
+    except DetalleLlamada.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioDetalleLlamada(request.POST or None, instance=detalle)
+
         if form.is_valid():
-            nuevoDetalle = form.save()
             ok = True
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            detalle = DetalleLlamada.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = detalle
-            form = FormularioDetalleLlamada(instance=detalle)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/miembro/agregar_detalle_llamada/')
+            form.save()
     else:
-        return HttpResponseRedirect('/miembro/detalles_llamada/')
+        form = FormularioDetalleLlamada(instance=detalle)
+        return render_to_response("Miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
+
+    return render_to_response("Miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
+
 
 @user_passes_test(cumplimientoPasosTest, login_url="/iniciar_sesion/")
 def cumplimientoPasos(request):
