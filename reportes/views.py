@@ -873,7 +873,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
             discipulos = Miembro.objects.get(id = grupo_i.listaLideres()[0]).discipulos()
             grupoDis = Grupo.objects.filter(Q(lider1__in = discipulos) | Q(lider2__in = discipulos))
-            opciones = {'predica': capitalize(predica.nombre), 'gi': capitalize(grupo_i.nombre)}
+            opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
             sw = True
 
             n = ['Predica']
