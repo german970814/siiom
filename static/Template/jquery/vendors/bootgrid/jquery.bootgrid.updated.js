@@ -1292,12 +1292,12 @@
          * @for defaults
          **/
         labels: {
-            all: "All",
-            infos: "Showing {{ctx.start}} to {{ctx.end}} of {{ctx.total}} entries",
-            loading: "Loading...",
-            noResults: "No results found!",
-            refresh: "Refresh",
-            search: "Search"
+            all: "Todos",
+            infos: "Mostrando {{ctx.start}} de {{ctx.total}} entradas",
+            loading: "Cargando...",
+            noResults: "No se encontraron resultados!",
+            refresh: "Refrescar",
+            search: "Buscar..."
         },
 
         /**
@@ -1373,7 +1373,7 @@
             rawHeaderCell: "<th class=\"{{ctx.css}}\">{{ctx.content}}</th>", // Used for the multi select box
             row: "<tr{{ctx.attr}}>{{ctx.cells}}</tr>",
             search: "<div class=\"{{css.search}}\"><div class=\"input-group\"><span class=\"{{css.icon}} input-group-addon {{css.iconSearch}}\"></span> <input type=\"text\" class=\"{{css.searchField}}\" placeholder=\"{{lbl.search}}\" /></div></div>",
-            select: "<div class=\"checkbox\"><label><input name=\"select\" type=\"{{ctx.type}}\" class=\"{{css.selectBox}}\" value=\"{{ctx.value}}\" {{ctx.checked}} /><i class=\"input-helper\"></i></label></div>"
+            select: "<div class=\"checkbox\"><label><input name=\"seleccionados\" type=\"{{ctx.type}}\" class=\"{{css.selectBox}}\" value=\"{{ctx.value}}\" {{ctx.checked}} /><i class=\"input-helper\"></i></label></div>"
         }
     };
 

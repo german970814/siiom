@@ -116,6 +116,10 @@ class FormularioAsignarGrupo(ModelForm):
         
 class FormularioCrearZona(ModelForm):
     required_css_class = 'requerido'
+    def __init__(self, *args, **kwargs):
+        super(FormularioCrearZona,self).__init__(*args,**kwargs)
+
+        self.fields['nombre'].widget.attrs.update({'class':'form-control input-lg'})
     
     class Meta:
         model = Zona
@@ -159,6 +163,14 @@ class FormularioPasos(ModelForm):
 class FormularioCrearEscalafon(ModelForm):
     required_css_class = 'requerido'
     
+    def __init__(self, *args, **kwargs):
+        super(FormularioCrearEscalafon,self).__init__(*args,**kwargs)
+
+        self.fields['celulas'].widget.attrs.update({'class':'form-control input-lg'})
+        self.fields['descripcion'].widget.attrs.update({'class':'form-control', 'placeholder':'Descripción...'})
+        self.fields['logro'].widget.attrs.update({'class':'form-control','placeholder':'Logros...'})
+        self.fields['rango'].widget.attrs.update({'class':'form-control'})
+
     class Meta:
         model = Escalafon
         fields = '__all__'

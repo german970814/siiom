@@ -19,7 +19,7 @@
                                 <i class="zmdi zmdi-unfold-more"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <input type="number" id="id_celulas" name="celulas" class="form-control input-lg">
+                                {{form.celulas}}
                                 <label for="id_celulas" class="fg-label requerido">Celulas:</label>
                             </div>
                         </div>
@@ -30,7 +30,7 @@
                                 <i class="zmdi zmdi-transform"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <input type="text" id="id_rango" name="rango" class="form-control input-lg">
+                                {{form.rango}}
                                 <label for="id_rango" class="fg-label requerido">Rango:</label>
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                             <p class="c-black f-500 m-b-20">Descripcion:</p>
                             <div class="form-group">
                                 <div class="fg-line requerido">
-                                    <textarea class="form-control" name="descripcion" id="id_descripcion" rows="5" placeholder="Descripción..."></textarea>
+                                    {{form.descripcion}}
                                 </div>
                             </div>
                         </div>
@@ -54,7 +54,7 @@
                             <p class="c-black f-500 m-b-20">Logro:</p>
                             <div class="form-group">
                                 <div class="fg-line requerido">
-                                    <textarea class="form-control" name="logro" id="id_logro" rows="5" placeholder="Logros..."></textarea>
+                                    {{form.logro}}
                                 </div>
                             </div>
                         </div>

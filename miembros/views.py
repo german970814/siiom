@@ -21,7 +21,11 @@ def eliminar(modelo, lista):
         ok = 1 #Los borro todos
         for e in lista:
             try:
-                modelo.objects.get(id=e).delete()
+                if type(e) == int:
+                    modelo.objects.get(id=e).delete()
+                else:
+                    modelo.objects.get(nombre__iexact=e).delete()
+
             except:
                 ok = 2 #Hubo un error
     return ok
@@ -104,7 +108,7 @@ def miembroInicio(request):
                     visitantes.append(ct.miembro)
     else:
         visitantes = []
-    request.session['visitantes'] = visitantes
+    # request.session['visitantes'] = visitantes
     if request.user.has_perm("miembros.es_administrador"):
         return HttpResponseRedirect ("/administracion/")  
     return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
@@ -513,27 +517,29 @@ def crearZona(request):
     return render_to_response('Miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
         
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarZona(request):
+def editarZona(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        zona = request.session['actual']
-        form = FormularioCrearZona(data=request.POST, instance=zona)
+
+    try:
+        zona = Zona.objects.get(pk=pk)
+    except Zona.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioCrearZona(request.POST or None, instance=zona)
+
         if form.is_valid():
-            nuevaZona = form.save()
             ok = True
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            zona = Zona.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = zona
-            form = FormularioCrearZona(instance=zona)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/miembro/listar_zonas/')
+            form.save()
+
     else:
-        return HttpResponseRedirect('/miembro/listar_zonas/')
+        print(zona)
+        form = FormularioCrearZona(instance=zona)
+        return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+
+    # return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+    return HttpResponseRedirect("/miembro/listar_zonas")
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarZonas(request):
@@ -678,15 +684,28 @@ def listarEscalafones(request):
         Muestra la lista de escalafones ya creados ordenado por el número de/
         células
     """
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/editar_escalafon/')  
+    def eliminarEscalafon(modelo, lista):
+        ok = 0
+        if lista:
+            ok = 1
+            for e in lista:
+                try:
+                    if type(e) == int:
+                        modelo.objects.get(id=e).delete()
+                    else:
+                        modelo.objects.get(rango__iexact=e).delete()
+
+                except:
+                    ok = 2
+        return ok
+
+    if request.method == 'POST':
         if 'eliminar' in request.POST:
-            okElim = eliminar(Escalafon, request.POST.getlist('seleccionados'))  
+            okElim = eliminarEscalafon(Escalafon, request.POST.getlist('seleccionados'))
+
     escalafones = list(Escalafon.objects.all().order_by('celulas'))
     return render_to_response('Miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
+
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def crearEscalafon(request):
@@ -705,28 +724,26 @@ def crearEscalafon(request):
     return render_to_response('Miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarEscalafon(request):
+def editarEscalafon(request, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        escalafon = request.session['actual']
-        form = FormularioCrearEscalafon(data=request.POST, instance=escalafon)
+
+    try:
+        escalafon = Escalafon.objects.get(pk=pk)
+    except Escalafon.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioCrearEscalafon(request.POST or None, instance=escalafon)
+
         if form.is_valid():
-            nuevoEscalafon = form.save()
-            ok = True
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            escalafon = Escalafon.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = escalafon
-            form = FormularioCrearEscalafon(instance=escalafon)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/miembro/listar_escalafones/')
+            form.save()
+
     else:
-        return HttpResponseRedirect('/miembro/listar_escalafones/')
+        form = FormularioCrearEscalafon(instance=escalafon)
+        return render_to_response("Miembros/crear_escalafon.html",locals(),context_instance=RequestContext(request))
+
+    return HttpResponseRedirect("/miembro/listar_escalafones/")
+
     
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def promoverMiembroEscalafon(request):
@@ -966,7 +983,7 @@ def administracion(request):
     totalCursos = Curso.objects.all().count()
     totalCursosA = Curso.objects.filter(estado='A').count()
     totalCursosC = Curso.objects.filter(estado='C').count()
-    visitantes = request.session['visitantes']
+    # visitantes = request.session['visitantes']
     return render_to_response('Miembros/administracion.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")

@@ -60,10 +60,24 @@ class FormularioCrearCurso(ModelForm):
 
 class FormularioEditarCurso(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self,*args,**kwargs):
+        super(FormularioEditarCurso,self).__init__(*args,**kwargs)
+
+        self.fields['nombre'].widget.attrs.update({'disabled':'', 'class':'form-control'})
+        self.fields['estado'].widget.attrs.update({'disabled':'', 'class':'form-control'})
+        self.fields['modulos'].widget.attrs.update({'disabled':'', 'class':'selectpicker'})
+        self.fields['red'].widget.attrs.update({'disabled':'', 'class':'form-control'})
+        self.fields['profesor'].widget.attrs.update({'disabled':'', 'class':'form-control'})
+        self.fields['material'].widget.attrs.update({'disabled':'', 'class':'form-control'})
+        self.fields['dia'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['hora'].widget.attrs.update({'class':'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Curso
-        fields = ('direccion', 'dia', 'hora')
+        # fields = ('direccion', 'dia', 'hora')
+        fields = '__all__'
 
 class FormularioMatricula(ModelForm):
     required_css_class = 'requerido'
