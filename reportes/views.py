@@ -515,7 +515,7 @@ def estadisticoReunionesGar(request):
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
-                opciones = {'fi': fechai, 'ff': fechaf, 'gi': capitalize(grupo_i.nombre)}
+                opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
                 sw = True
 
                 if 'descendientes' in request.POST and request.POST['descendientes']=='S':
@@ -524,7 +524,7 @@ def estadisticoReunionesGar(request):
                     grupos = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                 else:
                     grupo_f = Grupo.objects.get(id = request.POST['menuGrupo_f'])
-                    opciones['gf'] = capitalize(grupo_f.nombre)
+                    opciones['gf'] = grupo_f.nombre.capitalize()
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 

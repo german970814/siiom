@@ -1293,7 +1293,7 @@
          **/
         labels: {
             all: "Todos",
-            infos: "Mostrando {{ctx.start}} de {{ctx.total}} entradas",
+            infos: "Mostrando {{ctx.end}} de {{ctx.total}} entradas",
             loading: "Cargando...",
             noResults: "No se encontraron resultados!",
             refresh: "Refrescar",
