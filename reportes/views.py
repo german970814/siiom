@@ -15,7 +15,8 @@ from django.utils.datetime_safe import strftime
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from reportes.charts import PdfTemplate
-from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes
+from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, \
+    FormularioCumplimientoLlamadasLideres
 from reportes.forms import FormularioReportesSinEnviar, FormularioPredicas
 
 
@@ -1153,11 +1154,20 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
 
 
 @user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
-def ConsultarVisitasLlamadasLideresRed(request):
-    """Permite a un administrador y a un agente listar los lideres que tienen visitas asignadas y las llamadas
-     realizadas en un rango de fecha y red especificada."""
+def cumplimiento_llamadas_lideres_red(request):
+    """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
+    personas asignadas a su grupo dentro de un rango de fechas especificado."""
 
-    return render_to_response('reportes/llamadas_lideres_visitas.html', {}, context_instance=RequestContext(request))
+    if request.method == 'POST':
+        form = FormularioCumplimientoLlamadasLideres(data=request.POST)
+
+        if form.is_valid():
+            grupos = form.obtener_grupos()
+    else:
+        form = FormularioCumplimientoLlamadasLideres()
+
+    data = {'form': form, 'grupos': grupos}
+    return render_to_response('reportes/llamadas_lideres_visitas.html', data, context_instance=RequestContext(request))
 
 
 def sendMail(camposMail):

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from grupos.models import Red, Predica
+from django.db.models.aggregates import Count
+from grupos.models import Red, Predica, Grupo
 from miembros.models import Miembro
 
 __author__ = 'Tania'
@@ -60,3 +61,28 @@ class FormularioPredicas(forms.Form):
             self.fields['predica'].queryset = Predica.objects.all()
         else:
             self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in = miembro.pastores())
+
+class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
+    """Permite escoger entre un rango de fechas y una red."""
+
+    red = forms.ModelChoiceField(queryset=Red.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioCumplimientoLlamadasLideres, self).__init__(*args, **kwargs)
+        self.fields['red'].widget.attrs.update({'class': 'form-control'})
+
+    def obtener_grupos(self):
+        fecha_inicial = self.cleaned_data['fechai']
+        fecha_final = self.cleaned_data['fechaf']
+        red = self.cleaned_data['red']
+
+        grupos = Grupo.objects.filter(red=red, miembro__fechaAsignacionGAR__range=(fecha_inicial, fecha_final)).distinct()
+        grupos = grupos.annotate(personas_asignadas=Count('miembro'))
+
+        for grupo in grupos:
+            grupo.lideres = Miembro.objects.filter(id__in = grupo.listaLideres())
+            miembros_asignados = grupo.miembro_set.filter(fechaAsignacionGAR__range=(fecha_inicial, fecha_final))
+            grupo.llamadas_realizadas = miembros_asignados.filter(fechaLlamadaLider__isnull=True).count()
+            grupo.llamadas_no_realizadas = grupo.personas_asignadas - grupo.llamadas_realizadas
+
+        return grupos
