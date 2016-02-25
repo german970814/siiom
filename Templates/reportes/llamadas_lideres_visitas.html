@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="page-header">Cumplimiento de llamadas de líderes por red</h1>
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+    <div class="col-md-4">
+    <form id="form_visitasRed" class="alinearForm" action="{% url cumplimiento_llamadas_lideres %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="type" id="type" value="1">
+        <input type="submit" name="verReporte" value="Ver Reporte" class="button blue smallB">
+    </form>
+    </div>
+    </div>
+
+    <br>
+	
+	{% if grupos %}
+		
+    <table id="gruposSinReportes" class="table table-striped table-bordered table-hover" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Grupo</th>
+                <th>Lideres</th>
+                <th>Personas asignadas</th>
+                <th>Llamadas realizadas</th>
+                <th>Llamadas no realizadas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grupo in grupos %}
+                <tr>
+                    <td>{{ grupo.nombre|capfirst }}</td>
+                    <td>
+                        <ul>
+                        {% for lider in grupo.lideres %}
+                            <li>{{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        {{ grupo.personas_asignadas }}
+                    </td>
+                    <td>{{ grupo.llamadas_realizadas }}</td>
+                    <td>{{ grupo.llamadas_no_realizadas }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="text-center" colspan="5">No se han asignado visitas en este rango de fechas a esta red.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% endif %}
+
+{% endblock contenido %}
+
+{% block js %}
+<link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
+<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
+<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+		var dates = $("#id_fechai, #id_fechaf").datepicker({
+            dateFormat: 'dd/mm/yy',
+            changeYear: true,
+            changeMonth: true,
+            yearRange: 'c-50:c',
+	        maxDate: new Date(),
+            onSelect: function(selectedDate){
+                var option = this.id == "id_fechai" ? "minDate" : "maxDate";
+                dates.not(this).datepicker("option", option, selectedDate);
+            }
+		});
+	});
+</script>
+{% endblock %}
