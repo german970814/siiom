@@ -10,8 +10,8 @@ __author__ = 'Tania'
 class FormularioRangoFechas(forms.Form):
     required_css_class = 'requerido'
 
-    fechai = forms.DateField(label='Fecha inicial', required=True)
-    fechaf = forms.DateField(label='Fecha final', required=True)
+    fechai = forms.DateField(label='Fecha inicial', required=True, widget = forms.DateInput(attrs = {'size' : 10}))
+    fechaf = forms.DateField(label='Fecha final', required=True, widget = forms.DateInput(attrs = {'size' : 10}))
 
     def __init__(self, *args, **kwargs):
         super(FormularioRangoFechas, self).__init__(*args, **kwargs)
@@ -38,11 +38,12 @@ class FormularioVisitasRedPorMes(forms.Form):
 
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
+
 class FormularioReportesSinEnviar(forms.Form):
     required_css_class = 'requerido'
 
-    fechai = forms.DateField(label = 'Fecha inicial', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
-    fechaf = forms.DateField(label = 'Fecha final', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
+    fechai = forms.DateField(label='Fecha inicial', required=True, widget=forms.DateInput(attrs={'size': 10}))
+    fechaf = forms.DateField(label='Fecha final', required=True, widget=forms.DateInput(attrs={'size': 10}))
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
@@ -62,6 +63,7 @@ class FormularioPredicas(forms.Form):
         else:
             self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in = miembro.pastores())
 
+
 class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
     """Permite escoger entre un rango de fechas y una red."""
 
@@ -76,11 +78,11 @@ class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
         fecha_final = self.cleaned_data['fechaf']
         red = self.cleaned_data['red']
 
-        grupos = Grupo.objects.filter(red=red, miembro__fechaAsignacionGAR__range=(fecha_inicial, fecha_final)).distinct()
-        grupos = grupos.annotate(personas_asignadas=Count('miembro'))
+        grupos = Grupo.objects.filter(red=red, miembro__fechaAsignacionGAR__range=(fecha_inicial, fecha_final))
+        grupos = grupos.distinct().annotate(personas_asignadas=Count('miembro'))
 
         for grupo in grupos:
-            grupo.lideres = Miembro.objects.filter(id__in = grupo.listaLideres())
+            grupo.lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
             miembros_asignados = grupo.miembro_set.filter(fechaAsignacionGAR__range=(fecha_inicial, fecha_final))
             grupo.llamadas_realizadas = miembros_asignados.filter(fechaLlamadaLider__isnull=True).count()
             grupo.llamadas_no_realizadas = grupo.personas_asignadas - grupo.llamadas_realizadas

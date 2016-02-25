@@ -1158,6 +1158,7 @@ def cumplimiento_llamadas_lideres_red(request):
     """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
     personas asignadas a su grupo dentro de un rango de fechas especificado."""
 
+    grupos = []
     if request.method == 'POST':
         form = FormularioCumplimientoLlamadasLideres(data=request.POST)
 
@@ -1178,7 +1179,4 @@ def sendMail(camposMail):
 
 
 def sendMassMail(correos):
-    send_mass_mail(correos, fail_silently = False)
-
-
-
+    send_mass_mail(correos, fail_silently=False)
