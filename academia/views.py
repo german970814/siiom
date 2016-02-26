@@ -49,6 +49,11 @@ def adminMaestroTest(user):
 @user_passes_test(adminMaestroTest, login_url="/iniciar_sesion/")
 def verCursos(request, admin):
     """Permite a un maestro o a un administrador listar cursos."""
+    miembro = Miembro.objects.get(usuario=request.user)
+    if miembro.usuario.has_perm("miembros.es_administrador"):
+        admin = True
+    else:
+        admin = False
     
     if request.method == 'POST':
         request.session['seleccionados'] = request.POST.getlist('seleccionados')
@@ -71,8 +76,8 @@ def verDetalleCurso(request, curso):
     """Permite a un maestro o administrador ver los modulos y sesiones que se dan en un curso."""
     
     miembro = Miembro.objects.get(usuario = request.user)
-    id = int(curso)
-    curso = Curso.objects.get(id = id)
+    iid = int(curso)
+    curso = Curso.objects.get(id = iid)
     modulos = curso.modulos.all()
     for modulo in modulos:
         modulo.sesiones = Sesion.objects.filter(modulo = modulo)
@@ -163,11 +168,12 @@ def maestroAsistencia(request):
                 curso = Curso.objects.get(id = request.POST['id'])
                 modulos = curso.modulos.all()
                 data = serializers.serialize('json', modulos)
+                print(data)
             else:
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
                 data = serializers.serialize('json', sesiones)
-            return HttpResponse(data, conten_type="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         
         if 'verEstudiantes' in request.POST or 'aceptarAsistencia' in request.POST:
             try:
@@ -231,6 +237,7 @@ def maestroRegistrarEntregaTareas(request):
                 curso = Curso.objects.get(id = request.POST['id'])
                 modulos = curso.modulos.all()
                 data = serializers.serialize('json', modulos)
+                print(data)
             else:
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)

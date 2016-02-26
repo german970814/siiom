@@ -7,6 +7,8 @@
 			format: 'DD/MM/YYYY',
             maxDate: moment(),
 		});
+
+        $campos = $('input.form-control');
 	});
 </script>
 {% endblock %}
@@ -25,6 +27,16 @@
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                     <p>Se ha agregado el miembro correctamente.</p>
                 </div>
+            </div>
+            {% endif %}
+            {% if messages %}
+            <div class="row">
+                {% for message in messages %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>{{message}}</p>
+                </div>
+                {% endfor %}
             </div>
             {% endif %}
         </div>

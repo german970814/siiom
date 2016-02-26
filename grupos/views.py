@@ -167,7 +167,7 @@ def reportarReunionDiscipulado(request):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
-                        if unicode(m.id) in asistentesId:
+                        if m.id in asistentesId:
                             am = AsistenciaDiscipulado.objects.create(miembro=m, reunion = r, asistencia=True)
                         else:
                             am = AsistenciaDiscipulado.objects.create(miembro=m, reunion = r, asistencia=False)
@@ -321,26 +321,7 @@ def editarPredica(request, pk):
         return render_to_response("Grupos/crear_predica.html",locals(),context_instance=RequestContext(request))
 
     return render_to_response("Grupos/crear_predica.html",locals(),context_instance=RequestContext(request))
-    # miembro = Miembro.objects.get(usuario=request.user)
-    # if request.method == "POST":
-    #     predica = request.session['actual']
-    #     form = FormularioCrearPredica(data=request.POST, instance=predica)
-    #     if form.is_valid():
-    #         nuevaPredica = form.save()
-    #         ok = True
 
-    # if 'seleccionados' in request.session:
-    #     faltantes = request.session['seleccionados']
-    #     if len(faltantes) > 0:
-    #         predica = Predica.objects.get(id = request.session['seleccionados'].pop())
-    #         request.session['actual'] = predica
-    #         form = FormularioCrearPredica(instance=predica)
-    #         request.session['seleccionados'] = request.session['seleccionados']
-    #         return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
-    #     else:
-    #         return HttpResponseRedirect('/grupo/listar_predicas/')
-    # else:
-    #     return HttpResponseRedirect('/grupo/listar_predicas/')
     
 def eliminar(modelo, lista):
     ok = 0 #No hay nada en la lista

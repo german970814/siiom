@@ -18,6 +18,23 @@
                     rowSelect: true,
                     keepSelection: true
                 });
+        $("button[name='promoverPaso']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nadie para promover")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+
+        $("button[name='verMiembros']").click(function(event) {
+            if ($('#idPasos').val() == -1) {
+                swal("Alerta","Asegurate de escoger un paso")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
     })
 </script>
 {% endblock %}
@@ -56,6 +73,7 @@
             </div>
             <br>
             <br>
+            {% if miembros %}
             <table id="data-table-selection" class="table table-striped table-vmiddle">
                 <thead>
                     <tr>
@@ -81,6 +99,7 @@
                     <button type="submit" class="btn btn-success btn-block" name="promoverPaso">Aceptar</button>
                 </div>
             </div>
+            {% endif %}
         </form>
         <br>
         <br>

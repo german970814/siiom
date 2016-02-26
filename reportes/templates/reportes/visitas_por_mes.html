@@ -27,6 +27,36 @@
                 maxDate: moment(),
                 });
 
+            var $form_visitasMes = $('#form_visitasMes');
+            var $meses = $('#idMeses').children('label');
+            var $mes = [];
+            var $si = [];
+
+            for (var i = 0; i < $meses.length; i++) {
+                $mes[i] = $meses.children('input')[i];
+            }
+            
+
+            $form_visitasMes.submit(function(event) {
+                if ($('#id_ano').val() == '') {
+                    swal("Alerta","Asegurate de escoger un año");
+                    return false;
+                } else if ($('#id_ano').val() != '') {
+                    for (var j = 0; j < $mes.length; j++){
+                        if ($mes[j].checked) {
+                            $si.push($mes[j]);
+                        }
+                    }
+                    if ($si.length > 0){
+                        return true
+                    } else {
+                        swal("Alerta","Asegurate de escoger por lo menos un mes");
+                        return false;
+                    }
+                }
+            });
+
+
             {% if tipo == 1 %}
                 $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie_sel.png' %}");
                 $("#column_button").attr('src', "{% static 'Imagenes/chart_column.png' %}");
@@ -83,7 +113,7 @@
                 <div class="row">
                     <div class="col-md-3 col-md-offset-2">
                         <div class="input-group form-group">
-                            <div class="fg-line requerido">
+                            <div class="fg-line requerido" id="idMeses">
                                 {% for m in form.meses %}
                                 <label for="{{m.id_for_label}}" class="checkbox">
                                 {{m.tag}}
@@ -110,17 +140,26 @@
     {% if sw %}
     <div class="card">
         <div class="card-header">
-            
+            <h1>
+                <legend><h3>Reporte</h3></legend>
+            </h1>
         </div>
         <div class="card-body card-padding">
+            <small>Escoge un tipo de vista:</small>
+            <br>
+            <br>
             <div class="row">
-                <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
-                <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
-                <div id="out"></div>
+                <div class="col-sm-1">
+                    <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
+                </div>
+                <div class="col-sm-1">
+                    <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
+                </div>
+                <div class="col-md-12 col-md-offset-2"><div id="out"></div></div>
             </div>
             
         </div>
     </div>
-</div>
 {% endif %}
+</div>
 {% endblock %}

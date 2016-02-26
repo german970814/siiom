@@ -1,9 +1,6 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block js %}
-    <!-- <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script> -->
 <script type="text/javascript">
 $(document).ready(function(){
     $('#id_fechai').datetimepicker({
@@ -21,12 +18,23 @@ $(document).ready(function(){
 
 
     $('#id_fechai').on("dp.change",function(e){
-        console.log(e);
         $('#id_fechaf').data("DateTimePicker").minDate(e.date);
     });
 
     $('#id_fechaf').on("dp.change",function(e){
         $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+    });
+
+    $('#form_asistencia').submit(function(event) {
+        if ($('#id_fechai').val() == '') {
+            swal("Alerta!!!", "Asegurate de escoger una fecha inicial");
+            return false;
+        } else if ($('#id_fechaf').val() == '' && $('#id_fechai').val() != '') {
+            swal("Alerta!!!", "Asegurate de escoger una fecha final");
+            return false;
+        } else {
+            return true;
+        }
     });
 })
 </script>
@@ -51,7 +59,7 @@ $(document).ready(function(){
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechai" class="fg-label requerido">Fecha Inicial:</label>
+                                <label for="id_fechai" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Solo puedes escoger un Lunes." title="" data-original-title="Ayuda">Fecha Inicial:</label>
                                 {{form.fechai}}
                             </div>
                         </div>
@@ -62,7 +70,7 @@ $(document).ready(function(){
                                 <i class="zmdi zmdi-calendar-note"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                <label for="id_fechaf" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Solo puedes escoger un Domingo." title="" data-original-title="Ayuda">Fecha Final:</label>
                                 {{form.fechaf}}
                             </div>
                         </div>
@@ -106,7 +114,7 @@ $(document).ready(function(){
                                         <td>{{ m.nombre|capfirst }} {{ m.primerApellido|capfirst }}</td>
                                         {% for a in m.asis %}
                                             {% if a %}
-                                                <td><img src="{{ MEDIA_URL }}Imagenes/accept.png" ></td>
+                                                <td><img src="{% static 'Imagenes/accept.png' %}" ></td>
                                             {% else %}
                                                 <td></td>
                                             {% endif %}

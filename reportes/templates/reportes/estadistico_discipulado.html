@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block js %}
-<!-- <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script> -->
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
@@ -21,29 +18,19 @@
     {% endif %}
     
     $(document).ready(function(){
-        var dates = $("#id_fechai, #id_fechaf").datepicker({
-                                    maxDate: new Date(),
-                                    beforeShowDay: function(date){
-                                        var day = date.getDay();
-                                        var d = this.id == "id_fechai" ? [(day == 1), ""] : [(day == 0), ""];
-                                        return d;
-                                    },
-                                    onSelect: function(selectedDate){
-                                        var option = this.id == "id_fechai" ? "minDate" : "maxDate";
-                                        dates.not(this).datepicker("option", option, selectedDate);
-                                    }
-								});
-
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
-                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){agregarOpciones(data, 'idGrupo_f');}, "json");
+                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
+                    agregarOpciones(data, 'idGrupo_f');
+                    $('#idGrupo_f').selectpicker('refresh');
+                }, "json");
             }
             else{
                 $("#idGrupo_f").html('');
             }
         });
 
-        $("#idCheck").click(function(){
+        $("#idCheck").click(function(e){
             if($(this).is(':checked')){
                 $("#idGrupo_f").attr('disabled', 'disabled');
             }
@@ -52,7 +39,7 @@
             }
         });
 
-        $("input[name='ofrenda']").click(function(){
+        $("input[name='ofrenda']").click(function(e){
             if($(this).is(':checked')){
                 $("input[name='lid_asis'], input[name='asis_reg']").attr('disabled', 'disabled');
             }
@@ -61,33 +48,46 @@
             }
         });
 
-        $("#form_pasosTotal").submit(function(){
-            if($("#idGrupo_i").val() == -1){
-                alert("Por favor seleccione un grupo inicial.");
-            }
-            else{
-                if(!$("#idCheck").is(':checked')){
-                    if($("#idGrupo_f").val() == -1){
-                        alert("Por favor seleccione un grupo final o seleccione o la casilla de los descendientes.");
-                    }
-                    else{
-                       return true;
-                    }
-                }
-                else{
+        $campos = $("form input[type='checkbox']");
+        delete($campos[0]);
+        console.log($campos);
+        ini = [];
+
+        $("#form_pasosTotal").submit(function(event) {
+            if ($("#idGrupo_i").val() == -1) {
+                swal("Alerta!!!", "Por favor seleccione un grupo incial.");
+                return false;
+            } else if ($("idGrupo_i").val() != -1 && $("#idGrupo_f").val() == -1) {
+                if ($('#idCheck').is(':checked')) {
                     return true;
+                } else {
+                    swal("Alerta","Asegurate de escoger un grupo final o la opción de mostrar todos los descendientes del grupo inicial");
+                    return false;
+                }
+            } else if ($('#idGrupo_i').val() != -1 && $("#idGrupo_f").val() != -1 && $("#id_predica").val() == -1) {
+                swal("Alerta!!!","Asegurate de escoger una prédica");
+                return false;
+            } else {
+                for (var i = 0; i < $campos.length; i++) {
+                    if ($campos[i].checked) {
+                        ini.push($campos[i]);
+                    }
+                }
+                if (ini.length > 0) {
+                    return true;
+                } else {
+                    swal("Alerta!!!", "Asegurate de escoger por lo menos una opción");
                 }
             }
-            return false;
         });
 
         {% if tipo == 1 %}
-            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie_sel.png");
-            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column.png");
+            $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie_sel.png' %}");
+            $("#column_button").attr('src', "{% static 'Imagenes/chart_column.png' %}");
             $("#type").attr('value', '1');
         {% else %}
-            $("#column_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_column_sel.png");
-            $("#pie_button").attr('src', "{{ MEDIA_URL }}Imagenes/chart_pie.png");
+            $("#column_button").attr('src', "{% static 'Imagenes/chart_column_sel.png' %}");
+            $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie.png' %}");
             $("#type").attr('value', '2');
         {% endif %}
 
@@ -143,14 +143,12 @@
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="idGrupo_f" class="fg-label requerido">Grupo Final:</label>
+                                <label for="idGrupo_f" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Debes escoger un grupo inicial para poder ver algo aquí o escoger la opción de 'Mostrar Todos los Descendientes del Grupo Inicial'." title="" data-original-title="Ayuda">Grupo Final:</label>
                                 <select class="selectpicker" name="menuGrupo_f" id="idGrupo_f" data-live-search="true">
-                                 {% if  grupo_f %}
                                     <option value="-1" >------</option>
                                     {% for g_f in listaGrupo_f %}
                                         <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
                                     {% endfor %}
-                                 {% endif %}
                             </select>
                             </div>
                         </div>
@@ -174,9 +172,9 @@
                         <div class="input-group">
                             <div class="fg-line">
                                 <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" id="idCheck" name="lid_asis" value="S" {% if lid_asis %} checked="checked" {% endif %}>
+                                    <input type="checkbox" id="idCheck" name="descendientes" value="S" {% if descendientes %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
-                                    N&uacute;mero de L&iacute;deres Asistentes
+                                    Mostrar Todos los Descendientes del grupo inicial
                                 </label>
                             </div>
                         </div>
@@ -185,9 +183,9 @@
                         <div class="input-group">
                             <div class="fg-line">
                                 <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" name="asis_reg" value="S" {% if asis_reg %} checked="checked" {% endif %}>
+                                    <input type="checkbox" id="idCheck_1" name="lid_asis" value="S" {% if lid_asis %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
-                                    N&uacute;mero de Asistentes Regulares
+                                    N&uacute;mero de L&iacute;deres Asistentes
                                 </label>
                             </div>
                         </div>
@@ -198,9 +196,20 @@
                         <div class="input-group">
                             <div class="fg-line">
                                 <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" name="ofrenda" value="S" {% if ofrenda %} checked="checked" {% endif %}>
+                                    <input type="checkbox" id="idCheck_2" name="ofrenda" value="S" {% if ofrenda %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
                                     Ofrenda
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <div class="fg-line">
+                                <label for="" class="checkbox m-r-20">
+                                    <input type="checkbox" id="idCheck_3" name="asis_reg" value="S" {% if asis_reg %} checked="checked" {% endif %}>
+                                    <i class="input-helper m-r-20"></i>
+                                    N&uacute;mero de Asistentes Regulares
                                 </label>
                             </div>
                         </div>
@@ -220,8 +229,33 @@
                 </div>
             </div>
         </form>
-
     </div>
-    <div id="out"></div> 
+    {% if sw %}
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend><h3>Reporte</h3></legend>
+            </h1>
+        </div>
+        <div class="card-body card-padding">
+        <small>Selecciona una vista</small>
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-sm-1">
+                <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
+            </div>
+            <div class="col-sm-1">
+                <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
+            </div>
+        </div>
+            <div class="row">
+                <div class="col-md-12 col-md-offset-2">
+                    <div id="out"></div> 
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>   
 {% endblock %}

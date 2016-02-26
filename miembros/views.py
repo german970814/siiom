@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 # Create your views here.
 from django.shortcuts import render_to_response
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
@@ -27,6 +27,12 @@ def eliminar(modelo, lista):
     return ok
 
 def autenticarUsario(request):
+    if request.user.is_authenticated():
+        if request.user.has_perm("miembros.es_administrador"):
+            return HttpResponseRedirect("/administracion/") 
+        else:
+            return HttpResponseRedirect("/miembro/")
+
     valido = True
     if request.method == 'POST':
         nombreUsuaroio = request.POST.get('username', '')
@@ -109,8 +115,12 @@ def miembroInicio(request):
         return HttpResponseRedirect ("/administracion/")  
     return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
+
+isOk = False
 @user_passes_test(agregarVisitanteTest, login_url="/iniciar_sesion/")
 def liderAgregarMiembro(request):
+    global isOk
+
     accion = 'Guardar'
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == "POST":
@@ -127,8 +137,13 @@ def liderAgregarMiembro(request):
             nuevoMiembro.save()
             CambioTipo.objects.create(miembro=nuevoMiembro, autorizacion=miembro, fecha=date.today(), anteriorTipo=TipoMiembro.objects.get(nombre__iexact="visita"), nuevoTipo=TipoMiembro.objects.get(nombre__iexact="visita"))
             ok = True
+        else:
+            isOk = True
+            messages.error(request, "Debes llenar todos los campos")
+        isOk = False
     else:
         form = FormularioLiderAgregarMiembro()
+    isOk = False
     return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 @user_passes_test(liderTest, login_url="/iniciar_sesion/")
@@ -733,9 +748,12 @@ def promoverMiembroEscalafon(request):
         if form.is_valid():
             nuevoCambioEscalafon = form.save(commit=False)
             miembroEditar = nuevoCambioEscalafon.miembro
+            print(miembroEditar)
             if calcularCelulas(miembroEditar) >= nuevoCambioEscalafon.escalafon.celulas:
                 nuevoCambioEscalafon.save()
                 ok = True
+            else:
+                messages.error(request,"El miembro %s no cumple con los requisitos para el cambio." % (str(miembroEditar)))
     else:
         form = FormularioPromoverEscalafon()
     return render_to_response('Miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))

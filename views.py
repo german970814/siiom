@@ -20,6 +20,9 @@ from miembros.views import cambiarContrasena
 def inicio(request):
     return HttpResponseRedirect('/iniciar_sesion/')
 
+def custom_404(request):
+    return render_to_response('404.html')
+
 def miembroTest(user):
     return  user.is_authenticated() \
             and (Group.objects.get(name__iexact='Maestro') in user.groups.all()\

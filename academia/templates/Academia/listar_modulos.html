@@ -24,6 +24,14 @@
                         }
                     }
                 });
+        $("button[name='eliminar']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nada que Eliminar")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
     })
 </script>
 {% endblock %}

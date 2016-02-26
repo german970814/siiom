@@ -5,7 +5,6 @@
     <div class="card">
         <div class="card-header">
             <h1><legend><h3>{{ accion }} Detalles de Llamadas</h3></legend></h1>
-        </div>
         {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -14,6 +13,15 @@
                 </div>
             </div>
         {% endif %}
+        {% if form.errors %}
+                <div class="row">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Aún hay campos vacios. No se agregarón detalles</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
         <form action="" method="POST">
             {% csrf_token %}
             <div class="card-body card-padding">

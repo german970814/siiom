@@ -1,5 +1,21 @@
 {% extends "base.html" %}
-
+{% block js %}
+<script>
+    $(document).ready(function(){
+        $("button[name='aceptar']").click(function(event) {
+            if ($('#id_miembro').val() == '') {
+                swal("Alerta!!!", "Asegurate de escoger un miembro");
+                event.preventDefault();
+            } else if ($('#id_miembro').val() != '' && $('#id_escalafon').val() == '') {
+                swal("Alerta!!!", "Asegurate de escoger un escalafón");
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+    })
+</script>
+{% endblock %}
 {% block contenido %}
 <div class="container">
     <div class="card">
@@ -13,6 +29,16 @@
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                     <p>Se ha promovido el miembro correctamente <a alt="Listar Redes" class="alert-link" href="/miembro/listar_escalafones"> Volver a la lista de escalafones</a> <a href="/miembro/perfil/{{miembroEditar.id}}">ver perfil del miembro cambiado.</a></p>
                 </div>
+            </div>
+            {% endif %}
+            {% if messages %}
+            <div class="row">
+                {% for message in messages %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>{{ message }}</p>
+                </div>
+                {% endfor %}
             </div>
             {% endif %}
         </div>

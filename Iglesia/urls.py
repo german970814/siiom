@@ -1,13 +1,13 @@
 from django.conf.urls import include, patterns, url
+from django.views.generic import RedirectView
 from django.contrib import admin
-from grupos.views import *
-from academia.views import *
-from miembros.views import *
-from reportes.views import *
+from miembros.views import autenticarUsario, salir, administracion
 from views import resultadoBusqueda, depu, depu2
 import os
 
 admin.autodiscover()
+RedirectView.permanent = True
+handler404 = 'views.custom_404'
 
 urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -16,115 +16,22 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     #(r'^dp/$', depu2),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^iniciar_sesion/$', autenticarUsario),
+    url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
+    url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),
+    url(r'^administracion/$',  administracion, name="administracion"),
     url(r'^salir/$', salir),
     url(r'^resultado/(grupo|miembro)/$',  resultadoBusqueda),
-    url(r'^miembro/$', miembroInicio),
-    url(r'^miembro/agregar_miembro/$', liderAgregarMiembro),
-    url(r'^miembro/listar_miembros/$', liderListarMiembrosGrupo),
-    url(r'^miembro/editar_miembros/$', liderEditarMiembros),
-    url(r'^miembro/editar_miembro/(\d+)/$', editarMiembro),
-    url(r'^miembro/transladar_miembros/$', liderTransaldarMiembro),
-    url(r'^miembro/editar_perfil/$', liderEditarPerfil),
-    url(r'^miembro/cambiar_contrasena/$',  cambiarContrasena),
-    url(r'^miembro/llamadas_pendientes/lider/$',  liderLlamadasPendientesVisitantesGrupo),
-    url(r'^miembro/llamadas_pendientes/agente/$',  llamadasPendientesVisitantes),#aqui
-    url(r'^miembro/registrar_llamada/lider/$',  liderLlamarVisitas),
-    url(r'^miembro/registrar_llamada/agente/$',  llamarVisitas),
-    url(r'^miembro/promover_visitantes/$',  liderPromoverVisitantesGrupo),
-    url(r'^miembro/editar_grupo/$',  editarHorarioReunionGrupo),
-    url(r'^miembro/reportar_reunion_grupo/$',  reportarReunionGrupo),
-    url(r'^miembro/reportar_reunion_grupo_admin/$',  reportarReunionGrupoAdmin),
-    url(r'^miembro/perfil/(\d+)/$',  perfilMiembro),
-    url(r'^miembro/reportar_reunion_discipulado/$',  reportarReunionDiscipulado),
-    url(r'^miembro/confirmar_ofrenda_gar/(\d+)/$',  registrarPagoGrupo),
-    url(r'^miembro/confirmar_ofrenda_discipulado/(\d+)/$',  registrarPagoDiscipulado),
-    url(r'^miembro/asignar_grupo/(\d+)/$',  asignarGrupo),
-    url(r'^miembro/crear_zona/$',  crearZona),
-    url(r'^miembro/editar_zona/(?P<pk>\d+)$',  editarZona, name="editar_zona"),
-    url(r'^miembro/listar_zonas/$',  listarZonas),
-    url(r'^miembro/barrios/(\d+)/$',  barriosDeZona),
-    url(r'^miembro/crear_barrio/(\d+)/$',  crearBarrio),
-    url(r'^miembro/editar_barrio/$',  editarBarrio),
-    url(r'^miembro/crear_escalafon/$',  crearEscalafon),
-    url(r'^miembro/editar_escalafon/(?P<pk>\d+)$',  editarEscalafon, name="editar_escalafon"),
-    url(r'^miembro/listar_escalafones/$',  listarEscalafones),
-    url(r'^miembro/promover_escalafon/$',  promoverMiembroEscalafon),
-    url(r'^miembro/agregar_paso/$',  agregarPasoMiembro),
-    url(r'^miembro/listar_pasos/$',  listarPasos),
-    url(r'^miembro/editar_paso/(?P<pk>\d+)$',  editarPaso, name="editar_paso"),
-    url(r'^miembro/crear_tipo_miembro/$',  crearTipoMiembro),
-    url(r'^miembro/listar_tipo_miembro/$',  listarTipoMiembro),
-    url(r'^miembro/editar_tipo_miembro/(?P<pk>\d+)$',  editarTipoMiembro, name="editar_tipo_miembro"),
-    url(r'^miembro/cambiar_tipo_miembro/(\d+)/$',  cambiarMiembroDeTipoMiembro),
-    url(r'^miembro/detalles_llamada/$',  listarDetallesLlamada),
-    url(r'^miembro/agregar_detalle_llamada/$',  AgregarDetalleLlamada),
-    url(r'^miembro/editar_detalle_llamada/(?P<pk>\d+)$',  editarDetalleLlamada),
-    url(r'^grupo/grupo_padre/$', grupoRaiz),
-    url(r'^grupo/(\d+)/$', verGrupo),
-    url(r'^grupo/listar_redes/$', listarRedes),
-    url(r'^grupo/crear_red/$', crearRed),
-    url(r'^grupo/editar_red/(?P<pk>\d+)$', editarRed, name="editar_red"),
-    url(r'^grupo/listar_grupos/(\d+)/$',  gruposDeRed),
-    url(r'^grupo/crear_grupo/(\d+)/$', crearGrupo),
-    url(r'^grupo/editar_grupo/$', editarGrupo),
-    url(r'^grupo/listar_predicas/$', listarPredicas),
-    url(r'^grupo/crear_predica/$', crearPredica),
-    url(r'^grupo/editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),
-    url(r'^miembro/asignar_usuario/(\d+)/$',  crearUsuarioMimembro),
-    url(r'^miembro/eliminar_cambio_tipo/(\d+)/$',  eliminarCambioTipoMiembro),
-    url(r'^miembro/cumplimiento_pasos/$', cumplimientoPasos),
-#    url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
-#    url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
-    url(r'^reportes/visitas_por_red/$', visitasAsignadasRedes),
-    url(r'^reportes/asignacion_gar/$', asignacionGAR),
-    url(r'^reportes/primera_llamada/$', detalleLlamada, {'llamada': 1}),
-    url(r'^reportes/segunda_llamada/$', detalleLlamada, {'llamada': 2}),
-    url(r'^reportes/visitas_por_mes/$', visitasPorMes, {'por_red': False}),
-    url(r'^reportes/visitas_red_por_mes/$', visitasPorMes, {'por_red': True}),
-    url(r'^reportes/asistencia_reuniones/$', asistenciaGrupos),
-    url(r'^reportes/miembros_y_pasos/$', pasosPorMiembros),
-    url(r'^reportes/pasos_totales/$', PasosTotales),
-    url(r'^reportes/pasos_rango_fechas/$', PasosRangoFecha),
-    url(r'^reportes/estadistico_reunionesGAR/$', estadisticoReunionesGar),
-    url(r'^reportes/estadistico_reunionesDiscipulado/$', estadisticoReunionesDiscipulado),
-    url(r'^reportes/estadistico__totalizado_reunionesGAR/$', estadisticoTotalizadoReunionesGar),
-    url(r'^reportes/estadistico__totalizado_reunionesDiscipulado/$', estadisticoTotalizadoReunionesDiscipulado),
-    url(r'^reportes/desarrollo_grupos/$', desarrolloGrupo),
-    url(r'^reportes/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar, {}),
-    url(r'^reportes/reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}),
-    url(r'^reportes/consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}),
-    url(r'^reportes/consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}),
+    url(r'^miembro/', include("miembros.urls")),
+    url(r'^grupo/', include("grupos.urls")),
+    url(r'^reportes/', include("reportes.urls")),
+    
+    # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
+    # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
 )
 
 urlpatterns += patterns('',
     #--------------------------AMBOS------------------------
-    url(r'^academia/curso_detalle/(\d+)/$',  verDetalleCurso),
-    url(r'^academia/estudiantes/(\d+)/$', listarEstudiantes),
-    url(r'^academia/estudiante_detalle/(\d+)/$',  verDetalleEstudiante),
-    #---------------------------MAESTRO---------------------
-    url(r'^academia/cursos/$',  verCursos, {'admin': False}),    
-    url(r'^academia/editar_curso/(?P<pk>\d+)$',  editarCurso, {'admin': False, 'url': '/academia/cursos/'}),    
-    url(r'^academia/asistencia/$',  maestroAsistencia),  
-    url(r'^academia/evaluar_modulo/$',  evaluarModulo),
-    url(r'^academia/registrar_entrega_tarea/$',  maestroRegistrarEntregaTareas),  
-    url(r'^academia/promover_estudiante/$',  promoverModulo),
-    #----------------ADMINISTRADOR-----------------------
-    url(r'^academia/crear_curso/$',  crearCurso),
-    url(r'^academia/listar_cursos/$',  verCursos, {'admin': True}),
-    url(r'^academia/admin_editar_curso/(?P<pk>\d+)$',  editarCurso, {'admin': True, 'url': '/academia/listar_cursos/'}),
-    url(r'^academia/matricular/(\d+)/$',  matricularEstudiante),
-    url(r'^academia/crear_modulo/$',  crearModulo),
-    url(r'^academia/listar_modulos/$',  listarModulos),
-    url(r'^academia/editar_modulo/(?P<pk>\d+)$', editarModulo, name='editar_modulo'),
-    url(r'^academia/crear_sesion/(\d+)/$',  crearSesion),
-    url(r'^academia/sesiones/(\d+)/$',  listarSesiones),
-    url(r'^academia/editar_sesion/(\d+)/$',  editarSesion),
-    url(r'^administracion/$',  administracion),
-    url(r'^academia/listar_pagos/$',  listarPagosAcademia),
-    url(r'^miembro/graduar_alumno/$', graduarAlumno),
-     #----------------RECEPTOR-----------------------
-     url(r'^academia/recibir_pago/(\d+)/$',  recibirPago),
+    url(r'^academia/',  include("academia.urls")),
 )
 
 urlpatterns += patterns('',
