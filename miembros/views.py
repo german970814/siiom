@@ -2,6 +2,7 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.contrib import auth, messages
+from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
@@ -396,13 +397,15 @@ def llamarVisitas(request):
                 if nuevoLlamar.grupo is not None or nuevoLlamar.grupo !='':
                     lideres = Miembro.objects.filter(id__in = nuevoLlamar.grupo.listaLideres()).values('email')
                     receptores = ["%s" % (k['email']) for k in lideres]
-                    camposMail = ['Nuevo Miembro', "Lider de la iglesia Casa del Rey,\n\n\
+
+                    camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
 Se ha agregado un nuevo miembro a su G.A.R, por favor \
 ingrese al sistema para registrar la llamada:\n\
 http://iglesia.webfactional.com/iniciar_sesion\n\n\
 Cordialmente,\n\
-Admin",\
-                    receptores]
+Admin" % Sites.objects.get_current().name,\
+                    receptores] 
+                    #Solo para Panamá
                     sendMail(camposMail)
                 nuevoLlamar.fechaPrimeraLlamada = date.today()
             elif llamada == 2:
@@ -526,14 +529,15 @@ def asignarGrupo(request, id):
             if nuevoMiembro.grupo is not None or nuevoMiembro.grupo !='':
                     mailLideres = Miembro.objects.filter(id__in=nuevoMiembro.grupo.listaLideres()).values('email')
                     receptores = ["%s" % (k['email']) for k in mailLideres]
-                    camposMail = ['Nuevo Miembro', "Lider de la iglesia Casa del Rey,\n\n\
+                    camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
 Se ha agregado un nuevo miembro a su G.A.R, por favor \
 ingrese al sistema para registrar la llamada:\n\
 http://iglesia.webfactional.com/iniciar_sesion\n\n\
 Cordialmente,\n\
-Admin",\
-                    receptores] 
-                    #sendMail(camposMail)
+Admin" % Site.objects.get_current().name,\
+                    receptores]
+                    #Solo para Panamá
+                    sendMail(camposMail)
                     nuevoMiembro.fechaAsignacionGAR = date.today()
             nuevoMiembro.save()
             ok = True            
