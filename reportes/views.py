@@ -1,6 +1,5 @@
 # Create your views here.
 import calendar
-from copy import copy
 import datetime
 from encodings.utf_8_sig import encode
 from django.contrib import messages
@@ -16,8 +15,9 @@ from django.utils.datetime_safe import strftime
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from reportes.charts import PdfTemplate
-from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, FormularioReportesSinEnviar, \
-    FormularioPredicas
+from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, \
+    FormularioCumplimientoLlamadasLideres
+from reportes.forms import FormularioReportesSinEnviar, FormularioPredicas
 
 
 def liderAdminTest(user):
@@ -25,14 +25,17 @@ def liderAdminTest(user):
             and (Group.objects.get(name__iexact = 'Lider') in user.groups.all() \
             or Group.objects.get(name__iexact = 'Administrador') in user.groups.all())
 
+
 def agenteAdminTest(user):
     return user.is_authenticated() \
             and (Group.objects.get(name__iexact = 'Agente') in user.groups.all() \
             or Group.objects.get(name__iexact = 'Administrador') in user.groups.all())
 
+
 @user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
 def visitasAsignadasRedes(request):
-    """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida por el usuario."""
+    """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida
+    por el usuario."""
 
     tipo = 1
     titulo_pag = 'Total de visitas en cada red'
@@ -1152,14 +1155,31 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
 
     return render_to_response('reportes/morososDiscipulado.html', locals(), context_instance=RequestContext(request))
 
+
+@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+def cumplimiento_llamadas_lideres_red(request):
+    """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
+    personas asignadas a su grupo dentro de un rango de fechas especificado."""
+
+    grupos = []
+    if request.method == 'POST':
+        form = FormularioCumplimientoLlamadasLideres(data=request.POST)
+
+        if form.is_valid():
+            grupos = form.obtener_grupos()
+    else:
+        form = FormularioCumplimientoLlamadasLideres()
+
+    data = {'form': form, 'grupos': grupos}
+    return render_to_response('reportes/llamadas_lideres_visitas.html', data, context_instance=RequestContext(request))
+
+
 def sendMail(camposMail):
     subject = camposMail[0]
     mensaje = camposMail[1]
     receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently = False)
+    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
+
 
 def sendMassMail(correos):
-    send_mass_mail(correos, fail_silently = False)
-
-
-
+    send_mass_mail(correos, fail_silently=False)
