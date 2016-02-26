@@ -370,7 +370,7 @@ def liderLlamarVisitas(request):
                 request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
                 return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             except IndexError:
-                return
+                pass
             except ValueError:
                 return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
         else:
