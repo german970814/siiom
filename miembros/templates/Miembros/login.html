@@ -21,7 +21,11 @@
 
 <body class="login-content">
     <!-- Login -->
+    {% if next %}
+    <form action="/iniciar_sesion/?next={{next}}" method="POST"></form>
+    {% else %}
     <form action="/iniciar_sesion/" method="POST">
+    {% endif %}
     {% csrf_token %}
         <div class="lc-block toggled" style="padding:100px 40px 70px !important;" id="l-login">
             <div class="input-group m-b-20">
@@ -49,7 +53,7 @@
             </div>
             
             <button type="submit" class="btn btn-login btn-danger btn-float"><i class="zmdi zmdi-arrow-forward"></i></button>
-            <input type="hidden" name="next" value="{{ next|escape }}" />
+            <input type="hidden" name="next" value="{{ request.GET.next }}" />
             
             <ul class="login-navigation">
                 <li style="padidng:10px !important;" data-block="#" class="bgm-red">Registrarse</li>

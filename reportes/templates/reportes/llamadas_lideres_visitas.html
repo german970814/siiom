@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+<script type="text/javascript">
+    $(document).ready(function(){
+		$('#id_fechai').datetimepicker({
+            format: 'DD/MM/YYYY',
+            maxDate: moment(),
+        });
+
+        $('#id_fechaf').datetimepicker({
+            useCurrent: false,
+            format: 'DD/MM/YY',
+            maxDate: moment(),
+        });
+
+
+        $('#id_fechai').on("dp.change",function(e){
+            $('#id_fechaf').data("DateTimePicker").minDate(e.date);
+        });
+
+        $('#id_fechaf').on("dp.change",function(e){
+            $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+        });
+
+        $('#form_visitasRed').submit(function(event) {
+            /* Act on the event */
+            if ($('#id_fechai').val() == '') {
+                swal("Alerta!!!", "Asegurese de escoger una fecha inicial");
+                return false;
+            } else if ($('#id_fechai').val() != '' && $('#id_fechaf').val() == '') {
+                swal("Alerta", "Asegurese de escoger una fecha final");
+                return false;
+            } else if ($('#id_fechai').val() != '' && $('#id_fechaf').val() != '' && $("select[name='red']").val() == '') {
+                swal("Alerta", "Asegurese de escoger una red");
+                return false;
+            } else {
+                return true;
+            }
+        });
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h2 class="f-700 f-20">Cumplimiento de llamadas de líderes por red</h2>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST" id="form_visitasRed" >
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechai" class="fg-label requerido">Fecha Inicial:</label>
+                                {{form.fechai}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar-note"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                {{form.fechaf}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-accounts-alt"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_red" class="fg-label requerido">Red:</label>
+                                {{form.red}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <input type="hidden" name="type" id="type" value="1">
+                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="verReporte">Ver</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if grupos %}
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700 f-20">
+                <legend>
+                    <h3>Cumplimiento</h3>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="gruposSinReportes" class="table" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Grupo</th>
+                                    <th>Lideres</th>
+                                    <th>Personas asignadas</th>
+                                    <th>Llamadas realizadas</th>
+                                    <th>Llamadas no realizadas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grupo in grupos %}
+                                    <tr>
+                                        <td>{{ grupo.nombre|capfirst }}</td>
+                                        <td>
+                                            <ul>
+                                            {% for lider in grupo.lideres %}
+                                                <li>{{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}</li>
+                                            {% endfor %}
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            {{ grupo.personas_asignadas }}
+                                        </td>
+                                        <td>{{ grupo.llamadas_realizadas }}</td>
+                                        <td>{{ grupo.llamadas_no_realizadas }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td class="text-center" colspan="5">No se han asignado visitas en este rango de fechas a esta red.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

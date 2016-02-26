@@ -83,7 +83,7 @@ class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
 
     def __init__(self, *args, **kwargs):
         super(FormularioCumplimientoLlamadasLideres, self).__init__(*args, **kwargs)
-        self.fields['red'].widget.attrs.update({'class': 'form-control'})
+        self.fields['red'].widget.attrs.update({'class': 'selectpicker'})
 
     def obtener_grupos(self):
         fecha_inicial = self.cleaned_data['fechai']

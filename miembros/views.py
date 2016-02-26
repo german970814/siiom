@@ -27,6 +27,9 @@ def eliminar(modelo, lista):
     return ok
 
 def autenticarUsario(request):
+    algo = request.GET.get('next','')
+    request.session['next'] = request.GET.get('next')
+
     if request.user.is_authenticated():
         if request.user.has_perm("miembros.es_administrador"):
             return HttpResponseRedirect("/administracion/") 
@@ -37,16 +40,21 @@ def autenticarUsario(request):
     if request.method == 'POST':
         nombreUsuaroio = request.POST.get('username', '')
         contrasena = request.POST.get('password', '')
+        sig = request.POST.get('next','')
         usuario = auth.authenticate(username=nombreUsuaroio, password=contrasena)
         if usuario is not None:
             auth.login(request, usuario)
             if  Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
+                if sig != None or sig != '':
+                    return HttpResponseRedirect(sig)
                 return HttpResponseRedirect("/miembro/")
             elif Group.objects.get(name__iexact='Lider') in usuario.groups.all()      \
                     or Group.objects.get(name__iexact='Maestro') in usuario.groups.all()\
                     or Group.objects.get(name__iexact='Agente') in usuario.groups.all()\
                     or Group.objects.get(name__iexact='Receptor') in usuario.groups.all():
-                return HttpResponseRedirect('/miembro/')
+                    if sig != None or sig != '':
+                        return HttpResponseRedirect(sig)
+                    return HttpResponseRedirect('/miembro/')
             else:
                 valido = False
         else:
@@ -331,7 +339,8 @@ def liderLlamarVisitas(request):
     miembro = Miembro.objects.get(usuario = request.user)
     tipo = 'lider'
     if request.method == 'POST':
-        actual = request.session['visitaActual']
+        aux = request.session['visitaActual']
+        actual = Miembro.objects.get(id=aux['id'])#request.session['visitaActual']
         form = FormularioLlamadaLider(data=request.POST, instance=actual)
         if form.is_valid():
             nuevoLlamar = form.save(commit=False)
@@ -343,11 +352,27 @@ def liderLlamarVisitas(request):
     if 'visitantesSeleccionados' in request.session:
         faltantes = request.session['visitantesSeleccionados']
         if len(faltantes) > 0:
-            miembroLlamar = Miembro.objects.get(id = request.session['visitantesSeleccionados'].pop())
-            request.session['visitaActual'] = miembroLlamar
-            form = FormularioLlamadaLider(instance = miembroLlamar)        
-            request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
-            return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+            print(request.session['visitantesSeleccionados'])
+            try:
+                miembroLlamar = Miembro.objects.get(id = request.session['visitantesSeleccionados'].pop())
+                miembrol = {'id':str(miembroLlamar.id),
+                            'nombre':str(miembroLlamar.nombre), 
+                            'primerApellido':str(miembroLlamar.primerApellido),
+                            'genero':str(miembroLlamar.genero),
+                            'cedula':str(miembroLlamar.cedula),
+                            'email':str(miembroLlamar.email),
+                            'telefono':str(miembroLlamar.telefono),
+                            'celular':str(miembroLlamar.celular),
+                            'detalleLlamadaLider':str(miembroLlamar.detalleLlamadaLider)
+                            }
+                request.session['visitaActual'] = miembrol#miembroLlamar #linea que da el error
+                form = FormularioLlamadaLider(instance = miembroLlamar)        
+                request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
+                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+            except IndexError:
+                return
+            except ValueError:
+                return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
         else:
             return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
     else:

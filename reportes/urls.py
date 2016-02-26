@@ -21,5 +21,5 @@ urlpatterns = [
     url(r'^reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}, name="reportes_reuniones_discipulado_sin_enviar"),
     url(r'^consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}, name="consultar_sobres_sin_enviar"),
     url(r'^consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}, name="consultar_sobres_discipulados_sin_enviar"),
-    url(r'^reportes/cumplimiento_llamadas_lideres/$', cumplimiento_llamadas_lideres_red, name='cumplimiento_llamadas_lideres'),
+    url(r'^cumplimiento_llamadas_lideres/$', cumplimiento_llamadas_lideres_red, name='cumplimiento_llamadas_lideres'),
 ]
