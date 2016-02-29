@@ -51,7 +51,7 @@ class FormularioCrearCurso(ModelForm):
         self.fields['modulos'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
         self.fields['nombre'].widget.attrs.update({'class':'form-control'})
         self.fields['material'].widget.attrs.update({'class':'form-control','placeholder':'Material...'})
-        self.fields['hora'].widget.attrs.update({'class':'form-control'})
+        self.fields['hora'].widget.attrs.update({'class':'form-control','data-mask':'00:00'})
         self.fields['direccion'].widget.attrs.update({'class':'form-control'})
     
     class Meta:

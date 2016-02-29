@@ -13,9 +13,13 @@
                         iconRefresh: 'zmdi-refresh',
                         iconUp: 'zmdi-expand-less'
                     },
+                    caseSensitive: false,
                     formatters: {
                         "commands": function(column, row) {
                             return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/{%if admin %}admin_editar_curso{% else %}editar_curso{%endif%}/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
+                        },
+                        "link": function(column, row){
+                            return "<a href='/academia/estudiantes/" +row.id + "'\>" + "Ver" + "</a>";
                         }
                     }
                 });
@@ -30,8 +34,8 @@
             <h1 class="f-700 f-20">
                 <legend>
                     <h3>{% if not admin %}Mis{% endif %} Cursos</h3>
-                    {% if admin %}<small><a alt="Agregar Curso" href="/academia/crear_curso/">Agregar Curso</a></small>{% endif %}
                 </legend>
+                {% if admin %}<small><a alt="Agregar Curso" href="/academia/crear_curso/">Agregar Curso</a></small>{% endif %}
             </h1>
         </div>
         <form action="" method="POST">
@@ -50,6 +54,7 @@
                         {% endif %}
                         <th data-visible="false" class="hidden" data-column-id="id"></th>
                         <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                        <th data-column-id="ver" data-formatter="link" data-sortable="false">Link</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block javascript %}
 <script>
+	$(document).ready(function() {
+		$('#id_hora').datetimepicker({
+			format:'HH:MM',
+		})
+	});
 </script>
 {% endblock %}
 {% block contenido %}
@@ -8,7 +13,7 @@
     <div class="card">
         <div class="card-header">
             {{a}}
-            <h1 class="f-700">{{accion}} Curso</h1>
+            <h1 class="f-700"><legend><h3>{{accion}} Curso</h3></legend></h1>
             {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -154,7 +159,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" name="aceptar" value="Aceptar" class="btn btn-primary btn-block">Aceptar</button>
+                        <button type="submit" name="aceptar" value="Aceptar" class="btn btn-primary btn-block" {% if ok %} data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Si vuelves a presionar este boton crearas otro curso igual" title="" data-original-title="Ayuda" {% endif %}>Aceptar</button>
                     </div>
                 </div>
             </div>

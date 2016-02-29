@@ -1,10 +1,26 @@
 {% extends "base.html" %}
-
+{% block js %}
+    <script>
+    jQuery(document).ready(function($) {
+        $('#form').submit(function(event) {
+            /* Act on the event */
+            if ($('#id_nombre').val() == '') {
+                swal("Alerta","Asegurate de escoger un Nombre");
+                return false;
+            } else {
+                return true;
+            }
+        });
+    });
+    </script>
+{% endblock js %}
 {% block contenido %}
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h1 class="f-700">{{accion}} Sesi&oacute;n</h1>
+            <h1 class="f-700">
+                <legend><h3>{{accion}} Sesi&oacute;n</h3></legend>
+            </h1>
             {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -14,11 +30,11 @@
             </div>
             {% endif %}
         </div>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST" enctype="multipart/form-data" id="form">
             {% csrf_token %}
             <div class="card-body card-padding">
                 <div class="row">
-                	<div class="col-md-12">
+                	<div class="col-md-8 col-md-offset-2">
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
@@ -33,7 +49,7 @@
 	            <br>
 	            <br>
                 <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
+                    <div class="col-md-4 col-md-offset-4">
                         <button type="submit" name="aceptar" value="Aceptar" class="btn btn-primary btn-block">Aceptar</button>
                     </div>
                 </div>

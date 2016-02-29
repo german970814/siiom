@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.contrib import auth, messages
@@ -36,30 +36,30 @@ def autenticarUsario(request):
             return HttpResponseRedirect("/administracion/") 
         else:
             return HttpResponseRedirect("/miembro/")
-
-    valido = True
-    if request.method == 'POST':
-        nombreUsuaroio = request.POST.get('username', '')
-        contrasena = request.POST.get('password', '')
-        sig = request.POST.get('next','')
-        usuario = auth.authenticate(username=nombreUsuaroio, password=contrasena)
-        if usuario is not None:
-            auth.login(request, usuario)
-            if  Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
-                if sig != None or sig != '':
-                    return HttpResponseRedirect(sig)
-                return HttpResponseRedirect("/miembro/")
-            elif Group.objects.get(name__iexact='Lider') in usuario.groups.all()      \
-                    or Group.objects.get(name__iexact='Maestro') in usuario.groups.all()\
-                    or Group.objects.get(name__iexact='Agente') in usuario.groups.all()\
-                    or Group.objects.get(name__iexact='Receptor') in usuario.groups.all():
+    else:
+        valido = True
+        if request.method == 'POST':
+            nombreUsuaroio = request.POST.get('username', '')
+            contrasena = request.POST.get('password', '')
+            sig = request.POST.get('next','')
+            usuario = auth.authenticate(username=nombreUsuaroio, password=contrasena)
+            if usuario is not None:
+                auth.login(request, usuario)
+                if  Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
                     if sig != None or sig != '':
                         return HttpResponseRedirect(sig)
-                    return HttpResponseRedirect('/miembro/')
+                    return HttpResponseRedirect("/miembro/")
+                elif Group.objects.get(name__iexact='Lider') in usuario.groups.all()      \
+                        or Group.objects.get(name__iexact='Maestro') in usuario.groups.all()\
+                        or Group.objects.get(name__iexact='Agente') in usuario.groups.all()\
+                        or Group.objects.get(name__iexact='Receptor') in usuario.groups.all():
+                        if sig != None or sig != '':
+                            return HttpResponseRedirect(sig)
+                        return HttpResponseRedirect('/miembro/')
+                else:
+                    valido = False
             else:
                 valido = False
-        else:
-            valido = False
     return render_to_response('Miembros/login.html', locals(), context_instance=RequestContext(request))
 
 def salir(request):
@@ -636,29 +636,41 @@ def crearBarrio(request, id):
     return render_to_response('Miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarBarrio(request):
+def editarBarrio(request, id, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
+    try:
+        zona = Zona.objects.get(id=int(id))
+    except Zona.DoesNotExis:
+        raise Http404
+    try:
+        barrio = Barrio.objects.get(pk=pk)
+    except Barrio.DoesNotExist:
+        raise Http404
+
     if request.method == "POST":
-        barrio = request.session['actual']
-        zona = request.session['zona']
-        form = FormularioCrearZona(data=request.POST, instance=barrio)
+        # barrio = request.session['actual']
+        form = FormularioCrearBarrio(request.POST or None, instance=barrio)
         if form.is_valid():
             nuevoBarrio = form.save()
             ok = True
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            barrio = Barrio.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = barrio
-            form = FormularioCrearBarrio(instance=barrio)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
         else:
-            return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
+            return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+    # if 'seleccionados' in request.session:
+    #     faltantes = request.session['seleccionados']
+    #     if len(faltantes) > 0:
+    #         barrio = Barrio.objects.get(id = request.session['seleccionados'].pop())
+    #         request.session['actual'] = barrio
+    #         form = FormularioCrearBarrio(instance=barrio)
+    #         request.session['seleccionados'] = request.session['seleccionados']
+    #         return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+    #     else:
+    #         return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
     else:
-        return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
+        form = FormularioCrearBarrio(instance=barrio)
+        return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+
+    return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def agregarPasoMiembro(request):

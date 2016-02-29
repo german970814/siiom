@@ -13,6 +13,7 @@
                         iconRefresh: 'zmdi-refresh',
                         iconUp: 'zmdi-expand-less'
 	                    },
+                    {% if modulos %}
                     selection: true,
                     multiSelect: true,
                     rowSelect: true,
@@ -20,9 +21,11 @@
                     keepSelection: true,
                     formatters: {
                         "commands": function(column, row) {
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/editar_modulo/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/editar_modulo/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " +
+                                "<button type=\"button\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/sesiones/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button>";
                         }
                     }
+                    {% endif %}
                 });
         $("button[name='eliminar']").click(function(event) {
             if (!$('tr').hasClass('active')) {
@@ -81,7 +84,7 @@
 	                {% empty %}
 	                	<tr>
                             <td></td>
-	                    	<td colspan="2" class="centrarTexto">No existen modulos a&uacute;n.</td>
+	                    	<td colspan="2">No existen modulos a&uacute;n.</td>
 	                    </tr>
 					{% endfor %}
                 </tbody>

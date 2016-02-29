@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 
 {% block js %}
-<!-- <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script> -->
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fechaInicio").datetimepicker({
 			format: 'DD/MM/YYYY',
 			maxDate: moment(),
+		});
+
+		$('#form').submit(function(event) {
+			if ($('#id_estudiante').val() == ''){
+				swal("Alerta","Asegurese de escoger un estudiante");
+				return false;
+			} else if ($('#id_estudiante').val() != '' && $('#id_fechaInicio').val() == '') {
+				swal("Alerta","Asegurese de escoger una fecha");
+				return false;
+			} else {
+				return true;
+			}
 		});
 	});
 </script>
@@ -17,13 +26,13 @@
 {% block contenido %}
 <div class="container">
 	<div class="card">
-		<div class="card-header bgm-blue">
+		<div class="card-header">
 			<h1>
-				<h3 style="color:#fff;">Matricular Estudiante</h3>
+				<legend><h3>Matricular Estudiante</h3></legend>
 			</h1>
 		</div>
 		<div class="card-body card-padding">
-			<form action="" method="POST" enctype="multipart/form-data">
+			<form action="" method="POST" enctype="multipart/form-data" id="form">
 			{% if ok %}
 			<div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">

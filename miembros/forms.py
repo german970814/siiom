@@ -127,6 +127,11 @@ class FormularioCrearZona(ModelForm):
         
 class FormularioCrearBarrio(ModelForm):
     required_css_class = 'requerido'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioCrearBarrio, self).__init__(*args, **kwargs)
+
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Barrio

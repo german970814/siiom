@@ -362,6 +362,7 @@ def crearCurso(request):
         form = FormularioCrearCurso(data = request.POST)
         if form.is_valid():
             nuevoCurso = form.save()
+            form.full_clean()
             ok = True
     else:
         form = FormularioCrearCurso()
@@ -437,7 +438,7 @@ def editarModulo(request, pk):
         form = FormularioCrearModulo(instance=modulo)
         return render_to_response("Academia/crear_modulo.html",locals(),context_instance=RequestContext(request))
 
-    return HttpResponse("/academia/listar_modulos")
+    return HttpResponseRedirect("/academia/listar_modulos")
 
         
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
@@ -445,11 +446,9 @@ def listarSesiones(request, id):
     """Permite a un administrador listar las sesiones de un modulo."""
     
     if request.method == 'POST':
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect("/academia/editar_sesion/" + id + "/")
         if 'eliminar' in request.POST:
-            okElim = eliminar(Sesion, request.POST.getlist('seleccionados'))    
+            okElim = eliminar(Sesion, request.POST.getlist('seleccionados')) 
+
     miembro = Miembro.objects.get(usuario = request.user)
     modulo = Modulo.objects.get(id = int(id))
     sesiones = Sesion.objects.filter(modulo = modulo).order_by('id')
@@ -475,30 +474,38 @@ def crearSesion(request, id):
     return render_to_response('Academia/crear_sesion.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarSesion(request, id):
+def editarSesion(request, id, pk):
     """Permite a un administrador editar una sesion de un modulo de la academia."""
+    # miembro = Miembro.objects.get(usuario = request.user)
     
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario = request.user)
     modulo = Modulo.objects.get(id = int(id))
     
+    try:
+        sesion = Sesion.objects.get(pk=pk)
+    except Sesion.DoesNotExist:
+        raise Http404
+        
     if request.method == 'POST':
-        sesion = request.session['actual']
-        form = FormularioCrearSesion(data = request.POST, instance = sesion)
+
+        form = FormularioCrearSesion(request.POST or None, instance = sesion)
         if form.is_valid():
             sesionEditado = form.save()
             ok = True
         else:
             return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
     
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            sesionEditar = Sesion.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = sesionEditar            
-            request.session['seleccionados'] = request.session['seleccionados']
-            form = FormularioCrearSesion(instance = sesionEditar)
-            return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
+    # if 'seleccionados' in request.session:
+    #     faltantes = request.session['seleccionados']
+    #     if len(faltantes) > 0:
+    #         sesionEditar = Sesion.objects.get(id = request.session['seleccionados'].pop())
+    #         request.session['actual'] = sesionEditar            
+    #         request.session['seleccionados'] = request.session['seleccionados']
+    #         form = FormularioCrearSesion(instance = sesionEditar)
+        
+    else:
+        form = FormularioCrearSesion(instance=sesion)
+        return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect("/academia/sesiones/" + id + "/")
 

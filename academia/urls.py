@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^editar_modulo/(?P<pk>\d+)$', editarModulo, name='editar_modulo'),
     url(r'^crear_sesion/(\d+)/$',  crearSesion, name="editar_sesion"),
     url(r'^sesiones/(\d+)/$',  listarSesiones, name="sesiones"),
-    url(r'^editar_sesion/(\d+)/$',  editarSesion, name="editar_sesion"),
+    url(r'^editar_sesion/(?P<id>\d+)/(?P<pk>\d+)$',  editarSesion, name="editar_sesion"),
     url(r'^listar_pagos/$',  listarPagosAcademia, name="listar_pagos"),
     
      #----------------RECEPTOR-----------------------
