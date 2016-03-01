@@ -53,8 +53,10 @@
                             <th data-column-id="estado">Estado</th>
                         {% endif %}
                         <th data-visible="false" class="hidden" data-column-id="id"></th>
+                        {% if cursos %}
                         <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                         <th data-column-id="ver" data-formatter="link" data-sortable="false">Link</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>

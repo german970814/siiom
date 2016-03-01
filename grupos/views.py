@@ -73,8 +73,8 @@ def grupoRaiz(request):
 def editarHorarioReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
-    if grupo is None:
-        raise Http404
+    # if grupo is None:
+    #     raise Http404
     
     if request.method == 'POST':
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)

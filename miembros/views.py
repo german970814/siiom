@@ -618,7 +618,7 @@ def crearBarrio(request, id):
         Esta función permite crear barrios de una zona en la base de datos
     """
     accion = 'Crear'
-    miembro = Miembro.objects.get(usuario=request.user)
+    # miembro = Miembro.objects.get(usuario=request.user)
     try:
         zona = Zona.objects.get(id=id)
     except:
@@ -638,7 +638,7 @@ def crearBarrio(request, id):
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def editarBarrio(request, id, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)
+    # miembro = Miembro.objects.get(usuario=request.user)
     try:
         zona = Zona.objects.get(id=int(id))
     except Zona.DoesNotExis:

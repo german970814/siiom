@@ -3,6 +3,7 @@
 {% block contenido %}
 <div class="container">
     <div class="card">
+        {% if grupo != None %}
         <div class="card-header">
             <h1>
                 <legend>
@@ -17,8 +18,15 @@
                     </div>
                 </div>
             {% endif %}
+            {% if form.errors %}
+                <div class="row">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Ha Ocurrido un error.</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
-        {{ form.non_field_errors }}
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-body card-padding">
@@ -69,6 +77,19 @@
                 </div>
             </div>
         </form>
+        {% else %}
+                <div class="card-body card-padding">
+                    <div class="four-zero" style="margin-top: 35px; position: relative;">
+                        <h2>404!</h2>
+                        <small>Contenido solo para líderes</small>
+                        
+                        <footer>
+                            <a href="{% url 'inicio' %}"><i class="zmdi zmdi-arrow-back"></i></a>
+                            <a href="{% url 'inicio' %}"><i class="zmdi zmdi-home"></i></a>
+                        </footer>
+                    </div>
+                </div>
+        {% endif %}
     </div>
 </div>             
 {% endblock %}

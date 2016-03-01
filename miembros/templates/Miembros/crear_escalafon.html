@@ -4,10 +4,12 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h1>{{accion}} Escalaf&oacute;n</h1>
+            <h1>
+                <legend><h3>{{accion}} Escalaf&oacute;n</h3></legend>
+            </h1>
         {% if ok %}
             <div class="row">
-                <div class="alert alert-danger alert-dismissible" role="alert">
+                <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                     <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el escalaf&oacute;n correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el escalaf&oacute;n siguiente o{% endif %}</p>
                 </div>

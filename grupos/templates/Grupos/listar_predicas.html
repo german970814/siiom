@@ -13,6 +13,7 @@
                         iconRefresh: 'zmdi-refresh',
                         iconUp: 'zmdi-expand-less'
 	                    },
+                    {% if predicas %}
                     selection: true,
                     multiSelect: true,
                     rowSelect: true,
@@ -23,6 +24,7 @@
                             return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_predica/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
                         }
                     }
+                    {% endif %}
                 });
 
         $("button[name='eliminar']").click(function(event) {
@@ -43,8 +45,8 @@
         <div class="card-header">
             <h1 class="f-700 f-20">
             	<legend><h3>Pr&eacute;dicas</h3></legend>
-				<small><a alt="Agregar Predica" href="/grupo/crear_predica/">Agregar Pr&eacute;dica</a></small>
-	        </h1>
+            </h1>
+			<h5><a alt="Agregar Predica" href="/grupo/crear_predica/">Agregar Pr&eacute;dica</a></h5>
 	        {% if okElim == 1 %}
 				<div class="row">
                     <div class="alert alert-success alert-dismissible" role="alert">
@@ -55,7 +57,7 @@
 			{% else %}
 				{% if okElim == 2%}
 					<div class="row">
-	                    <div class="alert alert-success alert-dismissible" role="alert">
+	                    <div class="alert alert-danger alert-dismissible" role="alert">
 	                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
 	                        <p>Hubo un error al eliminar las predicas.</p>
 	                    </div>
@@ -71,20 +73,22 @@
                         <th data-visible="false" data-identifier="true" data-column-id="id"></th>
                         <th data-column-id="nombre" data-identifier="true">Nombre</th>
                         <th data-column-id="descripcion" data-identifier="true">Descripci&oacute;n</th>
+                        {% if predicas %}
                         <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for pred in predicas %}
 						<tr>
 							<td class="hidden">{{pred.id}}</td>
-                            <td><a alt="Ver Sesiones" href="/academia/sesiones/{{pred.id}}/">{{pred.nombre|capfirst}}</a></td>
+                            <td>{{pred.nombre|capfirst}}</td>
                             <td>{{pred.descripcion}}</td>
 						</tr>
 	                {% empty %}
 	                	<tr>
                             <td></td>
-	                    	<td colspan="2" class="centrarTexto">No existen Zonas a&uacute;n.</td>
+	                    	<td colspan="2" class="centrarTexto">No existen Prédicas a&uacute;n.</td>
 	                    </tr>
 					{% endfor %}
                 </tbody>

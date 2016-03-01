@@ -87,9 +87,6 @@
 							</tbody>
 						</table>
 						<br/>
-						{% else %}
-						<p>A&uacute;n no se han agregado barrios a esta zona.</p>
-						{% endif %}
                     </div>
                 </div>
                 <br>
@@ -99,6 +96,9 @@
                         <button type="submit" value="Eliminar" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
                     </div>
                 </div>
+				{% else %}
+				<p>A&uacute;n no se han agregado barrios a esta zona.</p>
+				{% endif %}
             </div>
         </form>
     </div>

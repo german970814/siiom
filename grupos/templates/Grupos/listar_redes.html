@@ -20,7 +20,8 @@
                     keepSelection: true,
                     formatters: {
                         "commands": function(column, row) {
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_red/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_red/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " +
+                                "<button type=\"button\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/listar_grupos/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button>";
                         }
                     }
                 });
@@ -76,7 +77,7 @@
                     {% for red in redes %}
 						<tr>
 							<td class="hidden">{{red.id}}</td>
-                            <td><a alt="Ver Sesiones" href="/academia/sesiones/{{red.id}}/">{{red.nombre|capfirst}}</a></td>
+                            <td>{{red.nombre|capfirst}}</td>
 						</tr>
 	                {% empty %}
 	                	<tr>
