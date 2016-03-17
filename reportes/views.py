@@ -1,22 +1,23 @@
 # Create your views here.
 import calendar
-from copy import copy
 import datetime
 from encodings.utf_8_sig import encode
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 from django.core import serializers
 from django.core.mail import send_mail, send_mass_mail
 from django.db.models import Sum, Q, Count
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.datetime_safe import strftime
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from reportes.charts import PdfTemplate
-from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, FormularioReportesSinEnviar, \
-    FormularioPredicas
+from reportes.forms import FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes, \
+    FormularioCumplimientoLlamadasLideres
+from reportes.forms import FormularioReportesSinEnviar, FormularioPredicas
 
 
 def liderAdminTest(user):
@@ -24,14 +25,17 @@ def liderAdminTest(user):
             and (Group.objects.get(name__iexact = 'Lider') in user.groups.all() \
             or Group.objects.get(name__iexact = 'Administrador') in user.groups.all())
 
+
 def agenteAdminTest(user):
     return user.is_authenticated() \
             and (Group.objects.get(name__iexact = 'Agente') in user.groups.all() \
             or Group.objects.get(name__iexact = 'Administrador') in user.groups.all())
 
+
 @user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
 def visitasAsignadasRedes(request):
-    """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida por el usuario."""
+    """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida
+    por el usuario."""
 
     tipo = 1
     titulo_pag = 'Total de visitas en cada red'
@@ -372,7 +376,7 @@ def PasosTotales(request):
             return HttpResponse(data, content_type="application/javascript")
         else:
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
-            opciones = {'gi': capitalize(grupo_i.nombre)}
+            opciones = {'gi': grupo_i.nombre.capitalize()}
             sw = True
 
             if 'descendientes' in request.POST and request.POST['descendientes']=='S':
@@ -381,7 +385,7 @@ def PasosTotales(request):
                 grupos = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
             else:
                 grupo_f = Grupo.objects.get(id = request.POST['menuGrupo_f'])
-                opciones['gf'] = capitalize(grupo_f.nombre)
+                opciones['gf'] = grupo_f.nombre.capitalize()
                 listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                 grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
@@ -442,7 +446,7 @@ def PasosRangoFecha(request):
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
-                opciones = {'fi': fechai, 'ff': fechaf, 'gi': capitalize(grupo_i.nombre)}
+                opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
                 sw = True
 
                 if 'descendientes' in request.POST and request.POST['descendientes']=='S':
@@ -451,7 +455,7 @@ def PasosRangoFecha(request):
                     grupos = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                 else:
                     grupo_f = Grupo.objects.get(id = request.POST['menuGrupo_f'])
-                    opciones['gf'] = capitalize(grupo_f.nombre)
+                    opciones['gf'] = grupo_f.nombre.capitalize()
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
@@ -515,7 +519,7 @@ def estadisticoReunionesGar(request):
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
-                opciones = {'fi': fechai, 'ff': fechaf, 'gi': capitalize(grupo_i.nombre)}
+                opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
                 sw = True
 
                 if 'descendientes' in request.POST and request.POST['descendientes']=='S':
@@ -524,7 +528,7 @@ def estadisticoReunionesGar(request):
                     grupos = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                 else:
                     grupo_f = Grupo.objects.get(id = request.POST['menuGrupo_f'])
-                    opciones['gf'] = capitalize(grupo_f.nombre)
+                    opciones['gf'] = grupo_f.nombre.capitalize()
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
@@ -676,15 +680,11 @@ def estadisticoReunionesDiscipulado(request):
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
             return HttpResponse(data, content_type="application/javascript")
         else:
-            # form = FormularioRangoFechas(request.POST)
             form = FormularioPredicas(miembro=miembro, data=request.POST)
             if form.is_valid():
-                # fechai = form.cleaned_data['fechai']
-                # fechaf = form.cleaned_data['fechaf']
                 predica = form.cleaned_data['predica']
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
-                # opciones = {'fi': fechai, 'ff': fechaf, 'gi': capitalize(grupo_i.nombre)}
-                opciones = {'predica': capitalize(predica.nombre), 'gi': capitalize(grupo_i.nombre)}
+                opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
                 sw = True
 
                 if 'descendientes' in request.POST and request.POST['descendientes']=='S':
@@ -693,36 +693,29 @@ def estadisticoReunionesDiscipulado(request):
                     grupos = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                 else:
                     grupo_f = Grupo.objects.get(id = request.POST['menuGrupo_f'])
-                    opciones['gf'] = capitalize(grupo_f.nombre)
+                    opciones['gf'] = grupo_f.nombre.capitalize()
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id = grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
-                # values = [['Dates']]
                 values = [['Predica']]
                 sw_while = True
-                # while sw_while:
-                #     sig = fechai + datetime.timedelta(days = 6)
 
                 if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
                     ofrenda = True
                     if 'Ofrenda' not in values[0]:
                         values[0].append('Ofrenda')
-                    # sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
                     sum_ofrenda = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('ofrenda'))
                     if sum_ofrenda['ofrenda__sum'] is None:
                         sum = 0
                     else:
                         sum = sum_ofrenda['ofrenda__sum']
-                    # values.append([fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y"), sum])
-                    values.append([predica.nombre.encode('ascii', 'ignore'), float(sum)])
+                    values.append([str(predica), float(sum)])
                 else:
-                    # l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
-                    l = [predica.nombre.encode('ascii', 'ignore')]
+                    l = [predica.nombre]
                     if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
                         lid_asis = True
                         if 'Lideres asistentes' not in values[0]:
                             values[0].append('Lideres asistentes')
-                        # numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
                         numlid = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
                         if numlid['numeroLideresAsistentes__sum'] is None:
                             sumLid = 0
@@ -738,17 +731,12 @@ def estadisticoReunionesDiscipulado(request):
                         numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
                         l.append(numAsis)
                     values.append(l)
-                    # fechai = sig + datetime.timedelta(days=1)
-                    # if sig >= fechaf:
-                    #     sw_while = False
-                # print l
                 if 'reportePDF' in request.POST:
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
                     PdfTemplate(response, 'Estadistico de reuniones Discipulado', opciones, values, 2)
                     return response
     else:
-        # form = FormularioRangoFechas()
         form = FormularioPredicas(miembro=miembro)
         sw = False
 
@@ -779,7 +767,7 @@ def estadisticoTotalizadoReunionesGar(request):
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
             discipulos = Miembro.objects.get(id = grupo_i.listaLideres()[0]).discipulos()
             grupoDis = Grupo.objects.filter(Q(lider1__in = discipulos) | Q(lider2__in = discipulos))
-            opciones = {'fi': fechai, 'ff': fechaf, 'g': capitalize(grupo_i.nombre)}
+            opciones = {'fi': fechai, 'ff': fechaf, 'g': grupo_i.nombre.capitalize()}
             sw = True
 
             n = ['Dates']
@@ -800,10 +788,10 @@ def estadisticoTotalizadoReunionesGar(request):
                         titulo = "'Ofrendas'"
                         sum_ofrenda = ReunionGAR.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
                         if sum_ofrenda['ofrenda__sum'] is None:
-                            sum = 0
+                            suma = 0
                         else:
-                            sum = sum_ofrenda['ofrenda__sum']
-                        l.append(float(sum))
+                            suma = sum_ofrenda['ofrenda__sum']
+                        l.append(float(suma))
                     else:
                         if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
                             lid_asis = True
@@ -873,17 +861,18 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
             grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
             discipulos = Miembro.objects.get(id = grupo_i.listaLideres()[0]).discipulos()
             grupoDis = Grupo.objects.filter(Q(lider1__in = discipulos) | Q(lider2__in = discipulos))
-            opciones = {'predica': capitalize(predica.nombre), 'gi': capitalize(grupo_i.nombre)}
+            opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
             sw = True
 
             n = ['Predica']
-            n.extend(["%s" % (nom.encode('ascii', 'ignore')) for nom in grupoDis.values_list('nombre', flat=True)])
+            print(grupoDis.values_list('nombre', flat=True))
+            n.extend(grupoDis.values_list('nombre', flat=True))
             values = [n]
             sw_while = True
             # while sw_while:
             #     sig = fechai + datetime.timedelta(days = 6)
             #     l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
-            l = [predica.nombre.encode('ascii', 'ignore')]
+            l = [predica.nombre.upper()]
 
             for g in grupoDis:
                 d = Miembro.objects.get(id = g.listaLideres()[0])
@@ -896,10 +885,10 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                     # sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('ofrenda'))
                     sum_ofrenda = ReunionDiscipulado.objects.filter(predica = predica, grupo__in = grupos).aggregate(Sum('ofrenda'))
                     if sum_ofrenda['ofrenda__sum'] is None:
-                        sum = 0
+                        suma = 0
                     else:
-                        sum = sum_ofrenda['ofrenda__sum']
-                    l.append(float(sum))
+                        suma = sum_ofrenda['ofrenda__sum']
+                    l.append(float(suma))
                 else:
                     if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
                         lid_asis = True
@@ -922,6 +911,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                             numAsis = AsistenciaDiscipulado.objects.filter(reunion__in = reg, asistencia = True).count()
                             l.append(numAsis)
             values.append(l)
+            # n.append(l)
 
             print('------------ ' + str(values))
             if 'reportePDF' in request.POST:
@@ -1013,11 +1003,19 @@ def listaGruposDescendientes_id(miembro):
             discipulos.extend(list(d.discipulos()))
     return listaG
 
+isOk = False
+
 @user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
 def ConsultarReportesSinEnviar(request, sobres=False):
     """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de reuniones de grupo en un rango de fecha
         especificado. El usuario escoge el tipo de reunion, si la reunion es de GAR(1) o discipulado (2). Luego podra enviar un mail a los lideres
         que no han ingresado los reportes y a sus lideres. Para el lider solo muestra su arbol."""
+
+    global isOk
+
+    if isOk:
+        messages.success(request,'Se han enviado los correros satisfactoriamente')
+        isOk = False
 
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
@@ -1035,15 +1033,18 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                 mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones GAR de las siguientes fechas:\n\n"
 
             correos = []
-            for g in grupos:
+            for ids,fechas in grupos.items():
                 receptores = list()
-                mailLideres = g.lideres.values('email')
+                g = Grupo.objects.get(id=ids)
+                mailLideres = Miembro.objects.filter(id__in=g.listaLideres()).values('email')
                 receptores.extend(["%s" % (k['email']) for k in mailLideres])
-                msj = mensaje + '\n'.join(map(str, g.fecha_reunion)) + "\n\nCordialmente,\n Admin"
+                msj = mensaje + '\n'.join(map(str, fechas)) + "\n\nCordialmente,\n Admin"
                 correos.append((asunto, msj, from_mail, receptores))
             print(tuple(correos))
+            isOk = True
 
             sendMassMail(tuple(correos))
+            return HttpResponseRedirect('/reportes/reportes_reuniones_sin_enviar/')
 
         form = FormularioReportesSinEnviar(request.POST)
         if 'verMorosos' in request.POST:
@@ -1051,6 +1052,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupos = []
+                gruposSinReporte = {}
                 sw = True
 
                 if miembro.usuario.has_perm("miembros.es_administrador"):
@@ -1072,21 +1074,26 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                             fecha = fechai + datetime.timedelta(days = int(g.diaGAR))
                             if fecha <= datetime.date.today():
                                 grupos[i].fecha_reunion.append(fecha)
+                                gruposSinReporte[g.id].append(str(fecha))
                         except:
+                            # print(g.id)
                             fecha = fechai + datetime.timedelta(days = int(g.diaGAR))
                             if fecha <= datetime.date.today():
                                 g.fecha_reunion = [fecha]
                                 g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
                                 grupos.append(g)
+                                strFecha = str(fecha)
+                                gruposSinReporte[g.id] = [strFecha]
 
                     fechai = sig
                     if sig >= fechaf:
                         sw = False
 
-                request.session['grupos_sin_reporte'] = grupos
+                request.session['grupos_sin_reporte'] = gruposSinReporte
                 request.session['sobres'] = sobres
     else:
         form = FormularioReportesSinEnviar()
+
 
     return render_to_response('reportes/morososGAR.html', locals(), context_instance=RequestContext(request))
 
@@ -1148,14 +1155,31 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
 
     return render_to_response('reportes/morososDiscipulado.html', locals(), context_instance=RequestContext(request))
 
+
+@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+def cumplimiento_llamadas_lideres_red(request):
+    """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
+    personas asignadas a su grupo dentro de un rango de fechas especificado."""
+
+    grupos = []
+    if request.method == 'POST':
+        form = FormularioCumplimientoLlamadasLideres(data=request.POST)
+
+        if form.is_valid():
+            grupos = form.obtener_grupos()
+    else:
+        form = FormularioCumplimientoLlamadasLideres()
+
+    data = {'form': form, 'grupos': grupos}
+    return render_to_response('reportes/llamadas_lideres_visitas.html', data, context_instance=RequestContext(request))
+
+
 def sendMail(camposMail):
     subject = camposMail[0]
     mensaje = camposMail[1]
     receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently = False)
+    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
+
 
 def sendMassMail(correos):
-    send_mass_mail(correos, fail_silently = False)
-
-
-
+    send_mass_mail(correos, fail_silently=False)

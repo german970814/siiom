@@ -15,6 +15,14 @@
                 </div>
             </div>
             {% endif %} 
+            {% if form.errors %}
+                <div class="row">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Aún hay campos vacios. No se agregarón pasos</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -26,7 +34,7 @@
                                 <i class="zmdi zmdi-account"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <input type="text" id="id_nombre" class="form-control" name="nombre">
+                                {{form.nombre}}
                                 <label for="id_nombre" class="fg-label requerido">Nombre:</label>
                             </div>
                         </div>
@@ -41,7 +49,7 @@
                                 <i class="zmdi zmdi-arrow-right-top"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <input type="number" id="id_prioridad" class="form-control" name="prioridad">
+                                {{form.prioridad}}
                                 <label for="id_prioridad" class="fg-label requerido">Prioridad:</label>
                             </div>
                         </div>

@@ -2,6 +2,40 @@
 {% load staticfiles %}
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    jQuery(document).ready(function($) {
+        $("#data-table-command").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },
+                    {% if estudiantes %}
+                    selection: true,
+                    multiSelect: true,
+                    rowSelect: true,
+                    caseSensitive: false,
+                    keepSelection: true,
+                    {% endif %}
+                    formatters: {
+                        "link" : function(column, row) {
+                            return "<a href='/academia/estudiante_detalle/" +row.id + "'\>" + "Ver" + "</a>";
+                        },
+                    }
+                });
+        $("button[name='Eliminar']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nada que Eliminar")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });    
+    });
+</script>
 {% endblock %}
 
 {% block contenido %}
@@ -20,28 +54,31 @@
                 <br>
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="estudiantes" class="table" cellspacing="0">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
-                                    <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-                                    <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('estudiantes');"/></div></th>
-                                    <th>Nombre</th>
-                                    <th>Modulo</th>
-                                    <th class="centrarTexto">Sesiones dadas</th>
-                                    <th class="centrarTexto">Sesiones faltantes</th>                   
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                    <th data-identifier="true" data-column-id="nombre">Nombre</th>
+                                    <th data-identifier="true" data-column-id="modulo">Modulo</th>
+                                    <th data-identifier="true" data-column-id="sesionesd">Sesiones dadas</th>
+                                    <th data-identifier="true" data-column-id="sesionesf">Sesiones faltantes</th>
+                                    {% if estudiantes %}
+                                    <th data-column-id="ver" data-formatter="link" data-sortable="false">Link</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for est in estudiantes %}
                                     <tr>
-                                        <td><input type="checkbox" name="seleccionados" value="{{est.id}}"/></td>
+                                        <td>{{est.id}}</td>
                                         <td><a href="/academia/estudiante_detalle/{{est.id}}/">{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</a></td>
                                         <td>{{ est.moduloActual.nombre }}</td>
-                                        <td class="centrarTexto">{{ est.sesionesDadas }}</td>
-                                        <td class="centrarTexto">{{ est.sesionesFaltantes }}</td>                    
+                                        <td>{{ est.sesionesDadas }}</td>
+                                        <td>{{ est.sesionesFaltantes }}</td>                    
                                     </tr>
                                 {% empty %}
                                     <tr>
+                                        <td></td>
                                         <td colspan="5" style="text-align:center;">A&uacute;n no hay estudiantes matriculados en el curso.</td>
                                     </tr>
                                 {% endfor %}
@@ -54,7 +91,7 @@
                 {% if admin %}
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" class="btn btn-success btn-block" name ="Eliminar">Eliminar</button>
+                        <button type="submit" class="btn bgm-red btn-block" name ="Eliminar">Eliminar</button>
                     </div>
                 </div>
                 {% endif %}
@@ -67,9 +104,9 @@
             <h1>
                 <legend>
                     <h3 class="f-700 f-20">{{ curso.nombre|capfirst }}</h3>
-                    <small><a href="/academia/curso_detalle/{{ curso.id }}/">Ver informaci&oacute;n del curso</a></small>
                 </legend>
             </h1>
+            <h4><a href="/academia/curso_detalle/{{ curso.id }}/">Ver informaci&oacute;n del curso</a></h4>
         </div>
         <form action="" method="POST">
             {% csrf_token %}
@@ -103,12 +140,9 @@
                 </div>
                 {% else %}
                 <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group form-group">
-                            <div class="fg-line requerido">
-                                <label for="accion" class="fg-label requerido"></label>
-                                <p><a alt="Matricular Estudiante" href="/academia/matricular/{{curso.id}}">Matricular Estudiante</a></p>
-                            </div>
+                    <div class="col-md-4 col-md-offset-4">
+                        <div class="fg-line requerido">
+                            <a class="btn btn-info btn-block" alt="Matricular Estudiante" href="/academia/matricular/{{curso.id}}">Matricular Estudiante</a>
                         </div>
                     </div>
                 </div>

@@ -73,8 +73,8 @@ def grupoRaiz(request):
 def editarHorarioReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
-    if grupo is None:
-        raise Http404
+    # if grupo is None:
+    #     raise Http404
     
     if request.method == 'POST':
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)
@@ -167,7 +167,7 @@ def reportarReunionDiscipulado(request):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
-                        if unicode(m.id) in asistentesId:
+                        if m.id in asistentesId:
                             am = AsistenciaDiscipulado.objects.create(miembro=m, reunion = r, asistencia=True)
                         else:
                             am = AsistenciaDiscipulado.objects.create(miembro=m, reunion = r, asistencia=False)
@@ -234,12 +234,11 @@ def registrarPagoDiscipulado(request, id):
 def listarRedes(request):
     miembro = Miembro.objects.get(usuario = request.user)    
     if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/grupo/editar_red/')
-        if  'eliminar' in request.POST:
+
+        if 'eliminar' in request.POST:
             okElim = eliminar(Red, request.POST.getlist('seleccionados'))
     redes = list(Red.objects.all())
+
     return render_to_response('Grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
@@ -256,36 +255,31 @@ def crearRed(request):
     return render_to_response('Grupos/crear_red.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarRed(request):
+def editarRed(request, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        zona = request.session['actual']
-        form = FormularioCrearRed(data=request.POST, instance=zona)
+
+    try:
+        red = Red.objects.get(pk=pk)
+    except Red.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioCrearRed(request.POST or None, instance=red)
+
         if form.is_valid():
-            nuevaRed = form.save()
             ok = True
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            red = Red.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = red
-            form = FormularioCrearRed(instance=red)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Grupos/crear_red.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/grupo/listar_redes/')
+            form.save()
+
     else:
-        return HttpResponseRedirect('/grupo/listar_redes/')
+        form = FormularioCrearRed(instance=red)
+        return render_to_response("Grupos/crear_red.html",locals(),context_instance=RequestContext(request))
+
+    return render_to_response("Grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
 @user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
 def listarPredicas(request):
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/grupo/editar_predica/')
         if  'eliminar' in request.POST:
             okElim = eliminar(Predica, request.POST.getlist('seleccionados'))
     predicas = list(Predica.objects.filter(miembro__id = miembro.id))
@@ -308,28 +302,26 @@ def crearPredica(request):
     return render_to_response('Grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
-def editarPredica(request):
+def editarPredica(request, pk):
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        predica = request.session['actual']
-        form = FormularioCrearPredica(data=request.POST, instance=predica)
-        if form.is_valid():
-            nuevaPredica = form.save()
-            ok = True
 
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            predica = Predica.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = predica
-            form = FormularioCrearPredica(instance=predica)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/grupo/listar_predicas/')
+    try:
+        predica = Predica.objects.get(pk=pk)
+    except Predica.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        form = FormularioCrearPredica(request.POST or None, instance=predica)
+
+        if form.is_valid():
+            ok = True
+            form.save()
     else:
-        return HttpResponseRedirect('/grupo/listar_predicas/')
+        form = FormularioCrearPredica(instance=predica)
+        return render_to_response("Grupos/crear_predica.html",locals(),context_instance=RequestContext(request))
+
+    return render_to_response("Grupos/crear_predica.html",locals(),context_instance=RequestContext(request))
+
     
 def eliminar(modelo, lista):
     ok = 0 #No hay nada en la lista

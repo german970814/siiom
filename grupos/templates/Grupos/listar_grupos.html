@@ -11,9 +11,9 @@
         	<h1>
         		<legend>
 					<h3 class="f-700 f-20">Grupos de la Red {{red.nombre|capfirst}}</h3>
-					<small><a alt="Agregar Grupo" href="/grupo/crear_grupo/{{red.id}}">Agregar Grupos <img src="{{MEDIA_URL}}Imagenes/add1.png" /></a></small>
         		</legend>
         	</h1>
+			<h5><a alt="Agregar Grupo" href="/grupo/crear_grupo/{{red.id}}">Agregar Grupos</a></h5>
         </div>
         {% if grupos %}
         <form action="" method="POST" enctype="multipart/form-data">
@@ -61,7 +61,7 @@
         {% else %}
         <div class="card-body card-padding">
         	<div class="row">
-				<div class="row">
+				<div class="col-md-8 col-md-offset-2">
 					<div class="alert alert-danger alert-dismissible" role="alert">
 						<button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
 						<p>A&uacute;n no se han agregado grupos a esta red.</p>

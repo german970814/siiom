@@ -1,11 +1,49 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
+{% block js %}
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    jQuery(document).ready(function($) {
+        $("#data-table-command").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },
+                    selection: false,
+                    multiSelect: false,
+                    rowSelect: false,
+                    caseSensitive: false,
+                    keepSelection: true,
+                    formatters: {
+                        "link" : function(column, row) {
+                            return "<a href='/academia/estudiante_detalle/" +row.id + "'\>" + "Ver" + "</a>";
+                        },
+                    }
+                });
+        $("button[name='Eliminar']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nada que Eliminar")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });    
+    });
+</script>
+{% endblock js %}
+
+
 
 {% block contenido %}
 <div class="container">
 	<div class="card">
         <div class="card-header">
             <h1>
-                <legend><h1>{{ curso.nombre|capfirst }}</h1></legend>
+                <legend><h3>{{ curso.nombre|capfirst }}</h3></legend>
             </h1>
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
@@ -14,12 +52,12 @@
                 <br>
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="estudiantes" class="table" cellspacing="0">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
-                                    <th style="text-align: center;">Modulo</th>
-                                    <th style="text-align: center;">Sesiones</th>
-                                    <th style="text-align: center;">Porcentaje</th>
+                                    <th data-identifier="true" data-column-id="module">Modulo</th>
+                                    <th data-identifier="true" data-column-id="session">Sesiones</th>
+                                    <th data-identifier="true" data-column-id="percent">Porcentaje</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -29,7 +67,7 @@
                                         <td>
                                             <ul class="clist clist-check">
                                                 {% for sesion in modulo.sesiones %}
-                                                    <li>{{ sesion.nombre|capfirst }}</li>
+                                                    <li>{{ sesion.nombre|capfirst }},  </li>
                                                 {% empty %}
                                                     <li>No hay sesiones en el modulo</li>
                                                 {% endfor %}

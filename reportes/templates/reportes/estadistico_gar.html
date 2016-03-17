@@ -2,14 +2,9 @@
 {% load staticfiles %}
 {% block js %}
 
-<!-- <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script> -->
-<!-- <link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" /> -->
-
-<!-- <link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" /> -->
-<!-- <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script> -->
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js' %}"></script>
 <script type="text/javascript">
     //dibujando el grafico
     {% if sw %}
@@ -40,7 +35,6 @@
 
 
         $('#id_fechai').on("dp.change",function(e){
-            console.log(e);
             $('#id_fechaf').data("DateTimePicker").minDate(e.date);
         });
 
@@ -48,9 +42,14 @@
             $('#id_fechai').data("DateTimePicker").maxDate(e.date);
         });
 
+
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
-                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){agregarOpciones(data, 'idGrupo_f');}, "json");
+                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
+                    // console.log(data);
+                    agregarOpciones(data, 'idGrupo_f');
+                    $('#idGrupo_f').selectpicker('refresh')
+                }, "json");
             }
             else{
                 $("#idGrupo_f").html('');
@@ -75,26 +74,48 @@
             }
         });
 
-        $("#form_pasosTotal").submit(function(){
-            if($("#idGrupo_i").val() == -1){
-                alert("Por favor seleccione un grupo inicial.");
-            }
-            else{
-                if(!$("#idCheck").is(':checked')){
-                    if($("#idGrupo_f").val() == -1){
-                        alert("Por favor seleccione un grupo final o seleccione o la casilla de los descendientes.");
-                    }
-                    else{
-                       return true;
-                    }
+        var $fechai = $('#id_fechai');
+        var $fechaf = $('#id_fechaf');
+        var $grupoi = $('#idGrupo_i');
+        var $grupof = $('#idGrupo_f');
+        var $visitas = $("input[name='visitas']");
+        var $lideres = $("input[name='lid_asis']");
+        var $ofrenda = $("input[name='ofrenda']");
+        var $asis_reg = $("input[name='asis_reg']");
+        var $descendientes = $("input[name='descendientes']");
+        var $sel = [];
+        var so = [];
+        $sel.push($visitas,$lideres,$ofrenda,$asis_reg)
+
+        $('#form_pasosTotal').submit(function(event) {
+            if ($fechai.val() == '') {
+                swal("Alerta!!!","Asegurate de escoger una fecha inicial");
+                return false;
+            } else if ($fechaf.val() == '' && $fechai.val() != '') {
+                swal("Alerta!!!","Asegurate de escoger una fecha final");
+                return false;
+            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() == -1) {
+                swal("Alerta!!!","Asegurate de escoger un grupo inicial");
+                return false;
+            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() != -1 && $grupof.val() == -1) {
+                if (!$descendientes.is(':checked')) {
+                    swal("Alerta!!!","Asegurate de escoger un grupo final o de seleccionar la opción de mostrar todos los descendientes del grupo inicial");
+                    return false;
+                } else {
+                    return true;
                 }
-                else{
+                
+            } else {
+                if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
+                    swal("Alerta", "Escoja por lo menos una opción");
+                    return false;
+                } else {
                     return true;
                 }
             }
-            return false;
         });
-	});
+
+    });
 </script>
 {% endblock %}
 
@@ -130,7 +151,7 @@
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechai" class="fg-label requerido">Fecha Inicial:</label>
+                                <label for="id_fechai" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Solo puedes escoger un Lunes." title="" data-original-title="Ayuda">Fecha Inicial:</label>
                                 {{form.fechai}}
                             </div>
                         </div>
@@ -141,7 +162,7 @@
                                 <i class="zmdi zmdi-calendar-note"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                <label for="id_fechaf" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Solo puedes escoger un Domingo." title="" data-original-title="Ayuda">Fecha Final:</label>
                                 {{form.fechaf}}
                             </div>
                         </div>
@@ -172,14 +193,12 @@
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="idGrupo_f" class="fg-label requerido">Grupo Final:</label>
-                                <select class="selectpicker" data-live-search="true" name="menuGrupo_f" id="idGrupo_f">
-                                {% if grupo_f %}
+                                <label for="idGrupo_f" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Para poder ver algo aqui debes escoger un grupo inicial." title="" data-original-title="Ayuda">Grupo Final:</label>
+                                <select class="selectpicker" name="menuGrupo_f" id="idGrupo_f">
                                     <option value="-1" {% if not grupo_f %} selected="selected {% endif %}">Selecciona Un Grupo</option>
                                     {% for g_f in listaGrupo_f %}
                                     <option value="{{g_f.id}}" {% if g_f == grupo_f %} selected="selected" {% endif %}>{{g_f.nombre|capfirst}}</option>
                                     {% endfor %}
-                                {% endif %}
                                 </select>
                             </div>
                         </div>
@@ -265,7 +284,13 @@
                 </div>
             </div>
         </form>
-        <div id="out"></div> 
     </div>  
+    {%if sw %}
+    <div class="card">
+        <div class="card-body card-padding">    
+        <div id="out"></div> 
+        </div>
+    </div>
+    {% endif %}
 </div> 
 {% endblock %}

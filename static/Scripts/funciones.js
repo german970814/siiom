@@ -49,4 +49,5 @@ function agregarOpciones(data, idCombo){
 	});
 	//$("#"+idCombo).empty();
     $("#"+idCombo).html(opciones);
+    $("#"+idCombo).trigger('chosen:updated');
 }

@@ -7,12 +7,12 @@
 <script type="text/javascript">
     //dibujando el grafico
     {% if sw and grupoDis %}
-        google.load("visualization", "1", {packages:["corechart"]});
+        google.load("visualization", "1", {packages:["corechart"],language:'es'});
         google.setOnLoadCallback(drawChart);
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: 600, height: 500, title: {{ titulo|safe }}};
+            var options = {legend: 'bottom', title: {{ titulo|safe }}};
             var chart = new google.visualization.ColumnChart(document.getElementById('out'));
             chart.draw(data, options);
         }
@@ -23,19 +23,6 @@
     {% endif %}
 
     $(document).ready(function(){
-        var dates = $("#id_fechai, #id_fechaf").datepicker({
-                                    maxDate: new Date(),
-                                    beforeShowDay: function(date){
-                                        var day = date.getDay();
-                                        var d = this.id == "id_fechai" ? [(day == 1), ""] : [(day == 0), ""];
-                                        return d;
-                                    },
-                                    onSelect: function(selectedDate){
-                                        var option = this.id == "id_fechai" ? "minDate" : "maxDate";
-                                        dates.not(this).datepicker("option", option, selectedDate);
-                                    }
-								});
-
         $("input[name='ofrenda']").click(function(){
             if($(this).is(':checked')){
                 $("input[name='lid_asis'], input[name='asis_reg']").attr('disabled', 'disabled');
@@ -65,15 +52,29 @@
 
         $("#form_totalGAR").submit(function(){
             if($("#idGrupo_i").val() == -1){
-                alert("Por favor seleccione un grupo inicial.");
+                swal("Alerta!!!","Por favor seleccione un grupo inicial.");
             }
             else{
                 return true;
             }
             return false;
         });
+
+        var $lid_asis = $("input[name='lid_asis']"); var $asis_reg = $("input[name='asis_reg']"); var $ofrenda = $("input[name='ofrenda']");
+
+        $("button[name='verReporte'], button[name='reportePDF']").click(function(event) {
+            if ($lid_asis.is(':checked') || $asis_reg.is(':checked') || $ofrenda.is(':checked')) {
+                return true;
+            }
+            else{
+                swal("Alerta!!!","Asegurate de escoger una opcion");
+                return false;
+            }
+        });
+
 	});
 </script>
+
 {% endblock %}
 
 {% block contenido %}
@@ -87,10 +88,12 @@
             </h1>
             {% if messages %}
                 <div class="row">
+                    {% for message in messages %}
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                         <p>{{message}}</p>
                     </div>
+                    {% endfor %}
                 </div>
             {% endif %}
         </div>
@@ -181,7 +184,14 @@
         </form>
 
     </div>
-    <div id="out"></div> 
+    {% if sw %}
+    <div class="card">
+        <div class="card-body card-padding">
+            <div id="out">
+            </div> 
+        </div>
+    </div>
+    {% endif %}
 </div>   
 
 {% endblock %}

@@ -14,9 +14,9 @@
 {% block contenido %}
 <div class="container">
 	<div class="card">
-		<div class="card-header bgm-blue">
+		<div class="card-header">
 			<h1>
-				<h3 style="color:#fff;">Registrar Llamada {{tipo|capfirst}}</h3>
+				<legend><h3>Registrar Llamada {{tipo|capfirst}}</h3></legend>
 			</h1>
 		</div>
 		<div class="card-body card-padding">
@@ -32,7 +32,7 @@
 			</div>
         	{% endif %}
 			<div class="row">
-				<div class="col-md-4">
+				<div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="zmdi zmdi-layers"></i>
@@ -43,7 +43,7 @@
                         </div>
                     </div>
                 </div>
-				<div class="col-md-4">
+				<div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="zmdi zmdi-phone"></i>
@@ -54,7 +54,7 @@
                         </div>
                     </div>
                 </div>
-				<div class="col-md-4">
+				<div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="zmdi zmdi-smartphone-iphone"></i>
@@ -65,33 +65,33 @@
                         </div>
                     </div>
                 </div>
+	            <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="zmdi zmdi-comment"></i>
+                        </span>
+                        <div class="fg-line requerido">
+                            <label for="id_detalleLlamadaLider" class="fg-label requerido">Detalle Llamada de Lider:</label>
+                            <p>{{form.detalleLlamadaLider}}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <br>
             <br>
             <div class="row">
-	            <div class="col-md-4">
-	                    <div class="input-group">
-	                        <span class="input-group-addon">
-	                            <i class="zmdi zmdi-comment"></i>
-	                        </span>
-	                        <div class="fg-line requerido">
-	                            <label for="id_detalleLlamadaLider" class="fg-label requerido">Detalle Llamada de Lider:</label>
-	                            <p>{{form.detalleLlamadaLider}}</p>
-	                        </div>
-	                    </div>
-	                </div>
-					<div class="col-md-4">
-	                    <div class="input-group">
-	                        <span class="input-group-addon">
-	                            <i class="zmdi zmdi-star"></i>
-	                        </span>
-	                        <div class="fg-line requerido">
-	                            <label for="id_observacionLlamadaLider" class="fg-label requerido">Observacion de Llamada Lider:</label>
-								<p>{{form.observacionLlamadaLider}}</p> 
-	                        </div>
-	                    </div>
-	                </div>
-				</div>
+				<div class="col-md-6 col-md-offset-3">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="zmdi zmdi-star"></i>
+                        </span>
+                        <div class="fg-line requerido">
+                            <label for="id_observacionLlamadaLider" class="fg-label requerido">Observacion de Llamada Lider:</label>
+							<p>{{form.observacionLlamadaLider}}</p> 
+                        </div>
+                    </div>
+                </div>
+			</div>
 			<br>
 			<br>
 			<div class="row">

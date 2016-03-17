@@ -1,10 +1,11 @@
 # Create your views here.
+from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from miembros.models import Miembro, CumplimientoPasos
 from academia.models import Curso, Matricula, AsistenciaSesiones, Modulo,\
     Sesion, Reporte
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core import serializers
@@ -48,6 +49,11 @@ def adminMaestroTest(user):
 @user_passes_test(adminMaestroTest, login_url="/iniciar_sesion/")
 def verCursos(request, admin):
     """Permite a un maestro o a un administrador listar cursos."""
+    miembro = Miembro.objects.get(usuario=request.user)
+    if miembro.usuario.has_perm("miembros.es_administrador"):
+        admin = True
+    else:
+        admin = False
     
     if request.method == 'POST':
         request.session['seleccionados'] = request.POST.getlist('seleccionados')
@@ -70,46 +76,35 @@ def verDetalleCurso(request, curso):
     """Permite a un maestro o administrador ver los modulos y sesiones que se dan en un curso."""
     
     miembro = Miembro.objects.get(usuario = request.user)
-    id = int(curso)
-    curso = Curso.objects.get(id = id)
+    iid = int(curso)
+    curso = Curso.objects.get(id = iid)
     modulos = curso.modulos.all()
     for modulo in modulos:
         modulo.sesiones = Sesion.objects.filter(modulo = modulo)
     return render_to_response("Academia/curso_detalle.html", locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminMaestroTest, login_url="/iniciar_sesion/")
-def editarCurso(request, admin, url):
+def editarCurso(request, admin, url, pk, template_name="Academia/crear_curso.html"):
     """Permite a un maestro o administrador editar un cursos."""
-    
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario = request.user)
+    curso = get_object_or_404(Curso, pk=pk)
+
     if request.method == 'POST':
-        curso = request.session['actual']
         if admin:
-            form = FormularioCrearCurso(data = request.POST, instance = curso)
+            form = FormularioCrearCurso(request.POST or None, instance=curso)
         else:
-            form = FormularioEditarCurso(data = request.POST, instance = curso)
+            form = FormularioEditarCurso(request.POST or None, instance=curso)
+
         if form.is_valid():
-            cursoEditado = form.save()
-            ok = True
-        else:
-            return render_to_response("Academia/crear_curso.html", locals(), context_instance=RequestContext(request))
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            cursoEditar = Curso.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = cursoEditar
-            request.session['seleccionados'] = request.session['seleccionados']
-            if admin:
-                form = FormularioCrearCurso(instance = cursoEditar)
-            else:
-                form = FormularioEditarCurso(instance = cursoEditar)
-            return render_to_response("Academia/crear_curso.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect(url)
+            form.save()
+            return HttpResponseRedirect("/academia/listar_cursos")
     else:
-        return HttpResponseRedirect(url)
+        if admin:
+            form = FormularioCrearCurso(instance=curso)
+        else:
+            form = FormularioEditarCurso(instance=curso)
+
+    return render_to_response(template_name,locals(),context_instance=RequestContext(request))
 
 @user_passes_test(adminMaestroTest, login_url="/iniciar_sesion/")
 def listarEstudiantes(request, curso):
@@ -173,11 +168,12 @@ def maestroAsistencia(request):
                 curso = Curso.objects.get(id = request.POST['id'])
                 modulos = curso.modulos.all()
                 data = serializers.serialize('json', modulos)
+                print(data)
             else:
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
                 data = serializers.serialize('json', sesiones)
-            return HttpResponse(data, conten_type="application/javascript")
+            return HttpResponse(data, content_type="application/javascript")
         
         if 'verEstudiantes' in request.POST or 'aceptarAsistencia' in request.POST:
             try:
@@ -241,6 +237,7 @@ def maestroRegistrarEntregaTareas(request):
                 curso = Curso.objects.get(id = request.POST['id'])
                 modulos = curso.modulos.all()
                 data = serializers.serialize('json', modulos)
+                print(data)
             else:
                 modulo = Modulo.objects.get(id = request.POST['id'])
                 sesiones = Sesion.objects.filter(modulo = modulo)
@@ -365,6 +362,7 @@ def crearCurso(request):
         form = FormularioCrearCurso(data = request.POST)
         if form.is_valid():
             nuevoCurso = form.save()
+            form.full_clean()
             ok = True
     else:
         form = FormularioCrearCurso()
@@ -392,14 +390,12 @@ def matricularEstudiante(request, id):
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarModulos(request):
     """Permite a un administrador listar los modulos de la academia."""
-    
+
     if request.method == 'POST':
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect("/academia/editar_modulo/")
         if 'eliminar' in request.POST:
-            okElim = eliminar(Modulo, request.POST.getlist('seleccionados'))    
-    miembro = Miembro.objects.get(usuario = request.user)
+            modulosEliminar = request.POST.getlist('seleccionados')
+            okElim = eliminar(Modulo,request.POST.getlist('seleccionados'))
+
     modulos = Modulo.objects.all().order_by('id')
     return render_to_response('Academia/listar_modulos.html', locals(), context_instance=RequestContext(request))
 
@@ -419,43 +415,40 @@ def crearModulo(request):
     form = FormularioCrearModulo()
     return render_to_response('Academia/crear_modulo.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarModulo(request):
+@user_passes_test(adminTest,login_url="/iniciar_sesion/")
+def editarModulo(request, pk):
     """Permite a un administrador editar los modulos existentes en la academia."""
     
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario = request.user)
-    
+    try:
+        modulo = Modulo.objects.get(pk=pk)
+    except Modulo.DoesNotExist:
+        raise Http404
+
     if request.method == 'POST':
-        modulo = request.session['actual']
-        form = FormularioCrearModulo(data = request.POST, instance = modulo)
+        form = FormularioCrearModulo(request.POST or None, instance=modulo)
+
         if form.is_valid():
-            moduloEditado = form.save()
+            form.save()
             ok = True
         else:
-            return render_to_response("Academia/crear_modulo.html", locals(), context_instance=RequestContext(request))
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            moduloEditar = Modulo.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = moduloEditar            
-            request.session['seleccionados'] = request.session['seleccionados']
-            form = FormularioCrearModulo(instance = moduloEditar)
-            return render_to_response("Academia/crear_modulo.html", locals(), context_instance=RequestContext(request))
+            print("Formulario Incorrecto")
 
-    return HttpResponseRedirect("/academia/listar_modulos/")
+    else:   
+        form = FormularioCrearModulo(instance=modulo)
+        return render_to_response("Academia/crear_modulo.html",locals(),context_instance=RequestContext(request))
+
+    return HttpResponseRedirect("/academia/listar_modulos")
+
         
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarSesiones(request, id):
     """Permite a un administrador listar las sesiones de un modulo."""
     
     if request.method == 'POST':
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect("/academia/editar_sesion/" + id + "/")
         if 'eliminar' in request.POST:
-            okElim = eliminar(Sesion, request.POST.getlist('seleccionados'))    
+            okElim = eliminar(Sesion, request.POST.getlist('seleccionados')) 
+
     miembro = Miembro.objects.get(usuario = request.user)
     modulo = Modulo.objects.get(id = int(id))
     sesiones = Sesion.objects.filter(modulo = modulo).order_by('id')
@@ -481,30 +474,38 @@ def crearSesion(request, id):
     return render_to_response('Academia/crear_sesion.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarSesion(request, id):
+def editarSesion(request, id, pk):
     """Permite a un administrador editar una sesion de un modulo de la academia."""
+    # miembro = Miembro.objects.get(usuario = request.user)
     
     accion = 'Editar'
-    miembro = Miembro.objects.get(usuario = request.user)
     modulo = Modulo.objects.get(id = int(id))
     
+    try:
+        sesion = Sesion.objects.get(pk=pk)
+    except Sesion.DoesNotExist:
+        raise Http404
+        
     if request.method == 'POST':
-        sesion = request.session['actual']
-        form = FormularioCrearSesion(data = request.POST, instance = sesion)
+
+        form = FormularioCrearSesion(request.POST or None, instance = sesion)
         if form.is_valid():
             sesionEditado = form.save()
             ok = True
         else:
             return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
     
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            sesionEditar = Sesion.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = sesionEditar            
-            request.session['seleccionados'] = request.session['seleccionados']
-            form = FormularioCrearSesion(instance = sesionEditar)
-            return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
+    # if 'seleccionados' in request.session:
+    #     faltantes = request.session['seleccionados']
+    #     if len(faltantes) > 0:
+    #         sesionEditar = Sesion.objects.get(id = request.session['seleccionados'].pop())
+    #         request.session['actual'] = sesionEditar            
+    #         request.session['seleccionados'] = request.session['seleccionados']
+    #         form = FormularioCrearSesion(instance = sesionEditar)
+        
+    else:
+        form = FormularioCrearSesion(instance=sesion)
+        return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect("/academia/sesiones/" + id + "/")
 

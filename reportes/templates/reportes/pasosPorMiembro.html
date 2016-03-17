@@ -6,7 +6,10 @@
     $(document).ready(function(){
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
-                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){agregarOpciones(data, 'idGrupo_f');}, "json");
+                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
+                    agregarOpciones(data, 'idGrupo_f');
+                    $('#idGrupo_f').selectpicker('refresh');
+                }, "json");
             }
             else{
                 $("#idGrupo_f").html('');
@@ -24,12 +27,14 @@
 
         $("#form_pasosPorMiembro").submit(function(){
             if($("#idGrupo_i").val() == -1){
-                alert("Por favor seleccione un grupo inicial.");
+                // alert("Por favor seleccione un grupo inicial.");
+                swal("Alerta!", "Por favor seleccione un grupo inicial.");
             }
             else{
                 if(!$("#idCheck").is(':checked')){
                     if($("#idGrupo_f").val() == -1){
-                        alert("Por favor seleccione un grupo final o seleccione o la casilla de los descendientes.");
+                        // alert("Por favor seleccione un grupo final o seleccione o la casilla de los descendientes.");
+                        swal("Alerta!","Por favor seleccione un grupo final o seleccione o la casilla de los descendientes.");
                     }
                     else{
                        return true;
@@ -82,14 +87,12 @@
                                 <i class="zmdi zmdi-accounts-outline"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="idGrupo_f" class="fg-label requerido">Grupo Final:</label>
+                                <label for="idGrupo_f" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Para poder ver  algo aquí debes escoger un grupo inicial." title="" data-original-title="Ayuda">Grupo Final:</label>
                                 <select class="selectpicker" data-live-search="true" id="idGrupo_f" name="menuGrupo_f">
-                                    {% if  grupo_f %}
                                         <option value="-1" >------</option>
                                         {% for g_f in listaGrupo_f %}
                                             <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
                                         {% endfor %}
-                                    {% endif %}
                                 </select>
                             </div>
                         </div>
@@ -149,7 +152,7 @@
                                             <td>{{ m.nombre|capfirst }} {{ m.primerApellido|capfirst }}</td>
                                             {% for c in m.cumple %}
                                                 {% if c %}
-                                                    <td><img src="{{ MEDIA_URL }}Imagenes/accept.png" ></td>
+                                                    <td><img src="{% static 'Imagenes/accept.png' %}" ></td>
                                                 {% else %}
                                                     <td></td>
                                                 {% endif %}

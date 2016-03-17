@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+	<div class="card">
+		<div class="card-body card-padding">
+			<div class="four-zero" style="margin-top: 35px; position: relative;">
+			    <h2>404!</h2>
+			    <small>No fue encontrada la página solicitada</small>
+			    
+			    <footer>
+			        <a href="{% url 'inicio' %}"><i class="zmdi zmdi-arrow-back"></i></a>
+			        <a href="{% url 'inicio' %}"><i class="zmdi zmdi-home"></i></a>
+			    </footer>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

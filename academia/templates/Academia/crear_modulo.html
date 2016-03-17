@@ -1,10 +1,29 @@
 {% extends "base.html" %}
+{% block js %}
+<script>
+    $(document).ready(function(){
+        $("#form").submit(function(event) {
+            if ($("#id_nombre").val() == '') {
+                swal("Alerta!!!", "Asegurate de poner un nombre");
+                return false;
+            } else if ($("#id_porcentaje").val() == '' && $("#id_nombre").val() != '') {
+                swal("Alerta!!!", "Asegurate de poner un porcentje");
+                return false;
+            } else {
+                return true;
+            }
+        });
+    })
+</script>
+{% endblock %}
 
 {% block contenido %}
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h1 class="f-700">{{accion}} Modulo</h1>
+            <h1 class="f-700">
+                <legend><h3>{{accion}} Modulo</h3></legend>
+            </h1>
             {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -14,7 +33,7 @@
             </div>
             {% endif %}
         </div>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST" enctype="multipart/form-data" id="form">
             {% csrf_token %}
             <div class="card-body card-padding">
                 <div class="row">

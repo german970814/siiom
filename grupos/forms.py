@@ -75,6 +75,10 @@ class FormularioReportarReunionDiscipulado(ModelForm):
 class FormularioCrearRed(ModelForm):
     required_css_class = 'requerido'
     
+    def __init__(self, *args, **kwargs):
+        super(FormularioCrearRed, self).__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+
     class Meta:
         model = Red
         fields = '__all__'

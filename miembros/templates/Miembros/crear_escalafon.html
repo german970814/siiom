@@ -4,11 +4,26 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            <h1>{{accion}} Escalaf&oacute;n</h1>
-        </div>
+            <h1>
+                <legend><h3>{{accion}} Escalaf&oacute;n</h3></legend>
+            </h1>
         {% if ok %}
-			<p class="ok">Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el escalaf&oacute;n correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el escalaf&oacute;n siguiente o{% endif %} <a alt="Listar Escalafones" href="/miembro/listar_escalafones">{% if accion == 'Crear' %}Volver{% else %}volver{% endif %} a la lista de escalafones.</a></p>
-		{% endif %}	
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el escalaf&oacute;n correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el escalaf&oacute;n siguiente o{% endif %}</p>
+                </div>
+            </div>
+        {% endif %}
+        {% if form.errors %}
+            <div class="row">
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Aún hay campos vacios. No se creó el escalafón</p>
+                </div>
+            </div>
+        {% endif %}
+        </div>
         <form action="" method="POST">
             {% csrf_token %}
             <div class="card-body card-padding">
@@ -19,7 +34,7 @@
                                 <i class="zmdi zmdi-unfold-more"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <input type="number" id="id_celulas" name="celulas" class="form-control input-lg">
+                                {{form.celulas}}
                                 <label for="id_celulas" class="fg-label requerido">Celulas:</label>
                             </div>
                         </div>
@@ -30,7 +45,7 @@
                                 <i class="zmdi zmdi-transform"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <input type="text" id="id_rango" name="rango" class="form-control input-lg">
+                                {{form.rango}}
                                 <label for="id_rango" class="fg-label requerido">Rango:</label>
                             </div>
                         </div>
@@ -44,7 +59,7 @@
                             <p class="c-black f-500 m-b-20">Descripcion:</p>
                             <div class="form-group">
                                 <div class="fg-line requerido">
-                                    <textarea class="form-control" name="descripcion" id="id_descripcion" rows="5" placeholder="Descripción..."></textarea>
+                                    {{form.descripcion}}
                                 </div>
                             </div>
                         </div>
@@ -54,7 +69,7 @@
                             <p class="c-black f-500 m-b-20">Logro:</p>
                             <div class="form-group">
                                 <div class="fg-line requerido">
-                                    <textarea class="form-control" name="logro" id="id_logro" rows="5" placeholder="Logros..."></textarea>
+                                    {{form.logro}}
                                 </div>
                             </div>
                         </div>
@@ -63,10 +78,8 @@
                 <br>
                 <br>
                 <div class="row">
-					<div class="col-md-8 col-md-offset-5">
-						<div class="input-group">
-							<button type="submit" value="Aceptar" class="btn btn-primary btn-block">Aceptar</button>
-						</div>
+					<div class="col-md-4 col-md-offset-4">
+						<button type="submit" value="Aceptar" class="btn btn-primary btn-block">Aceptar</button>
 					</div>
 				</div>
             </div>

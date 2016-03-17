@@ -2,6 +2,79 @@
 {% load staticfiles %}
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        $("#data-table-selection").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less',
+                    },
+                    selection: true,
+                    multiSelect: true,
+                    rowSelect: true,
+                    keepSelection: true,
+                    caseSensitive: false,
+                });
+
+        $("button[name='promoverPaso']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nadie para promover")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+
+        $("button[name='verMiembros']").click(function(event) {
+            if ($('#idPasos').val() == -1) {
+                swal("Alerta","Asegurate de escoger un paso")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+    })
+</script>
+{% comment %}
+<script>
+    jQuery(document).ready(function($) {
+        setTimeout(function(){
+            var checks = $('label>input[name="seleccionados"]');
+            var parents = [];
+            delete checks[0];
+            // console.log(checks);
+            for (var x = 1; x < checks.length; x++) {
+                parents.push(checks[x].parentNode.parentNode.parentNode.parentNode);
+            }
+            // console.log(parents);
+
+
+
+        }, 3000);
+    });
+</script>
+{% endcomment %}
+{% for m in miembros %}
+    {% if m.cumplio %}
+    <script>
+        jQuery(document).ready(function($) {
+            setTimeout(function(){
+                var a = $('tr[data-row-id="{{m.id}}"]');
+                a.addClass('active');
+                b = a.find('input');
+                b.each(function(index, el) {
+                    b[index].checked = true;
+                });
+            }, 1000);
+        });
+    </script>
+    {% endif %}
+{% endfor %}
+
 {% endblock %}
 
 {% block contenido %}
@@ -9,7 +82,7 @@
     <div class="card">
         <div class="card-header">
             <h1 class="f-700 f-20">
-                <legend><h3>Cumplimiento Pasos</h3></legend>
+                <legend><h3>Pasos</h3></legend>
             </h1>
             {% if ok %}
             <div class="row">
@@ -37,46 +110,39 @@
                 </div>
             </div>
             <br>
-            <div class="card-body card-padding table-responsive">
-                <br>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table id="cumplimientoPasos" class="table" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th class="checkboxBoton">
-                                        <div class="button gray smallB checkBoton">
-                                            <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('cumplimientoPasos');" />
-                                        </div>
-                                    </th>
-                                    <th>Nombre</th>    
-                                </tr>
-                            </thead>
-                            <tbody>      
-                            {% for m in miembros %}
-                                <tr>
-                                    <td><input type="checkbox" name="seleccionados" value="{{m.id}}" {% if m.cumplio %} checked="checked" {% endif %} /></td>
-                                    <td>{{m.nombre|capfirst}} {{m.primerApellido|capfirst}} {{m.segundoApellido|capfirst}}</td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td class="centrarTexto" colspan="2">No hay miembros que puedan cumplir este paso.</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        <br/>
-                    </div>
-                </div>
-                <br>
-                <br>
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
-                    </div>
+            <br>
+            {% if miembros %}
+            <table id="data-table-selection" class="table table-striped table-vmiddle">
+                <thead>
+                    <tr>
+                        <th data-column-id="id" data-identifier="true" data-visible="false"></th>
+                        <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in miembros %}
+                        <tr>
+                            <td>{{m.id}}</td>
+                            <td>{{m.nombre|capfirst}} {{m.primerApellido|capfirst}} {{m.segundoApellido|capfirst}}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td></td>
+                            <td colspan="2" class="centrarTexto">No hay miembros que puedan cumplir este paso</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <button type="submit" class="btn btn-success btn-block" name="promoverPaso">Aceptar</button>
                 </div>
             </div>
+            {% endif %}
         </form>
+        <br>
+        <br>
     </div>
 </div>
 {% endblock %}

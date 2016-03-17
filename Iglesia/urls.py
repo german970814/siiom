@@ -1,13 +1,13 @@
-from django.conf.urls import include, patterns
+from django.conf.urls import include, patterns, url
+from django.views.generic import RedirectView
 from django.contrib import admin
-from grupos.views import *
-from academia.views import *
-from miembros.views import *
-from reportes.views import *
+from miembros.views import autenticarUsario, salir, administracion
 from views import resultadoBusqueda, depu, depu2
 import os
 
 admin.autodiscover()
+RedirectView.permanent = True
+handler404 = 'views.custom_404'
 
 urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -15,119 +15,26 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     #(r'^dp/$', depu2),
-    (r'^admin/', include(admin.site.urls)),
-    (r'^iniciar_sesion/$', autenticarUsario),
-    (r'^salir/$', salir),
-    (r'^resultado/(grupo|miembro)/$',  resultadoBusqueda),
-    (r'^miembro/$', miembroInicio),
-    (r'^miembro/agregar_miembro/$', liderAgregarMiembro),
-    (r'^miembro/listar_miembros/$', liderListarMiembrosGrupo),
-    (r'^miembro/editar_miembros/$', liderEditarMiembros),
-    (r'^miembro/editar_miembro/(\d+)/$', editarMiembro),
-    (r'^miembro/transladar_miembros/$', liderTransaldarMiembro),
-    (r'^miembro/editar_perfil/$', liderEditarPerfil),
-    (r'^miembro/cambiar_contrasena/$',  cambiarContrasena),
-    (r'^miembro/llamadas_pendientes/lider/$',  liderLlamadasPendientesVisitantesGrupo),
-    (r'^miembro/llamadas_pendientes/agente/$',  llamadasPendientesVisitantes),#aqui
-    (r'^miembro/registrar_llamada/lider/$',  liderLlamarVisitas),
-    (r'^miembro/registrar_llamada/agente/$',  llamarVisitas),
-    (r'^miembro/promover_visitantes/$',  liderPromoverVisitantesGrupo),
-    (r'^miembro/editar_grupo/$',  editarHorarioReunionGrupo),
-    (r'^miembro/reportar_reunion_grupo/$',  reportarReunionGrupo),
-    (r'^miembro/reportar_reunion_grupo_admin/$',  reportarReunionGrupoAdmin),
-    (r'^miembro/perfil/(\d+)/$',  perfilMiembro),
-    (r'^miembro/reportar_reunion_discipulado/$',  reportarReunionDiscipulado),
-    (r'^miembro/confirmar_ofrenda_gar/(\d+)/$',  registrarPagoGrupo),
-    (r'^miembro/confirmar_ofrenda_discipulado/(\d+)/$',  registrarPagoDiscipulado),
-    (r'^miembro/asignar_grupo/(\d+)/$',  asignarGrupo),
-    (r'^miembro/crear_zona/$',  crearZona),
-    (r'^miembro/editar_zona/$',  editarZona),
-    (r'^miembro/listar_zonas/$',  listarZonas),
-    (r'^miembro/barrios/(\d+)/$',  barriosDeZona),
-    (r'^miembro/crear_barrio/(\d+)/$',  crearBarrio),
-    (r'^miembro/editar_barrio/$',  editarBarrio),
-    (r'^miembro/crear_escalafon/$',  crearEscalafon),
-    (r'^miembro/editar_escalafon/$',  editarEscalafon),
-    (r'^miembro/listar_escalafones/$',  listarEscalafones),
-    (r'^miembro/promover_escalafon/$',  promoverMiembroEscalafon),
-    (r'^miembro/agregar_paso/$',  agregarPasoMiembro),
-    (r'^miembro/listar_pasos/$',  listarPasos),
-    (r'^miembro/editar_paso/$',  editarPaso),
-    (r'^miembro/crear_tipo_miembro/$',  crearTipoMiembro),
-    (r'^miembro/listar_tipo_miembro/$',  listarTipoMiembro),
-    (r'^miembro/editar_tipo_miembro/$',  editarTipoMiembro),
-    (r'^miembro/cambiar_tipo_miembro/(\d+)/$',  cambiarMiembroDeTipoMiembro),
-    (r'^miembro/detalles_llamada/$',  listarDetallesLlamada),
-    (r'^miembro/agregar_detalle_llamada/$',  AgregarDetalleLlamada),
-    (r'^miembro/editar_detalle_llamada/$',  editarDetalleLlamada),
-    (r'^grupo/grupo_padre/$', grupoRaiz),
-    (r'^grupo/(\d+)/$', verGrupo),
-    (r'^grupo/listar_redes/$', listarRedes),
-    (r'^grupo/crear_red/$', crearRed),
-    (r'^grupo/editar_red/$', editarRed),
-    (r'^grupo/listar_grupos/(\d+)/$',  gruposDeRed),
-    (r'^grupo/crear_grupo/(\d+)/$', crearGrupo),
-    (r'^grupo/editar_grupo/$', editarGrupo),
-    (r'^grupo/listar_predicas/$', listarPredicas),
-    (r'^grupo/crear_predica/$', crearPredica),
-    (r'^grupo/editar_predica/$', editarPredica),
-    (r'^miembro/asignar_usuario/(\d+)/$',  crearUsuarioMimembro),
-    (r'^miembro/eliminar_cambio_tipo/(\d+)/$',  eliminarCambioTipoMiembro),
-    (r'^miembro/cumplimiento_pasos/$', cumplimientoPasos),
-#    (r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
-#    (r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
-    (r'^reportes/visitas_por_red/$', visitasAsignadasRedes),
-    (r'^reportes/asignacion_gar/$', asignacionGAR),
-    (r'^reportes/primera_llamada/$', detalleLlamada, {'llamada': 1}),
-    (r'^reportes/segunda_llamada/$', detalleLlamada, {'llamada': 2}),
-    (r'^reportes/visitas_por_mes/$', visitasPorMes, {'por_red': False}),
-    (r'^reportes/visitas_red_por_mes/$', visitasPorMes, {'por_red': True}),
-    (r'^reportes/asistencia_reuniones/$', asistenciaGrupos),
-    (r'^reportes/miembros_y_pasos/$', pasosPorMiembros),
-    (r'^reportes/pasos_totales/$', PasosTotales),
-    (r'^reportes/pasos_rango_fechas/$', PasosRangoFecha),
-    (r'^reportes/estadistico_reunionesGAR/$', estadisticoReunionesGar),
-    (r'^reportes/estadistico_reunionesDiscipulado/$', estadisticoReunionesDiscipulado),
-    (r'^reportes/estadistico__totalizado_reunionesGAR/$', estadisticoTotalizadoReunionesGar),
-    (r'^reportes/estadistico__totalizado_reunionesDiscipulado/$', estadisticoTotalizadoReunionesDiscipulado),
-    (r'^reportes/desarrollo_grupos/$', desarrolloGrupo),
-    (r'^reportes/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar, {}),
-    (r'^reportes/reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}),
-    (r'^reportes/consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}),
-    (r'^reportes/consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}),
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
+    url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),
+    url(r'^administracion/$',  administracion, name="administracion"),
+    url(r'^salir/$', salir),
+    url(r'^resultado/(grupo|miembro)/$',  resultadoBusqueda),
+    url(r'^miembro/', include("miembros.urls")),
+    url(r'^grupo/', include("grupos.urls")),
+    url(r'^reportes/', include("reportes.urls")),
+    
+    # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
+    # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
 )
 
 urlpatterns += patterns('',
     #--------------------------AMBOS------------------------
-    (r'^academia/curso_detalle/(\d+)/$',  verDetalleCurso),
-    (r'^academia/estudiantes/(\d+)/$', listarEstudiantes),
-    (r'^academia/estudiante_detalle/(\d+)/$',  verDetalleEstudiante),
-    #---------------------------MAESTRO---------------------
-    (r'^academia/cursos/$',  verCursos, {'admin': False}),    
-    (r'^academia/editar_curso/$',  editarCurso, {'admin': False, 'url': '/academia/cursos/'}),    
-    (r'^academia/asistencia/$',  maestroAsistencia),  
-    (r'^academia/evaluar_modulo/$',  evaluarModulo),
-    (r'^academia/registrar_entrega_tarea/$',  maestroRegistrarEntregaTareas),  
-    (r'^academia/promover_estudiante/$',  promoverModulo),
-    #----------------ADMINISTRADOR-----------------------
-    (r'^academia/crear_curso/$',  crearCurso),
-    (r'^academia/listar_cursos/$',  verCursos, {'admin': True}),
-    (r'^academia/admin_editar_curso/$',  editarCurso, {'admin': True, 'url': '/academia/listar_cursos/'}),
-    (r'^academia/matricular/(\d+)/$',  matricularEstudiante),
-    (r'^academia/crear_modulo/$',  crearModulo),
-    (r'^academia/listar_modulos/$',  listarModulos),
-    (r'^academia/editar_modulo/$',  editarModulo),
-    (r'^academia/crear_sesion/(\d+)/$',  crearSesion),
-    (r'^academia/sesiones/(\d+)/$',  listarSesiones),
-    (r'^academia/editar_sesion/(\d+)/$',  editarSesion),
-    (r'^administracion/$',  administracion),
-    (r'^academia/listar_pagos/$',  listarPagosAcademia),
-    (r'^miembro/graduar_alumno/$', graduarAlumno),
-     #----------------RECEPTOR-----------------------
-     (r'^academia/recibir_pago/(\d+)/$',  recibirPago),
+    url(r'^academia/',  include("academia.urls")),
 )
 
 urlpatterns += patterns('',
-        (r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__),
+        url(r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__),
                                                                                                    '../Templates').replace('\\','/')}),
 )

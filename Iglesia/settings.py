@@ -10,7 +10,7 @@ SECRET_KEY = '@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 # Application definition
 
@@ -25,7 +25,6 @@ INSTALLED_APPS = (
     'miembros',
     'academia',
     'grupos',
-    # 'googlecharts',
     'reportes',
 )
 
@@ -127,10 +126,13 @@ TEMPLATES = [
       'django.template.context_processors.request',
       'django.contrib.auth.context_processors.auth',
       'django.contrib.messages.context_processors.messages',
+      'context_processors.site',
       ],
     },
   },
 ]
+
+
 
 EMAIL_HOST = 'smtp.webfaction.com'
 EMAIL_HOST_PASSWORD = '46ea33cd'

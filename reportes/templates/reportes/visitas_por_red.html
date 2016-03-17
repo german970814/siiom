@@ -73,6 +73,18 @@
             }
 
         });
+
+        $('#form_totalGAR').submit(function(event) {
+            if ($('#id_fechai').val() == ''){
+                swal("Alerta!!!", "Asegurese de escoger una fecha inicial");
+                return false;
+            } else if ($('#id_fechai').val() != '' && $('#id_fechaf').val() == '') {
+                swal("Alerta!!!", "Asegurese de escoger una fecha final");
+                return false;
+            } else {
+                return true;
+            }
+        });
 	});
 </script>
 {% endblock %}
@@ -83,7 +95,7 @@
         <div class="card-header">
             <h1>
                 <legend>
-                    <h3 class="f-700 f-20">{{ titulo_pag }}</h3>
+                    <h3 class="f-700 f-30">{{ titulo_pag }}</h3>
                 </legend>
             </h1>
             {% if messages %}
@@ -117,7 +129,7 @@
                                 <i class="zmdi zmdi-calendar-note"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                <label for="id_fechaf" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="La fecha final no puede ser anterior a la fecha inicial." title="" data-original-title="Ayuda">Fecha Final:</label>
                                 {{form.fechaf}}
                             </div>
                         </div>
@@ -139,13 +151,23 @@
     {% if sw %}
     <div class="card">
         <div class="card-header">
-            
+            <h1>
+                <legend><h3>Reportes</h3></legend>
+            </h1>
         </div>
         <div class="card-body card-padding">
+            <small>Escoge un tipo de vista</small>
+            <br>
+            <br>
             <div class="row">
+            <div class="col-sm-1">
                 <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
+            </div>
+            <div class="col-sm-1">
                 <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
-                <div id="out"></div>
+            </div>
+
+            <div class="col-md-12 col-md-offset-2"><div id="out"></div></div>
             </div>
             
         </div>
