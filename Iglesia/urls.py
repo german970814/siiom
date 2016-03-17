@@ -34,7 +34,7 @@ urlpatterns += patterns('',
     url(r'^academia/',  include("academia.urls")),
 )
 
-urlpatterns += patterns('',
-        url(r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__),
-                                                                                                   '../Templates').replace('\\','/')}),
-)
+# urlpatterns += patterns('',
+#         url(r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__),
+#                                                                                                    '../Templates').replace('\\','/')}),
+# )
