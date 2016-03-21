@@ -2,11 +2,11 @@
 
 __author__ = 'tania'
 
-NAME = 'siiom'
+NAME = 'iglesia_prod'
 
-USER = 'siiom'
+USER = 'german1234'
 
-PASSWORD = '123456'
+PASSWORD = '1234'
 
 HOST = '127.0.0.1'
 

@@ -1,7 +1,7 @@
 from django.conf.urls import include, patterns, url
 from django.views.generic import RedirectView
 from django.contrib import admin
-from miembros.views import autenticarUsario, salir, administracion
+from miembros.views import autenticarUsario, salir, administracion, recuperar_contrasena
 from views import resultadoBusqueda, depu, depu2
 import os
 
@@ -24,7 +24,7 @@ urlpatterns = patterns('',
     url(r'^miembro/', include("miembros.urls")),
     url(r'^grupo/', include("grupos.urls")),
     url(r'^reportes/', include("reportes.urls")),
-    
+    url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena')
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
     # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
 )

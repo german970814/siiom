@@ -48,4 +48,5 @@ urlpatterns = [
     url(r'^asignar_usuario/(\d+)/$',  crearUsuarioMimembro, name="asignar_grupo"),
     url(r'^eliminar_cambio_tipo/(\d+)/$',  eliminarCambioTipoMiembro, name="eliminar_cambio_tipo"),
     url(r'^cumplimiento_pasos/$', cumplimientoPasos, name="cumplimiento_pasos"),
+    # url(r'^recuperar_contrasena/$', recuperar_contrasena, name="recuperar_contrasena")
 ]

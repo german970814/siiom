@@ -82,6 +82,7 @@
                     <li class="dropdown">
                         <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
                         <ul class="dropdown-menu dm-icon pull-right">
+                        {% if request.user.is_authenticated %}
                             <li class="hidden-xs">
                                 <a  href="/miembro/editar_perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
@@ -92,6 +93,11 @@
                             <li>
                                 <a href="/salir/"><i class="zmdi zmdi-power"></i> Salir</a>
                             </li>
+                        {% else %}
+                            <li class="hidden-xs">
+                                <a  href="/iniciar_sesion/"><i class="zmdi zmdi-assignment-account"></i> Iniciar Sesión</a>
+                            </li>
+                        {% endif %}
                         </ul>
                     </li>
                 </ul>
@@ -117,7 +123,11 @@
                         <img src="{% get_static_prefix %}Imagenes/{{dominioIglesia}}.jpg" alt="">
                     </div>
                     <div class="profile-info">
+                    {% if request.user.is_authenticated %}
                         {{ request.user }}
+                    {% else %}
+                        {{nombreIglesia}}
+                    {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
                 </a>

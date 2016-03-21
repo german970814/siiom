@@ -1114,3 +1114,68 @@ def sendMail(camposMail):
     mensaje = camposMail[1]
     receptor = camposMail[2]
     send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently = False)
+
+
+def recuperar_contrasena(request):
+    from .forms import FormularioRecuperarContrasenia
+
+    def _generate_password(pswd, length):
+        import random
+        pswd = ''
+        _abc = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZabcdefghijklmnñopqrstuvwxyz1234567890'
+
+        if isinstance(pswd, str):
+            for x in range(length):
+                pswd += random.choice(_abc)
+            return pswd
+
+        if isinstance(pswd, (list, tuple)):
+            for x in range(len(pswd)):
+                pswd[x] += random.choice(_abc)
+            return pswd
+
+    SUBJECT = "Recuperar Contraseña de %s" % Site.objects.get_current().name
+    MESSAGE = """Ingresa al siguiente link para cambiar tu contraseña:\n
+        http://localhost:8000/iniciar_sesion/?next=/miembro/cambiar_contrasena/\n\n\n
+        Usuario: '%s'\n
+        Nueva Contraseña: '%s' \n\n\n
+        Por favor no reenviar este correo"""
+    SENDER = "iglesia@mail.webfaction.com"
+    RECEPT = "%s"
+    ok = False
+
+    if request.method == 'POST':
+        if 'aceptar' in request.POST:
+            new_password = ''
+            form = FormularioRecuperarContrasenia(request.POST or None)
+
+            if form.is_valid():
+                email = form.cleaned_data['email']
+                try:
+                    usuario = User.objects.get(username__exact=email)
+                    new_password = _generate_password(new_password, 12)
+
+                    usuario.set_password(new_password)
+                    usuario.save()
+
+                    try:
+                        send_mail(SUBJECT,
+                            MESSAGE % (usuario.username, new_password),
+                            SENDER,
+                            (RECEPT % email, ),
+                            fail_silently=False)
+                        ok = True
+                    except:
+                        messages.error(request, "Ha Ocurrido un problema interno...")
+                    
+                except User.DoesNotExist:
+                    # raise Http404
+                    messages.error(request, "Usuario no encontrado, rectifica tu usuario para poder recuperar tu contraseña")
+
+        else:
+            form = FormularioRecuperarContrasenia()
+
+    else:
+        form = FormularioRecuperarContrasenia()
+
+    return render_to_response("Miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))

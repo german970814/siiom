@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block js %}
+	
+{% endblock js %}
+
+{% block contenido %}
+	<div class="container">
+		<div class="card">
+			<div class="card-header">
+				<h1>
+					<legend><h3>Recuperar Contrase&ntilde;a</h3></legend>
+				</h1>
+				{% if ok %}
+	            <div class="row">
+	                <div class="alert alert-success alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>Se ha enviado un email al correo del usuario con una nueva contraseña.</p>
+	                </div>
+	            </div>
+	            {% endif %}
+	            {% if messages %}
+		            {% for message in messages %}
+			            <div class="row">
+			                <div class="alert alert-danger alert-dismissible" role="alert">
+			                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+			                    <p>{{message}}</p>
+			                </div>
+			            </div>
+		            {% endfor %}
+	            {% endif %}
+	            {% if form.errors %}
+		            <div class="row">
+		                <div class="alert alert-danger alert-dismissible" role="alert">
+		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+		                    <p>{{form.errors}}</p>
+		                </div>
+		            </div>
+	            {% endif %}
+			</div>
+			<div class="card-body card-padding">
+				<div class="row">
+					<form action="" method="POST" enctype="multipart/form-data">
+					{% csrf_token %}
+						<div class="col-md-6 col-md-offset-3">
+							{{form.as_p}}
+						</div>
+						<div class="col-md-4 col-md-offset-4">
+							<button type="submit" class="btn btn-info btn-block" name="aceptar">Enviar Correo</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock contenido %}
+

@@ -52,12 +52,15 @@
                 </label>
             </div>
             
+            <ul class="login-navigation">
+                <li style="padidng:10px !important;" class="bgm-orange"><a style="color:#fff;" href="{% url 'recuperar_contrasena' %}">Olvide mi Contraseña</a></li>
+            </ul>
+            
             <button type="submit" class="btn btn-login btn-danger btn-float"><i class="zmdi zmdi-arrow-forward"></i></button>
             <input type="hidden" name="next" value="{{ request.GET.next }}" />
             
             <!--<ul class="login-navigation">
                 <li style="padidng:10px !important;" data-block="#" class="bgm-red">Registrarse</li>
-                <li style="padidng:10px !important;" data-block="#" class="bgm-orange">Olvide mi Contraseña</li>
             </ul> -->
         </div>
     </form>

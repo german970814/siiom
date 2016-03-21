@@ -250,3 +250,11 @@ class FormularioDetalleLlamada(ModelForm):
         model = DetalleLlamada
         fields = '__all__'
 
+
+class FormularioRecuperarContrasenia(forms.Form):
+    required_css_class = 'requerido'
+    email = forms.EmailField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioRecuperarContrasenia, self).__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class':'form-control'})
