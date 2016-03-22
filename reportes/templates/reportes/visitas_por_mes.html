@@ -96,7 +96,7 @@
             <div class="card-body card-padding">
                 <br>
                 <div class="row">
-                    <div class="col-md-6 col-md-offset-2">
+                    <div class="{% if por_red %}col-md-4{% else %}col-md-6{% endif %} col-md-offset-2">
                         <div class="input-group form-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
@@ -107,6 +107,19 @@
                             </div>
                         </div>
                     </div>
+                    {% if por_red %}
+                    <div class="col-md-4 ">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_ano" class="fg-label requerido">Red:</label>
+                                {{form.red}}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 <br>
                 <br>

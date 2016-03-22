@@ -269,6 +269,8 @@ def maestroRegistrarEntregaTareas(request):
                         ok = True
                 
                 estudiantes = AsistenciaSesiones.objects.filter(asistencia = True, matricula__curso = curso, matricula__moduloActual = modulo, sesion = sesion).exclude(matricula__estudiante__id__in = mLanzados).order_by('matricula__estudiante__nombre')   
+                if len(estudiantes) == 0:
+                    nadie = True
             except:
                 raise Http404
     

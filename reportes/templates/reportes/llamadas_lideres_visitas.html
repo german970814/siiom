@@ -4,7 +4,7 @@
 <script type="text/javascript">
     $(document).ready(function(){
 		$('#id_fechai').datetimepicker({
-            format: 'DD/MM/YYYY',
+            format: 'DD/MM/YY',
             maxDate: moment(),
         });
 
@@ -51,6 +51,14 @@
                     <h2 class="f-700 f-20">Cumplimiento de llamadas de líderes por red</h2>
                 </legend>
             </h1>
+            {% if nadie %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>No hay cumplimiento de llamadas para esta red.</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <form action="" method="POST" id="form_visitasRed" >
             {% csrf_token %}

@@ -2,13 +2,11 @@
 {% load staticfiles %}
 {% block js %}
 
-<!-- <link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" /> -->
-<!-- <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script> -->
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
 		$('#id_fechai').datetimepicker({
-            format: 'DD/MM/YYYY',
+            format: 'DD/MM/YY',
             daysOfWeekDisabled: [0,2,3,4,5,6],
             maxDate: moment(),
         });
@@ -22,7 +20,6 @@
 
 
         $('#id_fechai').on("dp.change",function(e){
-            console.log(e);
             $('#id_fechaf').data("DateTimePicker").minDate(e.date);
         });
 
@@ -42,7 +39,7 @@
 
         $('#form_pasosTotal').submit(function(event) {
             if ($('#id_fechai').val() == '') {
-                swal("ALerta!!!", "Asegurate de ingresar una fecha inicial")
+                swal("Alerta!!!", "Asegurate de ingresar una fecha inicial")
                 return false;
             } else if ($('#id_fechaf').val() == '' && $('#id_fechai').val() != '') {
                 swal("Alerta!!!", "Asegurate de ingresar una fehca final")

@@ -77,6 +77,14 @@
                     </div>
                 </div>
             {% endif %}
+            {% if nadie %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>No hay estudiantes en este Curso/Módulo.</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <form action="" method="POST" id="form_pasosTotal">
             {% csrf_token %}
@@ -136,7 +144,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" name ="verEstudiantes" class="btn btn-success btn-block">Ver</button>
+                        <button type="submit" name ="verEstudiantes" class="btn btn-info btn-block">Ver</button>
                     </div>
                 </div>
             </div>

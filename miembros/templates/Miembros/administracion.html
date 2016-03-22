@@ -12,7 +12,7 @@
             <div class="row">
                 <div class="mini-charts">
                     <div class="row">
-                        <div class="col-sm-4 col-md-">
+                        <div class="col-sm-3 col-md-">
                             <div class="mini-charts-item bgm-red">
                                 <div class="clearfix">
                                     <div class="chart stats-bar"></div>
@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-4 col-md-">
+                        <div class="col-sm-3 col-md-">
                             <div class="mini-charts-item bgm-orange">
                                 <div class="clearfix">
                                     <div class="chart stats-bar-2"></div>
@@ -34,19 +34,19 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- <div class="col-sm-6 col-md-3">
-                            <div class="mini-charts-item bgm-orange">
+                        <div class="col-sm-3 col-md-">
+                            <div class="mini-charts-item bgm-green">
                                 <div class="clearfix">
                                     <div class="chart stats-line"></div>
                                     <div class="count">
-                                        <small>Alguna Acción</small>
-                                        <h2>458,778</h2>
+                                        <small>Grupos en Estado Activos</small>
+                                        <h2>{{totalGruposA}}</h2>
                                     </div>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
 
-                        <div class="col-sm-4 col-md-">
+                        <div class="col-sm-3 col-md-">
                             <div class="mini-charts-item bgm-blue">
                                 <div class="clearfix">
                                     <div class="chart stats-line-2"></div>
@@ -109,6 +109,10 @@
                                     <tr>
                                         <td class="f-500 c-cyan">Miembros Inactivos</td>
                                         <td class="f-500 c-cyan">{{totalMiembrosI}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="f-500 c-cyan">Líderes</td>
+                                        <td class="f-500 c-cyan">{{totalLideres}}</td>
                                     </tr>
                                     <tr>
                                         <td class="f-500 c-cyan">Maestros</td>

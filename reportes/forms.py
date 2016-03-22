@@ -42,6 +42,7 @@ class FormularioVisitasRedPorMes(forms.Form):
         super(FormularioVisitasRedPorMes,self).__init__(*args,**kwargs)
 
         self.fields['ano'].widget.attrs.update({'class':'form-control','data-mask':'0000'})
+        self.fields['red'].widget.attrs.update({'class':'selectpicker', 'data-live-search':'true'})
 
     ano = forms.CharField(label='año', required=True)
     red = forms.ChoiceField(choices=RED_CHOICES)

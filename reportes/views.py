@@ -196,7 +196,7 @@ def visitasPorMes(request, por_red):
             opciones = {'ano': ano}
             if por_red:
                 red = Red.objects.get(id = form.cleaned_data['red'])
-                opciones['red'] = capitalize(red.nombre)
+                opciones['red'] = red.nombre.capitalize()
             sw = True
 
             values = [['Meses', 'Visitas registradas']]
@@ -518,8 +518,6 @@ def estadisticoReunionesGar(request):
             if form.is_valid():
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
-                print(form.fields['fechai'].initial)
-                print(form.fields['fechaf'].initial)
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
                 opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
                 sw = True
@@ -1164,15 +1162,18 @@ def cumplimiento_llamadas_lideres_red(request):
     personas asignadas a su grupo dentro de un rango de fechas especificado."""
 
     grupos = []
+    nadie = False
     if request.method == 'POST':
         form = FormularioCumplimientoLlamadasLideres(data=request.POST)
 
         if form.is_valid():
             grupos = form.obtener_grupos()
+            if len(grupos) == 0:
+                nadie = True
     else:
         form = FormularioCumplimientoLlamadasLideres()
 
-    data = {'form': form, 'grupos': grupos}
+    data = {'form': form, 'grupos': grupos, 'nadie':nadie}
     return render_to_response('reportes/llamadas_lideres_visitas.html', data, context_instance=RequestContext(request))
 
 

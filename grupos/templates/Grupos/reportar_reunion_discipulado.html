@@ -17,6 +17,29 @@
                     rowSelect: true,
                     keepSelection: true
                 });
+
+    jQuery(document).ready(function($) {
+        var $predica = $('#id_predica'), $lid_asis = $('#id_numeroLideresAsistentes'), $ofrenda = $('#id_ofrenda'), $novedades = $('#id_novedades');
+
+        $('button[name="aceptar"]').click(function(event) {
+            if ($predica.val() == '') {
+                swal("Alerta!", "Debes escoger una prédica!")
+                return false;
+            } else if ($predica.val() != '' && $lid_asis.val() == '') {
+                swal("Alerta!", "Debes especificar el numero de lideres asistentes");
+                return false;
+            } else if ($predica.val() != '' && $lid_asis.val() != '' && $ofrenda.val() == '') {
+                swal("Alerta!", "Debes especificar la ofrenda recogida");
+                return false;
+            } else if ($predica.val() != '' && $lid_asis.val() != '' && $ofrenda.val() != '' && $novedades.val() == '') {
+                swal("Alerta!", "Debes especificar si ocurrió alguna novedad");
+                return false;
+            } else {
+                return true;
+            }
+        });
+           
+    });
 </script>
 
 {% endblock %}
@@ -47,7 +70,7 @@
                 </div>
             {% endif %}
         </div>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST" enctype="multipart/form-data" id="form">
             {% csrf_token %}
             <div class="card-body card-padding table-responsive">
                 <br>
