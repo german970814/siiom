@@ -1130,11 +1130,6 @@ def recuperar_contrasena(request):
                 pswd += random.choice(_abc)
             return pswd
 
-        if isinstance(pswd, (list, tuple)):
-            for x in range(len(pswd)):
-                pswd[x] += random.choice(_abc)
-            return pswd
-
     SUBJECT = "Recuperar Contraseña de %s" % Site.objects.get_current().name
     MESSAGE = """Ingresa al siguiente link para cambiar tu contraseña:\n
         http://%s/iniciar_sesion/?next=/miembro/cambiar_contrasena/\n\n\n
