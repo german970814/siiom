@@ -1117,7 +1117,8 @@ def sendMail(camposMail):
 
 
 def recuperar_contrasena(request):
-    from .forms import FormularioRecuperarContrasenia
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/iniciar_sesion')
 
     def _generate_password(pswd, length):
         import random
