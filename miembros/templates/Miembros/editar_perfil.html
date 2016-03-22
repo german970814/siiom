@@ -75,11 +75,12 @@
                                 <i class="zmdi zmdi-male-female"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <select id="id_genero" name="genero" class="form-control">
+                                <!--<select id="id_genero" name="genero" class="form-control">
                                     <option selected="selected" value=""></option>
                                     <option value="M">Masculino</option>
                                     <option value="F">Femenino</option>
-                                </select>
+                                </select>-->
+                                {{form.genero}}
                                 <label for="id_genero" class="fg-label requerido">Género:</label>
                             </div>
                         </div>
@@ -198,13 +199,14 @@
                                 <i class="zmdi zmdi-local-wc"></i>
                             </span>
                             <div class="fg-line">
-                                <select id="id_estadoCivil" name="estadoCivil" class="form-control">
+                                <!--<select id="id_estadoCivil" name="estadoCivil" class="form-control">
                                     <option selected="selected" value=""></option>
                                     <option value="C">Casado</option>
                                     <option value="S">Soltero</option>
                                     <option value="V">Viudo</option>
                                     <option value="D">Divorciado</option>
-                                </select>
+                                </select>-->
+                                {{form.estadoCivil}}
                                 <label for="id_estadoCivil" class="fg-label">Estado Civil</label>
                             </div>
                         </div>
@@ -219,7 +221,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-3 col-md-offset-5">
-                        <button type="submit" value="Guardar Cambios" class="btn btn-primary btn-block">Guardar Cambios</button>
+                        <button type="submit" value="Guardar Cambios" name="aceptar" class="btn btn-primary btn-block">Guardar Cambios</button>
                     </div>
                 </div>
 			</div>

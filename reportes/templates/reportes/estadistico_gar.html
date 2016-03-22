@@ -21,7 +21,7 @@
     
     $(document).ready(function(){
         $('#id_fechai').datetimepicker({
-            format: 'DD/MM/YYYY',
+            format: 'DD/MM/YY',
             daysOfWeekDisabled: [0,2,3,4,5,6],
             maxDate: moment(),
         });
@@ -132,12 +132,14 @@
                 </legend>
             </h1>
             {% if messages %}
+            {% for message in messages %}
                 <div class="row">
                     <div class="alert alert-warning alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                         <p>{{message}}</p>
                     </div>
                 </div>
+            {% endfor %}
             {% endif %}
         </div>
         <form action="" method="POST" id="form_pasosTotal">

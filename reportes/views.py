@@ -514,10 +514,12 @@ def estadisticoReunionesGar(request):
             data = serializers.serialize('json', listaGruposDescendientes(lider_i))
             return HttpResponse(data, content_type="application/javascript")
         else:
-            form = FormularioRangoFechas(request.POST)
+            form = FormularioRangoFechas(request.POST or None)
             if form.is_valid():
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
+                print(form.fields['fechai'].initial)
+                print(form.fields['fechaf'].initial)
                 grupo_i = Grupo.objects.get(id = request.POST['menuGrupo_i'])
                 opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
                 sw = True
