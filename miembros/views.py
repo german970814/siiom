@@ -1137,7 +1137,7 @@ def recuperar_contrasena(request):
 
     SUBJECT = "Recuperar Contraseña de %s" % Site.objects.get_current().name
     MESSAGE = """Ingresa al siguiente link para cambiar tu contraseña:\n
-        http://localhost:8000/iniciar_sesion/?next=/miembro/cambiar_contrasena/\n\n\n
+        http://%s/iniciar_sesion/?next=/miembro/cambiar_contrasena/\n\n\n
         Usuario: '%s'\n
         Nueva Contraseña: '%s' \n\n\n
         Por favor no reenviar este correo"""
@@ -1161,7 +1161,7 @@ def recuperar_contrasena(request):
 
                     try:
                         send_mail(SUBJECT,
-                            MESSAGE % (usuario.username, new_password),
+                            MESSAGE % (request.META['HTTP_HOST'], usuario.username, new_password),
                             SENDER,
                             (RECEPT % email, ),
                             fail_silently=False)
