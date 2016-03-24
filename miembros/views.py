@@ -23,8 +23,11 @@ def eliminar(modelo, lista):
         for e in lista:
             try:
                 modelo.objects.get(id=e).delete()
+            except ValueError as e:
+                print(e)
+                pass
             except:
-                ok = 2 #Hubo un error
+                ok = 2 #Hubo un Error
     return ok
 
 def autenticarUsario(request):
@@ -278,7 +281,7 @@ def liderEditarPerfil(request):
 def cambiarContrasena(request):
     miembroUsuario = request.user
     if request.method == 'POST':
-        form = FormularioCambiarContrasena(data=request.POST)
+        form = FormularioCambiarContrasena(data=request.POST, request=request)
         if form.is_valid():
             if(miembroUsuario.check_password(form.cleaned_data['contrasenaAnterior']) and \
                form.cleaned_data['contrasenaNueva'] == form.cleaned_data['contrasenaNuevaVerificacion']):
@@ -289,7 +292,7 @@ def cambiarContrasena(request):
                 validacionContrasena = 'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
                 #return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))      
     else:
-        form = FormularioCambiarContrasena()            
+        form = FormularioCambiarContrasena(request=request)            
     return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
         
 @user_passes_test(liderTest, login_url="/iniciar_sesion/")
@@ -353,7 +356,6 @@ def liderLlamarVisitas(request):
     if 'visitantesSeleccionados' in request.session:
         faltantes = request.session['visitantesSeleccionados']
         if len(faltantes) > 0:
-            print(request.session['visitantesSeleccionados'])
             try:
                 miembroLlamar = Miembro.objects.get(id = request.session['visitantesSeleccionados'].pop())
                 miembrol = {'id':str(miembroLlamar.id),
@@ -574,7 +576,6 @@ def editarZona(request, pk):
             form.save()
 
     else:
-        print(zona)
         form = FormularioCrearZona(instance=zona)
         return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
@@ -770,6 +771,7 @@ def editarEscalafon(request, pk):
 
         if form.is_valid():
             form.save()
+            return HttpResponseRedirect("/miembro/listar_escalafones/")
 
     else:
         form = FormularioCrearEscalafon(instance=escalafon)
@@ -789,7 +791,6 @@ def promoverMiembroEscalafon(request):
         if form.is_valid():
             nuevoCambioEscalafon = form.save(commit=False)
             miembroEditar = nuevoCambioEscalafon.miembro
-            print(miembroEditar)
             if calcularCelulas(miembroEditar) >= nuevoCambioEscalafon.escalafon.celulas:
                 nuevoCambioEscalafon.save()
                 ok = True
@@ -1043,7 +1044,6 @@ def listarDetallesLlamada(request):
     if request.method == "POST":
 
         if 'eliminar' in request.POST:
-            print(request.POST.getlist('seleccionados'))
             okElim = eliminar(DetalleLlamada, request.POST.getlist('seleccionados'))
 
     detallesLlamada = list(DetalleLlamada.objects.all())

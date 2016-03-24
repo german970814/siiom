@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block css %}
+	<style>
+
+		.input-group .form-control{
+			z-index: inherit;
+		}
+
+	</style>
+{% endblock css %}
+
 {% block js %}
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -54,6 +64,7 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-addon">

@@ -40,6 +40,7 @@ class FormularioPromoverModulo(ModelForm):
         
 class FormularioCrearCurso(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self, *args, **kwargs):
         super (FormularioCrearCurso, self ).__init__(*args,**kwargs) # populates the post
@@ -51,7 +52,7 @@ class FormularioCrearCurso(ModelForm):
         self.fields['modulos'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
         self.fields['nombre'].widget.attrs.update({'class':'form-control'})
         self.fields['material'].widget.attrs.update({'class':'form-control','placeholder':'Material...'})
-        self.fields['hora'].widget.attrs.update({'class':'form-control','data-mask':'00:00'})
+        self.fields['hora'].widget.attrs.update({'class':'form-control','data-mask':'00:00:00'})
         self.fields['direccion'].widget.attrs.update({'class':'form-control'})
     
     class Meta:

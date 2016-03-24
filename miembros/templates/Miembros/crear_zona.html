@@ -11,7 +11,7 @@
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la zona correctamentbluee. Haga click en aceptar para editar la zona siguiente o <a alt="Listar Redes" class="alert-link" href="/miembro/listar_zonas">volver a la lista de zonas.</a></p>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la zona correctamente.<a alt="Listar Redes" class="alert-link" href="/miembro/listar_zonas">volver a la lista de zonas.</a></p>
                 </div>
             </div>
             {% endif %}
@@ -29,14 +29,17 @@
             <div class="card-body card-padding">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <div class="input-group fg-float input-group-lg">
+                        <div class="input-group fg-float input-group-lg {{form.nombre.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
-                            <div class="fg-line requerido">
+                            <div class="requerido">
+                                <label for="id_nombre" class="control-label requerido">Nombre:</label>
                                 {{form.nombre}}
-                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
                             </div>
+                            {% for error in form.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

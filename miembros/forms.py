@@ -13,6 +13,7 @@ from academia.models import Matricula
 
 class FormularioLiderAgregarMiembro(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self,g='',c=None,*args,**kwargs):
         super (FormularioLiderAgregarMiembro,self ).__init__(*args,**kwargs) # populates the post
@@ -52,6 +53,7 @@ class FormularioLiderAgregarMiembro(ModelForm):
 
 class FormularioAdminAgregarMiembro(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self,g='',*args,**kwargs):
         super (FormularioAdminAgregarMiembro,self ).__init__(*args,**kwargs) # populates the post
@@ -72,6 +74,7 @@ class FormularioAdminAgregarMiembro(ModelForm):
         
 class FormularioLlamadaLider(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     def __init__(self,*args,**kwargs):
         super(FormularioLlamadaLider,self).__init__(*args,**kwargs)
@@ -85,6 +88,7 @@ class FormularioLlamadaLider(ModelForm):
         
 class FormularioPrimeraLlamadaAgente(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     class Meta:
         model = Miembro
@@ -92,6 +96,7 @@ class FormularioPrimeraLlamadaAgente(ModelForm):
         
 class FormularioSegundaLlamadaAgente(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     class Meta:
         model = Miembro
@@ -100,13 +105,33 @@ class FormularioSegundaLlamadaAgente(ModelForm):
         
 class FormularioCambiarContrasena(forms.Form):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     contrasenaAnterior = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña anterior:')
     contrasenaNueva = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña nueva:')
     contrasenaNuevaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña nueva:')
 
+    def __init__(self, request,*args, **kwargs):
+        self.request = request
+        super(FormularioCambiarContrasena, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cont_vieja = self.data['contrasenaAnterior']
+        usuario = self.request.user
+
+        if not usuario.check_password(cont_vieja):
+            self.add_error('contrasenaAnterior', "Rectifica la Contraseña")
+            raise forms.ValidationError("Contraseña Incorrecta")
+
+        if self.data['contrasenaNueva'] != self.data['contrasenaNuevaVerificacion']:
+            self.add_error('contrasenaNuevaVerificacion', "Tus contraseñas no coinciden")
+            raise forms.ValidationError("Contraseñas no coinciden")
+
+        return super(FormularioCambiarContrasena, self).clean()
+
 class FormularioAsignarGrupo(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
         super(FormularioAsignarGrupo,self).__init__(*args,**kwargs)
@@ -118,10 +143,20 @@ class FormularioAsignarGrupo(ModelForm):
         
 class FormularioCrearZona(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
+
     def __init__(self, *args, **kwargs):
         super(FormularioCrearZona,self).__init__(*args,**kwargs)
 
         self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['nombre'].required = True
+
+    def clean(self):
+        nam = self.cleaned_data.get('nombre')
+
+        if not nam:
+            self.add_error('nombre', "Este campo es requerido")
+        return super(FormularioCrearZona, self).clean()
     
     class Meta:
         model = Zona
@@ -129,6 +164,7 @@ class FormularioCrearZona(ModelForm):
         
 class FormularioCrearBarrio(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
         super(FormularioCrearBarrio, self).__init__(*args, **kwargs)
@@ -142,6 +178,7 @@ class FormularioCrearBarrio(ModelForm):
         
 class FormularioPasosMiembro(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     class Meta:
         model = CumplimientoPasos
@@ -149,6 +186,7 @@ class FormularioPasosMiembro(ModelForm):
         
 class FormularioCumplimientoPasosMiembro(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self, *args, **kwargs):
         super (FormularioCumplimientoPasosMiembro, self ).__init__(*args,**kwargs) # populates the post
@@ -162,6 +200,7 @@ class FormularioCumplimientoPasosMiembro(ModelForm):
         
 class FormularioPasos(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
         super (FormularioPasos, self ).__init__(*args,**kwargs)
@@ -175,6 +214,7 @@ class FormularioPasos(ModelForm):
 
 class FormularioCrearEscalafon(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self, *args, **kwargs):
         super(FormularioCrearEscalafon,self).__init__(*args,**kwargs)
@@ -190,6 +230,7 @@ class FormularioCrearEscalafon(ModelForm):
 
 class FormularioPromoverEscalafon(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
         super(FormularioPromoverEscalafon, self).__init__(*args, **kwargs)
@@ -202,6 +243,8 @@ class FormularioPromoverEscalafon(ModelForm):
         
 class FormularioCrearTipoMiembro(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
+
     def __init__(self, *args, **kwargs):
         super (FormularioCrearTipoMiembro, self).__init__(*args, **kwargs)
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
@@ -212,6 +255,7 @@ class FormularioCrearTipoMiembro(ModelForm):
         
 class FormularioCambioTipoMiembro(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self, idm = '' ,*args,**kwargs):
         super (FormularioCambioTipoMiembro, self).__init__(*args, **kwargs) # populates the post
@@ -234,6 +278,7 @@ class FormularioCambioTipoMiembro(ModelForm):
                 
 class FormularioAsignarUsuario(forms.Form):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     email = forms.EmailField(label='Verificar correo:')
     contrasena = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña:')
@@ -242,6 +287,7 @@ class FormularioAsignarUsuario(forms.Form):
 
 class FormularioDetalleLlamada(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
     
     def __init__(self, *args, **kwargs):
         super (FormularioDetalleLlamada, self).__init__(*args, **kwargs)
@@ -255,8 +301,10 @@ class FormularioDetalleLlamada(ModelForm):
 
 class FormularioRecuperarContrasenia(forms.Form):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
+    
     email = forms.EmailField(required=True)
 
     def __init__(self, *args, **kwargs):
         super(FormularioRecuperarContrasenia, self).__init__(*args, **kwargs)
-        self.fields['email'].widget.attrs.update({'class':'form-control'})
+        self.fields['email'].widget.attrs.update({'class':'form-control', 'placeholder':'ejemplo@iglesia.com'})

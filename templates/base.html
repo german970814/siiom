@@ -50,7 +50,36 @@
                 min-width: 130px;
             }
         </style> -->
+    <style>
+        @media screen and (min-width: 767px) {
+            br.space {
+                display: none;
+            }
+        }
+        
+        @media screen and (max-width: 767px){
+            br.space-down{
+                display: none;
+            }
+        }
 
+        .has-error .input-group-addon{
+            border-color: #fff;
+            background-color: initial;
+        }
+
+        .has-success .input-group-addon{
+            border-color: #fff;
+            background-color: initial;
+        }
+
+        .has-warning .input-group-addon{
+            border-color: #fff;
+            background-color: initial;
+        }
+    </style>
+    {% block css %}
+    {% endblock %}
 
 </head>
 

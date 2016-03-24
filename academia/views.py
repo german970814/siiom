@@ -24,8 +24,11 @@ def eliminar(modelo, lista):
         for e in lista:
             try:
                 modelo.objects.get(id=e).delete()
+            except ValueError as e:
+                print(e)
+                pass
             except:
-                ok = 2 #Hubo un error
+                ok = 2 #Hubo un Error
     return ok
 
 def maestroTest(user):
@@ -538,5 +541,9 @@ def recibirPago(request, id):
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def listarPagosAcademia(request):
     miembro = Miembro.objects.get(usuario = request.user)
+    grupos = request.user.groups.all()
+    for g in grupos:
+        if 'Receptor' in g.name:
+            receptor=True
     matriculas = Matricula.objects.all()
     return render_to_response('Academia/listar_pago.html', locals(), context_instance=RequestContext(request))

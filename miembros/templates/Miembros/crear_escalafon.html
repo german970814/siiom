@@ -29,48 +29,62 @@
             <div class="card-body card-padding">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group fg-float input-group-lg">
+                        <div class="input-group fg-float input-group-lg {{form.celulas.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-unfold-more"></i>
                             </span>
                             <div class="fg-line requerido">
+                                <label for="id_celulas" class="control-label requerido">Celulas:</label>
                                 {{form.celulas}}
-                                <label for="id_celulas" class="fg-label requerido">Celulas:</label>
                             </div>
+                            {% for error in form.celulas.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group fg-float input-group-lg">
+                        <div class="input-group fg-float input-group-lg {{form.rango.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-transform"></i>
                             </span>
                             <div class="fg-line requerido">
+                                <label for="id_rango" class="control-label requerido">Rango:</label>
                                 {{form.rango}}
-                                <label for="id_rango" class="fg-label requerido">Rango:</label>
                             </div>
+                            {% for error in form.rango.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
                         <div class="card-body card-padding">
-                            <p class="c-black f-500 m-b-20">Descripcion:</p>
-                            <div class="form-group">
+                            <div class="form-group {{form.descripcion.css_classes}}">
                                 <div class="fg-line requerido">
+                                <label class="control-label">Descripcion:</label>
                                     {{form.descripcion}}
                                 </div>
+                            {% for error in form.descripcion.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="card-body card-padding">
-                            <p class="c-black f-500 m-b-20">Logro:</p>
-                            <div class="form-group">
+                            <div class="form-group {{form.descripcion.css_classes}}">
                                 <div class="fg-line requerido">
+                                <label class="control-label">Logro:</label>
                                     {{form.logro}}
                                 </div>
+                            {% for error in form.descripcion.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                             </div>
                         </div>
                     </div>

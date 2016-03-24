@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 {% block js %}
-<!-- <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script> -->
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fechaApertura").datetimepicker({
             maxDate : moment(),
             format: 'DD/MM/YYYY'
+        });
+        
+        $("#id_horaDiscipulado").datetimepicker({
+            format: 'hh:mm:ss',
+        });
+        
+        $("#id_horaGAR").datetimepicker({
+            format: 'hh:mm:ss',
         });
 	});
 </script>
@@ -24,7 +29,7 @@
                 <div class="row">
                     <div class="alert alert-success alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el grupo correctamente. <a alt="Lista de Grupos" href="/grupo/listar_grupos/{{red.id}}">Volver a la lista de grupos</a></p>
+                        <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el grupo correctamente. <a alt="Lista de Grupos" class="alert-link" href="/grupo/listar_grupos/{{red.id}}">Volver a la lista de grupos</a></p>
                     </div>
                 </div>
             {% endif %}
@@ -42,145 +47,181 @@
             <div class="card-body card-padding">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.lider1.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_lider1" class="fg-label requerido">L&iacute;der 1:</label>
+                                <label for="id_lider1" class="fg-label control-label requerido">L&iacute;der 1*:</label>
                             	{{form.lider1}}
                             </div>
+                            {% for error in form.lider1.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.lider2.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account-o"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_lider2" class="fg-label requerido">L&iacute;der 2:</label>
+                                <label for="id_lider2" class="fg-label control-label requerido">L&iacute;der 2:</label>
                             	{{form.lider2}}
                             </div>
+                            {% for error in form.lider2.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.direccion.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-map"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_direccion" class="fg-label">Direcci&oacute;n:</label>
+                                <label for="id_direccion" class="fg-label control-label">Direcci&oacute;n*:</label>
                             	{{form.direccion}}
                             </div>
+                            {% for error in form.direccion.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.estado.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-refresh"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_estado" class="fg-label requerido">Estado:</label>
+                                <label for="id_estado" class="fg-label control-label requerido">Estado*:</label>
                             	{{form.estado}}
                             </div>
+                            {% for error in form.estado.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.fechaApertura.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_fechaApertura" class="fg-label">Fecha Apertura Grupo:</label>
+                                <label for="id_fechaApertura" class="fg-label control-label">Fecha Apertura Grupo*:</label>
                             	{{form.fechaApertura}}
                             </div>
+                            {% for error in form.fechaApertura.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.diaGAR.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_diaGAR" class="fg-label">Dia del G.A.R:</label>
+                                <label for="id_diaGAR" class="fg-label control-label">Dia del G.A.R*:</label>
                             	{{form.diaGAR}}
                             </div>
+                            {% for error in form.diaGAR.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
                 <br>
-                <br>
-
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.horaGAR.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_horaGAR" class="fg-label">Hora del G.A.R:</label>
+                                <label for="id_horaGAR" class="fg-label control-label">Hora del G.A.R*:</label>
                             	{{form.horaGAR}}
                             </div>
+                            {% for error in form.horaGAR.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.diaDiscipulado.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar-note"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_diaDiscipulado" class="fg-label">Dia del Discipulado:</label>
+                                <label for="id_diaDiscipulado" class="fg-label control-label">Dia del Discipulado*:</label>
                             	{{form.diaDiscipulado}}
                             </div>
+                            {% for error in form.diaDiscipulado.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.horaDiscipulado.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_horaDiscipulado" class="fg-label">Hora del Discipulado:</label>
+                                <label for="id_horaDiscipulado" class="fg-label control-label">Hora del Discipulado*:</label>
                             	{{form.horaDiscipulado}}
                             </div>
+                            {% for error in form.horaDiscipulado.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
                 <br>
-                <br>
-
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group">
+                        <div class="input-group {{form.nombre.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_nombre" class="fg-label">Nombre:</label>
+                                <label for="id_nombre" class="fg-label control-label">Nombre*:</label>
                             	{{form.nombre}}
                             </div>
+                            {% for error in form.nombre.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.barrio.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-pin"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_barrio" class="fg-label">Barrio:</label>
+                                <label for="id_barrio" class="fg-label control-label">Barrio*:</label>
                             	{{form.barrio}}
                             </div>
+                            {% for error in form.barrio.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
                 <br>
                 <br>
-                
-
                 <br>
                 <br>
                 <div class="row">

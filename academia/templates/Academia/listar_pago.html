@@ -7,8 +7,12 @@
             <h1 class="f-700 f-20">
             	<legend>
             		<h3>Pagos de Academia</h3>
-            		<small>Haga click en un miembro para registrar un pago.</small>
-            	</legend>
+                </legend>
+                {% for g in grupos %}
+                    {% if 'Receptor' in g.name %}
+                        <small>Haga click en un miembro para registrar un pago.</small>
+                    {% endif %}
+                {% endfor %}
             </h1>
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
@@ -30,7 +34,11 @@
 					    	<tbody>
 							{% for matricula in matriculas %}
 								<tr>
+                                    {% if receptor %}
 									<td><a alt="Recibir Pago" href="/academia/recibir_pago/{{matricula.estudiante.id}}">{{matricula.estudiante.nombre|capfirst}} {{matricula.estudiante.primerApellido|capfirst}}</a></td>
+                                    {% else %}
+                                    <td>{{matricula.estudiante.nombre|capfirst}} {{matricula.estudiante.primerApellido|capfirst}}</td>
+                                    {% endif %}
 									<td>{{matricula.fechaInicio}}</td>
 									<td>{{matricula.moduloActual}}</td>
 									<td>${{matricula.pago}}</td>

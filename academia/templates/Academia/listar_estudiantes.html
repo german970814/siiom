@@ -22,7 +22,7 @@
                     {% endif %}
                     formatters: {
                         "link" : function(column, row) {
-                            return "<a href='/academia/estudiante_detalle/" +row.id + "'\>" + "Ver" + "</a>";
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/estudiante_detalle/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
                         },
                     }
                 });

@@ -2,6 +2,40 @@
 {% load staticfiles %}
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        $("#data-table-command").bootgrid({
+	        		css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+	                    },
+                    {% if grupos %}
+                    selection: true,
+                    multiSelect: true,
+                    rowSelect: true,
+                    caseSensitive: false,
+                    keepSelection: true,
+                    formatters: {
+                        "commands": function(column, row) {
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_grupo/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
+                        }
+                    }
+                    {% endif %}
+                });
+        $("button[name='eliminar']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nada que Eliminar")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+    })
+</script>
 {% endblock %}
 
 {% block contenido %}
@@ -14,6 +48,23 @@
         		</legend>
         	</h1>
 			<h5><a alt="Agregar Grupo" href="/grupo/crear_grupo/{{red.id}}">Agregar Grupos</a></h5>
+			{% if okElim == 1 %}
+			<div class="row">
+	            <div class="alert alert-success alert-dismissible" role="alert">
+	                <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                <p>Se eliminaron los grupos seleccionadas.</p>
+	            </div>
+	        </div>
+			{% else %}
+				{% if okElim == 2 %}
+					<div class="row">
+		                <div class="alert alert-danger alert-dismissible" role="alert">
+		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+		                    <p>Hubo un error al eliminar los grupo.</p>
+		                </div>
+		            </div>
+				{% endif %}
+			{% endif %}
         </div>
         {% if grupos %}
         <form action="" method="POST" enctype="multipart/form-data">
@@ -22,22 +73,22 @@
                 <br>
                 <div class="row">
                     <div class="col-md-12">
-						<table id="grupos" class="table" cellspacing="0">
+						<table id="data-table-command" class="table table-striped table-vmiddle">
 							<thead>
 						       	<tr>
-						       		<th class="checkboxBoton"><div class="button gray smallB checkBoton">
-									<input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('grupos');" /></div></th>
-						            <th>Nombre</th>
-						            <th>Lider1</th>
-						            <th>Lider2</th>
-						            <th>Estado</th>
-						            <th>Fecha de Apertura</th>
+						       		<th data-identifier="true" data-column-id="id" data-visible="false"></th>
+						            <th data-identifier="true" data-column-id="nombre">Nombre</th>
+						            <th data-identifier="true" data-column-id="lider1">Lider1</th>
+						            <th data-identifier="true" data-column-id="lider2">Lider2</th>
+						            <th data-identifier="true" data-column-id="estado">Estado</th>
+						            <th data-identifier="true" data-column-id="fecha">Fecha de Apertura</th>
+						            <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
 						       	</tr>
 					    	</thead>
 					    	<tbody>
 							{% for grupo in grupos %}
 								<tr>
-									<td><input type="checkbox" name="seleccionados" value="{{grupo.id}}"/></td>
+									<td>{{grupo.id}}</td>
 									<td>{{grupo.nombre|capfirst}}</td>
 									<td>{{grupo.lider1.nombre|capfirst}}</td>
 									<td>{{grupo.lider2.nombre|capfirst}}</td>
@@ -52,8 +103,8 @@
                 <br>
                 <br>
                 <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
                     </div>
                 </div>
             </div>
@@ -61,9 +112,8 @@
         {% else %}
         <div class="card-body card-padding">
         	<div class="row">
-				<div class="col-md-8 col-md-offset-2">
-					<div class="alert alert-danger alert-dismissible" role="alert">
-						<button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+				<div class="col-md-10 col-md-offset-1">
+					<div class="alert alert-warning" role="alert">
 						<p>A&uacute;n no se han agregado grupos a esta red.</p>
 					</div>
 				</div>

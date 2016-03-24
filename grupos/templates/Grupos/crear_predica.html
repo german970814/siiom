@@ -30,14 +30,17 @@
             <div class="card-body card-padding">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-1">
-                        <div class="input-group">
+                        <div class="input-group {{form.nombre.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
+                                <label for="id_nombre" class="fg-label requerido control-label">Nombre:</label>
                             	{{form.nombre}}
                             </div>
+                            {% for error in form.nombre.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -45,14 +48,17 @@
                 <br>
                 <div class="row">
                     <div class="col-md-8 col-md-offset-1">
-                        <div class="input-group">
+                        <div class="input-group {{form.descripcion.css_classes}}">
                         	<span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_descripcion" class="fg-label requerido">Descripcci&oacute;n:</label>
+                                <label for="id_descripcion" class="fg-label control-label requerido">Descripcci&oacute;n:</label>
                             	{{form.descripcion}}
                             </div>
+                            {% for error in form.descripcion.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

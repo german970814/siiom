@@ -12,6 +12,7 @@ from grupos.models import Predica
 
 
 class FormularioEditarGrupo(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
     
     class Meta:        
@@ -21,10 +22,11 @@ class FormularioEditarGrupo(ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormularioEditarGrupo, self).__init__(*args, **kwargs)
         self.fields['direccion'].widget.attrs.update({'class' : 'form-control'})   
-        self.fields['diaGAR'].widget.attrs.update({'class' : 'selectpicker','data-live-search':'true'}) 
+        self.fields['diaGAR'].widget.attrs.update({'class' : 'selectpicker', 'data-live-search':'true'}) 
         self.fields['horaGAR'].widget.attrs.update({'class' : 'form-control time-picker','data-mask':'00:00:00'})      
         
 class FormularioReportarReunionGrupo(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
     
     class Meta:
@@ -41,6 +43,7 @@ class FormularioReportarReunionGrupo(ModelForm):
         self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
 
 class FormularioReportarReunionGrupoAdmin(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
 
     class Meta:
@@ -58,6 +61,7 @@ class FormularioReportarReunionGrupoAdmin(ModelForm):
         self.fields['ofrenda'].widget.attrs.update({'class' : 'form-control'})
         
 class FormularioReportarReunionDiscipulado(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
     
     class Meta:
@@ -73,6 +77,7 @@ class FormularioReportarReunionDiscipulado(ModelForm):
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in = miembro.pastores())
         
 class FormularioCrearRed(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
     
     def __init__(self, *args, **kwargs):
@@ -84,6 +89,7 @@ class FormularioCrearRed(ModelForm):
         fields = '__all__'
         
 class FormularioCrearGrupo(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
     
     def __init__(self, red = '', new=True, *args, **kwargs):
@@ -94,10 +100,9 @@ class FormularioCrearGrupo(ModelForm):
         self.fields['diaGAR'].widget.attrs.update({'class':'selectpicker'})
         self.fields['diaDiscipulado'].widget.attrs.update({'class':'selectpicker'})
         self.fields['barrio'].widget.attrs.update({'class':'selectpicker','data-live-search':'true'})
-        self.fields['horaGAR'].widget.attrs.update({'class':'form-control'})
-        self.fields['fechaApertura'].widget.attrs.update({'class':'form-control'})
-        self.fields['horaGAR'].widget.attrs.update({'class':'form-control'})
-        self.fields['horaDiscipulado'].widget.attrs.update({'class':'form-control'})
+        self.fields['horaGAR'].widget.attrs.update({'class':'form-control', 'data-mask':'00:00:00'})
+        self.fields['fechaApertura'].widget.attrs.update({'class':'form-control', 'data-mask':'00/00/0000'})
+        self.fields['horaDiscipulado'].widget.attrs.update({'class':'form-control', 'data-mask':'00:00:00'})
         self.fields['direccion'].widget.attrs.update({'class':'form-control'})
         self.fields['nombre'].widget.attrs.update({'class':'form-control'})
 
@@ -127,6 +132,7 @@ class FormularioCrearGrupo(ModelForm):
         exclude = ('red',)
 
 class FormularioCrearGrupoRaiz(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
 
     def __init__(self, new=True, *args, **kwargs):
@@ -169,6 +175,7 @@ class FormularioCrearGrupoRaiz(ModelForm):
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
 class FormularioReportesSinEnviar(forms.Form):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
     
     reunion = forms.TypedChoiceField(choices = REUNION_CHOICES, coerce = int, required = True, widget = forms.RadioSelect)
@@ -176,6 +183,7 @@ class FormularioReportesSinEnviar(forms.Form):
     fechaf = forms.DateField(label = 'Fecha final', required = True, widget = forms.DateInput(attrs = {'size' : 10}))
 
 class FormularioCrearPredica(ModelForm):
+    error_css_class = 'has-error'
     required_css_class = 'requerido'
 
     def __init__(self,*args,**kwargs):

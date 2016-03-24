@@ -29,14 +29,17 @@
             <div class="card-body card-padding">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <div class="input-group fg-float">
+                        <div class="input-group fg-float {{form.nombre.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
                             <div class="fg-line requerido">
+                                <label for="id_nombre" class="control-label requerido">Nombre:</label>
                                 {{form.nombre}}
-                                <label for="id_nombre" class="fg-label requerido">Nombre:</label>
                             </div>
+                            {% for error in form.nombre.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -44,14 +47,17 @@
                 <br>
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <div class="input-group fg-float">
+                        <div class="input-group fg-float {{form.prioridad.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-arrow-right-top"></i>
                             </span>
                             <div class="fg-line requerido">
+                                <label for="id_prioridad" class="control-label requerido">Prioridad:</label>
                                 {{form.prioridad}}
-                                <label for="id_prioridad" class="fg-label requerido">Prioridad:</label>
                             </div>
+                            {% for error in form.prioridad.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

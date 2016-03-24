@@ -327,9 +327,12 @@ def eliminar(modelo, lista):
     ok = 0 #No hay nada en la lista
     if lista:
         ok = 1 #Los borro todos
-        for e in lista:
+        for m in lista:
             try:
-                modelo.objects.get(id=e).delete()
+                modelo.objects.get(id=m).delete()
+            except ValueError as e:
+                print(e)
+                pass
             except:
                 ok = 2 #Hubo un error
     return ok
@@ -337,18 +340,23 @@ def eliminar(modelo, lista):
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
 def gruposDeRed(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
+
     try:
         red = Red.objects.get(id=id)
     except:
         raise Http404
-    grupos = list(Grupo.objects.filter(red=red))
+
     if request.method == "POST":
         if 'editar' in request.POST:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             request.session['red'] = red
             return HttpResponseRedirect('/grupo/editar_grupo/')
         if  'eliminar' in request.POST:
+            print(request.POST.getlist('seleccionados'))
             okElim = eliminar(Grupo, request.POST.getlist('seleccionados'))
+
+    grupos = list(Grupo.objects.filter(red=red))
+    
     return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
@@ -372,29 +380,26 @@ def crearGrupo(request, id):
     return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")
-def editarGrupo(request):
+def editarGrupo(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        barrio = request.session['actual']
-        red = request.session['red']
-        form = FormularioCrearGrupo(data=request.POST, instance=barrio)
+    
+    try:
+        grupo = Grupo.objects.get(pk=pk)
+    except Grupo.DoesNotExist:
+        raise Http404
+
+    red = grupo.red
+    if request.method == 'POST':
+        form = FormularioCrearGrupo(data=request.POST or None, instance=grupo, new=False)
+
         if form.is_valid():
             nuevoGrupo = form.save()
             ok = True
-    
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            grupo = Grupo.objects.get(id = request.session['seleccionados'].pop())
-            request.session['actual'] = grupo
-            form = FormularioCrearGrupo(instance=grupo, red=grupo.red_id, new=False)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Grupos/crear_grupo_admin.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect('/grupo/listar_grupos/'+str(red.id))
     else:
-        return HttpResponseRedirect('/grupo/listar_grupos/'+str(red.id))
+        form = FormularioCrearGrupo(instance=grupo, new=False)
+
+    return render_to_response("Grupos/crear_grupo_admin.html", locals(), context_instance=RequestContext(request))
     
 @user_passes_test(verGrupoTest, login_url="/iniciar_sesion/")
 def verGrupo(request, id):

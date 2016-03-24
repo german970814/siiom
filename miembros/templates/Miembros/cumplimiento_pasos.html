@@ -93,6 +93,7 @@
             </div>
             {% endif %}
         </div>
+        <div class="card-body card-padding">
         <form action="" method="POST">
             {% csrf_token %}
             <div class="row">
@@ -105,6 +106,7 @@
                         {% endfor %}
                     </select>
                 </div>
+                <br class="space">
                 <div class="col-md-2">
                     <button type="submit" name="verMiembros" value="Ver" class="btn btn-primary btn-block">Ver</button>
                 </div>
@@ -141,6 +143,7 @@
             </div>
             {% endif %}
         </form>
+        </div>
         <br>
         <br>
     </div>
