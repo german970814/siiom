@@ -80,7 +80,8 @@ def editarHorarioReunionGrupo(request):
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/miembro/')
+            ok = True
+            # return HttpResponseRedirect('/miembro/')
     else:
         form = FormularioEditarGrupo(instance=grupo)    
     return render_to_response('Grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
@@ -356,7 +357,7 @@ def gruposDeRed(request, id):
             okElim = eliminar(Grupo, request.POST.getlist('seleccionados'))
 
     grupos = list(Grupo.objects.filter(red=red))
-    
+
     return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
 
 @user_passes_test(adminTest, login_url="/iniciar_sesion/")

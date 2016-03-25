@@ -23,7 +23,7 @@ class FormularioEditarGrupo(ModelForm):
         super(FormularioEditarGrupo, self).__init__(*args, **kwargs)
         self.fields['direccion'].widget.attrs.update({'class' : 'form-control'})   
         self.fields['diaGAR'].widget.attrs.update({'class' : 'selectpicker', 'data-live-search':'true'}) 
-        self.fields['horaGAR'].widget.attrs.update({'class' : 'form-control time-picker','data-mask':'00:00:00'})      
+        self.fields['horaGAR'].widget.attrs.update({'class' : 'form-control','data-mask':'00:00:00'})      
         
 class FormularioReportarReunionGrupo(ModelForm):
     error_css_class = 'has-error'

@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block js %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#id_horaGAR").datetimepicker({
+                format: 'HH:mm',
+            });
+        });
+    </script>
+{% endblock js %}
+
 {% block contenido %}
 <div class="container">
     <div class="card">
@@ -20,9 +30,9 @@
             {% endif %}
             {% if form.errors %}
                 <div class="row">
-                    <div class="alert alert-success alert-dismissible" role="alert">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Ha Ocurrido un error.</p>
+                        <p>Verifica los campos señalados.</p>
                     </div>
                 </div>
             {% endif %}
@@ -33,38 +43,48 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.direccion.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-pin"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_direccion" class="fg-label requerido">Direcc&oacute;n:</label>
+                                <label for="id_direccion" class="fg-label control-label requerido">Direcc&oacute;n:</label>
                                 {{form.direccion}}
                             </div>
+                            {% for err in form.direccion.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.diaGAR.css_classes}}">
                             {{ form.diaGAR.errors }}
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_diaGAR" class="fg-label requerido">D&iacute;a G.A.R:</label>
+                                <label for="id_diaGAR" class="fg-label control-label requerido">D&iacute;a G.A.R:</label>
                                 {{form.diaGAR}}
                             </div>
+                            {% for err in form.diaGAR.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
-                            {{ form.horaGAR.errors }}
+                        <div class="input-group {{form.horaGAR.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_horaGAR" class="fg-label requerido">Hora G.A.R:</label>
+                                <label for="id_horaGAR" class="fg-label control-label requerido">Hora G.A.R:</label>
                                 {{form.horaGAR}}
                             </div>
+                            {% for err in form.horaGAR.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

@@ -1,14 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block js %}
-<!--
-<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
--->
-<!-- <link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
-<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script> -->
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -60,84 +52,110 @@
                 <br>
                 <div class="row">
                     <div class="col-md-3">
-                        <div class="input-group">
+                        <div class="input-group {{form.grupo.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fecha" class="fg-label requerido">Grupo:</label>
+                                <label for="id_fecha" class="fg-label control-label requerido">Grupo*:</label>
                                 {{form.grupo}}
                             </div>
+                            {% for err in form.grupo.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-3">
-                        <div class="input-group">
+                        <div class="input-group {{form.predica.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_predica" class="fg-label requerido">Pr&eacute;dica:</label>
+                                <label for="id_predica" class="fg-label control-label requerido">Pr&eacute;dica*:</label>
                                 {{form.predica}}
                             </div>
+                            {% for err in form.predica.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-3">
-                        <div class="input-group">
+                        <div class="input-group {{form.ofrenda.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-money-box"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_ofrenda" class="fg-label requerido">Ofrenda GAR:</label>
+                                <label for="id_ofrenda" class="fg-label control-label requerido">Ofrenda GAR*:</label>
                                 {{form.ofrenda}}
                             </div>
+                            {% for err in form.ofrenda.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-3">
-                        <div class="input-group">
+                        <div class="input-group {{form.fecha.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fecha" class="fg-label requerido">Fecha del grupo:</label>
+                                <label for="id_fecha" class="fg-label control-label requerido">Fecha del grupo*:</label>
                                 {{form.fecha}}
                             </div>
+                            {% for err in form.fecha.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.numeroTotalAsistentes.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_numeroTotalAsistentes" class="fg-label requerido">¿Cu&aacute;l fue la asistencia total de tu grupo incluyendo visitas y l&iacute;deres?:</label>
+                                <label for="id_numeroTotalAsistentes" class="fg-label control-label requerido">¿Cu&aacute;l fue la asistencia total de tu grupo incluyendo visitas y l&iacute;deres?*:</label>
                                 {{form.numeroTotalAsistentes}}
                             </div>
+                            {% for err in form.numeroTotalAsistentes.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.numeroVisitas.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_numeroVisitas" class="fg-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran visitas?:</label>
+                                <label for="id_numeroVisitas" class="fg-label control-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran visitas?*:</label>
                                 {{form.numeroVisitas}}
                             </div>
+                            {% for err in form.numeroVisitas.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{form.numeroLideresAsistentes.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_numeroTotalAsistentes" class="fg-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran los l&iacute;deres del grupo?:</label>
+                                <label for="id_numeroTotalAsistentes" class="fg-label control-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran los l&iacute;deres del grupo?*:</label>
                                 {{form.numeroLideresAsistentes}}
                             </div>
+                            {% for err in form.numeroLideresAsistentes.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
