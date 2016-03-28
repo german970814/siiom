@@ -59,8 +59,8 @@ class FormularioReportesSinEnviar(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
-        self.fields['fechai'].widget.attrs.update({'class' : 'form-control'})
-        self.fields['fechaf'].widget.attrs.update({'class' : 'form-control'})         
+        self.fields['fechai'].widget.attrs.update({'class' : 'form-control', 'data-mask':'00/00/00'})
+        self.fields['fechaf'].widget.attrs.update({'class' : 'form-control', 'data-mask':'00/00/00'})         
 
 class FormularioPredicas(forms.Form):
     required_css_class = 'requerido'

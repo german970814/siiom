@@ -57,6 +57,13 @@
             }
         });
 
+        {% if descendientes %}
+            check = $('#idCheck');
+            $(window).on('load', () => {
+                check[0].checked = true;
+            });
+        {% endif %}
+
         $("#idCheck").click(function(){
             if($(this).is(':checked')){
                 $("#idGrupo_f").attr('disabled', 'disabled');
@@ -138,6 +145,7 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-addon">
@@ -149,6 +157,7 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-addon">
@@ -167,7 +176,7 @@
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
                         <div class="input-group">
@@ -185,6 +194,7 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group">
                             <label class="checkbox">
@@ -196,12 +206,13 @@
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
                         <input type="hidden" name="type" id="type" value="1">
                         <button type="submit" value="Editar" class="btn btn-success btn-block" name ="verReporte">Ver</button>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <button type="submit" value="Editar" class="btn btn-warning btn-block" name ="reportePDF">Generar PDF</button>
                     </div>

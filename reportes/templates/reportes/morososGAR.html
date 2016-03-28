@@ -18,6 +18,10 @@
             maxDate: moment(),
         });
 
+        $('#id_fechai').keypress(function(event) {
+            event.preventDefault();
+            return false;
+        });
 
         $('#id_fechai').on("dp.change",function(e){
             $('#id_fechaf').data("DateTimePicker").minDate(e.date);
@@ -79,7 +83,6 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                    {{ form.fechai.errors }}
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
@@ -90,8 +93,8 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
-                    {{ form.fechaf.errors }}
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar-note"></i>

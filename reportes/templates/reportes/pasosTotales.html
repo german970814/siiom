@@ -20,8 +20,9 @@
             chart.draw(data, options);
         }
     {% endif %}
-    
+
     $(document).ready(function(){
+
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
                 $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
@@ -42,6 +43,13 @@
                 $("#idGrupo_f").removeAttr('disabled');
             }
         });
+
+        {% if descendientes %}
+            check = $('#idCheck');
+            $(window).on('load', () => {
+                check[0].checked = true;
+            });
+        {% endif %}
 
         $("#form_pasosTotal").submit(function(event) {
             if ($('#idGrupo_i').val() == -1) {
@@ -112,6 +120,7 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group">
                             <span class="input-group-addon">
@@ -128,6 +137,7 @@
                             </div>
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group">
                             <label class="checkbox">
@@ -139,12 +149,13 @@
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
                         <input type="hidden" name="type" id="type" value="1">
                         <button type="submit" value="Editar" class="btn btn-success btn-block" name ="verReporte">Ver</button>
                     </div>
+                    <br class="space">
                     <div class="col-md-4">
                         <button type="submit" value="Editar" class="btn btn-warning btn-block" name ="reportePDF">Generar PDF</button>
                     </div>
