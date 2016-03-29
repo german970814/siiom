@@ -94,7 +94,7 @@
                 </div>
             </li>
             <li class="logo hidden-xs">
-                <a href="/miembro">{{nombreIglesia}}</a>
+                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{{nombreIglesia}}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -178,7 +178,7 @@
             </div>
             <ul class="main-menu">
                 <li class="active">
-                    <a href="/miembro"><i class="zmdi zmdi-home"></i> Dashboard</a>
+                    <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
                 </li>
                 {% if perms.miembros.es_administrador %}
                 <li class="sub-menu">

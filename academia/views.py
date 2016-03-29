@@ -100,7 +100,10 @@ def editarCurso(request, admin, url, pk, template_name="Academia/crear_curso.htm
 
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/academia/listar_cursos")
+            if admin:
+                return HttpResponseRedirect("/academia/listar_cursos")
+            else:
+                return HttpResponseRedirect("/academia/cursos/")
     else:
         if admin:
             form = FormularioCrearCurso(instance=curso)
@@ -117,14 +120,25 @@ def listarEstudiantes(request, curso):
         if 'Eliminar' in request.POST:
             eliminar(Matricula, request.POST.getlist('seleccionados'))
         else:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
+            print("request--------", request.POST.getlist('seleccionados'))
+            seleccionados = list()
+            for x in request.POST.getlist('seleccionados'):
+                if isinstance(x, int):
+                    seleccionados.append(x)
+                else:
+                    try:
+                        seleccionados.append(int(x))
+                    except ValueError:
+                        pass
+            print("seleccionados", seleccionados)
+            request.session['seleccionados'] = seleccionados #request.POST.getlist('seleccionados')
             request.session['curso'] = request.POST['curso']
             if request.POST['accion'] == 'M':
                 return HttpResponseRedirect("/academia/evaluar_modulo/")
             if request.POST['accion'] == 'P':
                 return HttpResponseRedirect("/academia/promover_estudiante/")
     
-    admin = request.session['admin']
+    # admin = request.session['admin']
     miembro = Miembro.objects.get(usuario = request.user)
     id = int(curso)
     curso = Curso.objects.get(id = id)
@@ -285,12 +299,13 @@ def maestroRegistrarEntregaTareas(request):
 def evaluarModulo(request):
     """Permite a un profesor registrar la calificacion del examen final del modulo actual en el que se encuentra el estudiante, siempre y cuando 
        este halla asistido a todas las sesiones de dicho modulo."""
-        
+
     if request.method == 'POST':
         if request.session.get('actual') != None:
             actual = request.session['actual'] #estudiante actual
             try:
-                reporte = Reporte.objects.get(matricula = actual, modulo = actual.moduloActual)
+                estudiante_actual = Matricula.objects.get(id=actual)
+                reporte = Reporte.objects.get(matricula= estudiante_actual, modulo= estudiante_actual.moduloActual)
                 form = FormularioEvaluarModulo(data = request.POST, instance = reporte)
                 sw = True
             except:
@@ -300,19 +315,19 @@ def evaluarModulo(request):
             if form.is_valid():               
                 nuevoReporte = form.save(commit = sw)
                 if not sw:
-                    nuevoReporte.matricula = actual
-                    nuevoReporte.modulo = actual.moduloActual
+                    nuevoReporte.matricula = estudiante_actual
+                    nuevoReporte.modulo = estudiante_actual.moduloActual
                     nuevoReporte.save()
-                total = actual.curso.modulos.all().aggregate(Sum('porcentaje'))
-                actual.notaDefinitiva = actual.notaDefinitiva + (nuevoReporte.nota*nuevoReporte.modulo.porcentaje/total['porcentaje__sum'])
-                actual.save()
+                total = estudiante_actual.curso.modulos.all().aggregate(Sum('porcentaje'))
+                estudiante_actual.notaDefinitiva = estudiante_actual.notaDefinitiva + (nuevoReporte.nota*nuevoReporte.modulo.porcentaje/total['porcentaje__sum'])
+                estudiante_actual.save()
                 ok = True
     
     if 'seleccionados' in request.session:
             faltantes = request.session['seleccionados']
             if len(faltantes) > 0:
                 estudiante = Matricula.objects.get(id = request.session['seleccionados'].pop())
-                request.session['actual'] = estudiante                       
+                request.session['actual'] = int(estudiante.id)
                 request.session['seleccionados'] = request.session['seleccionados']                
                 puedeVer = estudiante.asistioTodasSesiones()
                 try:
@@ -334,8 +349,8 @@ def promoverModulo(request):
     if request.method == 'POST':
         if request.session.get('actual') != None:
             actual = request.session['actual']
-            est = actual
-            form = FormularioPromoverModulo(data = request.POST, instance = actual)
+            est = Matricula.objects.get(id= actual)
+            form = FormularioPromoverModulo(data= request.POST, instance= est)
             if form.is_valid():
                 estudiantePromovido = form.save()
                 ok = True
@@ -344,7 +359,7 @@ def promoverModulo(request):
             faltantes = request.session['seleccionados']
             if len(faltantes) > 0:
                 estudiante = Matricula.objects.get(id = request.session['seleccionados'].pop())
-                request.session['actual'] = estudiante                       
+                request.session['actual'] = int(estudiante.id)
                 request.session['seleccionados'] = request.session['seleccionados']
                 puedeVer = estudiante.moduloReportado()
                 form = FormularioPromoverModulo(est = estudiante, instance = estudiante) 

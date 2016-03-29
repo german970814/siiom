@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+
+{% block css %}
+	<style>
+	
+		.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+			background-color: #fff;
+			opacity: 0.5;
+		}
+
+	</style>
+{% endblock css %}
+
 {% block js %}
 <script>
 	$(document).ready(function() {
@@ -26,7 +38,7 @@
                 <div class="row">
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Aún hay campos vacios. No se creó e curso</p>
+                        <p>Aún hay campos vacios. No se puede {{accion}} el curso</p>
                     </div>
                 </div>
             {% endif %}

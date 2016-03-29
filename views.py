@@ -130,3 +130,6 @@ def depu2(request):
         g.save()
         print(g.nombre)
     return HttpResponse(grupos)
+
+def without_perms(request):
+    return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))

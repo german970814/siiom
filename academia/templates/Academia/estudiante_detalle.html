@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block contenido %}
 <div class="container">
     <div class="card">
@@ -124,8 +124,8 @@
                                 {% for sesion in modulo.sesiones %}
                                     <tr>
                                       <td style="width: 320px;text-align:center;">{{ sesion.nombre|capfirst }}</td>
-                                      <td style="text-align: center;">{% if sesion.asistencia.asistencia %}<img src="{{ MEDIA_URL }}Imagenes/accept.png" />{% endif %}                                       </td>
-                                      <td style="text-align: center;">{% if sesion.asistencia.tarea %}<img src="{{ MEDIA_URL }}Imagenes/accept.png" />{% endif %}</td>
+                                      <td style="text-align: center;">{% if sesion.asistencia.asistencia %}<img src="{% static 'Imagenes/accept.png' %}" />{% endif %}                                       </td>
+                                      <td style="text-align: center;">{% if sesion.asistencia.tarea %}<img src="{% static 'Imagenes/accept.png' %}" />{% endif %}</td>
                                     </tr>
                                 {% endfor %}
                                 <tr><td colspan="3"><b>Examen Final:</b> {{ modulo.reporte.nota }}</td></tr>

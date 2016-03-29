@@ -29,7 +29,7 @@ class FormularioLiderAgregarMiembro(ModelForm):
         self.fields['telefono'].widget.attrs.update({'class':'form-control'})
         self.fields['celular'].widget.attrs.update({'class':'form-control'})
         self.fields['direccion'].widget.attrs.update({'class':'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class':'form-control','data-mask':'00/00/00'})
+        self.fields['fechaNacimiento'].widget.attrs.update({'class':'form-control','data-mask':'00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class':'form-control'})
         self.fields['email'].widget.attrs.update({'class':'form-control'})
         self.fields['estadoCivil'].widget.attrs.update({'class':'form-control'})

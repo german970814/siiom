@@ -58,6 +58,24 @@
             });
 		});		
 </script>
+
+{% for e in estudiantes %}
+    {% if e.tarea %}
+    <script>
+        jQuery(document).ready(function($) {
+            setTimeout(function(){
+                var a = $('tr[data-row-id="{{e.id}}"]');
+                a.addClass('active');
+                b = a.find('input');
+                b.each(function(index, el) {
+                    b[index].checked = true;
+                });
+            }, 1000);
+        });
+    </script>
+    {% endif %}
+{% endfor %}
+
 {% endblock %}
 
 {% block contenido %}
@@ -71,7 +89,7 @@
             </h1>
             {% if ok %}
                 <div class="row">
-                    <div class="alert alert-warning alert-dismissible" role="alert">
+                    <div class="alert alert-success alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                         <p>Se han registrado correctamente la entrega de tareas.</p>
                     </div>
@@ -171,11 +189,12 @@
                     <tbody>
                         {% for est in estudiantes %}
                         <tr>
-                            <td class="hidden">{{est.id}}</td>
-                            <td>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</td>
+                            <td>{{est.id}}</td>
+                            <td>{{est.matricula.estudiante.nombre|capfirst}} {{est.matricula.estudiante.primerApellido|capfirst}} {{est.matricula.estudiante.segundoApellido|capfirst}}</td>
                         </tr>
                         {% empty %}
                             <tr>
+                                <td></td>
                                 <td>No hay estudiantes en este modulo.</td>
                             </tr>
                         {% endfor %}

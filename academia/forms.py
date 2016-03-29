@@ -61,19 +61,30 @@ class FormularioCrearCurso(ModelForm):
 
 class FormularioEditarCurso(ModelForm):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     def __init__(self,*args,**kwargs):
         super(FormularioEditarCurso,self).__init__(*args,**kwargs)
 
-        self.fields['nombre'].widget.attrs.update({'disabled':'', 'class':'form-control'})
-        self.fields['estado'].widget.attrs.update({'disabled':'', 'class':'form-control'})
-        self.fields['modulos'].widget.attrs.update({'disabled':'', 'class':'selectpicker'})
-        self.fields['red'].widget.attrs.update({'disabled':'', 'class':'form-control'})
-        self.fields['profesor'].widget.attrs.update({'disabled':'', 'class':'form-control'})
-        self.fields['material'].widget.attrs.update({'disabled':'', 'class':'form-control'})
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['estado'].widget.attrs.update({'class':'form-control'})
+        self.fields['modulos'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['red'].widget.attrs.update({'class':'form-control'})
+        self.fields['profesor'].widget.attrs.update({'class':'form-control'})
+        self.fields['material'].widget.attrs.update({'class':'form-control'})
         self.fields['dia'].widget.attrs.update({'class':'selectpicker'})
         self.fields['hora'].widget.attrs.update({'class':'form-control'})
         self.fields['direccion'].widget.attrs.update({'class':'form-control'})
+
+        self.fields['nombre'].widget.attrs['readonly'] = True
+        self.fields['estado'].widget.attrs['readonly'] = True
+        self.fields['modulos'].widget.attrs['readonly'] = True
+        self.fields['red'].widget.attrs['readonly'] = True
+        self.fields['profesor'].widget.attrs['readonly'] = True
+        self.fields['material'].widget.attrs['readonly'] = True
+
+    def save(self, commit=True):
+        return super(FormularioEditarCurso, self).save(commit)
     
     class Meta:
         model = Curso

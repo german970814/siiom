@@ -1113,7 +1113,7 @@ def sendMail(camposMail):
     subject = camposMail[0]
     mensaje = camposMail[1]
     receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently = False)
+    #send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently = False)
 
 
 def recuperar_contrasena(request):

@@ -43,7 +43,7 @@
 			}
 		});
 
-        $("#formularioAsistencia").submit(function(){
+        $("#formularioAsistencia, #aceptarAsistencia").submit(function(){
             if ($('#idCurso').val() == -1){
                 swal("Alerta","Por favor selecciona un curso");
                 return false;
@@ -56,15 +56,27 @@
             } else {
                 return true;
             }
-        })
-
-        if ($("td[colspan='2']")) {
-            $("button[name='aceptarAsistencia']").click(function(event) {
-                event.preventDefault();
-            });
-        }
+        });
 	});		
 </script>
+
+{% for e in estudiantes %}
+    {% if e.asistencia %}
+    <script>
+        jQuery(document).ready(function($) {
+            setTimeout(function(){
+                var a = $('tr[data-row-id="{{e.id}}"]');
+                a.addClass('active');
+                b = a.find('input');
+                b.each(function(index, el) {
+                    b[index].checked = true;
+                });
+            }, 1000);
+        });
+    </script>
+    {% endif %}
+{% endfor %}
+
 {% endblock %}
 
 {% block contenido %}
@@ -129,7 +141,7 @@
                                 <select id="idSesion" name="menuSesiones" class="selectpicker" data-live-search="true">
                                     <option value="-1">------</option>
                                     {% for s in sesiones %}
-                                    <option value="{{ s.id }}" {% if s == modulo %} selected="selected" {% endif %}>{{ s.nombre|capfirst }}</option>
+                                    <option value="{{ s.id }}" {% if s == sesion %} selected="selected" {% endif %}>{{ s.nombre|capfirst }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -145,50 +157,52 @@
             </div>
         </form>
     </div>
-    <div class="card">
-        <form action="" method="POST" id="aceptarAsistencia" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="card-header">
-                <h1>
-                    <legend><h3>Lista</h3></legend>
-                </h1>
-            </div>
-            
-            <div class="table-responsive">
-                <table id="data-table-selection" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th data-visible="false" data-column-id="id" data-identifier="true"></th>
-                            <th data-column-id="nombre" data-identifier="true">Nombre</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for est in estudiantes %}
-                        <tr>
-                            <td class="hidden">{{est.id}}</td>
-                            <td>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</td>
-                        </tr>
-                        {% empty %}
-                            <tr>
-                                <td></td>
-                                <td colspan="2">No hay estudiantes en este modulo.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="row">
-                <div class="col-md-4 col-md-offset-4">
-                    <button type="submit" class="btn btn-success btn-block" name ="aceptarAsistencia">Aceptar</button>
-                    <input type="hidden" name="menuCursos" value="{{curso.id}}"/>
-                    <input type="hidden" name="menuModulos" value="{{modulo.id}}"/>
-                    <input type="hidden" name="menuSesiones" value="{{sesion.id}}"/>
+    {% if estudiantes %}
+        <div class="card">
+            <form action="" method="POST" id="aceptarAsistencia" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card-header">
+                    <h1>
+                        <legend><h3>Lista</h3></legend>
+                    </h1>
                 </div>
-            </div>
-            <br>
-            <br>
-        </form>
-    </div>
+                
+                <div class="table-responsive">
+                    <table id="data-table-selection" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th data-visible="false" data-column-id="id" data-identifier="true"></th>
+                                <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for est in estudiantes %}
+                            <tr>
+                                <td class="hidden">{{est.id}}</td>
+                                <td>{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</td>
+                            </tr>
+                            {% empty %}
+                                <tr>
+                                    <td></td>
+                                    <td colspan="2">No hay estudiantes en este modulo.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" class="btn btn-success btn-block" name ="aceptarAsistencia">Aceptar</button>
+                        <input type="hidden" name="menuCursos" value="{{curso.id}}"/>
+                        <input type="hidden" name="menuModulos" value="{{modulo.id}}"/>
+                        <input type="hidden" name="menuSesiones" value="{{sesion.id}}"/>
+                    </div>
+                </div>
+                <br>
+                <br>
+            </form>
+        </div>
+    {% endif %}    
 </div>
 {% endblock %}
 
