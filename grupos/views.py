@@ -48,7 +48,7 @@ def PastorAdminTest(user):
     and (Group.objects.get(name__iexact='Pastor') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def grupoRaiz(request):
     """Permite a un administrador crear o editar el grupo raiz de la iglesia."""
 
@@ -69,7 +69,7 @@ def grupoRaiz(request):
             form = FormularioCrearGrupoRaiz()
     return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
             
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def editarHorarioReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
@@ -108,7 +108,7 @@ def reunionDiscipuladoReportada(predica, grupo):
     else:
         return False
 
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
@@ -119,7 +119,6 @@ def reportarReunionGrupo(request):
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
-                print('entro valid')
                 r = form.save(commit=False)
                 if not reunionReportada(r.fecha, grupo, 1):
                     r.grupo = grupo
@@ -137,7 +136,7 @@ def reportarReunionGrupo(request):
             form = FormularioReportarReunionGrupo()    
     return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def reportarReunionGrupoAdmin(request):
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == 'POST':
@@ -153,7 +152,7 @@ def reportarReunionGrupoAdmin(request):
         form = FormularioReportarReunionGrupoAdmin()
     return render_to_response('Grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionDiscipulado(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
@@ -180,7 +179,7 @@ def reportarReunionDiscipulado(request):
             form = FormularioReportarReunionDiscipulado(miembro=miembro)
     return render_to_response('Grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(receptorAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(receptorAdminTest, login_url="/dont_have_permissions/")
 def registrarPagoGrupo(request, id):
     
     miembro = Miembro.objects.get(usuario = request.user) 
@@ -205,7 +204,7 @@ def registrarPagoGrupo(request, id):
     ofrendasPendientesGar = ReunionGAR.objects.filter(grupo = grupoLidera, confirmacionEntregaOfrenda = False)
     return render_to_response("Grupos/registrar_pago_gar.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(receptorAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(receptorAdminTest, login_url="/dont_have_permissions/")
 def registrarPagoDiscipulado(request, id):
     
     miembro = Miembro.objects.get(usuario = request.user) 
@@ -231,7 +230,7 @@ def registrarPagoDiscipulado(request, id):
     ofrendasPendientesDiscipulado = ReunionDiscipulado.objects.filter(grupo = grupoLidera, confirmacionEntregaOfrenda=False)
     return render_to_response("Grupos/registrar_pago_discipulado.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarRedes(request):
     miembro = Miembro.objects.get(usuario = request.user)    
     if request.method == "POST":
@@ -242,7 +241,7 @@ def listarRedes(request):
 
     return render_to_response('Grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearRed(request):
     miembro = Miembro.objects.get(usuario = request.user)
     accion = 'Crear'
@@ -255,7 +254,7 @@ def crearRed(request):
         form = FormularioCrearRed()
     return render_to_response('Grupos/crear_red.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarRed(request, pk):
     accion = 'Editar'
 
@@ -277,7 +276,7 @@ def editarRed(request, pk):
 
     return render_to_response("Grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def listarPredicas(request):
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == "POST":
@@ -286,7 +285,7 @@ def listarPredicas(request):
     predicas = list(Predica.objects.filter(miembro__id = miembro.id))
     return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def crearPredica(request):
     miembro = Miembro.objects.get(usuario = request.user)
     accion = 'Crear'
@@ -302,7 +301,7 @@ def crearPredica(request):
         form = FormularioCrearPredica()
     return render_to_response('Grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(PastorAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def editarPredica(request, pk):
     accion = 'Editar'
 
@@ -338,7 +337,7 @@ def eliminar(modelo, lista):
                 ok = 2 #Hubo un error
     return ok
     
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def gruposDeRed(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
 
@@ -353,14 +352,13 @@ def gruposDeRed(request, id):
             request.session['red'] = red
             return HttpResponseRedirect('/grupo/editar_grupo/')
         if  'eliminar' in request.POST:
-            print(request.POST.getlist('seleccionados'))
             okElim = eliminar(Grupo, request.POST.getlist('seleccionados'))
 
     grupos = list(Grupo.objects.filter(red=red))
 
     return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearGrupo(request, id):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
@@ -380,7 +378,7 @@ def crearGrupo(request, id):
         form = FormularioCrearGrupo(red = id)
     return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarGrupo(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
@@ -402,7 +400,7 @@ def editarGrupo(request, pk):
 
     return render_to_response("Grupos/crear_grupo_admin.html", locals(), context_instance=RequestContext(request))
     
-@user_passes_test(verGrupoTest, login_url="/iniciar_sesion/")
+@user_passes_test(verGrupoTest, login_url="/dont_have_permissions/")
 def verGrupo(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
     try:
@@ -554,7 +552,6 @@ def reporteVisitasPorRed(request):
             visReuniones = ReunionGAR.objects.filter(grupo=grupo.id).values('numeroVisitas')
             if len(visReuniones.values()) > 0:
                 visitas = sum([int(dict['numeroVisitas']) for dict in visReuniones.values('numeroVisitas')])
-                print(visitas)
                 visRed = visRed + visitas
         l.append(visRed)
         data.append(l)

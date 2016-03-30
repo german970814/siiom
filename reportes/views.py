@@ -32,7 +32,7 @@ def agenteAdminTest(user):
             or Group.objects.get(name__iexact = 'Administrador') in user.groups.all())
 
 
-@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
 def visitasAsignadasRedes(request):
     """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida
     por el usuario."""
@@ -75,7 +75,7 @@ def visitasAsignadasRedes(request):
     miembro = Miembro.objects.get(usuario=request.user)
     return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
 def asignacionGAR(request):
     """Este reporte muestra el total de personas que han sido asignadas, que no les interesa, etc a un GAR en un rango de fechas
         escogidas por el usuario. Para este reporte se toman en cuenta los datos de las llamadas(pertenece, interesado, etc)."""
@@ -127,7 +127,7 @@ def asignacionGAR(request):
     miembro = Miembro.objects.get(usuario=request.user)
     return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
 def detalleLlamada(request, llamada):
     """Este reporte muestra el total de personas que se le hicieron llamadas de consolidacion en una fecha determinada."""
 
@@ -175,7 +175,7 @@ def detalleLlamada(request, llamada):
     miembro = Miembro.objects.get(usuario=request.user)
     return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
 def visitasPorMes(request, por_red):
     """Este reporte muestra el total de visitas registradas por mes y el total de visitas de una red registradas por mes.
         El usuario debe escoger los meses los cuales se mostraran en el reporte."""
@@ -236,7 +236,7 @@ def visitasPorMes(request, por_red):
     miembro = Miembro.objects.get(usuario=request.user)
     return render_to_response('reportes/visitas_por_mes.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def asistenciaGrupos(request):
     """Muestra la asistencia de los miembros de un grupo de amistad a las reuniones."""
 
@@ -303,7 +303,7 @@ def listaCaminoGrupos(grupoi, grupof):
             listaG.insert(0, padre)
     return listaG
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def pasosPorMiembros(request):
     """Muestra los miembros de los grupos seleccionados y los pasos hechos por cada miembro."""
 
@@ -351,7 +351,7 @@ def pasosPorMiembros(request):
 
     return render_to_response('reportes/pasosPorMiembro.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def PasosTotales(request):
     """Muestra un reporte de pasos por totales."""
 
@@ -418,7 +418,7 @@ def PasosTotales(request):
     
     return render_to_response('reportes/pasosTotales.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def PasosRangoFecha(request):
     """Muestra un reporte de pasos por un rango de fecha."""
 
@@ -488,7 +488,7 @@ def PasosRangoFecha(request):
 
     return render_to_response('reportes/pasosRangoFecha.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def estadisticoReunionesGar(request):
     """Muestra un estadistico de los reportes de reunion GAR segun los grupos, las opciones y el rango de fecha escogidos."""
 
@@ -656,7 +656,7 @@ def estadisticoReunionesGar(request):
     
     return render_to_response('reportes/estadistico_gar.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def estadisticoReunionesDiscipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado segun los grupos, las opciones y el rango de fecha escogidos."""
 
@@ -742,7 +742,7 @@ def estadisticoReunionesDiscipulado(request):
 
     return render_to_response('reportes/estadistico_discipulado.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def estadisticoTotalizadoReunionesGar(request):
     """Muestra un estadistico de los reportes de reunion GAR totalizado por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
 
@@ -838,7 +838,7 @@ def estadisticoTotalizadoReunionesGar(request):
 
     return render_to_response('reportes/estadistico_total_gar.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def estadisticoTotalizadoReunionesDiscipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado totalizado por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
 
@@ -925,7 +925,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
 
     return render_to_response('reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def desarrolloGrupo(request):
     """Muestra un arbol de desarrollo de tu grupo."""
 
@@ -1005,7 +1005,7 @@ def listaGruposDescendientes_id(miembro):
 
 isOk = False
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def ConsultarReportesSinEnviar(request, sobres=False):
     """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de reuniones de grupo en un rango de fecha
         especificado. El usuario escoge el tipo de reunion, si la reunion es de GAR(1) o discipulado (2). Luego podra enviar un mail a los lideres
@@ -1097,7 +1097,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
 
     return render_to_response('reportes/morososGAR.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
     """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de reuniones de discipulado para una predica
         especificada. El usuario escoge la predica Luego podra enviar un mail a los lideres que no han ingresado los reportes y a sus lideres.
@@ -1156,7 +1156,7 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
     return render_to_response('reportes/morososDiscipulado.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(agenteAdminTest, login_url="/iniciar_sesion/")
+@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
 def cumplimiento_llamadas_lideres_red(request):
     """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
     personas asignadas a su grupo dentro de un rango de fechas especificado."""

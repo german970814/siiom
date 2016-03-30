@@ -57,6 +57,20 @@
                 return true;
             }
         });
+
+        {% if nadie %}
+        $(window).load(function() {
+            // swal("Lo sentimos", "Parece que no hay estudiantes en esta sesión/módulo");
+            swal({   
+                title: "Lo Sentimos",   
+                text: "Parece que no hay estudiantes en esta sesión/módulo",   
+                type: "warning",
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Aceptar",   
+                closeOnConfirm: false 
+            });
+        });
+        {% endif %}
 	});		
 </script>
 

@@ -31,8 +31,7 @@ def eliminar(modelo, lista):
     return ok
 
 def autenticarUsario(request):
-    algo = request.GET.get('next','')
-    request.session['next'] = request.GET.get('next')
+    siguiente = request.session.get('next', '')
 
     if request.user.is_authenticated():
         if request.user.has_perm("miembros.es_administrador"):
@@ -42,10 +41,12 @@ def autenticarUsario(request):
     else:
         valido = True
         if request.method == 'POST':
-            nombreUsuaroio = request.POST.get('username', '')
+            nombreUsuario = request.POST.get('username', '')
             contrasena = request.POST.get('password', '')
             sig = request.POST.get('next','')
-            usuario = auth.authenticate(username=nombreUsuaroio, password=contrasena)
+            if siguiente:
+                sig = siguiente
+            usuario = auth.authenticate(username=nombreUsuario, password=contrasena)
             if usuario is not None:
                 auth.login(request, usuario)
                 if  Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
@@ -106,7 +107,7 @@ def asignarGrupoTest(user):
             and (Group.objects.get(name__iexact='Agente') in user.groups.all()\
              or Group.objects.get(name__iexact='Administrador') in user.groups.all())
             
-@user_passes_test(miembroTest, login_url="/iniciar_sesion/")
+@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def miembroInicio(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
@@ -129,7 +130,7 @@ def miembroInicio(request):
 
 
 isOk = False
-@user_passes_test(agregarVisitanteTest, login_url="/iniciar_sesion/")
+@user_passes_test(agregarVisitanteTest, login_url="/dont_have_permissions/")
 def liderAgregarMiembro(request):
     global isOk
 
@@ -158,7 +159,7 @@ def liderAgregarMiembro(request):
     isOk = False
     return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderListarMiembrosGrupo(request):
     if request.method == 'POST':
         if 'transladar' in request.POST:
@@ -175,7 +176,7 @@ def liderListarMiembrosGrupo(request):
         miembrosGrupo = grupo.miembrosGrupo()
     return render_to_response("Miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderEditarMiembros(request):
     accion = 'Guardar y editar siguiente'
     miembro = Miembro.objects.get(usuario = request.user)
@@ -209,7 +210,7 @@ def liderEditarMiembros(request):
     else:
         return HttpResponseRedirect("/miembro/listar_miembros/")
 
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderTransaldarMiembro(request):
     miembro = Miembro.objects.get(usuario = request.user)
     discipulos = list(miembro.discipulos())
@@ -251,7 +252,7 @@ def liderTransaldarMiembro(request):
     else:
         return HttpResponseRedirect("/miembro/listar_miembros/")
 
-@user_passes_test(miembroTest, login_url='/iniciar_sesion/')
+@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def liderEditarPerfil(request):
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == 'POST':
@@ -277,7 +278,7 @@ def liderEditarPerfil(request):
         form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
     return render_to_response("Miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderTest, login_url='/iniciar_sesion/')
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def cambiarContrasena(request):
     miembroUsuario = request.user
     if request.method == 'POST':
@@ -295,7 +296,7 @@ def cambiarContrasena(request):
         form = FormularioCambiarContrasena(request=request)            
     return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
         
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderLlamadasPendientesVisitantesGrupo(request):
     if request.method == 'POST':
         request.session['visitantesSeleccionados'] = request.POST.getlist('seleccionados')
@@ -316,7 +317,7 @@ def liderLlamadasPendientesVisitantesGrupo(request):
 #                    visitantes.append(ct.miembro)
     return render_to_response("Miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(llamdaAgenteTest, login_url="/iniciar_sesion/")
+@user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
 def llamadasPendientesVisitantes(request):
     if request.method == 'POST':
         request.session['miembrosSeleccionados'] = request.POST.getlist('seleccionados')
@@ -338,7 +339,7 @@ def llamadasPendientesVisitantes(request):
 #                miembros.append(ct.miembro)
     return render_to_response("Miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderLlamarVisitas(request):
     miembro = Miembro.objects.get(usuario = request.user)
     tipo = 'lider'
@@ -381,7 +382,7 @@ def liderLlamarVisitas(request):
     else:
         return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/") 
 
-@user_passes_test(llamdaAgenteTest, login_url="/iniciar_sesion/")
+@user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
 def llamarVisitas(request):
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == 'POST':
@@ -441,7 +442,7 @@ Admin" % Sites.objects.get_current().name,\
     else:
         return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")           
             
-@user_passes_test(liderTest, login_url="/iniciar_sesion/")         
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")         
 def liderPromoverVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)    
     grupo = miembro.grupoLidera()
@@ -465,7 +466,7 @@ def liderPromoverVisitantesGrupo(request):
                     visitantes.append(ct.miembro)        
     return render_to_response("Miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(miembroTest, login_url="/iniciar_sesion/")
+@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def perfilMiembro(request, id):
     try:
         miembro = Miembro.objects.get(id = id)
@@ -479,7 +480,7 @@ def perfilMiembro(request, id):
     pasos = list(CumplimientoPasos.objects.filter(miembro = miembro).order_by('fecha'))    
     return render_to_response("Miembros/perfil.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(editarMiembroTest, login_url="/iniciar_sesion/")
+@user_passes_test(editarMiembroTest, login_url="/dont_have_permissions/")
 def editarMiembro(request, id):
     try:
         miembroEditar = Miembro.objects.get(id=id) 
@@ -511,7 +512,7 @@ def editarMiembro(request, id):
             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero,instance=miembroEditar)    
     return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(asignarGrupoTest, login_url="/iniciar_sesion/")
+@user_passes_test(asignarGrupoTest, login_url="/dont_have_permissions/")
 def asignarGrupo(request, id):
     try:
         miembroEditar = Miembro.objects.get(id=id)
@@ -545,7 +546,7 @@ Admin" % Site.objects.get_current().name,\
             ok = True            
     return render_to_response("Miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearZona(request):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
@@ -558,7 +559,7 @@ def crearZona(request):
         form = FormularioCrearZona()
     return render_to_response('Miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
         
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarZona(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
@@ -582,7 +583,7 @@ def editarZona(request, pk):
     return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
     # return HttpResponseRedirect("/miembro/listar_zonas")
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarZonas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
@@ -592,7 +593,7 @@ def listarZonas(request):
     zonas = list(Zona.objects.all())
     return render_to_response('Miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def barriosDeZona(request, id):
     """
         Esta función permite listar los barrios que están registrados en determinada/
@@ -613,7 +614,7 @@ def barriosDeZona(request, id):
     barrios = list(Barrio.objects.filter(zona=zona))
     return render_to_response('Miembros/barrios.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearBarrio(request, id):
     """
         Esta función permite crear barrios de una zona en la base de datos
@@ -636,7 +637,7 @@ def crearBarrio(request, id):
         form = FormularioCrearBarrio()
     return render_to_response('Miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarBarrio(request, id, pk):
     accion = 'Editar'
     # miembro = Miembro.objects.get(usuario=request.user)
@@ -673,7 +674,7 @@ def editarBarrio(request, id, pk):
 
     return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def agregarPasoMiembro(request):
     """
         Esta función sirve para agregar un paso a la lista de pasos que puede cumplir/
@@ -690,7 +691,7 @@ def agregarPasoMiembro(request):
         form = FormularioPasos()    
     return render_to_response('Miembros/agregar_paso.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def  listarPasos(request):
     """
         Esta función sirve para listar los pasos con que cuenta la iglesia
@@ -703,7 +704,7 @@ def  listarPasos(request):
     pasos = Pasos.objects.all().order_by("prioridad")
     return render_to_response('Miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarPaso(request, pk):
     accion = 'Editar'
 
@@ -726,7 +727,7 @@ def editarPaso(request, pk):
     # return HttpResponseRedirect("/miembro/listar_pasos/")
     return render_to_response("Miembros/agregar_paso.html",locals(),context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarEscalafones(request):
     """
         Muestra la lista de escalafones ya creados ordenado por el número de/
@@ -741,7 +742,7 @@ def listarEscalafones(request):
     return render_to_response('Miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearEscalafon(request):
     """
         Crea Escalafones con sus respectivos campos
@@ -757,7 +758,7 @@ def crearEscalafon(request):
         form = FormularioCrearEscalafon()
     return render_to_response('Miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarEscalafon(request, pk):
     accion = 'Editar'
 
@@ -781,7 +782,7 @@ def editarEscalafon(request, pk):
     return render_to_response("Miembros/crear_escalafon.html",locals(),context_instance=RequestContext(request))
 
     
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def promoverMiembroEscalafon(request):
     """Promueve un miembro de escalafon siempre y cuando este cumpla con los requesitos para el cambio."""
 
@@ -800,7 +801,7 @@ def promoverMiembroEscalafon(request):
         form = FormularioPromoverEscalafon()
     return render_to_response('Miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearTipoMiembro(request):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
@@ -813,7 +814,7 @@ def crearTipoMiembro(request):
         form = FormularioCrearTipoMiembro()
     return render_to_response('Miembros/crear_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarTipoMiembro(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
@@ -825,7 +826,7 @@ def listarTipoMiembro(request):
     tipos = list(TipoMiembro.objects.all().order_by('nombre'))
     return render_to_response('Miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarTipoMiembro(request, pk):
     accion = 'Editar'
 
@@ -849,7 +850,7 @@ def editarTipoMiembro(request, pk):
     return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
 
     
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def cambiarMiembroDeTipoMiembro(request, id):
     miembro = Miembro.objects.get(usuario=request.user)    
     try:
@@ -896,7 +897,7 @@ def cambiarMiembroDeTipoMiembro(request, id):
         form = FormularioCambioTipoMiembro(idm = int(id))    
     return render_to_response('Miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearUsuarioMimembro(request, id):
     try:
         miembroCambio = Miembro.objects.get(id=id)
@@ -930,7 +931,7 @@ def crearUsuarioMimembro(request, id):
     form.email = miembroCambio.email        
     return render_to_response('Miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
         
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def graduarAlumno(request):
     miembro = Miembro.objects.get(usuario = request.user)
 
@@ -958,7 +959,7 @@ def graduarAlumno(request):
         form = FormularioCumplimientoPasosMiembro()
     return render_to_response('Miembros/graduar_estudiante.html', locals(), context_instance=RequestContext(request))    
     
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def eliminarCambioTipoMiembro(request, id):
     """
         El cambio que se va a eliminar se guarda en la var cambio y si esta es un/
@@ -1006,7 +1007,7 @@ def calcularCelulas(miembro):
                 discipulos.append(s)        
     return celulas
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def administracion(request):
     miembro = Miembro.objects.get(usuario=request.user)
     totalGrupos = Grupo.objects.all().count()
@@ -1024,7 +1025,7 @@ def administracion(request):
     # visitantes = request.session['visitantes']
     return render_to_response('Miembros/administracion.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def AgregarDetalleLlamada(request):
     miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
@@ -1037,7 +1038,7 @@ def AgregarDetalleLlamada(request):
         form = FormularioDetalleLlamada()
     return render_to_response('Miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))    
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarDetallesLlamada(request):
     miembro = Miembro.objects.get(usuario=request.user)  
 
@@ -1050,7 +1051,7 @@ def listarDetallesLlamada(request):
 
     return render_to_response('Miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request))
 
-@user_passes_test(adminTest, login_url="/iniciar_sesion/")
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarDetalleLlamada(request, pk):
     accion = 'Editar'
 
@@ -1072,7 +1073,7 @@ def editarDetalleLlamada(request, pk):
     return render_to_response("Miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(cumplimientoPasosTest, login_url="/iniciar_sesion/")
+@user_passes_test(cumplimientoPasosTest, login_url="/dont_have_permissions/")
 def cumplimientoPasos(request):
     """Permite a un Administrador o a un Agente registrar los cumplimientos de los pasos de los miembros. Una vez seleccionado un paso,
         se muestran los miembros que pueden realizar dicho paso y los que lo hayan realizado. La condición para que un miembro pueda

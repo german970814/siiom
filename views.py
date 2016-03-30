@@ -7,14 +7,14 @@ from datetime import date
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import Group, User
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from miembros.models import Miembro, TipoMiembro
 from django.template.context import RequestContext
 from grupos.models import Grupo
 from django.db.models import Q
 from miembros.forms import FormularioCumplimientoPasosMiembro
 from miembros.models import CambioTipo, CumplimientoPasos, Pasos
-from miembros.views import cambiarContrasena
+from miembros.views import cambiarContrasena, autenticarUsario
 
 
 def inicio(request):
@@ -131,5 +131,26 @@ def depu2(request):
         print(g.nombre)
     return HttpResponse(grupos)
 
+# @login_required
 def without_perms(request):
+    if not request.user.is_authenticated():
+        # return autenticarUsario(request, siguiente=request.GET.get('next',''))
+        request.session['next'] = request.GET.get('next', '')
+        return HttpResponseRedirect('/iniciar_sesion/')
+    nexts = request.session['next']
     return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))
+
+
+#Teoria
+"""
+request = Request principal fuera sin estar autenticado
+
+pagina = /academia/estudiantes/2/ #Pagina a la que se solicita el request
+
+# Se percata de los permisos y de que los usuarios no estan logeados, y los envia a "/dont_have_permission/"
+
+/dont_have_permissions/ tiene un @login_required, es decir el next que llega a /dont_have_permissions/ seria: 
+"?next=/academia/estudiantes/2/" pero no entra en la vista porque hay una redirección hacia /iniciar_sesion/ 
+por lo cual el next que llega a esa vista seria "?next/dont_have_permissions/?next=/academia/estudiante/2/"
+este next no puede ser procesado...
+"""
