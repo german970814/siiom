@@ -32,6 +32,19 @@
                 return true;
             }
         });
+
+        {% if not visitantes %}
+        $(window).load(function() {
+            swal({   
+                title: "Lo Sentimos",   
+                text: "No tienes llamadas pendientes",   
+                type: "warning",
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Aceptar",   
+                closeOnConfirm: false 
+            });
+        });
+        {% endif %}
     })
 </script>
 {% endblock %}
@@ -86,7 +99,7 @@
             <br>
             <div class="row">
                 <div class="col-md-4 col-md-offset-4">
-                    <button type="submit" name="registrarLlamada" class="btn btn-info btn-block"><i class="zmdi zmdi-phone"></i> Registrar Llamada</button>
+                    <button type="submit" name="registrarLlamada" class="btn btn-info btn-block"><i class="zmdi zmdi-phone"></i>  Registrar Llamada</button>
                 </div>
             </div>
         </form>
@@ -94,11 +107,9 @@
         <br>
         {% else %}
         <div class="row">
-        <div class="col-md-4 col-md-offset-4">
-            <h3>No tienes llamadas pendientes</h3>
-        </div>
-        <br>
-        <br>
+            <div class="alert alert-warning alert-dismissible col-md-8 col-md-offset-2" role="alert">
+                <p style="text-align:center; font-size:15px;">No Tienes Llamadas Pendientes</p>
+            </div>
         </div>
         {% endif %}
         {% else %}

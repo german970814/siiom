@@ -137,7 +137,7 @@ def without_perms(request):
         # return autenticarUsario(request, siguiente=request.GET.get('next',''))
         request.session['next'] = request.GET.get('next', '')
         return HttpResponseRedirect('/iniciar_sesion/')
-    nexts = request.session['next']
+    # nexts = request.session['next']
     return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))
 
 

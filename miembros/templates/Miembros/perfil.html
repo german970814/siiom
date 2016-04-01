@@ -3,16 +3,44 @@
 {% block contenido %}
 
 <div class="container">
-                    {% if pasos %}
+<div class="block-header">
+        {% if perms.miembros.es_administrador %}
+        <h2 style="font-size:20px !important; margin-bottom:-20px;">{{miembro.nombre|upper}} {{miembro.primerApellido|upper}} <small>({{miembro.cedula}})</small></h2>
+	        <ul class="actions m-t-20 hidden-xs">
+	            <li class="dropdown">
+	                <a href="" data-toggle="dropdown">
+	                    <i class="zmdi zmdi-more-vert"></i>
+	                </a>
+	    
+	                <ul class="dropdown-menu dropdown-menu-right">
+	                    <li>
+	                        <a href="/miembro/editar_miembro/{{miembro.id}}/">Editar Usuario</a>
+	                    </li>
+	                    {% if not miembro.asisteGAR and not miembro.grupo %}
+	                    <li>
+	                        <a href="/miembro/asignar_grupo/{{miembro.id}}/">Asignar a Grupo</a>
+	                    </li>
+	                    {% endif %}
+	                    {% if not miembro.usuario %} {# and not miembro.grupo %} #}
+	                    <li>
+	                        <a href="/miembro/asignar_usuario/{{miembro.id}}/">Asignar Usuario</a>
+	                    </li>
+	                    {% endif %}
+	                </ul>
+	            </li>
+	        </ul>
+        {% endif %}
+    </div>
+    {% if pasos %}
     <div class="card">
         <div class="card-header">
             <h1 class="f-700">
-            	<legend>
+            	<legend style="margin-bottom: 0px !important">
             		<h3>Tipo de Miembro:</h3>
-            		<small>
-						<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro</a>
-					</small>
             	</legend>
+        		<small>
+					<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro</a>
+				</small>
             </h1>
             {% if ok %}
             	<p class="ok"></p>
@@ -67,7 +95,7 @@
                     	<div class="col-md-4">
                         	<div class="input-group">
                             	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-account"></i>
+                            		<i class="zmdi zmdi-account" style="color:#607D8B;"></i>
                             	</span>
 	                            <h5>Nombre completo:</h5>
 
@@ -78,7 +106,7 @@
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-card"></i>
+                            		<i class="zmdi zmdi-card c-brown"></i>
                             	</span>
 	                            <h5>C&eacute;dula:</h5>
 	                            <p>{{miembro.cedula}}</p>
@@ -88,7 +116,7 @@
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-calendar"></i>
+                            		<i class="zmdi zmdi-calendar c-green"></i>
                             	</span>
 	                            <h5>Fecha de Nacimiento:</h5>
 	                            <p>{{miembro.fechaNacimiento}}</p>
@@ -109,7 +137,7 @@
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-account"></i>
+                            		<i class="zmdi zmdi-account c-teal"></i>
                             	</span>
 	                            <h5>Profesi&oacute;n:</h5>
 	                            <p>{{miembro.profesion}}</p>
@@ -148,7 +176,7 @@
 	                    <div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-email"></i>
+                            		<i class="zmdi zmdi-email c-orange"></i>
                             	</span>
 	                            <h5>E-mail:</h5>
 	                            <p>{{miembro.email}}</p>
@@ -159,7 +187,7 @@
 	                    <div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-phone"></i>
+                            		<i class="zmdi zmdi-phone c-teal"></i>
                             	</span>
 	                            <h5>Tel&eacute;fono:</h5>
 	                            <p>{{miembro.telefono}}</p>
@@ -171,7 +199,7 @@
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-smartphone-android"></i>
+                            		<i class="zmdi zmdi-smartphone-android c-yellow"></i>
                             	</span>
 	                            <h5>Celular:</h5>
 	                            <p>{{miembro.celular}}</p>
@@ -183,7 +211,7 @@
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-map"></i>
+                            		<i class="zmdi zmdi-map c-lime"></i>
                             	</span>
 	                            <h5>Direcci&oacute;n:</h5>
 	                            <p>{{miembro.direccion}}</p>
@@ -194,7 +222,7 @@
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
-                            		<i class="zmdi zmdi-pin"></i>
+                            		<i class="zmdi zmdi-pin c-red"></i>
                             	</span>
 	                            <h5>Barrio:</h5>
 	                            <p>{{miembro.barrio}}</p>
@@ -221,7 +249,7 @@
 		                    <div class="col-md-4">
 		                        <div class="input-group">
 		                        	<span class="input-group-addon">
-	                            		<i class="zmdi zmdi-refresh"></i>
+	                            		<i class="zmdi zmdi-refresh c-gray"></i>
 	                            	</span>
 		                            <h5>Estado del miembro:</h5>
 		                            <p>{{miembro.get_estado_display}}</p>
@@ -318,7 +346,7 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-check-all"></i>
+				            		<i class="zmdi zmdi-check-all c-blue"></i>
 				            	</span>
 				                <h5>Asistencia a G.A.R:</h5>
 				                {% if miembro.asisteGAR %}
@@ -326,30 +354,32 @@
 				                {% else %}
 				                	{%if miembro.noInteresadoGAR %}
 				                	<p>El miembro no est&aacute; interesado en G.A.R</p>
+				                	{% else %}
+				                	<p>No se tienen datos</p>
 				                	{% endif %}
 				                {% endif %}
 				            </div>
 				        </div>
 
 						{% if not miembro.asisteGAR and not miembro.noInteresadoGAR %}
-				        <div class="col-md-4">
-				            <div class="input-group">
-				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-phone-forwarded"></i>
-				            	</span>
-								{% if miembro.fechaPrimeraLlamada %}
-				                <h5>Primera Llamada:</h5>
-				                <p>{{miembro.fechaPrimeraLlamada}}</p>
-				                {% endif %}
-				            </div>
-				        </div>
+							{% if miembro.fechaPrimeraLlamada %}
+					        <div class="col-md-4">
+					            <div class="input-group">
+					            	<span class="input-group-addon">
+					            		<i class="zmdi zmdi-phone-forwarded c-green"></i>
+					            	</span>
+					                <h5>Primera Llamada:</h5>
+					                <p>{{miembro.fechaPrimeraLlamada}}</p>
+					            </div>
+					        </div>
+				            {% endif %}
 				        {% endif %}
 
 				        {% if miembro.detallePrimeraLlamada %}
 				        <div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-phone-in-talk"></i>
+				            		<i class="zmdi zmdi-phone-in-talk c-orange"></i>
 				            	</span>
 				                <h5>Detalle de la primera llamada:</h5>
 				                <p>{{miembro.detallePrimeraLlamada}}</p>
@@ -361,7 +391,7 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-comment-alt-text"></i>
+				            		<i class="zmdi zmdi-comment-alt-text c-gray"></i>
 				            	</span>
 				                <h5>Observaci&oacute;n de la primera llamada:</h5>
 				                <p>{{miembro.observacionPrimeraLlamada}}</p>
@@ -373,10 +403,9 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-phone-forwarded"></i>
+				            		<i class="zmdi zmdi-phone-forwarded c-green"></i>
 				            	</span>
-				            	<h4>Segunda Llamada</h4>
-				                <h5>Fecha de la segunda llamada:</h5>
+				                <h5>Segunda Llamada:</h5>
 				                <p>{{miembro.fechaSegundaLlamada}}</p>
 				            </div>
 				        </div>
@@ -386,7 +415,7 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-phone-ring"></i>
+				            		<i class="zmdi zmdi-phone-ring c-red"></i>
 				            	</span>
 				                <h5>Detalle de la Segunda llamada:</h5>
 				                <p>{{miembro.detalleSegundaLlamada}}</p>
@@ -398,7 +427,7 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-comment-alt-text"></i>
+				            		<i class="zmdi zmdi-comment-alt-text c-gray"></i>
 				            	</span>
 				                <h5>Observaci&oacute;n de la segunda llamada:</h5>
 				                <p>{{miembro.observacionSegundaLlamada}}</p>
@@ -410,9 +439,8 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-calendar-note"></i>
+				            		<i class="zmdi zmdi-calendar-note c-orange"></i>
 				            	</span>
-								<h4>Llamada de L&iacute;der</h4>
 				                <h5>Fecha de llamada del L&iacute;der:</h5>
 				                <p>{{miembro.fechaLlamadaLider}}</p>
 				            </div>
@@ -423,9 +451,8 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-phone-forwarded"></i>
+				            		<i class="zmdi zmdi-phone-forwarded c-green"></i>
 				            	</span>
-								<h4>Llamada de L&iacute;der</h4>
 				                <h5>Detalle de la llamada del L&iacute;der:</h5>
 				                <p>{{miembro.detalleLlamadaLider}}</p>
 				            </div>
@@ -436,7 +463,7 @@
 						<div class="col-md-4">
 				            <div class="input-group">
 				            	<span class="input-group-addon">
-				            		<i class="zmdi zmdi-comment-alt-text"></i>
+				            		<i class="zmdi zmdi-comment-alt-text c-gray"></i>
 				            	</span>
 				                <h5>Observaci&oacute;n de la llamada del L&iacute;der:</h5>
 				                <p>{{miembro.observacionLlamadaLider}}</p>

@@ -2,6 +2,45 @@
 {% load staticfiles %}
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    jQuery(document).ready(function($) {
+        $("#data-table-command").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },   
+                    selection: true,
+                    multiSelect: true,
+                    rowSelect: true,
+                    caseSensitive: false,
+                    keepSelection: true,
+                    formatters: {
+                        "link" : function(column, row) {
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/miembro/editar_miembro/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
+                        },
+                    }
+                });
+
+        $("#data-table-command-1").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },
+                    formatters: {
+                        "link" : function(column, row) {
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/miembro/editar_miembro/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
+                        },
+                    }
+                });
+    });
+</script>
 {% endblock %}
 
 {% block contenido %}
@@ -12,7 +51,9 @@
     {% if miembrosGrupo %}
     <div class="card">
         <div class="card-header">
-            <h2 class="f-700 f-20">{{grupo.nombre|capfirst}}</h2>
+            <h1 class="f-700 f-20">
+                <legend><h3>{{grupo.nombre|capfirst}}</h3></legend>
+            </h1>
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -21,19 +62,18 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Miembros</h3>
-                        <table id="miembros" class="table" cellspacing="0">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
-                                    <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-                                    <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('miembros');"/></div></th>
-                                    <th>Nombre</th>
-                                    <!--  <th>Tipo de Miembro</th> -->
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                    <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                                    <th data-column-id="ver" data-formatter="link" data-sortable="false">Comandos</th>
                                 </tr>
                             </thead>
                             <tbody>
                             {% for mg in miembrosGrupo %}
                                 <tr>
-                                    <td><input type="checkbox" name="seleccionados" value="{{mg.id}}"/></td>
+                                    <td>{{mg.id}}</td>
                                     <td>{{mg.nombre|capfirst}} {{mg.primerApellido|capfirst}} {% if mg.segundoApellido %} {{mg.segundoApellido|capfirst}} {% endif %}</td>
                                     <!-- <td>Deidad</td>  -->
                                 </tr>
@@ -46,10 +86,7 @@
                 <br>
                 <br>
                 <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 col-md-offset-4">
                         <button type="submit" value="Transladar" class="btn btn-danger btn-block" name ="transladar">Transladar</button>
                     </div>
                 </div>
@@ -60,7 +97,9 @@
     {% if discipulos %}
     <div class="card">
         <div class="card-header">
-            <h2 class="f-700 f-20">{{grupo.nombre|capfirst}}</h2>
+            <h1 class="f-700 f-20">
+                <legend><h3>{{grupo.nombre|capfirst}}</h3></legend>
+            </h1>
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -69,20 +108,18 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Discípulos</h3>
-                        <table id="discipulos" class="table" cellspacing="0">
+                        <table id="data-table-command-1" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
-                                    <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-                                        <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('discipulos');" /></div>
-                                    </th>
-                                    <th>Nombre</th>
-                                    <!--   <th>Tipo de Miembro</th> -->
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                    <th data-identifier="true" data-column-id="nombre1">Nombre</th>
+                                    <th data-column-id="ver" data-formatter="link" data-sortable="false">Comandos</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for d in discipulos %}
                                 <tr>
-                                    <td><input type="checkbox" name="seleccionados" value="{{d.id}}"/></td>
+                                    <td>{{d.id}}</td>
                                     <td>{{d.nombre|capfirst}} {{d.primerApellido|capfirst}} {% if d.segundoApellido %} {{d.segundoApellido|capfirst}} {% endif %}</td>
                                     <!--   <td>Deidad</td> -->
                                 </tr>
@@ -90,13 +127,6 @@
                             </tbody>
                         </table>
                         <br/>
-                    </div>
-                </div>
-                <br>
-                <br>
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <button type="submit" value="Editar" class="btn btn-success btn-block" name ="editar">Editar</button>
                     </div>
                 </div>
             </div>

@@ -37,6 +37,7 @@ class FormularioLiderAgregarMiembro(ModelForm):
         self.fields['barrio'].widget.attrs.update({'class':'form-control'})
         self.fields['genero'].widget.attrs.update({'class':'form-control'})
         self.fields['estadoCivil'].widget.attrs.update({'class':'form-control'})
+        # self.fields['estado'].widget.attrs.update({'class':'form-control'})
             # if c:
             #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
             # else:
@@ -55,15 +56,36 @@ class FormularioAdminAgregarMiembro(ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
     
-    def __init__(self,g='',*args,**kwargs):
+    def __init__(self, g= '', *args, **kwargs):
         super (FormularioAdminAgregarMiembro,self ).__init__(*args,**kwargs) # populates the post
         if g != '':
             if g == 'M':
                 g = 'F'
             else:
                 g = 'M'
-            self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
+            queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
+            self.fields['conyugue'].queryset = queryset
+
+            if self.instance.conyugue:
+                conyugue = Miembro.objects.filter(id= self.instance.conyugue.id)
+                self.fields['conyugue'].queryset = queryset|conyugue
+
+        self.fields['nombre'].widget.attrs.update({'class':'form-control'})
+        self.fields['primerApellido'].widget.attrs.update({'class':'form-control'})
+        self.fields['segundoApellido'].widget.attrs.update({'class':'form-control'})
+        self.fields['telefono'].widget.attrs.update({'class':'form-control'})
+        self.fields['celular'].widget.attrs.update({'class':'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class':'form-control'})
+        self.fields['fechaNacimiento'].widget.attrs.update({'class':'form-control','data-mask':'00/00/0000'})
+        self.fields['cedula'].widget.attrs.update({'class':'form-control'})
+        self.fields['email'].widget.attrs.update({'class':'form-control'})
+        self.fields['estadoCivil'].widget.attrs.update({'class':'form-control'})
+        self.fields['profesion'].widget.attrs.update({'class':'form-control'})
         self.fields['barrio'].widget.attrs.update({'class':'form-control'})
+        self.fields['genero'].widget.attrs.update({'class':'form-control'})
+        self.fields['estadoCivil'].widget.attrs.update({'class':'form-control'})
+        self.fields['estado'].widget.attrs.update({'class':'form-control'})
+        self.fields['conyugue'].widget.attrs.update({'class':'selectpicker', 'data-live-search':'true'})
 
     class Meta:
         model = Miembro
@@ -90,6 +112,11 @@ class FormularioPrimeraLlamadaAgente(ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
     
+    def __init__(self, *args, **kwargs):
+        super(FormularioPrimeraLlamadaAgente, self).__init__(*args, **kwargs)
+        self.fields['detallePrimeraLlamada'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['observacionPrimeraLlamada'].widget.attrs.update({'class':'form-control'})
+
     class Meta:
         model = Miembro
         fields = ('detallePrimeraLlamada', 'observacionPrimeraLlamada', 'noInteresadoGAR', 'asisteGAR', 'asignadoGAR', 'fechaAsignacionGAR', 'grupo')
@@ -97,6 +124,11 @@ class FormularioPrimeraLlamadaAgente(ModelForm):
 class FormularioSegundaLlamadaAgente(ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioSegundaLlamadaAgente, self).__init__(*args, **kwargs)
+        self.fields['detalleSegundaLlamada'].widget.attrs.update({'class':'selectpicker'})
+        self.fields['observacionSegundaLlamada'].widget.attrs.update({'class':'form-control'})
     
     class Meta:
         model = Miembro
@@ -283,6 +315,12 @@ class FormularioAsignarUsuario(forms.Form):
     email = forms.EmailField(label='Verificar correo:')
     contrasena = forms.CharField(widget=forms.PasswordInput(render_value=False),max_length=20, label='Contraseña:')
     contrasenaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña:')
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioAsignarUsuario, self).__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class':'form-control'})
+        self.fields['contrasena'].widget.attrs.update({'class':'form-control'})
+        self.fields['contrasenaVerificacion'].widget.attrs.update({'class':'form-control'})
 
 
 class FormularioDetalleLlamada(ModelForm):

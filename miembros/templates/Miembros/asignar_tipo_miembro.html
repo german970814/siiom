@@ -5,7 +5,9 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-			<h2 class="f-700 f-20">Asignar cambio de Tipo de Miembro a {{miembroCambio.nombre|capfirst}} {{miembroCambio.primerApellido|capfirst}} </h2>
+			<h1 class="f-700 f-20">
+                <legend><h3>Asignar cambio de Tipo de Miembro a {{miembroCambio.nombre|capfirst}} {{miembroCambio.primerApellido|capfirst}}</h3></legend>
+            </h1>
             {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
@@ -20,7 +22,7 @@
             <div class="card-body card-padding">
                 <br>
                 <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
+                    <div class="col-md-4 col-md-offset-4">
                         <p class="f-500 m-b-15 c-black"></p>
                         {{form.as_p}}
                     </div>
@@ -28,7 +30,7 @@
                 <br>
                 <br>
                 <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
+                    <div class="col-md-4 col-md-offset-4">
                         <button type="submit" value="aceptar" class="btn btn-primary btn-block" name ="aceptar">Aceptar</button>
                     </div>
                 </div>

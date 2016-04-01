@@ -3,9 +3,9 @@
 {% block contenido %}
 <div class="container">
 	<div class="card">
-		<div class="card-header bgm-blue">
+		<div class="card-header">
 			<h1>
-				<h3 style="color:#fff;">{{miembroEditar.nombre|capfirst}} {{miembroEditar.primerApellido|capfirst}} {{miembroEditar.segundoApellido|capfirst}}</h3>
+				<legend><h3>{{miembroEditar.nombre|capfirst}} {{miembroEditar.primerApellido|capfirst}} {{miembroEditar.segundoApellido|capfirst}}</h3></legend>
 			</h1>
 		</div>
 		<div class="card-body card-padding">
@@ -16,7 +16,7 @@
 						<div class="">
 							<label for="">Transladar a:</label>
 							<select name="menu" class="selectpicker" data-live-search="true">
-								{%for grupo in grupos%} 
+								{%for grupo in groups %} 
 						   		<option id="id_menu" value={{grupo.id}}> {{grupo.nombre|capfirst}}</option>
 							   	{%endfor%}
 							</select>

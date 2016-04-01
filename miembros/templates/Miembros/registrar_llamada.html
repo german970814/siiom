@@ -1,14 +1,6 @@
 {% extends "base.html" %}
 
 {% block js %}
-<!-- <link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script> -->
-<script type="text/javascript">
-	$(document).ready(function(){
-		$("#id_fechaAsignacionGAR").datepicker();
-	});
-</script>
 {% endblock %}
 
 {% block contenido %}
@@ -26,7 +18,9 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="">
-						<h4>Miembro ingreso: {{ miembroIngreso.nombre|capfirst }} {{miembroIngreso.primerApellido|capfirst}} {{miembroIngreso.segundoApellido|capfirst}} ({{ gMiembroIngreso.nombre }})</h4>
+                        <h4>Miembro ingreso:</h4>
+                        <p>{{ miembroIngreso.nombre|capfirst }} {{miembroIngreso.primerApellido|capfirst}} {{miembroIngreso.segundoApellido|capfirst}} ({{ gMiembroIngreso.nombre }})</p>
+
 					</div>
 				</div>
 			</div>
@@ -43,6 +37,7 @@
                         </div>
                     </div>
                 </div>
+                <br class="space">
 				<div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-addon">
@@ -54,6 +49,7 @@
                         </div>
                     </div>
                 </div>
+                <br class="space">
 				<div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-addon">
@@ -65,6 +61,7 @@
                         </div>
                     </div>
                 </div>
+                <br class="space">
 	            <div class="col-md-3">
                     <div class="input-group">
                         <span class="input-group-addon">
@@ -72,13 +69,21 @@
                         </span>
                         <div class="fg-line requerido">
                             <label for="id_detalleLlamadaLider" class="fg-label requerido">Detalle Llamada de Lider:</label>
-                            <p>{{form.detalleLlamadaLider}}</p>
+                            {% if tipo == 'lider' %}
+                                <p>{{form.detalleLlamadaLider}}</p>
+                            {% else %}
+                                {% if tipo == 'primera' %}
+                                    <p>{{form.detallePrimeraLlamada}}</p>
+                                {% else %}
+                                    <p>{{form.detalleSegundaLlamada}}</p>
+                                {% endif %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
             <br>
-            <br>
+            <br class="space-down">
             <div class="row">
 				<div class="col-md-6 col-md-offset-3">
                     <div class="input-group">
@@ -87,7 +92,15 @@
                         </span>
                         <div class="fg-line requerido">
                             <label for="id_observacionLlamadaLider" class="fg-label requerido">Observacion de Llamada Lider:</label>
-							<p>{{form.observacionLlamadaLider}}</p> 
+                            {% if tipo == 'lider' %}
+							<p>{{form.observacionLlamadaLider}}</p>
+                            {% else %}
+                                {% if tipo == 'primera' %}
+                                    <p>{{form.observacionPrimeraLlamada}}</p>
+                                {% else %}
+                                    <p>{{form.observacionSegundaLlamada}}</p>
+                                {% endif %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>

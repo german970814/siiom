@@ -191,16 +191,20 @@ def registrarPagoGrupo(request, id):
     if request.method == "POST":
         seleccionados = request.POST.getlist('seleccionados')
         for seleccionado in seleccionados:
-            reunion = ReunionGAR.objects.get(id = seleccionado)
+            try:
+                reunion = ReunionGAR.objects.get(id= seleccionado)
+            except ValueError:
+                continue
             reunion.confirmacionEntregaOfrenda = True
             reunion.save()
-            mensaje = "pago registrado exitosamente"
+            success = True
+            mensaje = "Pago registrado exitosamente"
     
     grupoLidera = miembroRegistrar.grupoLidera()
     sw = True
     if grupoLidera is None:
         sw = False
-        mensaje = 'El miembro no tiene ningun grupo asignado.'
+        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
     ofrendasPendientesGar = ReunionGAR.objects.filter(grupo = grupoLidera, confirmacionEntregaOfrenda = False)
     return render_to_response("Grupos/registrar_pago_gar.html", locals(), context_instance=RequestContext(request))
 
@@ -216,17 +220,21 @@ def registrarPagoDiscipulado(request, id):
     if request.method == "POST":
         seleccionados = request.POST.getlist('seleccionados')
         for seleccionado in seleccionados:
-            reunion = ReunionDiscipulado.objects.get(id = seleccionado)
+            try:
+                reunion = ReunionDiscipulado.objects.get(id= seleccionado)
+            except ValueError:
+                continue
             reunion.confirmacionEntregaOfrenda = True
             reunion.save()
-            mensaje = "pago registrado exitosamente"
-        return HttpResponseRedirect('/miembro/perfil/'+str(miembro.id))
+            success = True
+            mensaje = "Pago registrado exitosamente"
+        # return HttpResponseRedirect('/miembro/perfil/'+str(miembro.id))
             
     grupoLidera = miembroRegistrar.grupoLidera()
     sw = True
     if grupoLidera is None:
         sw = False
-        mensaje = 'El miembro no tiene ningun grupo asignado.'
+        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
     ofrendasPendientesDiscipulado = ReunionDiscipulado.objects.filter(grupo = grupoLidera, confirmacionEntregaOfrenda=False)
     return render_to_response("Grupos/registrar_pago_discipulado.html", locals(), context_instance=RequestContext(request))
 
@@ -556,3 +564,15 @@ def reporteVisitasPorRed(request):
         l.append(visRed)
         data.append(l)
     return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url='/dont_have_permissions/')
+def faltante_confirmar_ofrenda(request):
+    grupos = ReunionGAR.objects.filter(confirmacionEntregaOfrenda=False).distinct('grupo')
+    return render_to_response('Grupos/faltante_confirmar_ofrenda.html', locals(), context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url='/dont_have_permissions/')
+def faltante_confirmar_ofrenda_discipulado(request):
+    grupos = ReunionDiscipulado.objects.filter(confirmacionEntregaOfrenda=False).distinct('grupo')
+    return render_to_response('Grupos/faltante_confirmar_ofrenda_discipulado.html', locals(), context_instance=RequestContext(request))

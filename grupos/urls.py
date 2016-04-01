@@ -13,4 +13,6 @@ urlpatterns = [
     url(r'^listar_predicas/$', listarPredicas, name="listar_predicas"),
     url(r'^crear_predica/$', crearPredica, name="crear_predica"),
     url(r'^editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),
+    url(r'^faltante_confirmar_ofrenda/$', faltante_confirmar_ofrenda, name="faltantes_confirmar_ofrenda"),
+    url(r'^faltante_confirmar_ofrenda_discipulado/$', faltante_confirmar_ofrenda_discipulado, name="faltantes_confirmar_ofrenda_discipulado"),
 ]

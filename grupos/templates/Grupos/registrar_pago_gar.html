@@ -2,6 +2,51 @@
 {% load staticfiles %}
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        $("#data-table-command").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },
+                    selection: true,
+                    multiSelect: true,
+                    rowSelect: true,
+                    caseSensitive: false,
+                    keepSelection: true,
+                    formatters: {
+                        "commands": function(column, row) {
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/editar_modulo/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
+                        }
+                    }
+                });
+        $("button[name='eliminar']").click(function(event) {
+            if (!$('tr').hasClass('active')) {
+                swal("Nada que Eliminar")
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+
+        {% if visitantes %}
+        $(window).load(function() {
+            swal({   
+                title: "Lo Sentimos",   
+                text: "No tienes llamadas pendientes",   
+                type: "warning",
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Aceptar",   
+                closeOnConfirm: false 
+            });
+        });
+        {% endif %}
+    })
+</script>
 {% endblock %}
 
 {% block contenido %}
@@ -13,9 +58,9 @@
                     <h3 class="f-700 f-20">Confirmar Ofrenda Grupo de Amistad</h3>
                 </legend>
             </h1>
-            {% if mensaje%}
+            {% if mensaje %}
             <div class="row">
-                <div class="alert alert-warning alert-dismissible" role="alert">
+                <div class="alert alert-{% if success %}success{% else %}warning{% endif %} alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
                     <p>{{mensaje}}</p>
                 </div>
@@ -23,33 +68,33 @@
             {% endif %}
         </div>
         {% if sw %}
+        {% if ofrendasPendientesGar %}
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-body card-padding table-responsive">
                 <br>
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="ofrendasPendientesGAR" class="table" cellspacing="0">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
-                                    <th class="checkboxBoton"><div class="button gray smallB checkBoton">
-                                    <input type="checkbox" name="checkBoton" class="checkBoton todos" onclick="checkTodos('ofrendasPendientesGAR');" /></div></th>
-                                    <th>Grupo</th>
-                                    <th>Fecha Reunion</th>
-                                    <th>Monto Ofrenda</th>
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                    <th data-identifier="true" data-column-id="grupo">Grupo</th>
+                                    <th data-identifier="true" data-column-id="fecha">Fecha Reunion</th>
+                                    <th data-identifier="true" data-column-id="monto">Monto Ofrenda</th>
                                 </tr>
                             </thead>
                             <tbody>
                             {% for reunion in ofrendasPendientesGar %}
                                 <tr>
-                                    <td><input type="checkbox" name="seleccionados" value="{{reunion.id}}"/></td>
+                                    <td>{{reunion.id}}</td>
                                     <td>{{reunion.grupo.nombre|capfirst}}</td>
                                     <td>{{reunion.fecha}}</td>
                                     <td>{{reunion.ofrenda}}</td>
-                                    
                                 </tr>
                             {% empty %}
                                 <tr>
+                                    <td></td>
                                     <td colspan="4" class="centrarTexto">No tiene reuniones a confirmar.</td>
                                 </tr>
                             {% endfor %}
@@ -66,6 +111,15 @@
                 </div>
             </div>
         </form>
+        {% else %}
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="col-sm-offset-1">
+                    <p>No tiene reuniones a confirmar.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 </div>

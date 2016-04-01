@@ -9,7 +9,44 @@
 		});
 
         $campos = $('input.form-control');
+
+        $('#id_estadoCivil').on('change', () => {
+            {% if miembroEditar.conyugue %}
+            var $anterior = {{miembroEditar.conyugue.id}};
+            {% else %}
+            var $anterior;
+            {% endif %}
+
+            if ($('#id_estadoCivil').val() == 'C') {
+                
+                if ($('#conyugue').hasClass('hidden')) {
+                    $('#conyugue').removeClass('hidden');
+                } 
+
+                if ($anterior) {
+                    $('#id_conyugue').val($anterior);
+                    $('#id_conyugue').selectpicker('refresh');
+                }
+
+            } else {
+
+                // $anterior = $('#id_conyugue').val();
+                $('#conyugue').addClass('hidden');
+
+                $('#id_conyugue').val('');
+                $('#id_conyugue').selectpicker('refresh');
+
+            }
+        });
 	});
+
+    {% if miembroEditar.conyugue %}
+        $(window).load(function() {
+            $('#id_conyugue').val(parseInt('{{miembroEditar.conyugue.id}}'));
+            $('#id_conyugue').selectpicker('refresh');
+            console.log('{{miembroEditar.conyugue.id}}');
+        });
+    {% endif %}
 </script>
 {% endblock %}
 
@@ -43,7 +80,7 @@
                 <div class="row">
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Han Ocurrido un error. Por favor valida los campos</p>
+                        <p>Ha Ocurrido un error. Por favor valida los campos</p>
                     </div>
                 </div>
             {% endif %}
@@ -107,11 +144,7 @@
                             </span>
                             <div class="fg-line requerido">
                                 <label for="id_genero" class="control-label requerido">Género*:</label>
-                                <select id="id_genero" name="genero" class="form-control">
-                                    <option selected="selected" value=""></option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Femenino</option>
-                                </select>
+                                {{form.genero}}
                             </div>
                             {% for err in form.genero.errors %}
                                 <small class="help-block">{{err}}</small>
@@ -254,26 +287,98 @@
                 <br>
                 <br class="space-down">
                 <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
+                    <div class="{%if accion == 'Editar' %}col-md-4 col-md-offset-2{% else %}col-md-8 col-md-offset-2{% endif %}">
                         <div class="input-group {{form.estadoCivil.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-local-wc"></i>
                             </span>
                             <div class="fg-line">
                                 <label for="id_estadoCivil" class="control-label">Estado Civil:</label>
-                                <select id="id_estadoCivil" name="estadoCivil" class="form-control">
-                                    <option selected="selected" value=""></option>
-                                    <option value="C">Casado</option>
-                                    <option value="S">Soltero</option>
-                                    <option value="V">Viudo</option>
-                                    <option value="D">Divorciado</option>
-                                </select>
+                                {{form.estadoCivil}}
                             </div>
                             {% for err in form.estadoCivil.errors %}
                                 <small class="help-block">{{err}}</small>
                             {% endfor %}
                         </div>
                     </div>
+                    {% if accion == 'Editar' %}
+                    <br class="space">
+                    <div class="col-md-4 col-md-ofset-2 {% if not miembroEditar.conyugue %}hidden{% endif %}" id="conyugue">
+                        <div class="input-group {{form.conyugue.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-local-wc"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="id_conyugue" class="control-label">Cónyugue:</label>
+                                {{form.conyugue}}
+                            </div>
+                            {% for err in form.conyugue.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-2 col-md-offset-2">
+                        <div class="input-group {{form.estado.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-refresh"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="id_estado" class="control-label">Estado:</label>
+                                {{form.estado}}
+                            </div>
+                            {% for err in form.estado.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-2 col-md-ofsset-2">
+                        <div class="input-group {{form.convertido.css_classes}}">
+                            <div class="fg-line">
+                                <label for="id_convertido" class="control-label checkbox">
+                                {{form.convertido}}
+                                <i class="input-helper m-r-20"></i>
+                                Convertido
+                                </label>
+                            </div>
+                            {% for err in form.convertido.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-md-ofsset-2">
+                        <div class="input-group {{form.asisteGAR.css_classes}}">
+                            <div class="fg-line">
+                                <label for="id_asisteGAR" class="control-label checkbox">
+                                {{form.asisteGAR}}
+                                <i class="input-helper m-r-20"></i>
+                                Asiste a G.A.R
+                                </label>
+                            </div>
+                            {% for err in form.asisteGAR.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-md-ofsset-2">
+                        <div class="input-group {{form.asignadoGAR.css_classes}}">
+                            <div class="fg-line">
+                                <label for="id_asignadoGAR" class="control-label checkbox">
+                                {{form.asignadoGAR}}
+                                <i class="input-helper m-r-20"></i>
+                                Asignado a G.A.R
+                                </label>
+                            </div>
+                            {% for err in form.asignadoGAR.errors %}
+                                <small class="help-block">{{err}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 <br>
                 <br>
