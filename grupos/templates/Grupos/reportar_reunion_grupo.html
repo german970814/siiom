@@ -133,15 +133,15 @@
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.fecha.css_classes}}">
+                        <div class="input-group {{form.numeroTotalAsistentes.css_classes}}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
                                 <label for="id_numeroTotalAsistentes" class="fg-label control-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran los l&iacute;deres del grupo?:</label>
-                                {{form.numeroLideresAsistentes}}
+                                {{form.numeroTotalAsistentes}}
                             </div>
-                            {% for err in form.numeroLideresAsistentes.errors %}
+                            {% for err in form.numeroTotalAsistentes.errors %}
                                 <small class="help-block">{{err}}</small>
                             {% endfor %}
                         </div>
