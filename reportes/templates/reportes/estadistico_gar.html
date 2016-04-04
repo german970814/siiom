@@ -13,11 +13,21 @@
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: 700, height: 500};
+            var options = {width: '100%', height: 500};
             var chart = new google.visualization.LineChart(document.getElementById('out'));
             chart.draw(data, options);
         }
     {% endif %}
+
+    $(window).load(function() {
+        if ($("input[name='ofrenda']").is(':checked')) {
+            $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
+        };
+
+        if ($("#idCheck").is(':checked')) {
+            $("#idGrupo_f").attr('disabled', 'disabled');
+        };
+    });
     
     $(document).ready(function(){
         $('#id_fechai').datetimepicker({
@@ -33,7 +43,6 @@
             maxDate: moment(),
         });
 
-
         $('#id_fechai').on("dp.change",function(e){
             $('#id_fechaf').data("DateTimePicker").minDate(e.date);
         });
@@ -41,7 +50,6 @@
         $('#id_fechaf').on("dp.change",function(e){
             $('#id_fechai').data("DateTimePicker").maxDate(e.date);
         });
-
 
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
@@ -55,6 +63,18 @@
                 $("#idGrupo_f").html('');
             }
         });
+
+        var $fechai = $('#id_fechai');
+        var $fechaf = $('#id_fechaf');
+        var $grupoi = $('#idGrupo_i');
+        var $grupof = $('#idGrupo_f');
+        var $visitas = $("input[name='visitas']");
+        var $lideres = $("input[name='lid_asis']");
+        var $ofrenda = $("input[name='ofrenda']");
+        var $asis_reg = $("input[name='asis_reg']");
+        var $descendientes = $("input[name='descendientes']");
+        var $sel = [];
+        $sel.push($visitas,$lideres,$asis_reg);
 
         $("#idCheck").click(function(){
             if($(this).is(':checked')){
@@ -72,20 +92,15 @@
             else{
                 $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").removeAttr('disabled');
             }
-        });
 
-        var $fechai = $('#id_fechai');
-        var $fechaf = $('#id_fechaf');
-        var $grupoi = $('#idGrupo_i');
-        var $grupof = $('#idGrupo_f');
-        var $visitas = $("input[name='visitas']");
-        var $lideres = $("input[name='lid_asis']");
-        var $ofrenda = $("input[name='ofrenda']");
-        var $asis_reg = $("input[name='asis_reg']");
-        var $descendientes = $("input[name='descendientes']");
-        var $sel = [];
-        var so = [];
-        $sel.push($visitas,$lideres,$ofrenda,$asis_reg)
+            for (var i = 0; i < $sel.length; i++) {
+                if ($sel[i].is(':checked')) {
+                    $sel[i][0].checked = false;
+                } else {
+                    console.log("Does not Checked yet!");
+                }
+            }
+        });
 
         $('#form_pasosTotal').submit(function(event) {
             if ($fechai.val() == '') {
@@ -102,17 +117,15 @@
                     swal("Alerta!!!","Asegurate de escoger un grupo final o de seleccionar la opción de mostrar todos los descendientes del grupo inicial");
                     return false;
                 } else {
-                    return true;
-                }
-                
-            } else {
-                if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
-                    swal("Alerta", "Escoja por lo menos una opción");
-                    return false;
-                } else {
-                    return true;
+                    if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
+                        swal("Alerta", "Escoja por lo menos una opción");
+                        return false;
+                    } else {
+                        return true;
                 }
             }
+                
+            } 
         });
 
     });

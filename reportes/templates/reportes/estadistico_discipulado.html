@@ -11,11 +11,17 @@
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: 700, height: 500};
+            var options = {width: '100%', height: 500};
             var chart = new google.visualization.ColumnChart(document.getElementById('out'));
             chart.draw(data, options);
         }
     {% endif %}
+
+    $(window).load(function() {
+        if ($('#idCheck').is(':checked')) {
+            $('#idGrupo_f').attr('disabled', 'disabled');
+        }
+    });
     
     $(document).ready(function(){
         $("#idGrupo_i").change(function(){
@@ -30,6 +36,13 @@
             }
         });
 
+        var $iter = [];
+        var $ofrenda = $('#idCheck_2');
+        var $lid_asis = $('#idCheck_1');
+        var $asis_reg = $('#idCheck_3');
+        $iter.push($lid_asis, $asis_reg);
+        ini = [];
+
         $("#idCheck").click(function(e){
             if($(this).is(':checked')){
                 $("#idGrupo_f").attr('disabled', 'disabled');
@@ -39,44 +52,54 @@
             }
         });
 
-        $("input[name='ofrenda']").click(function(e){
-            if($(this).is(':checked')){
+        $("input[name='ofrenda']").click(function(){
+            if ($(this).is(':checked')) {
                 $("input[name='lid_asis'], input[name='asis_reg']").attr('disabled', 'disabled');
-            }
-            else{
+            } else {
                 $("input[name='lid_asis'], input[name='asis_reg']").removeAttr('disabled');
+            }
+
+            for (var i = 0; i < $iter.length; i++) {
+                if ($iter[i].is(':checked')) {
+                    $iter[i][0].checked = false;
+                } else {
+                    console.log("Does not Checked yet!");
+                }
             }
         });
 
-        $campos = $("form input[type='checkbox']");
-        delete($campos[0]);
-        console.log($campos);
-        ini = [];
-
-        $("#form_pasosTotal").submit(function(event) {
-            if ($("#idGrupo_i").val() == -1) {
+        $('#form_pasosTotal').submit(function(event) {
+            if ($('#idGrupo_i').val() == -1) {
                 swal("Alerta!!!", "Por favor seleccione un grupo incial.");
                 return false;
-            } else if ($("idGrupo_i").val() != -1 && $("#idGrupo_f").val() == -1) {
+            } if ($('#idGrupo_i').val() != -1 && $('#idGrupo_f').val() == -1) {
                 if ($('#idCheck').is(':checked')) {
-                    return true;
+                    if ($('#id_predica').val() == -1) {
+                        swal("Alerta!!!","Asegurate de escoger una prédica");
+                        return false;
+                    } else if ($('#id_predica').val() != -1) {
+                        if (!$ofrenda.is(':checked') && !$lid_asis.is(':checked') && !$asis_reg.is(':checked')) {
+                            swal("Alerta!!!", "Asegurate de escoger por lo menos una opción");
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
                 } else {
                     swal("Alerta","Asegurate de escoger un grupo final o la opción de mostrar todos los descendientes del grupo inicial");
                     return false;
                 }
-            } else if ($('#idGrupo_i').val() != -1 && $("#idGrupo_f").val() != -1 && $("#id_predica").val() == -1) {
-                swal("Alerta!!!","Asegurate de escoger una prédica");
-                return false;
             } else {
-                for (var i = 0; i < $campos.length; i++) {
-                    if ($campos[i].checked) {
-                        ini.push($campos[i]);
+                if ($('#id_predica').val() == -1) {
+                    swal("Alerta!!!","Asegurate de escoger una prédica");
+                    return false;
+                } else if ($('#id_predica').val() != -1) {
+                    if (!$ofrenda.is(':checked') && !$lid_asis.is(':checked') && !$asis_reg.is(':checked')) {
+                        swal("Alerta!!!", "Asegurate de escoger por lo menos una opción");
+                        return false;
+                    } else {
+                        return true;
                     }
-                }
-                if (ini.length > 0) {
-                    return true;
-                } else {
-                    swal("Alerta!!!", "Asegurate de escoger por lo menos una opción");
                 }
             }
         });
@@ -252,7 +275,7 @@
             </div>
         </div>
             <div class="row">
-                <div class="col-md-12 col-md-offset-2">
+                <div class="col-md-12">
                     <div id="out"></div> 
                 </div>
             </div>

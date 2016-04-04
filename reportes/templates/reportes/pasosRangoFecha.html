@@ -11,7 +11,7 @@
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: 700, height: 500};
+            var options = {width: '100%', height: 500};
             {% if tipo == 1 %}
                 var chart = new google.visualization.PieChart(document.getElementById('out'));
             {% else %}
@@ -20,6 +20,12 @@
             chart.draw(data, options);
         }
     {% endif %}
+
+    $(window).load(function() {
+        if($("#idCheck").is(':checked')){
+                $("#idGrupo_f").attr('disabled', 'disabled');
+            }
+    });
     
     $(document).ready(function(){
         
@@ -56,13 +62,6 @@
                 $("#idGrupo_f").html('');
             }
         });
-
-        {% if descendientes %}
-            check = $('#idCheck');
-            $(window).on('load', () => {
-                check[0].checked = true;
-            });
-        {% endif %}
 
         $("#idCheck").click(function(){
             if($(this).is(':checked')){
@@ -198,7 +197,7 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <label class="checkbox">
-                                <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if lid_asis %}checked="checked"{% endif %}/>
+                                <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if descendientes %}checked="checked"{% endif %}/>
                                 <i class="input-helper m-r-20"></i>
                                 Mostrar Todos Los Descendientes del Grupo Inicial
                             </label>
@@ -240,7 +239,7 @@
             </div>
         </div>
             <div class="row">
-                <div class="col-md-12 col-md-offset-2">
+                <div class="col-md-12">
                     <div id="out"></div> 
                 </div>
             </div>

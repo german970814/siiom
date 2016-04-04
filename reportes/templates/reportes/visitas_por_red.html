@@ -1,15 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block js %}
-<!--
-<link href="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/css/redmond/jquery-ui-1.8.11.custom.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/js/jquery-ui-1.8.11.custom.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}Scripts/jquery-ui-1.8.11.custom/i18n/jquery.ui.datepicker-es.js"></script>
--->
-<!-- <link href="{{ MEDIA_URL }}Scripts/css/redmond/jquery-ui-1.10.4.custom.css" rel="stylesheet" type="text/css" />
-<link href="{{ MEDIA_URL }}Scripts/css/geova.css" rel="stylesheet" /> -->
-<!-- <script type="text/javascript" src="{{ MEDIA_URL }}Scripts/js/jquery-ui-1.10.4.custom.js"></script> -->
-
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
     $(document).ready(function(){
@@ -41,7 +32,7 @@
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: 700, height: 500};
+            var options = {width: '100%', height: 500};
         {% if tipo == 1 %}
             var chart = new google.visualization.PieChart(document.getElementById('out'));
         {% else %}
@@ -168,7 +159,7 @@
                 <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
             </div>
 
-            <div class="col-md-12 col-md-offset-2"><div id="out"></div></div>
+            <div class="col-md-12"><div id="out"></div></div>
             </div>
             
         </div>

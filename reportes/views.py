@@ -771,7 +771,7 @@ def estadisticoTotalizadoReunionesGar(request):
             sw = True
 
             n = ['Dates']
-            n.extend(["%s" % (nom.encode('ascii', 'ignore')) for nom in grupoDis.values_list('nombre', flat=True)])
+            n.extend(["%s" % nom for nom in grupoDis.values_list('nombre', flat=True)])
             values = [n]
             sw_while = True
             while sw_while:

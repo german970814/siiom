@@ -11,15 +11,35 @@
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: 700, height: 500, title: {{ titulo|safe }}};
+            var options = {width: '100%', height: 500, title: {{ titulo|safe }}};
             var chart = new google.visualization.ColumnChart(document.getElementById('out'));
             chart.draw(data, options);
         }
     {% else %}
-        {% if sw and not grupoDis %}
-            alert('El {{ grupo_i.nombre|capfirst }} no tiene discipulos');
-        {% endif %}
+        
     {% endif %}
+
+    $(window).load(function() {
+        if ($('input[name="ofrenda"]').is(':checked')) {
+            $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
+        } else if ($("input[name='lid_asis']").is(':checked')){
+            $("input[name='ofrenda'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
+        } else if ($("input[name='visitas']").is(':checked')){
+            $("input[name='lid_asis'], input[name='ofrenda'], input[name='asis_reg']").attr('disabled', 'disabled');
+        } else if ($("input[name='asis_reg']").is(':checked')){
+            $("input[name='lid_asis'], input[name='visitas'], input[name='ofrenda']").attr('disabled', 'disabled');
+        }
+        {% if sw and not grupoDis %}
+            swal({   
+                title: "Lo Sentimos",   
+                text: "El grupo {{grupo_i.nombre}} no tiene discípulos",   
+                type: "warning",
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Aceptar",   
+                closeOnConfirm: false 
+            });
+        {% endif %}
+    });
 
     $(document).ready(function(){
         $('#id_fechai').datetimepicker({
@@ -85,10 +105,7 @@
 
         var arr = []; var otro = [];
         arr.push($('form input[type="checkbox"]'));
-        
-        // for (var e = 0; e < arr.length; e++){
-
-        // }
+        console.log(arr);
 
         $('#form_totalGAR').submit(function(event) {
             if ($fechai.val() == '') {
@@ -124,7 +141,7 @@
         <div class="card-header">
             <h1>
                 <legend>
-                    <h3 class="f-700 f-20">Estadistico de reuniones GAR totalizado por discipulos</h3>
+                    <h3 class="f-700 f-20">Estadistico de reuniones GAR totalizado por discípulos</h3>
                 </legend>
             </h1>
             {% if messages %}
@@ -257,7 +274,7 @@
         </div>
         <div class="card-body card-padding">
             <div class="row">
-                <div class="col-md-12 col-md-offset-2">
+                <div class="col-md-12">
                     <div id="out"></div>                 
                 </div>
             </div>

@@ -18,11 +18,30 @@
         }
     {% else %}
         {% if sw and not grupoDis %}
-            alert('El {{ grupo_i.nombre|capfirst }} no tiene discipulos');
+            $(window).load(function() {
+                swal({   
+                    title: "Lo Sentimos",   
+                    text: "El grupo {{ grupo_i.nombre|capfirst }} no tiene discipulos",   
+                    type: "warning",
+                    confirmButtonColor: "#DD6B55",   
+                    confirmButtonText: "Aceptar",   
+                    closeOnConfirm: false 
+                });
+            });
         {% endif %}
     {% endif %}
 
     $(document).ready(function(){
+        $(window).load(function() {
+            if ($("input[name='ofrenda']").is(':checked')) {
+                $("input[name='lid_asis'], input[name='asis_reg']").attr('disabled', 'disabled');
+            } else if ($("input[name='lid_asis']").is(':checked')){
+                $("input[name='ofrenda'], input[name='asis_reg']").attr('disabled', 'disabled');
+            } else if ($("input[name='asis_reg']").is(':checked')) {
+                $("input[name='lid_asis'], input[name='ofrenda']").attr('disabled', 'disabled');
+            }
+        });
+
         $("input[name='ofrenda']").click(function(){
             if($(this).is(':checked')){
                 $("input[name='lid_asis'], input[name='asis_reg']").attr('disabled', 'disabled');
