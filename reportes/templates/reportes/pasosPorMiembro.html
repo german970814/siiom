@@ -3,6 +3,12 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript">
+    $(window).load((e) => {
+        if ($('input[name="descendientes"]').is(':checked')) {
+            $('#idGrupo_f').attr('disabled', 'disabled');
+        }
+    });
+
     $(document).ready(function(){
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
@@ -57,7 +63,7 @@
         <div class="card-header">
             <h1>
                 <legend>
-                <h2 class="f-700 f-20">Pasos Realizados Por Cada Miembro</h2>
+                    <h3 class="f-700 f-20">Pasos Realizados Por Cada Miembro</h3>
                 </legend>
             </h1>
         </div>
@@ -102,7 +108,7 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <label class="checkbox">
-                                <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if lid_asis %}checked="checked"{% endif %}/>
+                                <input type="checkbox" name="descendientes" id="idCheck" value="S" {% if descendientes %}checked="checked"{% endif %}/>
                                 <i class="input-helper m-r-20"></i>
                                 Mostrar Todos Los Descendientes del Grupo
                             </label>
@@ -123,7 +129,7 @@
         <div class="card-header">
             <h1>
                 <legend>
-                <h2 class="f-700 f-20">Pasos</h2>
+                    <h3 class="f-700 f-20">Pasos</h3>
                 </legend>
             </h1>
         </div>

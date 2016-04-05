@@ -782,7 +782,7 @@ def estadisticoTotalizadoReunionesGar(request):
                     d = Miembro.objects.get(id = g.listaLideres()[0])
                     grupos = listaGruposDescendientes(d)
 
-                    if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
+                    if 'opcion' in request.POST and request.POST['opcion']=='O':
                         ofrenda = True
                         opciones['opt'] = 'Ofrendas'
                         titulo = "'Ofrendas'"
@@ -793,7 +793,7 @@ def estadisticoTotalizadoReunionesGar(request):
                             suma = sum_ofrenda['ofrenda__sum']
                         l.append(float(suma))
                     else:
-                        if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
+                        if 'opcion' in request.POST and request.POST['opcion']=='L':
                             lid_asis = True
                             opciones['opt'] = 'Lideres Asistentes'
                             titulo = "'Lideres Asistentes'"
@@ -804,7 +804,7 @@ def estadisticoTotalizadoReunionesGar(request):
                                 sumLid = numlid['numeroLideresAsistentes__sum']
                             l.append(sumLid)
                         else:
-                            if 'visitas' in request.POST and request.POST['visitas']=='S':
+                            if 'opcion' in request.POST and request.POST['opcion']=='V':
                                 visitas = True
                                 opciones['opt'] = 'Visitas'
                                 titulo = "'Visitas'"
@@ -815,7 +815,7 @@ def estadisticoTotalizadoReunionesGar(request):
                                     sumVis = numVis['numeroVisitas__sum']
                                 l.append(sumVis)
                             else:
-                                if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
+                                if 'opcion' in request.POST and request.POST['opcion']=='A':
                                     asis_reg = True
                                     opciones['opt'] = 'Asistentes Regulares'
                                     titulo = "'Asistentes Regulares'"
