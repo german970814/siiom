@@ -39,6 +39,8 @@ def visitasAsignadasRedes(request):
 
     tipo = 1
     titulo_pag = 'Total de visitas en cada red'
+    vAxis = 'Numero de Visitas'
+    hAxis = 'Redes'
     if request.method == 'POST':
         form = FormularioRangoFechas(request.POST)
         if form.is_valid():
@@ -91,6 +93,8 @@ def asignacionGAR(request):
             sw = True
 
             values = [['Control', 'Miembros']]
+            vAxis = 'Numero de Miembros'
+            hAxis = 'Estado de Miembros'
             num_miembros = CambioTipo.objects.filter(fecha__range = (fecha_i, fecha_f), nuevoTipo__nombre__iexact = 'Visita').count()
             num_AsignadoGAR = CambioTipo.objects.filter(fecha__range = (fecha_i, fecha_f), nuevoTipo__nombre__iexact = 'Visita', miembro__asignadoGAR = True).count()
             num_asisteGAR = CambioTipo.objects.filter(fecha__range = (fecha_i, fecha_f), nuevoTipo__nombre__iexact = 'Visita', miembro__asisteGAR = True).count()
@@ -136,6 +140,10 @@ def detalleLlamada(request, llamada):
         titulo_pag = 'Primera Llamada realizada en la iglesia'
     else:
         titulo_pag = 'Segunda Llamada realizada en la iglesia'
+
+    vAxis = 'Numero de Llamadas'
+    hAxis = 'Detalle de la Llamada'
+
     if request.method == 'POST':
         form = FormularioRangoFechas(request.POST)
         if form.is_valid():
@@ -540,7 +548,7 @@ def estadisticoReunionesGar(request):
 
                 if 'reportePDF' in request.POST:
                     values = [['Rango fecha', 'Visitas', 'Regulares', 'Lideres', 'Total asistentes', 'Grupos que reportaron sobres',
-                               'Grupos que no han reportado sobres', 'Porcentaje de utilizacion']]
+                               'Grupos que no han reportado sobres', 'Porcentaje de grupos reportados']]
 
                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
                     while sw_while:
@@ -701,6 +709,7 @@ def estadisticoReunionesDiscipulado(request):
                 sw_while = True
 
                 if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
+                    titulo = "'Ofrenda'"
                     ofrenda = True
                     if 'Ofrenda' not in values[0]:
                         values[0].append('Ofrenda')
@@ -713,6 +722,7 @@ def estadisticoReunionesDiscipulado(request):
                 else:
                     l = [predica.nombre]
                     if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
+                        titulo = "'Lideres Asistentes'"
                         lid_asis = True
                         if 'Lideres asistentes' not in values[0]:
                             values[0].append('Lideres asistentes')
@@ -723,6 +733,7 @@ def estadisticoReunionesDiscipulado(request):
                             sumLid = numlid['numeroLideresAsistentes__sum']
                         l.append(sumLid)
                     if 'asis_reg' in request.POST and request.POST['asis_reg']=='S':
+                        titulo = "'Asistentes Regulares'"
                         asis_reg = True
                         if 'Asistentes regulares' not in values[0]:
                             values[0].append('Asistentes regulares')
@@ -878,7 +889,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                 d = Miembro.objects.get(id = g.listaLideres()[0])
                 grupos = listaGruposDescendientes(d)
 
-                if 'ofrenda' in request.POST and request.POST['ofrenda']=='S':
+                if 'opcion' in request.POST and request.POST['opcion']=='O':
                     ofrenda = True
                     opciones['opt'] = 'Ofrendas'
                     titulo = "'Ofrendas'"
@@ -890,7 +901,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                         suma = sum_ofrenda['ofrenda__sum']
                     l.append(float(suma))
                 else:
-                    if 'lid_asis' in request.POST and request.POST['lid_asis']=='S':
+                    if 'opcion' in request.POST and request.POST['opcion']=='L':
                         lid_asis = True
                         opciones['opt'] = 'Lideres Asistentes'
                         titulo = "'Lideres Asistentes'"
@@ -902,7 +913,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                             sumLid = numlid['numeroLideresAsistentes__sum']
                         l.append(sumLid)
                     else:
-                        if 'asis_reg' in request.POST and request.POST['asis_reg']=='S': #discipulos
+                        if 'opcion' in request.POST and request.POST['opcion']=='A': #discipulos
                             asis_reg = True
                             opciones['opt'] = 'Asistentes Regulares'
                             titulo = "'Asistentes Regulares'"

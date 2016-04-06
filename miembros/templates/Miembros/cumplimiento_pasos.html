@@ -18,7 +18,49 @@
                     rowSelect: true,
                     keepSelection: true,
                     caseSensitive: false,
-                });
+                })
+
+        var $seleccionados = [];
+        var $seleccion = [];
+        
+        {% for m in miembros  %}
+            {% if m.cumplio %}
+                $seleccionados.push('{{m.id}}');
+                $seleccion.push('{{m.id}}');
+            {% endif %}
+        {% endfor %}
+
+        $("#data-table-selection").bootgrid().on("loaded.rs.jquery.bootgrid", function(e) {
+            var $seleccionados_event_loaded = $seleccionados.slice(0);
+            $(this).bootgrid('select', $seleccionados_event_loaded);
+        });
+
+        $("#data-table-selection").bootgrid().on("selected.rs.jquery.bootgrid", function(e, selectedRows) {
+            for (var x = 0; x < selectedRows.length; x++) {
+                if (typeof selectedRows[x].id === "string") {
+                    $seleccion.push(selectedRows[x].id);
+                }
+            }
+        });
+
+        $("#data-table-selection").bootgrid().on("deselected.rs.jquery.bootgrid", function(e, deselectedRows) {
+            for (var x = 0; x < deselectedRows.length; x++) {
+                if (typeof deselectedRows[x].id === "string") {
+                    // delete $seleccion[parseInt(deselectedRows[x].id)];
+                    var aux = $seleccion.indexOf(deselectedRows[x].id);
+                    $seleccion
+                    var aux2 = $seleccionados.indexOf(deselectedRows[x].id);
+                    // $seleccion[aux]
+                    if (aux in $seleccion) {
+                        delete $seleccion[aux]
+                    }
+
+                    if (aux2 in $seleccionados) {
+                        delete $seleccionados[aux2]
+                    }
+                }
+            }
+        });
 
         $("button[name='promoverPaso']").click(function(event) {
             if (!$('tr').hasClass('active')) {
@@ -37,44 +79,15 @@
                 return true;
             }
         });
+
+        $('#form').submit(function(event) {
+            for (var i = 0; i < $seleccion.length; i++) {
+                var x = $seleccion[i];
+                $('button[name="promoverPaso"]').append('<input type="hidden" name="seleccionados" value="'+ x.toString() +'">')
+            }
+        });
     })
 </script>
-{% comment %}
-<script>
-    jQuery(document).ready(function($) {
-        setTimeout(function(){
-            var checks = $('label>input[name="seleccionados"]');
-            var parents = [];
-            delete checks[0];
-            // console.log(checks);
-            for (var x = 1; x < checks.length; x++) {
-                parents.push(checks[x].parentNode.parentNode.parentNode.parentNode);
-            }
-            // console.log(parents);
-
-
-
-        }, 3000);
-    });
-</script>
-{% endcomment %}
-{% for m in miembros %}
-    {% if m.cumplio %}
-    <script>
-        jQuery(document).ready(function($) {
-            setTimeout(function(){
-                var a = $('tr[data-row-id="{{m.id}}"]');
-                a.addClass('active');
-                b = a.find('input');
-                b.each(function(index, el) {
-                    b[index].checked = true;
-                });
-            }, 1000);
-        });
-    </script>
-    {% endif %}
-{% endfor %}
-
 {% endblock %}
 
 {% block contenido %}
@@ -94,7 +107,7 @@
             {% endif %}
         </div>
         <div class="card-body card-padding">
-        <form action="" method="POST">
+        <form id="form" action="" method="POST">
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-6 col-md-offset-2">

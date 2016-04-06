@@ -13,21 +13,20 @@
 
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {width: '100%', height: 500};
+            var options = {
+                width: '100%',
+                height: 500,
+                vAxis: {
+                    title: "Frecuencia",
+                },
+                hAxis: {
+                    title: "Rango de Fechas",
+                }
+            };
             var chart = new google.visualization.LineChart(document.getElementById('out'));
             chart.draw(data, options);
         }
     {% endif %}
-
-    $(window).load(function() {
-        if ($("input[name='ofrenda']").is(':checked')) {
-            $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
-        };
-
-        if ($("#idCheck").is(':checked')) {
-            $("#idGrupo_f").attr('disabled', 'disabled');
-        };
-    });
     
     $(document).ready(function(){
         $('#id_fechai').datetimepicker({
@@ -86,13 +85,6 @@
         });
 
         $("input[name='ofrenda']").click(function(){
-            if($(this).is(':checked')){
-                $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
-            }
-            else{
-                $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").removeAttr('disabled');
-            }
-
             for (var i = 0; i < $sel.length; i++) {
                 if ($sel[i].is(':checked')) {
                     $sel[i][0].checked = false;
@@ -101,6 +93,16 @@
                 }
             }
         });
+
+        $("input[name='lid_asis'], input[name='asis_reg'], input[name='visitas']").click(() => {
+            for (var i = 0; i < 1; i++) {
+                if ($ofrenda.is(':checked')) {
+                    $ofrenda[0].checked = false;
+                } else {
+                    console.log("Does not checked yet!");
+                }
+            }
+        })
 
         $('#form_pasosTotal').submit(function(event) {
             if ($fechai.val() == '') {
@@ -227,7 +229,7 @@
                     <div class="col-md-4 col-md-offset-2">
                         <div class="input-group">
                             <div class="fg-line">
-                                <label for="" class="checkbox m-r-20">
+                                <label for="idCheck" class="checkbox m-r-20">
                                     <input type="checkbox" id="idCheck" name="descendientes" value="S" {% if descendientes %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
                                     Mostrar todos los descendientes del grupo inicial
@@ -239,8 +241,8 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <div class="fg-line">
-                                <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" name="lid_asis" value="S" {% if lid_asis %} checked="checked" {% endif %}>
+                                <label for="lid_asis" class="checkbox m-r-20">
+                                    <input id="lid_asis" type="checkbox" name="lid_asis" value="S" {% if lid_asis %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
                                     N&uacute;mero de L&iacute;deres Asistentes
                                 </label>
@@ -254,8 +256,8 @@
                     <div class="col-md-4 col-md-offset-2">
                         <div class="input-group">
                             <div class="fg-line">
-                                <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" name="visitas" value="S" {% if visitas %} checked="checked" {% endif %}>
+                                <label for="visitas" class="checkbox m-r-20">
+                                    <input id="visitas" type="checkbox" name="visitas" value="S" {% if visitas %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
                                     N&uacute;mero de Visitas
                                 </label>
@@ -266,8 +268,8 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <div class="fg-line">
-                                <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" name="asis_reg" value="S" {% if asis_reg %} checked="checked" {% endif %}>
+                                <label for="asis_reg" class="checkbox m-r-20">
+                                    <input id="asis_reg" type="checkbox" name="asis_reg" value="S" {% if asis_reg %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
                                     N&uacute;mero de Asistentes Regulares
                                 </label>

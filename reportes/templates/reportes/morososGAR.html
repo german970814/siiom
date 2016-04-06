@@ -136,18 +136,21 @@
                         <tr>
                             <td>{{ grupo.nombre|capfirst }}</td>
                             <td>
-                                <ul>
                                 {% for lider in grupo.lideres %}
-                                    <li>{{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}</li>
+                                    {% if forloop.first %}
+                                        {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
+                                    {% else %}
+                                    - {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
+                                    {% endif %}
                                 {% endfor %}
-                                </ul>
                             </td>
                             <td>
-                                <ul>
                                 {% for fecha in grupo.fecha_reunion %}
-                                    <li>{{ fecha }}</li>
+                                    {% if forloop.first %}
+                                        {{ fecha }}
+                                    {% endif %}
+                                    - {{ fecha }}
                                 {% endfor %}
-                                </ul>
                             </td>
                         </tr>
                     {% empty %}

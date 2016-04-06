@@ -1,8 +1,20 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block js %}
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
+        $("#data-table-selection").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less',
+                    },
+                    caseSensitive: false,
+                })
+
 		$('#id_fechai').datetimepicker({
             format: 'DD/MM/YY',
             maxDate: moment(),
@@ -126,14 +138,14 @@
                 <br>
                 <div class="row">
                     <div class="col-md-12">
-                        <table id="gruposSinReportes" class="table" cellspacing="0">
+                        <table id="data-table-selection" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
-                                    <th>Grupo</th>
-                                    <th>Lideres</th>
-                                    <th>Personas asignadas</th>
-                                    <th>Llamadas realizadas</th>
-                                    <th>Llamadas no realizadas</th>
+                                    <th data-column-id="grupo">Grupo</th>
+                                    <th data-column-id="lideres">Lideres</th>
+                                    <th data-column-id="personas">Personas asignadas</th>
+                                    <th data-column-id="llamadas1">Llamadas realizadas</th>
+                                    <th data-column-id="llamadas2">Llamadas no realizadas</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -141,15 +153,15 @@
                                     <tr>
                                         <td>{{ grupo.nombre|capfirst }}</td>
                                         <td>
-                                            <ul>
                                             {% for lider in grupo.lideres %}
-                                                <li>{{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}</li>
+                                                {% if forloop.first %}
+                                                    {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
+                                                {% else %}
+                                                - {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
+                                                {% endif %}
                                             {% endfor %}
-                                            </ul>
                                         </td>
-                                        <td>
-                                            {{ grupo.personas_asignadas }}
-                                        </td>
+                                        <td>{{ grupo.personas_asignadas }}</td>
                                         <td>{{ grupo.llamadas_realizadas }}</td>
                                         <td>{{ grupo.llamadas_no_realizadas }}</td>
                                     </tr>

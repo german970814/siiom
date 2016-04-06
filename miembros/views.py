@@ -1104,7 +1104,7 @@ def cumplimientoPasos(request):
     if request.method == 'POST':
         if 'verMiembros' in request.POST or 'promoverPaso' in request.POST:           
             try:
-                pasoE = Pasos.objects.get(id = request.POST.getlist('menuPasos')[0])
+                pasoE = Pasos.objects.get(id= request.POST.getlist('menuPasos')[0])
                 numPasos = Pasos.objects.filter(prioridad__lt = pasoE.prioridad).count()
                 
                 if 'promoverPaso' in request.POST:

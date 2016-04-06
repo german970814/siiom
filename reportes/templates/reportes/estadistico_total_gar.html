@@ -30,15 +30,6 @@
     {% endif %}
 
     $(window).load(function() {
-        // if ($('input[name="ofrenda"]').is(':checked')) {
-        //     $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
-        // } else if ($("input[name='lid_asis']").is(':checked')){
-        //     $("input[name='ofrenda'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
-        // } else if ($("input[name='visitas']").is(':checked')){
-        //     $("input[name='lid_asis'], input[name='ofrenda'], input[name='asis_reg']").attr('disabled', 'disabled');
-        // } else if ($("input[name='asis_reg']").is(':checked')){
-        //     $("input[name='lid_asis'], input[name='visitas'], input[name='ofrenda']").attr('disabled', 'disabled');
-        // }
 
         {% if sw and not grupoDis %}
             swal({   
@@ -74,42 +65,6 @@
         $('#id_fechaf').on("dp.change",function(e){
             $('#id_fechai').data("DateTimePicker").maxDate(e.date);
         });
-
-        // $("input[name='ofrenda']").click(function(){
-        //     if($(this).is(':checked')){
-        //         $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
-        //     }
-        //     else{
-        //         $("input[name='lid_asis'], input[name='visitas'], input[name='asis_reg']").removeAttr('disabled');
-        //     }
-        // });
-
-        // $("input[name='lid_asis']").click(function(){
-        //     if($(this).is(':checked')){
-        //         $("input[name='ofrenda'], input[name='visitas'], input[name='asis_reg']").attr('disabled', 'disabled');
-        //     }
-        //     else{
-        //         $("input[name='ofrenda'], input[name='visitas'], input[name='asis_reg']").removeAttr('disabled');
-        //     }
-        // });
-
-        // $("input[name='visitas']").click(function(){
-        //     if($(this).is(':checked')){
-        //         $("input[name='lid_asis'], input[name='ofrenda'], input[name='asis_reg']").attr('disabled', 'disabled');
-        //     }
-        //     else{
-        //         $("input[name='lid_asis'], input[name='ofrenda'], input[name='asis_reg']").removeAttr('disabled');
-        //     }
-        // });
-
-        // $("input[name='asis_reg']").click(function(){
-        //     if($(this).is(':checked')){
-        //         $("input[name='lid_asis'], input[name='visitas'], input[name='ofrenda']").attr('disabled', 'disabled');
-        //     }
-        //     else{
-        //         $("input[name='lid_asis'], input[name='visitas'], input[name='ofrenda']").removeAttr('disabled');
-        //     }
-        // });
 
         var $grupoi = $('#idGrupo_i'); var $fechai = $('#id_fechai'); var $fechaf = $('#id_fechaf');
 
