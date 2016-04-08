@@ -2,6 +2,7 @@
 from calendar import weekday
 import datetime
 from xml import dom
+from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
@@ -244,7 +245,9 @@ def listarRedes(request):
     if request.method == "POST":
 
         if 'eliminar' in request.POST:
-            okElim = eliminar(Red, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Red, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
     redes = list(Red.objects.all())
 
     return render_to_response('Grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
@@ -289,7 +292,9 @@ def listarPredicas(request):
     miembro = Miembro.objects.get(usuario = request.user)
     if request.method == "POST":
         if  'eliminar' in request.POST:
-            okElim = eliminar(Predica, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Predica, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
     predicas = list(Predica.objects.filter(miembro__id = miembro.id))
     return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
@@ -331,7 +336,7 @@ def editarPredica(request, pk):
     return render_to_response("Grupos/crear_predica.html",locals(),context_instance=RequestContext(request))
 
     
-def eliminar(modelo, lista):
+def eliminar(request,modelo, lista):
     ok = 0 #No hay nada en la lista
     if lista:
         ok = 1 #Los borro todos
@@ -343,6 +348,8 @@ def eliminar(modelo, lista):
                 pass
             except:
                 ok = 2 #Hubo un error
+    if ok == 1:
+        messages.success(request, "Se ha eliminado correctamente")
     return ok
     
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -360,7 +367,9 @@ def gruposDeRed(request, id):
             request.session['red'] = red
             return HttpResponseRedirect('/grupo/editar_grupo/')
         if  'eliminar' in request.POST:
-            okElim = eliminar(Grupo, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Grupo, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
 
     grupos = list(Grupo.objects.filter(red=red))
 

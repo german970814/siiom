@@ -14,7 +14,7 @@
 	    
 	                <ul class="dropdown-menu dropdown-menu-right">
 	                    <li>
-	                        <a href="/miembro/editar_miembro/{{miembro.id}}/">Editar Usuario</a>
+	                        <a href="/miembro/editar_miembro/{{miembro.id}}/">Editar Miembro</a>
 	                    </li>
 	                    {% if not miembro.asisteGAR and not miembro.grupo %}
 	                    <li>
@@ -26,17 +26,22 @@
 	                        <a href="/miembro/asignar_usuario/{{miembro.id}}/">Asignar Usuario</a>
 	                    </li>
 	                    {% endif %}
+	                    {% if not tipos %}
+	                    <li>
+	                        <a href="/miembro/cambiar_tipo_miembro/{{miembro.id}}/">Agregar Tipo de Miembro</a>
+	                    </li>
+	                    {% endif %}
 	                </ul>
 	            </li>
 	        </ul>
         {% endif %}
     </div>
-    {% if pasos %}
+    {% if tipos %}
     <div class="card">
         <div class="card-header">
             <h1 class="f-700">
             	<legend style="margin-bottom: 0px !important">
-            		<h3>Tipo de Miembro:</h3>
+            		<h3>Tipo de Miembro</h3>
             	</legend>
         		<small>
 					<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro</a>
@@ -61,7 +66,7 @@
 				                <a href="" alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"></a>
 				                {% endif %}
 				                <ul class="clist clist-check">
-				                	<li>{{cambio.nuevoTipo}}</li>
+				                	<li>{{cambio.nuevoTipo|upper}}</li>
 				                </ul>
 				                {% endfor %}
 				            </div>

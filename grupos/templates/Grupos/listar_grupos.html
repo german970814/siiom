@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -26,14 +27,12 @@
                     }
                     {% endif %}
                 });
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
-            }
-        });
+
+        $seleccionados = [];
+
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+
+        send_form("#form", $seleccionados);
     })
 </script>
 {% endblock %}
@@ -48,78 +47,79 @@
         		</legend>
         	</h1>
 			<h5><a alt="Agregar Grupo" href="/grupo/crear_grupo/{{red.id}}">Agregar Grupos</a></h5>
-			{% if okElim == 1 %}
-			<div class="row">
-	            <div class="alert alert-success alert-dismissible" role="alert">
-	                <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-	                <p>Se eliminaron los grupos seleccionadas.</p>
+			{% if okElim == 2 %}
+				<div class="row">
+	                <div class="alert alert-danger alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>Hubo un error al eliminar los grupo.</p>
+	                </div>
 	            </div>
-	        </div>
-			{% else %}
-				{% if okElim == 2 %}
-					<div class="row">
-		                <div class="alert alert-danger alert-dismissible" role="alert">
-		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-		                    <p>Hubo un error al eliminar los grupo.</p>
-		                </div>
-		            </div>
-				{% endif %}
 			{% endif %}
-        </div>
-        {% if grupos %}
-        <form action="" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="card-body card-padding table-responsive">
-                <br>
-                <div class="row">
-                    <div class="col-md-12">
-						<table id="data-table-command" class="table table-striped table-vmiddle">
-							<thead>
-						       	<tr>
-						       		<th data-identifier="true" data-column-id="id" data-visible="false"></th>
-						            <th data-identifier="true" data-column-id="nombre">Nombre</th>
-						            <th data-identifier="true" data-column-id="lider1">Lider1</th>
-						            <th data-identifier="true" data-column-id="lider2">Lider2</th>
-						            <th data-identifier="true" data-column-id="estado">Estado</th>
-						            <th data-identifier="true" data-column-id="fecha">Fecha de Apertura</th>
-						            <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
-						       	</tr>
-					    	</thead>
-					    	<tbody>
-							{% for grupo in grupos %}
-								<tr>
-									<td>{{grupo.id}}</td>
-									<td>{{grupo.nombre|capfirst}}</td>
-									<td>{{grupo.lider1.nombre|capfirst}}</td>
-									<td>{{grupo.lider2.nombre|capfirst}}</td>
-									<td>{{grupo.get_estado_display}}</td>
-									<td>{{grupo.fechaApertura|capfirst}}</td>
-								</tr>
-							{% endfor %}
-							</tbody>
-						</table>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="row">
+                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
                     </div>
                 </div>
-                <br>
-                <br>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% if grupos %}
+            <div class="card-body card-padding table-responsive">
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="data-table-command" class="table table-striped table-vmiddle">
+                        <thead>
+                            <tr>
+                                <th data-identifier="true" data-column-id="id" data-visible="false"></th>
+                                <th data-identifier="true" data-column-id="nombre">Nombre</th>
+                                <th data-identifier="true" data-column-id="lider1">Lider1</th>
+                                <th data-identifier="true" data-column-id="lider2">Lider2</th>
+                                <th data-identifier="true" data-column-id="estado">Estado</th>
+                                <th data-identifier="true" data-column-id="fecha">Fecha de Apertura</th>
+                                <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for grupo in grupos %}
+                            <tr>
+                                <td>{{grupo.id}}</td>
+                                <td>{{grupo.nombre|capfirst}}</td>
+                                <td>{{grupo.lider1.nombre|capfirst}}</td>
+                                <td>{{grupo.lider2.nombre|capfirst}}</td>
+                                <td>{{grupo.get_estado_display}}</td>
+                                <td>{{grupo.fechaApertura|capfirst}}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+            <br>
+            <form action="" id="form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <button type="submit" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
         {% else %}
         <div class="card-body card-padding">
-        	<div class="row">
-				<div class="col-md-10 col-md-offset-1">
-					<div class="alert alert-warning" role="alert">
-						<p>A&uacute;n no se han agregado grupos a esta red.</p>
-					</div>
-				</div>
-			</div>
-		</div>
-		{% endif %}
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="alert alert-warning" role="alert">
+                        <p>A&uacute;n no se han agregado grupos a esta red.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

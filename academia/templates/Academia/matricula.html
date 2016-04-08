@@ -47,7 +47,7 @@
 			<div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha mariculado el estudiante correctamente.<a alt="Listar Estudiantes" href="/academia/estudiantes/{{ id }}/">(volver a la lista de estudiantes.)</a></p>
+                    <p>Se ha mariculado el estudiante correctamente.<a class="alert-link" alt="Listar Estudiantes" href="/academia/estudiantes/{{ id }}/"> (volver a la lista de estudiantes.)</a></p>
                 </div>
             </div>
             {% endif %}
@@ -58,8 +58,8 @@
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-layers"></i>
                             </span>
-                            <div class="fg-line requerido">
-                                <label for="id_estudiante" class="fg-label requerido">Estudiante:</label>
+                            <div class="requerido">
+                                <label for="id_estudiante" class="requerido">Estudiante:</label>
                                 {{form.estudiante}}
                             </div>
                         </div>

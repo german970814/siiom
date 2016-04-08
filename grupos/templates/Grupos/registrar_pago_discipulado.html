@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -24,14 +25,25 @@
                         }
                     }
                 });
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
-            }
+
+        $seleccionados = [];
+
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='confirmar']", "Ninguno elegido para confirmar");
+
+        send_form("#form", $seleccionados);
+
+        {% if not ofrendasPendientesDiscipulado %}
+        $(window).load(function() {
+            swal({   
+                title: "Lo Sentimos",   
+                text: "No tienes discipulados pendientes por confirmar ofrenda",   
+                type: "warning",
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Aceptar",   
+                closeOnConfirm: false 
+            });
         });
+        {% endif %}
     })
 </script>
 {% endblock %}
@@ -45,7 +57,7 @@
                     <h3 class="f-700 f-20">Confirmar ofrenda reunion discipulado</h3>
                 </legend>
             </h1>
-            {% if mensaje%}
+            {% if mensaje %}
             <div class="row">
                 <div class="alert alert-{% if success %}success{% else %}warning{% endif %} alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
@@ -56,8 +68,6 @@
         </div>
         {% if sw %}
         {% if ofrendasPendientesDiscipulado %}
-        <form action="" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
             <div class="card-body card-padding table-responsive">
                 <br>
                 <div class="row">
@@ -90,13 +100,15 @@
                 </div>
                 <br>
                 <br>
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" value="Verificar" class="btn btn-primary btn-block">Verificar</button>
+                <form id="form" action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <button type="submit" name="confirmar" value="Verificar" class="btn btn-primary btn-block">Verificar</button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
-        </form>
         {% else %}
             <div class="card-body card-padding">
                 <div class="row">

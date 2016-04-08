@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-selection").bootgrid({
@@ -20,47 +21,16 @@
                     caseSensitive: false,
                 })
 
-        var $seleccionados = [];
         var $seleccion = [];
         
         {% for m in miembros  %}
             {% if m.cumplio %}
-                $seleccionados.push('{{m.id}}');
                 $seleccion.push('{{m.id}}');
             {% endif %}
         {% endfor %}
 
-        $("#data-table-selection").bootgrid().on("loaded.rs.jquery.bootgrid", function(e) {
-            var $seleccionados_event_loaded = $seleccionados.slice(0);
-            $(this).bootgrid('select', $seleccionados_event_loaded);
-        });
-
-        $("#data-table-selection").bootgrid().on("selected.rs.jquery.bootgrid", function(e, selectedRows) {
-            for (var x = 0; x < selectedRows.length; x++) {
-                if (typeof selectedRows[x].id === "string") {
-                    $seleccion.push(selectedRows[x].id);
-                }
-            }
-        });
-
-        $("#data-table-selection").bootgrid().on("deselected.rs.jquery.bootgrid", function(e, deselectedRows) {
-            for (var x = 0; x < deselectedRows.length; x++) {
-                if (typeof deselectedRows[x].id === "string") {
-                    // delete $seleccion[parseInt(deselectedRows[x].id)];
-                    var aux = $seleccion.indexOf(deselectedRows[x].id);
-                    $seleccion
-                    var aux2 = $seleccionados.indexOf(deselectedRows[x].id);
-                    // $seleccion[aux]
-                    if (aux in $seleccion) {
-                        delete $seleccion[aux]
-                    }
-
-                    if (aux2 in $seleccionados) {
-                        delete $seleccionados[aux2]
-                    }
-                }
-            }
-        });
+        // Se controla el uso y manejo de la tabla
+        bootgrid_table_solution("#data-table-selection", $seleccion);
 
         $("button[name='promoverPaso']").click(function(event) {
             if (!$('tr').hasClass('active')) {

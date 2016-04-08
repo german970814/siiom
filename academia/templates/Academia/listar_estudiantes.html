@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     jQuery(document).ready(function($) {
         $("#data-table-command").bootgrid({
@@ -18,20 +19,30 @@
                     multiSelect: true,
                     rowSelect: true,
                     caseSensitive: false,
-                    keepSelection: true,
                     {% endif %}
+                    keepSelection: true,
                     formatters: {
                         "link" : function(column, row) {
                             return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/estudiante_detalle/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> "
                         },
                     }
                 });
-        $("button[name='Eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
+
+        $seleccionados = [];
+
+        // Se controla el uso y manejo de la tabla incluyendo enviada de datos al servidor
+        bootgrid_table_solution("#data-table-command", $seleccionados{% if perms.miembros.es_administrador %}, $add_button_function=true, "button[name='Eliminar']", "Nada que Eliminar"{% endif %});
+
+        $('#form').submit(function(event) {
+            for (var i = 0; i < $seleccionados.length; i++) {
+                x = $seleccionados[i];
+                try {
+                    $(this).append('<input type="hidden" name="seleccionados" value="' + x.toString() +'">');
+                }
+
+                catch(err) {
+                    console.log(err);
+                }
             }
         });
 
@@ -41,16 +52,34 @@
                     swal("Alerta!!!","Debes escoger una accion a realizar");
                     return false;
                 } else {
-                    // return true;
-                    if ($('tr').hasClass('active') && $('tr').find('input').is(':checked')) {
-                        return true;
+                    if (!$('tr').hasClass('active')) {
+                        if ($seleccionados.length == 0) {
+                            swal("Alerta!!!", "Debes escoger por lo menos un estudiante");
+                            event.preventDefault();
+                        } else {
+                            var $undef = [];
+                            var $str = [];
+                            for (var i = 0; i < $seleccionados.length; i++) {
+                                if ($seleccionados[i] === undefined) {
+                                    $undef.push($seleccionados[i]);
+                                }
+                                if (typeof $seleccionados[i] === 'string') {
+                                    $str.push($seleccionados[i]);
+                                }
+                            }
+                            if ($str.length > 0) {
+                                return true;
+                            } else if ($str.length == 0 && $undef.length >= 0) {
+                                swal("Alerta!!!", "Debes escoger por lo menos un estudiante");
+                                return false;
+                            }
+                        }
                     } else {
-                        swal("Alerta!!!", "Debes escoger por lo menos un estudiante");
-                        return false;
+                        return true;
                     }
                 }
             });
-        {% endif %}    
+        {% endif %}
     });
 </script>
 {% endblock %}
@@ -65,7 +94,7 @@
                 </legend>
             </h1>
         </div>
-        <form action="" method="POST">
+        <form action="" method="POST" id="form">
             {% csrf_token %}
             <div class="card-body card-padding table-responsive">
                 <br>
@@ -76,7 +105,7 @@
                                 <tr>
                                     <th data-visible="false" data-identifier="true" data-column-id="id"></th>
                                     <th data-identifier="true" data-column-id="nombre">Nombre</th>
-                                    <th data-identifier="true" data-column-id="modulo">Modulo</th>
+                                    <th data-identifier="true" data-column-id="modulo">Módulo</th>
                                     <th data-identifier="true" data-column-id="sesionesd">Sesiones dadas</th>
                                     <th data-identifier="true" data-column-id="sesionesf">Sesiones faltantes</th>
                                     {% if estudiantes %}
@@ -89,7 +118,7 @@
                                     <tr>
                                         <td>{{est.id}}</td>
                                         <td><a href="/academia/estudiante_detalle/{{est.id}}/">{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</a></td>
-                                        <td>{{ est.moduloActual.nombre }}</td>
+                                        <td>{% if est.moduloActual %}{{ est.moduloActual.nombre }}</td>{% else %}No Asignado a Ningún Módulo Aún{% endif %}
                                         <td>{{ est.sesionesDadas }}</td>
                                         <td>{{ est.sesionesFaltantes }}</td>                    
                                     </tr>
@@ -108,12 +137,11 @@
                 {% if perms.miembros.es_administrador %}
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" class="btn bgm-red btn-block" name ="Eliminar">Eliminar</button>
+                        <button type="submit" class="btn bgm-red btn-block" name="Eliminar">Eliminar</button>
                     </div>
                 </div>
                 {% endif %}
             </div>
-        <!--</form>-->
     </div>
 
     <div class="card">
@@ -125,8 +153,6 @@
             </h1>
             <h4><a href="/academia/curso_detalle/{{ curso.id }}/">Ver informaci&oacute;n del curso</a></h4>
         </div>
-        <!--<form action="" method="POST">-->
-            {% csrf_token %}
             <div class="card-body card-padding">
                 <br>
                 {% if not perms.miembros.es_administrador %}

@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -27,14 +28,11 @@
                     }
                     {% endif %}
                 });
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
-            }
-        });
+        $seleccionados = [];
+
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+
+        send_form("#form", $seleccionados);
     })
 </script>
 {% endblock %}
@@ -47,14 +45,6 @@
             	<legend><h3>Modulos</h3></legend>
 	            <small><a alt="Agregar Modulo" href="/academia/crear_modulo/">Agregar Modulo</a></small>
 	            </h1>
-		        {% if okElim == 1 %}
-				<div class="row">
-		            <div class="alert alert-success alert-dismissible" role="alert">
-		                <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-		                <p>Se eliminaron los modulos seleccionadas.</p>
-		            </div>
-		        </div>
-				{% else %}
 				{% if okElim == 2%}
 					<div class="row">
 		                <div class="alert alert-danger alert-dismissible" role="alert">
@@ -63,12 +53,19 @@
 		                </div>
 		            </div>
 				{% endif %}
-			{% endif %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="row">
+                        <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p>{{message}}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
         </div>
         <div class="row">
             <div class="col-md-12">
-            <form action="" method="POST">
-            	{% csrf_token %}
                 <table id="data-table-command" class="table table-striped table-vmiddle">
                     <thead>
                         <tr>
@@ -79,26 +76,28 @@
                     </thead>
                     <tbody>
                         {% for modulo in modulos %}
-    						<tr>
-    							<td class="hidden">{{modulo.id}}</td>
+                            <tr>
+                                <td class="hidden">{{modulo.id}}</td>
                                 <td><a alt="Ver Sesiones" href="/academia/sesiones/{{modulo.id}}/">{{modulo.nombre|capfirst}}</a></td>
-    						</tr>
-    	                {% empty %}
-    	                	<tr>
+                            </tr>
+                        {% empty %}
+                            <tr>
                                 <td></td>
-    	                    	<td colspan="2">No existen modulos a&uacute;n.</td>
-    	                    </tr>
-    					{% endfor %}
+                                <td colspan="2">No existen modulos a&uacute;n.</td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
-    	        <br>
-    	        <br>
-    	        <div class="row">
+                <br>
+                <br>
+                <div class="row">
+                <form id="form" action="" method="POST">
+                    {% csrf_token %}
     	            <div class="col-md-4 col-md-offset-4">
     					<button type="submit" name="eliminar" class="btn btn-danger btn-block"><i class="zmdi zmdi-delete"></i> Eliminar</button>
     				</div>
-    	        </div>
-            </form>
+                </form>
+        	</div>
         </div>
         </div>
         <br>

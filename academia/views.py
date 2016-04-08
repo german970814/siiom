@@ -17,7 +17,7 @@ from academia.forms import FormularioEvaluarModulo,\
     FormularioMatricula, FormularioCrearModulo, FormularioCrearSesion,\
     FormularioRecibirPago
 
-def eliminar(modelo, lista):
+def eliminar(request, modelo, lista):
     ok = 0 #No hay nada en la lista
     if lista:
         ok = 1 #Los borro todos
@@ -29,6 +29,8 @@ def eliminar(modelo, lista):
                 pass
             except:
                 ok = 2 #Hubo un Error
+    if ok == 1:
+        messages.success(request, "Se ha eliminado correctamente")
     return ok
 
 def maestroTest(user):
@@ -118,18 +120,22 @@ def listarEstudiantes(request, curso):
     
     if request.method == 'POST':
         if 'Eliminar' in request.POST:
-            eliminar(Matricula, request.POST.getlist('seleccionados'))
+            eliminar(request,Matricula, request.POST.getlist('seleccionados'))
         else:
             seleccionados = list()
             for x in request.POST.getlist('seleccionados'):
                 if isinstance(x, int):
-                    seleccionados.append(x)
+                    if not x in seleccionados:
+                        seleccionados.append(x)
                 else:
                     try:
-                        seleccionados.append(int(x))
+                        if not x in seleccionados:
+                            seleccionados.append(int(x))
                     except ValueError:
                         pass
-            request.session['seleccionados'] = seleccionados #request.POST.getlist('seleccionados')
+            sel = []
+            [sel.append(y) for y in seleccionados if y not in sel]
+            request.session['seleccionados'] = sel #request.POST.getlist('seleccionados')
             request.session['curso'] = request.POST['curso']
             if request.POST['accion'] == 'M':
                 return HttpResponseRedirect("/academia/evaluar_modulo/")
@@ -413,7 +419,9 @@ def listarModulos(request):
     if request.method == 'POST':
         if 'eliminar' in request.POST:
             modulosEliminar = request.POST.getlist('seleccionados')
-            okElim = eliminar(Modulo,request.POST.getlist('seleccionados'))
+            okElim = eliminar(request, Modulo,request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
 
     modulos = Modulo.objects.all().order_by('id')
     return render_to_response('Academia/listar_modulos.html', locals(), context_instance=RequestContext(request))
@@ -466,7 +474,9 @@ def listarSesiones(request, id):
     
     if request.method == 'POST':
         if 'eliminar' in request.POST:
-            okElim = eliminar(Sesion, request.POST.getlist('seleccionados')) 
+            okElim = eliminar(request, Sesion, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
 
     miembro = Miembro.objects.get(usuario = request.user)
     modulo = Modulo.objects.get(id = int(id))

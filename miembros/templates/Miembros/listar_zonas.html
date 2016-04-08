@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -25,12 +26,22 @@
                         }
                     }
                 });
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
+
+        $seleccionados = [];
+
+        // Se controla el uso y manejo de la tabla incluyendo enviada de datos al servidor
+        bootgrid_table_solution("#data-table-command", $seleccionados, $add_button_function=true, "button[name='eliminar']", "Nada que Eliminar");
+
+        $('#form').submit(function(event) {
+            for (var i = 0; i < $seleccionados.length; i++) {
+                x = $seleccionados[i];
+                try {
+                    $(this).append('<input type="hidden" name="seleccionados" value="' + x.toString() +'">');
+                }
+
+                catch(err) {
+                    console.log(err);
+                }
             }
         });
     })
@@ -43,59 +54,60 @@
         <div class="card-header">
             <h1 class="f-700 f-20">
             	<legend><h3>Zonas</h3></legend>
-				<small>Haga click en una zona para ver los barrios de &eacute;sta.
+				<small>Haga click en "Ver" para ver los barrios de esa zona.
 				<a alt="Agregar Zona" href="/miembro/crear_zona/">Agregar Zona</a></small>
 	        </h1>
-	        {% if okElim == 1 %}
+			{% if okElim == 2 %}
             <div class="row">
-                <div class="alert alert-success alert-dismissible" role="alert">
+                <div class="alert alert-danger alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se eliminaron las zonas seleccionadas</p>
+                    <p>Hubo un error al eliminar las zonas</p>
                 </div>
             </div>
-			{% else %}
-				{% if okElim == 2%}
-	            <div class="row">
-	                <div class="alert alert-danger alert-dismissible" role="alert">
-	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-	                    <p>Hubo un error al eliminar las zonas</p>
-	                </div>
-	            </div>
-				{% endif %}
 			{% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="row">
+                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
-        <form action="" method="POST">
-        	{% csrf_token %}
-            <table id="data-table-command" class="table table-striped table-vmiddle">
-                <thead>
+        <table id="data-table-command" class="table table-striped table-vmiddle">
+            <thead>
+                <tr>
+                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                    <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for zona in zonas %}
                     <tr>
-                        <th data-visible="false" data-identifier="true" data-column-id="id"></th>
-                        <th data-column-id="nombre" data-identifier="true">Nombre</th>
-                        <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                        <td class="hidden">{{zona.id}}</td>
+                        <td><a alt="Ver Sesiones" href="/academia/sesiones/{{zona.id}}/">{{zona.nombre|capfirst}}</a></td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for zona in zonas %}
-						<tr>
-							<td class="hidden">{{zona.id}}</td>
-                            <td><a alt="Ver Sesiones" href="/academia/sesiones/{{zona.id}}/">{{zona.nombre|capfirst}}</a></td>
-						</tr>
-	                {% empty %}
-	                	<tr>
-                            <td></td>
-	                    	<td colspan="2" class="centrarTexto">No existen Zonas a&uacute;n.</td>
-	                    </tr>
-					{% endfor %}
-                </tbody>
-            </table>
-	        <br>
-	        <br>
-	        <div class="row">
-	            <div class="col-md-4 col-md-offset-4">
-					<button type="submit" name="eliminar" class="btn btn-danger btn-block"><i class="zmdi zmdi-delete"></i> Eliminar</button>
-				</div>
-	        </div>
-        </form>
+                {% empty %}
+                    <tr>
+                        <td></td>
+                        <td colspan="2" class="centrarTexto">No existen Zonas a&uacute;n.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <form action="" method="POST" id="form">
+                	{% csrf_token %}
+            		<button type="submit" name="eliminar" class="btn btn-danger btn-block"><i class="zmdi zmdi-delete"></i> Eliminar</button>
+                </form>
+            </div>
+        </div>
         <br>
         <br>
     </div>

@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script type="text/javascript">
 		$(document).ready(function(){
             $("#data-table-selection").bootgrid({
@@ -18,6 +19,17 @@
                     rowSelect: true,
                     keepSelection: true
                 });
+
+            var $seleccionados = [];
+            var $seleccion = [];
+            {% for e in estudiantes  %}
+                {% if e.tarea %}
+                    $seleccionados.push('{{e.id}}');
+                {% endif %}
+            {% endfor %}
+
+            // Se controla el uso y manejo de la tabla
+            bootgrid_table_solution("#data-table-selection", $seleccionados);
 
 			$("#idCurso").change(function(){
 				if ($(this).val() != -1){
@@ -56,25 +68,34 @@
                     return true;
                 }
             });
+
+            $('#formTarea').submit(function(event) {
+                try {
+                    for (var i = 0; i < $seleccionados.length; i++) {
+                        var x = $seleccionados[i];
+                        $('button[name="aceptarTarea"]').append('<input type="hidden" name="seleccionados" value="'+ x.toString() +'">')
+                    }
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            });
+
+            {% if nadie %}
+            $(window).load(function() {
+                // swal("Lo sentimos", "Parece que no hay estudiantes en esta sesión/módulo");
+                swal({   
+                    title: "Lo Sentimos",
+                    text: "Parece que no hay estudiantes en esta sesión/módulo",   
+                    type: "warning",
+                    confirmButtonColor: "#DD6B55",   
+                    confirmButtonText: "Aceptar",   
+                    closeOnConfirm: false 
+                });
+            });
+            {% endif %}
 		});		
 </script>
-
-{% for e in estudiantes %}
-    {% if e.tarea %}
-    <script>
-        jQuery(document).ready(function($) {
-            setTimeout(function(){
-                var a = $('tr[data-row-id="{{e.id}}"]');
-                a.addClass('active');
-                b = a.find('input');
-                b.each(function(index, el) {
-                    b[index].checked = true;
-                });
-            }, 1000);
-        });
-    </script>
-    {% endif %}
-{% endfor %}
 
 {% endblock %}
 
@@ -170,7 +191,7 @@
     </div>
     {% if estudiantes %}
     <div class="card">
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="" id="formTarea" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-header">
                 <h1>

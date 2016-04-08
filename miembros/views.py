@@ -16,18 +16,23 @@ import datetime
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
 
-def eliminar(modelo, lista):
+def eliminar(request,modelo, lista):
     ok = 0 #No hay nada en la lista
     if lista:
         ok = 1 #Los borro todos
         for e in lista:
             try:
-                modelo.objects.get(id=e).delete()
+                if isinstance(e, str):
+                    modelo.objects.get(id=int(e)).delete()
+                else:
+                    modelo.objects.get(id=e).delete()
             except ValueError as e:
                 print(e)
                 pass
             except:
                 ok = 2 #Hubo un Error
+    if ok == 1:
+        messages.success(request, "Se ha eliminado correctamente")
     return ok
 
 def autenticarUsario(request):
@@ -453,33 +458,30 @@ Admin" % Sites.objects.get_current().name,\
             
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")         
 def liderPromoverVisitantesGrupo(request):
-    miembro = Miembro.objects.get(usuario = request.user)    
+    miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
     if grupo:
-        miembrosGrupo = list(grupo.miembro_set.all()) 
+        miembrosGrupo = list(grupo.miembro_set.all())
         if request.method == 'POST':
             lista = request.POST.getlist('seleccionados')
             lista.reverse()
-            visitantesSeleccionados = lista #request.POST.getlist('seleccionados').reverse()
-            for visitante in visitantesSeleccionados:
+            for visitante in lista:
                 try:
                     v = Miembro.objects.get(id=int(visitante))
                 except ValueError:
                     continue
                 if v in miembrosGrupo:
                     visita = CambioTipo.objects.create(miembro=v, autorizacion=miembro, fecha=date.today(), anteriorTipo=TipoMiembro.objects.get(nombre__iexact="Visita"), nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Miembro"))
-                    # visita.save()
             return HttpResponseRedirect('')
-    
-        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
+
+        tipo = TipoMiembro.objects.get(nombre__iexact='Visita')
         visitantes = []
         for mg in miembrosGrupo:
-            ct = list(CambioTipo.objects.filter(miembro= mg).order_by('fecha'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
+            ct = list(CambioTipo.objects.filter(miembro=mg).order_by('fecha').order_by('id'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
             if len(ct) != 0 and ct != None:
                 ct = ct.pop()
-                if(ct.nuevoTipo ==  tipo and ct.anteriorTipo == tipo):
+                if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo):
                     visitantes.append(ct.miembro)
-                    print(visitantes)
     return render_to_response("Miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
@@ -608,7 +610,10 @@ def listarZonas(request):
     if request.method == "POST":
 
         if 'eliminar' in request.POST:
-            okElim = eliminar(Zona, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Zona, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                messages.success(request, "Se eliminaron las zonas seleccionadas")
+                return HttpResponseRedirect('')
     zonas = list(Zona.objects.all())
     return render_to_response('Miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
 
@@ -629,7 +634,7 @@ def barriosDeZona(request, id):
             request.session['zona'] = zona
             return HttpResponseRedirect('/miembro/editar_barrio/')
         if 'eliminar' in request.POST:
-            okElim = eliminar(Barrio, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Barrio, request.POST.getlist('seleccionados'))
     barrios = list(Barrio.objects.filter(zona=zona))
     return render_to_response('Miembros/barrios.html', locals(), context_instance=RequestContext(request))
 
@@ -719,7 +724,9 @@ def  listarPasos(request):
     if request.method == "POST":
 
         if 'eliminar' in request.POST:
-            okElim = eliminar(Pasos, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Pasos, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
     pasos = Pasos.objects.all().order_by("prioridad")
     return render_to_response('Miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
 
@@ -755,7 +762,9 @@ def listarEscalafones(request):
 
     if request.method == 'POST':
         if 'eliminar' in request.POST:
-            okElim = eliminar(Escalafon, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,Escalafon, request.POST.getlist('seleccionados'))
+            if okElim == 1:
+                return HttpResponseRedirect('')
 
     escalafones = list(Escalafon.objects.all().order_by('celulas'))
     return render_to_response('Miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
@@ -841,7 +850,7 @@ def listarTipoMiembro(request):
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             return HttpResponseRedirect('/miembro/editar_tipo_miembro/')
         if 'eliminar' in request.POST:
-            okElim = eliminar(TipoMiembro, request.POST.getlist('seleccionados'))   
+            okElim = eliminar(request,TipoMiembro, request.POST.getlist('seleccionados'))   
     tipos = list(TipoMiembro.objects.all().order_by('nombre'))
     return render_to_response('Miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
@@ -916,43 +925,51 @@ def cambiarMiembroDeTipoMiembro(request, id):
         form = FormularioCambioTipoMiembro(idm = int(id))    
     return render_to_response('Miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearUsuarioMimembro(request, id):
     try:
         miembroCambio = Miembro.objects.get(id=id)
     except:
         raise Http404
-    
+
     if miembroCambio.usuario:
         return HttpResponseRedirect("/dont_have_permissions/")
+
+    sesion = True
+
+    if not 'tipo' in request.session:
+        sesion = False
 
     if request.method == "POST":
         form = FormularioAsignarUsuario(data=request.POST)
         if form.is_valid() and form.cleaned_data['contrasena'] == form.cleaned_data['contrasenaVerificacion']:
             nuevoUsuario = User()
             if form.cleaned_data['email'] != miembroCambio.email:
-                miembroCambio.correo = form.cleaned_data['email']    
+                miembroCambio.correo = form.cleaned_data['email']
             nuevoUsuario.username = form.cleaned_data['email']
             nuevoUsuario.set_password(form.cleaned_data['contrasena'])
             nuevoUsuario.save()
             miembroCambio.usuario = nuevoUsuario
             miembroCambio.save()
-            if request.session['tipo'].lower() == "lider":
-                miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
-            if request.session['tipo'].lower() == "agente": 
-                miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Agente'))
-            if request.session['tipo'].lower() == "maestro": 
-                miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Maestro'))
-            if request.session['tipo'].lower() == "receptor": 
-                miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
-            if request.session['tipo'].lower() == "administrador":
-                miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
+            if sesion:
+                if request.session['tipo'].lower() == "lider":
+                    miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
+                if request.session['tipo'].lower() == "agente":
+                    miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Agente'))
+                if request.session['tipo'].lower() == "maestro":
+                    miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Maestro'))
+                if request.session['tipo'].lower() == "receptor":
+                    miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
+                if request.session['tipo'].lower() == "administrador":
+                    miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
             return HttpResponseRedirect('/miembro/perfil/'+str(miembroCambio.id)+'/')
     else:
         form = FormularioAsignarUsuario()
-    form.email = miembroCambio.email        
+    form.email = miembroCambio.email
     return render_to_response('Miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
-        
+
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def graduarAlumno(request):
     miembro = Miembro.objects.get(usuario = request.user)
@@ -1067,7 +1084,7 @@ def listarDetallesLlamada(request):
     if request.method == "POST":
 
         if 'eliminar' in request.POST:
-            okElim = eliminar(DetalleLlamada, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request,DetalleLlamada, request.POST.getlist('seleccionados'))
 
     detallesLlamada = list(DetalleLlamada.objects.all())
 

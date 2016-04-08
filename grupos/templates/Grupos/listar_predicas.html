@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -27,14 +28,11 @@
                     {% endif %}
                 });
 
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
-            }
-        });
+        $seleccionados = [];
+
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+
+        send_form("#form", $seleccionados);
     })
 </script>
 {% endblock %}
@@ -47,54 +45,55 @@
             	<legend><h3>Pr&eacute;dicas</h3></legend>
             </h1>
 			<h5><a alt="Agregar Predica" href="/grupo/crear_predica/">Agregar Pr&eacute;dica</a></h5>
-	        {% if okElim == 1 %}
+			{% if okElim == 2%}
 				<div class="row">
-                    <div class="alert alert-success alert-dismissible" role="alert">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Se eliminaron las predicas seleccionadas.</p>
+                        <p>Hubo un error al eliminar las predicas.</p>
                     </div>
                 </div>
-			{% else %}
-				{% if okElim == 2%}
-					<div class="row">
-	                    <div class="alert alert-danger alert-dismissible" role="alert">
-	                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-	                        <p>Hubo un error al eliminar las predicas.</p>
-	                    </div>
-	                </div>
-				{% endif %}
 			{% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="row">
+                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
-        <form action="" method="POST">
-        	{% csrf_token %}
-            <table id="data-table-command" class="table table-striped table-vmiddle">
-                <thead>
+        <table id="data-table-command" class="table table-striped table-vmiddle">
+            <thead>
+                <tr>
+                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                    <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                    <th data-column-id="descripcion" data-identifier="true">Descripci&oacute;n</th>
+                    {% if predicas %}
+                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predicas %}
                     <tr>
-                        <th data-visible="false" data-identifier="true" data-column-id="id"></th>
-                        <th data-column-id="nombre" data-identifier="true">Nombre</th>
-                        <th data-column-id="descripcion" data-identifier="true">Descripci&oacute;n</th>
-                        {% if predicas %}
-                        <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
-                        {% endif %}
+                        <td class="hidden">{{pred.id}}</td>
+                        <td>{{pred.nombre|capfirst}}</td>
+                        <td>{{pred.descripcion}}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for pred in predicas %}
-						<tr>
-							<td class="hidden">{{pred.id}}</td>
-                            <td>{{pred.nombre|capfirst}}</td>
-                            <td>{{pred.descripcion}}</td>
-						</tr>
-	                {% empty %}
-	                	<tr>
-                            <td></td>
-	                    	<td colspan="2" class="centrarTexto">No existen Prédicas a&uacute;n.</td>
-	                    </tr>
-					{% endfor %}
-                </tbody>
-            </table>
-	        <br>
-	        <br>
+                {% empty %}
+                    <tr>
+                        <td></td>
+                        <td colspan="2" class="centrarTexto">No existen Prédicas a&uacute;n.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <br>
+        <form id="form" action="" method="POST">
+        	{% csrf_token %}
 	        <div class="row">
 	            <div class="col-md-4 col-md-offset-4">
 					<button type="submit" name="eliminar" class="btn btn-danger btn-block"><i class="zmdi zmdi-delete"></i> Eliminar</button>
