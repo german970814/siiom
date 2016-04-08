@@ -14,6 +14,7 @@ def deploy():
     _update_virtualenv(env.user, env.host, source_folder)
     _update_static_files(source_folder, env.user, env.host)
     _update_database(source_folder, env.user, env.host)
+    _restart_gunicorn_server(env.user)
 
 
 def _create_directory_structure_if_necessary(site_folder):
@@ -68,3 +69,8 @@ def _update_database(source_folder, user, site_name):
     run('cd %s && /home/%s/.envs/%s/bin/python3 manage.py migrate --noinput' % (
         source_folder, user, site_name
     ))
+
+
+def _restart_gunicorn_server(user):
+    run('/home/%s/bin/supervisorctl -c /home/%s/etc/supervisord.conf restart siiom' % (user, user))
+    run('/home/%s/bin/supervisorctl -c /home/%s/etc/supervisord.conf status siiom' % (user, user))
