@@ -302,6 +302,7 @@
                         </div>
                     </div>
                     {% if accion == 'Editar' %}
+                    {% if admin %}  
                     <br class="space">
                     <div class="col-md-4 col-md-ofset-2 {% if not miembroEditar.conyugue %}hidden{% endif %}" id="conyugue">
                         <div class="input-group {{form.conyugue.css_classes}}">
@@ -378,6 +379,7 @@
                             {% endfor %}
                         </div>
                     </div>
+                    {% endif %}
                     {% endif %}
                 </div>
                 <br>

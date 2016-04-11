@@ -49,16 +49,17 @@ def PastorAdminTest(user):
     and (Group.objects.get(name__iexact='Pastor') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def grupoRaiz(request):
     """Permite a un administrador crear o editar el grupo raiz de la iglesia."""
 
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
         try:
             grupoP = Grupo.objects.get(red=None)
             form = FormularioCrearGrupoRaiz(data=request.POST, instance=grupoP)
-        except :
+        except:
             form = FormularioCrearGrupoRaiz(data=request.POST)
         if form.is_valid():
             form.save()
@@ -66,17 +67,18 @@ def grupoRaiz(request):
         try:
             grupoP = Grupo.objects.get(red=None)
             form = FormularioCrearGrupoRaiz(instance=grupoP, new=False)
-        except :
+        except:
             form = FormularioCrearGrupoRaiz()
     return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
-            
+
+
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def editarHorarioReunionGrupo(request):
     miembro = Miembro.objects.get(usuario = request.user)
     grupo = miembro.grupoLidera()
     # if grupo is None:
     #     raise Http404
-    
+
     if request.method == 'POST':
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)
         if form.is_valid():
@@ -153,9 +155,10 @@ def reportarReunionGrupoAdmin(request):
         form = FormularioReportarReunionGrupoAdmin()
     return render_to_response('Grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionDiscipulado(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
     if grupo:
         discipulos = miembro.discipulos()
@@ -169,9 +172,9 @@ def reportarReunionDiscipulado(request):
                     r.save()
                     for m in discipulos:
                         if m.id in asistentesId:
-                            am = AsistenciaDiscipulado.objects.create(miembro=m, reunion = r, asistencia=True)
+                            am = AsistenciaDiscipulado.objects.create(miembro=m, reunion=r, asistencia=True)
                         else:
-                            am = AsistenciaDiscipulado.objects.create(miembro=m, reunion = r, asistencia=False)
+                            am = AsistenciaDiscipulado.objects.create(miembro=m, reunion=r, asistencia=False)
                         am.save()
                     ok = True
                 else:
@@ -298,9 +301,10 @@ def listarPredicas(request):
     predicas = list(Predica.objects.filter(miembro__id = miembro.id))
     return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def crearPredica(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
     if request.method == "POST":
         form = FormularioCrearPredica(data=request.POST)
@@ -313,6 +317,7 @@ def crearPredica(request):
     else:
         form = FormularioCrearPredica()
     return render_to_response('Grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
+
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def editarPredica(request, pk):

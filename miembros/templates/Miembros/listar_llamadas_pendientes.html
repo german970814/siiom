@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -24,14 +25,11 @@
                         }
                     }
                 });
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
-            }
-        });
+        $seleccionados = [];
+
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='registrarLlamada']", "No ha seleccionado nadie para registrar llamada");
+
+        send_form("#form", $seleccionados);
 
         {% if not visitantes %}
         $(window).load(function() {
@@ -77,8 +75,6 @@
         </div>
         {% if grupo %}
         {% if visitantes %}
-        <form action="" method="POST">
-            {% csrf_token %}
             <table id="data-table-command" class="table table-striped table-vmiddle">
                 <thead>
                     <tr>
@@ -97,12 +93,14 @@
             </table>
             <br>
             <br>
-            <div class="row">
-                <div class="col-md-4 col-md-offset-4">
-                    <button type="submit" name="registrarLlamada" class="btn btn-info btn-block"><i class="zmdi zmdi-phone"></i>  Registrar Llamada</button>
+            <form id="form" action="" method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="registrarLlamada" class="btn btn-info btn-block"><i class="zmdi zmdi-phone"></i>  Registrar Llamada</button>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
         <br>
         <br>
         {% else %}

@@ -3,22 +3,25 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
-    $("#data-table-selection").bootgrid({
-                    css: {
-                        icon: 'zmdi icon',
-                        iconColumns: 'zmdi-view-module',
-                        iconDown: 'zmdi-expand-more',
-                        iconRefresh: 'zmdi-refresh',
-                        iconUp: 'zmdi-expand-less'
-                    },
-                    selection: true,
-                    multiSelect: true,
-                    rowSelect: true,
-                    keepSelection: true
-                });
-
     jQuery(document).ready(function($) {
+        $("#data-table-selection").bootgrid({
+            css: {
+                icon: 'zmdi icon',
+                iconColumns: 'zmdi-view-module',
+                iconDown: 'zmdi-expand-more',
+                iconRefresh: 'zmdi-refresh',
+                iconUp: 'zmdi-expand-less'
+            },
+            selection: true,
+            multiSelect: true,
+            rowSelect: true,
+            keepSelection: true
+        });
+
+        $seleccionados = [];
+        bootgrid_table_solution("#data-table-selection", $seleccionados);
         var $predica = $('#id_predica'), $lid_asis = $('#id_numeroLideresAsistentes'), $ofrenda = $('#id_ofrenda'), $novedades = $('#id_novedades');
 
         $('button[name="aceptar"]').click(function(event) {
@@ -35,10 +38,39 @@
                 swal("Alerta!", "Debes especificar si ocurrió alguna novedad");
                 return false;
             } else {
-                return true;
+                // return true;
+                if (!$('tr').hasClass('active')) {
+                    if ($seleccionados.length == 0) {
+                        swal("Alerta","Debes escoger algun miembro asistente");
+                        event.preventDefault();
+                    } else {
+                        var $undef = [];
+                        var $str = [];
+                        for (var i = 0; i < $seleccionados.length; i++) {
+                            if ($seleccionados[i] === undefined) {
+                                $undef.push($seleccionados[i]);
+                            }
+                            if (typeof $seleccionados[i] === 'string') {
+                                $str.push($seleccionados[i]);
+                            }
+                        }
+                        if ($str.length > 0) {
+                            return true;
+                        } else if ($str.length == 0 && $undef.length >= 0) {
+                            swal("Alerta","Debes escoger algun miembro asistente");
+                            return false;
+                        }
+                    }
+                } else {
+                    return true;
+                }
             }
         });
+
            
+        send_form("#form", $seleccionados);
+
+
     });
 </script>
 
@@ -140,16 +172,19 @@
                 <table id="data-table-selection" class="table table-striped">
                     <thead>
                         <tr>
+                            <th data-column-id="id" data-identifier="true" data-visible="false"></th>
                             <th data-column-id="nombre" data-identifier="true">Nombre</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for mg in discipulos %}
                             <tr>
+                                <td>{{mg.id}}</td>
                                 <td>{{mg.nombre|capfirst}} {{mg.primerApellido|capfirst}} {% if mg.segundoApellido %} {{mg.segundoApellido|capfirst}} {% endif %}</td>
                             </tr>
                         {% empty %}
                             <tr>
+                                <td></td>
                                 <td>No Tiene Ningún grupo asignado</td>
                             </tr>                        
                         {% endfor %}

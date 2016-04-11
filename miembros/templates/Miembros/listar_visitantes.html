@@ -28,7 +28,7 @@
 
         $seleccionados = [];
 
-        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='confirmar']", "Nada que Eliminar");
 
         send_form("#form", $seleccionados);
 
@@ -74,11 +74,11 @@
             <br>
             <form id="form" action="" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-4 col-md-offset-4">
-                            <button type="submit" name="confirmar" value="Promover" class="btn btn-success btn-block">Promover</button>
-                        </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="confirmar" value="Promover" class="btn btn-success btn-block">Promover</button>
                     </div>
+                </div>
             </form>
         </div>
         {% else %}

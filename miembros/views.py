@@ -498,19 +498,22 @@ def perfilMiembro(request, id):
     pasos = list(CumplimientoPasos.objects.filter(miembro = miembro).order_by('fecha'))    
     return render_to_response("Miembros/perfil.html", locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(editarMiembroTest, login_url="/dont_have_permissions/")
 def editarMiembro(request, id):
     try:
-        miembroEditar = Miembro.objects.get(id=id) 
+        miembroEditar = Miembro.objects.get(id=id)
     except:
         raise Http404
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     accion = "Editar"
     if request.method == 'POST':
         if miembro.usuario.has_perm('miembros.es_administrador'):
-            form = FormularioAdminAgregarMiembro(data= request.POST, instance= miembroEditar)
-        else: 
-            form = FormularioLiderAgregarMiembro(data= request.POST, instance= miembroEditar)
+            form = FormularioAdminAgregarMiembro(data=request.POST, instance=miembroEditar)
+            admin = True
+        else:
+            form = FormularioLiderAgregarMiembro(data=request.POST, instance=miembroEditar)
+            lider = True
         if form.is_valid():
             nuevoMiembro = form.save(commit=False)
             nuevoMiembro.estado = 'A'
@@ -519,7 +522,7 @@ def editarMiembro(request, id):
                 nuevoMiembro.usuario.username = nuevoMiembro.email
                 nuevoMiembro.usuario.save()
             if nuevoMiembro.conyugue != None and nuevoMiembro.conyugue != '':
-                    conyugue = Miembro.objects.get(id = nuevoMiembro.conyugue.id)
+                    conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
                     conyugue.conyugue = nuevoMiembro
                     conyugue.estadoCivil = 'C'
                     conyugue.save()
@@ -528,10 +531,12 @@ def editarMiembro(request, id):
             return HttpResponseRedirect("/miembro/perfil/" + str(nuevoMiembro.id) + "/")
     else:
         if miembro.usuario.has_perm('miembros.es_administrador'):
-            form = FormularioAdminAgregarMiembro(g= miembroEditar.genero, instance= miembroEditar)
+            form = FormularioAdminAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
+            admin = True
         else:
-            form = FormularioLiderAgregarMiembro(g= miembroEditar.genero, instance= miembroEditar)    
-    return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance= RequestContext(request))
+            form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
+            lider = True
+    return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 @user_passes_test(asignarGrupoTest, login_url="/dont_have_permissions/")
 def asignarGrupo(request, id):

@@ -39,6 +39,9 @@
                         },
                     }
                 });
+
+        $('button[name="transladar"]').attr('disabled', 'disabled')
+
     });
 </script>
 {% endblock %}
@@ -85,7 +88,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" value="Transladar" class="btn btn-danger btn-block" name ="transladar">Transladar</button>
+                        <button type="submit" value="Transladar" class="btn btn-warning btn-block" name ="transladar">Transladar</button>
                     </div>
                 </div>
             </div>
@@ -96,16 +99,14 @@
     <div class="card">
         <div class="card-header">
             <h1 class="f-700 f-20">
-                <legend><h3>{{grupo.nombre|capfirst}}</h3></legend>
+                <legend><h3>Discípulos de {{grupo.nombre|capfirst}}</h3></legend>
             </h1>
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-body card-padding table-responsive">
-                <br>
                 <div class="row">
                     <div class="col-md-12">
-                        <h3>Discípulos</h3>
                         <table id="data-table-command-1" class="table table-striped table-vmiddle">
                             <thead>
                                 <tr>
