@@ -155,7 +155,8 @@
         </div>
             <div class="card-body card-padding">
                 <br>
-                {% if not perms.miembros.es_administrador %}
+                {# {% if not perms.miembros.es_administrador %} #}
+                {% if perms.miembros.es_maestro %}
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <div class="input-group form-group">
@@ -181,7 +182,9 @@
                         <button type="submit" name="Aceptar" class="btn btn-success btn-block">Aceptar</button>
                     </div>
                 </div>
-                {% else %}
+                {% endif %}
+                {% if perms.miembros.es_administrador %}
+                <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <div class="fg-line requerido">

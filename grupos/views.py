@@ -300,6 +300,9 @@ def listarPredicas(request):
             if okElim == 1:
                 return HttpResponseRedirect('')
     predicas = list(Predica.objects.filter(miembro__id=miembro.id))
+
+    if Group.objects.get(name__iexact='Administrador') in request.user.groups.all():
+        predicas = list(Predica.objects.all())
     return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
 
