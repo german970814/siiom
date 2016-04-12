@@ -43,9 +43,11 @@
             	<legend style="margin-bottom: 0px !important">
             		<h3>Tipo de Miembro</h3>
             	</legend>
+            	{% if perms.miembros.es_administrador %}
         		<small>
 					<a alt="Agregar Cambio de tipo" href="/miembro/cambiar_tipo_miembro/{{miembro.id}}">Agregar Tipo de Miembro</a>
 				</small>
+				{% endif %}
             </h1>
             {% if ok %}
             	<p class="ok"></p>

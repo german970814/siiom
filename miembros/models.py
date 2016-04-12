@@ -159,6 +159,8 @@ class Miembro(models.Model):
                     sw = False
                 else:
                     grupo_actual = grupo_actual.lider1.grupo
+            else:
+                sw = False
 
         return pastores
     
