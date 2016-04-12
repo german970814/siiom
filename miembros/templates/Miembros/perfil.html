@@ -66,7 +66,9 @@
 				                <a href="" alt="Eliminar Cambio de Tipo" href="/miembro/eliminar_cambio_tipo/{{cambio.id}}"></a>
 				                {% endif %}
 				                <ul class="clist clist-check">
-				                	<li>{{cambio.nuevoTipo|upper}}</li>
+				                	<li>{{cambio.nuevoTipo|upper}}{% if perms.miembros.es_administrador %} <a href="/miembro/eliminar_cambio_tipo/{{cambio.id}}" alt="Eliminar Cambio de Tipo"><span class="input-group-addon">
+                            		<i class="zmdi zmdi-delete c-red"></i>
+                            	</span></a></li>{% endif %}
 				                </ul>
 				                {% endfor %}
 				            </div>

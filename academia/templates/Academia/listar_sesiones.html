@@ -3,6 +3,7 @@
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
@@ -26,14 +27,13 @@
                     }
                     {% endif %}
                 });
-        $("button[name='eliminar']").click(function(event) {
-            if (!$('tr').hasClass('active')) {
-                swal("Nada que Eliminar")
-                event.preventDefault();
-            } else {
-                return true;
-            }
-        });
+
+        $seleccionados = [];
+
+        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+
+        send_form("#form", $seleccionados);
+
     })
 </script>
 {% endblock %}
@@ -64,46 +64,46 @@
 				{% endif %}
 			{% endif %}
         </div>
-        <form action="" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
             <div class="card-body card-padding table-responsive">
-                <br>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table id="data-table-command" class="table table-striped table-vmiddle">
-                            <thead>
-						       	<tr>
-						       		<th data-identifier="true" data-column-id="id" data-visible="false"></th>
-						            <th data-identifier="true" data-column-id="nombre">Nombre</th>
-						            <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
-						       	</tr>
-					    	</thead>
-					    	<tbody>
-							{% for sesion in sesiones %}
-								<tr>
-									<td>{{sesion.id}}</td>
-									<td>{{sesion.nombre|capfirst}}</td>
-								</tr>
-			                {% empty %}
-			                	<tr>
-                                    <td></td>
-			                    	<td colspan="2">A&uacute;n no se han agregado sesiones a este modulo.</td>
-			                    </tr>
-							{% endfor %}
-							</tbody>
-                        </table>
-                        <br/>
-                    </div>
-                </div>
-                <br>
-                <br>
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-4">
-						<button type="submit" name="eliminar" class="btn btn-danger btn-block">Eliminar</button>
-					</div>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="data-table-command" class="table table-striped table-vmiddle">
+                        <thead>
+                            <tr>
+                                <th data-identifier="true" data-column-id="id" data-visible="false"></th>
+                                <th data-identifier="true" data-column-id="nombre">Nombre</th>
+                                <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for sesion in sesiones %}
+                            <tr>
+                                <td>{{sesion.id}}</td>
+                                <td>{{sesion.nombre|capfirst}}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td></td>
+                                <td colspan="2">A&uacute;n no se han agregado sesiones a este modulo.</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <br/>
                 </div>
             </div>
-        </form>
+            <br>
+            <br>
+            <form id="form" action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="eliminar" class="btn btn-danger btn-block">Eliminar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

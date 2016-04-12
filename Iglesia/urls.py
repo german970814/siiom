@@ -10,11 +10,6 @@ RedirectView.permanent = True
 handler404 = 'views.custom_404'
 
 urlpatterns = patterns('',
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    #(r'^dp/$', depu2),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
     url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),

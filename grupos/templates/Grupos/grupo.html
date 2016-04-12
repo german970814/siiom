@@ -13,18 +13,29 @@
 					<div class="fg-line">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-portable-wifi c-purple"></i>
+                            	</span>
 								<h5>Zona:</h5>
 								<small>{{grupo.barrio.zona.nombre}}</small>
 							</div>
 						</div>
+						<br class="space">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-flag c-pink"></i>
+                            	</span>
 								<h5>Barrio:</h5>
 								<small>{{grupo.barrio.nombre}}</small>
 							</div>
 						</div>
+						<br class="space">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-pin c-red"></i>
+                            	</span>
 								<h5>Direcci&oacute;n</h5>
 								<small>{{grupo.direccion}}</small>
 							</div>
@@ -33,48 +44,72 @@
 				</div>
 			</div>
 			<br>
+			<br class="space-down">
 			<div class="row">
 				<div class="col-md-12">
 					<div class="fg-line">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-calendar c-yellow"></i>
+                            	</span>
 								<h5>D&iacute;a GAR:</h5>
-								<small>{{grupo.diaGAR}}</small>
+								<small>{{grupo.get_diaGAR_display|upper}}</small>
 							</div>
 						</div>
+						<br class="space">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-watch c-gray"></i>
+                            	</span>
 								<h5>Hora GAR:</h5>
 								<small>{{grupo.horaGAR}}</small>
 							</div>
 						</div>
+						<br class="space">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-view-day c-brown"></i>
+                            	</span>
 								<h5>D&iacute;a Discipulado:</h5>
-								<small>{{grupo.diaDiscipulado}}</small>
+								<small>{{grupo.get_diaDiscipulado_display|upper}}</small>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<br>
+			<br class="space-down">
 			<div class="row">
 				<div class="col-md-12">
 					<div class="fg-line">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-time c-green"></i>
+                            	</span>
 								<h5>Hora Discipulado:</h5>
 								<small>{{grupo.horaDiscipulado}}</small>
 							</div>
 						</div>
+						<br class="space">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-calendar-note c-orange"></i>
+                            	</span>
 								<h5>Fecha de Apertura:</h5>
 								<small>{{grupo.fechaApertura}}</small>
 							</div>
 						</div>
+						<br class="space">
 						<div class="col-md-4">
 							<div class="input-group">
+								<span class="input-group-addon">
+                            		<i class="zmdi zmdi-accounts c-blue"></i>
+                            	</span>
 								<h5>Líderes:</h5>
 								<small>{{grupo.lider1.nombre}} {{grupo.lider1.primerApellido}}</small>
 								{% if grupo.lider2 %}

@@ -290,15 +290,16 @@ def editarRed(request, pk):
 
     return render_to_response("Grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def listarPredicas(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
-        if  'eliminar' in request.POST:
-            okElim = eliminar(request,Predica, request.POST.getlist('seleccionados'))
+        if 'eliminar' in request.POST:
+            okElim = eliminar(request, Predica, request.POST.getlist('seleccionados'))
             if okElim == 1:
                 return HttpResponseRedirect('')
-    predicas = list(Predica.objects.filter(miembro__id = miembro.id))
+    predicas = list(Predica.objects.filter(miembro__id=miembro.id))
     return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
 
@@ -404,7 +405,7 @@ def crearGrupo(request, id):
 def editarGrupo(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
-    
+
     try:
         grupo = Grupo.objects.get(pk=pk)
     except Grupo.DoesNotExist:
@@ -421,15 +422,18 @@ def editarGrupo(request, pk):
         form = FormularioCrearGrupo(instance=grupo, new=False)
 
     return render_to_response("Grupos/crear_grupo_admin.html", locals(), context_instance=RequestContext(request))
-    
+
+
 @user_passes_test(verGrupoTest, login_url="/dont_have_permissions/")
 def verGrupo(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
     try:
         grupo = Grupo.objects.get(id=id)
-    except:
+    except Grupo.DoesNotExist:
+        raise Http404
         ok = False
     return render_to_response('Grupos/grupo.html', locals(), context_instance=RequestContext(request))
+
 
 #def ConsultarReportesSinEnviar(request, sobres=False):
 #    """Permite a un administrador revisar que lideres no han registrado sus reportes de reuniones de grupo en un rango de fecha
@@ -562,6 +566,7 @@ def sendMail(camposMail):
 #                    sig = sig + datetime.timedelta(weeks = 1)
 #
 #    return render_to_response('Grupos/morososGAR.html', locals(), context_instance=RequestContext(request))
+
 
 def reporteVisitasPorRed(request):
     redes = Red.objects.all()

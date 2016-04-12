@@ -18,8 +18,8 @@ urlpatterns = [
     url(r'^estadistico__totalizado_reunionesDiscipulado/$', estadisticoTotalizadoReunionesDiscipulado, name="estadistico__totalizado_reunionesDiscipulado"),
     url(r'^desarrollo_grupos/$', desarrolloGrupo, name="desarrollo_grupos"),
     url(r'^reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar, {}, name="reportes_reuniones_sin_enviar"),
-    url(r'^reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}, name="reportes_reuniones_discipulado_sin_enviar"),
-    url(r'^consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}, name="consultar_sobres_sin_enviar"),
-    url(r'^consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}, name="consultar_sobres_discipulados_sin_enviar"),
+    url(r'^reportes_reuniones_discipulado_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {}, name="reportes_reuniones_discipulado_sin_enviar"), #No asignado aun a ningun menu
+    url(r'^consultar_sobres_sin_enviar/$', ConsultarReportesSinEnviar, {'sobres': True}, name="consultar_sobres_sin_enviar"), #Error
+    url(r'^consultar_sobres_discipulados_sin_enviar/$', ConsultarReportesDiscipuladoSinEnviar, {'sobres': True}, name="consultar_sobres_discipulados_sin_enviar"), #Error
     url(r'^cumplimiento_llamadas_lideres/$', cumplimiento_llamadas_lideres_red, name='cumplimiento_llamadas_lideres'),
 ]
