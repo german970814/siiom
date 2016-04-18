@@ -1,6 +1,8 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block css %}
+<link rel="stylesheet" href="{% static 'css/estilos_foto_perfil.css' %}">
+<link href="{% static 'Template/jquery/vendors/bower_components/lightgallery/light-gallery/css/lightGallery.css' %}" rel="stylesheet">
     <style>
         @media screen and (min-width: 767px) {
             br.space {
@@ -32,6 +34,8 @@
 {% endblock css %}
 
 {% block js %}
+<script src="{% static 'Template/jquery/vendors/bower_components/lightgallery/light-gallery/js/lightGallery.min.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bower_components/mediaelement/build/mediaelement-and-player.min.js' %}"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fechaNacimiento").datetimepicker({ 
@@ -70,6 +74,39 @@
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card-body card-padding">
+                    <!--Aqui comienza la prueba de imagenes-->
+                    <div class="lightbox row">
+                        <div data-src="{{ miembro.foto_perfil.url }}" class="col-sm-2 col-xs-6">
+                            <div class="lightbox-item">
+                                <img src="{{ miembro.foto_perfil.url }}" alt="" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="content-profile" class="col-md-2 col-md-offset-5 col-xs-3 col-xs-offset-4">
+                        <img id="profile" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
+                        <div id="change">
+                            <input type="file" name="foto_perfil" id="id_foto_perfil" class="btn btn-block">
+                        </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                    <div class="col-md-4 col-md-offset-2 col-sm-2">
+                        <div class="input-group {{form.foto_perfil.css_classes}}">
+                            <!-- <span class="input-group-addon">
+                                <i class="zmdi zmdi-account"></i>
+                            </span> -->
+                            <div class="fg-line requerido">
+                                <!--<label for="id_foto_perfil" class="requerido control-label">Foto perfil:</label>-->
+                                {#{{form.foto_perfil}}#}
+                            </div>
+                            {% for error in form.foto_perfil.errors %}
+                            <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    </div>
+                    <!--Aqui termina la prueba de imagenes-->
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2 col-sm-2">
                         <div class="input-group {{form.nombre.css_classes}}">

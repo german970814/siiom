@@ -13,6 +13,7 @@ from datetime import date
 from academia.views import adminTest
 from academia.models import Curso
 import datetime
+import os
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
 
@@ -271,7 +272,7 @@ def liderTransaldarMiembro(request):
     if request.session.get('seleccionados') != None:
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
-            miembroEditar = Miembro.objects.get(id = request.session['seleccionados'].pop())
+            miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
             request.session['actual'] = int(miembroEditar.id)
             request.session['seleccionados'] = request.session['seleccionados']
             return render_to_response("Miembros/transladar_miembro.html", locals(), context_instance=RequestContext(request))
@@ -283,18 +284,29 @@ def liderTransaldarMiembro(request):
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def liderEditarPerfil(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
+    if miembro.foto_perfil:
+        rut_perfil = miembro.foto_perfil.path
+        print(rut_perfil)
     if request.method == 'POST':
         if 'contrasena' in request.POST:
             return HttpResponseRedirect("/miembro/cambiar_contrasena/")
         elif 'aceptar' in request.POST:
-            form = FormularioLiderAgregarMiembro(data=request.POST, instance=miembro)
+            form = FormularioLiderAgregarMiembro(data=request.POST, files=request.FILES, instance=miembro)
             if form.is_valid():
+                if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
+                    from django.conf import settings
+                    ruta = str(miembro.foto_perfil.file)
+                    r = settings.MEDIA_ROOT + "/media/profile_pictures/user_%s/" % miembro.id
+                    if os.path.exists(rut_perfil):
+                        print("si existe")
+                    print(ruta)
+                    if os.path.isfile(rut_perfil):
+                        print("Es archivo")
+                        os.remove(rut_perfil)
                 miembroEditado = form.save()
-                miembroEditado.usuario.username = miembroEditado.email
-                miembroEditado.usuario.save()
                 if miembroEditado.conyugue != None:
-                    conyugue = Miembro.objects.get(id = miembroEditado.conyugue.id)
+                    conyugue = Miembro.objects.get(id=miembroEditado.conyugue.id)
                     conyugue.conyugue = miembroEditado
                     conyugue.estadoCivil = 'C'
                     conyugue.save()

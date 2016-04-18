@@ -4,7 +4,7 @@ from django.contrib import admin
 from miembros.views import autenticarUsario, salir, administracion, recuperar_contrasena
 from views import resultadoBusqueda, depu, depu2, without_perms
 import os
-
+from django.conf import settings
 admin.autodiscover()
 RedirectView.permanent = True
 handler404 = 'views.custom_404'
@@ -26,11 +26,11 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += patterns('',
-    #--------------------------AMBOS------------------------
+    #  --------------------------AMBOS------------------------
     url(r'^academia/',  include("academia.urls")),
 )
 
-# urlpatterns += patterns('',
-#         url(r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__),
-#                                                                                                    '../Templates').replace('\\','/')}),
-# )
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        url(r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, }),
+    )

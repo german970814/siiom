@@ -1,0 +1,47 @@
+
+/*
+ * Estilos de las fotos, perfil y portada
+ * Hecho por: German Alzate
+ *
+ */
+
+#content-profile {
+	overflow: hidden;
+	border-radius: 50%;
+	background-color: #F2F2F0;;
+	height: 150px;
+	width: 150px;
+}
+
+#profile {
+	background-color:#F2F2F0;
+	border-radius:50%;
+	width:150px;
+	height:150px; 
+	/*background-image:url('{{miembro.foto_perfil.url}}'); */
+	border: 1px solid #A0A09C;
+	margin-left: -12%;
+}
+
+
+#change {
+
+}
+
+#content-profile:hover #change {
+	margin-top: -60px;
+	background-color: #F2F2F0;
+	opacity: .5;
+	z-index: 3;
+	position: relative;
+	height: 45%;
+	width: 120%;
+	margin-left: -12px;
+}
+
+#id_foto_perfil {
+	height: 100%;
+	width: 100%;
+	background: transparent;
+	/*opacity: 0;*/
+}
