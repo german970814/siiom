@@ -1,6 +1,30 @@
 {% extends "base.html" %}
 
 {% block js %}
+<script>
+    jQuery(document).ready(function($) {
+        $('#form').submit(function(event) {
+            {% if tipo == 'lider' %}
+            if ($('#id_detalleLlamadaLider').val() == '') {
+                swal("Alerta!!!", "Debes escoger un detalle de llamada");
+                return false;
+            }
+            {% else %}
+                {% if tipo == 'primera' %}
+                    if ($('#id_detallePrimeraLlamada').val() == '') {
+                        swal("Alerta!!!", "Debes escoger un detalle de llamada");
+                        return false;
+                    }
+                {% else %}
+                    if ($('#id_detalleSegundaLlamada').val() == '') {
+                        swal("Alerta!!!", "Debes escoger un detalle de llamada");
+                        return false;
+                    }
+                {% endif %}
+            {% endif %}
+        });
+    });
+</script>
 {% endblock %}
 
 {% block contenido %}
@@ -12,7 +36,7 @@
 			</h1>
 		</div>
 		<div class="card-body card-padding">
-			<form action="" method="POST" enctype="multipart/form-data">
+			<form action="" id="form" method="POST" enctype="multipart/form-data">
 			{% csrf_token %}
 			{% if tipo == 'primera' %}
 			<div class="row">
@@ -120,5 +144,4 @@
 </div>
 	
 	
-{% endblock %}  
-		{{ form.as_p }}	
+{% endblock %}

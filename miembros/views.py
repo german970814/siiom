@@ -171,7 +171,7 @@ def liderAgregarMiembro(request):
             ok = True
         else:
             isOk = True
-            messages.error(request, "Debes llenar todos los campos")
+            # messages.error(request, "Debes llenar todos los campos")
         isOk = False
     else:
         form = FormularioLiderAgregarMiembro()

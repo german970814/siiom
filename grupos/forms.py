@@ -112,6 +112,10 @@ class FormularioCrearGrupo(ModelForm):
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
+        def override_str(obj):
+            obj.__class__.__str__ = lambda x: x.nombre.upper() + ' ' + x.primerApellido.upper() + \
+                ' ' + '(' + x.cedula + ')'
+
         if red != '':
             lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
             grupos = Grupo.objects.all()
@@ -119,9 +123,11 @@ class FormularioCrearGrupo(ModelForm):
             for g in grupos:
                 lidGrupos.extend(g.listaLideres())
             if new:
+                print("agk")
                 query1 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
                 query2 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
             else:
+                print("Asdasd")
                 lider1 = self.instance.lider1.id
                 lidGrupos.remove(lider1)
                 query1 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
@@ -130,8 +136,28 @@ class FormularioCrearGrupo(ModelForm):
                     lider2 = self.instance.lider2.id
                     lidGrupos.remove(lider2)
                 query2 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+
+            for q in query1:
+                override_str(q)
+            for j in query2:
+                override_str(j)
+
             self.fields['lider1'].queryset = query1
             self.fields['lider2'].queryset = query2
+
+        else:
+            newquery1 = self.fields['lider1'].queryset
+            newquery2 = self.fields['lider2'].queryset
+
+            que = newquery1 | newquery2
+
+            for q in que:
+                override_str(q)
+            # for q in newquery2:
+            #     override_str(q)
+
+            self.fields['lider1'].queryset = newquery1.order_by('nombre')
+            self.fields['lider2'].queryset = newquery2.order_by('nombre')
 
     class Meta:
         model = Grupo

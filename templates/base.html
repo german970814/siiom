@@ -530,6 +530,19 @@
             
             notify(nFrom, nAlign, nIcons, nType, nAnimIn, nAnimOut);
         });
+
+        {% if sw %}
+            
+            $(window).resize(function(){
+                    drawChart();
+                });
+
+            $('#tw-switch').on('change', function() {
+                setTimeout("drawChart()", 500);
+            });
+
+        {% endif %}
+
     </script>
 
     {% block js %}
