@@ -427,6 +427,18 @@
         </section>
     </section>
 
+    <footer id="footer">
+        &copy; SIIOM Hecho por "Ingeniarte Soft."
+        
+        <!-- <ul class="f-menu">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Support</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul> -->
+    </footer>
+
     <!-- end -->
 
     <div class="page-loader">
@@ -477,11 +489,11 @@
     <script src="{% static 'Template/jquery/js/charts.js' %}"></script>
     <script src="{% static 'Template/jquery/js/functions.js' %}"></script>
     <script>
-        function notify(from, align, icon, type, animIn, animOut){
+        function notify(ms, from, align, icon, type, animIn, animOut){
             $.growl({
                 icon: icon,
-                title: ' Bootstrap Growl ',
-                message: 'Turning standard Bootstrap alerts into awesome notifications',
+                title: ' Notificación ',
+                message: ms,
                 url: ''
             },{
                     element: 'body',

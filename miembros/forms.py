@@ -33,61 +33,15 @@ class FormularioLiderAgregarMiembro(ModelForm):
         self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['barrio'].widget.attrs.update({'class': 'form-control'})
-        self.fields['genero'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'form-control'})
+        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
         # self.fields['estado'].widget.attrs.update({'class':'form-control'})
             # if c:
             #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
             # else:
             #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
-
-    def clean_foto_perfil(self):
-        foto = self.cleaned_data['foto_perfil']
-
-        if foto is None:
-            foto = 'static/Imagenes/log.jpg'
-
-        try:
-            from django.core.files.images import get_image_dimensions
-
-            w, h = get_image_dimensions(foto)
-
-            max_width = max_height = 800
-
-            if w > max_width or h > max_height:
-                self.add_error('foto_perfil', 'Tamaño maximo aceptado de %sx%s y has puesto una de \
-                    %sx%s' % (max_width, max_height, w, h))
-
-            main, sub = foto.content_type.split('/')
-            if not(main == 'image' and sub in ['jpeg', 'pjpeg', 'gif', 'png']):
-                self.add_error('foto_perfil', 'Error con el tipo de imagen')
-
-            if len(foto) > (20 * 1024):
-                print("Error exceso de tamaño")
-
-        except AttributeError:
-            print("Ocurrio un error_____________________________________**")
-            pass
-
-        return foto
-
-    def clean(self):
-        return super(FormularioLiderAgregarMiembro, self).clean()
-
-    def save(self, commit=True):
-        # from django.core.files.base import ContentFile
-        # print(self.cleaned_data['foto_perfil'])
-        # f = ContentFile(self.cleaned_data['foto_perfil'])
-        # if self.instance:
-        #     if self.instance.foto_perfil != '' and self.cleaned_data['foto_perfil'] != '':
-        #         print("Foto nueva")
-        #         nueva = self.cleaned_data['foto_perfil']
-        #         self.instance.foto_perfil.delete(save=True)
-        #         self.instance.foto_perfil.save('media/profile_pictures/user_%s/' % self.instance.id, content=f, save=True)
-        return super(FormularioLiderAgregarMiembro, self).save(commit)
 
     class Meta:
         model = Miembro
@@ -96,7 +50,7 @@ class FormularioLiderAgregarMiembro(ModelForm):
                    'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
                    'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
                    'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
-                   'noInteresadoGAR', 'convertido', 'estado', 'conyugue')
+                   'noInteresadoGAR', 'convertido', 'estado', 'conyugue', 'foto_perfil')
 
 
 class FormularioAdminAgregarMiembro(ModelForm):
@@ -126,20 +80,19 @@ class FormularioAdminAgregarMiembro(ModelForm):
         self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'form-control'})
         self.fields['genero'].widget.attrs.update({'class': 'form-control'})
         self.fields['estadoCivil'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estado'].widget.attrs.update({'class': 'form-control'})
+        # self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['conyugue'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
     class Meta:
         model = Miembro
-        exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',\
-                   'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',\
-                   'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada', \
-                   'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',)
+        exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
+                   'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
+                   'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
+                   'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada', 'estado')
 
 
 class FormularioLlamadaLider(ModelForm):
@@ -406,3 +359,80 @@ class FormularioRecuperarContrasenia(forms.Form):
     def __init__(self, *args, **kwargs):
         super(FormularioRecuperarContrasenia, self).__init__(*args, **kwargs)
         self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'ejemplo@iglesia.com'})
+
+
+class FormularioFotoPerfil(forms.ModelForm):
+    error_css_class = 'has-error'
+
+    def __init__(self, *args, **kwargs):
+        return super(FormularioFotoPerfil, self).__init__(*args, **kwargs)
+
+    def clean_foto_perfil(self):
+        foto = self.cleaned_data['foto_perfil']
+
+        if foto is None:
+            foto = 'static/Imagenes/log.jpg'
+
+        try:
+            from django.core.files.images import get_image_dimensions
+
+            w, h = get_image_dimensions(foto)
+
+            max_width = max_height = 2000
+
+            if w > max_width or h > max_height:
+                self.add_error('foto_perfil', 'Tamaño maximo aceptado de %sx%s y has puesto una de \
+                    %sx%s' % (max_width, max_height, w, h))
+
+            # main, sub = foto.content_type.split('/')
+            # if not(main == 'image' and sub in ['jpeg', 'pjpeg', 'gif', 'png']):
+            #     self.add_error('foto_perfil', 'Error con el tipo de imagen')
+
+            # if len(foto) > (20 * 1024):
+            #     print("Error exceso de tamaño")
+
+        except AttributeError as e:
+            print(e)
+            pass
+
+        return foto
+
+    def clean(self):
+        return super(FormularioFotoPerfil, self).clean()
+
+    def save(self, commit=True):
+        from PIL import Image
+        from io import BytesIO
+
+        image_field = self.cleaned_data.get('foto_perfil')
+        image_file = BytesIO(image_field.read())
+        image = Image.open(image_file)
+        w, h = image.size
+
+        if w > 1000 or h > 1000:
+            image = image.resize((1000, 1000), Image.ANTIALIAS)
+        if w < 400 or h < 400:
+            image = image.resize((400, 400), Image.ANTIALIAS)
+
+        image_file = BytesIO()
+        image.save(image_file, 'JPEG', quality=90)
+
+        image_field.file = image_file
+
+        return super(FormularioFotoPerfil, self).save(commit=commit)
+
+    class Meta:
+        model = Miembro
+        fields = ('foto_perfil', )
+
+
+class FormularioInformacionIglesiaMiembro(forms.ModelForm):
+    error_css_class = 'has-error'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioInformacionIglesiaMiembro, self).__init__(*args, **kwargs)
+        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+
+    class Meta:
+        model = Miembro
+        fields = ('estado', 'convertido', 'asisteGAR', 'asignadoGAR')

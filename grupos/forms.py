@@ -17,14 +17,13 @@ class FormularioEditarGrupo(ModelForm):
 
     class Meta:
         model = Grupo
-        fields = ('direccion', \
-                  'diaGAR', 'horaGAR')
+        fields = ('direccion', 'diaGAR', 'horaGAR')
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarGrupo, self).__init__(*args, **kwargs)
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00:00'})
+        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00'})
 
 
 class FormularioReportarReunionGrupo(ModelForm):
@@ -204,3 +203,16 @@ class FormularioCrearPredica(ModelForm):
     class Meta:
         model = Predica
         exclude = ('miembro',)
+
+
+class FormularioEditarDiscipulado(ModelForm):
+    error_css_class = 'has-error'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarDiscipulado, self).__init__(*args, **kwargs)
+        self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00'})
+        self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
+
+    class Meta:
+        model = Grupo
+        fields = ('diaDiscipulado', 'horaDiscipulado')

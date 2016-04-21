@@ -1,12 +1,9 @@
 # Create your views here.
-from calendar import weekday
 import datetime
-from xml import dom
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-import sys
 from grupos.forms import FormularioEditarGrupo,\
     FormularioReportarReunionGrupo, FormularioReportarReunionDiscipulado,\
     FormularioCrearRed, FormularioCrearGrupo
@@ -23,26 +20,31 @@ from grupos.models import Predica
 
 
 def receptorTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Receptor') in user.groups.all()
 
+
 def liderTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Lider') in user.groups.all()
 
+
 def adminTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Administrador') in user.groups.all()
 
+
 def verGrupoTest(user):
-    return  user.is_authenticated()\
+    return user.is_authenticated()\
     and (Group.objects.get(name__iexact='Lider') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
+
 def receptorAdminTest(user):
-    return  user.is_authenticated()\
+    return user.is_authenticated()\
     and (Group.objects.get(name__iexact='Receptor') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
+
 
 def PastorAdminTest(user):
     return user.is_authenticated()\
@@ -73,35 +75,61 @@ def grupoRaiz(request):
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def editarHorarioReunionGrupo(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+def editarHorarioReunionGrupo(request, pk=None):
+    g = True
+    miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+    # grupo.miembro_set.all()
+    if pk:
+        try:
+            miembro = Miembro.objects.get(id=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
     grupo = miembro.grupoLidera()
-    # if grupo is None:
-    #     raise Http404
+    if mismo:
+        puede_editar = True
+    if grupo is None:
+        puede_editar = False
+        grupo = miembro.grupo
+        no_lider = True
+
+    miembros = grupo.miembrosGrupo()
+    lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
 
     if request.method == 'POST':
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)
         if form.is_valid():
             form.save()
             ok = True
-            # return HttpResponseRedirect('/miembro/')
+            ms = "El Grupo %s Fue Editado Correctamente" % grupo.nombre.upper()
+            if mismo:
+                ms = "Has Editado Tú Grupo Correctamente"
+        else:
+            ms = "Ocurrió un Error, Por Favor Verifica El Formulario"
     else:
-        form = FormularioEditarGrupo(instance=grupo)    
+        form = FormularioEditarGrupo(instance=grupo)
+
     return render_to_response('Grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
 
-def reunionReportada(fecha, grupo, tipo):
-    ini_semana = fecha-datetime.timedelta(days = fecha.isoweekday()-1)
-    fin_semana = fecha+datetime.timedelta(days = 7-fecha.isoweekday())
 
-    if tipo==1: #GAR
-        reunion = grupo.reuniongar_set.filter(fecha__gte = ini_semana, fecha__lt = fin_semana)
-    else: #DISCIPULADO
-        reunion = grupo.reuniondiscipulado_set.filter(fecha__gte = ini_semana, fecha__lt = fin_semana)
+def reunionReportada(fecha, grupo, tipo):
+    ini_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
+    fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
+
+    if tipo == 1:  # GAR
+        reunion = grupo.reuniongar_set.filter(fecha__gte=ini_semana, fecha__lt=fin_semana)
+    else:  # DISCIPULADO
+        reunion = grupo.reuniondiscipulado_set.filter(fecha__gte=ini_semana, fecha__lt=fin_semana)
 
     if reunion:
         return True
     else:
         return False
+
 
 def reunionDiscipuladoReportada(predica, grupo):
     reunion = grupo.reuniondiscipulado_set.filter(predica=predica)
@@ -111,9 +139,10 @@ def reunionDiscipuladoReportada(predica, grupo):
     else:
         return False
 
+
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionGrupo(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
     if grupo:
         discipulos = miembro.discipulos()
@@ -136,12 +165,13 @@ def reportarReunionGrupo(request):
                 else:
                     ya_reportada = True
         else:
-            form = FormularioReportarReunionGrupo()    
+            form = FormularioReportarReunionGrupo()
     return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
+
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def reportarReunionGrupoAdmin(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
@@ -183,27 +213,28 @@ def reportarReunionDiscipulado(request):
             form = FormularioReportarReunionDiscipulado(miembro=miembro)
     return render_to_response('Grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(receptorAdminTest, login_url="/dont_have_permissions/")
 def registrarPagoGrupo(request, id):
-    
-    miembro = Miembro.objects.get(usuario = request.user) 
+
+    miembro = Miembro.objects.get(usuario=request.user)
     try:
-        miembroRegistrar = Miembro.objects.get(id = int(id)) 
+        miembroRegistrar = Miembro.objects.get(id=int(id))
     except:
         raise Http404
-    
+
     if request.method == "POST":
         seleccionados = request.POST.getlist('seleccionados')
         for seleccionado in seleccionados:
             try:
-                reunion = ReunionGAR.objects.get(id= seleccionado)
+                reunion = ReunionGAR.objects.get(id=seleccionado)
             except ValueError:
                 continue
             reunion.confirmacionEntregaOfrenda = True
             reunion.save()
             success = True
             mensaje = "Pago registrado exitosamente"
-    
+
     grupoLidera = miembroRegistrar.grupoLidera()
     sw = True
     if grupoLidera is None:
@@ -212,20 +243,21 @@ def registrarPagoGrupo(request, id):
     ofrendasPendientesGar = ReunionGAR.objects.filter(grupo = grupoLidera, confirmacionEntregaOfrenda = False)
     return render_to_response("Grupos/registrar_pago_gar.html", locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(receptorAdminTest, login_url="/dont_have_permissions/")
 def registrarPagoDiscipulado(request, id):
-    
-    miembro = Miembro.objects.get(usuario = request.user) 
+
+    miembro = Miembro.objects.get(usuario=request.user)
     try:
-        miembroRegistrar = Miembro.objects.get(id = int(id)) 
+        miembroRegistrar = Miembro.objects.get(id=int(id))
     except:
         raise Http404
-    
+
     if request.method == "POST":
         seleccionados = request.POST.getlist('seleccionados')
         for seleccionado in seleccionados:
             try:
-                reunion = ReunionDiscipulado.objects.get(id= seleccionado)
+                reunion = ReunionDiscipulado.objects.get(id=seleccionado)
             except ValueError:
                 continue
             reunion.confirmacionEntregaOfrenda = True
@@ -233,7 +265,7 @@ def registrarPagoDiscipulado(request, id):
             success = True
             mensaje = "Pago registrado exitosamente"
         # return HttpResponseRedirect('/miembro/perfil/'+str(miembro.id))
-            
+
     grupoLidera = miembroRegistrar.grupoLidera()
     sw = True
     if grupoLidera is None:
@@ -242,22 +274,24 @@ def registrarPagoDiscipulado(request, id):
     ofrendasPendientesDiscipulado = ReunionDiscipulado.objects.filter(grupo = grupoLidera, confirmacionEntregaOfrenda=False)
     return render_to_response("Grupos/registrar_pago_discipulado.html", locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarRedes(request):
-    miembro = Miembro.objects.get(usuario = request.user)    
+    miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
 
         if 'eliminar' in request.POST:
-            okElim = eliminar(request,Red, request.POST.getlist('seleccionados'))
+            okElim = eliminar(request, Red, request.POST.getlist('seleccionados'))
             if okElim == 1:
                 return HttpResponseRedirect('')
     redes = list(Red.objects.all())
 
     return render_to_response('Grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearRed(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
     if request.method == "POST":
         form = FormularioCrearRed(data=request.POST)
@@ -267,6 +301,7 @@ def crearRed(request):
     else:
         form = FormularioCrearRed()
     return render_to_response('Grupos/crear_red.html', locals(), context_instance=RequestContext(request))
+
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarRed(request, pk):
@@ -344,11 +379,11 @@ def editarPredica(request, pk):
 
     return render_to_response("Grupos/crear_predica.html",locals(),context_instance=RequestContext(request))
 
-    
-def eliminar(request,modelo, lista):
-    ok = 0 #No hay nada en la lista
+
+def eliminar(request, modelo, lista):
+    ok = 0  # No hay nada en la lista
     if lista:
-        ok = 1 #Los borro todos
+        ok = 1  # Los borro todos
         for m in lista:
             try:
                 modelo.objects.get(id=m).delete()
@@ -356,11 +391,12 @@ def eliminar(request,modelo, lista):
                 print(e)
                 pass
             except:
-                ok = 2 #Hubo un error
+                ok = 2  # Hubo un error
     if ok == 1:
         messages.success(request, "Se ha eliminado correctamente")
     return ok
-    
+
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def gruposDeRed(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
@@ -375,8 +411,8 @@ def gruposDeRed(request, id):
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             request.session['red'] = red
             return HttpResponseRedirect('/grupo/editar_grupo/')
-        if  'eliminar' in request.POST:
-            okElim = eliminar(request,Grupo, request.POST.getlist('seleccionados'))
+        if 'eliminar' in request.POST:
+            okElim = eliminar(request, Grupo, request.POST.getlist('seleccionados'))
             if okElim == 1:
                 return HttpResponseRedirect('')
 
@@ -384,25 +420,27 @@ def gruposDeRed(request, id):
 
     return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
 
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearGrupo(request, id):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
     try:
-        red = Red.objects.get(id = id)
+        red = Red.objects.get(id=id)
     except:
         raise Http404
     if request.method == "POST":
-        form = FormularioCrearGrupo(data=request.POST, red = id)
+        form = FormularioCrearGrupo(data=request.POST, red=id)
         if form.is_valid():
-            form = FormularioCrearGrupo(data=request.POST, red = id)
+            form = FormularioCrearGrupo(data=request.POST, red=id)
             nuevoGrupo = form.save(commit=False)
             nuevoGrupo.red = red
             nuevoGrupo.save()
             ok = True
     else:
-        form = FormularioCrearGrupo(red = id)
+        form = FormularioCrearGrupo(red=id)
     return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
+
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarGrupo(request, pk):
@@ -506,7 +544,8 @@ def sendMail(camposMail):
     subject = camposMail[0]
     mensaje = camposMail[1]
     receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently = False)
+    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
+
 
 #def ConsultarSobresSinEnviar(request):
 #    ConsultarReportesSinEnviar(request, True)
