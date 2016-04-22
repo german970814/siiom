@@ -6,7 +6,7 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from miembros.forms import *
 from grupos.models import Grupo
 from grupos.forms import FormularioEditarDiscipulado
@@ -1371,6 +1371,7 @@ def recuperar_contrasena(request):
     return render_to_response("Miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
+@login_required
 def ver_discipulos(request, pk=None):
     d = True
     miembro = Miembro.objects.get(usuario=request.user)
@@ -1415,6 +1416,7 @@ def ver_discipulos(request, pk=None):
     return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
 
 
+@login_required
 def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
@@ -1454,6 +1456,7 @@ def ver_informacion_miembro(request, pk=None):
     return render_to_response("Miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 
 
+@login_required
 def eliminar_foto_perfil(request, pk):
     from django.conf import settings
     miembro = Miembro.objects.get(usuario=request.user)
@@ -1482,6 +1485,4 @@ def eliminar_foto_perfil(request, pk):
                         print("Es archivo")
                         os.remove(rut_perfil)
                     miembro.foto_perfil.delete(save=True)
-                ok = True
-                ms = "Foto eliminada Correctamente"
     return HttpResponse(settings.STATIC_URL + 'Imagenes/profile-none.jpg')
