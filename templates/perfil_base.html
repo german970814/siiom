@@ -116,6 +116,28 @@
                 })
             }
         });
+
+        $('#delete-photo').click(function(event) {
+            var csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            $.ajax({
+                url: '/miembro/eliminar_foto_perfil/{{miembro.id}}',
+                type: 'POST',
+                data: {'delete_file': '', 'csrfmiddlewaretoken': csrf},
+                success: function(data){
+                    $('#photo-p').attr('src', function() {
+                        return data;
+                    })
+                    var nFrom = $(this).attr('data-from');
+                    var nAlign = $(this).attr('data-align');
+                    var nIcons = $(this).attr('data-icon');
+                    var nType = $(this).attr('data-type');
+                    var nAnimIn = $(this).attr('data-animation-in');
+                    var nAnimOut = $(this).attr('data-animation-out');
+                    
+                    notify('Foto Eliminada con Exito', nFrom, nAlign, nIcons, 'warning', 'animated bounceIn', nAnimOut);
+                }
+            })
+        });
     });
 </script>
 {% block js2 %}
@@ -164,7 +186,7 @@
                     <div class="pmo-pic">
                         <div class="p-relative">
                             {% if mismo %}
-                            <input type="file" name="foto_perfil" id="id_foto_perfil" class="btn btn-block">
+                            <input type="file" name="foto_perfil" id="id_foto_perfil">
                             {% endif %}
                             <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt=""> 
                             
@@ -186,7 +208,7 @@
                             </a>
                             {% else %}
                                 {% if perms.miembro.es_administrador %}
-                                <a href="" class="pmop-edit">
+                                <a href="#" class="pmop-edit" id="delete-photo">
                                     <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar foto de perfil</span>
                                 </a>
                                 {% endif %}

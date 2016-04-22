@@ -113,7 +113,7 @@
                         <ul class="dropdown-menu dm-icon pull-right">
                         {% if request.user.is_authenticated %}
                             <li class="hidden-xs">
-                                <a  href="/miembro/editar_perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
+                                <a  href="/miembro/perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
                             <li>
                                 <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
@@ -163,13 +163,10 @@
                 {% if request.user.is_authenticated %}
                 <ul class="main-menu">
                     <li>
-                        <a href="/miembro/perfil/{{id_miembro}}"><i class="zmdi zmdi-account"></i> Perfil</a>
+                        <a href="/miembro/perfil/"><i class="zmdi zmdi-account"></i> Perfil</a>
                     </li>
                     <li>
                         <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
-                    </li>
-                    <li>
-                        <a href="/miembro/editar_perfil/"><i class="zmdi zmdi-settings"></i> Configuración</a>
                     </li>
                     <li>
                         <a href="/salir/"><i class="zmdi zmdi-time-restore"></i> Salir</a>
@@ -541,6 +538,32 @@
             var nAnimOut = $(this).attr('data-animation-out');
             
             notify(nFrom, nAlign, nIcons, nType, nAnimIn, nAnimOut);
+        });
+
+        $(document).ready(function() {
+            var local = localStorage.getItem('check');
+
+            if (local == 0) {
+                if ($('body').hasClass('sw-toggled')) {
+                    $('body').removeClass('sw-toggled');
+                    $('#tw-switch').prop('checked', false);
+                }
+            }
+
+            $('body').on('change', '#toggle-width input:checkbox', function () {
+                if ($("#tw-switch").is(':checked')) {
+                    setTimeout(function () {
+                        $('body').addClass('toggled sw-toggled');
+                        localStorage.setItem('check', 1);
+                    }, 250);
+                }
+                else {
+                    setTimeout(function () {
+                        $('body').removeClass('toggled sw-toggled');
+                        localStorage.setItem('check', 0);
+                    }, 250);
+                }
+            });
         });
     </script>
 

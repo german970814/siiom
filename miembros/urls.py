@@ -1,4 +1,5 @@
 from django.conf.urls import include, patterns, url
+from django.views.generic import RedirectView
 from .views import *
 from grupos.views import editarHorarioReunionGrupo, reportarReunionGrupo, reportarReunionGrupoAdmin, reportarReunionDiscipulado, registrarPagoGrupo,registrarPagoDiscipulado
 
@@ -10,6 +11,7 @@ urlpatterns = [
     url(r'^editar_miembro/(\d+)/$', editarMiembro, name="editar_miembro"),
     url(r'^transladar_miembros/$', liderTransaldarMiembro, name="transladar_miembros"),  # No se usa actualmente
     # url(r'^editar_perfil/$', liderEditarPerfil, name="editar_perfil"),
+    url(r'^editar_perfil/$', RedirectView.as_view(url='/miembro/perfil/')),
     url(r'^perfil/(?P<pk>\d*)$', liderEditarPerfil, name="editar_perfil"),
     url(r'^cambiar_contrasena/$', cambiarContrasena, name="cambiar_contrasena"),
     url(r'^llamadas_pendientes/lider/$', liderLlamadasPendientesVisitantesGrupo, name="llamadas_pendientes_lider"),
@@ -18,6 +20,7 @@ urlpatterns = [
     url(r'^registrar_llamada/agente/$', llamarVisitas, name="registrar_llamada_agente"),
     url(r'^promover_visitantes/$', liderPromoverVisitantesGrupo, name="promover_visitantes"),
     url(r'^grupo/(?P<pk>\d*)$', editarHorarioReunionGrupo, name="editar_grupo"),
+    url(r'^editar_grupo/$', RedirectView.as_view(url="/miembro/grupo/")),
     url(r'^reportar_reunion_grupo/$', reportarReunionGrupo, name="reportar_reunion_grupo"),
     url(r'^reportar_reunion_grupo_admin/$', reportarReunionGrupoAdmin, name="reportar_reunion_grupo_admin"),
     # url(r'^perfil/(\d+)/$',  perfilMiembro, name="perfil"),
@@ -51,4 +54,5 @@ urlpatterns = [
     url(r'^cumplimiento_pasos/$', cumplimientoPasos, name="cumplimiento_pasos"),
     url(r'^discipulos/(?P<pk>\d*)$', ver_discipulos, name="ver_discipulos"),
     url(r'^informacion_iglesia/(?P<pk>\d*)$', ver_informacion_miembro, name="ver_informacion"),
+    url(r'^eliminar_foto_perfil/(?P<pk>\d*)$', eliminar_foto_perfil, name="eliminar_foto"),
 ]

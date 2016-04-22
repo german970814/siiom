@@ -75,3 +75,11 @@
 	height: inherit;
 	margin-top: -6px;
 }
+
+@media (max-width: 768px){
+
+	.pmo-stat{
+		background-color: rgba(0,0,0,0) !important;
+	}
+	
+}

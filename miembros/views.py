@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 from django.contrib import auth, messages
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
 from django.contrib.auth.decorators import user_passes_test
 from miembros.forms import *
@@ -1452,3 +1452,36 @@ def ver_informacion_miembro(request, pk=None):
     pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
 
     return render_to_response("Miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
+
+
+def eliminar_foto_perfil(request, pk):
+    from django.conf import settings
+    miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+
+    if pk:
+        try:
+            miembro = Miembro.objects.get(pk=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
+    foto = False
+    if miembro.foto_perfil:
+        rut_perfil = miembro.foto_perfil.path
+        foto = True
+    if request.method == 'POST':
+        if 'delete_file' in request.POST:
+            if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
+                if foto:
+                    if os.path.exists(rut_perfil):
+                        print("si existe")
+                    if os.path.isfile(rut_perfil):
+                        print("Es archivo")
+                        os.remove(rut_perfil)
+                    miembro.foto_perfil.delete(save=True)
+                ok = True
+                ms = "Foto eliminada Correctamente"
+    return HttpResponse(settings.STATIC_URL + 'Imagenes/profile-none.jpg')
