@@ -113,7 +113,7 @@
                         <ul class="dropdown-menu dm-icon pull-right">
                         {% if request.user.is_authenticated %}
                             <li class="hidden-xs">
-                                <a  href="/miembro/editar_perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
+                                <a  href="/miembro/perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
                             <li>
                                 <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
@@ -149,7 +149,7 @@
             <div class="profile-menu">
                 <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{dominioIglesia}}.png') !important;">
                     <div class="profile-pic">
-                        <img src="{% get_static_prefix %}Imagenes/{{dominioIglesia}}.jpg" alt="">
+                        <img src="{% if mi.foto_perfil %}{{ mi.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                     </div>
                     <div class="profile-info">
                     {% if request.user.is_authenticated %}
@@ -163,13 +163,10 @@
                 {% if request.user.is_authenticated %}
                 <ul class="main-menu">
                     <li>
-                        <a href="/miembro/perfil/{{id_miembro}}"><i class="zmdi zmdi-account"></i> Perfil</a>
+                        <a href="/miembro/perfil/"><i class="zmdi zmdi-account"></i> Perfil</a>
                     </li>
                     <li>
                         <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
-                    </li>
-                    <li>
-                        <a href="/miembro/editar_perfil/"><i class="zmdi zmdi-settings"></i> Configuración</a>
                     </li>
                     <li>
                         <a href="/salir/"><i class="zmdi zmdi-time-restore"></i> Salir</a>
@@ -427,6 +424,18 @@
         </section>
     </section>
 
+    <footer id="footer">
+        &copy; SIIOM Hecho por "Ingeniarte Soft."
+        
+        <!-- <ul class="f-menu">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Support</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul> -->
+    </footer>
+
     <!-- end -->
 
     <div class="page-loader">
@@ -477,11 +486,11 @@
     <script src="{% static 'Template/jquery/js/charts.js' %}"></script>
     <script src="{% static 'Template/jquery/js/functions.js' %}"></script>
     <script>
-        function notify(from, align, icon, type, animIn, animOut){
+        function notify(ms, from, align, icon, type, animIn, animOut){
             $.growl({
                 icon: icon,
-                title: ' Bootstrap Growl ',
-                message: 'Turning standard Bootstrap alerts into awesome notifications',
+                title: ' Notificación ',
+                message: ms,
                 url: ''
             },{
                     element: 'body',
@@ -543,6 +552,31 @@
 
         {% endif %}
 
+        $(document).ready(function() {
+            var local = localStorage.getItem('check');
+
+            if (local == 0) {
+                if ($('body').hasClass('sw-toggled')) {
+                    $('body').removeClass('sw-toggled');
+                    $('#tw-switch').prop('checked', false);
+                }
+            }
+
+            $('body').on('change', '#toggle-width input:checkbox', function () {
+                if ($("#tw-switch").is(':checked')) {
+                    setTimeout(function () {
+                        $('body').addClass('toggled sw-toggled');
+                        localStorage.setItem('check', 1);
+                    }, 250);
+                }
+                else {
+                    setTimeout(function () {
+                        $('body').removeClass('toggled sw-toggled');
+                        localStorage.setItem('check', 0);
+                    }, 250);
+                }
+            });
+        });
     </script>
 
     {% block js %}

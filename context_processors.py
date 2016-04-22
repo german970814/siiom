@@ -17,5 +17,6 @@ def site(request):
 	if request.user.is_authenticated():
 		miembro = Miembro.objects.get(usuario=request.user)
 		data['id_miembro'] = miembro.id
+		data['mi'] = miembro
 
 	return data

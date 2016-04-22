@@ -1,0 +1,238 @@
+{% extends "perfil_base.html" %}
+
+{% block card %}
+<div class="pmb-block">
+    <div class="pmbb-header">
+        <h2><i class="zmdi zmdi-chart m-r-5"></i> Infomación Géneral</h2>
+        
+        {% if perms.miembro.es_administrador %}
+        <ul class="actions">
+            <li class="dropdown">
+                <a href="" data-toggle="dropdown">
+                    <i class="zmdi zmdi-more-vert"></i>
+                </a>
+                
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li>
+                        <a data-pmb-action="edit" href="" class="edit-error">Editar</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+    <div class="pmbb-body p-l-30">
+        <div class="pmbb-view">
+            <dl class="dl-horizontal">
+                <dt>Estado del Miembro</dt>
+                <dd>{{miembro.get_estado_display}}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Convertido</dt>
+                <dd>{% if miembro.convertido %}Si{% else %}No{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Grupo que Lidera</dt>
+                <dd>{% if miembro.grupoLidera %}{{miembro.grupoLidera.nombre|upper}}{% else %}Ninguno{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Grupo al que pertenece</dt>
+                <dd>{% if miembro.grupo %}{{miembro.grupo.nombre|upper}}{% else %}No Pertenece a Ningún Grupo{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Lideres</dt>
+                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}<a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, <a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}No Tiene Lideres{% endif %}</dd>
+            </dl>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data" id="form_informacion">
+        {% csrf_token %}
+        <div class="pmbb-edit">
+            <div class="input-group {{form.estado.css_classes}} col-xs-12">
+            <dl class="dl-horizontal">
+                <dt class="p-t-10">
+                	<label for="id_estado" class="requerido control-label">Estado del Miembro*:</label>
+                </dt>
+                <dd>
+                    <div class="fg-line">
+                        {{form.estado}}
+                    </div>
+                    {% for error in form.estado.errors %}
+                    <small class="help-block">{{error}}</small>
+                    {% endfor %}
+                </dd>
+            </dl>
+            </div>
+            <div class="input-group {{form.convertido.css_classes}} col-xs-12">
+            <dl class="dl-horizontal">
+                <dt class="p-t-10">
+                	<label for="id_convertido" class="requerido control-label">Convertido:</label>
+                </dt>
+                <dd>
+                    <div class="fg-line">
+                    	<label for="id_convertido" class="control-label checkbox">
+                        {{form.convertido}}
+                        <i class="input-helper m-r-20"></i>
+                        </label>
+                    </div>
+                    {% for error in form.convertido.errors %}
+                    <small class="help-block">{{error}}</small>
+                    {% endfor %}
+                </dd>
+            </dl>
+            </div>
+            <div class="m-t-30">
+                <button type="submit" name="aceptar" class="btn btn-primary btn-sm">Guardar</button>
+                <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pmb-block">
+    <div class="pmbb-header">
+        <h2><i class="zmdi zmdi-assignment-account m-r-5"></i> Infomación de Consolidación de G.A.R</h2>
+    </div>
+    <div class="pmbb-body p-l-30">
+        <div class="pmbb-view">
+            <dl class="dl-horizontal">
+                <dt>Fecha Asignacion G.A.R</dt>
+                <dd>{% if miembro.fechaAsignacionGAR %}{{miembro.fechaAsignacionGAR}}{% else %}No ha sido Asignado a G.A.R aún{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Asistencia a G.A.R</dt>
+                <dd>{% if miembro.asisteGAR %}El Miembro Asiste a G.A.R{% else %}{% if miembro.noInteresadoGAR %}El Miembro no está interesado en G.A.R{% else %}No se Tienen Datos{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Primera Llamada</dt>
+                <dd>{% if miembro.fechaPrimeraLlamada %}{{miembro.fechaPrimeraLlamada}}{% else %}No se ha realizado la Primera Llamada{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Detalle Primera Llamada</dt>
+                <dd>{% if not miembro.fechaPrimeraLlamada %}SIN DATOS{% else %}{% if miembro.detallePrimeraLlamada %}{{miembro.detallePrimeraLlamada}}{% else %}No hay detalles de esta llamada{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Observacion Primera Llamada</dt>
+                <dd>{% if not miembro.fechaPrimeraLlamada %}SIN DATOS{% else %}{% if miembro.observacionPrimeraLlamada %}{{miembro.observacionPrimeraLlamada}}{% else %}No hay observaciones de esta llamada{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Segunda Llamada</dt>
+                <dd>{% if miembro.fechaSegundaLlamada %}{{miembro.fechaSegundaLlamada}}{% else %}No se ha realizado la Segunda Llamada{% endif%}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Detalle Segunda Llamada</dt>
+                <dd>{% if not miembro.fechaSegundaLlamada %}SIN DATOS{% else %}{% if miembro.detalleSegundaLlamada %}{{miembro.detalleSegundaLlamada}}{% else %}No hay detalles de esta llamada{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Observacion Segunda Llamada</dt>
+                <dd>{% if not miembro.fechaSegundaLlamada %}SIN DATOS{% else %}{% if miembro.observacionSegundaLlamada %}{{miembro.observacionSegundaLlamada}}{% else %}No hay observaciones de esta llamada{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Llamada Líder</dt>
+                <dd>{% if miembro.fechaLlamadaLider %}{{miembro.fechaLlamadaLider}}{% else %}No se ha realizado la Llamada de Líder{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Detalle Llamada Líder</dt>
+                <dd>{% if not miembro.fechaLlamadaLider %}SIN DATOS{% else %}{% if miembro.detalleLlamadaLider %}{{miembro.detalleLlamadaLider}}{% else %}No hay detalles de la Llamada del Líder{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Observacion Llamada Líder</dt>
+                <dd>{% if not miembro.fechaLlamadaLider %}SIN DATOS{% else %}{% if miembro.observacionLlamadaLider %}{{miembro.observacionLlamadaLider}}{% else %}No hay observaciones de la Llamada del Líder{% endif %}{% endif %}</dd>
+            </dl>
+        </div>
+        <div class="pmbb-edit">
+            <div class="m-t-30">
+                <button type="submit" name="aceptar" class="btn btn-primary btn-sm">Guardar</button>
+                <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="pmb-block">
+    <div class="pmbb-header">
+        <h2><i class="zmdi zmdi-graduation-cap m-r-5"></i> Logros</h2>
+        
+        {% if perms.miembro.es_administrador %}
+        <ul class="actions">
+            <li class="dropdown">
+                <a href="" data-toggle="dropdown">
+                    <i class="zmdi zmdi-more-vert"></i>
+                </a>
+                
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li>
+                        <a data-pmb-action="edit" href="" class="edit-error">Editar</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+    <div class="pmbb-body p-l-30">
+        <div class="pmbb-view">
+            <dl class="dl-horizontal">
+                <dt>Pasos que ha completado</dt>
+                <dd>{% for paso in pasos %}{% if forloop.first %}{{paso.paso}}{% else %}, {{paso.paso}}{% endif %}{% empty %}Ningún Paso Aún{% endfor %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Asistencia a G.A.R</dt>
+                <dd>{% if miembro.asisteGAR %}El Miembro Asiste a G.A.R{% else %}{% if miembro.noInteresadoGAR %}El Miembro no está interesado en G.A.R{% else %}SIN DATOS{% endif %}{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Escalafon</dt>
+                <dd>{% if escalafon %}{{escalafon}}{% else %}SIN DATOS{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Tipo de Miembro</dt>
+                {% for cambio in tipos %}
+                <dd>{{cambio.nuevoTipo|upper}}  {% if perms.miembro.es_administrador %}<a href="/miembro/eliminar_cambio_tipo/{{cambio.id}}" alt="Eliminar Cambio de Tipo"><i class="c-red">-</i></a>{% endif %}</dd>
+                {% endfor %}
+            </dl>
+        </div>
+        <div class="pmbb-edit">
+            <div class="input-group {{form.asisteGAR.css_classes}} col-xs-12">
+            <dl class="dl-horizontal">
+                <dt class="p-t-10">Asitencia a G.A.R:</dt>
+                <dd>
+                    <div class="fg-line">
+                    	<label for="id_asisteGAR" class="control-label checkbox">
+                        {{form.asisteGAR}}
+                        <i class="input-helper m-r-20"></i>
+                        </label>
+                    </div>
+                    {% for error in form.asisteGAR.errors %}
+                    <small class="help-block">{{error}}</small>
+                    {% endfor %}
+                </dd>
+            </dl>
+            </div>
+            <div class="input-group {{form.asignadoGAR.css_classes}} col-xs-12">
+            <dl class="dl-horizontal">
+                <dt class="p-t-10">Asignado a G.A.R:</dt>
+                <dd>
+                    <div class="fg-line">
+                    	<label for="id_asignadoGAR" class="control-label checkbox">
+                        {{form.asignadoGAR}}
+                        <i class="input-helper m-r-20"></i>
+                        </label>
+                    </div>
+                    {% for error in form.asignadoGAR.errors %}
+                    <small class="help-block">{{error}}</small>
+                    {% endfor %}
+                </dd>
+            </dl>
+            </div>
+            <div class="m-t-30">
+                <button type="submit" name="aceptar" class="btn btn-primary btn-sm">Guardar</button>
+                <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+
+
+{% endblock card %}

@@ -1,12 +1,9 @@
 # Create your views here.
-from calendar import weekday
 import datetime
-from xml import dom
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-import sys
 from grupos.forms import FormularioEditarGrupo,\
     FormularioReportarReunionGrupo, FormularioReportarReunionDiscipulado,\
     FormularioCrearRed, FormularioCrearGrupo
@@ -23,28 +20,28 @@ from grupos.models import Predica
 
 
 def receptorTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Receptor') in user.groups.all()
 
 
 def liderTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Lider') in user.groups.all()
 
 
 def adminTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Administrador') in user.groups.all()
 
 
 def verGrupoTest(user):
-    return  user.is_authenticated()\
+    return user.is_authenticated()\
     and (Group.objects.get(name__iexact='Lider') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
 
 def receptorAdminTest(user):
-    return  user.is_authenticated()\
+    return user.is_authenticated()\
     and (Group.objects.get(name__iexact='Receptor') in user.groups.all()\
          or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
@@ -78,26 +75,50 @@ def grupoRaiz(request):
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def editarHorarioReunionGrupo(request):
+def editarHorarioReunionGrupo(request, pk=None):
+    g = True
     miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+    # grupo.miembro_set.all()
+    if pk:
+        try:
+            miembro = Miembro.objects.get(id=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
     grupo = miembro.grupoLidera()
-    # if grupo is None:
-    #     raise Http404
+    if mismo:
+        puede_editar = True
+    if grupo is None:
+        puede_editar = False
+        grupo = miembro.grupo
+        no_lider = True
+
+    miembros = grupo.miembrosGrupo()
+    lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
 
     if request.method == 'POST':
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)
         if form.is_valid():
             form.save()
             ok = True
-            # return HttpResponseRedirect('/miembro/')
+            ms = "El Grupo %s Fue Editado Correctamente" % grupo.nombre.upper()
+            if mismo:
+                ms = "Has Editado Tú Grupo Correctamente"
+        else:
+            ms = "Ocurrió un Error, Por Favor Verifica El Formulario"
     else:
         form = FormularioEditarGrupo(instance=grupo)
+
     return render_to_response('Grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
 
 
 def reunionReportada(fecha, grupo, tipo):
-    ini_semana = fecha-datetime.timedelta(days=fecha.isoweekday()-1)
-    fin_semana = fecha+datetime.timedelta(days=7-fecha.isoweekday())
+    ini_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
+    fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
 
     if tipo == 1:  # GAR
         reunion = grupo.reuniongar_set.filter(fecha__gte=ini_semana, fecha__lt=fin_semana)
@@ -454,7 +475,7 @@ def verGrupo(request, id):
     return render_to_response('Grupos/grupo.html', locals(), context_instance=RequestContext(request))
 
 
-#def ConsultarReportesSinEnviar(request, sobres=False):
+# def ConsultarReportesSinEnviar(request, sobres=False):
 #    """Permite a un administrador revisar que lideres no han registrado sus reportes de reuniones de grupo en un rango de fecha
 #        especificado. El administrador escoge el tipo de reunion, si la reunion es de GAR(1) o discipulado (2). Luego el administrador
 #        podra enviar un mail a los lideres que no han ingresado los reportes y a sus lideres."""
@@ -524,7 +545,8 @@ def sendMail(camposMail):
     receptor = camposMail[2]
     send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
 
-#def ConsultarSobresSinEnviar(request):
+
+# def ConsultarSobresSinEnviar(request):
 #    ConsultarReportesSinEnviar(request, True)
 #    miembro = Miembro.objects.get(usuario=request.user)
 #    form = FormularioReportesSinEnviar()

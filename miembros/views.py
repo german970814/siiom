@@ -4,15 +4,17 @@ from django.shortcuts import render_to_response
 from django.contrib import auth, messages
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from miembros.forms import *
 from grupos.models import Grupo
+from grupos.forms import FormularioEditarDiscipulado
 from datetime import date
 from academia.views import adminTest
 from academia.models import Curso
 import datetime
+import os
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
 
@@ -134,12 +136,60 @@ def miembroInicio(request):
         visitantes = []
         for mg in miembrosGrupo:
             ct = list(CambioTipo.objects.filter(miembro=mg).order_by('id'))  # filter(nuevoTipo=tipo, anteriorTipo=tipo)
-            if len(ct) != 0 and ct != None:
+            if len(ct) != 0 and ct is not None:
                 ct = ct.pop()
                 if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider == None)):
                     visitantes.append(ct.miembro)
     else:
         visitantes = []
+
+    discipulos = list()
+    inactivos = list()
+    grupos = list()
+
+    def sub_discipulos(disc, miem, sw=True):
+        disc2 = list(miem.discipulos())
+        if sw:
+            for discipulo in disc2:
+                if discipulo.grupoLidera():
+                    if discipulo not in disc:
+                        # print("%s discipulo de %s" % (discipulo, miem))
+                        disc.append(discipulo)
+                    if discipulo.discipulos():
+                        sub_discipulos(disc, discipulo)
+                    else:
+                        sw = False
+                else:
+                    if discipulo not in inactivos:
+                        # print("inactivo", discipulo)
+                        inactivos.append(discipulo)
+                    sw = False
+
+    def sub_grupos(grus, miem, disci, sw=True):
+        if sw:
+            for disc in disci:
+                if disc.grupoLidera() is not None and disc.grupoLidera() not in grus:
+                    grus.append(disc.grupoLidera())
+
+    def lid_gru(miem):
+        visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
+        grupo = miem.grupoLidera()
+        if grupo:
+            return grupo.miembro_set.filter(id__in=visitas)
+        else:
+            return []
+
+    def lid_inc(miem):
+        pass
+
+    sub_discipulos(discipulos, miembro)
+    sub_grupos(grupos, miembro, discipulos)
+    totalLideres = len(discipulos)
+    totalGrupos = len(grupos)
+    # print(lid_gru(miembro))
+    lideresGrupo = len(lid_gru(miembro))
+    totalGruposI = len(inactivos)
+
     # request.session['visitantes'] = visitantes
     if request.user.has_perm("miembros.es_administrador"):
         return HttpResponseRedirect("/administracion/")
@@ -189,7 +239,7 @@ def liderListarMiembrosGrupo(request):
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             return HttpResponseRedirect('/miembro/editar_miembros/')
 
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
     if grupo:
         discipulos = miembro.discipulos()
@@ -200,7 +250,7 @@ def liderListarMiembrosGrupo(request):
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderEditarMiembros(request):
     accion = 'Guardar y editar siguiente'
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
         actual = request.session['actual']
         form = FormularioLiderAgregarMiembro(data=request.POST, instance=actual)
@@ -271,7 +321,7 @@ def liderTransaldarMiembro(request):
     if request.session.get('seleccionados') != None:
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
-            miembroEditar = Miembro.objects.get(id = request.session['seleccionados'].pop())
+            miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
             request.session['actual'] = int(miembroEditar.id)
             request.session['seleccionados'] = request.session['seleccionados']
             return render_to_response("Miembros/transladar_miembro.html", locals(), context_instance=RequestContext(request))
@@ -282,29 +332,80 @@ def liderTransaldarMiembro(request):
 
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
-def liderEditarPerfil(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+def liderEditarPerfil(request, pk=None):
+    p = True
+    miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+    if pk:
+        try:
+            miembro = Miembro.objects.get(id=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
+    foto = False
+    if miembro.foto_perfil:
+        rut_perfil = miembro.foto_perfil.path
+        foto = True
     if request.method == 'POST':
+
+        if 'file' in request.POST:
+            from .forms import FormularioFotoPerfil
+            from django.conf import settings
+            from django.http import HttpResponse
+            f = FormularioFotoPerfil(data=request.POST, files=request.FILES, instance=miembro)
+            if f.is_valid():
+                if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
+                    if foto:
+                        r = settings.MEDIA_ROOT + "/media/profile_pictures/user_%s/" % miembro.id
+                        if os.path.exists(rut_perfil):
+                            print("si existe")
+                        if os.path.isfile(rut_perfil):
+                            print("Es archivo")
+                            os.remove(rut_perfil)
+                f.save()
+                ok = True
+                ms = "Foto editada Correctamente"
+                return HttpResponse(str(miembro.foto_perfil.url))
+            else:
+                print(f.errors)
+                print("Ocurrio un error en la vista liderEditarPerfil:317")
+
         if 'contrasena' in request.POST:
             return HttpResponseRedirect("/miembro/cambiar_contrasena/")
+
         elif 'aceptar' in request.POST:
-            form = FormularioLiderAgregarMiembro(data=request.POST, instance=miembro)
+            if request.user.has_perm('miembros.es_administrador'):
+                form = FormularioAdminAgregarMiembro(data=request.POST, files=request.FILES, instance=miembro)
+                admin = True
+            else:
+                form = FormularioLiderAgregarMiembro(request.POST or None, request.FILES or None, instance=miembro)
             if form.is_valid():
                 miembroEditado = form.save()
-                miembroEditado.usuario.username = miembroEditado.email
-                miembroEditado.usuario.save()
-                if miembroEditado.conyugue != None:
-                    conyugue = Miembro.objects.get(id = miembroEditado.conyugue.id)
+                if miembroEditado.conyugue is not None:
+                    conyugue = Miembro.objects.get(id=miembroEditado.conyugue.id)
                     conyugue.conyugue = miembroEditado
                     conyugue.estadoCivil = 'C'
                     conyugue.save()
                     miembroEditado.estadoCivil = 'C'
                     miembroEditado.save()
-                return HttpResponseRedirect("/miembro/perfil/"+str(miembro.id))
+                ok = True
+                ms = "Miembro Editado Correctamente"
+                if mismo:
+                    ms = "Te has Editado Correctamente"
+                # return HttpResponseRedirect("/miembro/perfil/" + str(miembro.id))
+            else:
+                ms = "Ha Ocurrido un Error, Verifica el Formulario"
         else:
             return HttpResponseRedirect("/miembro/")
     else:
-        form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
+        if request.user.has_perm('miembros.es_administrador'):
+            form = FormularioAdminAgregarMiembro(instance=miembro, g=miembro.genero)
+            admin = True
+        else:
+            form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
     return render_to_response("Miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
 
 
@@ -323,7 +424,7 @@ def cambiarContrasena(request):
                 validacionContrasena = 'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
                 #return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))      
     else:
-        form = FormularioCambiarContrasena(request=request)            
+        form = FormularioCambiarContrasena(request=request)
     return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
@@ -333,14 +434,14 @@ def liderLlamadasPendientesVisitantesGrupo(request):
         request.session['visitantesSeleccionados'] = request.POST.getlist('seleccionados')
         return HttpResponseRedirect('/miembro/registrar_llamada/lider/')
 
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
     if grupo:
-        visitantes = grupo.miembro_set.filter(fechaLlamadaLider = None)
+        visitantes = grupo.miembro_set.filter(fechaLlamadaLider=None)
 #        miembrosGrupo = list(grupo.miembro_set.all())
 #        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
 #        visitantes = []
-#        for mg in miembrosGrupo:        
+#        for mg in miembrosGrupo:
 #            ct = list(CambioTipo.objects.filter(miembro = mg).order_by('fecha'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
 #            if len(ct) != 0 and ct != None:
 #                ct = ct.pop()
@@ -354,8 +455,8 @@ def llamadasPendientesVisitantes(request):
     if request.method == 'POST':
         request.session['miembrosSeleccionados'] = request.POST.getlist('seleccionados')
         return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
-    
-    miembro = Miembro.objects.get(usuario = request.user)
+
+    miembro = Miembro.objects.get(usuario=request.user)
     miembrosPrimera = Miembro.objects.filter(fechaPrimeraLlamada=None)
     miembrosSegunda = Miembro.objects.filter(fechaSegundaLlamada=None).exclude(fechaPrimeraLlamada=None)
 
@@ -363,7 +464,7 @@ def llamadasPendientesVisitantes(request):
         ninguna = True
 #    miembrosIglesia = Miembro.objects.all()
 #    tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
-#    miembros = []    
+#    miembros = []
 #    for mg in miembrosIglesia:
 #        ct = list(CambioTipo.objects.filter(miembro = mg).order_by('fecha'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
 #        if len(ct) != 0 and ct != None:
@@ -377,16 +478,16 @@ def llamadasPendientesVisitantes(request):
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderLlamarVisitas(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     tipo = 'lider'
     if request.method == 'POST':
         aux = request.session['visitaActual']
-        actual = Miembro.objects.get(id=aux['id'])#request.session['visitaActual']
+        actual = Miembro.objects.get(id=aux['id'])  # request.session['visitaActual']
         form = FormularioLlamadaLider(data=request.POST, instance=actual)
         if form.is_valid():
             nuevoLlamar = form.save(commit=False)
             nuevoLlamar.fechaLlamadaLider = date.today()
-            nuevoLlamar.save()            
+            nuevoLlamar.save()
         else:
             return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
 
@@ -394,19 +495,19 @@ def liderLlamarVisitas(request):
         faltantes = request.session['visitantesSeleccionados']
         if len(faltantes) > 0:
             try:
-                miembroLlamar = Miembro.objects.get(id = request.session['visitantesSeleccionados'].pop())
-                miembrol = {'id':str(miembroLlamar.id),
-                            'nombre':str(miembroLlamar.nombre), 
-                            'primerApellido':str(miembroLlamar.primerApellido),
-                            'genero':str(miembroLlamar.genero),
-                            'cedula':str(miembroLlamar.cedula),
-                            'email':str(miembroLlamar.email),
-                            'telefono':str(miembroLlamar.telefono),
-                            'celular':str(miembroLlamar.celular),
-                            'detalleLlamadaLider':str(miembroLlamar.detalleLlamadaLider)
+                miembroLlamar = Miembro.objects.get(id=request.session['visitantesSeleccionados'].pop())
+                miembrol = {'id': str(miembroLlamar.id),
+                            'nombre': str(miembroLlamar.nombre),
+                            'primerApellido': str(miembroLlamar.primerApellido),
+                            'genero': str(miembroLlamar.genero),
+                            'cedula': str(miembroLlamar.cedula),
+                            'email': str(miembroLlamar.email),
+                            'telefono': str(miembroLlamar.telefono),
+                            'celular': str(miembroLlamar.celular),
+                            'detalleLlamadaLider': str(miembroLlamar.detalleLlamadaLider)
                             }
-                request.session['visitaActual'] = miembrol#miembroLlamar #linea que da el error
-                form = FormularioLlamadaLider(instance = miembroLlamar)        
+                request.session['visitaActual'] = miembrol  # miembroLlamar #linea que da el error
+                form = FormularioLlamadaLider(instance=miembroLlamar)
                 request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
                 return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             except IndexError:
@@ -421,10 +522,10 @@ def liderLlamarVisitas(request):
 
 @user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
 def llamarVisitas(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
         actual = Miembro.objects.get(id=request.session['miembroActual'])
-        if actual.fechaPrimeraLlamada == None: # or actual.detallePrimeraLlamada == '':
+        if actual.fechaPrimeraLlamada == None:  # or actual.detallePrimeraLlamada == '':
             form = FormularioPrimeraLlamadaAgente(data=request.POST, instance=actual)
             llamada = 1
         elif actual.fechaSegundaLlamada == '' or actual.detalleSegundaLlamada == None:
@@ -458,17 +559,17 @@ Admin" % Sites.objects.get_current().name,\
     if 'miembrosSeleccionados' in request.session:
         faltantes = request.session['miembrosSeleccionados']
         if len(faltantes) > 0:
-            miembroLlamar = Miembro.objects.get(id = request.session['miembrosSeleccionados'].pop())
+            miembroLlamar = Miembro.objects.get(id=request.session['miembrosSeleccionados'].pop())
             request.session['miembroActual'] = int(miembroLlamar.id)
             request.session['miembrosSeleccionados'] = request.session['miembrosSeleccionados']
             if miembroLlamar.fechaPrimeraLlamada == '' or miembroLlamar.fechaPrimeraLlamada == None:
                 tipo = "primera"
                 try:
-                    miembroIngreso = CambioTipo.objects.get(miembro=miembroLlamar, nuevoTipo__nombre__iexact = 'visita').autorizacion
+                    miembroIngreso = CambioTipo.objects.get(miembro=miembroLlamar, nuevoTipo__nombre__iexact='visita').autorizacion
                     gMiembroIngreso = miembroIngreso.grupoLidera()
-                except :
+                except:
                     pass
-                form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)        
+                form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)
                 return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada == None:
                 tipo = "segunda"
@@ -477,10 +578,10 @@ Admin" % Sites.objects.get_current().name,\
         else:
             return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
     else:
-        return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")           
+        return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")         
+@user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderPromoverVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
@@ -501,7 +602,7 @@ def liderPromoverVisitantesGrupo(request):
         tipo = TipoMiembro.objects.get(nombre__iexact='Visita')
         visitantes = []
         for mg in miembrosGrupo:
-            ct = list(CambioTipo.objects.filter(miembro=mg).order_by('fecha').order_by('id'))#.filter(nuevoTipo=tipo, anteriorTipo=tipo)
+            ct = list(CambioTipo.objects.filter(miembro=mg).order_by('fecha').order_by('id'))  # .filter(nuevoTipo=tipo, anteriorTipo=tipo)
             if len(ct) != 0 and ct != None:
                 ct = ct.pop()
                 if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo):
@@ -953,7 +1054,7 @@ def cambiarMiembroDeTipoMiembro(request, id):
 
                 if miembroCambio.usuario == None or miembroCambio.usuario == '':
                     request.session['tipo'] = nuevoCambioTipo.nuevoTipo.nombre
-                    return HttpResponseRedirect('/miembro/asignar_usuario/'+str(miembroCambio.id)+'/')
+                    return HttpResponseRedirect('/miembro/asignar_usuario/' + str(miembroCambio.id) + '/')
                 else:
                     if nuevoCambioTipo.nuevoTipo.nombre.lower() == "lider":
                         miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
@@ -1080,7 +1181,7 @@ def eliminarCambioTipoMiembro(request, id):
     except:
         pass
     cambio.delete()
-    return HttpResponseRedirect('/miembro/perfil/'+str(cambio.miembro.id))
+    return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
 
 def calcularCelulas(miembro):
@@ -1268,3 +1369,120 @@ def recuperar_contrasena(request):
         form = FormularioRecuperarContrasenia()
 
     return render_to_response("Miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
+
+
+@login_required
+def ver_discipulos(request, pk=None):
+    d = True
+    miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+    if pk:
+        try:
+            miembro = Miembro.objects.get(id=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
+    grupo = miembro.grupoLidera() or None
+
+    if request.method == 'POST':
+        if grupo is not None or grupo != '':
+            form = FormularioEditarDiscipulado(request.POST or None, instance=grupo)
+
+            if form.is_valid():
+                form.save()
+                # return HttpResponseRedirect('')
+                ok = True
+                ms = "Discipulado del grupo %s editado Correctamente" % grupo.nombre
+                if mismo:
+                    ms = "Tu Discipulado ha sido editado Correctamente"
+            else:
+                ms = "Ocurrió un Error, Por Favor Verifica el Formulario"
+    else:
+        if grupo is not None or grupo != '':
+            form = FormularioEditarDiscipulado(instance=grupo)
+
+    discipulos = miembro.discipulos()
+    if len(discipulos) > 0:
+        discipulos = discipulos.order_by('nombre')
+    else:
+        lista_lideres = miembro.grupo.listaLideres()
+        lideres = Miembro.objects.filter(id__in=lista_lideres)
+        discipulos = lideres[0].discipulos().order_by('nombre')
+        no_discipulos = True
+
+    return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
+
+
+@login_required
+def ver_informacion_miembro(request, pk=None):
+    i = True
+    miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+    if pk:
+        try:
+            miembro = Miembro.objects.get(id=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
+    if request.user.has_perm('miembros.es_administrador'):
+        if request.method == 'POST':
+            form = FormularioInformacionIglesiaMiembro(request.POST or None, instance=miembro)
+
+            if form.is_valid():
+                form.save()
+                ok = True
+                ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
+                if mismo:
+                    ms = "Te has Editado Correctamente"
+            else:
+                ms = "Ocurrió un Error, Por Favor Verifica el Formulario"
+        else:
+            form = FormularioInformacionIglesiaMiembro(instance=miembro)
+
+    if miembro.grupo:
+        lideres_miembro = Miembro.objects.filter(id__in=miembro.grupo.listaLideres())
+    escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
+    tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
+    if len(escalafones) > 0:
+        escalafon = escalafones.pop()
+    pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
+
+    return render_to_response("Miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
+
+
+@login_required
+def eliminar_foto_perfil(request, pk):
+    from django.conf import settings
+    miembro = Miembro.objects.get(usuario=request.user)
+    mismo = True
+
+    if pk:
+        try:
+            miembro = Miembro.objects.get(pk=pk)
+            mismo = False
+            if Miembro.objects.get(usuario=request.user).id == miembro.id:
+                mismo = True
+        except Miembro.DoesNotExist:
+            raise Http404
+
+    foto = False
+    if miembro.foto_perfil:
+        rut_perfil = miembro.foto_perfil.path
+        foto = True
+    if request.method == 'POST':
+        if 'delete_file' in request.POST:
+            if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
+                if foto:
+                    if os.path.exists(rut_perfil):
+                        print("si existe")
+                    if os.path.isfile(rut_perfil):
+                        print("Es archivo")
+                        os.remove(rut_perfil)
+                    miembro.foto_perfil.delete(save=True)
+    return HttpResponse(settings.STATIC_URL + 'Imagenes/profile-none.jpg')
