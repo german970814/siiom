@@ -104,7 +104,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Primera Llamada</dt>
-                <dd>{% if miembro.fechaPrimeraLlamada %}{{miembro.fechaPrimeraLlamada}}{% else %}No se ha realizado la Primera Llamada{% endif %}</dd>
+                <dd>{% if miembro.fechaPrimeraLlamada %}{{miembro.fechaPrimeraLlamada}}{% else %}No se ha realizado la Primera Llamada {% if perms.miembros.es_agente or perms.miembros.es_administrador %} <button type="submit" name="rllamada" class="btn btn-warning">Registrar</button>{% endif %}{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Detalle Primera Llamada</dt>
@@ -116,7 +116,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Segunda Llamada</dt>
-                <dd>{% if miembro.fechaSegundaLlamada %}{{miembro.fechaSegundaLlamada}}{% else %}No se ha realizado la Segunda Llamada{% endif%}</dd>
+                <dd>{% if miembro.fechaSegundaLlamada %}{{miembro.fechaSegundaLlamada}}{% else %}No se ha realizado la Segunda Llamada {% if perms.miembros.es_agente or perms.miembros.es_administrador %} <button type="submit" name="rllamada" class="btn btn-warning">Registrar</button>{% endif %}{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Detalle Segunda Llamada</dt>

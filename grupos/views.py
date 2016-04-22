@@ -96,9 +96,12 @@ def editarHorarioReunionGrupo(request, pk=None):
         puede_editar = False
         grupo = miembro.grupo
         no_lider = True
-
-    miembros = grupo.miembrosGrupo()
-    lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
+    if grupo is not None:
+        miembros = grupo.miembrosGrupo()
+        lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
+    else:
+        miembros = None
+        lideres = None
 
     if request.method == 'POST':
         form = FormularioEditarGrupo(data=request.POST, instance=grupo)

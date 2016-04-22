@@ -1,6 +1,7 @@
 
 # Create your views here.
 from django.shortcuts import render_to_response
+from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
@@ -14,6 +15,7 @@ from datetime import date
 from academia.views import adminTest
 from academia.models import Curso
 import datetime
+import json
 import os
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
@@ -525,18 +527,18 @@ def llamarVisitas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
         actual = Miembro.objects.get(id=request.session['miembroActual'])
-        if actual.fechaPrimeraLlamada == None:  # or actual.detallePrimeraLlamada == '':
+        if actual.fechaPrimeraLlamada is None:  # or actual.detallePrimeraLlamada == '':
             form = FormularioPrimeraLlamadaAgente(data=request.POST, instance=actual)
             llamada = 1
-        elif actual.fechaSegundaLlamada == '' or actual.detalleSegundaLlamada == None:
+        elif actual.fechaSegundaLlamada == '' or actual.detalleSegundaLlamada is None:
             form = FormularioSegundaLlamadaAgente(data=request.POST, instance=actual)
             llamada = 2
 
         if form.is_valid():
             if llamada == 1:
                 nuevoLlamar = form.save(commit=False)
-                if nuevoLlamar.grupo is not None: #or nuevoLlamar.grupo != '':
-                    lideres = Miembro.objects.filter(id__in= nuevoLlamar.grupo.listaLideres()).values('email')
+                if nuevoLlamar.grupo is not None:  # or nuevoLlamar.grupo != '':
+                    lideres = Miembro.objects.filter(id__in=nuevoLlamar.grupo.listaLideres()).values('email')
                     receptores = ["%s" % (k['email']) for k in lideres]
 
                     camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
@@ -562,7 +564,8 @@ Admin" % Sites.objects.get_current().name,\
             miembroLlamar = Miembro.objects.get(id=request.session['miembrosSeleccionados'].pop())
             request.session['miembroActual'] = int(miembroLlamar.id)
             request.session['miembrosSeleccionados'] = request.session['miembrosSeleccionados']
-            if miembroLlamar.fechaPrimeraLlamada == '' or miembroLlamar.fechaPrimeraLlamada == None:
+            request.session['perfil'] = miembroLlamar.id
+            if miembroLlamar.fechaPrimeraLlamada == '' or miembroLlamar.fechaPrimeraLlamada is None:
                 tipo = "primera"
                 try:
                     miembroIngreso = CambioTipo.objects.get(miembro=miembroLlamar, nuevoTipo__nombre__iexact='visita').autorizacion
@@ -571,11 +574,14 @@ Admin" % Sites.objects.get_current().name,\
                     pass
                 form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)
                 return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
-            elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada == None:
+            elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada is None:
                 tipo = "segunda"
                 form = FormularioSegundaLlamadaAgente(instance=miembroLlamar)
                 return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
         else:
+            if 'perfil' in request.session:
+                if isinstance(request.session['perfil'], int):
+                    return HttpResponseRedirect("/miembro/informacion_iglesia/" + str(request.session['perfil']))
             return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
     else:
         return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
@@ -1408,10 +1414,14 @@ def ver_discipulos(request, pk=None):
     if len(discipulos) > 0:
         discipulos = discipulos.order_by('nombre')
     else:
-        lista_lideres = miembro.grupo.listaLideres()
-        lideres = Miembro.objects.filter(id__in=lista_lideres)
-        discipulos = lideres[0].discipulos().order_by('nombre')
-        no_discipulos = True
+        try:
+            lista_lideres = miembro.grupo.listaLideres()
+            lideres = Miembro.objects.filter(id__in=lista_lideres)
+            discipulos = lideres[0].discipulos().order_by('nombre')
+        except AttributeError:
+            lista_lideres = None
+        finally:
+            no_discipulos = True
 
     return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
 
@@ -1432,6 +1442,12 @@ def ver_informacion_miembro(request, pk=None):
 
     if request.user.has_perm('miembros.es_administrador'):
         if request.method == 'POST':
+            if 'rllamada' in request.POST:
+                data = {'id': miembro.id}
+                request.session['perfil'] = True
+                request.session['miembrosSeleccionados'] = [miembro.id]
+                return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
+
             form = FormularioInformacionIglesiaMiembro(request.POST or None, instance=miembro)
 
             if form.is_valid():
@@ -1458,9 +1474,11 @@ def ver_informacion_miembro(request, pk=None):
 
 @login_required
 def eliminar_foto_perfil(request, pk):
-    from django.conf import settings
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
+    response = {}
+    # mensaje = {"status":"True"}
+    # return HttpResponse(json.dumps(mensaje),content_type='application/json')
 
     if pk:
         try:
@@ -1484,5 +1502,15 @@ def eliminar_foto_perfil(request, pk):
                     if os.path.isfile(rut_perfil):
                         print("Es archivo")
                         os.remove(rut_perfil)
-                    miembro.foto_perfil.delete(save=True)
-    return HttpResponse(settings.STATIC_URL + 'Imagenes/profile-none.jpg')
+                    try:
+                        miembro.foto_perfil.delete(save=True)
+                        response['status'] = 'success'
+                        response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
+                        response['ms'] = 'Foto Eliminada Exitosamente'
+                    except:
+                        response['status'] = 'danger'
+                        response['ms'] = 'Hubo un error al intentar eliminar la foto'
+        else:
+            response['status'] = 'danger'
+            response['ms'] = 'Permiso denegado para hacer esta operacion'
+    return HttpResponse(json.dumps(response), content_type='application/json')

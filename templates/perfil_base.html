@@ -155,7 +155,6 @@
                         <a href="" data-toggle="dropdown">
                             <i class="zmdi zmdi-more-vert"></i>
                         </a>
-            
                         <ul class="dropdown-menu dropdown-menu-right">
                             {% if not miembro.asisteGAR and not miembro.grupo %}
                             <li>
@@ -167,11 +166,9 @@
                                 <a href="/miembro/asignar_usuario/{{miembro.id}}/">Asignar Usuario</a>
                             </li>
                             {% endif %}
-                            {% if not tipos %}
                             <li>
                                 <a href="/miembro/cambiar_tipo_miembro/{{miembro.id}}/">Agregar Tipo de Miembro</a>
                             </li>
-                            {% endif %}
                             <li>
                                 <a href="">Refrescar</a>
                             </li>

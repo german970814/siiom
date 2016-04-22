@@ -19,13 +19,13 @@
     <div class="card">
         <div class="card-header">
             <h1 class="f-20">
-                <legend><h3>Asignar Grupo a {{miembroEditar.nombre}} {{miembroEditar.primerApellido}} ({{miembroEditar.cedula}})</h3></legend>
+                <legend><h3>Asignar Grupo a {{miembroEditar.nombre|upper}} {{miembroEditar.primerApellido|upper}} ({{miembroEditar.cedula}})</h3></legend>
             </h1> 
             {% if ok %}
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha asignado correctamente</p>
+                    <p>Se ha asignado correctamente. <a class="alert-link" href="/miembro/grupo/{{miembroEditar.id}}">Volver al perfil.</a></p>
                 </div>
             </div>
             {% endif %}
@@ -34,8 +34,8 @@
             {% csrf_token %}
             <div class="card-body card-padding">
                 <div class="row">
-                	<div class="col-md-4">
-                    	<p class="t-20 form-control-static"><label>Miembro ingreso:</label> {{ miembroIngreso.nombre|capfirst }} {{miembroIngreso.primerApellido|capfirst}} {{miembroIngreso.segundoApellido|capfirst}} ({{ gMiembroIngreso.nombre }})</p>
+                	<div class="col-md-6">
+                    	<p class="t-20 form-control-static"><label>Miembro ingreso:</label> {{ miembroIngreso.nombre|upper }} {{miembroIngreso.primerApellido|upper}} {{miembroIngreso.segundoApellido|upper}} ({{ gMiembroIngreso.nombre|upper }})</p>
                     </div>
                 </div>
                 <br>

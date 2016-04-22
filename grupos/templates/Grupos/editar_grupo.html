@@ -2,6 +2,7 @@
 {% load staticfiles %}
 
 {% block card %}
+{% if grupo %}
 <div class="pmb-block">
     <div class="pmbb-header">
         <h2><i class="zmdi zmdi-assignment m-r-5"></i> Datos del Grupo{% if no_lider %} al que Asiste{% endif %}</h2>
@@ -115,7 +116,6 @@
     </form>
 </div>
 
-
 <div class="pmb-block">
     <div class="pmbb-header">
         <h2><i class="zmdi zmdi-accounts-alt m-r-5"></i> Miembros del Grupo{% if no_lider %} al que Asiste{% endif %}</h2>
@@ -132,10 +132,6 @@
                     <strong>{{miem.nombre|upper}} {{miem.primerApellido|upper}}</strong>
                     <small>{{miem.cedula}}</small>
                 </div>
-                
-                <div class="c-footer">
-                    <button class="waves-effect"><i class="zmdi zmdi-eye"></i></button>
-                </div>
             </div>
         </div>
         {% empty %}
@@ -143,4 +139,14 @@
         {% endfor %}
     </div>
 </div>
+{% else %}
+{% if mismo %}
+<div class="container">
+    <div class="p-25 p-t-25">No Perteneces A Nigún Grupo Aún</div>
+</div>
+{% endif %}
+<div class="container">
+    <div class="p-25 p-t-25">El Miembro No Pertenece a Grupo. {% if perms.miembros.es_administrador %}<a href="/miembro/asignar_grupo/{{miembro.id}}/" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>{% endif %}</div>
+</div>
+{% endif %}
 {% endblock card %}
