@@ -2,11 +2,12 @@
 
 __author__ = 'tania'
 
-NAME = 'siiom'
+NAME = "siiom"
 
-USER = 'siiom'
+USER = "postgres"
 
-PASSWORD = '123456'
+PASSWORD = "123456"
+# PASSWORD = 'ecbddac9'
 
 HOST = '127.0.0.1'
 
