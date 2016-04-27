@@ -200,8 +200,11 @@
                             </div> -->
                             
                             {% if mismo %}
-                            <a href="#" class="pmop-edit" id="change-photo">
+                            <a class="pmop-edit" id="change-photo" style="width:50%; cursor:pointer;">
                                 <i class="zmdi zmdi-camera"></i> <span class="hidden-xs">Cambiar Foto de Perfil</span>
+                            </a>
+                            <a  class="pmop-edit" id="delete-photo" style="width:50%; margin-left:50%; cursor:pointer;">
+                                <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar Foto de Perfil</span>
                             </a>
                             {% else %}
                                 {% if perms.miembro.es_administrador %}
