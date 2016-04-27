@@ -19,6 +19,7 @@ import json
 import os
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
+from .forms import FormularioFotoPerfil
 
 
 def eliminar(request, modelo, lista):
@@ -354,9 +355,7 @@ def liderEditarPerfil(request, pk=None):
     if request.method == 'POST':
 
         if 'file' in request.POST:
-            from .forms import FormularioFotoPerfil
-            from django.conf import settings
-            from django.http import HttpResponse
+            dat = {}
             f = FormularioFotoPerfil(data=request.POST, files=request.FILES, instance=miembro)
             if f.is_valid():
                 if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
@@ -369,11 +368,15 @@ def liderEditarPerfil(request, pk=None):
                             os.remove(rut_perfil)
                 f.save()
                 ok = True
-                ms = "Foto editada Correctamente"
-                return HttpResponse(str(miembro.foto_perfil.url))
+                dat['ms'] = "Foto editada Correctamente"
+                dat['status'] = 'success'
+                dat['ruta'] = str(miembro.foto_perfil.url)
+                return HttpResponse(json.dumps(dat), content_type="application/json")
             else:
-                print(f.errors)
-                print("Ocurrio un error en la vista liderEditarPerfil:317")
+                dat['ms'] = "Foto demasiado Grande Tamaño maximo aceptado: 2000x2000"
+                dat['status'] = 'danger'
+                dat['ruta'] = str(miembro.foto_perfil.url)
+                return HttpResponse(json.dumps(dat), content_type="application/json")
 
         if 'contrasena' in request.POST:
             return HttpResponseRedirect("/miembro/cambiar_contrasena/")
@@ -1504,13 +1507,23 @@ def eliminar_foto_perfil(request, pk):
                         os.remove(rut_perfil)
                     try:
                         miembro.foto_perfil.delete(save=True)
-                        response['status'] = 'success'
+                        response['status'] = 'warning'
                         response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
                         response['ms'] = 'Foto Eliminada Exitosamente'
                     except:
                         response['status'] = 'danger'
+                        response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
                         response['ms'] = 'Hubo un error al intentar eliminar la foto'
+                else:
+                    response['status'] = 'danger'
+                    response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
+                    response['ms'] = 'No hay ninguna foto a eliminar'
+            else:
+                response['status'] = 'warning'
+                response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
+                response['ms'] = 'No hay fotos para eliminar'
         else:
             response['status'] = 'danger'
+            response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
             response['ms'] = 'Permiso denegado para hacer esta operacion'
     return HttpResponse(json.dumps(response), content_type='application/json')
