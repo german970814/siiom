@@ -2,3 +2,5 @@ Django==1.8.8
 Pillow==2.5.1
 psycopg2==2.5.3
 reportlab==3.1.8
+gunicorn==19.4.5
+setproctitle==1.1.9
