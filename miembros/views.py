@@ -375,7 +375,10 @@ def liderEditarPerfil(request, pk=None):
             else:
                 dat['ms'] = "Foto demasiado Grande Tamaño maximo aceptado: 2000x2000"
                 dat['status'] = 'danger'
-                dat['ruta'] = str(miembro.foto_perfil.url)
+                if foto:
+                    dat['ruta'] = str(miembro.foto_perfil.url)
+                else:
+                    dat['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
                 return HttpResponse(json.dumps(dat), content_type="application/json")
 
         if 'contrasena' in request.POST:
