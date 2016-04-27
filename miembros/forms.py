@@ -436,3 +436,17 @@ class FormularioInformacionIglesiaMiembro(forms.ModelForm):
     class Meta:
         model = Miembro
         fields = ('estado', 'convertido', 'asisteGAR', 'asignadoGAR')
+
+
+class FormularioTipoMiembros(forms.ModelForm):
+    tipos = forms.ModelMultipleChoiceField(queryset=TipoMiembro.objects.all(), widget=forms.CheckboxSelectMultiple)
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioTipoMiembros, self).__init__(*args, **kwargs)
+        if self.instance:
+            tipos = CambioTipo.objects.filter(miembro=self.instance)
+            self.fields['tipos'].initial = [tipo.nuevoTipo.id for tipo in tipos]
+
+    class Meta:
+        model = CambioTipo
+        exclude = ('miembro', 'autorizacion', 'nuevoTipo', 'anteriorTipo', 'fecha')

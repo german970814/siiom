@@ -198,9 +198,9 @@
                         {% endfor %}
                     </dd>
                 </dl>
-            {% if admin %}
             </div>
-                <div class="input-group {{form.conyugue.css_classes}} col-xs-12" id="cpm1">
+            {% if admin %}
+            <div class="input-group {{form.conyugue.css_classes}} col-xs-12" id="cpm1">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
                         <label for="id_conyugue" class="control-label" id="label_conyugue">Casado Con:</label>
@@ -214,11 +214,11 @@
                         {% endfor %}
                     </dd>
                 </dl>
+            </div>
             {% endif %}
-                <div class="m-t-30">
-                    <button type="submit" name="aceptar" class="btn btn-primary btn-sm">Guardar</button>
-                    <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
-                </div>
+            <div class="m-t-30">
+                <button type="submit" name="aceptar" class="btn btn-primary btn-sm">Guardar</button>
+                <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
             </div>
         </div>
     </div>

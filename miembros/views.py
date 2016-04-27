@@ -1193,7 +1193,7 @@ def eliminarCambioTipoMiembro(request, id):
     except:
         pass
     cambio.delete()
-    return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
+    # return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
 
 def calcularCelulas(miembro):
@@ -1455,8 +1455,61 @@ def ver_informacion_miembro(request, pk=None):
                 return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
 
             form = FormularioInformacionIglesiaMiembro(request.POST or None, instance=miembro)
+            form_cambio_tipo = FormularioTipoMiembros(request.POST or None, instance=miembro)
 
-            if form.is_valid():
+            if form.is_valid() and form_cambio_tipo.is_valid():
+                tipos = form_cambio_tipo.cleaned_data['tipos']
+                tpvisita = TipoMiembro.objects.get(nombre__iexact='visita')
+                tpmiembro = TipoMiembro.objects.get(nombre__iexact='miembro')
+                tplider = TipoMiembro.objects.get(nombre__iexact='lider')
+
+                cambio = CambioTipo.objects.filter(miembro=miembro)
+                tipos_cambio = [c.nuevoTipo for c in cambio]
+                eliminar = [cambio for cambio in tipos_cambio if cambio not in tipos]
+                if len(eliminar):
+                    for e in eliminar:
+                        c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
+                        eliminarCambioTipoMiembro(request, c.id)
+                    cambio = CambioTipo.objects.filter(miembro=miembro)
+                    tipos_cambio = [c.nuevoTipo for c in cambio]
+                for tipo in tipos:
+                    if tipo not in tipos_cambio:
+                        cambio = CambioTipo()
+                        cambio.miembro = miembro
+                        cambio.autorizacion = Miembro.objects.get(usuario=request.user)
+                        cambio.fecha = date.today()
+                        if tipo not in tipos_cambio:
+                            if tipo == tpvisita:
+                                cambio.anterior = tipo
+                            elif tipo == tpmiembro:
+                                cambio.anteriorTipo = tpvisita
+                            elif tipo == tplider:
+                                cambio.anteriorTipo = tpmiembro
+                            else:
+                                cambio.anteriorTipo = tipo
+                        if not cambio.miembro.usuario and tipo not in [tpvisita, tpmiembro]:
+                            cambio.miembro.usuario = User()
+                            cambio.miembro.usuario.username = cambio.miembro.email
+                            cambio.miembro.usuario.set_password(cambio.miembro.cedula)
+                            cambio.miembro.usuario.save()
+                        if tipo == tplider:
+                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='lider'))
+                        elif tipo == TipoMiembro.objects.get(nombre__iexact='agente'):
+                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Agente'))
+                        elif tipo == TipoMiembro.objects.get(nombre__iexact='maestro'):
+                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Maestro'))
+                        elif tipo == TipoMiembro.objects.get(nombre__iexact='receptor'):
+                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
+                        elif tipo == TipoMiembro.objects.get(nombre__iexact='administrador'):
+                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
+                        elif tipo == TipoMiembro.objects.get(nombre__iexact='pastor'):
+                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
+                        cambio.miembro.usuario.save()
+                        cambio.nuevoTipo = tipo
+                        cambio.save()
+                    else:
+                        continue
+
                 form.save()
                 ok = True
                 ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
@@ -1466,6 +1519,7 @@ def ver_informacion_miembro(request, pk=None):
                 ms = "Ocurrió un Error, Por Favor Verifica el Formulario"
         else:
             form = FormularioInformacionIglesiaMiembro(instance=miembro)
+            form_cambio_tipo = FormularioTipoMiembros(instance=miembro)
 
     if miembro.grupo:
         lideres_miembro = Miembro.objects.filter(id__in=miembro.grupo.listaLideres())
@@ -1530,3 +1584,33 @@ def eliminar_foto_perfil(request, pk):
             response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
             response['ms'] = 'Permiso denegado para hacer esta operacion'
     return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+# miembro = Miembro.objects.get(usuario=request.user)
+#     try:
+#         cambio = CambioTipo.objects.get(id=id)
+#     except:
+#         raise Http404
+
+#     if cambio.nuevoTipo.nombre.lower() == "lider":
+#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Lider'))
+#     if cambio.nuevoTipo.nombre.lower() == "agente":
+#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Agente'))
+#     if cambio.nuevoTipo.nombre.lower() == "maestro":
+#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Maestro'))
+#     if cambio.nuevoTipo.nombre.lower() == "receptor":
+#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Receptor'))
+#     if cambio.nuevoTipo.nombre.lower() == "administrador":
+#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Administrador'))
+#     if cambio.nuevoTipo.nombre.lower() == "pastor":
+#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Pastor'))
+
+#     try:
+#         if len(cambio.miembro.usuario.groups.all()) == 0:
+#             cambio.miembro.usuario = None
+#             cambio.miembro.save()
+#             cambio.miembro.usuario.delete()
+#     except:
+#         pass
+#     cambio.delete()
+#     return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
