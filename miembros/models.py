@@ -120,7 +120,7 @@ class Miembro(models.Model):
     fechaRegistro = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.nombre + " - " + self.primerApellido
+        return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'
 
     def grupoLidera(self):
         """Devuelve el grupo al cual lidera el miembro o su conyugue. Si al miembro no se le ha asignado ningun grupo devuelve None."""
