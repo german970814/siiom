@@ -79,41 +79,122 @@
             maxDate: moment(),
 		});
 
-        formdata = new FormData();
 
         $('#change-photo').click(function(event) {
             $('#id_foto_perfil').click();
         });
+        
+        if(!$('html').hasClass('ismobile')) {
+            if($('.loader-fotop')[0]) {
+                setTimeout (function () {
+                    $('.loader-fotop').fadeOut();
+                }, 500);
+
+            }
+        }
+
+        // if (window.File && window.FileReader && window.FileList && window.Blob) {
+        //     document.getElementById('filesToUpload').onchange = function(){
+        //         var files = document.getElementById('filesToUpload').files;
+        //         for(var i = 0; i < files.length; i++) {
+        //             resizeAndUpload(files[i]);
+        //         }
+        //     };
+        // } else {
+        //     alert('The File APIs are not fully supported in this browser.');
+        // }
+         
+        function resizeAndUpload(file) {
+            var reader = new FileReader();
+                reader.onloadend = function() {
+             
+                var tempImg = new Image();
+                tempImg.src = reader.result;
+                tempImg.onload = function() {
+             
+                    var MAX_WIDTH = 600;
+                    var MAX_HEIGHT = 600;
+                    var tempW = tempImg.width;
+                    var tempH = tempImg.height;
+                    if (tempW > tempH) {
+                        if (tempW > MAX_WIDTH) {
+                           tempH *= MAX_WIDTH / tempW;
+                           tempW = MAX_WIDTH;
+                        }
+                    } else {
+                        if (tempH > MAX_HEIGHT) {
+                           tempW *= MAX_HEIGHT / tempH;
+                           tempH = MAX_HEIGHT;
+                        }
+                    }
+             
+                    var canvas = document.createElement('canvas');
+                    canvas.width = tempW;
+                    canvas.height = tempH;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(this, 0, 0, tempW, tempH);
+                    var dataURL = canvas.toDataURL("image/jpeg");
+                    console.log(dataURL);
+                    return dataURL;
+                    // var xhr = new XMLHttpRequest();
+                    // xhr.onreadystatechange = function(ev){
+                    //     document.getElementById('filesInfo').innerHTML = 'Done!';
+                    // };
+             
+                    // xhr.open('POST', 'uploadResized.php', true);
+                    // xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+                    // var data = 'image=' + dataURL;
+                    // xhr.send(data);
+                  }
+             
+               }
+            reader.readAsDataURL(file);
+        }
 
         $("#id_foto_perfil").change(function(event) {
+            formdata = new FormData();
+            var nFrom = $(this).attr('data-from');
+            var nAlign = $(this).attr('data-align');
+            var nIcons = $(this).attr('data-icon');
+            var nType = $(this).attr('data-type');
+            var nAnimIn = $(this).attr('data-animation-in');
+            var nAnimOut = $(this).attr('data-animation-out');
             var file = this.files[0];
             var $csrf = $('input[name="csrfmiddlewaretoken"]').val()
 
             if (formdata) {
-                formdata.append('foto_perfil', file);
-                formdata.append('csrfmiddlewaretoken', $csrf);
-                formdata.append('file', '')
+                // console.log(file);
+                // console.log($('input[type="file"]')[0]);
+                // 2000000
+                if (file.size > 20) {
+                    notify("Se esta controlando el tamaño de la imagen", nFrom, nAlign, nIcons, "info", 'animated bounceIn', nAnimOut);
+                    imgre = resizeAndUpload($('input[type="file"]')[0].files);
+                    console.log(imgre);
+                } else {
+                    formdata.append('foto_perfil', file);
+                    formdata.append('csrfmiddlewaretoken', $csrf);
+                    formdata.append('file', '')
 
-                $.ajax({
-                    url: '/miembro/perfil/',
-                    type: 'POST',
-                    data: formdata,
-                    processData: false,
-                    contentType: false,
-                    success: function(data){
-                        $('#photo-p').attr('src', function() {
-                            return data.ruta;
-                        })
-                        var nFrom = $(this).attr('data-from');
-                        var nAlign = $(this).attr('data-align');
-                        var nIcons = $(this).attr('data-icon');
-                        var nType = $(this).attr('data-type');
-                        var nAnimIn = $(this).attr('data-animation-in');
-                        var nAnimOut = $(this).attr('data-animation-out');
-                        
-                        notify(data.ms, nFrom, nAlign, nIcons, data.status, 'animated bounceIn', nAnimOut);
-                    }
-                })
+                    $.ajax({
+                        url: '/miembro/perfil/',
+                        type: 'POST',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function(){
+                            if ($('.loader-fotop')[0]) {
+                                $('.loader-fotop').fadeIn();
+                            }
+                        },
+                        success: function(data){
+                            $('#photo-p').attr('src', function() {
+                                return data.ruta;
+                            })
+                            $('.loader-fotop').fadeOut();
+                            notify(data.ms, nFrom, nAlign, nIcons, data.status, 'animated bounceIn', nAnimOut);
+                        }
+                    })
+                }
             }
         });
 
@@ -183,7 +264,7 @@
                     <div class="pmo-pic">
                         <div class="p-relative">
                             {% if mismo %}
-                            <input type="file" name="foto_perfil" id="id_foto_perfil">
+                            <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*">
                             {% endif %}
                             <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt=""> 
                             
@@ -213,6 +294,11 @@
                                 </a>
                                 {% endif %}
                             {% endif %}
+                        </div>
+                        <div class="preloader pl-xxl loader-fotop" style="">
+                            <svg class="pl-circular" viewBox="25 25 50 50">
+                                <circle class="plc-path" cx="50" cy="50" r="20" />
+                            </svg>
                         </div>
                         
                         
@@ -249,6 +335,7 @@
                 </div>
             </div>
         </div>
+
     </section>
 </section>
 {% endblock contenido %}

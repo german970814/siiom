@@ -76,10 +76,21 @@
 	margin-top: -6px;
 }
 
+.loader-fotop{
+	display: inherit;
+	position: absolute;
+	top: 25%;
+	right: 50%;
+	left: 30%;
+}
+
 @media (max-width: 768px){
 
 	.pmo-stat{
 		background-color: rgba(0,0,0,0) !important;
 	}
 	
+	.loader-fotop{
+		display: none;
+	}
 }
