@@ -387,9 +387,11 @@ def liderEditarPerfil(request, pk=None):
         elif 'aceptar' in request.POST:
             if request.user.has_perm('miembros.es_administrador'):
                 form = FormularioAdminAgregarMiembro(data=request.POST, files=request.FILES, instance=miembro)
+                print("ES ADMIN")
                 admin = True
             else:
-                form = FormularioLiderAgregarMiembro(request.POST or None, request.FILES or None, instance=miembro)
+                form = FormularioLiderAgregarMiembro(data=request.POST, files=request.FILES, instance=miembro)
+                print("NO ES ADMIN")
             if form.is_valid():
                 miembroEditado = form.save()
                 if miembroEditado.conyugue is not None:
@@ -411,9 +413,11 @@ def liderEditarPerfil(request, pk=None):
     else:
         if request.user.has_perm('miembros.es_administrador'):
             form = FormularioAdminAgregarMiembro(instance=miembro, g=miembro.genero)
+            print("ES ADMIN")
             admin = True
         else:
             form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
+            print("NO ES ADMIN")
     return render_to_response("Miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
 
 

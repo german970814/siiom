@@ -124,10 +124,16 @@
                         return false;
                     } else {
                         return true;
+                    }
+                }
+            } else {
+                if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
+                    swal("Alerta", "Escoja por lo menos una opción");
+                    return false;
+                } else {
+                    return true;
                 }
             }
-                
-            } 
         });
 
     });
