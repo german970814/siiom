@@ -1172,22 +1172,22 @@ def eliminarCambioTipoMiembro(request, id):
 
     if cambio.nuevoTipo.nombre.lower() == "lider":
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Lider'))
-    if cambio.nuevoTipo.nombre.lower() == "agente":
+    elif cambio.nuevoTipo.nombre.lower() == "agente":
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Agente'))
-    if cambio.nuevoTipo.nombre.lower() == "maestro":
+    elif cambio.nuevoTipo.nombre.lower() == "maestro":
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Maestro'))
-    if cambio.nuevoTipo.nombre.lower() == "receptor":
+    elif cambio.nuevoTipo.nombre.lower() == "receptor":
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Receptor'))
-    if cambio.nuevoTipo.nombre.lower() == "administrador":
+    elif cambio.nuevoTipo.nombre.lower() == "administrador":
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Administrador'))
-    if cambio.nuevoTipo.nombre.lower() == "pastor":
+    elif cambio.nuevoTipo.nombre.lower() == "pastor":
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Pastor'))
 
     try:
         if len(cambio.miembro.usuario.groups.all()) == 0:
+            cambio.miembro.usuario.delete()
             cambio.miembro.usuario = None
             cambio.miembro.save()
-            cambio.miembro.usuario.delete()
     except:
         pass
     cambio.delete()
@@ -1452,10 +1452,11 @@ def ver_informacion_miembro(request, pk=None):
                 request.session['miembrosSeleccionados'] = [miembro.id]
                 return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
 
-            form = FormularioInformacionIglesiaMiembro(request.POST or None, instance=miembro)
-            form_cambio_tipo = FormularioTipoMiembros(request.POST or None, instance=miembro)
+            form = FormularioInformacionIglesiaMiembro(request.POST, instance=miembro)
+            form_cambio_tipo = FormularioTipoMiembros(request.POST, instance=miembro)
 
             if form.is_valid() and form_cambio_tipo.is_valid():
+                form.save()
                 tipos = form_cambio_tipo.cleaned_data['tipos']
                 tpvisita = TipoMiembro.objects.get(nombre__iexact='visita')
                 tpmiembro = TipoMiembro.objects.get(nombre__iexact='miembro')
@@ -1466,6 +1467,7 @@ def ver_informacion_miembro(request, pk=None):
                 eliminar = [cambio for cambio in tipos_cambio if cambio not in tipos]
                 if len(eliminar):
                     for e in eliminar:
+                        print(e)
                         c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
@@ -1485,30 +1487,41 @@ def ver_informacion_miembro(request, pk=None):
                                 cambio.anteriorTipo = tpmiembro
                             else:
                                 cambio.anteriorTipo = tipo
-                        if not cambio.miembro.usuario and tipo not in [tpvisita, tpmiembro]:
-                            cambio.miembro.usuario = User()
-                            cambio.miembro.usuario.username = cambio.miembro.email
-                            cambio.miembro.usuario.set_password(cambio.miembro.cedula)
+                        if tipo not in [tpvisita, tpmiembro]:
+                            if not cambio.miembro.usuario:
+                                print("Entre a crear usuario")
+                                import re
+                                cedula = re.findall(r'\d+', cambio.miembro.cedula)
+                                cedula = ''.join(cedula)
+                                print(cambio.miembro.cedula)
+                                print(type(cambio.miembro.cedula))
+                                print(cedula)
+                                print(type(cedula))
+                                usuario = User()
+                                usuario.username = cambio.miembro.email
+                                usuario.set_password(cedula)
+                                usuario.save()
+                                cambio.miembro.usuario = usuario
+                                cambio.miembro.save()
+                                print("Usuario %s y password %s" % (cambio.miembro.usuario.username, str(cedula))) 
+                            if tipo == tplider:
+                                cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='lider'))
+                            elif tipo == TipoMiembro.objects.get(nombre__iexact='agente'):
+                                cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Agente'))
+                            elif tipo == TipoMiembro.objects.get(nombre__iexact='maestro'):
+                                cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Maestro'))
+                            elif tipo == TipoMiembro.objects.get(nombre__iexact='receptor'):
+                                cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
+                            elif tipo == TipoMiembro.objects.get(nombre__iexact='administrador'):
+                                cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
+                            elif tipo == TipoMiembro.objects.get(nombre__iexact='pastor'):
+                                cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
                             cambio.miembro.usuario.save()
-                        if tipo == tplider:
-                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='lider'))
-                        elif tipo == TipoMiembro.objects.get(nombre__iexact='agente'):
-                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Agente'))
-                        elif tipo == TipoMiembro.objects.get(nombre__iexact='maestro'):
-                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Maestro'))
-                        elif tipo == TipoMiembro.objects.get(nombre__iexact='receptor'):
-                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
-                        elif tipo == TipoMiembro.objects.get(nombre__iexact='administrador'):
-                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
-                        elif tipo == TipoMiembro.objects.get(nombre__iexact='pastor'):
-                            cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
-                        cambio.miembro.usuario.save()
                         cambio.nuevoTipo = tipo
                         cambio.save()
                     else:
                         continue
 
-                form.save()
                 ok = True
                 ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
                 if mismo:

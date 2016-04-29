@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 import datetime
 from django.db.models import Q
+from django.core.validators import RegexValidator
 
 
 class Zona(models.Model):
@@ -85,7 +86,7 @@ class Miembro(models.Model):
     telefono = models.CharField(max_length=50, null=True, blank=True, verbose_name='teléfono')
     celular = models.CharField(max_length=50, null=True, blank=True)
     fechaNacimiento = models.DateField(verbose_name="fecha de nacimiento", null=True, blank=True)
-    cedula = models.CharField(max_length=25, unique=True, verbose_name='cédula')
+    cedula = models.CharField(max_length=25, unique=True, verbose_name='cédula', validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")])
     direccion = models.CharField(max_length=50, null=True, blank=True, verbose_name='dirección')
     barrio = models.ForeignKey(Barrio, null=True, blank=True)
     email = models.EmailField(unique=True)
