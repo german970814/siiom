@@ -1467,7 +1467,6 @@ def ver_informacion_miembro(request, pk=None):
                 eliminar = [cambio for cambio in tipos_cambio if cambio not in tipos]
                 if len(eliminar):
                     for e in eliminar:
-                        print(e)
                         c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
@@ -1489,21 +1488,15 @@ def ver_informacion_miembro(request, pk=None):
                                 cambio.anteriorTipo = tipo
                         if tipo not in [tpvisita, tpmiembro]:
                             if not cambio.miembro.usuario:
-                                print("Entre a crear usuario")
                                 import re
                                 cedula = re.findall(r'\d+', cambio.miembro.cedula)
                                 cedula = ''.join(cedula)
-                                print(cambio.miembro.cedula)
-                                print(type(cambio.miembro.cedula))
-                                print(cedula)
-                                print(type(cedula))
                                 usuario = User()
                                 usuario.username = cambio.miembro.email
                                 usuario.set_password(cedula)
                                 usuario.save()
                                 cambio.miembro.usuario = usuario
                                 cambio.miembro.save()
-                                print("Usuario %s y password %s" % (cambio.miembro.usuario.username, str(cedula))) 
                             if tipo == tplider:
                                 cambio.miembro.usuario.groups.add(Group.objects.get(name__iexact='lider'))
                             elif tipo == TipoMiembro.objects.get(nombre__iexact='agente'):
