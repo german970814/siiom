@@ -40,6 +40,10 @@
                 <dd>{% if miembro.grupo %}{{miembro.grupo.nombre|upper}}{% else %}No Pertenece a Ningún Grupo{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
+                <dt>Red a la que pertenece</dt>
+                <dd>{% if miembro.grupo %}{{miembro.grupo.red|upper}}{% else %}No Pertenece a Ningúna Red{% endif %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
                 <dt>Lideres</dt>
                 <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}<a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, <a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}No Tiene Lideres{% endif %}</dd>
             </dl>

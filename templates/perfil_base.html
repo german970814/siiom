@@ -227,7 +227,8 @@
 {% endblock %}
 
 {% block contenido %}
-    
+<section>
+    <section>
         <div class="container">
             <div class="block-header">
                 <h2>{{miembro.nombre|upper}} {{miembro.primerApellido|upper}}<small>{% if miembro.grupoLidera %}Lider del grupo '{{miembro.grupoLidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
