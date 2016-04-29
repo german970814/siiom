@@ -93,107 +93,108 @@
             }
         }
 
-        // if (window.File && window.FileReader && window.FileList && window.Blob) {
-        //     document.getElementById('filesToUpload').onchange = function(){
-        //         var files = document.getElementById('filesToUpload').files;
-        //         for(var i = 0; i < files.length; i++) {
-        //             resizeAndUpload(files[i]);
-        //         }
-        //     };
-        // } else {
-        //     alert('The File APIs are not fully supported in this browser.');
-        // }
-         
-        function resizeAndUpload(file) {
-            var reader = new FileReader();
-                reader.onloadend = function() {
-             
-                var tempImg = new Image();
-                tempImg.src = reader.result;
-                tempImg.onload = function() {
-             
-                    var MAX_WIDTH = 600;
-                    var MAX_HEIGHT = 600;
-                    var tempW = tempImg.width;
-                    var tempH = tempImg.height;
-                    if (tempW > tempH) {
-                        if (tempW > MAX_WIDTH) {
-                           tempH *= MAX_WIDTH / tempW;
-                           tempW = MAX_WIDTH;
-                        }
-                    } else {
-                        if (tempH > MAX_HEIGHT) {
-                           tempW *= MAX_HEIGHT / tempH;
-                           tempH = MAX_HEIGHT;
-                        }
+        // Funcion al momento de subir las fotos evitar error 413(Http status)
+        window.uploadPhotos = function(url){
+            var file = event.target.files[0];
+
+            if(file.type.match(/image.*/)) {
+
+                var reader = new FileReader();
+                reader.onload = function (readerEvent) {
+                    var image = new Image();
+                    image.onload = function (imageEvent) {
+
+                        var canvas = document.createElement('canvas'),
+                            max_size = 800,
+                            width = max_size;
+                            height = max_size;
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+                        var dataUrl = canvas.toDataURL('image/jpeg');
+                        var resizedImage = dataURLToBlob(dataUrl);
+                        $.event.trigger({
+                            type: "imageResized",
+                            blob: resizedImage,
+                            url: url
+                        });
                     }
-             
-                    var canvas = document.createElement('canvas');
-                    canvas.width = tempW;
-                    canvas.height = tempH;
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(this, 0, 0, tempW, tempH);
-                    var dataURL = canvas.toDataURL("image/jpeg");
-                    console.log(dataURL);
-                    return dataURL;
-                    // var xhr = new XMLHttpRequest();
-                    // xhr.onreadystatechange = function(ev){
-                    //     document.getElementById('filesInfo').innerHTML = 'Done!';
-                    // };
-             
-                    // xhr.open('POST', 'uploadResized.php', true);
-                    // xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-                    // var data = 'image=' + dataURL;
-                    // xhr.send(data);
-                  }
-             
-               }
-            reader.readAsDataURL(file);
+                    image.src = readerEvent.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        };
+
+        var dataURLToBlob = function(dataURL) {
+            var BASE64_MARKER = ';base64,';
+            if (dataURL.indexOf(BASE64_MARKER) == -1) {
+                var parts = dataURL.split(',');
+                var contentType = parts[0].split(':')[1];
+                var raw = parts[1];
+
+                return new Blob([raw], {type: contentType});
+            }
+
+            var parts = dataURL.split(BASE64_MARKER);
+            var contentType = parts[0].split(':')[1];
+            var raw = window.atob(parts[1]);
+            var rawLength = raw.length;
+
+            var uInt8Array = new Uint8Array(rawLength);
+
+            for (var i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+
+            blob = new Blob([uInt8Array], {type: contentType});
+
+            return blob;
         }
 
-        $("#id_foto_perfil").change(function(event) {
-            formdata = new FormData();
+
+        $(document).on("imageResized", function (event) {
             var nFrom = $(this).attr('data-from');
             var nAlign = $(this).attr('data-align');
             var nIcons = $(this).attr('data-icon');
             var nType = $(this).attr('data-type');
             var nAnimIn = $(this).attr('data-animation-in');
             var nAnimOut = $(this).attr('data-animation-out');
-            var file = this.files[0];
             var $csrf = $('input[name="csrfmiddlewaretoken"]').val()
 
-            if (formdata) {
-                // console.log(file);
-                // console.log($('input[type="file"]')[0]);
-                // 2000000
-                if (file.size > 20) {
-                    notify("Se esta controlando el tamaño de la imagen", nFrom, nAlign, nIcons, "info", 'animated bounceIn', nAnimOut);
-                    imgre = resizeAndUpload($('input[type="file"]')[0].files);
-                    console.log(imgre);
-                } else {
-                    formdata.append('foto_perfil', file);
-                    formdata.append('csrfmiddlewaretoken', $csrf);
-                    formdata.append('file', '')
-
+            var data = new FormData();
+            var date = new Date();
+            if (event.blob && event.url) {
+                if (event.blob.size < 2000000) {
+                    data.append('file', '');
+                    data.append('foto_perfil', event.blob, date.getSeconds().toString() + '-' + date.getMilliseconds().toString());
+                    data.append('csrfmiddlewaretoken', $csrf);
                     $.ajax({
-                        url: '/miembro/perfil/',
-                        type: 'POST',
-                        data: formdata,
-                        processData: false,
+                        url: event.url,
+                        data: data,
+                        cache: false,
                         contentType: false,
+                        processData: false,
+                        type: 'POST',
                         beforeSend: function(){
                             if ($('.loader-fotop')[0]) {
                                 $('.loader-fotop').fadeIn();
                             }
+                            $('#photo-p').attr('src', function() {
+                                return '{% static "Imagenes/profile-none.jpg" %}';
+                            })
                         },
                         success: function(data){
-                            $('#photo-p').attr('src', function() {
-                                return data.ruta;
-                            })
-                            $('.loader-fotop').fadeOut();
+                            setTimeout(function() {
+                                $('#photo-p, .mCS_img_loaded').attr('src', function() {
+                                    return data.ruta;
+                                })
+                                $('.loader-fotop').fadeOut();
+                            }, 2000)
                             notify(data.ms, nFrom, nAlign, nIcons, data.status, 'animated bounceIn', nAnimOut);
                         }
-                    })
+                    });
+                } else {
+                    notify('Imagen Muy Grande', nFrom, nAlign, nIcons, 'warning', 'animated bounceIn', nAnimOut);
                 }
             }
         });
@@ -205,7 +206,7 @@
                 type: 'POST',
                 data: {'delete_file': '', 'csrfmiddlewaretoken': csrf},
                 success: function(data){
-                    $('#photo-p').attr('src', function() {
+                    $('#photo-p, .mCS_img_loaded').attr('src', function() {
                         return data.ruta;
                     })
                     var nFrom = $(this).attr('data-from');
@@ -264,7 +265,7 @@
                     <div class="pmo-pic">
                         <div class="p-relative">
                             {% if mismo %}
-                            <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*">
+                            <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="uploadPhotos('/miembro/perfil/')">
                             {% endif %}
                             <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt=""> 
                             

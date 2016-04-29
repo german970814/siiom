@@ -361,10 +361,8 @@ def liderEditarPerfil(request, pk=None):
                 if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
                     if foto:
                         r = settings.MEDIA_ROOT + "/media/profile_pictures/user_%s/" % miembro.id
-                        if os.path.exists(rut_perfil):
-                            print("si existe")
-                        if os.path.isfile(rut_perfil):
-                            print("Es archivo")
+                        if os.path.exists(rut_perfil) and os.path.isfile(rut_perfil):
+                            print("Se borra el archivo anterior")
                             os.remove(rut_perfil)
                 f.save()
                 ok = True

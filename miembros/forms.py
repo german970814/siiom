@@ -415,7 +415,9 @@ class FormularioFotoPerfil(forms.ModelForm):
             image = image.resize((400, 400), Image.ANTIALIAS)
 
         image_file = BytesIO()
+        image.filename = 'german'
         image.save(image_file, 'JPEG', quality=90)
+        print(image.filename)
 
         image_field.file = image_file
 
