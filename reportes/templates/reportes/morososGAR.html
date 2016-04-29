@@ -76,6 +76,7 @@
                 </div>
             {% endif %}
         </div>
+        {% if miembro.discipulos or perms.miembros.es_administrador %}
         <form action="" method="POST" id="form_pasosTotal">
             {% csrf_token %}
             {{ form.non_field_errors }}
@@ -170,6 +171,13 @@
                 <br>
                 <br>
             </form>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="card">
+        <div class="card-header">
+            <p>No tiene ningun grupo de amistad asignado</p>
         </div>
     </div>
     {% endif %}

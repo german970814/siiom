@@ -102,6 +102,7 @@
                 </div>
             {% endif %}
         </div>
+        {% if miembro.discipulos %}
         <form action="" method="POST" enctype="multipart/form-data" id="form">
             {% csrf_token %}
             <div class="card-body card-padding table-responsive">
@@ -202,6 +203,13 @@
         <br>
         <br>
     </div>
+    {% else %}
+    <div class="card">
+        <div class="card-header">
+            <p>No tiene ningun grupo de amistad asignado</p>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 

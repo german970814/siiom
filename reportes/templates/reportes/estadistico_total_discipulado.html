@@ -88,6 +88,7 @@
                 </div>
             {% endif %}
         </div>
+        {% if miembro.discipulos or perms.miembros.es_administrador %}
         <form action="" method="POST" id="form_totalGAR">
             {% csrf_token %}
             <div class="card-body card-padding">
@@ -175,6 +176,13 @@
                 </div>
             </div>
         </form>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <p>No tiene ningun grupo de amistad asignado</p>
+            </div>
+        </div>
+        {% endif %}
 
     </div>
     {% if sw %}

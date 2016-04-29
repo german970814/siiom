@@ -866,73 +866,74 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     lid_asis = False
     asis_reg = False
 
-    if request.method == 'POST':
-        form = FormularioPredicas(miembro=miembro, data=request.POST)
-        if form.is_valid():
-            predica = form.cleaned_data['predica']
-            grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-            discipulos = Miembro.objects.get(id=grupo_i.listaLideres()[0]).discipulos()
-            grupoDis = Grupo.objects.filter(Q(lider1__in=discipulos) | Q(lider2__in=discipulos))
-            opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
-            sw = True
+    if miembro.discipulos() or miembro.usuario.has_perm("miembros.es_administrador"):
+        if request.method == 'POST':
+            form = FormularioPredicas(miembro=miembro, data=request.POST)
+            if form.is_valid():
+                predica = form.cleaned_data['predica']
+                grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
+                discipulos = Miembro.objects.get(id=grupo_i.listaLideres()[0]).discipulos()
+                grupoDis = Grupo.objects.filter(Q(lider1__in=discipulos) | Q(lider2__in=discipulos))
+                opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
+                sw = True
 
-            n = ['Predica']
-            n.extend(grupoDis.values_list('nombre', flat=True))
-            values = [n]
-            sw_while = True
-            # while sw_while:
-            #     sig = fechai + datetime.timedelta(days = 6)
-            #     l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
-            l = [predica.nombre.upper()]
+                n = ['Predica']
+                n.extend(grupoDis.values_list('nombre', flat=True))
+                values = [n]
+                sw_while = True
+                # while sw_while:
+                #     sig = fechai + datetime.timedelta(days = 6)
+                #     l = [fechai.strftime("%d/%m/%y")+'-'+sig.strftime("%d/%m/%y")]
+                l = [predica.nombre.upper()]
 
-            for g in grupoDis:
-                d = Miembro.objects.get(id=g.listaLideres()[0])
-                grupos = listaGruposDescendientes(d)
+                for g in grupoDis:
+                    d = Miembro.objects.get(id=g.listaLideres()[0])
+                    grupos = listaGruposDescendientes(d)
 
-                if 'opcion' in request.POST and request.POST['opcion'] == 'O':
-                    ofrenda = True
-                    opciones['opt'] = 'Ofrendas'
-                    titulo = "'Ofrendas'"
-                    # sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range=(fechai, sig), grupo__in=grupos).aggregate(Sum('ofrenda'))
-                    sum_ofrenda = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos).aggregate(Sum('ofrenda'))
-                    if sum_ofrenda['ofrenda__sum'] is None:
-                        suma = 0
-                    else:
-                        suma = sum_ofrenda['ofrenda__sum']
-                    l.append(float(suma))
-                else:
-                    if 'opcion' in request.POST and request.POST['opcion'] == 'L':
-                        lid_asis = True
-                        opciones['opt'] = 'Lideres Asistentes'
-                        titulo = "'Lideres Asistentes'"
-                        # numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
-                        numlid = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos).aggregate(Sum('numeroLideresAsistentes'))
-                        if numlid['numeroLideresAsistentes__sum'] is None:
-                            sumLid = 0
+                    if 'opcion' in request.POST and request.POST['opcion'] == 'O':
+                        ofrenda = True
+                        opciones['opt'] = 'Ofrendas'
+                        titulo = "'Ofrendas'"
+                        # sum_ofrenda = ReunionDiscipulado.objects.filter(fecha__range=(fechai, sig), grupo__in=grupos).aggregate(Sum('ofrenda'))
+                        sum_ofrenda = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos).aggregate(Sum('ofrenda'))
+                        if sum_ofrenda['ofrenda__sum'] is None:
+                            suma = 0
                         else:
-                            sumLid = numlid['numeroLideresAsistentes__sum']
-                        l.append(sumLid)
+                            suma = sum_ofrenda['ofrenda__sum']
+                        l.append(float(suma))
                     else:
-                        if 'opcion' in request.POST and request.POST['opcion'] == 'A':  # discipulos
-                            asis_reg = True
-                            opciones['opt'] = 'Asistentes Regulares'
-                            titulo = "'Asistentes Regulares'"
-                            # reg = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
-                            reg = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos)
-                            numAsis = AsistenciaDiscipulado.objects.filter(reunion__in=reg, asistencia=True).count()
-                            l.append(numAsis)
-            values.append(l)
-            # n.append(l)
+                        if 'opcion' in request.POST and request.POST['opcion'] == 'L':
+                            lid_asis = True
+                            opciones['opt'] = 'Lideres Asistentes'
+                            titulo = "'Lideres Asistentes'"
+                            # numlid = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos).aggregate(Sum('numeroLideresAsistentes'))
+                            numlid = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos).aggregate(Sum('numeroLideresAsistentes'))
+                            if numlid['numeroLideresAsistentes__sum'] is None:
+                                sumLid = 0
+                            else:
+                                sumLid = numlid['numeroLideresAsistentes__sum']
+                            l.append(sumLid)
+                        else:
+                            if 'opcion' in request.POST and request.POST['opcion'] == 'A':  # discipulos
+                                asis_reg = True
+                                opciones['opt'] = 'Asistentes Regulares'
+                                titulo = "'Asistentes Regulares'"
+                                # reg = ReunionDiscipulado.objects.filter(fecha__range = (fechai, sig), grupo__in = grupos)
+                                reg = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos)
+                                numAsis = AsistenciaDiscipulado.objects.filter(reunion__in=reg, asistencia=True).count()
+                                l.append(numAsis)
+                values.append(l)
+                # n.append(l)
 
-            print('------------ ' + str(values))
-            if 'reportePDF' in request.POST:
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                PdfTemplate(response, 'Estadistico de reuniones Discipulado totalizadas por discipulo', opciones, values, 2)
-                return response
-    else:
-        form = FormularioPredicas(miembro=miembro)
-        sw = False
+                print('------------ ' + str(values))
+                if 'reportePDF' in request.POST:
+                    response = HttpResponse(content_type='application/pdf')
+                    response['Content-Disposition'] = 'attachment; filename=report.pdf'
+                    PdfTemplate(response, 'Estadistico de reuniones Discipulado totalizadas por discipulo', opciones, values, 2)
+                    return response
+        else:
+            form = FormularioPredicas(miembro=miembro)
+            sw = False
 
     return render_to_response('reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request))
 
