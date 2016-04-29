@@ -82,8 +82,8 @@ class FormularioAdminAgregarMiembro(ModelForm):
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'form-control'})
-        self.fields['genero'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'form-control'})
+        self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
         # self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['conyugue'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 

@@ -390,6 +390,10 @@ def liderEditarPerfil(request, pk=None):
                 form = FormularioLiderAgregarMiembro(data=request.POST, files=request.FILES, instance=miembro)
             if form.is_valid():
                 miembroEditado = form.save()
+                if miembroEditado.usuario is not None:
+                    miembroEditado.usuario.username = miembroEditado.email
+                    miembroEditado.usuario.save()
+                    miembroEditado.save()
                 if miembroEditado.conyugue is not None:
                     conyugue = Miembro.objects.get(id=miembroEditado.conyugue.id)
                     conyugue.conyugue = miembroEditado
@@ -1588,33 +1592,3 @@ def eliminar_foto_perfil(request, pk):
             response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
             response['ms'] = 'Permiso denegado para hacer esta operacion'
     return HttpResponse(json.dumps(response), content_type='application/json')
-
-
-# miembro = Miembro.objects.get(usuario=request.user)
-#     try:
-#         cambio = CambioTipo.objects.get(id=id)
-#     except:
-#         raise Http404
-
-#     if cambio.nuevoTipo.nombre.lower() == "lider":
-#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Lider'))
-#     if cambio.nuevoTipo.nombre.lower() == "agente":
-#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Agente'))
-#     if cambio.nuevoTipo.nombre.lower() == "maestro":
-#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Maestro'))
-#     if cambio.nuevoTipo.nombre.lower() == "receptor":
-#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Receptor'))
-#     if cambio.nuevoTipo.nombre.lower() == "administrador":
-#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Administrador'))
-#     if cambio.nuevoTipo.nombre.lower() == "pastor":
-#         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Pastor'))
-
-#     try:
-#         if len(cambio.miembro.usuario.groups.all()) == 0:
-#             cambio.miembro.usuario = None
-#             cambio.miembro.save()
-#             cambio.miembro.usuario.delete()
-#     except:
-#         pass
-#     cambio.delete()
-#     return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
