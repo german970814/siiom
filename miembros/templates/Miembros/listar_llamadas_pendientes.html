@@ -31,6 +31,7 @@
 
         send_form("#form", $seleccionados);
 
+        {% if grupo %}
         {% if not visitantes %}
         $(window).load(function() {
             swal({   
@@ -42,6 +43,7 @@
                 closeOnConfirm: false 
             });
         });
+        {% endif %}
         {% endif %}
     })
 </script>
@@ -111,10 +113,11 @@
         </div>
         {% endif %}
         {% else %}
-        <div class="row">
-        <div class="col-md-4 col-md-offset-4">
-            <h2>No estas asignado a ningun grupo.</h2>
-        </div><br><br></div>
+        <div class="card">
+            <div class="card-header">
+                <p>No tiene ningun grupo de amistad asignado</p>
+            </div>
+        </div>
         {% endif %}
     </div>
 </div>

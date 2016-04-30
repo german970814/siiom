@@ -42,6 +42,15 @@ def eliminar(request, modelo, lista):
     return ok
 
 
+def divorciar(miembro, conyugue, estado_civil):
+    miembro.estadoCivil = estado_civil
+    miembro.conyugue = None
+    miembro.save()
+    conyugue.estadoCivil = estado_civil
+    conyugue.conyugue = None
+    conyugue.save()
+
+
 def autenticarUsario(request):
     siguiente = request.session.get('next', '')
 
@@ -338,6 +347,7 @@ def liderTransaldarMiembro(request):
 def liderEditarPerfil(request, pk=None):
     p = True
     miembro = Miembro.objects.get(usuario=request.user)
+    casado = False
     mismo = True
     if pk:
         try:
@@ -347,6 +357,9 @@ def liderEditarPerfil(request, pk=None):
                 mismo = True
         except Miembro.DoesNotExist:
             raise Http404
+
+    if miembro.estadoCivil == 'C':
+        casado = True
 
     foto = False
     if miembro.foto_perfil:
@@ -402,6 +415,10 @@ def liderEditarPerfil(request, pk=None):
                     conyugue.save()
                     miembroEditado.estadoCivil = 'C'
                     miembroEditado.save()
+                if casado and miembroEditado.estadoCivil != 'C':
+                    conyugue = Miembro.objects.get(conyugue=miembroEditado)
+                    divorciar(miembroEditado, conyugue, miembroEditado.estadoCivil)
+
                 ok = True
                 ms = "Miembro Editado Correctamente"
                 if mismo:
@@ -448,14 +465,14 @@ def liderLlamadasPendientesVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
     lideres = []
-    for lid in grupo.miembro_set.all():
-        lideres.append(CambioTipo.objects.filter(miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
-    lids = []
-    for l in lideres:
-        for k in l:
-            if k.miembro.id not in lids:
-                lids.append(k.miembro.id)
     if grupo:
+        for lid in grupo.miembro_set.all():
+            lideres.append(CambioTipo.objects.filter(miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
+        lids = []
+        for l in lideres:
+            for k in l:
+                if k.miembro.id not in lids:
+                    lids.append(k.miembro.id)
         visitantes = grupo.miembro_set.filter(fechaLlamadaLider=None).exclude(id__in=lids)
 #        miembrosGrupo = list(grupo.miembro_set.all())
 #        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
