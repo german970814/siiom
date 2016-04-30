@@ -155,3 +155,7 @@ LOGGING = {
     },
     'root': {'level': 'INFO'},
 }
+
+AUTHENTICATION_BACKENDS = (
+    'miembros.backends.EmailAuthenticationBackend',
+)

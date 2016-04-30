@@ -53,23 +53,23 @@ def autenticarUsario(request):
     else:
         valido = True
         if request.method == 'POST':
-            nombreUsuario = request.POST.get('username', '')
+            nombreUsuario = request.POST.get('email', '')
             contrasena = request.POST.get('password', '')
             sig = request.POST.get('next', '')
             if siguiente:
                 sig = siguiente
-            usuario = auth.authenticate(username=nombreUsuario, password=contrasena)
+            usuario = auth.authenticate(email=nombreUsuario, password=contrasena)
             if usuario is not None:
                 auth.login(request, usuario)
                 if Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
-                    if sig != None or sig != '':
+                    if sig is not None or sig != '':
                         return HttpResponseRedirect(sig)
                     return HttpResponseRedirect("/miembro/")
                 elif Group.objects.get(name__iexact='Lider') in usuario.groups.all()      \
                         or Group.objects.get(name__iexact='Maestro') in usuario.groups.all()\
                         or Group.objects.get(name__iexact='Agente') in usuario.groups.all()\
                         or Group.objects.get(name__iexact='Receptor') in usuario.groups.all():
-                        if sig != None or sig != '':
+                        if sig is not None or sig != '':
                             return HttpResponseRedirect(sig)
                         return HttpResponseRedirect('/miembro/')
                 else:
@@ -85,7 +85,7 @@ def salir(request):
 
 
 def miembroTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and (Group.objects.get(name__iexact='Maestro') in user.groups.all()\
             or Group.objects.get(name__iexact='Lider') in user.groups.all()    \
             or Group.objects.get(name__iexact='Agente') in user.groups.all()   \
@@ -94,39 +94,39 @@ def miembroTest(user):
 
 
 def liderTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Lider') in user.groups.all()
 
 
 def agenteTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and Group.objects.get(name__iexact='Agente') in user.groups.all()            
 
 
 def editarMiembroTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and user.has_perm("miembros.puede_editar_miembro")
 
 
 def llamdaAgenteTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and user.has_perm("miembros.llamada_agente")
 
 
 def agregarVisitanteTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and user.has_perm("miembros.puede_agregar_visitante")
 
 
 def cumplimientoPasosTest(user):
-    return  user.is_authenticated() \
+    return user.is_authenticated() \
             and user.has_perm("miembros.cumplimiento_pasos")
 
 
 def asignarGrupoTest(user):
-    return  user.is_authenticated()\
+    return user.is_authenticated()\
             and (Group.objects.get(name__iexact='Agente') in user.groups.all()\
-             or Group.objects.get(name__iexact='Administrador') in user.groups.all())
+            or Group.objects.get(name__iexact='Administrador') in user.groups.all())
 
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
@@ -262,7 +262,7 @@ def liderEditarMiembros(request):
             nuevoMiembro.usuario.username = nuevoMiembro.email
             nuevoMiembro.usuario.save()
             if nuevoMiembro.conyugue != None and nuevoMiembro.conyugue != "":
-                    conyugue = Miembro.objects.get(id = nuevoMiembro.conyugue.id)
+                    conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
                     conyugue.conyugue = nuevoMiembro
                     conyugue.estadoCivil = 'C'
                     conyugue.save()
@@ -274,9 +274,9 @@ def liderEditarMiembros(request):
     if 'seleccionados' in request.session:
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
-            miembroEditar = Miembro.objects.get(id = request.session['seleccionados'].pop())
+            miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
             request.session['actual'] = miembroEditar
-            form = FormularioLiderAgregarMiembro(g=miembroEditar.genero,instance=miembroEditar)        
+            form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
             request.session['seleccionados'] = request.session['seleccionados']
             return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
         else:
@@ -287,13 +287,13 @@ def liderEditarMiembros(request):
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderTransaldarMiembro(request):
-    miembro = Miembro.objects.get(usuario = request.user)
+    miembro = Miembro.objects.get(usuario=request.user)
     discipulos = list(miembro.discipulos())
     if 'grupos' not in request.session:
         grupos = []
         for discipulo in discipulos:
             grupo = discipulo.grupoLidera()
-            if grupo != None:
+            if grupo is not None:
                 if grupo.estado == 'A' and grupo not in grupos:
                     grupos.append(grupo.id)
             subdiscipulos = discipulo.discipulos()
@@ -321,7 +321,7 @@ def liderTransaldarMiembro(request):
             nombre = 'Transladar siguiente'
             return render_to_response("error.html", locals(), context_instance=RequestContext(request))
 
-    if request.session.get('seleccionados') != None:
+    if request.session.get('seleccionados') is not None:
         faltantes = request.session['seleccionados']
         if len(faltantes) > 0:
             miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
@@ -425,7 +425,7 @@ def cambiarContrasena(request):
     if request.method == 'POST':
         form = FormularioCambiarContrasena(data=request.POST, request=request)
         if form.is_valid():
-            if(miembroUsuario.check_password(form.cleaned_data['contrasenaAnterior']) and \
+            if (miembroUsuario.check_password(form.cleaned_data['contrasenaAnterior']) and \
                form.cleaned_data['contrasenaNueva'] == form.cleaned_data['contrasenaNuevaVerificacion']):
                 miembroUsuario.set_password(form.cleaned_data['contrasenaNueva'])
                 miembroUsuario.save()
@@ -446,8 +446,16 @@ def liderLlamadasPendientesVisitantesGrupo(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
+    lideres = []
+    for lid in grupo.miembro_set.all():
+        lideres.append(CambioTipo.objects.filter(miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
+    lids = []
+    for l in lideres:
+        for k in l:
+            if k.miembro.id not in lids:
+                lids.append(k.miembro.id)
     if grupo:
-        visitantes = grupo.miembro_set.filter(fechaLlamadaLider=None)
+        visitantes = grupo.miembro_set.filter(fechaLlamadaLider=None).exclude(id__in=lids)
 #        miembrosGrupo = list(grupo.miembro_set.all())
 #        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
 #        visitantes = []
@@ -849,7 +857,7 @@ def editarBarrio(request, id, pk):
         form = FormularioCrearBarrio(instance=barrio)
         return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
 
-    return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
+    return HttpResponseRedirect('/miembro/barrios/' + str(zona.id))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1124,7 +1132,7 @@ def crearUsuarioMimembro(request, id):
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
                 if request.session['tipo'].lower() == "administrador":
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
-            return HttpResponseRedirect('/miembro/perfil/'+str(miembroCambio.id)+'/')
+            return HttpResponseRedirect('/miembro/perfil/' + str(miembroCambio.id) + '/')
     else:
         form = FormularioAsignarUsuario()
     form.email = miembroCambio.email
@@ -1240,7 +1248,7 @@ def AgregarDetalleLlamada(request):
             ok = True
     else:
         form = FormularioDetalleLlamada()
-    return render_to_response('Miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))    
+    return render_to_response('Miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
