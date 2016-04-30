@@ -392,6 +392,7 @@ def liderEditarPerfil(request, pk=None):
                 miembroEditado = form.save()
                 if miembroEditado.usuario is not None:
                     miembroEditado.usuario.username = miembroEditado.email
+                    miembroEditado.usuario.email = miembroEditado.email
                     miembroEditado.usuario.save()
                     miembroEditado.save()
                 if miembroEditado.conyugue is not None:
