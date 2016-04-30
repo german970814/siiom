@@ -1117,6 +1117,7 @@ def crearUsuarioMimembro(request, id):
             if form.cleaned_data['email'] != miembroCambio.email:
                 miembroCambio.correo = form.cleaned_data['email']
             nuevoUsuario.username = form.cleaned_data['email']
+            nuevoUsuario.email = form.cleaned_data['email']
             nuevoUsuario.set_password(form.cleaned_data['contrasena'])
             nuevoUsuario.save()
             miembroCambio.usuario = nuevoUsuario
@@ -1505,6 +1506,7 @@ def ver_informacion_miembro(request, pk=None):
                                 cedula = ''.join(cedula)
                                 usuario = User()
                                 usuario.username = cambio.miembro.email
+                                usuario.email = cambio.miembro.email
                                 usuario.set_password(cedula)
                                 usuario.save()
                                 cambio.miembro.usuario = usuario
