@@ -290,7 +290,7 @@
                                 <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar Foto de Perfil</span>
                             </a>
                             {% else %}
-                                {% if perms.miembro.es_administrador %}
+                                {% if perms.miembro.es_administrador and miembro.foto_perfil %}
                                 <a href="#" class="pmop-edit" id="delete-photo">
                                     <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar foto de perfil</span>
                                 </a>

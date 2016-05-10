@@ -112,8 +112,8 @@
                 <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
             </div>
         </div>
-    </div>
     </form>
+    </div>
 </div>
 
 <div class="pmb-block">
@@ -146,7 +146,11 @@
 </div>
 {% endif %}
 <div class="container">
-    <div class="p-25 p-t-25">El Miembro No Pertenece a Grupo. {% if perms.miembros.es_administrador %}<a href="/miembro/asignar_grupo/{{miembro.id}}/" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>{% endif %}</div>
+    <div class="p-25 p-t-25">El Miembro No Pertenece a Grupo. 
+    {% if perms.miembros.es_administrador %}
+        <a href="/miembro/asignar_grupo/{{miembro.id}}/" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>
+    {% endif %}
+    </div>
 </div>
 {% endif %}
 {% endblock card %}
