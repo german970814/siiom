@@ -268,7 +268,8 @@ def liderEditarMiembros(request):
         form = FormularioLiderAgregarMiembro(data=request.POST, instance=actual)
         if form.is_valid():
             nuevoMiembro = form.save()
-            nuevoMiembro.usuario.username = nuevoMiembro.email
+            nuevoMiembro.usuario.username = nuevoMiembro.nombre + nuevoMiembro.primerApellido
+            nuevoMiembro.usuario.email = nuevoMiembro.email
             nuevoMiembro.usuario.save()
             if nuevoMiembro.conyugue != None and nuevoMiembro.conyugue != "":
                     conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
@@ -404,7 +405,7 @@ def liderEditarPerfil(request, pk=None):
             if form.is_valid():
                 miembroEditado = form.save()
                 if miembroEditado.usuario is not None:
-                    miembroEditado.usuario.username = miembroEditado.email
+                    miembroEditado.usuario.username = miembroEditado.nombre + miembroEditado.primerApellido
                     miembroEditado.usuario.email = miembroEditado.email
                     miembroEditado.usuario.save()
                     miembroEditado.save()
@@ -686,7 +687,8 @@ def editarMiembro(request, id):
             nuevoMiembro.estado = 'A'
             nuevoMiembro.save()
             if nuevoMiembro.usuario != None:
-                nuevoMiembro.usuario.username = nuevoMiembro.email
+                nuevoMiembro.usuario.username = nuevoMiembro.nombre + nuevoMiembro.primerApellido
+                nuevoMiembro.usuario.email = nuevoMiembro.email
                 nuevoMiembro.usuario.save()
             if nuevoMiembro.conyugue != None and nuevoMiembro.conyugue != '':
                     conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
@@ -1523,7 +1525,7 @@ def ver_informacion_miembro(request, pk=None):
                                 cedula = re.findall(r'\d+', cambio.miembro.cedula)
                                 cedula = ''.join(cedula)
                                 usuario = User()
-                                usuario.username = cambio.miembro.email
+                                usuario.username = cambio.miembro.nombre + cambio.miembro.primerApellido
                                 usuario.email = cambio.miembro.email
                                 usuario.set_password(cedula)
                                 usuario.save()

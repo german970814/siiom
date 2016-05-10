@@ -11,7 +11,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SIIOM: {{nombreIglesia}}</title>
+    <title>{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{nombreIglesia}}</title>
 
     <!-- Bootstrap Core CSS -->
 
@@ -94,7 +94,7 @@
                 </div>
             </li>
             <li class="logo hidden-xs">
-                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">SIIOM</a>
+                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -153,7 +153,7 @@
                     </div>
                     <div class="profile-info">
                     {% if request.user.is_authenticated %}
-                        {{ request.user }}
+                        {{ request.user.email }}
                     {% else %}
                         {{nombreIglesia}}
                     {% endif %}
@@ -263,7 +263,7 @@
                                     <a href="/grupo/listar_predicas/">Listar Prédicas</a>
                                 </li>
                                 <li>
-                                    <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión GAR</a>
+                                    <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
                                 <li>
                                     <a href="/grupo/faltante_confirmar_ofrenda/">Grupos Faltantes Confirmar Ofrenda</a>
@@ -277,13 +277,13 @@
                 </li>
                 {% endif %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi GAR</a>
+                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
                         <li>
-                            <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre GAR</a>
+                            <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                         <li>
-                            <a href="/miembro/editar_grupo/">Editar mi GAR</a>
+                            <a href="/miembro/editar_grupo/">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                         <li>
                             <a href="/miembro/llamadas_pendientes/lider/">Llamadas Pendientes</a>
@@ -291,13 +291,13 @@
                     </ul>
                 </li>
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes GAR</a>
+                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
                         <li>
-                            <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi GAR</a>
+                            <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                         <li>
-                            <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar GAR</a>
+                            <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
@@ -359,7 +359,7 @@
                                     <a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discupulado</a>
                                 </li>
                                 <li>
-                                    <a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones GAR</a>
+                                    <a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
                             </ul>
                         </li>
@@ -388,7 +388,7 @@
                             <a href="#">Asignación y Llamadas</a>
                             <ul>
                                 <li>
-                                    <a href="/reportes/asignacion_gar/">Control de Asignacion a GAR</a>
+                                    <a href="/reportes/asignacion_gar/">Control de Asignacion a {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
                                 <li>
                                     <a href="/reportes/primera_llamada/">Primera Llamada</a>

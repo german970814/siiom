@@ -158,4 +158,5 @@ LOGGING = {
 
 AUTHENTICATION_BACKENDS = (
     'miembros.backends.EmailAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )

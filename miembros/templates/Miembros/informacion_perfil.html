@@ -94,17 +94,17 @@
 
 <div class="pmb-block">
     <div class="pmbb-header">
-        <h2><i class="zmdi zmdi-assignment-account m-r-5"></i> Infomación de Consolidación de G.A.R</h2>
+        <h2><i class="zmdi zmdi-assignment-account m-r-5"></i> Infomación de Consolidación de {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</h2>
     </div>
     <div class="pmbb-body p-l-30">
         <div class="pmbb-view">
             <dl class="dl-horizontal">
-                <dt>Fecha Asignacion G.A.R</dt>
-                <dd>{% if miembro.fechaAsignacionGAR %}{{miembro.fechaAsignacionGAR}}{% else %}No ha sido Asignado a G.A.R aún{% endif %}</dd>
+                <dt>Fecha Asignacion {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dd>{% if miembro.fechaAsignacionGAR %}{{miembro.fechaAsignacionGAR}}{% else %}No ha sido Asignado a {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %} aún{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
-                <dt>Asistencia a G.A.R</dt>
-                <dd>{% if miembro.asisteGAR %}El Miembro Asiste a G.A.R{% else %}{% if miembro.noInteresadoGAR %}El Miembro no está interesado en G.A.R{% else %}No se Tienen Datos{% endif %}{% endif %}</dd>
+                <dt>Asistencia a {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dd>{% if miembro.asisteGAR %}El Miembro Asiste a {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}{% else %}{% if miembro.noInteresadoGAR %}El Miembro no está interesado en {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}{% else %}No se Tienen Datos{% endif %}{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Primera Llamada</dt>
@@ -199,7 +199,7 @@
         <div class="pmbb-edit">
             <div class="input-group {{form.asisteGAR.css_classes}} col-xs-12">
             <dl class="dl-horizontal">
-                <dt class="p-t-10">Asitencia a G.A.R:</dt>
+                <dt class="p-t-10">Asitencia a {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}:</dt>
                 <dd>
                     <div class="fg-line">
                     	<label for="id_asisteGAR" class="control-label checkbox">
@@ -215,7 +215,7 @@
             </div>
             <div class="input-group {{form.asignadoGAR.css_classes}} col-xs-12">
             <dl class="dl-horizontal">
-                <dt class="p-t-10">Asignado a G.A.R:</dt>
+                <dt class="p-t-10">Asignado a {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}:</dt>
                 <dd>
                     <div class="fg-line">
                         <label for="id_asignadoGAR" class="control-label checkbox">
