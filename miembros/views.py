@@ -20,6 +20,7 @@ import os
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
 from .forms import FormularioFotoPerfil
+from reportes.views import listaGruposDescendientes
 
 
 def eliminar(request, modelo, lista):
@@ -141,6 +142,10 @@ def asignarGrupoTest(user):
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def miembroInicio(request):
     miembro = Miembro.objects.get(usuario=request.user)
+
+    if request.user.has_perm("miembros.es_administrador"):
+        return HttpResponseRedirect("/administracion/")
+
     grupo = miembro.grupoLidera()
     if grupo:
         miembrosGrupo = list(grupo.miembro_set.all())
@@ -159,29 +164,29 @@ def miembroInicio(request):
     inactivos = list()
     grupos = list()
 
-    def sub_discipulos(disc, miem, sw=True):
-        disc2 = list(miem.discipulos())
-        if sw:
-            for discipulo in disc2:
-                if discipulo.grupoLidera():
-                    if discipulo not in disc:
-                        # print("%s discipulo de %s" % (discipulo, miem))
-                        disc.append(discipulo)
-                    if discipulo.discipulos():
-                        sub_discipulos(disc, discipulo)
-                    else:
-                        sw = False
-                else:
-                    if discipulo not in inactivos:
-                        # print("inactivo", discipulo)
-                        inactivos.append(discipulo)
-                    sw = False
+    # def sub_discipulos(disc, miem, sw=True):
+    #     disc2 = list(miem.discipulos())
+    #     if sw:
+    #         for discipulo in disc2:
+    #             if discipulo.grupoLidera():
+    #                 if discipulo not in disc:
+    #                     # print("%s discipulo de %s" % (discipulo, miem))
+    #                     disc.append(discipulo)
+    #                 if discipulo.discipulos():
+    #                     sub_discipulos(disc, discipulo)
+    #                 else:
+    #                     sw = False
+    #             else:
+    #                 if discipulo not in inactivos:
+    #                     # print("inactivo", discipulo)
+    #                     inactivos.append(discipulo)
+    #                 sw = False
 
-    def sub_grupos(grus, miem, disci, sw=True):
-        if sw:
-            for disc in disci:
-                if disc.grupoLidera() is not None and disc.grupoLidera() not in grus:
-                    grus.append(disc.grupoLidera())
+    # def sub_grupos(grus, miem, disci, sw=True):
+    #     if sw:
+    #         for disc in disci:
+    #             if disc.grupoLidera() is not None and disc.grupoLidera() not in grus:
+    #                 grus.append(disc.grupoLidera())
 
     def lid_gru(miem):
         visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
@@ -191,20 +196,25 @@ def miembroInicio(request):
         else:
             return []
 
-    def lid_inc(miem):
-        pass
 
-    sub_discipulos(discipulos, miembro)
-    sub_grupos(grupos, miembro, discipulos)
+    # sub_discipulos(discipulos, miembro)
+    # sub_grupos(grupos, miembro, discipulos)
+    k = listaGruposDescendientes(miembro)
+    for lid in k:
+        if lid == miembro.grupoLidera():
+            pass
+        else:
+            if lid.listaLideres():
+                for miem in lid.listaLideres():
+                    discipulos.append(Miembro.objects.get(id=miem))
+            else:
+                pass
     totalLideres = len(discipulos)
-    totalGrupos = len(grupos)
-    # print(lid_gru(miembro))
-    lideresGrupo = len(lid_gru(miembro))
-    totalGruposI = len(inactivos)
+    totalGrupos = len(listaGruposDescendientes(miembro))  # len(grupos)
+    lideresGrupo = len(lid_gru(miembro)) - 1
+    # totalGruposI = totalLideres - lideresGrupo
 
     # request.session['visitantes'] = visitantes
-    if request.user.has_perm("miembros.es_administrador"):
-        return HttpResponseRedirect("/administracion/")
     return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
 
