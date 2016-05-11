@@ -1,7 +1,8 @@
 from django.conf.urls import include, patterns, url
 from django.views.generic import RedirectView
 from .views import *
-from grupos.views import editarHorarioReunionGrupo, reportarReunionGrupo, reportarReunionGrupoAdmin, reportarReunionDiscipulado, registrarPagoGrupo,registrarPagoDiscipulado
+from grupos.views import editarHorarioReunionGrupo, reportarReunionGrupo, \
+    reportarReunionGrupoAdmin, reportarReunionDiscipulado, registrarPagoGrupo, registrarPagoDiscipulado
 
 urlpatterns = [
     url(r'^$', miembroInicio, name="miembro_inicio"),
@@ -50,7 +51,7 @@ urlpatterns = [
     url(r'^editar_detalle_llamada/(?P<pk>\d+)$', editarDetalleLlamada, name="editar_detalle_llamada"),
     url(r'^graduar_alumno/$', graduarAlumno, name="graduar_alumno"),
     url(r'^asignar_usuario/(\d+)/$', crearUsuarioMimembro, name="asignar_grupo"),
-    url(r'^eliminar_cambio_tipo/(\d+)/$', eliminarCambioTipoMiembro, name="eliminar_cambio_tipo"),  # No usada actualmente
+    url(r'^eliminar_cambio_tipo/(\d+)/$', eliminarCambioTipoMiembro, name="eliminar_cambio_tipo"),  # No usada
     url(r'^cumplimiento_pasos/$', cumplimientoPasos, name="cumplimiento_pasos"),
     url(r'^discipulos/(?P<pk>\d*)$', ver_discipulos, name="ver_discipulos"),
     url(r'^informacion_iglesia/(?P<pk>\d*)$', ver_informacion_miembro, name="ver_informacion"),

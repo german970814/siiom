@@ -1,21 +1,29 @@
-# Create your views here.
+# Django Imports
 from django.contrib import messages
-from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
-from miembros.models import Miembro, CumplimientoPasos
-from academia.models import Curso, Matricula, AsistenciaSesiones, Modulo,\
-    Sesion, Reporte
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template.context import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core import serializers
-import datetime
 from django.db.models.aggregates import Sum
 from django.db.models import Q
-from academia.forms import FormularioEvaluarModulo,\
-    FormularioPromoverModulo, FormularioCrearCurso, FormularioEditarCurso,\
-    FormularioMatricula, FormularioCrearModulo, FormularioCrearSesion,\
-    FormularioRecibirPago
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template.context import RequestContext
+
+# Apps Imports
+from .models import (
+    Curso, Matricula, AsistenciaSesiones, Modulo, Sesion, Reporte
+)
+from .forms import (
+    FormularioEvaluarModulo, FormularioPromoverModulo, FormularioCrearCurso,
+    FormularioEditarCurso, FormularioMatricula, FormularioCrearModulo,
+    FormularioCrearSesion, FormularioRecibirPago
+)
+from miembros.models import Miembro, CumplimientoPasos
+from common.tests import (
+    maestroTest, receptorTest, adminTest, adminMaestroTest
+)
+
+# Python Packages
+import datetime
 
 
 def eliminar(request, modelo, lista):
@@ -34,29 +42,9 @@ def eliminar(request, modelo, lista):
         messages.success(request, "Se ha eliminado correctamente")
     return ok
 
-
-def maestroTest(user):
-    return user.is_authenticated() \
-           and Group.objects.get(name__iexact='Maestro') in user.groups.all()
-
-
-def receptorTest(user):
-    return  user.is_authenticated() \
-            and Group.objects.get(name__iexact='Receptor') in user.groups.all()
-
-
-def adminTest(user):
-    return user.is_authenticated() \
-           and Group.objects.get(name__iexact='Administrador') in user.groups.all()
-
-
-def adminMaestroTest(user):
-    return user.is_authenticated() \
-           and (Group.objects.get(name__iexact = 'Administrador') in user.groups.all() \
-                or Group.objects.get(name__iexact = 'Maestro') in user.groups.all())
-
-
 #  -------------------------AMBOS----------------------------------
+
+
 @user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
 def verCursos(request, admin):
     """Permite a un maestro o a un administrador listar cursos."""
@@ -134,11 +122,11 @@ def listarEstudiantes(request, curso):
             seleccionados = list()
             for x in request.POST.getlist('seleccionados'):
                 if isinstance(x, int):
-                    if not x in seleccionados:
+                    if x not in seleccionados:
                         seleccionados.append(x)
                 else:
                     try:
-                        if not x in seleccionados:
+                        if x not in seleccionados:
                             seleccionados.append(int(x))
                     except ValueError:
                         pass
@@ -223,7 +211,10 @@ def maestroAsistencia(request):
                 mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
 
                 if 'aceptarAsistencia' in request.POST:
-                    estudiantes = Matricula.objects.filter(Q(curso=curso), Q(moduloActual=modulo) | Q(moduloActual=None)).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
+                    estudiantes = Matricula.objects.filter(
+                        Q(curso=curso),
+                        Q(moduloActual=modulo) | Q(moduloActual=None)
+                    ).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
                     seleccionados = request.POST.getlist('seleccionados')
                     for est in estudiantes:
                         if est.moduloActual is None:
@@ -235,7 +226,9 @@ def maestroAsistencia(request):
                                 a = AsistenciaSesiones.objects.get(matricula=est, sesion=sesion)
                                 a.asistencia = True
                             except:
-                                a = AsistenciaSesiones.objects.create(matricula=est, sesion=sesion, asistencia = True, fecha=datetime.datetime.now())
+                                a = AsistenciaSesiones.objects.create(
+                                    matricula=est, sesion=sesion,
+                                    asistencia=True, fecha=datetime.datetime.now())
                             a.save()
                             ok = True
                         else:
@@ -247,7 +240,9 @@ def maestroAsistencia(request):
                             except:
                                 pass
 
-                estudiantes = Matricula.objects.filter(Q(curso=curso), Q(moduloActual=modulo) | Q(moduloActual=None)).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
+                estudiantes = Matricula.objects.filter(
+                    Q(curso=curso), Q(moduloActual=modulo) | Q(moduloActual=None)
+                ).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
                 for est in estudiantes:
                     try:
                         a = AsistenciaSesiones.objects.get(sesion=sesion, matricula=est)
@@ -295,7 +290,10 @@ def maestroRegistrarEntregaTareas(request):
                 mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
 
                 if 'aceptarTarea' in request.POST:
-                    estudiantes = AsistenciaSesiones.objects.filter(asistencia=True, matricula__curso=curso, matricula__moduloActual=modulo, sesion=sesion).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
+                    estudiantes = AsistenciaSesiones.objects.filter(
+                        asistencia=True, matricula__curso=curso,
+                        matricula__moduloActual=modulo, sesion=sesion
+                    ).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
                     seleccionados = request.POST.getlist('seleccionados')
                     for est in estudiantes:
                         if str(est.id) in seleccionados:
@@ -305,7 +303,10 @@ def maestroRegistrarEntregaTareas(request):
                         est.save()
                         ok = True
 
-                estudiantes = AsistenciaSesiones.objects.filter(asistencia=True, matricula__curso=curso, matricula__moduloActual=modulo, sesion=sesion).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
+                estudiantes = AsistenciaSesiones.objects.filter(
+                    asistencia=True, matricula__curso=curso, matricula__moduloActual=modulo,
+                    sesion=sesion
+                ).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
                 if len(estudiantes) == 0:
                     nadie = True
             except:
@@ -322,7 +323,7 @@ def evaluarModulo(request):
     encuentra el estudiante, siempre y cuando este halla asistido a todas las sesiones de dicho modulo."""
 
     if request.method == 'POST':
-        if request.session.get('actual') != None:
+        if request.session.get('actual') is not None:
             actual = request.session['actual']  # estudiante actual
             try:
                 estudiante_actual = Matricula.objects.get(id=actual)
@@ -340,7 +341,8 @@ def evaluarModulo(request):
                     nuevoReporte.modulo = estudiante_actual.moduloActual
                     nuevoReporte.save()
                 total = estudiante_actual.curso.modulos.all().aggregate(Sum('porcentaje'))
-                estudiante_actual.notaDefinitiva = estudiante_actual.notaDefinitiva + (nuevoReporte.nota*nuevoReporte.modulo.porcentaje/total['porcentaje__sum'])
+                estudiante_actual.notaDefinitiva = estudiante_actual.notaDefinitiva + \
+                    (nuevoReporte.nota * nuevoReporte.modulo.porcentaje / total['porcentaje__sum'])
                 estudiante_actual.save()
                 ok = True
 
@@ -369,7 +371,7 @@ def promoverModulo(request):
        de el modulo actual en el que se encuentra."""
 
     if request.method == 'POST':
-        if request.session.get('actual') != None:
+        if request.session.get('actual') is not None:
             actual = request.session['actual']
             est = Matricula.objects.get(id=actual)
             form = FormularioPromoverModulo(data=request.POST, instance=est)

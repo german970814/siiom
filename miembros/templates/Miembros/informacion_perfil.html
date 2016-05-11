@@ -25,27 +25,27 @@
         <div class="pmbb-view">
             <dl class="dl-horizontal">
                 <dt>Estado del Miembro</dt>
-                <dd>{{miembro.get_estado_display}}</dd>
+                <dd>{% if miembro.estado %}{{miembro.get_estado_display}}{% else %}SIN DATOS{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Convertido</dt>
-                <dd>{% if miembro.convertido %}Si{% else %}No{% endif %}</dd>
+                <dd>{% if miembro.convertido %}SI{% else %}NO{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Grupo que Lidera</dt>
-                <dd>{% if miembro.grupoLidera %}{{miembro.grupoLidera.nombre|upper}}{% else %}Ninguno{% endif %}</dd>
+                <dd>{% if miembro.grupoLidera %}{{miembro.grupoLidera.nombre|upper}}{% else %}NINGUNO{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Grupo al que pertenece</dt>
-                <dd>{% if miembro.grupo %}{{miembro.grupo.nombre|upper}}{% else %}No Pertenece a Ningún Grupo{% endif %}</dd>
+                <dd>{% if miembro.grupo %}{{miembro.grupo.nombre|upper}}{% else %}NO PERTENEC A NINGÚN GRUPO AÚN{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Red a la que pertenece</dt>
-                <dd>{% if miembro.grupo %}{{miembro.grupo.red|upper}}{% else %}No Pertenece a Ningúna Red{% endif %}</dd>
+                <dd>{% if miembro.grupo %}{{miembro.grupo.red|upper}}{% else %}NO PERTENECE A NINGUNA RED{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Lideres</dt>
-                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}<a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, <a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}No Tiene Lideres{% endif %}</dd>
+                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}{% if not lid.grupoLidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, {% if not lid.grupoLidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}NO TIENE LÍDERES{% endif %}</dd>
             </dl>
         </div>
         <form action="" method="POST" enctype="multipart/form-data" id="form_informacion">

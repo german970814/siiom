@@ -12,9 +12,7 @@ from miembros.models import Miembro, TipoMiembro
 from django.template.context import RequestContext
 from grupos.models import Grupo
 from django.db.models import Q
-from miembros.forms import FormularioCumplimientoPasosMiembro
 from miembros.models import CambioTipo, CumplimientoPasos, Pasos
-from miembros.views import cambiarContrasena, autenticarUsario
 
 
 def inicio(request):
@@ -26,12 +24,13 @@ def custom_404(request):
 
 
 def miembroTest(user):
-    return  user.is_authenticated() \
-            and (Group.objects.get(name__iexact='Maestro') in user.groups.all()\
-            or Group.objects.get(name__iexact='Lider') in user.groups.all()    \
-            or Group.objects.get(name__iexact='Agente') in user.groups.all()   \
-            or Group.objects.get(name__iexact='Receptor') in user.groups.all()
-            or Group.objects.get(name__iexact='Administrador') in user.groups.all())
+    return user.is_authenticated() and (
+        Group.objects.get(name__iexact='Maestro') in user.groups.all()
+        or Group.objects.get(name__iexact='Lider') in user.groups.all()
+        or Group.objects.get(name__iexact='Agente') in user.groups.all()
+        or Group.objects.get(name__iexact='Receptor') in user.groups.all()
+        or Group.objects.get(name__iexact='Administrador') in user.groups.all()
+    )
 
 
 @user_passes_test(miembroTest, login_url="/iniciar_sesion/")
@@ -52,7 +51,10 @@ def resultadoBusqueda(request, tipoBus):
         resultadosGrupos = []
 
         for st in csTerm:
-            resultadosMiembros.extend(list(Miembro.objects.filter(Q(nombre__icontains=st) | Q(cedula=st) | Q(primerApellido__icontains=st) | Q(segundoApellido__icontains=st)).order_by("nombre")))
+            resultadosMiembros.extend(list(Miembro.objects.filter(
+                Q(nombre__icontains=st) | Q(cedula=st) |
+                Q(primerApellido__icontains=st) | Q(segundoApellido__icontains=st)
+            ).order_by("nombre")))
             resultadosGrupos.extend(list(Grupo.objects.filter(nombre__icontains=st).order_by("nombre")))
 
         resultadosMiembros = list(set(resultadosMiembros))
@@ -94,15 +96,15 @@ def depu(request):
     print(padre)
     for m in miembros:
         if m.email != 'NN':
-            cad = cad+m.email+'<br />'
-            if m.usuario == None:
+            cad = cad + m.email + '<br />'
+            if m.usuario is None:
                 user = User.objects.create()
                 user.username = m.email
                 user.set_password(123456)
                 user.save()
                 m.usuario = user
 
-            if m.conyugue != None and m.conyugue != '':
+            if m.conyugue is not None and m.conyugue != '':
                 con = Miembro.objects.get(id=m.conyugue.id)
                 con.conyugue = m
                 con.estadoCivil = 'C'
@@ -112,13 +114,17 @@ def depu(request):
             m.save()
             print(m)
 
-            cambioTipo = CambioTipo.objects.create(miembro=m, autorizacion=padre, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider"), anteriorTipo=TipoMiembro.objects.get(nombre__iexact="visita"), fecha=date.today())
+            cambioTipo = CambioTipo.objects.create(
+                miembro=m, autorizacion=padre, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider"),
+                anteriorTipo=TipoMiembro.objects.get(nombre__iexact="visita"), fecha=date.today())
             print(cambioTipo)
             cambioTipo.save()
 
             m.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
 
-            cp = CumplimientoPasos.objects.create(miembro=m, paso=Pasos.objects.get(nombre__iexact = 'Lanzamiento'), fecha=date.today())
+            cp = CumplimientoPasos.objects.create(
+                miembro=m, paso=Pasos.objects.get(nombre__iexact='Lanzamiento'),
+                fecha=date.today())
             print(cp)
             cp.save()
 

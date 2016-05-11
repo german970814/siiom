@@ -1,55 +1,27 @@
-# Create your views here.
-import datetime
+# Django Imports
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-from grupos.forms import FormularioEditarGrupo,\
-    FormularioReportarReunionGrupo, FormularioReportarReunionDiscipulado,\
-    FormularioCrearRed, FormularioCrearGrupo
-from miembros.models import Miembro
-from grupos.models import Grupo, AsistenciaMiembro, ReunionGAR,\
-    ReunionDiscipulado, Red, AsistenciaDiscipulado
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
 from django.http import HttpResponseRedirect, Http404
-from academia.views import adminTest
-from grupos.forms import FormularioReportesSinEnviar, FormularioCrearGrupoRaiz, FormularioCrearPredica, \
-    FormularioReportarReunionGrupoAdmin
-from grupos.models import Predica
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template.context import RequestContext
 
+# Apps Imports
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
+from .forms import (
+    FormularioEditarGrupo, FormularioReportarReunionGrupo,
+    FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
+    FormularioTransladarGrupo, FormularioCrearGrupoRaiz, FormularioCrearPredica,
+    FormularioReportarReunionGrupoAdmin,
+)
+from miembros.models import Miembro
+from common.tests import (
+    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
+)
 
-def receptorTest(user):
-    return user.is_authenticated() \
-            and Group.objects.get(name__iexact='Receptor') in user.groups.all()
-
-
-def liderTest(user):
-    return user.is_authenticated() \
-            and Group.objects.get(name__iexact='Lider') in user.groups.all()
-
-
-def adminTest(user):
-    return user.is_authenticated() \
-            and Group.objects.get(name__iexact='Administrador') in user.groups.all()
-
-
-def verGrupoTest(user):
-    return user.is_authenticated()\
-    and (Group.objects.get(name__iexact='Lider') in user.groups.all()\
-         or Group.objects.get(name__iexact='Administrador') in user.groups.all())
-
-
-def receptorAdminTest(user):
-    return user.is_authenticated()\
-    and (Group.objects.get(name__iexact='Receptor') in user.groups.all()\
-         or Group.objects.get(name__iexact='Administrador') in user.groups.all())
-
-
-def PastorAdminTest(user):
-    return user.is_authenticated()\
-    and (Group.objects.get(name__iexact='Pastor') in user.groups.all()\
-         or Group.objects.get(name__iexact='Administrador') in user.groups.all())
+# Python Packages
+import datetime
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -241,7 +213,8 @@ def registrarPagoGrupo(request, id):
     sw = True
     if grupoLidera is None:
         sw = False
-        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
+        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % \
+            (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
     ofrendasPendientesGar = ReunionGAR.objects.filter(grupo=grupoLidera, confirmacionEntregaOfrenda=False)
     return render_to_response("Grupos/registrar_pago_gar.html", locals(), context_instance=RequestContext(request))
 
@@ -272,8 +245,10 @@ def registrarPagoDiscipulado(request, id):
     sw = True
     if grupoLidera is None:
         sw = False
-        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
-    ofrendasPendientesDiscipulado = ReunionDiscipulado.objects.filter(grupo=grupoLidera, confirmacionEntregaOfrenda=False)
+        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % \
+            (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
+    ofrendasPendientesDiscipulado = ReunionDiscipulado.objects.filter(grupo=grupoLidera,
+                                                                      confirmacionEntregaOfrenda=False)
     return render_to_response("Grupos/registrar_pago_discipulado.html", locals(), context_instance=RequestContext(request))
 
 
@@ -479,68 +454,79 @@ def verGrupo(request, id):
 
 
 # def ConsultarReportesSinEnviar(request, sobres=False):
-#    """Permite a un administrador revisar que lideres no han registrado sus reportes de reuniones de grupo en un rango de fecha
-#        especificado. El administrador escoge el tipo de reunion, si la reunion es de GAR(1) o discipulado (2). Luego el administrador
-#        podra enviar un mail a los lideres que no han ingresado los reportes y a sus lideres."""
-#
-#    miembro = Miembro.objects.get(usuario=request.user)
-#    if request.method == 'POST':
-#        if 'Enviar' in request.POST:
-#            if 'grupos_sin_reporte' in request.session:
-#                grupos = request.session['grupos_sin_reporte']
-#                receptores = list()
-#                for g in grupos:
-#                    mailLideres = g.lideres.values('email')
-#                    receptores.extend(["%s" % (k['email']) for k in mailLideres])
-#                camposMail = ['Reportes Reunion', 'mensaje', receptores]
-#                sendMail(camposMail)
-#                    #mailLideres = Miembro.objects.filter(id__in = g.lideres[0].grupo.listaLideres()).values('email')
-#                    #receptores = ["%s" % (k['email']) for k in mailLideres]
-#                    #camposMail1 = ['Lideres Reporte Reunion', 'mensaje', receptores]
-#
-#        form = FormularioReportesSinEnviar(request.POST)
-#        #Se buscan los grupos que deben reunion
-#        if 'verMorosos' in request.POST:
-#            if form.is_valid():
-#                tipoReunion = form.cleaned_data['reunion']
-#                fechai = form.cleaned_data['fechai']
-#                fechaf = form.cleaned_data['fechaf']
-#                grupos = []
-#                sw = True
-#                while sw:
-#                    sig = fechai + datetime.timedelta(weeks = 1)
-#                    if tipoReunion == 1:
-#                        gr = Grupo.objects.filter(estado='A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig)
-#                    else:
-#                        gr = Grupo.objects.filter(estado='A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig)
-#                    for g in gr:
-#                        try:
-#                            i = grupos.index(g)
-#                            if sobres:
-#                                if tipoReunion == 1:
-#                                    gr = Grupo.objects.filter(estado='A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
-#                                else:
-#                                    gr = Grupo.objects.filter(estado='A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig, reuniondiscipulado__confirmacionentregaofrenda = True)
-#                            else:
-#                                if tipoReunion == 1:
-#                                    grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
-#                                else:
-#                                    grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaDiscipulado)))
-#                        except:
-#                            if tipoReunion == 1:
-#                                g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaGAR))]
-#                            else:
-#                                g.fecha_reunion = [fechai + datetime.timedelta(days = int(g.diaDiscipulado))]
-#                            g.lideres = Miembro.objects.filter(id__in = g.listaLideres())
-#                            grupos.append(g)
-#                    fechai = sig
-#                    if sig >= fechaf:
-#                        sw = False
-#                request.session['grupos_sin_reporte'] = grupos
-#    else:
-#        form = FormularioReportesSinEnviar()
-#
-#    return render_to_response('Grupos/morososGAR.html', locals(), context_instance=RequestContext(request))
+#     """Permite a un administrador revisar que lideres no han registrado sus reportes de reuniones de grupo
+#     en un rango de fecha especificado. El administrador escoge el tipo de reunion, si la reunion es de GAR
+#     (1) o discipulado (2). Luego el administrador podra enviar un mail a los lideres que no han ingresado
+#     los reportes y a sus lideres."""
+
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     if request.method == 'POST':
+#         if 'Enviar' in request.POST:
+#             if 'grupos_sin_reporte' in request.session:
+#                 grupos = request.session['grupos_sin_reporte']
+#                 receptores = list()
+#                 for g in grupos:
+#                     mailLideres = g.lideres.values('email')
+#                     receptores.extend(["%s" % (k['email']) for k in mailLideres])
+#                 camposMail = ['Reportes Reunion', 'mensaje', receptores]
+#                 sendMail(camposMail)
+#                 # mailLideres = Miembro.objects.filter(id__in = g.lideres[0].grupo.listaLideres()).values('email')
+#                 # receptores = ["%s" % (k['email']) for k in mailLideres]
+#                 # camposMail1 = ['Lideres Reporte Reunion', 'mensaje', receptores]
+
+#         form = FormularioReportesSinEnviar(request.POST)
+#         # Se buscan los grupos que deben reunion
+#         if 'verMorosos' in request.POST:
+#             if form.is_valid():
+#                 tipoReunion = form.cleaned_data['reunion']
+#                 fechai = form.cleaned_data['fechai']
+#                 fechaf = form.cleaned_data['fechaf']
+#                 grupos = []
+#                 sw = True
+#                 while sw:
+#                     sig = fechai + datetime.timedelta(weeks=1)
+#                     if tipoReunion == 1:
+#                         gr = Grupo.objects.filter(estado='A').exclude(reuniongar__fecha__gte=fechai,
+#                                                                       reuniongar__fecha__lt=sig)
+#                     else:
+#                         gr = Grupo.objects.filter(estado='A').exclude(reuniondiscipulado__fecha__gte=fechai,
+#                                                                       reuniondiscipulado__fecha__lt=sig)
+#                     for g in gr:
+#                         try:
+#                             i = grupos.index(g)
+#                             if sobres:
+#                                 if tipoReunion == 1:
+#                                     gr = Grupo.objects.filter(
+#                                         estado='A').exclude(reuniongar__fecha__gte=fechai,
+#                                                             reuniongar__fecha__lt=sig,
+#                                                             reuniongar__confirmacionentregaofrenda=True)
+#                                 else:
+#                                     gr = Grupo.objects.filter(
+#                                         estado='A').exclude(reuniondiscipulado__fecha__gte=fechai,
+#                                                             reuniondiscipulado__fecha__lt=sig,
+#                                                             reuniondiscipulado__confirmacionentregaofrenda=True)
+#                             else:
+#                                 if tipoReunion == 1:
+#                                     grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days=int(g.diaGAR)))
+#                                 else:
+#                                     grupos[i].fecha_reunion.append(fechai + datetime.timedelta(
+#                                         days=int(g.diaDiscipulado)))
+#                         except:
+#                             if tipoReunion == 1:
+#                                 g.fecha_reunion = [fechai + datetime.timedelta(days=int(g.diaGAR))]
+#                             else:
+#                                 g.fecha_reunion = [fechai + datetime.timedelta(days=int(g.diaDiscipulado))]
+#                             g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
+#                             grupos.append(g)
+#                     fechai = sig
+#                     if sig >= fechaf:
+#                         sw = False
+#                 request.session['grupos_sin_reporte'] = grupos
+#     else:
+#         form = FormularioReportesSinEnviar()
+
+#     return render_to_response('Grupos/morososGAR.html', locals(), context_instance=RequestContext(request))
+
 
 def sendMail(camposMail):
     subject = camposMail[0]
@@ -550,66 +536,78 @@ def sendMail(camposMail):
 
 
 # def ConsultarSobresSinEnviar(request):
-#    ConsultarReportesSinEnviar(request, True)
-#    miembro = Miembro.objects.get(usuario=request.user)
-#    form = FormularioReportesSinEnviar()
-#    if request.method == 'POST':
-#        if 'Enviar' in request.POST:
-#            if 'grupos_sin_reporte' in request.session:
-#                grupos = request.session['grupos_sin_reporte']
-#                for g in grupos:
-#                    mailLideres = g.lideres.values('email')
-#                    receptores = ["%s" % (k['email']) for k in mailLideres]
-#                    camposMail = ['Reportes Reunion', 'mensaje', receptores]
-#                    print camposMail
-#                    #mailLideres = Miembro.objects.filter(id__in = g.lideres[0].grupo.listaLideres()).values('email')
-#                    #receptores = ["%s" % (k['email']) for k in mailLideres]
-#                    #camposMail1 = ['Lideres Reporte Reunion', 'mensaje', receptores]
-#
-#        form = FormularioReportesSinEnviar(request.POST)
-#        if 'verMorosos' in request.POST:
-#            if form.is_valid():
-#                tipoReunion = form.cleaned_data['reunion']
-#                fechai = form.cleaned_data['fechai']
-#                fechaf = form.cleaned_data['fechaf']
-#                grupos = []
-#                sw = True
-#                while sw:
-#                    sig = fechai + datetime.timedelta(weeks = 1)
-#                    if tipoReunion == 1:
-#                        gr = Grupo.objects.filter(estado='A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
-#                    else:
-#                        gr = Grupo.objects.filter(estado='A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig, reuniondiscipulado__confirmacionentregaofrenda = True)
-#                    for g in gr:
-#                        try:
-#                            i = grupos.index(g)
-#                            if tipoReunion == 1:
-#                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaGAR)))
-#                            else:
-#                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days = int(g.diaDiscipulado)))
-#                        except:
-#
-#                if fechai.weekday() > 0:
-#                    fechai = fechai - datetime.timedelta(days = fechai.weekday())
-#                if fechaf.weekday() < 6:
-#                    if fechaf < datetime.date.today():
-#                        dom = fechaf + datetime.timedelta(days = 6-fechaf.weekday())
-#                        if datetime.date.today() < dom:
-#                            fechaf = datetime.date.today()
-#                        else:
-#                            fechaf = dom
-#                sig = fechai + datetime.timedelta(weeks = 1)
-#                grupos = []
-#                while sig <= fechaf:
-#                    if tipoReunion == 1:
-#                        g = Grupo.objects.filter(estado='A').exclude(reuniongar__fecha__gte = fechai, reuniongar__fecha__lt = sig, reuniongar__confirmacionentregaofrenda = True)
-#                    else:
-#                        g = Grupo.objects.filter(estado='A').exclude(reuniondiscipulado__fecha__gte = fechai, reuniondiscipulado__fecha__lt = sig, reuniondiscipulado__confirmacionentregaofrenda = True)
-#                    grupos.extend(list(g))
-#                    fechai = sig
-#                    sig = sig + datetime.timedelta(weeks = 1)
-#
-#    return render_to_response('Grupos/morososGAR.html', locals(), context_instance=RequestContext(request))
+#     ConsultarReportesSinEnviar(request, True)
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     form = FormularioReportesSinEnviar()
+#     if request.method == 'POST':
+#         if 'Enviar' in request.POST:
+#             if 'grupos_sin_reporte' in request.session:
+#                 grupos = request.session['grupos_sin_reporte']
+#                 for g in grupos:
+#                     mailLideres = g.lideres.values('email')
+#                     receptores = ["%s" % (k['email']) for k in mailLideres]
+#                     camposMail = ['Reportes Reunion', 'mensaje', receptores]
+#                     print camposMail
+#                     # mailLideres = Miembro.objects.filter(id__in = g.lideres[0].grupo.listaLideres()).values('email')
+#                     # receptores = ["%s" % (k['email']) for k in mailLideres]
+#                     # camposMail1 = ['Lideres Reporte Reunion', 'mensaje', receptores]
+
+#         form = FormularioReportesSinEnviar(request.POST)
+#         if 'verMorosos' in request.POST:
+#             if form.is_valid():
+#                 tipoReunion = form.cleaned_data['reunion']
+#                 fechai = form.cleaned_data['fechai']
+#                 fechaf = form.cleaned_data['fechaf']
+#                 grupos = []
+#                 sw = True
+#                 while sw:
+#                     sig = fechai + datetime.timedelta(weeks=1)
+#                     if tipoReunion == 1:
+#                         gr = Grupo.objects.filter(
+#                             estado='A').exclude(reuniongar__fecha__gte=fechai,
+#                                                 reuniongar__fecha__lt=sig,
+#                                                 reuniongar__confirmacionentregaofrenda=True)
+#                     else:
+#                         gr = Grupo.objects.filter(
+#                             estado='A').exclude(reuniondiscipulado__fecha__gte=fechai,
+#                                                 reuniondiscipulado__fecha__lt=sig,
+#                                                 reuniondiscipulado__confirmacionentregaofrenda=True)
+#                     for g in gr:
+#                         try:
+#                             i = grupos.index(g)
+#                             if tipoReunion == 1:
+#                                 grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days=int(g.diaGAR)))
+#                             else:
+#                                grupos[i].fecha_reunion.append(fechai + datetime.timedelta(days=int(g.diaDiscipulado)))
+#                         except:
+#                             pass
+#                 if fechai.weekday() > 0:
+#                     fechai = fechai - datetime.timedelta(days=fechai.weekday())
+#                 if fechaf.weekday() < 6:
+#                     if fechaf < datetime.date.today():
+#                         dom = fechaf + datetime.timedelta(days=6 - fechaf.weekday())
+#                         if datetime.date.today() < dom:
+#                             fechaf = datetime.date.today()
+#                         else:
+#                             fechaf = dom
+#                 sig = fechai + datetime.timedelta(weeks=1)
+#                 grupos = []
+#                 while sig <= fechaf:
+#                     if tipoReunion == 1:
+#                         g = Grupo.objects.filter(
+#                             estado='A').exclude(reuniongar__fecha__gte=fechai,
+#                                                 reuniongar__fecha__lt=sig,
+#                                                 reuniongar__confirmacionentregaofrenda=True)
+#                     else:
+#                         g = Grupo.objects.filter(
+#                             estado='A').exclude(reuniondiscipulado__fecha__gte=fechai,
+#                                                 reuniondiscipulado__fecha__lt=sig,
+#                                                 reuniondiscipulado__confirmacionentregaofrenda=True)
+#                     grupos.extend(list(g))
+#                     fechai = sig
+#                     sig = sig + datetime.timedelta(weeks=1)
+
+#     return render_to_response('Grupos/morososGAR.html', locals(), context_instance=RequestContext(request))
 
 
 def reporteVisitasPorRed(request):
@@ -639,3 +637,26 @@ def faltante_confirmar_ofrenda(request):
 def faltante_confirmar_ofrenda_discipulado(request):
     grupos = ReunionDiscipulado.objects.filter(confirmacionEntregaOfrenda=False).distinct('grupo')
     return render_to_response('Grupos/faltante_confirmar_ofrenda_discipulado.html', locals(), context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+def transladar_grupos(request, id_grupo):
+
+    grupo = get_object_or_404(Grupo, id=id_grupo)
+    lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
+    red = grupo.red
+
+    if request.method == 'POST':
+        form = FormularioTransladarGrupo(data=request.POST, red=red, grupo_id=id_grupo)
+
+        if form.is_valid():
+            grupo_escogido = Grupo.objects.get(id=request.POST['grupo'])
+            for miembro in lideres:
+                miembro.grupo = grupo_escogido
+                miembro.save()
+            ok = True
+
+    else:
+        form = FormularioTransladarGrupo(red=red, grupo_id=id_grupo)
+
+    return render_to_response("Miembros/transladar_grupos.html", locals(), context_instance=RequestContext(request))

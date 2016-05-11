@@ -122,17 +122,21 @@ class FormularioCrearGrupo(ModelForm):
             for g in grupos:
                 lidGrupos.extend(g.listaLideres())
             if new:
-                query1 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-                query2 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+                query1 = Miembro.objects.filter(
+                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+                query2 = Miembro.objects.filter(
+                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
             else:
                 lider1 = self.instance.lider1.id
                 lidGrupos.remove(lider1)
-                query1 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+                query1 = Miembro.objects.filter(
+                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
                 lidGrupos.append(lider1)
                 if self.instance.lider2 is not None:
                     lider2 = self.instance.lider2.id
                     lidGrupos.remove(lider2)
-                query2 = Miembro.objects.filter(id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+                query2 = Miembro.objects.filter(
+                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
 
             self.fields['lider1'].queryset = query1
             self.fields['lider2'].queryset = query2
@@ -202,7 +206,9 @@ class FormularioCrearPredica(ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormularioCrearPredica, self).__init__(*args, **kwargs)
 
-        self.fields['descripcion'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Descripción...', 'rows': '3'})
+        self.fields['descripcion'].widget.attrs.update({'class': 'form-control',
+                                                        'placeholder': 'Descripción...',
+                                                        'rows': '3'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
     class Meta:
@@ -221,3 +227,16 @@ class FormularioEditarDiscipulado(ModelForm):
     class Meta:
         model = Grupo
         fields = ('diaDiscipulado', 'horaDiscipulado')
+
+
+class FormularioTransladarGrupo(forms.Form):
+    error_css_class = 'has-error'
+
+    queryset = Grupo.objects.all()
+    grupo = forms.ModelChoiceField(queryset=queryset, required=True)
+
+    def __init__(self, red=None, grupo_id=None, *args, **kwargs):
+        super(FormularioTransladarGrupo, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        if red or grupo_id:
+            self.fields['grupo'].queryset = self.fields['grupo'].queryset.filter(red=red).exclude(id=grupo_id)

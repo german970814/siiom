@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from django.db import models
-from miembros.models import Miembro, CambioTipo
+from miembros.models import CambioTipo
 
 
 class Red(models.Model):
@@ -40,15 +40,21 @@ class Grupo(models.Model):
     barrio = models.ForeignKey('miembros.Barrio')
 
     def __str__(self):
-        cad = self.lider1.nombre.capitalize() + " " + self.lider1.primerApellido.capitalize() + "(" + self.lider1.cedula + ")"
+        cad = self.lider1.nombre.capitalize() \
+            + " " + self.lider1.primerApellido.capitalize() + "(" + self.lider1.cedula + ")"
 
         if self.lider2:
-            cad = cad + " - " + self.lider2.nombre.capitalize() + " " + self.lider2.primerApellido.capitalize() + "(" + self.lider2.cedula + ")"
+            cad = cad + " - " + self.lider2.nombre.capitalize() + \
+                " " + self.lider2.primerApellido.capitalize() + "(" + self.lider2.cedula + ")"
 
         return cad
 
     def listaLideres(self):
-        """Devuelve una lista con los ids de los lideres del grupo. Los lideres estan definidos en los campos lider1, lider2 y sus conyugues siempre y cuando estos sean lideres."""
+        """
+        Devuelve una lista con los ids de los lideres del grupo.
+        Los lideres estan definidos en los campos lider1, lider2 y sus conyugues
+        siempre y cuando estos sean lideres.
+        """
 
         lideres = []
         if self.lider1:

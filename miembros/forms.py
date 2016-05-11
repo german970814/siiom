@@ -38,10 +38,12 @@ class FormularioLiderAgregarMiembro(ModelForm):
         self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
         # self.fields['estado'].widget.attrs.update({'class':'form-control'})
-            # if c:
-            #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
-            # else:
-            #     self.fields['conyugue'].queryset = Miembro.objects.filter(Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
+        # if c:
+        #     self.fields['conyugue'].queryset = Miembro.objects.filter(
+        #         Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
+        # else:
+        #     self.fields['conyugue'].queryset = Miembro.objects.filter(
+        #         Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
 
     class Meta:
         model = Miembro
@@ -121,7 +123,13 @@ class FormularioPrimeraLlamadaAgente(ModelForm):
 
     class Meta:
         model = Miembro
-        fields = ('detallePrimeraLlamada', 'observacionPrimeraLlamada', 'noInteresadoGAR', 'asisteGAR', 'asignadoGAR', 'fechaAsignacionGAR', 'grupo')
+        fields = ('detallePrimeraLlamada',
+                  'observacionPrimeraLlamada',
+                  'noInteresadoGAR',
+                  'asisteGAR',
+                  'asignadoGAR',
+                  'fechaAsignacionGAR',
+                  'grupo')
 
 
 class FormularioSegundaLlamadaAgente(ModelForm):
@@ -142,9 +150,12 @@ class FormularioCambiarContrasena(forms.Form):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
-    contrasenaAnterior = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña anterior:')
-    contrasenaNueva = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña nueva:')
-    contrasenaNuevaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña nueva:')
+    contrasenaAnterior = forms.CharField(
+        widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña anterior:')
+    contrasenaNueva = forms.CharField(
+        widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña nueva:')
+    contrasenaNuevaVerificacion = forms.CharField(
+        widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña nueva:')
 
     def __init__(self, request, *args, **kwargs):
         self.request = request
@@ -229,7 +240,8 @@ class FormularioCumplimientoPasosMiembro(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FormularioCumplimientoPasosMiembro, self).__init__(*args, **kwargs)  # populates the post
-        estudiantes = Matricula.objects.all().exclude(estudiante__pasos__nombre__iexact='lanzamiento').values('estudiante')
+        estudiantes = Matricula.objects.all().exclude(
+            estudiante__pasos__nombre__iexact='lanzamiento').values('estudiante')
         self.fields['miembro'].queryset = Miembro.objects.filter(id__in=estudiantes)
         self.fields['miembro'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
@@ -327,7 +339,8 @@ class FormularioAsignarUsuario(forms.Form):
 
     email = forms.EmailField(label='Verificar correo:')
     contrasena = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña:')
-    contrasenaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña:')
+    contrasenaVerificacion = forms.CharField(widget=forms.PasswordInput(render_value=False),
+                                             max_length=20, label='Verifique contraseña:')
 
     def __init__(self, *args, **kwargs):
         super(FormularioAsignarUsuario, self).__init__(*args, **kwargs)
@@ -439,6 +452,8 @@ class FormularioInformacionIglesiaMiembro(forms.ModelForm):
 
 
 class FormularioTipoMiembros(forms.ModelForm):
+    error_css_class = 'has-error'
+
     tipos = forms.ModelMultipleChoiceField(queryset=TipoMiembro.objects.all(), widget=forms.CheckboxSelectMultiple)
 
     def __init__(self, *args, **kwargs):

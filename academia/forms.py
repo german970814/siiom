@@ -32,7 +32,8 @@ class FormularioPromoverModulo(ModelForm):
         if est != '':
             modEst = est.modulos.all()
             if est.moduloActual:
-                self.fields['moduloActual'].queryset = est.curso.modulos.exclude(id__in=modEst).exclude(id__in=[est.moduloActual.id])
+                self.fields['moduloActual'].queryset = est.curso.modulos.exclude(
+                    id__in=modEst).exclude(id__in=[est.moduloActual.id])
             else:
                 self.fields['moduloActual'].queryset = est.curso.modulos.exclude(id__in=modEst)
 
@@ -102,10 +103,14 @@ class FormularioMatricula(ModelForm):
     def __init__(self, *args, **kwargs):
         super(FormularioMatricula, self).__init__(*args, **kwargs)  # populates the post
         mCurso = Matricula.objects.all().values('estudiante')
-        mLiderMaestro = CambioTipo.objects.filter(Q(nuevoTipo__nombre__iexact='lider') | Q(nuevoTipo__nombre__iexact='maestro')).values('miembro')
+        mLiderMaestro = CambioTipo.objects.filter(
+            Q(nuevoTipo__nombre__iexact='lider') | Q(nuevoTipo__nombre__iexact='maestro')).values('miembro')
         mEncuentro = CumplimientoPasos.objects.filter(paso__nombre__iexact='encuentro').values('miembro')
-        self.fields['estudiante'].queryset = Miembro.objects.filter(id__in=mEncuentro).exclude(id__in=mLiderMaestro).exclude(id__in=mCurso).exclude(grupo=None)
-        self.fields['estudiante'].widget.attrs.update({'class': 'form-control selectpicker', 'data-live-search': 'true'})
+        self.fields['estudiante'].queryset = Miembro.objects.filter(
+            id__in=mEncuentro).exclude(id__in=mLiderMaestro).exclude(id__in=mCurso).exclude(grupo=None)
+        self.fields['estudiante'].widget.attrs.update(
+            {'class': 'form-control selectpicker', 'data-live-search': 'true'}
+        )
         self.fields['fechaInicio'].widget.attrs.update({'class': 'form-control'})
 
     class Meta:

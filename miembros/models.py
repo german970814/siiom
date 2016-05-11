@@ -61,20 +61,20 @@ class Miembro(models.Model):
         return ruta
 
     opcionesGenero = (
-      ('M', 'Masculino'),
-      ('F', 'Femenino'),
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
     )
     opcionesEstado = (
-      ('A', 'Activo'),
-      ('I', 'Inactivo'),
-      ('R', 'Restauración'),
+        ('A', 'Activo'),
+        ('I', 'Inactivo'),
+        ('R', 'Restauración'),
     )
 
     opcionesEstadoCivil = (
-      ('C', 'Casado'),
-      ('S', 'Soltero'),
-      ('V', 'Viudo'),
-      ('D', 'Divorciado'),
+        ('C', 'Casado'),
+        ('S', 'Soltero'),
+        ('V', 'Viudo'),
+        ('D', 'Divorciado'),
     )
     #  autenticacion
     usuario = models.ForeignKey(User, unique=True, null=True, blank=True)
@@ -86,12 +86,22 @@ class Miembro(models.Model):
     telefono = models.CharField(max_length=50, null=True, blank=True, verbose_name='teléfono')
     celular = models.CharField(max_length=50, null=True, blank=True)
     fechaNacimiento = models.DateField(verbose_name="fecha de nacimiento", null=True, blank=True)
-    cedula = models.CharField(max_length=25, unique=True, verbose_name='cédula', validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")])
+    cedula = models.CharField(
+        max_length=25,
+        unique=True,
+        verbose_name='cédula',
+        validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")]
+    )
     direccion = models.CharField(max_length=50, null=True, blank=True, verbose_name='dirección')
     barrio = models.ForeignKey(Barrio, null=True, blank=True)
     email = models.EmailField(unique=True)
     profesion = models.CharField(max_length=20, null=True, blank=True, verbose_name='profesión')
-    estadoCivil = models.CharField(max_length=1, choices=opcionesEstadoCivil, null=True, blank=True, verbose_name="estado civil")
+    estadoCivil = models.CharField(
+        max_length=1,
+        choices=opcionesEstadoCivil,
+        null=True, blank=True,
+        verbose_name="estado civil"
+    )
     conyugue = models.ForeignKey('self', related_name='casado_con', null=True, blank=True, verbose_name='cónyugue')
     foto_perfil = models.ImageField(upload_to=ruta_imagen, null=True, blank=True)
     portada = models.ImageField(upload_to=ruta_imagen, null=True, blank=True)
@@ -108,28 +118,66 @@ class Miembro(models.Model):
     fechaAsignacionGAR = models.DateField(null=True, blank=True, verbose_name='fecha de asignación a GAR')
     #  Llamada Lider
     fechaLlamadaLider = models.DateField(null=True, blank=True, verbose_name='fecha de llamada del líder')
-    detalleLlamadaLider = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='llamada_lider', verbose_name='detalle de llamada del líder')
-    observacionLlamadaLider = models.TextField(max_length=300, null=True, blank=True, verbose_name='observación de llamada del líder')
+    detalleLlamadaLider = models.ForeignKey(
+        DetalleLlamada,
+        null=True,
+        blank=True,
+        related_name='llamada_lider',
+        verbose_name='detalle de llamada del líder'
+    )
+    observacionLlamadaLider = models.TextField(
+        max_length=300,
+        null=True,
+        blank=True,
+        verbose_name='observación de llamada del líder'
+    )
     #  Primera llamada
     fechaPrimeraLlamada = models.DateField(null=True, blank=True, verbose_name="fecha de primera llamada")
-    detallePrimeraLlamada = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='primera_llamada', verbose_name="detalle de primera llamada")
-    observacionPrimeraLlamada = models.TextField(max_length=300, null=True, blank=True, verbose_name='observación de primera llamada')
+    detallePrimeraLlamada = models.ForeignKey(
+        DetalleLlamada,
+        null=True,
+        blank=True,
+        related_name='primera_llamada',
+        verbose_name="detalle de primera llamada"
+    )
+    observacionPrimeraLlamada = models.TextField(
+        max_length=300,
+        null=True,
+        blank=True,
+        verbose_name='observación de primera llamada'
+    )
     #  Segunda Llamada
     fechaSegundaLlamada = models.DateField(null=True, blank=True, verbose_name="fecha de segunda llamada")
-    detalleSegundaLlamada = models.ForeignKey(DetalleLlamada, null=True, blank=True, related_name='segunda_llamada', verbose_name="detalle de segunda llamada")
-    observacionSegundaLlamada = models.TextField(max_length=300, null=True, blank=True, verbose_name='observación de segunda llamada')
+    detalleSegundaLlamada = models.ForeignKey(
+        DetalleLlamada,
+        null=True,
+        blank=True,
+        related_name='segunda_llamada',
+        verbose_name="detalle de segunda llamada"
+    )
+    observacionSegundaLlamada = models.TextField(
+        max_length=300,
+        null=True,
+        blank=True,
+        verbose_name='observación de segunda llamada'
+    )
     fechaRegistro = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'
 
     def grupoLidera(self):
-        """Devuelve el grupo al cual lidera el miembro o su conyugue. Si al miembro no se le ha asignado ningun grupo devuelve None."""
+        """
+        Devuelve el grupo al cual lidera el miembro o su conyugue.
+        Si al miembro no se le ha asignado ningun grupo devuelve None.
+        """
 
         from grupos.models import Grupo
         try:
             if self.conyugue:
-                return Grupo.objects.get(Q(lider1=self) | Q(lider1=self.conyugue) | Q(lider2=self) | Q(lider2=self.conyugue))
+                return Grupo.objects.get(
+                    Q(lider1=self) | Q(lider1=self.conyugue) | Q(lider2=self) | Q(lider2=self.conyugue)
+                )
             else:
                 return Grupo.objects.get(Q(lider1=self) | Q(lider2=self))
         except:
