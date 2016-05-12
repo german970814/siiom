@@ -1122,7 +1122,7 @@ def graduarAlumno(request):
         form = FormularioCumplimientoPasosMiembro(data=request.POST)
         if form.is_valid():
             estudianteGraduado = form.save(commit=False)
-            estudianteGraduado.paso = Pasos.objects.get(nombre="lanzamiento")
+            estudianteGraduado.paso = Pasos.objects.get(nombre__iexact="lanzamiento")
             try:
                 estudiante = Matricula.objects.get(estudiante=estudianteGraduado.miembro)
             except:

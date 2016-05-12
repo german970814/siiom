@@ -10,6 +10,8 @@ from miembros.models import Miembro, Zona, Barrio, CumplimientoPasos,\
 from django.db.models import Q
 from django import forms
 from academia.models import Matricula
+from PIL import Image
+from io import BytesIO
 
 
 class FormularioLiderAgregarMiembro(ModelForm):
@@ -414,21 +416,18 @@ class FormularioFotoPerfil(forms.ModelForm):
         return super(FormularioFotoPerfil, self).clean()
 
     def save(self, commit=True):
-        from PIL import Image
-        from io import BytesIO
-
         image_field = self.cleaned_data.get('foto_perfil')
         image_file = BytesIO(image_field.read())
         image = Image.open(image_file)
         w, h = image.size
 
-        if w > 1000 or h > 1000:
-            image = image.resize((1000, 1000), Image.ANTIALIAS)
-        if w < 400 or h < 400:
-            image = image.resize((400, 400), Image.ANTIALIAS)
+        # if w > 1000 or h > 1000:
+        #     image = image.resize((1000, 1000), Image.ANTIALIAS)
+        # if w < 400 or h < 400:
+        #     image = image.resize((400, 400), Image.ANTIALIAS)
 
         image_file = BytesIO()
-        image.save(image_file, 'JPEG', quality=90)
+        image.save(image_file, 'png', quality=90)
 
         image_field.file = image_file
 

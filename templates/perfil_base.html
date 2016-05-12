@@ -93,6 +93,11 @@
             }
         }
 
+        function escalar(h, w, max) {
+            retorna = (h * max) / w
+            return retorna
+        }
+
         // Funcion al momento de subir las fotos evitar error 413(Http status)
         window.uploadPhotos = function(url){
             var file = event.target.files[0];
@@ -103,11 +108,16 @@
                 reader.onload = function (readerEvent) {
                     var image = new Image();
                     image.onload = function (imageEvent) {
-
+                        // console.log(imageEvent.path[0].height);
                         var canvas = document.createElement('canvas'),
-                            max_size = 800,
-                            width = max_size;
-                            height = max_size;
+                        max_size = 250;
+                        // if (imageEvent.path[0].height > 1000) {
+                        //     max_size = 1000
+                        // }
+                        width = max_size;
+                        height = max_size;
+                        // width = escalar(imageEvent.path[0].height, imageEvent.path[0].width, max_size)
+                        // height = escalar(imageEvent.path[0].height, imageEvent.path[0].width, max_size)
                         canvas.width = width;
                         canvas.height = height;
                         canvas.getContext('2d').drawImage(image, 0, 0, width, height);
@@ -147,7 +157,7 @@
             }
 
             blob = new Blob([uInt8Array], {type: contentType});
-
+            console.log(blob);
             return blob;
         }
 
@@ -166,7 +176,7 @@
             if (event.blob && event.url) {
                 if (event.blob.size < 2000000) {
                     data.append('file', '');
-                    data.append('foto_perfil', event.blob, date.getSeconds().toString() + '-' + date.getMilliseconds().toString());
+                    data.append('foto_perfil', event.blob, date.getSeconds().toString() + '-' + date.getMilliseconds().toString() + '.png');
                     data.append('csrfmiddlewaretoken', $csrf);
                     $.ajax({
                         url: event.url,

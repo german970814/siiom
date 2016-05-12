@@ -187,7 +187,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Escalafon</dt>
-                <dd>{% if escalafon %}{{escalafon}}{% else %}SIN DATOS{% endif %}</dd>
+                <dd>{% if escalafon %}{{escalafon.escalafon.rango|upper}}{% else %}SIN DATOS{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Tipo de Miembro</dt>
