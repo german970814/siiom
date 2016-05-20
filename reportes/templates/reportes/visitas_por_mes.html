@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        //dibujando el grafico
+        {% if sw %}
+            google.load("visualization", "1", {packages:["corechart"]});
+            google.setOnLoadCallback(drawChart);
+
+            function drawChart(){
+                var data = google.visualization.arrayToDataTable({{ values|safe }});
+                var options = {
+                    width: '100%',
+                    height: 500,
+                    title: '{{ titulo_pag|safe }}',
+                    vAxis: {
+                        title: 'Número de Visitas Registradas'
+                    },
+                    hAxis: {
+                        title: 'Meses'
+                    }
+                };
+            {% if tipo == 1 %}
+                var chart = new google.visualization.PieChart(document.getElementById('out'));
+            {% else %}
+                var chart = new google.visualization.ColumnChart(document.getElementById('out'));
+            {% endif %}
+                chart.draw(data, options);
+            }
+        {% endif %}
+
+        $(document).ready(function(){
+
+            $('#id_ano').datetimepicker({
+                format: 'YYYY',
+                maxDate: moment(),
+                });
+
+            var $form_visitasMes = $('#form_visitasMes');
+            var $meses = $('#idMeses').children('label');
+            var $mes = [];
+            var $si = [];
+
+            for (var i = 0; i < $meses.length; i++) {
+                $mes[i] = $meses.children('input')[i];
+            }
+            
+
+            $form_visitasMes.submit(function(event) {
+                if ($('#id_ano').val() == '') {
+                    swal("Alerta","Asegurate de escoger un año");
+                    return false;
+                } else if ($('#id_ano').val() != '') {
+                    for (var j = 0; j < $mes.length; j++){
+                        if ($mes[j].checked) {
+                            $si.push($mes[j]);
+                        }
+                    }
+                    if ($si.length > 0){
+                        return true
+                    } else {
+                        swal("Alerta","Asegurate de escoger por lo menos un mes");
+                        return false;
+                    }
+                }
+            });
+
+
+            {% if tipo == 1 %}
+                $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie_sel.png' %}");
+                $("#column_button").attr('src', "{% static 'Imagenes/chart_column.png' %}");
+                $("#type").attr('value', '1');
+            {% else %}
+                $("#column_button").attr('src', "{% static 'Imagenes/chart_column_sel.png' %}");
+                $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie.png' %}");
+                $("#type").attr('value', '2');
+            {% endif %}
+            $("#pie_button, #column_button").click(function(){
+                if(this.id == "pie_button")
+                {   $("#type").attr('value', '1');
+                    $("#form_visitasMes").submit();
+                }
+                else
+                {   $("#type").attr('value', '2');
+                    $("#form_visitasMes").submit();
+                }
+
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">{{ titulo_pag }}</h3>
+                </legend>
+            </h1>
+        </div>
+        <form action="" method="POST" id="form_visitasMes">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <br>
+                <div class="row">
+                    <div class="{% if por_red %}col-md-4{% else %}col-md-6{% endif %} col-md-offset-2">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_ano" class="fg-label requerido">Año:</label>
+                                {{form.ano}}
+                            </div>
+                        </div>
+                    </div>
+                    {% if por_red %}
+                    <br class="space">
+                    <div class="col-md-4 ">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_ano" class="fg-label requerido">Red:</label>
+                                {{form.red}}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-3 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <div class="fg-line requerido" id="idMeses">
+                                {% for m in form.meses %}
+                                <label for="{{m.id_for_label}}" class="checkbox">
+                                {{m.tag}}
+                                <i class="input-helper m-r-20"></i>
+                                {{m.choice_label}}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3" style="margin-top: 100px;">
+                        <input type="hidden" name="type" id="type" value="1">
+                        <button class="btn btn-info btn-block" name="verReporte">Ver Reporte</button>
+                        <button style="margin-top: 25px;" class="btn btn-warning btn-block" name="reportePDF">Generar PDF</button>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if sw %}
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend><h3>Reporte</h3></legend>
+            </h1>
+        </div>
+        <div class="card-body card-padding">
+            <small>Escoge un tipo de vista:</small>
+            <br>
+            <br>
+            <div class="row">
+                <div class="col-sm-1">
+                    <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
+                </div>
+                <div class="col-sm-1">
+                    <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
+                </div>
+                <div class="col-md-12"><div id="out"></div></div>
+            </div>
+            
+        </div>
+    </div>
+{% endif %}
+</div>
+{% endblock %}

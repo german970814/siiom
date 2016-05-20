@@ -1,0 +1,164 @@
+{% extends "perfil_base.html" %}
+{% load staticfiles %}
+
+{% block card %}
+{% if grupo %}
+<div class="pmb-block">
+    <div class="pmbb-header">
+        <h2><i class="zmdi zmdi-assignment m-r-5"></i> Datos del Grupo{% if no_lider %} al que Asiste{% endif %}</h2>
+        
+        {% if puede_editar or perms.miembros.es_administrador %}
+        <ul class="actions">
+            <li class="dropdown">
+                <a href="" data-toggle="dropdown">
+                    <i class="zmdi zmdi-more-vert"></i>
+                </a>
+                
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li>
+                        <a data-pmb-action="edit" href="" class="edit-error">Editar</a>
+                    </li>
+                    {% if perms.miembros.es_administrador %}
+                    <li>
+                        <a href="/grupo/editar_grupo/{{grupo.id}}">Editar Grupo Como Administrador</a>
+                    </li>
+                    <li>
+                        <a href="/grupo/transladar_grupo/{{grupo.id}}">Trasladar Grupo en Organigrama</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+    <div class="pmbb-body p-l-30">
+        <div class="pmbb-view">
+            <dl class="dl-horizontal">
+                <dt>Estado del Grupo</dt>
+                <dd>{{ grupo.get_estado_display|upper }}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Dirección</dt>
+                <dd>{{ grupo.direccion|upper }}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Dia del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dd>{{ grupo.get_diaGAR_display|upper }}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Hora del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dd>{{ grupo.horaGAR|upper }}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Lideres</dt>
+                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% else %},  <a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% endif %}{% endfor %}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Nombre Grupo</dt>
+                <dd>{{ grupo.nombre|upper }}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Red</dt>
+                <dd>{{ grupo.red }}</dd>
+            </dl>
+            <dl class="dl-horizontal">
+                <dt>Barrio</dt>
+                <dd>{{ grupo.barrio|upper }}</dd>
+            </dl>
+        </div>
+        
+    <form action="" id="form-grupo" method="post" enctype="multpart/form-data">
+        {% csrf_token %}
+        <div class="pmbb-edit">
+            <div class="input-group {{form.direccion.css_classes}} col-xs-12">
+                <dl class="dl-horizontal">
+                    <dt class="p-t-10">
+                        <label for="id_nombre" class="requerido control-label">Dirección*:</label>
+                    </dt>
+                    <dd>
+                        <div class="fg-line">
+                            {{form.direccion}}
+                        </div>
+                        {% for error in form.direccion.errors %}
+                        <small class="help-block">{{error}}</small>
+                        {% endfor %}
+                    </dd>
+                </dl>
+            </div>
+            <div class="input-group {{form.diaGAR.css_classes}} col-xs-12">
+                <dl class="dl-horizontal">
+                    <dt class="p-t-10">
+                        <label for="id_diaGAR" class="requerido control-label">Dia del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
+                    </dt>
+                    <dd>
+                        <div class="fg-line">
+                           {{form.diaGAR}}
+                        </div>
+                        {% for error in form.diaGAR.errors %}
+                        <small class="help-block">{{error}}</small>
+                        {% endfor %}
+                    </dd>
+                </dl>
+            </div>
+            <div class="input-group {{form.horaGAR.css_classes}} col-xs-12">
+                <dl class="dl-horizontal">
+                    <dt class="p-t-10">
+                        <label for="id_horaGAR" class="control-label">Hora del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
+                    </dt>
+                    <dd>
+                        <div class="dtp-container dropdown fg-line">
+                            {{form.horaGAR}}
+                        </div>
+                        {% for error in form.horaGAR.errors %}
+                        <small class="help-block">{{error}}</small>
+                        {% endfor %}
+                    </dd>
+                </dl>
+            </div>
+            <div class="m-t-30">
+                <button type="submit" name="aceptar" class="btn btn-primary btn-sm">Guardar</button>
+                <button data-pmb-action="reset" class="btn btn-link btn-sm">Cancelar</button>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+
+<div class="pmb-block">
+    <div class="pmbb-header">
+        <h2><i class="zmdi zmdi-accounts-alt m-r-5"></i> Miembros del Grupo{% if no_lider %} al que Asiste{% endif %}</h2>
+    </div>
+    <div class="contacts c-profile clearfix row">
+        {% for miem in miembros %}
+        <div class="col-md-3 col-sm-4 col-xs-6">
+            <div class="c-item">
+                <a href="/miembro/perfil/{{miem.id}}" class="ci-avatar">
+                    <img src="{% if miem.foto_perfil %}{{ miem.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
+                </a>
+                
+                <div class="c-info">
+                    <strong>{{miem.nombre|upper}} {{miem.primerApellido|upper}}</strong>
+                    <small>{{miem.cedula}}</small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <dt class="p-t-10">No hay Miembros en este grupo</dt>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+{% if mismo %}
+<div class="container">
+    <div class="p-25 p-t-25">No Perteneces A Nigún Grupo Aún</div>
+</div>
+{% endif %}
+<div class="container">
+    <div class="p-25 p-t-25">El Miembro No Pertenece a Grupo. 
+    {% if perms.miembros.es_administrador %}
+        <a href="/miembro/asignar_grupo/{{miembro.id}}/" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>
+    {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock card %}

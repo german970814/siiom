@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block js %}
+<script>
+    $(document).ready(function(){
+        $("#form").submit(function(event) {
+            if ($("#id_nombre").val() == '') {
+                swal("Alerta!!!", "Asegurate de poner un nombre");
+                return false;
+            } else if ($("#id_porcentaje").val() == '' && $("#id_nombre").val() != '') {
+                swal("Alerta!!!", "Asegurate de poner un porcentje");
+                return false;
+            } else {
+                return true;
+            }
+        });
+    })
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">
+                <legend><h3>{{accion}} Modulo</h3></legend>
+            </h1>
+            {% if ok %}
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el modulo correctamente. <a class="alert-link" alt="Listar Cursos" href="/academia/listar_modulos/">(volver a la lista de modulos.)</a></p>
+                </div>
+            </div>
+            {% endif %}
+            {% if form.errors %}
+            <div class="row">
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Aún Hay campos incorrectos verifique los errores</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data" id="form">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                	<div class="col-md-12">
+	                    <div class="col-md-4 col-md-offset-2">
+	                        <div class="input-group {{form.nombre.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-account"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_nombre" class="control-label requerido">Nombre:</label>
+	                                {{form.nombre}}
+	                            </div>
+                                {% for error in form.nombre.errors %}
+                                <small class="help-block">{{error}}</small>
+                                {% endfor %}
+	                        </div>
+	                    </div>
+                        <br class="space">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.porcentaje.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-arrow-right-top"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_porcentaje" class="control-label requerido">Porcentaje:</label>
+	                                {{form.porcentaje}}
+	                            </div>
+                                {% for error in form.porcentaje.errors %}
+                                <small class="help-block">{{error}}</small>
+                                {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="aceptar" value="Aceptar" class="btn btn-primary btn-block">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

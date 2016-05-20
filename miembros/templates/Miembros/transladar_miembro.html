@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+	<div class="card">
+		<div class="card-header">
+			<h1>
+				<legend><h3>{{miembroEditar.nombre|capfirst}} {{miembroEditar.primerApellido|capfirst}} {{miembroEditar.segundoApellido|capfirst}}</h3></legend>
+			</h1>
+		</div>
+		<div class="card-body card-padding">
+			<form action="" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4">
+						<div class="">
+							<label for="">Transladar a:</label>
+							<select name="menu" class="selectpicker" data-live-search="true">
+								{%for grupo in groups %} 
+						   		<option id="id_menu" value={{grupo.id}}> {{grupo.nombre|capfirst}}</option>
+							   	{%endfor%}
+							</select>
+						</div>
+					</div>
+				</div>
+				<br>
+				<br>
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4">
+						<button name="aceptar" class="btn btn-info btn-block" type="submit">
+							Transladar
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

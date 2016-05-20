@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#id_fechai').datetimepicker({
+            format: 'DD/MM/YY',
+            maxDate: moment(),
+        });
+
+        $('#id_fechaf').datetimepicker({
+            useCurrent: false,
+            format: 'DD/MM/YY',
+            maxDate: moment(),
+        });
+
+
+        $('#id_fechai').on("dp.change",function(e){
+            $('#id_fechaf').data("DateTimePicker").minDate(e.date);
+        });
+
+        $('#id_fechaf').on("dp.change",function(e){
+            $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+        });
+    });
+    //dibujando el grafico
+    {% if sw %}
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart(){
+            var data = google.visualization.arrayToDataTable({{ values|safe }});
+            var options = {
+                title: '{{ titulo_pag|safe }}',
+                width: '100%',
+                height: 500,
+                vAxis: {
+                    title: '{{ vAxis|safe }}'
+                },
+                hAxis: {
+                    title: '{{ hAxis|safe }}'
+                }
+            };
+        {% if tipo == 1 %}
+            var chart = new google.visualization.PieChart(document.getElementById('out'));
+        {% else %}
+            var chart = new google.visualization.ColumnChart(document.getElementById('out'));
+        {% endif %}
+            chart.draw(data, options);
+        }
+    {% endif %}
+
+    $(document).ready(function(){
+
+        {% if tipo == 1 %}
+            $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie_sel.png' %}");
+            $("#column_button").attr('src', "{% static 'Imagenes/chart_column.png' %}");
+            $("#type").attr('value', '1');
+        {% else %}
+            $("#column_button").attr('src', "{% static 'Imagenes/chart_column_sel.png' %}");
+            $("#pie_button").attr('src', "{% static 'Imagenes/chart_pie.png' %}");
+            $("#type").attr('value', '2');
+        {% endif %}
+
+        $("#pie_button, #column_button").click(function(){
+            if(this.id == "pie_button")
+            {   $("#type").attr('value', '1');
+                $("#form_visitasRed").submit();
+            }
+            else
+            {   $("#type").attr('value', '2');
+                $("#form_visitasRed").submit();
+            }
+
+        });
+
+        $('#form_visitasRed').submit(function(event) {
+            if ($('#id_fechai').val() == ''){
+                swal("Alerta!!!", "Asegurese de escoger una fecha inicial");
+                return false;
+            } else if ($('#id_fechai').val() != '' && $('#id_fechaf').val() == '') {
+                swal("Alerta!!!", "Asegurese de escoger una fecha final");
+                return false;
+            } else {
+                return true;
+            }
+        });
+	});
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-30">{{ titulo_pag }}</h3>
+                </legend>
+            </h1>
+            {% if messages %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{message}}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" id="form_visitasRed">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechai" class="fg-label requerido">Fecha Inicial:</label>
+                                {{form.fechai}}
+                            </div>
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar-note"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaf" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="La fecha final no puede ser anterior a la fecha inicial." title="" data-original-title="Ayuda">Fecha Final:</label>
+                                {{form.fechaf}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <input type="hidden" name="type" id="type" value="1">
+                    <div class="col-md-4 col-md-offset-2">
+                        <button class="btn btn-info btn-block" name="verReporte">Ver Reporte</button>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <button class="btn btn-warning btn-block" name="reportePDF">Generar PDF</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if sw %}
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend><h3>Reportes</h3></legend>
+            </h1>
+        </div>
+        <div class="card-body card-padding">
+            <small>Escoge un tipo de vista</small>
+            <br>
+            <br>
+            <div class="row">
+            <div class="col-sm-1">
+                <input type="image" src="{% static 'Imagenes/chart_pie_sel.png' %}" value="pie" name="pie_button" id="pie_button">
+            </div>
+            <div class="col-sm-1">
+                <input type="image" src="{% static 'Imagenes/chart_column.png' %}" value="column" name="column_button" id="column_button">
+            </div>
+
+            <div class="col-md-12"><div id="out"></div></div>
+            </div>
+            
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

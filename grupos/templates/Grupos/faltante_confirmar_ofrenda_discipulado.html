@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+    $(document).ready(function(){
+        $("#data-table-command").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },
+                    caseSensitive: false,
+                    formatters: {
+                        "commands": function(column, row) {
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/miembro/confirmar_ofrenda_discipulado/" + row.id + "'\"><span class=\"zmdi zmdi-card\"></span></button> "
+                        }
+                    }
+                });
+    })
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+	<div class="card">
+		<div class="card-header">
+			<h1>
+				<legend>
+					<h3>Lista Discipulados Con Ofrenda Sin Confirmar</h3>
+				</legend>
+			</h1>
+			{% if mensaje %}
+	            <div class="row">
+	                <div class="alert alert-success alert-dismissible" role="alert">
+	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+	                    <p>{{mensaje}}</p>
+	                </div>
+	            </div>
+            {% endif %}
+		</div>
+		<form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
+                            <thead>
+                                <tr>
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                    <th data-identifier="true" data-column-id="grupo">Grupo</th>
+                                    <th data-column-id="ver" data-formatter="commands" data-sortable="false">Registrar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for grupo in grupos %}
+                                <tr>
+                                    <td>{{grupo.grupo.listaLideres|first}}</td>
+                                    <td>{{grupo}}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td></td>
+                                    <td class="centrarTexto">No tiene reuniones a confirmar.</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </form>
+	</div>
+</div>	
+{% endblock contenido %}
+{# {% for grupo in grupos %}
+	<p>{{grupo}}</p>
+{% endfor %} #}

@@ -17,6 +17,7 @@ color_list = [colors.red, colors.yellow, colors.green, colors.blue, colors.cyan,
               colors.orangered, colors.chartreuse, colors.aquamarine, colors.skyblue, colors.indigo, colors.lavender,
               colors.gold, colors.greenyellow, colors.powderblue, colors.purple]
 
+
 class BarChart(Drawing):
 
     def __init__(self, width=400, height=200, data=[], labels=[], legends=[], *args, **kw):
@@ -38,13 +39,14 @@ class BarChart(Drawing):
 
         self.legend.alignment = 'right'
         self.legend.x = self.width
-        self.legend.y = self.height - self.height/4
+        self.legend.y = self.height - self.height / 4
         self.legend.dx = 8
         self.legend.dy = 8
         self.legend.deltay = 10
         self.legend.dxTextSpace = 3
         self.legend.columnMaximum = 10
         self.legend.colorNamePairs = [(color_list[i], legends[i]) for i in range(len(legends))]
+
 
 class PieChart(Drawing):
 
@@ -53,24 +55,25 @@ class PieChart(Drawing):
         self.add(Pie(), name='chart')
         self.add(Legend(), name='legend')
 
-        self.chart.x = self.width/4
+        self.chart.x = self.width / 4
         self.chart.y = 15
         self.chart.width = self.width - 150
         self.chart.height = self.height - 40
         self.chart.data = data
-        #self.chart.labels = labels
+        # self.chart.labels = labels
         for i in range(len(data)):
             self.chart.slices[i].fillColor = color_list[i]
 
         self.legend.alignment = 'right'
         self.legend.x = self.width - 20
-        self.legend.y = self.height - self.height/4
+        self.legend.y = self.height - self.height / 4
         self.legend.dx = 8
         self.legend.dy = 8
         self.legend.deltay = 10
         self.legend.dxTextSpace = 3
         self.legend.columnMaximum = 10
         self.legend.colorNamePairs = [(color_list[i], legends[i]) for i in range(len(legends))]
+
 
 class LineChart(Drawing):
 
@@ -92,7 +95,7 @@ class LineChart(Drawing):
 
         self.legend.alignment = 'right'
         self.legend.x = self.width
-        self.legend.y = self.height - self.height/4
+        self.legend.y = self.height - self.height / 4
         self.legend.dx = 8
         self.legend.dy = 1
         self.legend.deltay = 10
@@ -100,18 +103,19 @@ class LineChart(Drawing):
         self.legend.columnMaximum = 10
         self.legend.colorNamePairs = [(color_list[i], legends[i]) for i in range(len(legends))]
 
+
 class PdfTemplate(SimpleDocTemplate):
 
     def __init__(self, filename, titulo, opciones, datos, tipo, total=False, tabla=None, **kw):
         SimpleDocTemplate.__init__(self, filename, pagesize=letter, **kw)
 
-        #Estilos
+        # Estilos
         style = getSampleStyleSheet()
 
-        #Titulo
+        # Titulo
         header = Paragraph(titulo, style['Title'])
 
-        #Opciones
+        # Opciones
         op = ''
         if 'fi' in opciones:
             op = op + '<b>Fecha Inicial:</b> %s<br />' % opciones['fi']
@@ -126,7 +130,7 @@ class PdfTemplate(SimpleDocTemplate):
         if 'opt' in opciones:
             op = op + '<b>Opcion:</b> %s<br />' % opciones['opt']
         if 'ano' in opciones:
-            op = op + u'<b>Año:</b> %s<br />' % opciones['ano']
+            op = op + '<b>Año:</b> %s<br />' % opciones['ano']
         if 'red' in opciones:
             op = op + '<b>Red:</b> %s<br />' % opciones['red']
         if 'predica' in opciones:
@@ -137,7 +141,7 @@ class PdfTemplate(SimpleDocTemplate):
             op = op + '<b>Total de grupos inactivos:</b> %s<br />' % opciones['total_grupos_inactivos']
         op_p = Paragraph(op, style['Normal'])
 
-        #Tabla
+        # Tabla
 
         if tabla is not None:
             d = tabla
@@ -147,38 +151,41 @@ class PdfTemplate(SimpleDocTemplate):
             f = 10
 
         table = Table(d)
-        table_style = [('BACKGROUND', (0,0), (-1,0), colors.orange),
-            ('ALIGN', (1,1), (-1,-1), 'CENTER'),
+        table_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
             ('FONTSIZE', (0, 0), (-1, -1), f),
             ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-            ('BOX', (0, 0), (-1, -1), 0.25, colors.black)]
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+        ]
+
         if total:
-            table_style.append(('BACKGROUND', (0,-1), (-1,-1), colors.orange))
+            table_style.append(('BACKGROUND', (0, -1), (-1, -1), colors.orange))
         table.setStyle(TableStyle(table_style))
 
-        #Graficos
+        # Graficos
         sw = True
         if total:
             datos.pop()
         other_labels = datos.pop(0)
         other_labels.pop(0)
-        chart_datos = zip(*datos)
-        print chart_datos
+        chart_datos = list(zip(*datos))
+        print(chart_datos)
         labels = list(chart_datos.pop(0))
-        if tipo==1: #Pie chart
+        if tipo == 1:  # Pie chart
             data = list(chart_datos.pop())
             if sum(data) != 0:
                 chart = PieChart(data=data, labels=labels, legends=labels)
             else:
                 sw = False
-        elif tipo==2: #Bar chart
+        elif tipo == 2:  # Bar chart
             data = chart_datos
             chart = BarChart(data=data, labels=labels, legends=other_labels)
-        else: #Line chart
+        else:  # Line chart
             data = chart_datos
             chart = LineChart(data=data, labels=labels, legends=other_labels)
 
-        #Agregar al pdf
+        # Agregar al pdf
         catalog = []
         catalog.append(header)
         catalog.append(Spacer(1, 50))
@@ -190,4 +197,3 @@ class PdfTemplate(SimpleDocTemplate):
             catalog.append(chart)
 
         self.build(catalog)
-
