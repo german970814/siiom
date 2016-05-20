@@ -1,14 +1,14 @@
 from django.contrib import admin
-from miembros.models import Zona
-from miembros.models import Barrio
-from miembros.models import Pasos
-from miembros.models import TipoMiembro
-from miembros.models import DetalleLlamada
-from miembros.models import Escalafon
-from miembros.models import Miembro
-from miembros.models import CambioTipo
-from miembros.models import CambioEscalafon
-from miembros.models import CumplimientoPasos
+from .models import Zona
+from .models import Barrio
+from .models import Pasos
+from .models import TipoMiembro
+from .models import DetalleLlamada
+from .models import Escalafon
+from .models import Miembro
+from .models import CambioTipo
+from .models import CambioEscalafon
+from .models import CumplimientoPasos
 
 class miembroAdmin(admin.ModelAdmin):
 	list_display = ('id','cedula','nombre','primerApellido','segundoApellido', 'usuario')

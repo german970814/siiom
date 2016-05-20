@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block js %}
+<script>
+    $(document).ready(function(){
+        $("button[name='guardar']").click(function(event) {
+            /* Act on the event */
+            if ($('#id_miembro').val() == '') {
+                swal("Ningun Miembro");
+                event.preventDefault();
+            } else {
+                return true;
+            }
+        });
+    })
+</script>
+{% endblock %}
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700 f-20">
+                <legend><h3>Graduar Estudiante</h3></legend>
+            </h1>
+            {% if ok %}
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha registrado el lanzamiento del miembro correctamente.</p>
+                </div>
+            </div>
+            {% endif %}
+        <p>Seleccione el miembro al que se va a lanzar</p>
+        </div>   
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-sm-12">
+            		{% if not puedeVer %}
+                        <div class="row">
+                            <div class="alert alert-warning alert-dismissible" role="alert">
+                                <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                                <p>El estudiante actual no ha cumplido con todos los m&oacute;dulos.</p>
+                            </div>
+                        </div>
+					{% endif %}
+                    </div>
+            	</div>
+                <div class="row">
+                	<div class="col-md-4 col-md-offset-4">
+	                    {% if puedeVer %}
+                        <label for="id_miembro">Miembro:</label>
+	                    {{form.miembro}}
+	                    {% endif %}
+	                </div>
+	            </div>
+                <br>
+                <br>
+                {% if puedeVer %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" value="Guardar Cambios" name="guardar" class="btn btn-primary btn-block">Guardar</button>
+                    </div>
+                </div>
+                {% endif %}
+			</div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+	{% if grupo %}
+    <div class="card" style="background: #edecec;box-shadow: none;">
+        <div class="card-header">
+            <div class="row">
+                <h1>Resumen de mi Grupo</h1>
+            </div>
+        </div>
+        <div class="card-body card-padding">
+            <div class="row">
+                <div class="mini-charts">
+                    <div class="row">
+                        <div class="col-sm-4 col-md-">
+                            <div class="mini-charts-item bgm-red">
+                                <div class="clearfix">
+                                    <div class="chart stats-bar"></div>
+                                    <div class="count">
+                                        <small>Total Grupos</small>
+                                        <h2>{{totalGrupos}}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-md-">
+                            <div class="mini-charts-item bgm-orange">
+                                <div class="clearfix">
+                                    <div class="chart stats-bar-2"></div>
+                                    <div class="count">
+                                        <small>Total Líderes</small>
+                                        <h2>{{totalLideres}}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-md-">
+                            <div class="mini-charts-item bgm-green">
+                                <div class="clearfix">
+                                    <div class="chart stats-line"></div>
+                                    <div class="count">
+                                        <small>Lideres en Grupo</small>
+                                        <h2>{{lideresGrupo}}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--<div class="col-sm-3 col-md-">
+                            <div class="mini-charts-item bgm-blue">
+                                <div class="clearfix">
+                                    <div class="chart stats-line-2"></div>
+                                    <div class="count">
+                                        <small>Lideres Inactivos</small>
+                                        <h2>{{totalGruposI}}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	{% endif %} 
+	{% if visitantes %}
+	<div class="card">
+		<div class="card-header">
+			<h1>
+				<legend><h3>Notificaciones</h3></legend>
+			</h1>
+		</div>
+		<div class="card-body card-padding">
+			<div class="row">
+			{% for visita in visitantes %}
+	            <div class="alert bgm-cyan" role="alert">
+	                <p  class="f-15" style="color:#fff;">Llamada pendiente al visitante {{visita.nombre|capfirst}} {{visita.primerApellido|capfirst}} para informarle de las reuniones de G.A.R <a style="color: #fff;" alt="Listar Redes" class="alert-link f-700" href="/miembro/registrar_llamada/lider/">Registrar Llamada</a></p>
+	            </div>
+	        {% endfor %}
+	    	</div>
+		</div>
+	</div>
+	{% endif %}
+</div>
+{% endblock %} 
+

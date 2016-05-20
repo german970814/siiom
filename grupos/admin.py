@@ -5,11 +5,11 @@ Created on Apr 1, 2011
 '''
 
 from django.contrib import admin
-from grupos.models import Red
-from grupos.models import Grupo
-from grupos.models import ReunionGAR
-from grupos.models import ReunionDiscipulado
-from grupos.models import Predica
+from .models import Red
+from .models import Grupo
+from .models import ReunionGAR
+from .models import ReunionDiscipulado
+from .models import Predica
 
 class GrupoAdmin(admin.ModelAdmin):
     search_fields = ['nombre']

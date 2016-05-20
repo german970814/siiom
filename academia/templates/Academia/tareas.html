@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
+<script type="text/javascript">
+		$(document).ready(function(){
+            $("#data-table-selection").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                    },
+                    selection: true,
+                    multiSelect: true,
+                    rowSelect: true,
+                    keepSelection: true
+                });
+
+            var $seleccionados = [];
+            var $seleccion = [];
+            {% for e in estudiantes  %}
+                {% if e.tarea %}
+                    $seleccionados.push('{{e.id}}');
+                {% endif %}
+            {% endfor %}
+
+            // Se controla el uso y manejo de la tabla
+            bootgrid_table_solution("#data-table-selection", $seleccionados);
+
+			$("#idCurso").change(function(){
+				if ($(this).val() != -1){
+					$.post("", {combo: 'idCurso', id: $(this).val()}, function(data){
+                        agregarOpciones(data, 'idModulo');
+                        $('#idModulo').selectpicker('refresh');
+                    }, "json");
+				} else {
+					$("#idModulo").html('');
+					$("#idSesion").html('');
+				}
+			});
+			
+			$("#idModulo").change(function(){
+				if ($(this).val() != -1){
+					$.post("", {combo: 'idModulo', id: $(this).val()}, function(data){
+                        agregarOpciones(data, 'idSesion');
+                        $('#idSesion').selectpicker('refresh');
+                        ;}, "json");
+				} else {
+					$("#idSesion").html('');
+				}
+			});
+
+            $('#form_pasosTotal').submit(function(event) {
+                if ($('#idCurso').val() == -1) {
+                    swal("Alerta!!!","Asegurate de escoger un curso");
+                    return false;
+                } else if ($('#idModulo').val() == -1 && $('#idCurso').val() != -1) {
+                    swal("Alerta!!!","Asegurate de escoger un módulo");
+                    return false;
+                } else if ($('#idModulo').val() != -1 && $('#idCurso').val() != -1 && $('#idSesion').val() == -1){
+                    swal("Alerta!!!","Asegurate de escoger una sesión");
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            $('#formTarea').submit(function(event) {
+                try {
+                    for (var i = 0; i < $seleccionados.length; i++) {
+                        var x = $seleccionados[i];
+                        $('button[name="aceptarTarea"]').append('<input type="hidden" name="seleccionados" value="'+ x.toString() +'">')
+                    }
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            });
+
+            {% if nadie %}
+            $(window).load(function() {
+                // swal("Lo sentimos", "Parece que no hay estudiantes en esta sesión/módulo");
+                swal({   
+                    title: "Lo Sentimos",
+                    text: "Parece que no hay estudiantes en esta sesión/módulo",   
+                    type: "warning",
+                    confirmButtonColor: "#DD6B55",   
+                    confirmButtonText: "Aceptar",   
+                    closeOnConfirm: false 
+                });
+            });
+            {% endif %}
+		});		
+</script>
+
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">Registro de Tareas</h3>
+                </legend>
+            </h1>
+            {% if ok %}
+                <div class="row">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Se han registrado correctamente la entrega de tareas.</p>
+                    </div>
+                </div>
+            {% endif %}
+            {% if nadie %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>No hay estudiantes en este Curso/Módulo.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" id="form_pasosTotal">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group form-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idCurso" class="fg-label requerido">Cursos:</label>
+                                <select class="selectpicker" data-live-search="true" name="menuCursos" id="idCurso">
+                                    <option value="-1" {% if not curso %} selected="selected" {% endif %}>Selecciona un curso</option>          
+                                    {% for c in cursos %}
+                                        <option value="{{ c.id }}" {% if c == curso %} selected="selected" {% endif %}>{{ c.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idModulo" class="fg-label requerido">M&oacute;dulos:</label>
+                                <select class="selectpicker" data-live-search="true" name="menuModulos" id="idModulo">
+                                    <option value="-1" >Selecciona un Módulo</option>
+                                    {% for m in modulos %}
+                                        <option value="{{ m.id }}" {% if m == modulo %} selected="selected" {% endif %}>{{ m.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="idSesion" class="fg-label requerido">Sesiones:</label>
+                                <select class="selectpicker" data-live-search="true" name="menuSesiones" id="idSesion">
+                                    <option value="-1" >-----</option>          
+                                    {% for s in sesiones %}
+                                        <option value="{{ s.id }}" {% if s == sesion %} selected="selected" {% endif %}>{{ s.nombre|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name ="verEstudiantes" class="btn btn-info btn-block">Ver</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if estudiantes %}
+    <div class="card">
+        <form action="" id="formTarea" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-header">
+                <h1>
+                    <legend><h3>{% if not admin %}Mis{% endif %} Cursos</h3></legend>
+                </h1>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="data-table-selection" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th data-visible="false" data-column-id="id" data-identifier="true"></th>
+                            <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for est in estudiantes %}
+                        <tr>
+                            <td>{{est.id}}</td>
+                            <td>{{est.matricula.estudiante.nombre|capfirst}} {{est.matricula.estudiante.primerApellido|capfirst}} {{est.matricula.estudiante.segundoApellido|capfirst}}</td>
+                        </tr>
+                        {% empty %}
+                            <tr>
+                                <td></td>
+                                <td>No hay estudiantes en este modulo.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-4 col-md-offset-4">
+                <input type="hidden" name="menuCursos" value="{{curso.id}}"/>
+                <input type="hidden" name="menuModulos" value="{{modulo.id}}"/>
+                <input type="hidden" name="menuSesiones" value="{{sesion.id}}"/>
+                <button type="submit" class="btn btn-warning btn-block" name ="aceptarTarea">Registrar</button>
+            </div>
+            <br>
+            <br>
+            <br>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
