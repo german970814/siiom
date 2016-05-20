@@ -1,8 +1,46 @@
 from fabric.contrib.files import append, exists, sed
-from fabric.api import env, local, run
+from fabric.api import env, local, run, hosts
 import random
 
 REPO_URL = 'https://taniamhn@bitbucket.org/ingeniarte/iglesia.git'
+
+env.hosts = ['iglesia.webfactional.com', 'panama.iglesia.webfactional.com', 'gng.iglesia.webfactional.com']
+env.user = 'iglesia'
+
+enviroments = {
+    'siiom.conial.net': {
+        'name': 'siiom',
+        'db': 'siiom',
+        'user': 'siiom',
+        'pass': '123456'
+    },
+
+    'iglesia.webfactional.com': {
+        'name': 'cdr',
+        'db': 'iglesia_prod',
+        'user': 'iglesia',
+        'pass': 'ecbddac9'
+    },
+
+    'panama.iglesia.webfactional.com': {
+        'name': 'vps',
+        'db': 'panama_prod',
+        'user': 'iglesia',
+        'pass': 'ecbddac9'
+    },
+
+    'gng.iglesia.webfactional.com': {
+        'name': 'gng',
+        'db': 'gng',
+        'user': 'iglesia',
+        'pass': 'ecbddac9'
+    }
+}
+
+
+@hosts('conial@siiom.conial.net')
+def staging():
+    deploy()
 
 
 def deploy():
@@ -13,12 +51,13 @@ def deploy():
     _update_settings(source_folder, env.host)
     _update_virtualenv(env.user, env.host, source_folder)
     _update_static_files(source_folder, env.user, env.host)
+    _update_database_info(source_folder, env.host)
     _update_database(source_folder, env.user, env.host)
-    _restart_gunicorn_server(env.user)
+    _restart_gunicorn_server(env.user, env.host)
 
 
 def _create_directory_structure_if_necessary(site_folder):
-    for subfolder in ('database', 'static', 'source', 'media'):
+    for subfolder in ('static', 'source', 'media'):
         run('mkdir -p %s/%s' % (site_folder, subfolder))
 
 
@@ -34,7 +73,7 @@ def _get_latest_source(source_folder):
 
 def _update_settings(source_folder, site_name):
     settings_path = source_folder + '/Iglesia/settings.py'
-    # sed(settings_path, "DEBUG = True", "DEBUG = False")
+    sed(settings_path, "DEBUG = True", "DEBUG = False")
     sed(settings_path,
         'ALLOWED_HOSTS =.+$',
         'ALLOWED_HOSTS = ["%s"]' % (site_name,)
@@ -65,12 +104,22 @@ def _update_static_files(source_folder, user, site_name):
     ))
 
 
+def _update_database_info(source_folder, host):
+    database_path = source_folder + '/Iglesia/database.py'
+
+    valores = enviroments[host]
+    sed(database_path, 'NAME = ""', 'NAME = "%s"' % (valores['db']))
+    sed(database_path, 'USER = ""', 'USER = "%s"' % (valores['user']))
+    sed(database_path, 'PASSWORD = ""', 'PASSWORD = "%s"' % (valores['pass']))
+
+
 def _update_database(source_folder, user, site_name):
     run('cd %s && /home/%s/.envs/%s/bin/python3 manage.py migrate --noinput' % (
         source_folder, user, site_name
     ))
 
 
-def _restart_gunicorn_server(user):
-    run('/home/%s/bin/supervisorctl -c /home/%s/etc/supervisord.conf restart siiom' % (user, user))
-    run('/home/%s/bin/supervisorctl -c /home/%s/etc/supervisord.conf status siiom' % (user, user))
+def _restart_gunicorn_server(user, host):
+    name = enviroments[host]['name']
+    run('/home/%s/bin/supervisorctl -c /home/%s/etc/supervisord.conf restart %s' % (user, user, name))
+    run('/home/%s/bin/supervisorctl -c /home/%s/etc/supervisord.conf status %s' % (user, user, name))
