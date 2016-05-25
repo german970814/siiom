@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    <style>
+        .table-responsive {
+            overflow-x: inherit;
+        }
+    </style>
+{% endblock css %}
+
+{% block js %}
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
+<script>
+    jQuery(document).ready(function($) {
+        $("#data-table-selection").bootgrid({
+            css: {
+                icon: 'zmdi icon',
+                iconColumns: 'zmdi-view-module',
+                iconDown: 'zmdi-expand-more',
+                iconRefresh: 'zmdi-refresh',
+                iconUp: 'zmdi-expand-less'
+            },
+            caseSensitive: false,
+            formatters: {
+                "commands": function(column, row) {
+                    return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_reporte/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
+                }
+            }
+        });
+        $('#id_fechai').datetimepicker({
+            format: 'DD/MM/YY',
+            // daysOfWeekDisabled: [0,2,3,4,5,6],
+            maxDate: moment(),
+        });
+        $('#id_fechaf').datetimepicker({
+            useCurrent: false,
+            format: 'DD/MM/YY',
+            // daysOfWeekDisabled: [1,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+        $('#id_fechai').keypress(function(event) {
+            event.preventDefault();
+            return false;
+        });
+
+        $('#id_fechai').on("dp.change",function(e){
+            $('#id_fechaf').data("DateTimePicker").minDate(e.date);
+        });
+
+        $('#id_fechaf').on("dp.change",function(e){
+            $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+        });
+
+        function agregar_opciones(data, id){
+            var opciones = '<option value="-1" selected="selected">------</option>';
+            // data.forEach(function(item){
+            //  opciones += '<option value="' + item['pk'] + '">' + item['fields']['nombre'] + '</option>';
+            // });
+            // datos = eval(data);
+            // console.log(data)
+            for (var i = 0; i < data.length; i++) {
+                opciones += '<option value="' + data[i]['pk'] + '">' + data[i]['nombre'] + '</option>';
+            }
+            //$("#"+idCombo).empty();
+            $("#"+id).html(opciones);
+            $("#"+id).trigger('chosen:updated');
+        }
+
+        setTimeout(auxiliar, 2000);
+        function auxiliar(){
+            $(".grupo .bs-searchbox input").on('keydown change keyup', function(event){
+                if($(this).val() != ''){
+                    $.ajax({
+                        url: "/grupo/ver_reportes/",
+                        data: {
+                            combo: $(this).val(),
+                            value: $(this).val(),
+                            csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                        },
+                        type: 'POST',
+                        success: function(data){
+                            agregar_opciones(data, 'id_grupo');
+                            $('#id_grupo').selectpicker('refresh');
+                        }
+                    });
+                }
+                else{
+                    $("#id_grupo").html('');
+                    $("#id_grupo").trigger('chosen:updated');
+                    $('#id_grupo').selectpicker('refresh');
+                }
+            });
+        }
+
+        {% if vacio %}
+        $(window).load(function() {
+            // swal("Lo sentimos", "Parece que no hay estudiantes en esta sesión/módulo");
+            swal({   
+                title: "Lo Sentimos",
+                text: "Parece que no hay reportes en este rango de fecha",   
+                type: "warning",
+                confirmButtonColor: "#DD6B55",   
+                confirmButtonText: "Aceptar",   
+                closeOnConfirm: false 
+            });
+        });
+        {% endif %}
+        // $seleccionados = [];
+        // bootgrid_table_solution("#data-table-selection", $seleccionados);
+        // 
+        var $fechai = $('#id_fechai'), $fechaf = $('#id_fechaf'), $grupo = $('#id_grupo');
+
+        $('button[name="aceptar"]').click(function(event) {
+            if ($fechai.val() == '') {
+                swal("Alerta!", "Debes escoger una Fecha Inicial!")
+                return false;
+            } else if ($fechai.val() != '' && $fechaf.val() == '') {
+                swal("Alerta!", "Debes escoger una Fecha Final!");
+                return false;
+            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupo.val() == '') {
+                swal("Alerta!", "Debes escoger un grupo");
+                return false;
+            } else {
+               return true;
+            }
+        });
+
+    });
+</script>
+
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">Ver Reportes de Grupos</h3>
+                </legend>
+            </h1>
+            {% if ok %}
+                <div class="row">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Se ha registrado el reporte correctamente.</p>
+                    </div>
+                </div>
+            {% endif %}
+            {% if ya_reportada %}
+                <div class="row">
+                    <div class="alert alert-warning alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Ya ha sido reportada una reunion para esta predica.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="card-body card-padding table-responsive">
+            <br>
+            <form action="" method="POST" enctype="multipart/form-data" id="form">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 grupo">
+                        <div class="input-group fg-line">
+                            <label for="id_grupo" class="fg-label requerido">Grupo:</label>
+                            {{form.grupo}}
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-accounts"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechai" class="fg-label requerido">Fecha Incial:</label>
+                                {{form.fechai}}
+                            </div>
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-money-box"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
+                                {{form.fechaf}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="aceptar" class="btn btn-primary btn-block">Aceptar</button>
+                    </div>
+                </div>
+            </form>
+            {% if reuniones %}
+            <div class="card-header">
+                <h1>
+                    <legend>
+                        <h3>Reportes</h3>
+                    </legend>
+                </h1>
+            </div>
+            <div class="table-responsive">
+                <table id="data-table-selection" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th data-column-id="id" data-identifier="true" data-visible="false"></th>
+                            <th data-column-id="nombre" data-identifier="true">Fecha</th>
+                            <th data-column-id="predica" data-identifier="true">Prédica</th>
+                            <th data-column-id="asistencia" data-identifier="true">Asistentes</th>
+                            <th data-column-id="asistencia" data-identifier="true">Líderes Asistentes</th>
+                            <th data-column-id="visitas" data-identifier="true">Visitas</th>
+                            <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mg in reuniones %}
+                            <tr>
+                                <td>{{mg.id}}</td>
+                                <td>{{mg.fecha}}</td>
+                                <td>{{mg.predica}}</td>
+                                <td>{{mg.numeroTotalAsistentes}}</td>
+                                <td>{{mg.numeroLideresAsistentes}}</td>
+                                <td>{{mg.numeroVisitas}}</td>
+                            </tr>                
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <br>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

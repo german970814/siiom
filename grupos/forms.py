@@ -9,6 +9,7 @@ from django.forms.models import ModelForm
 from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
+from reportes.forms import FormularioRangoFechas
 
 
 class FormularioEditarGrupo(ModelForm):
@@ -240,3 +241,35 @@ class FormularioTransladarGrupo(forms.Form):
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         if red or grupo_id:
             self.fields['grupo'].queryset = self.fields['grupo'].queryset.filter(red=red).exclude(id=grupo_id)
+
+
+class FormularioReportesEnviados(FormularioRangoFechas):
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.none())  # .filter(estado='A'))
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioReportesEnviados, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update(
+            {'class': 'selectpicker', 'data-live-search': 'true'}
+        )
+
+        if self.is_bound:
+            try:
+                queryset = Grupo.objects.filter(id=self.data['grupo'])
+            except Grupo.DoesNotExist:
+                queryset = Grupo.objects.none()
+
+            self.fields['grupo'].queryset = queryset
+
+
+class FormularioEditarReunionGAR(forms.ModelForm):
+    error_css_class = 'has-error'
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarReunionGAR, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha'].widget.attrs.update({'readonly': ''})
+
+    class Meta:
+        model = ReunionGAR
+        exclude = ('grupo', 'asistentecia')
