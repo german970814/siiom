@@ -1,19 +1,32 @@
 from django.db import models
+import datetime
+from .managers import EncuentroManager
 
 
 class Encuentro(models.Model):
     """
     Modelo para la creacion de encuentros
     """
+    ACTIVO = 'A'
+    INACTIVO = 'I'
+    OPCIONES_ESTADO = (
+        (ACTIVO, 'ACTIVO'),
+        (INACTIVO, 'INACTIVO'),
+    )
+
     fecha_inicial = models.DateTimeField(verbose_name='Fecha Inicial')
     fecha_final = models.DateField(verbose_name='Fecha Final')
     hotel = models.CharField(max_length=100, verbose_name='Hotel')
     grupos = models.ManyToManyField('grupos.Grupo', verbose_name='Grupos')
-    coordinador = models.ForeignKey('miembros.Miembro', verbose_name='Coordinador')
-    tesorero = models.ForeignKey('miembros.Miembro', verbose_name='Tesorero')
+    coordinador = models.ForeignKey('miembros.Miembro',
+                                    verbose_name='Coordinador', related_name='encuentros_coordinador')
+    tesorero = models.ForeignKey('miembros.Miembro', verbose_name='Tesorero', related_name='encuentros_tesorero')
     direccion = models.CharField(max_length=100, verbose_name='Direccion', blank=True)
     observaciones = models.TextField(verbose_name='Observaciones', blank=True)
     dificultades = models.TextField(verbose_name='Dificultades', blank=True)
+    estado = models.CharField(max_length=1, choices=OPCIONES_ESTADO, default=ACTIVO, verbose_name='Estado')
+
+    objects = EncuentroManager()
 
     def __str__(self):
         return '{0} - {1}'.format(self.fecha_inicial, self.fecha_final)
@@ -21,6 +34,18 @@ class Encuentro(models.Model):
     def save(self, *args, **kwargs):
         self.hotel = self.hotel.upper()
         super(Encuentro, self).save(*args, **kwargs)
+
+    @property
+    def en_curso(self):
+        if datetime.date.today() >= self.fecha_inicial.date() and datetime.date.today() <= self.fecha_final:
+            return True
+        return False
+
+    @property
+    def acabado(self):
+        if datetime.date.today() > self.fecha_final:
+            return True
+        return False
 
 
 class Encontrista(models.Model):

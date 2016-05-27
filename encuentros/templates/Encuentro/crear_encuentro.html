@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block js %}
+    <script>
+        jQuery(document).ready(function($) {
+            $('#id_fecha_inicial').datetimepicker({
+                format: 'DD/MM/YY H:m',
+                minDate: moment(),
+            });
+
+            $('#id_fecha_final').datetimepicker({
+                useCurrent: false,
+                format: 'DD/MM/YY',
+                minDate: moment(),
+            });
+
+            // $('#id_fecha_inicial').keypress(function(event) {
+            //     event.preventDefault();
+            //     return false;
+            // });
+
+            // $('#id_fecha_inicial').on("dp.change",function(e){
+            //     $('#id_fecha_final').data("DateTimePicker").minDate(e.date);
+            // });
+
+            // $('#id_fecha_final').on("dp.change",function(e){
+            //     $('#id_fecha_inicial').data("DateTimePicker").maxDate(e.date);
+            // });
+
+            var $seleccionados = new Array();
+            var $oficial = new Array();
+
+            function agregar_opciones(data, id){
+                var opciones = '';
+                if ($oficial.length) {
+                    for (var i = 0; i < opciones.length; i++) {
+                        opciones += '<option value=">' + $oficial[i] + '">' + i.toString() + 'Grupo</option>'
+                    }
+                } 
+                for (var i = 0; i < data.length; i++) {
+                    opciones += '<option value="' + data[i]['pk'] + '">' + data[i]['nombre'] + '</option>';
+                }
+                $("#"+id).html(opciones);
+                $("#"+id).trigger('chosen:updated');
+            }
+
+            setTimeout(auxiliar, 2000);
+            function auxiliar(){
+                $(".grupos .bs-searchbox input").on('keydown', function(event){
+                    if($(this).val() != ''){
+                        $.ajax({
+                            url: "{% url 'obtener_grupos' %}",
+                            data: {
+                                id_red: $('#id_red').val(),
+                                combo_grupo: $(this).val(),
+                                value: $(this).val(),
+                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                            },
+                            type: 'POST',
+                            success: function(data){
+                                // console.log(data);
+                                agregar_opciones(data, 'id_grupos');
+                                $('#id_grupos').selectpicker('refresh');
+                            }
+                        });
+                    }
+                    else{
+                        $("#id_grupos").html('');
+                        $("#id_grupos").trigger('chosen:updated');
+                    }
+                });
+
+                $(".tesorero .bs-searchbox input").on('keydown', function(event){
+                    if($(this).val() != ''){
+                        $.ajax({
+                            url: "/encuentro/nuevo/",
+                            data: {
+                                id_red: $('#id_red').val(),
+                                combo_tesorero: $(this).val(),
+                                value: $(this).val(),
+                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                            },
+                            type: 'POST',
+                            success: function(data){
+                                // console.log(data);
+                                agregar_opciones(data, 'id_tesorero');
+                                $('#id_tesorero').selectpicker('refresh');
+                            }
+                        });
+                    }
+                    else{
+                        $("#id_tesorero").html('');
+                        $("#id_tesorero").trigger('chosen:updated');
+                    }
+                });
+
+                $(".coordinador .bs-searchbox input").on('keydown', function(event){
+                    if($(this).val() != ''){
+                        $.ajax({
+                            url: "/encuentro/nuevo/",
+                            data: {
+                                id_red: $('#id_red').val(),
+                                combo_tesorero: $(this).val(),
+                                value: $(this).val(),
+                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                            },
+                            type: 'POST',
+                            success: function(data){
+                                // console.log(data);
+                                agregar_opciones(data, 'id_coordinador');
+                                $('#id_coordinador').selectpicker('refresh');
+                            }
+                        });
+                    }
+                    else{
+                        $("#id_coordinador").html('');
+                        $("#id_coordinador").trigger('chosen:updated');
+                    }
+                });
+            }
+            // Array.prototype.unico = function(a){
+            //     return function(){
+            //         return this.filter(a)}
+            //     }(function(a,b,c){return c.indexOf(a,b+1)<0})
+
+            Array.prototype.Contains = function(v) {
+                for(var i = 0; i < this.length; i++) {
+                    if(this[i] === v) return true;
+                }
+                return false;
+            };
+
+            // var event = document.createEvent('Event');
+            // event.initEvent('Deseleccionar', true, true);
+
+            $('#id_grupos').on('Deseleccionar', function() {
+                $oficial = $seleccionados
+                // console.log($oficial);
+                $('.add').html($seleccionados);
+            })
+
+            $('#id_grupos').on('Seleccionar', function() {
+                $oficial = $seleccionados
+                // console.log($oficial);
+                $('.add').html($seleccionados);
+            })
+
+            var $ultimo;
+
+            $('#id_grupos').on('changed.bs.select', function() {
+                var value = $(this).val()
+                if (value === null && $seleccionados.length) {
+                    // aqui el ultimo
+                    $seleccionados.splice($seleccionados.indexOf($ultimo), 1);
+                    $(this).trigger('Deseleccionar');
+                } else if (value === null) {
+                    $seleccionados.splice(0, 1);
+                    $(this).trigger('Deseleccionar');
+                } else {
+                    if (value.length > $seleccionados.length) {
+                        for (var i = 0; i < value.length; i++) {
+                            if ($seleccionados.Contains(value[i])){
+                                continue;
+                            } else {
+                                $seleccionados.push(value[i]);
+                                $ultimo = value[i];
+                                $(this).trigger('Seleccionar');
+                            }
+                        }
+                    } else {
+                        if (value.length == $seleccionados.length - 1) {
+                            for (var i = 0; i < $seleccionados.length; i++) {
+                                if (!value.Contains($seleccionados[i])) {
+                                    $seleccionados.splice($seleccionados.indexOf($seleccionados[i]), 1);
+                                    $(this).trigger('Deseleccionar');
+                                } else {
+                                    continue;
+                                }
+                            }
+                        } else if ($seleccionados.length > value.length) {
+                            console.log("legue qui");
+                            for (var i = 0; i < value.length; i++) {
+                                if ($seleccionados.Contains(value[i])){
+                                    continue;
+                                } else {
+                                    $seleccionados.push(value[i]);
+                                    $ultimo = value[i];
+                                    $(this).trigger('Seleccionar');
+                                }
+                            }
+                            $('.add').html($seleccionados);
+                        } else if ($seleccionados.length < value.length){
+                            console.log("siiii");
+                            $('.add').html($seleccionados);
+                        } else {
+                            console.log("else");
+                            for (var i = 0; i < value.length; i++) {
+                                if ($seleccionados.Contains(value[i])){
+                                    continue;
+                                } else {
+                                    $seleccionados.push(value[i]);
+                                    $ultimo = value[i];
+                                    $(this).trigger('Seleccionar');
+                                }
+                            }
+                            $('.add').html($seleccionados);
+                        }
+                    }
+                }
+            })
+        });
+    </script>
+{% endblock js %}
+
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700">
+                <legend><h3>{{accion}} Encuentro</h3></legend>
+            </h1>
+            {% if ok %}
+                <div class="row">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el encuentro correctamente. <a alt="Listar Encuentros" class="alert-link" href="/encuentro/encuentros"> Volver a la lista de encuentros</a> <a alt="Agregar encontrista" class="alert-link" href="/encuentro/agregar_encontrista/{{ nuevo_encuentro.id }}/"> o agregar encontristas a este encuentro</a></p>
+                    </div>
+                </div>
+            {% endif %} 
+                <div class="add"></div>
+            {% if form.errors %}
+                <div class="row">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Aún hay errores en el formulario. {{form.errors}}</p>
+                    </div>
+                </div>
+            {% endif %} 
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="input-group {{form.fecha_inicial.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fecha_inicial" class="fg-label requerido control-label">Fecha Inicial:</label>
+                                {{form.fecha_inicial}}
+                            </div>
+                            {% for error in form.fecha_inicial.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="input-group {{form.fecha_final.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fecha_final" class="fg-label control-label requerido">Fecha Final:</label>
+                                {{form.fecha_final}}
+                            </div>
+                            {% for error in form.fecha_final.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group {{form.hotel.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-hotel"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_hotel" class="fg-label requerido control-label">Hotel:</label>
+                                {{form.hotel}}
+                            </div>
+                            {% for error in form.hotel.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group {{form.direccion.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-pin"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_direccion" class="fg-label requerido control-label">Dirección:</label>
+                                {{form.direccion}}
+                            </div>
+                            {% for error in form.direccion.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group {{form.red.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-star"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_red" class="fg-label control-label requerido">Red:</label>
+                                {{form.red}}
+                            </div>
+                            {% for error in form.red.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 grupos">
+                        <div class="input-group {{form.grupos.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-accounts-alt"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_grupos" class="fg-label control-label requerido">Grupos:</label>
+                                {{form.grupos}}
+                            </div>
+                            {% for error in form.grupos.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-5 col-md-offset-1 coordinador">
+                        <div class="input-group {{form.coordinador.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-male"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_coordinador" class="fg-label requerido control-label">Coordinador:</label>
+                                {{form.coordinador}}
+                            </div>
+                            {% for error in form.coordinador.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-5 tesorero">
+                        <div class="input-group {{form.tesorero.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-star"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_tesorero" class="fg-label control-label requerido">Tesorero:</label>
+                                {{form.tesorero}}
+                            </div>
+                            {% for error in form.tesorero.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <div class="input-group {{form.observaciones.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-star"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_observaciones" class="fg-label control-label requerido">Observaciones:</label>
+                                {{form.observaciones}}
+                            </div>
+                            {% for error in form.observaciones.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" value="aceptar" name="aceptar" class="btn btn-primary btn-block">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
