@@ -29,6 +29,7 @@ INSTALLED_APPS = (
     'academia',
     'grupos',
     'reportes',
+    'encuentros',
 )
 
 MIDDLEWARE_CLASSES = (

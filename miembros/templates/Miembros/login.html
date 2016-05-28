@@ -17,6 +17,30 @@
     <!-- CSS -->
     <link href="{% static 'Template/jquery/css/app.min.1.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/css/app.min.2.css' %}" rel="stylesheet">
+
+    <style>
+        .login-navigation > li{
+            border-radius: 10px;
+            padding: 0 5px;
+            font-size: 8px;
+            display: inline-block;
+            margin: 0 2px;
+            transition: all;
+            transition-duration: 150ms;
+            cursor: pointer;
+            vertical-align: top;
+            color: #fff;
+            line-height: 16px;
+            /*min-width: 16px;
+            min-height: 16px;*/
+            text-transform: uppercase;
+        }
+
+        .login-navigation > li:not(:hover){
+            border-radius: 10px;
+            font-size: 8px;
+        }
+    </style>
 </head>
 
 <body class="login-content">
@@ -83,6 +107,11 @@
     <script src="{% static 'Template/jquery/vendors/bower_components/Waves/dist/waves.min.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.min.js' %}"></script>
     <!--<script src="{% static 'Template/jquery/js/functions.js' %}"></script>-->
-    
+    <script>
+    jQuery(document).ready(function($) {
+        console.log($('li.bgm-orange'));
+        $('li.bgm-orange').hover();
+    });
+    </script>
 </body>
 </html>

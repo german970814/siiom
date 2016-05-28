@@ -32,6 +32,7 @@
         });
 
         $("#data-table-basic").bootgrid({
+                    caseSensitive: false,
                     css: {
                         icon: 'zmdi icon',
                         iconColumns: 'zmdi-view-module',
@@ -151,8 +152,9 @@
                                 {% for fecha in grupo.fecha_reunion %}
                                     {% if forloop.first %}
                                         {{ fecha }}
-                                    {% endif %}
+                                    {% else %}
                                     - {{ fecha }}
+                                    {% endif %}
                                 {% endfor %}
                             </td>
                         </tr>
@@ -165,11 +167,11 @@
                 </table>
                 <br>
                 <br>
-                <div class="row">
+                <!--<div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <Button type="submit" class="btn btn-warning btn-block" name ="Enviar">Enviar E-mail</Button>
                     </div>
-                </div>
+                </div>-->
                 <br>
                 <br>
             </form>

@@ -3,7 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import send_mail
-from django.http import HttpResponseRedirect, Http404
+from django.db.models import Q
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
@@ -13,7 +14,7 @@ from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
     FormularioTransladarGrupo, FormularioCrearGrupoRaiz, FormularioCrearPredica,
-    FormularioReportarReunionGrupoAdmin,
+    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR
 )
 from miembros.models import Miembro
 from common.tests import (
@@ -22,6 +23,7 @@ from common.tests import (
 
 # Python Packages
 import datetime
+import json
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -660,3 +662,54 @@ def transladar_grupos(request, id_grupo):
         form = FormularioTransladarGrupo(red=red, grupo_id=id_grupo)
 
     return render_to_response("Miembros/transladar_grupos.html", locals(), context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+def ver_reportes_grupo(request):
+    if request.method == 'POST' or ('post' in request.session and len(request.session['post']) > 1):
+
+        if 'combo' in request.POST:
+            value = request.POST['value']
+            querys = Q(lider1__nombre__icontains=value) | Q(lider1__primerApellido__icontains=value) | \
+                Q(lider1__cedula__icontains=value) | Q(lider2__nombre__icontains=value) | \
+                Q(lider2__primerApellido__icontains=value) | Q(lider2__cedula__icontains=value)
+            # Importante que se puedan escoger todos los grupos y no solo los 'Activos'
+            busqueda = Grupo.objects.filter(querys)[:5]
+            response = [{'pk': str(s.id), 'nombre': str(s)} for s in busqueda]
+            return HttpResponse(json.dumps(response), content_type='aplicattion/json')
+
+        form = FormularioReportesEnviados(data=request.POST or request.session['post'])
+
+        if form.is_valid():
+            grupo = form.cleaned_data['grupo']  # get_object_or_404(Grupo, id=request.POST['grupo'])
+            fecha_inicial = form.cleaned_data['fechai']
+            fecha_final = form.cleaned_data['fechaf']
+            request.session['post'] = request.POST
+            fecha_final += datetime.timedelta(days=1)
+            reuniones = grupo.reuniongar_set.filter(fecha__range=(fecha_inicial, fecha_final)).order_by('-fecha')
+            if len(reuniones) == 0:
+                vacio = True
+
+    else:
+        form = FormularioReportesEnviados()
+
+    return render_to_response("Grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+def editar_runion_grupo(request, pk):
+
+    reunion = get_object_or_404(ReunionGAR, pk=pk)
+
+    if request.method == 'POST':
+        form = FormularioEditarReunionGAR(data=request.POST, instance=reunion)
+
+        if form.is_valid():
+            form.save()
+            ok = True
+            request.session['post'] = request.session['post']
+
+    else:
+        form = FormularioEditarReunionGAR(instance=reunion)
+
+    return render_to_response("Grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
