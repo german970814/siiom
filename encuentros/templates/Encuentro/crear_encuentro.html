@@ -48,29 +48,29 @@
 
             setTimeout(auxiliar, 2000);
             function auxiliar(){
-                $(".grupos .bs-searchbox input").on('keydown', function(event){
-                    if($(this).val() != ''){
-                        $.ajax({
-                            url: "{% url 'obtener_grupos' %}",
-                            data: {
-                                id_red: $('#id_red').val(),
-                                combo_grupo: $(this).val(),
-                                value: $(this).val(),
-                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
-                            },
-                            type: 'POST',
-                            success: function(data){
-                                // console.log(data);
-                                agregar_opciones(data, 'id_grupos');
-                                $('#id_grupos').selectpicker('refresh');
-                            }
-                        });
-                    }
-                    else{
-                        $("#id_grupos").html('');
-                        $("#id_grupos").trigger('chosen:updated');
-                    }
-                });
+                // $(".grupos .bs-searchbox input").on('keydown', function(event){
+                //     if($(this).val() != ''){
+                //         $.ajax({
+                //             url: "{% url 'obtener_grupos' %}",
+                //             data: {
+                //                 id_red: $('#id_red').val(),
+                //                 combo_grupo: $(this).val(),
+                //                 value: $(this).val(),
+                //                 csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                //             },
+                //             type: 'POST',
+                //             success: function(data){
+                //                 // console.log(data);
+                //                 agregar_opciones(data, 'id_grupos');
+                //                 $('#id_grupos').selectpicker('refresh');
+                //             }
+                //         });
+                //     }
+                //     else{
+                //         $("#id_grupos").html('');
+                //         $("#id_grupos").trigger('chosen:updated');
+                //     }
+                // });
 
                 $(".tesorero .bs-searchbox input").on('keydown', function(event){
                     if ($('#id_red').val() != '') {
@@ -143,81 +143,81 @@
             // var event = document.createEvent('Event');
             // event.initEvent('Deseleccionar', true, true);
 
-            $('#id_grupos').on('Deseleccionar', function() {
-                $oficial = $seleccionados
-                // console.log($oficial);
-                $('.add').html($seleccionados);
-            })
+            // $('#id_grupos').on('Deseleccionar', function() {
+            //     $oficial = $seleccionados
+            //     // console.log($oficial);
+            //     $('.add').html($seleccionados);
+            // })
 
-            $('#id_grupos').on('Seleccionar', function() {
-                $oficial = $seleccionados
-                // console.log($oficial);
-                $('.add').html($seleccionados);
-            })
+            // $('#id_grupos').on('Seleccionar', function() {
+            //     $oficial = $seleccionados
+            //     // console.log($oficial);
+            //     $('.add').html($seleccionados);
+            // })
 
-            var $ultimo;
+            // var $ultimo;
 
-            $('#id_grupos').on('changed.bs.select', function() {
-                var value = $(this).val()
-                if (value === null && $seleccionados.length) {
-                    // aqui el ultimo
-                    $seleccionados.splice($seleccionados.indexOf($ultimo), 1);
-                    $(this).trigger('Deseleccionar');
-                } else if (value === null) {
-                    $seleccionados.splice(0, 1);
-                    $(this).trigger('Deseleccionar');
-                } else {
-                    if (value.length > $seleccionados.length) {
-                        for (var i = 0; i < value.length; i++) {
-                            if ($seleccionados.Contains(value[i])){
-                                continue;
-                            } else {
-                                $seleccionados.push(value[i]);
-                                $ultimo = value[i];
-                                $(this).trigger('Seleccionar');
-                            }
-                        }
-                    } else {
-                        if (value.length == $seleccionados.length - 1) {
-                            for (var i = 0; i < $seleccionados.length; i++) {
-                                if (!value.Contains($seleccionados[i])) {
-                                    $seleccionados.splice($seleccionados.indexOf($seleccionados[i]), 1);
-                                    $(this).trigger('Deseleccionar');
-                                } else {
-                                    continue;
-                                }
-                            }
-                        } else if ($seleccionados.length > value.length) {
-                            console.log("legue qui");
-                            for (var i = 0; i < value.length; i++) {
-                                if ($seleccionados.Contains(value[i])){
-                                    continue;
-                                } else {
-                                    $seleccionados.push(value[i]);
-                                    $ultimo = value[i];
-                                    $(this).trigger('Seleccionar');
-                                }
-                            }
-                            $('.add').html($seleccionados);
-                        } else if ($seleccionados.length < value.length){
-                            console.log("siiii");
-                            $('.add').html($seleccionados);
-                        } else {
-                            console.log("else");
-                            for (var i = 0; i < value.length; i++) {
-                                if ($seleccionados.Contains(value[i])){
-                                    continue;
-                                } else {
-                                    $seleccionados.push(value[i]);
-                                    $ultimo = value[i];
-                                    $(this).trigger('Seleccionar');
-                                }
-                            }
-                            $('.add').html($seleccionados);
-                        }
-                    }
-                }
-            })
+            // $('#id_grupos').on('changed.bs.select', function() {
+            //     var value = $(this).val()
+            //     if (value === null && $seleccionados.length) {
+            //         // aqui el ultimo
+            //         $seleccionados.splice($seleccionados.indexOf($ultimo), 1);
+            //         $(this).trigger('Deseleccionar');
+            //     } else if (value === null) {
+            //         $seleccionados.splice(0, 1);
+            //         $(this).trigger('Deseleccionar');
+            //     } else {
+            //         if (value.length > $seleccionados.length) {
+            //             for (var i = 0; i < value.length; i++) {
+            //                 if ($seleccionados.Contains(value[i])){
+            //                     continue;
+            //                 } else {
+            //                     $seleccionados.push(value[i]);
+            //                     $ultimo = value[i];
+            //                     $(this).trigger('Seleccionar');
+            //                 }
+            //             }
+            //         } else {
+            //             if (value.length == $seleccionados.length - 1) {
+            //                 for (var i = 0; i < $seleccionados.length; i++) {
+            //                     if (!value.Contains($seleccionados[i])) {
+            //                         $seleccionados.splice($seleccionados.indexOf($seleccionados[i]), 1);
+            //                         $(this).trigger('Deseleccionar');
+            //                     } else {
+            //                         continue;
+            //                     }
+            //                 }
+            //             } else if ($seleccionados.length > value.length) {
+            //                 console.log("legue qui");
+            //                 for (var i = 0; i < value.length; i++) {
+            //                     if ($seleccionados.Contains(value[i])){
+            //                         continue;
+            //                     } else {
+            //                         $seleccionados.push(value[i]);
+            //                         $ultimo = value[i];
+            //                         $(this).trigger('Seleccionar');
+            //                     }
+            //                 }
+            //                 $('.add').html($seleccionados);
+            //             } else if ($seleccionados.length < value.length){
+            //                 console.log("siiii");
+            //                 $('.add').html($seleccionados);
+            //             } else {
+            //                 console.log("else");
+            //                 for (var i = 0; i < value.length; i++) {
+            //                     if ($seleccionados.Contains(value[i])){
+            //                         continue;
+            //                     } else {
+            //                         $seleccionados.push(value[i]);
+            //                         $ultimo = value[i];
+            //                         $(this).trigger('Seleccionar');
+            //                     }
+            //                 }
+            //                 // $('.add').html($seleccionados);
+            //             }
+            //         }
+            //     }
+            // })
         });
     </script>
 {% endblock js %}
