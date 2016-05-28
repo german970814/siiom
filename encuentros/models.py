@@ -47,6 +47,12 @@ class Encuentro(models.Model):
             return True
         return False
 
+    @property
+    def tiene_asistencia(self):
+        if self.encontrista_set.filter(asistio=True):
+            return True
+        return False
+
 
 class Encontrista(models.Model):
     """

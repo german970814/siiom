@@ -26,6 +26,12 @@
         var $seleccionados = [];
         var $seleccion = [];
 
+        {% for m in encontristas %}
+            {% if m.asistio %}
+                $seleccionados.push('{{m.id}}');
+            {% endif %}
+        {% endfor %}
+
         // Se controla el uso y manejo de la tabla
         bootgrid_table_solution("#data-table-selection", $seleccionados);
 

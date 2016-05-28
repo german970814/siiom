@@ -420,7 +420,7 @@
                 </li>
                     {% if perms.miembros.es_tesorero or perms.miembros.es_administrador or perms.miembros.es_coordinador %}
                     <li class="sub-menu">
-                        <a href=""><i class="zmdi zmdi-account-box-mail"></i>Encuentros</a>
+                        <a href=""><i class="zmdi zmdi-globe"></i>Encuentros</a>
                         <ul>
                             {% if perms.miembros.es_administrador %}
                             <li>
@@ -429,9 +429,6 @@
                             {% endif %}
                             <li>
                                 <a href="{% url 'listar_encuentros' %}">Listar Encuentros</a>
-                            </li>
-                            <li>
-                                <a href="#">Mis Encuentros</a>
                             </li>
                         </ul>
                     </li>

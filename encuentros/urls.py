@@ -2,7 +2,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^nuevo/$', views.crear_encuetro, name="crear_encuetro"),
+    url(r'^nuevo/$', views.crear_encuentro, name="crear_encuetro"),
     url(r'^encuentros/$', views.listar_encuentros, name="listar_encuentros"),
     url(r'^agregar_encontrista/(?P<id_encuentro>\d+)/$', views.agregar_encontrista, name="agregar_encontrista"),
     url(r'^listar_encontristas/(?P<id_encuentro>\d+)/$', views.listar_encontristas, name="listar_encontristas"),

@@ -16,7 +16,16 @@
             caseSensitive: false,
             formatters: {
                 "commands" : function(column, row) {
-                    return {% if perms.miembros.es_tesorero or perms.miembros.es_administrador %}"<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/agregar_encontrista/" + row.id + "'\"><span class=\"zmdi zmdi-plus\"></span></button> " + {% endif %} "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/listar_encontristas/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button> " + "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle " + row.class + "\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-album\"></span></button> "
+                    if (row.class == 'c-green' || row.class == 'c-red' || row.class == 'c-blue') {
+                        {% if perms.miembros.es_administrador or perms.miembros.es_tesorero %}
+                        var $link = '/encuentro/asistencia_encuentro/' + row.id + '/';
+                        {% else %}
+                        var $link = '#';
+                        {% endif %}
+                    } else {
+                        var $link = '#';
+                    }
+                    return {% if perms.miembros.es_tesorero or perms.miembros.es_administrador %}"<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/agregar_encontrista/" + row.id + "'\"><span class=\"zmdi zmdi-plus\"></span></button> " + {% endif %} "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/listar_encontristas/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button> " + "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle " + row.class + "\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-album\" onClick=\"window.location.href='"+$link+"'\"></span></button> "
                 },
             }
         });
@@ -31,10 +40,10 @@
         // }
         setTimeout(ver_encuentros_realizados, 1000);
         function ver_encuentros_realizados() {
-            $('button.c-red').click(function(event) {
-                var val = $(this).parent().parent().attr('data-row-id')
-                window.location.href = "{% url 'asistencia_encuentro' 0 %}".replace(0, val);
-            });
+            // $('button.c-red, button.c-green').click(function(event) {
+            //     var val = $(this).parent().parent().attr('data-row-id')
+            //     window.location.href = "{% url 'asistencia_encuentro' 0 %}".replace(0, val);
+            // });
 
             $('button.c-green').attr('title', 'Estado Activo');
             $('button.c-red').attr('title', 'Estado Completado');
@@ -71,14 +80,16 @@
                                 <th data-identifier="true" data-column-id="hotel">Hotel</th>
                                 <th data-identifier="true" data-column-id="grupos">Grupos</th>
 					            <th data-identifier="true" data-column-id="gns">N. Encontristas</th>
+                                {% if encuentros %}
                                 <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                                {% endif %}
 					       	</tr>
 				    	</thead>
 				    	<tbody>
 						{% for encuentro in encuentros %}
 							<tr>
                                 <td>{{ encuentro.id}}</td>
-                                <td>{% if encuentro.en_curso and not encuentro.acabado %}c-green{% elif encuentro.acabado %}c-red{% else %}c-gray{% endif %}</td>
+                                <td>{% if encuentro.en_curso and not encuentro.acabado %}c-green{% elif encuentro.tiene_asistencia %}c-blue{% elif encuentro.acabado %}c-red{% else %}c-gray{% endif %}</td>
                                 <td>{{ encuentro.fecha_inicial }}</td>
 								<td>{{ encuentro.fecha_final }}</td>
 								<td>{{ encuentro.coordinador }}</td>
@@ -89,6 +100,7 @@
 							</tr>
 		                {% empty %}
 		                	<tr>
+                                <td></td>
                                 <td></td>
 		                    	<td colspan="4" class="centrarTexto">No existen Encuentros aún</td>
 		                    </tr>

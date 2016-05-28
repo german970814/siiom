@@ -10,14 +10,14 @@ from miembros.models import Miembro, TipoMiembro
 from .models import Encuentro, Encontrista
 import json
 from common.tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
-from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro
+from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro, solo_encuentros_miembro
 
 
-URL = "/dont_have_permissions"
+URL = "/dont_have_permissions/"
 
 
 @user_passes_test(adminTest, login_url=URL)
-def crear_encuetro(request):
+def crear_encuentro(request):
     accion = 'Crear'
     if request.method == 'POST':
         if 'combo_tesorero' in request.POST:
@@ -75,6 +75,9 @@ def listar_encuentros(request):
 def agregar_encontrista(request, id_encuentro):
     accion = 'Crear'
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
+    mismo = solo_encuentros_miembro(request, encuentro)
+    if mismo:
+        return mismo
 
     if request.method == 'POST':
         form = NuevoEncontristaForm(data=request.POST, encuentro=encuentro)
@@ -95,6 +98,9 @@ def editar_encontrista(request, id_encontrista):
     accion = 'Editar'
     encontrista = get_object_or_404(Encontrista, pk=id_encontrista)
     encuentro = encontrista.encuentro
+    mismo = solo_encuentros_miembro(request, encuentro)
+    if mismo:
+        return mismo
 
     if request.method == 'POST':
         form = NuevoEncontristaForm(data=request.POST, instance=encontrista)  # , encuentro=encuentro)
@@ -122,6 +128,9 @@ def borrar_encontrista(request, id_encontrista):
 def listar_encontristas(request, id_encuentro):
 
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
+    mismo = solo_encuentros_miembro(request, encuentro)
+    if mismo:
+        return mismo
 
     encontristas = encuentro.encontrista_set.all()
     return render_to_response('Encuentro/listar_encontristas.html', locals(), context_instance=RequestContext(request))
@@ -131,13 +140,13 @@ def listar_encontristas(request, id_encuentro):
 @user_passes_test(tesorero_administrador_test, login_url=URL)
 def asistencia_encuentro(request, id_encuentro):
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
-    if encuentro.acabado:
-        encontristas = encuentro.encontrista_set.all()
-        if len(encontristas) == 0:
-            mensaje = 'Este encuentro no tiene encontristas'
-    else:
-        mensaje = 'Este encuentro aun no ha acabado'
-        encontristas = []
+    mismo = solo_encuentros_miembro(request, encuentro)
+    if mismo:
+        return mismo
+
+    encontristas = encuentro.encontrista_set.all()
+    if len(encontristas) == 0:
+        mensaje = 'Este encuentro no tiene encontristas'
 
     if request.method == 'POST':
         if 'seleccionados' in request.POST:
@@ -146,7 +155,8 @@ def asistencia_encuentro(request, id_encuentro):
                 for encontrista in seleccionados:
                     encontrista.asistio = True
                     encontrista.save()
-                crear_miembros_con_encontristas(seleccionados)
+                if request.user.has_perm('miembros.es_administrador'):
+                    crear_miembros_con_encontristas(seleccionados)
                 return HttpResponseRedirect('/encuentro/encuentros/')
             else:
                 pass

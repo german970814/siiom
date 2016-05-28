@@ -1,6 +1,7 @@
 from threading import Thread
 from miembros.models import TipoMiembro, Pasos, CumplimientoPasos, CambioTipo, Miembro
 from django.contrib.auth.models import Group
+from django.http import HttpResponseRedirect
 import datetime
 
 
@@ -54,7 +55,7 @@ def crear_miembros_con_encontristas(encontristas):
     if tesorero_group in encuentro.tesorero.usuario.groups.all():
         encuentro.tesorero.usuario.groups.remove(tesorero_group)
         encuentro.tesorero.usuario.save()
-    if coordinador_group in encuentro.tesorero.usuario.groups.all():
+    if coordinador_group in encuentro.coordinador.usuario.groups.all():
         encuentro.coordinador.usuario.groups.remove(coordinador_group)
         encuentro.coordinador.usuario.save()
     encuentro.estado = 'I'
@@ -71,3 +72,14 @@ def avisar_tesorero_coordinador_encuentro(tesorero, coordinador):
     if coordinador_group not in coordinador.usuario.groups.all():
         coordinador.usuario.groups.add(coordinador_group)
         coordinador.save()
+
+
+def solo_encuentros_miembro(request, encuentro):
+    if not request.user.has_perm('miembros.es_administrador'):
+        if request.user.has_perm('miembros.es_coordinador'):
+            if encuentro not in Miembro.objects.get(usuario=request.user).encuentros_coordinador.all():
+                return HttpResponseRedirect('/dont_have_permissions/')
+        if request.user.has_perm('miembros.es_tesorero'):
+            if encuentro not in Miembro.objects.get(usuario=request.user).encuentros_tesorero.all():
+                return HttpResponseRedirect('/dont_have_permissions/')
+    return None

@@ -73,50 +73,58 @@
                 });
 
                 $(".tesorero .bs-searchbox input").on('keydown', function(event){
-                    if($(this).val() != ''){
-                        $.ajax({
-                            url: "/encuentro/nuevo/",
-                            data: {
-                                id_red: $('#id_red').val(),
-                                combo_tesorero: $(this).val(),
-                                value: $(this).val(),
-                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
-                            },
-                            type: 'POST',
-                            success: function(data){
-                                // console.log(data);
-                                agregar_opciones(data, 'id_tesorero');
-                                $('#id_tesorero').selectpicker('refresh');
-                            }
-                        });
-                    }
-                    else{
-                        $("#id_tesorero").html('');
-                        $("#id_tesorero").trigger('chosen:updated');
+                    if ($('#id_red').val() != '') {
+                        if($(this).val() != ''){
+                            $.ajax({
+                                url: "/encuentro/nuevo/",
+                                data: {
+                                    id_red: $('#id_red').val(),
+                                    combo_tesorero: $(this).val(),
+                                    value: $(this).val(),
+                                    csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                                },
+                                type: 'POST',
+                                success: function(data){
+                                    // console.log(data);
+                                    agregar_opciones(data, 'id_tesorero');
+                                    $('#id_tesorero').selectpicker('refresh');
+                                }
+                            });
+                        }
+                        else{
+                            $("#id_tesorero").html('');
+                            $("#id_tesorero").trigger('chosen:updated');
+                        }
+                    } else {
+                        swal("Alerta", "Asegurate de escoger primero una red");
                     }
                 });
 
                 $(".coordinador .bs-searchbox input").on('keydown', function(event){
-                    if($(this).val() != ''){
-                        $.ajax({
-                            url: "/encuentro/nuevo/",
-                            data: {
-                                id_red: $('#id_red').val(),
-                                combo_tesorero: $(this).val(),
-                                value: $(this).val(),
-                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
-                            },
-                            type: 'POST',
-                            success: function(data){
-                                // console.log(data);
-                                agregar_opciones(data, 'id_coordinador');
-                                $('#id_coordinador').selectpicker('refresh');
-                            }
-                        });
-                    }
-                    else{
-                        $("#id_coordinador").html('');
-                        $("#id_coordinador").trigger('chosen:updated');
+                    if ($('#id_red').val() != '') {
+                        if($(this).val() != ''){
+                            $.ajax({
+                                url: "/encuentro/nuevo/",
+                                data: {
+                                    id_red: $('#id_red').val(),
+                                    combo_tesorero: $(this).val(),
+                                    value: $(this).val(),
+                                    csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+                                },
+                                type: 'POST',
+                                success: function(data){
+                                    // console.log(data);
+                                    agregar_opciones(data, 'id_coordinador');
+                                    $('#id_coordinador').selectpicker('refresh');
+                                }
+                            });
+                        }
+                        else{
+                            $("#id_coordinador").html('');
+                            $("#id_coordinador").trigger('chosen:updated');
+                        }
+                    } else {
+                        swal("Alerta", "Asegurate de escoger primero una red");
                     }
                 });
             }
@@ -235,7 +243,7 @@
                 <div class="row">
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Aún hay errores en el formulario. {{form.errors}}</p>
+                        <p>Aún hay errores en el formulario.</p>
                     </div>
                 </div>
             {% endif %} 
