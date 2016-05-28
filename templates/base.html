@@ -421,6 +421,21 @@
                     </ul>
                     {% endif %}
                 </li>
+                    {% if perms.miembros.es_tesorero or perms.miembros.es_administrador or perms.miembros.es_coordinador %}
+                    <li class="sub-menu">
+                        <a href=""><i class="zmdi zmdi-globe"></i>Encuentros</a>
+                        <ul>
+                            {% if perms.miembros.es_administrador %}
+                            <li>
+                                <a href="{% url 'crear_encuetro' %}">Crear Encuentro</a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="{% url 'listar_encuentros' %}">Listar Encuentros</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 {% endif %} 
             </ul>
         </aside>

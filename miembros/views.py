@@ -143,8 +143,10 @@ def miembroInicio(request):
             else:
                 pass
     totalLideres = len(discipulos)
-    totalGrupos = len(listaGruposDescendientes(miembro))  # len(grupos)
+    totalGrupos = len(k)  # len(grupos)
     lideresGrupo = len(lid_gru(miembro)) - 1
+    if lideresGrupo == -1:
+        lideresGrupo = 0
     # totalGruposI = totalLideres - lideresGrupo
 
     # request.session['visitantes'] = visitantes

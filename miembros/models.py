@@ -239,7 +239,9 @@ class Miembro(models.Model):
             ("llamada_lider", "puede modificar llamada lider"),
             ("llamada_agente", "puede modificar llamada agente"),
             ("cumplimiento_pasos", "puede registrar el cumplimiento de pasos"),
-            ("es_pastor", "indica si un miembro es pastor")
+            ("es_pastor", "indica si un miembro es pastor"),
+            ("es_tesorero", "indica si un miembro es tesorero"),
+            ("es_coordinador", "indica si un miembro es coordinador"),
         )
 
 
