@@ -40,12 +40,12 @@ class Grupo(models.Model):
     barrio = models.ForeignKey('miembros.Barrio')
 
     def __str__(self):
-        cad = self.lider1.nombre.capitalize() \
-            + " " + self.lider1.primerApellido.capitalize() + "(" + self.lider1.cedula + ")"
+        cad = self.lider1.nombre.upper() \
+            + " " + self.lider1.primerApellido.upper() + "(" + self.lider1.cedula + ")"
 
         if self.lider2:
-            cad = cad + " - " + self.lider2.nombre.capitalize() + \
-                " " + self.lider2.primerApellido.capitalize() + "(" + self.lider2.cedula + ")"
+            cad = cad + " - " + self.lider2.nombre.upper() + \
+                " " + self.lider2.primerApellido.upper() + "(" + self.lider2.cedula + ")"
 
         return cad
 

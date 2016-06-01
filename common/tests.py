@@ -38,18 +38,21 @@ def cumplimientoPasosTest(user):
 
 
 def asignarGrupoTest(user):
-    return user.is_authenticated()\
-        and (Group.objects.get(name__iexact='Agente') in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (Group.objects.get(name__iexact='Agente') in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def miembroTest(user):
-    return user.is_authenticated() \
-        and (Group.objects.get(name__iexact='Maestro') in user.groups.all()
-        or LIDER in user.groups.all()
-        or Group.objects.get(name__iexact='Agente') in user.groups.all()
-        or Group.objects.get(name__iexact='Receptor') in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (Group.objects.get(name__iexact='Maestro') in user.groups.all() or
+         LIDER in user.groups.all() or Group.objects.get(name__iexact='Agente') in user.groups.all() or
+         Group.objects.get(name__iexact='Receptor') in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def receptorTest(user):
@@ -63,21 +66,27 @@ def adminTest(user):
 
 
 def verGrupoTest(user):
-    return user.is_authenticated()\
-        and (Group.objects.get(name__iexact='Lider') in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (Group.objects.get(name__iexact='Lider') in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def receptorAdminTest(user):
-    return user.is_authenticated()\
-        and (Group.objects.get(name__iexact='Receptor') in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (Group.objects.get(name__iexact='Receptor') in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def PastorAdminTest(user):
-    return user.is_authenticated()\
-        and (Group.objects.get(name__iexact='Pastor') in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (Group.objects.get(name__iexact='Pastor') in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def maestroTest(user):
@@ -86,21 +95,27 @@ def maestroTest(user):
 
 
 def adminMaestroTest(user):
-    return user.is_authenticated() \
-        and (ADMINISTRADOR in user.groups.all()
-        or Group.objects.get(name__iexact='Maestro') in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (ADMINISTRADOR in user.groups.all() or
+         Group.objects.get(name__iexact='Maestro') in user.groups.all())
+    )
 
 
 def liderAdminTest(user):
-    return user.is_authenticated() \
-        and (LIDER in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (LIDER in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def agenteAdminTest(user):
-    return user.is_authenticated() \
-        and (Group.objects.get(name__iexact='Agente') in user.groups.all()
-        or ADMINISTRADOR in user.groups.all())
+    return (
+        user.is_authenticated() and
+        (Group.objects.get(name__iexact='Agente') in user.groups.all() or
+         ADMINISTRADOR in user.groups.all())
+    )
 
 
 def tesorero_administrador_test(user):

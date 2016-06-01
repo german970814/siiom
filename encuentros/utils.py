@@ -5,16 +5,46 @@ from django.http import HttpResponseRedirect
 import datetime
 
 
+Miembro.algun_encuentro_como_coordinador = property(
+    lambda x: [f for f in x.encuentros_coordinador.all() if f.no_empieza]
+)
+
+Miembro.algun_encuentro_como_tesorero = property(
+    lambda x: [f for f in x.encuentros_tesorero.all() if f.no_empieza]
+)
+
+
 def posponer_function(function):
+    from functools import wraps
+
+    @wraps(function)
     def decorator(*args, **kwargs):
         t = Thread(target=function, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
+        return t
     return decorator
+
+
+# def async(function):
+#     from functools import wraps
+
+#     @wraps(function)
+#     def decorator(*args, **kwargs):
+#         func = Thread(target=function, args=args, kwargs=kwargs)
+#         func.start()
+#         return func
+#     return decorator
 
 
 @posponer_function
 def crear_miembros_con_encontristas(encontristas):
+    """
+    Nota: Importante en esta vista al momento de ejecutar esta funcion, cuando se ejecuta
+    la vista en html que reenderiza ve el encuentro como ACTIVO ya que el estado INACTIVO
+    se pone luego de que acaba la funcion, hay que buscar la forma de avisarle al
+    request.user que aun no se ha actualizado...
+    """
     tesorero_group = Group.objects.get(name__iexact='tesorero')
     coordinador_group = Group.objects.get(name__iexact='coordinador')
     tipo_miembro = TipoMiembro.objects.get(nombre__iexact='miembro')
@@ -52,14 +82,21 @@ def crear_miembros_con_encontristas(encontristas):
                 cambio.autorizacion = encontrista.encuentro.tesorero
                 cambio.save()
     encuentro = encontrista.encuentro
-    if tesorero_group in encuentro.tesorero.usuario.groups.all():
-        encuentro.tesorero.usuario.groups.remove(tesorero_group)
-        encuentro.tesorero.usuario.save()
-    if coordinador_group in encuentro.coordinador.usuario.groups.all():
-        encuentro.coordinador.usuario.groups.remove(coordinador_group)
-        encuentro.coordinador.usuario.save()
-    encuentro.estado = 'I'
+    encuentro.estado = encuentro._meta.model.INACTIVO
     encuentro.save()
+    # Si el tesorero tiene el grupo de 'Tesorero'
+    if tesorero_group in encuentro.tesorero.usuario.groups.all():
+        # # Si no hay encuentros que no se han cumplido
+        # if not encuentro.tesorero.algun_encuentro_como_tesorero:
+        # Si no hay algun encuentro que siga activo
+        if not any(enc for enc in encuentro.tesorero.encuentros_tesorero.activos()):
+            encuentro.tesorero.usuario.groups.remove(tesorero_group)
+            encuentro.tesorero.usuario.save()
+    if coordinador_group in encuentro.coordinador.usuario.groups.all():
+        # if not encuentro.coordinador.algun_encuentro_como_coordinador:
+        if not any(enc for enc in encuentro.coordinador.encuentros_coordinador.activos()):
+            encuentro.coordinador.usuario.groups.remove(coordinador_group)
+            encuentro.coordinador.usuario.save()
 
 
 @posponer_function
