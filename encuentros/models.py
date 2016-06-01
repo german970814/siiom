@@ -53,6 +53,12 @@ class Encuentro(models.Model):
             return True
         return False
 
+    @property
+    def no_empieza(self):
+        if datetime.date.today() < self.fecha_inicial.date():
+            return True
+        return False
+
 
 class Encontrista(models.Model):
     """
@@ -78,7 +84,7 @@ class Encontrista(models.Model):
     asistio = models.BooleanField(default=False, verbose_name='Asistio')
 
     def __str__(self):
-        return '{0} {1} ({3})'.format(self.primer_nombre, self.primer_apellido, self.identificacion)
+        return '{0} {1} ({2})'.format(self.primer_nombre, self.primer_apellido, self.identificacion)
 
     def save(self, *args, **kwargs):
         self.primer_nombre = self.primer_nombre.upper()

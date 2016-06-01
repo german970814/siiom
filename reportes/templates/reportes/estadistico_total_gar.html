@@ -156,7 +156,7 @@
                                 <select class="selectpicker" name="menuGrupo_i" id="idGrupo_i" data-live-search="true">
                                     <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
                                     {% for g_i in listaGrupo_i %}
-                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
+                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

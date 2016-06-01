@@ -1,3 +1,4 @@
 .idea
 *.pyc
 FaltaPorFront.txt
+Iglesia/settings__debug.py
