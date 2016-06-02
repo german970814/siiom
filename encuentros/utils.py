@@ -1,7 +1,12 @@
-from threading import Thread
-from miembros.models import TipoMiembro, Pasos, CumplimientoPasos, CambioTipo, Miembro
+# Django
 from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
+
+# Apps
+from miembros.models import TipoMiembro, Pasos, CumplimientoPasos, CambioTipo, Miembro
+
+# Python
+from threading import Thread
 import datetime
 
 
@@ -14,7 +19,7 @@ Miembro.algun_encuentro_como_tesorero = property(
 )
 
 
-def posponer_function(function):
+def async(function):
     from functools import wraps
 
     @wraps(function)
@@ -37,7 +42,7 @@ def posponer_function(function):
 #     return decorator
 
 
-@posponer_function
+@async
 def crear_miembros_con_encontristas(encontristas):
     """
     Nota: Importante en esta vista al momento de ejecutar esta funcion, cuando se ejecuta
@@ -99,7 +104,7 @@ def crear_miembros_con_encontristas(encontristas):
             encuentro.coordinador.usuario.save()
 
 
-@posponer_function
+@async
 def avisar_tesorero_coordinador_encuentro(tesorero, coordinador):
     tesorero_group = Group.objects.get(name__iexact='tesorero')
     coordinador_group = Group.objects.get(name__iexact='coordinador')

@@ -159,7 +159,9 @@ def reportarReunionGrupoAdmin(request):
             else:
                 ya_reportada = True
     else:
-        form = FormularioReportarReunionGrupoAdmin()
+        init = request.GET.get('grupo', None)
+        initial = {'grupo': init}
+        form = FormularioReportarReunionGrupoAdmin(initial=initial)
     return render_to_response('Grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 

@@ -55,6 +55,7 @@ class FormularioReportarReunionGrupoAdmin(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
+        self.fields['grupo'].queryset = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['fecha'].widget.attrs.update({'class': 'form-control'})
         self.fields['predica'].widget.attrs.update({'class': 'form-control'})

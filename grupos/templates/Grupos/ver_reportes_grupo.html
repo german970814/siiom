@@ -142,6 +142,11 @@
                 <legend>
                     <h3 class="f-700 f-20">Ver Reportes de Grupos</h3>
                 </legend>
+                {% if reuniones %}
+                {% if reuniones.first.grupo.id %}
+                <small><a href="/miembro/reportar_reunion_grupo_admin/?grupo={{ reuniones.first.grupo.id }}">Crear un reporte para este grupo</a></small>
+                {% endif %}
+                {% endif %}
             </h1>
             {% if ok %}
                 <div class="row">
