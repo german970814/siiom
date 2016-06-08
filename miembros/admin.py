@@ -29,8 +29,9 @@ class DecadeBornListFilter(admin.SimpleListFilter):
         in the right sidebar.
         """
         return (
-            ('none', 'Sin entrar aun'),
             ('hoy', 'Hoy'),
+            ('ultima_semana', 'Ultima Semana'),
+            ('ultimo_mes', 'Ultimo Mes'),
         )
 
     def queryset(self, request, queryset):
@@ -41,23 +42,45 @@ class DecadeBornListFilter(admin.SimpleListFilter):
         """
         # Compare the requested value (either '80s' or '90s')
         # to decide how to filter the queryset.
+        if self.value() == 'hoy':
+            return queryset.filter(usuario__last_login__icontains=datetime.date.today())
+        if self.value() == 'ultima_semana':
+            return queryset.filter(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=7), datetime.date.today() + datetime.timedelta(days=1)))
+        if self.value() == 'ultimo_mes':
+            return queryset.filter(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=30), datetime.date.today() + datetime.timedelta(days=1)))
+
+
+class FiltroSinEntrar(admin.SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = 'Usuarios sin entrar'
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'notlogin'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('none', 'Nunca'),
+            ('hoy', 'Hoy'),
+            ('ultima_semana', 'Ultima Semana'),
+            ('ultimo_mes', 'Ultimo Mes'),
+        )
+
+    def queryset(self, request, queryset):
         if self.value() == 'none':
             return queryset.filter(usuario__last_login=None)
         if self.value() == 'hoy':
-            return queryset.filter(usuario__last_login__icontains=datetime.date.today())
+            return queryset.exclude(usuario__last_login__icontains=datetime.date.today())
+        if self.value() == 'ultima_semana':
+            return queryset.exclude(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=7), datetime.date.today() + datetime.timedelta(days=1)))
+        if self.value() == 'ultimo_mes':
+            return queryset.exclude(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=30), datetime.date.today() + datetime.timedelta(days=1)))
 
 
 class miembroAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cedula', 'nombre', 'primerApellido', 'segundoApellido', 'usuario', 'filter_user_last_login_none')
+    list_display = ('id', 'cedula', 'nombre', 'primerApellido', 'segundoApellido', 'usuario')
     search_fields = ('cedula', 'nombre', 'primerApellido', 'segundoApellido', 'email', 'usuario__username')
-    list_filter = (DecadeBornListFilter, )
-
-    def filter_user_last_login_none(self, obj):
-        if obj.usuario:
-            last_login = obj.usuario.last_login
-        else:
-            last_login = '-----'
-        return last_login
+    list_filter = (DecadeBornListFilter, FiltroSinEntrar)
 
 
 class cambioTipoAdmin(admin.ModelAdmin):
