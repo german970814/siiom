@@ -10,6 +10,7 @@ from miembros.models import Miembro, Zona, Barrio, CumplimientoPasos,\
 from django.db.models import Q
 from django import forms
 from academia.models import Matricula
+from grupos.models import Grupo
 from PIL import Image
 from io import BytesIO
 
@@ -464,3 +465,12 @@ class FormularioTipoMiembros(forms.ModelForm):
     class Meta:
         model = CambioTipo
         exclude = ('miembro', 'autorizacion', 'nuevoTipo', 'anteriorTipo', 'fecha')
+
+
+class FormularioTransladarMiembro(forms.Form):
+    error_css_class = 'has-error'
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.all().select_related('lider1', 'lider2'))
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioTransladarMiembro, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker'})

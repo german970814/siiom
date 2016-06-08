@@ -1,8 +1,12 @@
+
+# Django
 from django import forms
+
+# Apps
 from .models import Encuentro, Encontrista
 from grupos.models import Grupo, Red
 from miembros.models import Miembro
-from reportes.views import listaGruposDescendientes
+# from reportes.views import listaGruposDescendientes
 
 
 class CrearEncuentroForm(forms.ModelForm):

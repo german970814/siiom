@@ -1585,3 +1585,29 @@ def eliminar_foto_perfil(request, pk):
             response['ruta'] = settings.STATIC_URL + 'Imagenes/profile-none.jpg'
             response['ms'] = 'Permiso denegado para hacer esta operacion'
     return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+def transladar_miembros(request, id_miembro):
+
+    try:
+        miembro = Miembro.objects.get(id=id_miembro)
+    except Miembro.DoesNotExist:
+        raise Http404
+
+    if miembro.grupoLidera():
+        return HttpResponseRedirect('/dont_have_permissions/')
+
+    if request.method == 'POST':
+        form = FormularioTransladarMiembro(data=request.POST)
+
+        if form.is_valid():
+            grupo = form.cleaned_data['grupo']
+            miembro.grupo = grupo
+            miembro.save()
+            if miembro.conyugue:
+                miembro.conyugue.grupo = grupo
+                miembro.conyugue.save()
+    else:
+        form = FormularioTransladarMiembro()
+    return render_to_response('Miembros/transladar_miembro.html', locals(), context_instance=RequestContext(request))

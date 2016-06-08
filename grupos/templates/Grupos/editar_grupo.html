@@ -19,12 +19,17 @@
                         <a data-pmb-action="edit" href="" class="edit-error">Editar</a>
                     </li>
                     {% if perms.miembros.es_administrador %}
-                    <li>
-                        <a href="/grupo/editar_grupo/{{grupo.id}}">Editar Grupo Como Administrador</a>
-                    </li>
-                    <li>
-                        <a href="/grupo/transladar_grupo/{{grupo.id}}">Trasladar Grupo en Organigrama</a>
-                    </li>
+                        <li>
+                            <a href="/grupo/editar_grupo/{{grupo.id}}">Editar Grupo Como Administrador</a>
+                        </li>
+                        <li>
+                            <a href="/grupo/transladar_grupo/{{grupo.id}}">Trasladar Grupo en Organigrama</a>
+                        </li>
+                        {% if not miembro.grupoLidera %}
+                            <li>
+                                <a href="/miembro/transladar_miembros/{{miembro.id}}">Trasladar Miembro de Grupo</a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
             </li>
