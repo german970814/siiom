@@ -25,6 +25,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'waffle',
     'miembros',
     'academia',
     'grupos',
@@ -41,6 +42,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'waffle.middleware.WaffleMiddleware',
 )
 
 ROOT_URLCONF = 'Iglesia.urls'
