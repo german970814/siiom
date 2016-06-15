@@ -12,28 +12,32 @@ enviroments = {
         'name': 'siiom',
         'db': 'siiom',
         'user': 'siiom',
-        'pass': '123456'
+        'pass': '123456',
+        'source': 'develop'
     },
 
     'iglesia.webfactional.com': {
         'name': 'cdr',
         'db': 'iglesia_prod',
         'user': 'iglesia',
-        'pass': 'ecbddac9'
+        'pass': 'ecbddac9',
+        'source': 'master'
     },
 
     'panama.iglesia.webfactional.com': {
         'name': 'vps',
         'db': 'panama_prod',
         'user': 'iglesia',
-        'pass': 'ecbddac9'
+        'pass': 'ecbddac9',
+        'source': 'master'
     },
 
     'gng.iglesia.webfactional.com': {
         'name': 'gng',
         'db': 'gng',
         'user': 'iglesia',
-        'pass': 'ecbddac9'
+        'pass': 'ecbddac9',
+        'source': 'master'
     }
 }
 
@@ -67,7 +71,9 @@ def _get_latest_source(source_folder):
     else:
         run('git clone %s %s' % (REPO_URL, source_folder))
 
-    current_commit = local("git log origin/feature/migracion-1.8.9 -n 1 --format=%H", capture=True)
+    source = enviroments[env.host]['source']
+
+    current_commit = local("git log origin/" + source + " -n 1 --format=%H", capture=True)
     run('cd %s && git reset --hard %s' % (source_folder, current_commit))
 
 

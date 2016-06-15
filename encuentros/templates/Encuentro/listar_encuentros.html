@@ -25,7 +25,7 @@
                     } else {
                         var $link = '#';
                     }
-                    return {% if perms.miembros.es_tesorero or perms.miembros.es_administrador %}"<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/agregar_encontrista/" + row.id + "'\"><span class=\"zmdi zmdi-plus\"></span></button> " + {% endif %} "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/listar_encontristas/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button> " + "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle " + row.class + "\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-album\" onClick=\"window.location.href='"+$link+"'\"></span></button> "
+                    return {% if perms.miembros.es_tesorero or perms.miembros.es_administrador %}"<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/agregar_encontrista/" + row.id + "'\"><span class=\"zmdi zmdi-plus\"></span></button> " + {% endif %}{% if perms.miembros.es_administrador %}"<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/editar_encuentro/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " + {% endif %} "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/encuentro/listar_encontristas/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button> " + "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle " + row.class + "\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-album\" onClick=\"window.location.href='"+$link+"'\"></span></button> "
                 },
             }
         });
@@ -92,8 +92,8 @@
                                 <td>{% if encuentro.en_curso and not encuentro.acabado %}c-green{% elif encuentro.tiene_asistencia %}c-blue{% elif encuentro.acabado %}c-red{% else %}c-gray{% endif %}</td>
                                 <td>{{ encuentro.fecha_inicial }}</td>
 								<td>{{ encuentro.fecha_final }}</td>
-								<td>{{ encuentro.coordinador }}</td>
-                                <td>{{ encuentro.tesorero }}</td>
+								<td>{{ encuentro.coordinador|upper }}</td>
+                                <td>{{ encuentro.tesorero|upper }}</td>
                                 <td>{{ encuentro.hotel }}</td>
 								<td>{% for grupo in encuentro.grupos.all %}{% if forloop.first %}{{ grupo }}{% else %}, {{ grupo }}{% endif %}{% endfor %}</td>
                                 <td>{{ encuentro.encontrista_set.count }}</td>

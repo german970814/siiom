@@ -15,11 +15,11 @@
                         iconUp: 'zmdi-expand-less'
 	                    },
                     {% if grupos %}
-                    selection: true,
-                    multiSelect: true,
-                    rowSelect: true,
+                    // selection: true,
+                    // multiSelect: true,
+                    // rowSelect: true,
+                    // keepSelection: true,
                     caseSensitive: false,
-                    keepSelection: true,
                     formatters: {
                         "commands": function(column, row) {
                             return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_grupo/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
@@ -30,9 +30,9 @@
 
         $seleccionados = [];
 
-        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+        // bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
 
-        send_form("#form", $seleccionados);
+        // send_form("#form", $seleccionados);
     })
 </script>
 {% endblock %}
@@ -100,14 +100,14 @@
             </div>
             <br>
             <br>
-            <form action="" id="form" method="POST" enctype="multipart/form-data">
+            <!--{# <form action="" id="form" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <button type="submit" class="btn btn-danger btn-block" name ="eliminar">Eliminar</button>
                     </div>
                 </div>
-            </form>
+            </form> #}-->
         </div>
         {% else %}
         <div class="card-body card-padding">

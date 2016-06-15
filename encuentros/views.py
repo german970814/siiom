@@ -1,6 +1,7 @@
 
 # Django
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
@@ -9,7 +10,7 @@ from django.template.context import RequestContext
 
 # Apps
 from .models import Encuentro, Encontrista
-from .forms import CrearEncuentroForm, NuevoEncontristaForm
+from .forms import CrearEncuentroForm, NuevoEncontristaForm, EditarEncuentroForm
 from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro, solo_encuentros_miembro
 from grupos.models import Red, Grupo
 from miembros.models import Miembro, TipoMiembro
@@ -32,7 +33,7 @@ def crear_encuentro(request):
             value = request.POST['value']
             querys = Q(nombre__icontains=value) | Q(primerApellido__icontains=value) | Q(cedula__icontains=value)
             tipo = TipoMiembro.objects.get(nombre__iexact='lider')
-            miembros = Miembro.objects.filter(miembro_cambiado__nuevoTipo=tipo, estado='A')
+            miembros = Miembro.objects.filter(miembro_cambiado__nuevoTipo=tipo, estado='A', grupo__red=red)
             miembros = miembros.filter(querys)[:10]
             response = [{'pk': str(a.id), 'nombre': str(a)} for a in miembros]
             return HttpResponse(json.dumps(response), content_type='application/json')
@@ -45,6 +46,51 @@ def crear_encuentro(request):
             ok = True
     else:
         form = CrearEncuentroForm()
+
+    return render_to_response('Encuentro/crear_encuentro.html', locals(), context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url=URL)
+def editar_encuentro(request, id_encuentro):
+    """Vista de edicion de encuentros"""
+    accion = 'Editar'
+    encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
+    tesorero = Miembro.objects.get(id=encuentro.tesorero.id)
+    coordinador = Miembro.objects.get(id=encuentro.coordinador.id)
+    if request.method == 'POST':
+        if 'combo_tesorero' in request.POST:
+            red = Red.objects.get(id=request.POST['id_red'])
+            value = request.POST['value']
+            querys = Q(nombre__icontains=value) | Q(primerApellido__icontains=value) | Q(cedula__icontains=value)
+            tipo = TipoMiembro.objects.get(nombre__iexact='lider')
+            miembros = Miembro.objects.filter(miembro_cambiado__nuevoTipo=tipo, estado='A', grupo__red=red)
+            miembros = miembros.filter(querys)[:10]
+            response = [{'pk': str(a.id), 'nombre': str(a)} for a in miembros]
+            return HttpResponse(json.dumps(response), content_type='application/json')
+
+        form = EditarEncuentroForm(data=request.POST, instance=encuentro)
+
+        if form.is_valid():
+            nuevo_tesorero = form.cleaned_data['tesorero']
+            nuevo_coordinador = form.cleaned_data['coordinador']
+            if coordinador != nuevo_coordinador:
+                grupo_coordinador = Group.objects.get(name__iexact='coordinador')
+                if grupo_coordinador in coordinador.usuario.groups.all() and \
+                   not coordinador.encuentros_coordinador.activos().exclude(id__in=[encuentro.id]):
+                    coordinador.usuario.groups.remove(grupo_coordinador)
+                    coordinador.usuario.save()
+            if tesorero != nuevo_tesorero:
+                grupo_tesorero = Group.objects.get(name__iexact='tesorero')
+                if grupo_tesorero in tesorero.usuario.groups.all() and \
+                   not tesorero.encuentros_tesorero.activos().exclude(id__in=[encuentro.id]):
+                    tesorero.usuario.groups.remove(grupo_tesorero)
+                    tesorero.usuario.save()
+            encuentro_editado = form.save()
+            avisar_tesorero_coordinador_encuentro(encuentro_editado.tesorero, encuentro_editado.coordinador)
+            ok = True
+
+    else:
+        form = EditarEncuentroForm(instance=encuentro)
 
     return render_to_response('Encuentro/crear_encuentro.html', locals(), context_instance=RequestContext(request))
 

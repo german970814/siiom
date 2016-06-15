@@ -14,11 +14,11 @@
                         iconRefresh: 'zmdi-refresh',
                         iconUp: 'zmdi-expand-less'
 	                    },
-                    selection: true,
-                    multiSelect: true,
-                    rowSelect: true,
+                    //selection: true,
+                    //multiSelect: true,
+                    //rowSelect: true,
+                    //keepSelection: true,
                     caseSensitive: false,
-                    keepSelection: true,
                     formatters: {
                         "commands": function(column, row) {
                             return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_red/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " +
@@ -29,9 +29,9 @@
 
         $seleccionados = [];
 
-        bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
+        // bootgrid_table_solution("#data-table-command", $seleccionados, true, "button[name='eliminar']", "Nada que Eliminar");
 
-        send_form("#form", $seleccionados);
+        // send_form("#form", $seleccionados);
     })
 </script>
 {% endblock %}
@@ -87,14 +87,14 @@
         </table>
         <br>
         <br>
-        <form id="form" action="" method="POST">
+        <!--{# <form id="form" action="" method="POST">
         	{% csrf_token %}
             <div class="row">
                 <div class="col-md-4 col-md-offset-4">
                     <button type="submit" name="eliminar" class="btn btn-danger btn-block"><i class="zmdi zmdi-delete"></i> Eliminar</button>
                 </div>
             </div>
-        </form>
+        </form> #} -->
         <br>
         <br>
     </div>
