@@ -99,7 +99,9 @@ class FormularioCrearGrupo(ModelForm):
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
-    def __init__(self, red='', new=True, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        red = kwargs.pop('red', None)
+        new = kwargs.pop('new', None)
         super(FormularioCrearGrupo, self).__init__(*args, **kwargs)
         self.fields['lider1'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['lider2'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
@@ -113,35 +115,68 @@ class FormularioCrearGrupo(ModelForm):
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-        # def override_str(obj):
-        #     obj.__class__.__str__ = lambda x: x.nombre.upper() + ' ' + x.primerApellido.upper() + \
-        #         ' ' + '(' + x.cedula + ')'
+        if red:
+            lideres = CambioTipo.objects.filter(
+                nuevoTipo__nombre__iexact='lider',
+                miembro__grupo__red=red
+            ).select_related('miembro').values_list('miembro', flat=True)
+            lideres_exclude = []
+            query = Miembro.objects.filter(id__in=lideres).select_related('conyugue')
+            # Block QuerySet que demora
+            for lider in query:
+                if lider.grupoLidera():
+                    lideres_exclude.append(lider.id)
+            query = query.exclude(id__in=lideres_exclude)
+            # endblock
 
-        if red != '':
-            lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-            grupos = Grupo.objects.all()
-            lidGrupos = []
-            for g in grupos:
-                lidGrupos.extend(g.listaLideres())
-            if new:
-                query1 = Miembro.objects.filter(
-                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-                query2 = Miembro.objects.filter(
-                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-            else:
-                lider1 = self.instance.lider1.id
-                lidGrupos.remove(lider1)
-                query1 = Miembro.objects.filter(
-                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-                lidGrupos.append(lider1)
-                if self.instance.lider2 is not None:
-                    lider2 = self.instance.lider2.id
-                    lidGrupos.remove(lider2)
-                query2 = Miembro.objects.filter(
-                    id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+            self.fields['lider1'].queryset = query
+            self.fields['lider2'].queryset = query  # query2
 
-            self.fields['lider1'].queryset = query1
-            self.fields['lider2'].queryset = query2
+        if not new:
+            query_lider1 = self.fields['lider1'].queryset | Miembro.objects.filter(id=self.instance.lider1.id)
+            query_lider2 = self.fields['lider2'].queryset | Miembro.objects.filter(id=self.instance.lider2.id)
+            self.fields['lider1'].queryset = query_lider1
+            self.fields['lider2'].queryset = query_lider2
+
+        # if red != '':
+        #     lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
+        #     grupos = Grupo.objects.all().select_related('lider1', 'lider2')
+        #     lidGrupos = []
+        #     for g in grupos:
+        #         lidGrupos.extend(g.listaLideres())
+        #     if new:
+        #         query1 = Miembro.objects.filter(
+        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+        #         query2 = Miembro.objects.filter(
+        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+        #     else:
+        #         lider1 = self.instance.lider1.id
+        #         lidGrupos.remove(lider1)
+        #         query1 = Miembro.objects.filter(
+        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+        #         lidGrupos.append(lider1)
+        #         if self.instance.lider2 is not None:
+        #             lider2 = self.instance.lider2.id
+        #             lidGrupos.remove(lider2)
+        #         query2 = Miembro.objects.filter(
+        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(FormularioCrearGrupo, self).clean(*args, **kwargs)
+
+        if 'lider1' in cleaned_data and 'lider2' in cleaned_data:
+            if cleaned_data['lider1'] == cleaned_data['lider2']:
+                self.add_error('lider1', 'Lider1 no puede ser igual a lider2')
+                self.add_error('lider2', 'Lider2 no puede ser igual a lider1')
+
+        if 'lider1' in cleaned_data:
+            if cleaned_data['lider1'].grupoLidera():
+                print(cleaned_data['lider1'])
+                self.add_error('lider1', 'No se puede efectuar el cambio porque este lider ya lidera un grupo')
+
+        if 'lider2' in cleaned_data:
+            if cleaned_data['lider2'].grupoLidera():
+                self.add_error('lider2', 'No se puede efectuar el cambio porque este lider ya lidera un grupo')
 
     class Meta:
         model = Grupo

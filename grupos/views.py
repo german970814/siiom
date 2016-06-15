@@ -411,15 +411,14 @@ def crearGrupo(request, id):
     except:
         raise Http404
     if request.method == "POST":
-        form = FormularioCrearGrupo(data=request.POST, red=id)
+        form = FormularioCrearGrupo(data=request.POST, red=red, new=True)
         if form.is_valid():
-            form = FormularioCrearGrupo(data=request.POST, red=id)
             nuevoGrupo = form.save(commit=False)
             nuevoGrupo.red = red
             nuevoGrupo.save()
             ok = True
     else:
-        form = FormularioCrearGrupo(red=id)
+        form = FormularioCrearGrupo(red=red, new=True)
     return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 
@@ -435,13 +434,13 @@ def editarGrupo(request, pk):
 
     red = grupo.red
     if request.method == 'POST':
-        form = FormularioCrearGrupo(data=request.POST or None, instance=grupo, new=False)
+        form = FormularioCrearGrupo(data=request.POST or None, red=red, instance=grupo, new=False)
 
         if form.is_valid():
             nuevoGrupo = form.save()
             ok = True
     else:
-        form = FormularioCrearGrupo(instance=grupo, new=False)
+        form = FormularioCrearGrupo(instance=grupo, new=False, red=red)
 
     return render_to_response("Grupos/crear_grupo_admin.html", locals(), context_instance=RequestContext(request))
 
