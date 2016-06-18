@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block css %}
+	<link rel="stylesheet" href="{% static 'Scripts/tagsinput/bootstrap-tagsinput.css' %}">
+
+{% endblock css %}
+
+{% block contenido %}
+	<div class="container">
+		<form action="" method="post" enctype="multipart/form-data">
+			<div class="card">
+				<div class="card-header">
+					<h2>
+						<legend><h3>Registro de Documento</h3></legend>
+					</h2>
+					{% if messages %}
+						{% for message in messages %}
+							<h1>{{message}}</h1>
+						{% endfor %}
+					{% endif %}
+				</div>
+				{% csrf_token %}
+				<div class="card-body card-padding">
+					<div class="row">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.departamento.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-hotel"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_departamento" class="fg-label requerido control-label">{{ form.departamento.label }}:</label>
+	                                {{ form.departamento }}
+	                            </div>
+	                            {% for error in form.departamento.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.area.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-calendar"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_area" class="fg-label requerido control-label">{{ form.area.label }}:</label>
+	                                {{ form.area }}
+	                            </div>
+	                            {% for error in form.area.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.fecha.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-hotel"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_fecha" class="fg-label requerido control-label">{{ form.fecha.label }}:</label>
+	                                {{ form.fecha }}
+	                            </div>
+	                            {% for error in form.fecha.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+	                <br>
+	                <br>
+	                <div class="row">
+	                    <div class="col-md-3">
+	                        <div class="input-group {{form.descripcion.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-calendar"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_descripcion" class="fg-label control-label requerido">{{ form.descripcion.label }}:</label>
+	                                {{ form.descripcion }}
+	                            </div>
+	                            {% for error in form.descripcion.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <div class="col-md-3">
+	                        <div class="input-group {{form.palabras.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-hotel"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_palabras" class="fg-label requerido control-label">{{ form.palabras.label|title }}:</label>
+	                                {{ form.palabras }}
+	                                <!--<div id="palabras" class="form-control"></div>-->
+	                            </div>
+	                            {% for error in form.palabras.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+				</div>
+			</div>
+
+			{% for form_d in form_documentos %}
+			<div class="form-documentos">
+				<div class="block-header">
+					<h2>Documentos</h2>
+
+					<ul class="actions">
+			            <li>
+			                <a href="">
+			                    <i class="zmdi zmdi-minus"></i>
+			                </a>
+			            </li>
+			            <li class="dropdown">
+			                <a href="" data-toggle="dropdown">
+			                    <i class="zmdi zmdi-more-vert"></i>
+			                </a>
+			                <ul class="dropdown-menu dropdown-menu-right">
+			                    <li>
+			                        <a href="">Refresh</a>
+			                    </li>
+			                    <li>
+			                        <a href="">Manage Widgets</a>
+			                    </li>
+			                    <li>
+			                        <a href="">Widgets Settings</a>
+			                    </li>
+			                </ul>
+			            </li>
+			        </ul>
+				</div>
+
+				<div class="card">
+					<div class="card-header">
+						
+					</div>
+					<div class="card-body card-padding">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="input-group {{form_d.archivo.css_classes}}">
+		                            <span class="input-group-addon">
+		                                <i class="zmdi zmdi-hotel"></i>
+		                            </span>
+		                            <div class="fg-line requerido">
+		                                <label for="id_archivo" class="fg-label requerido control-label">{{ form_d.archivo.label|title }}:</label>
+		                                {{ form_d.archivo }}
+		                            </div>
+		                            {% for error in form_d.archivo.errors %}
+		                                <small class="help-block">{{error}}</small>
+		                            {% endfor %}
+		                        </div>
+							</div>
+							<div class="col-md-6">
+								<div class="input-group {{form_d.tipo_documento.css_classes}}">
+		                            <span class="input-group-addon">
+		                                <i class="zmdi zmdi-hotel"></i>
+		                            </span>
+		                            <div class="fg-line requerido">
+		                                <label for="id_tipo_documento" class="fg-label requerido control-label">{{ form_d.tipo_documento.label|title }}:</label>
+		                                {{ form_d.tipo_documento }}
+		                            </div>
+		                            {% for error in form_d.tipo_documento.errors %}
+		                                <small class="help-block">{{error}}</small>
+		                            {% endfor %}
+		                        </div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{% if form_documentos.can_delete %}
+		        {{ form_d.DELETE }}
+		    {% endif %}
+			{% endfor %}
+			{{ form_documentos.management_form }}
+
+			<div class="row">
+				<div class="col-md-4 col-md-offset-4">
+					<button class="btn btn-block btn-primary" type="submit">
+						Aceptar
+					</button>
+				</div>
+			</div>
+	    </form>
+	</div>
+{% endblock contenido %}
+
+	<script src="{% static 'Scripts/tagsinput/bootstrap-tagsinput.js' %}"></script>
+{% block js %}
+	<script src="{% static 'Scripts/jquery.formset.js' %}"></script>
+	<script src="{% static 'Scripts/tokenizer/bootstrap-tokenfield.js' %}"></script>
+	<script>
+		jQuery(document).ready(function($) {
+			$('#id_fecha').datetimepicker({
+				format: 'DD/MM/YYYY',
+			})
+
+			$('.form-documentos').formset({
+	            addText: 'Agregar Beneficiario',
+	            deleteText: 'Quitar',
+	            especial: true,
+	        });
+
+
+			// $('#id_palabras').tokenfield({
+			//     autocomplete: {
+			//         source: ['red','blue','green','yellow','violet','brown','purple','black','white'],
+			//         delay: 100
+			//     },
+			//     showAutocompleteOnFocus: true
+			// })
+
+
+	  //       var palabras = new Bloodhound({
+			// 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+			// 	queryTokenizer: Bloodhound.tokenizers.whitespace,
+			// 	prefetch: '{% url "api" %}'
+			// });
+			
+			// palabras.initialize();
+
+	  //       $('#id_palabras').tagsinput({
+	  //       	itemValue: 'value',
+			// 	itemText: 'text',
+			// 	typeaheadjs: {
+			// 		name: 'palabras',
+			// 	    displayKey: 'text',
+			// 	    source: palabras.ttAdapter()
+			// 	}
+	  //       })
+
+	  //       try {
+	  //       	// $('#id_palabras').tagsinput('add', { id: 1, text: 'some tag' });
+	  //       } catch (err) {
+	  //       	console.log(err);
+	  //       }
+
+   //      	$('.tt-input').keypress(function(e) {
+   //      		console.log(e.keyCode);
+   //      		if (e.keyCode == 13) {
+   //      			// e.preventDefault();
+   //      			// $('#id_palabras').tagsinput('add', $(this).val());
+   //      			return true;
+   //      		}
+   //      	})
+
+   //      	$('form').keypress(function(e) {
+   //      		console.log(e.keyCode);
+   //      		if (e.keyCode == 13) {
+   //      			// e.preventDefault();
+   //      			return false;
+   //      		}
+   //      	})
+
+
+		});
+	</script>
+{% endblock js %}

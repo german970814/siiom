@@ -34,6 +34,7 @@ class Registro(models.Model):
 
     area = models.ForeignKey('organizacional.Area', verbose_name=_('área'), related_name='registros')
     descripcion = models.TextField(_('descripción'))
+    fecha = models.DateField(_('fecha'))
     palabras_claves = models.ManyToManyField(
         PalabraClave,
         verbose_name=_('palabras claves'),
@@ -51,7 +52,7 @@ class Documento(models.Model):
 
     def ruta_archivo(self, filename):
         registro = self.registro
-        return 'gestion_documental/area_{}/registro_{}/{}'.format(registro.area.id, registro.id, self.filename)
+        return 'gestion_documental/area_{}/registro_{}/{}'.format(registro.area.id, registro.id, filename)
 
     registro = models.ForeignKey(Registro, verbose_name=_('registro'), related_name='documentos')
     tipo_documento = models.ForeignKey(TipoDocumento, verbose_name=_('tipo de documento'), related_name='documentos')
