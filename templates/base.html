@@ -1,5 +1,7 @@
 {% load staticfiles %}
 {% load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -155,7 +157,7 @@
                     {% if request.user.is_authenticated %}
                         {{ request.user.email }}
                     {% else %}
-                        {{nombreIglesia}}
+                        {{ nombreIglesia }}
                     {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
@@ -436,6 +438,14 @@
                         </ul>
                     </li>
                     {% endif %}
+                    <li class="sub-menu">
+                        <a href=""><i class="zmdi zmdi-globe"></i>{% trans "Gestión Documental" %}</a>
+                        <ul>
+                            <li>
+                                <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
+                            </li>
+                        </ul>
+                    </li>
                 {% endif %} 
             </ul>
         </aside>
