@@ -1,24 +1,34 @@
 # Django Package
 from django.contrib import messages
 from django.db import transaction
-from django.shortcuts import render, redirect
-from django.utils.translation import ugettext_lazy as _
-# from django.forms.models import modelformset_factory
+from django.http import HttpResponse
 from django.forms import inlineformset_factory
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
+# from django.forms.models import modelformset_factory
 
 # Locale Apps
 from .models import Registro, Documento, PalabraClave
 from .forms import FormularioRegistroDocumento, FormularioDocumentos
 
+# Apps
+from organizacional.models import Area
+
+# Python Package
+import json
+
 
 @transaction.atomic
 def ingresar_registro(request):
-    """"""
+    """
+    Vista de captura de datos para los registros del sistema de gestion
+    """
 
-    # Define Formset
+    # Define FormSet
     DocumentosFormSet = inlineformset_factory(
         Registro, Documento, fk_name='registro', form=FormularioDocumentos,
-        min_num=0, extra=1, validate_min=True, can_delete=False
+        min_num=1, extra=0, validate_min=True, can_delete=False
     )
 
     if request.method == 'POST':
@@ -27,21 +37,38 @@ def ingresar_registro(request):
         if form.is_valid():
             registro = form.save(commit=False)
             form_documentos = DocumentosFormSet(request.POST, request.FILES, instance=registro)
+            # Si ambos documentos son validos
             if form_documentos.is_valid():
                 registro.save()
-                palabras = form.cleaned_data['palabras']
+                # Se extraen las palabras que vienen del formulario y se separan por coma en una lista
+                palabras = form.cleaned_data['palabras'].split(',')
+                # Se buscan las palabras recursivamente
                 for palabra in palabras:
-                    palabra_clave, created = PalabraClave.objects.get_or_create(nombre__iexact=palabra)
-                    registro.palabras_claves.add(palabra_clave)
+                    # Se busca, si no existe la palabra se crea
+                    if palabra != '':
+                        palabra_clave, created = PalabraClave.objects.get_or_create(
+                            nombre__iexact=palabra, defaults={'nombre': palabra}
+                        )
+                        # if created:
+                        #     palabra_clave.nombre = palabra.lower()
+                        #     palabra_clave.save()
+                        if palabra_clave not in registro.palabras_claves.all():
+                            registro.palabras_claves.add(palabra_clave)
+                # se guarda el registro
                 registro.save()
+                # Se guardan los documentos
                 form_documentos.save()
-                messages.success(request, _("Se ha creado"))
-                return redirect('ingresar_registro')
+                messages.success(request, _("Se ha creado el registro exitosamente"))
+                # Todo Correcto
+                return redirect('sgd:ingresar_registro')
             else:
-                messages.error(request, _("se callo en el segundo"))
+                # Error en el formulario de documentos
+                messages.error(request, _("Por favor verifique los documentos enviados"))
         else:
-            form_documentos = DocumentosFormSet(queryset=Documento.objects.none())
-            messages.error(request, _("todo mal llave"))
+            # Error en el primer formulario del registro general
+            form_documentos = DocumentosFormSet(queryset=Documento.objects.none(), data=request.POST)
+            form_documentos.is_valid()
+            messages.error(request, _("Se han encontrado errores en el formulario"))
     else:
         form = FormularioRegistroDocumento()
         form_documentos = DocumentosFormSet(queryset=Documento.objects.none())
@@ -51,11 +78,25 @@ def ingresar_registro(request):
     return render(request, 'gestion_documental/ingresar_registro.html', data)
 
 
-def api(request):
-    import json
-    from django.http import HttpResponse
+def palabras_claves_json(request):
+    """
+    Vista que devuelve una lista con los nombres de las palabras claves para typeahead.js
+    """
     palabras = PalabraClave.objects.all()
 
-    r = [p.nombre for p in palabras]
+    response = [p.nombre for p in palabras]
 
-    return HttpResponse(json.dumps(r), content_type="application/javascript")
+    return HttpResponse(json.dumps(response), content_type="application/javascript")
+
+
+@csrf_exempt
+def area_tipo_documento_json(request):
+    """
+    Retorna los tipos de documentos pertenecientes a cada area
+    """
+    if request.method == 'POST':
+        area = get_object_or_404(Area, pk=request.POST['id_area'])
+
+        response = [{'id': tipo.id, 'tipo': tipo.nombre} for tipo in area.tipos_documento.all()]
+
+        return HttpResponse(json.dumps(response), content_type="application/json")

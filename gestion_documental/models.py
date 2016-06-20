@@ -19,7 +19,7 @@ class TipoDocumento(models.Model):
 class PalabraClave(models.Model):
     """Modelo que guarda las palabras claves que se usan en los registros."""
 
-    nombre = models.CharField(_('nombre'), max_length=250)
+    nombre = models.CharField(_('nombre'), max_length=250, unique=True)
 
     class Meta:
         verbose_name = _('palabra clave')

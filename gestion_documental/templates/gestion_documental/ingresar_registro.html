@@ -3,7 +3,42 @@
 
 {% block css %}
 	<link rel="stylesheet" href="{% static 'Scripts/tagsinput/bootstrap-tagsinput.css' %}">
+	<style>
+		.label-info {
+			background-color: #2196f3;
+		}
 
+		.bootstrap-tagsinput {
+			background-color: #fff;
+			border: 1px solid #e0e0e0;
+			border-left: 0;
+			border-right: 0;
+			border-top: 0;
+			box-shadow: inherit;
+			display: inherit;
+			padding: inherit;
+			color: #555;
+			vertical-align: inherit;
+			border-radius: inherit;
+			max-width: 100%;
+			line-height: inherit;
+			cursor: text;
+			width: 100%;
+		}
+
+		.bootstrap-tagsinput .tag {
+			margin-right: 2px;
+			margin-bottom: 2px;
+			color: white;
+			display: inline-block;
+			font-size: 12px;
+		}
+
+		.bootstrap-tagsinput .twitter-typeahead .tt-hint {
+			top: 8px !important;
+			left: -5px !important;
+		}
+	</style>
 {% endblock css %}
 
 {% block contenido %}
@@ -16,7 +51,12 @@
 					</h2>
 					{% if messages %}
 						{% for message in messages %}
-							<h1>{{message}}</h1>
+							<div class="row">
+				                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+				                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+				                    <p>{{ message|safe }}</p>
+				                </div>
+				            </div>
 						{% endfor %}
 					{% endif %}
 				</div>
@@ -26,7 +66,7 @@
 	                    <div class="col-md-4">
 	                        <div class="input-group {{form.departamento.css_classes}}">
 	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-hotel"></i>
+	                                <i class="zmdi zmdi-city"></i>
 	                            </span>
 	                            <div class="fg-line requerido">
 	                                <label for="id_departamento" class="fg-label requerido control-label">{{ form.departamento.label }}:</label>
@@ -37,10 +77,11 @@
 	                            {% endfor %}
 	                        </div>
 	                    </div>
+	                    <br class="space">
 	                    <div class="col-md-4">
 	                        <div class="input-group {{form.area.css_classes}}">
 	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-calendar"></i>
+	                                <i class="zmdi zmdi-crop"></i>
 	                            </span>
 	                            <div class="fg-line requerido">
 	                                <label for="id_area" class="fg-label requerido control-label">{{ form.area.label }}:</label>
@@ -51,10 +92,11 @@
 	                            {% endfor %}
 	                        </div>
 	                    </div>
+	                    <br class="space">
 	                    <div class="col-md-4">
 	                        <div class="input-group {{form.fecha.css_classes}}">
 	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-hotel"></i>
+	                                <i class="zmdi zmdi-calendar"></i>
 	                            </span>
 	                            <div class="fg-line requerido">
 	                                <label for="id_fecha" class="fg-label requerido control-label">{{ form.fecha.label }}:</label>
@@ -66,13 +108,13 @@
 	                        </div>
 	                    </div>
 	                </div>
-	                <br>
+	                <br class="space-down">
 	                <br>
 	                <div class="row">
-	                    <div class="col-md-3">
+	                    <div class="col-md-4">
 	                        <div class="input-group {{form.descripcion.css_classes}}">
 	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-calendar"></i>
+	                                <i class="zmdi zmdi-calendar-note"></i>
 	                            </span>
 	                            <div class="fg-line requerido">
 	                                <label for="id_descripcion" class="fg-label control-label requerido">{{ form.descripcion.label }}:</label>
@@ -83,10 +125,11 @@
 	                            {% endfor %}
 	                        </div>
 	                    </div>
-	                    <div class="col-md-3">
+	                    <br class="space">
+	                    <div class="col-md-4">
 	                        <div class="input-group {{form.palabras.css_classes}}">
 	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-hotel"></i>
+	                                <i class="zmdi zmdi-key"></i>
 	                            </span>
 	                            <div class="fg-line requerido">
 	                                <label for="id_palabras" class="fg-label requerido control-label">{{ form.palabras.label|title }}:</label>
@@ -113,22 +156,6 @@
 			                    <i class="zmdi zmdi-minus"></i>
 			                </a>
 			            </li>
-			            <li class="dropdown">
-			                <a href="" data-toggle="dropdown">
-			                    <i class="zmdi zmdi-more-vert"></i>
-			                </a>
-			                <ul class="dropdown-menu dropdown-menu-right">
-			                    <li>
-			                        <a href="">Refresh</a>
-			                    </li>
-			                    <li>
-			                        <a href="">Manage Widgets</a>
-			                    </li>
-			                    <li>
-			                        <a href="">Widgets Settings</a>
-			                    </li>
-			                </ul>
-			            </li>
 			        </ul>
 				</div>
 
@@ -141,21 +168,32 @@
 							<div class="col-md-6">
 								<div class="input-group {{form_d.archivo.css_classes}}">
 		                            <span class="input-group-addon">
-		                                <i class="zmdi zmdi-hotel"></i>
+		                                <i class="zmdi zmdi-file"></i>
 		                            </span>
-		                            <div class="fg-line requerido">
-		                                <label for="id_archivo" class="fg-label requerido control-label">{{ form_d.archivo.label|title }}:</label>
-		                                {{ form_d.archivo }}
-		                            </div>
+		                            <label for="id_archivo" class="fg-label requerido control-label">{{ form_d.archivo.label|title }}:</label>
+		                            <br>
+		                            <!--<div class="fg-line requerido">
+		                                {# {{ form_d.archivo }} #}
+		                            </div>-->
+		                            <div class="fileinput fileinput-new" data-provides="fileinput">
+						                <span class="btn btn-primary btn-file m-r-10">
+						                    <span class="fileinput-new">Seleccionar Archivo</span>
+						                    <span class="fileinput-exists">Cambiar</span>
+						                    {{ form_d.archivo }}
+						                </span>
+						                <span class="fileinput-filename"></span>
+						                <a href="#" class="close fileinput-exists" data-dismiss="fileinput">&times;</a>
+						            </div>
 		                            {% for error in form_d.archivo.errors %}
 		                                <small class="help-block">{{error}}</small>
 		                            {% endfor %}
 		                        </div>
 							</div>
+							<br class="space">
 							<div class="col-md-6">
 								<div class="input-group {{form_d.tipo_documento.css_classes}}">
 		                            <span class="input-group-addon">
-		                                <i class="zmdi zmdi-hotel"></i>
+		                                <i class="zmdi zmdi-file-text"></i>
 		                            </span>
 		                            <div class="fg-line requerido">
 		                                <label for="id_tipo_documento" class="fg-label requerido control-label">{{ form_d.tipo_documento.label|title }}:</label>
@@ -175,7 +213,8 @@
 		    {% endif %}
 			{% endfor %}
 			{{ form_documentos.management_form }}
-
+			<br>
+			<br>
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4">
 					<button class="btn btn-block btn-primary" type="submit">
@@ -187,11 +226,16 @@
 	</div>
 {% endblock contenido %}
 
+	<script src="{% static 'Scripts/' %}"></script>
+	<script src="{% static 'Scripts/tokenizer/bootstrap-tokenfield.js' %}"></script>
 	<script src="{% static 'Scripts/tagsinput/bootstrap-tagsinput.js' %}"></script>
 {% block js %}
 	<script src="{% static 'Scripts/jquery.formset.js' %}"></script>
-	<script src="{% static 'Scripts/tokenizer/bootstrap-tokenfield.js' %}"></script>
+	<script src="{% static 'Scripts/tagsinput/bootstrap-tagsinput.js' %}"></script>
 	<script>
+		$(window).load(function (e) {
+			window.localStorage.removeItem('__/sgd/palabras_claves_json/__data')
+		})
 		jQuery(document).ready(function($) {
 			$('#id_fecha').datetimepicker({
 				format: 'DD/MM/YYYY',
@@ -201,59 +245,105 @@
 	            addText: 'Agregar Beneficiario',
 	            deleteText: 'Quitar',
 	            especial: true,
+	            added: function (row) {
+	            	var $tipo = row.find('.tipo_doc');
+	            	var $viejo_select = row.prev(".form-documentos").find(".tipo_doc");
+	            	$tipo.html($viejo_select.html());
+	            	// $tipo.selectpicker();
+	            }
 	        });
 
+	        var citynames = new Bloodhound({
+			  	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+			  	queryTokenizer: Bloodhound.tokenizers.whitespace,
+			  	prefetch: {
+			    	url: '{% url "sgd:palabras_claves_json" %}',
+			    	filter: function(list) {
+			      		return $.map(list, function(cityname) {
+			        		return { name: cityname };
+			        	});
+			    	}
+			  	}
+			});
 
-			// $('#id_palabras').tokenfield({
-			//     autocomplete: {
-			//         source: ['red','blue','green','yellow','violet','brown','purple','black','white'],
-			//         delay: 100
-			//     },
-			//     showAutocompleteOnFocus: true
-			// })
+			citynames.initialize();
 
+			$('#id_palabras').tagsinput({
+			  	typeaheadjs: {
+			    	name: 'citynames',
+			    	displayKey: 'name',
+			    	valueKey: 'name',
+			    	source: citynames.ttAdapter()
+			  	}
+			});
 
-	  //       var palabras = new Bloodhound({
-			// 	datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
-			// 	queryTokenizer: Bloodhound.tokenizers.whitespace,
-			// 	prefetch: '{% url "api" %}'
-			// });
-			
-			// palabras.initialize();
+			$('.tt-input').addClass('form-control')
 
-	  //       $('#id_palabras').tagsinput({
-	  //       	itemValue: 'value',
-			// 	itemText: 'text',
-			// 	typeaheadjs: {
-			// 		name: 'palabras',
-			// 	    displayKey: 'text',
-			// 	    source: palabras.ttAdapter()
-			// 	}
-	  //       })
+        	$('#id_palabras').keypress(function(e) {
+        		if (e.keyCode == 13) {
+        			// e.preventDefault();
+        			// $('#id_palabras').tagsinput('add', $(this).val());
+        			return true;
+        		}
+        	})
 
-	  //       try {
-	  //       	// $('#id_palabras').tagsinput('add', { id: 1, text: 'some tag' });
-	  //       } catch (err) {
-	  //       	console.log(err);
-	  //       }
+        	$('.tt-input').blur(function(event) {
+        		$('#id_palabras').tagsinput('add', $(this).val())
+        		$(this).val(' ')
+        	});
 
-   //      	$('.tt-input').keypress(function(e) {
-   //      		console.log(e.keyCode);
-   //      		if (e.keyCode == 13) {
-   //      			// e.preventDefault();
-   //      			// $('#id_palabras').tagsinput('add', $(this).val());
-   //      			return true;
-   //      		}
-   //      	})
+        	$('form').keypress(function(e) {
+        		if (e.keyCode == 13) {
+        			// e.preventDefault();
+        			return false;
+        		}
+        	})
 
-   //      	$('form').keypress(function(e) {
-   //      		console.log(e.keyCode);
-   //      		if (e.keyCode == 13) {
-   //      			// e.preventDefault();
-   //      			return false;
-   //      		}
-   //      	})
+        	$('#id_departamento').change(function(event) {
+        		$.ajax({
+        			url : '{% url "organizacional:areas_departamento_json" %}',
+        			type: 'POST',
+        			data: {'id_departamento': $(this).val()},
+        			success: function(data) {
+        				function agregar_opciones(data, id){
+							var opciones = '<option value="-1" selected="selected">------</option>';
+							datos = eval(data);
+							for (var i = 0; i < datos.length; i++) {
+								opciones += '<option value="' + datos[i]['id'] + '">' + datos[i]['area'] + '</option>';
+							}
+						    $("#"+id).html(opciones);
+						    $("#"+id).trigger('chosen:updated');
+						}
 
+						agregar_opciones(data, 'id_area');
+						$('#id_area').selectpicker('refresh');
+        			}
+        		})
+        	});
+
+        	$('#id_area').change(function(event) {
+        		$.ajax({
+        			url : '{% url "sgd:area_tipo_documento_json" %}',
+        			type: 'POST',
+        			data: {'id_area': $(this).val()},
+        			success: function(data) {
+        				function agregar_opciones(data, id){
+        					// $('.tipo_doc').selectpicker('refresh');	
+							var opciones = '<option value="-1" selected="selected">------</option>';
+							datos = eval(data);
+							for (var i = 0; i < datos.length; i++) {
+								opciones += '<option value="' + datos[i]['id'] + '">' + datos[i]['tipo'] + '</option>';
+							}
+						    $("."+id).html(opciones);
+						    // $("."+id).trigger('chosen:updated');
+						}
+
+						agregar_opciones(data, 'tipo_doc');
+						// $('.tipo_doc').selectpicker();
+						// console.log(data);
+        			}
+        		})
+        	});
 
 		});
 	</script>
