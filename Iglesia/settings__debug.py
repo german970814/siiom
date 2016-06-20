@@ -25,12 +25,15 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'waffle',
     'debug_toolbar',
     'miembros',
     'academia',
     'grupos',
     'reportes',
     'encuentros',
+    'organizacional',
+    'gestion_documental',
 )
 
 MIDDLEWARE_CLASSES = (
