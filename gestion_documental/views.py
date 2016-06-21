@@ -4,7 +4,7 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 # from django.forms.models import modelformset_factory
 

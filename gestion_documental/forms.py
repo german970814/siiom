@@ -13,6 +13,7 @@ class FormularioRegistroDocumento(forms.ModelForm):
     """
     Formulario para el modelo de registro en el capture
     """
+
     error_css_class = 'has-error'
 
     departamento = forms.ModelChoiceField(queryset=Departamento.objects.all(), label='Departamento')
