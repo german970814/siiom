@@ -13,16 +13,18 @@ from .models import Registro, Documento, PalabraClave
 from .forms import FormularioRegistroDocumento, FormularioDocumentos
 
 # Apps
+from waffle.decorators import waffle_switch
 from organizacional.models import Area
 
 # Python Package
 import json
 
 
+@waffle_switch('gestion_documental')
 @transaction.atomic
 def ingresar_registro(request):
     """
-    Vista de captura de datos para los registros del sistema de gestion
+    Vista de captura de datos para los registros del sistema de gestión.
     """
 
     # Define FormSet
@@ -49,9 +51,7 @@ def ingresar_registro(request):
                         palabra_clave, created = PalabraClave.objects.get_or_create(
                             nombre__iexact=palabra, defaults={'nombre': palabra}
                         )
-                        # if created:
-                        #     palabra_clave.nombre = palabra.lower()
-                        #     palabra_clave.save()
+
                         if palabra_clave not in registro.palabras_claves.all():
                             registro.palabras_claves.add(palabra_clave)
                 # se guarda el registro
@@ -82,8 +82,8 @@ def palabras_claves_json(request):
     """
     Vista que devuelve una lista con los nombres de las palabras claves para typeahead.js
     """
-    palabras = PalabraClave.objects.all()
 
+    palabras = PalabraClave.objects.all()
     response = [p.nombre for p in palabras]
 
     return HttpResponse(json.dumps(response), content_type="application/javascript")
@@ -94,9 +94,9 @@ def area_tipo_documento_json(request):
     """
     Retorna los tipos de documentos pertenecientes a cada area
     """
+
     if request.method == 'POST':
         area = get_object_or_404(Area, pk=request.POST['id_area'])
-
         response = [{'id': tipo.id, 'tipo': tipo.nombre} for tipo in area.tipos_documento.all()]
 
         return HttpResponse(json.dumps(response), content_type="application/json")
