@@ -6,6 +6,7 @@ from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import permission_required
 # from django.forms.models import modelformset_factory
 
 # Locale Apps
@@ -21,6 +22,7 @@ import json
 
 
 @waffle_switch('gestion_documental')
+@permission_required('gestion_documental.add_registro')
 @transaction.atomic
 def ingresar_registro(request):
     """

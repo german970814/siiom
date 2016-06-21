@@ -440,14 +440,16 @@
                     </li>
                     {% endif %}
                     {% switch "gestion_documental" %}
-                    <li class="sub-menu">
-                        <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
-                        <ul>
-                            <li>
-                                <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
-                            </li>
-                        </ul>
-                    </li>
+                        {% if perms.gestion_documental %}
+                            <li class="sub-menu">
+                                <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
+                                <ul>
+                                    <li>
+                                        <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
+                                    </li>
+                                </ul>
+                            </li>                            
+                        {% endif %}
                     {% endswitch %}
                 {% endif %} 
             </ul>
