@@ -554,12 +554,9 @@ def estadisticoReunionesGar(request):
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
 
             desc = listaGruposDescendientes(lider_i)
-            print(desc)
             descendientes = [{'pk': descendiente.pk, 'nombre': str(descendiente)} for descendiente in desc]
-            # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
 
             return HttpResponse(json.dumps(descendientes), content_type="application/json")
         else:

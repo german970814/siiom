@@ -54,7 +54,6 @@ function agregarOpciones(data, idCombo){
 
 // Permite agregar opciones a un select.
 function agregarOpciones2(data, idCombo){
-    console.log(data);
     var opciones = '<option value="-1" selected="selected">------</option>';
     data.forEach(function(item){
         opciones += '<option value="' + item['pk'] + '">' + item['nombre'] + '</option>';
