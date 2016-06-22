@@ -134,9 +134,11 @@ class FormularioCrearGrupo(ModelForm):
 
         if not new:
             query_lider1 = self.fields['lider1'].queryset | Miembro.objects.filter(id=self.instance.lider1.id)
-            query_lider2 = self.fields['lider2'].queryset | Miembro.objects.filter(id=self.instance.lider2.id)
             self.fields['lider1'].queryset = query_lider1
-            self.fields['lider2'].queryset = query_lider2
+
+            if self.instance.lider2:
+                query_lider2 = self.fields['lider2'].queryset | Miembro.objects.filter(id=self.instance.lider2.id)
+                self.fields['lider2'].queryset = query_lider2
 
         # if red != '':
         #     lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
@@ -168,15 +170,6 @@ class FormularioCrearGrupo(ModelForm):
             if cleaned_data['lider1'] == cleaned_data['lider2']:
                 self.add_error('lider1', 'Lider1 no puede ser igual a lider2')
                 self.add_error('lider2', 'Lider2 no puede ser igual a lider1')
-
-        if 'lider1' in cleaned_data:
-            if cleaned_data['lider1'].grupoLidera():
-                print(cleaned_data['lider1'])
-                self.add_error('lider1', 'No se puede efectuar el cambio porque este lider ya lidera un grupo')
-
-        if 'lider2' in cleaned_data:
-            if cleaned_data['lider2'].grupoLidera():
-                self.add_error('lider2', 'No se puede efectuar el cambio porque este lider ya lidera un grupo')
 
     class Meta:
         model = Grupo
