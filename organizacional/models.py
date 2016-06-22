@@ -15,6 +15,10 @@ class Departamento(models.Model):
     def __str__(self):
         return self.nombre.title()
 
+    def save(self, *args, **kwargs):
+        self.nombre = self.nombre.lower()
+        super(Departamento, self).save(*args, **kwargs)
+
 
 class Area(models.Model):
     """Modelo para guardar las áreas de una iglesia."""
@@ -28,6 +32,10 @@ class Area(models.Model):
 
     def __str__(self):
         return self.nombre.title()
+
+    def save(self, *args, **kwargs):
+        self.nombre = self.nombre.lower()
+        super(Area, self).save(*args, **kwargs)
 
 
 class Empleado(models.Model):

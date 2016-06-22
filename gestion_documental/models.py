@@ -15,6 +15,10 @@ class TipoDocumento(models.Model):
     def __str__(self):
         return self.nombre.capitalize()
 
+    def save(self, *args, **kwargs):
+        self.nombre = self.nombre.lower()
+        super(TipoDocumento, self).save(*args, **kwargs)
+
 
 class PalabraClave(models.Model):
     """Modelo que guarda las palabras claves que se usan en los registros."""
@@ -27,6 +31,10 @@ class PalabraClave(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        self.nombre = self.nombre.lower()
+        super(PalabraClave, self).save(*args, **kwargs)
 
 
 class Registro(models.Model):

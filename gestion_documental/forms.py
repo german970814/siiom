@@ -61,7 +61,7 @@ class FormularioDocumentos(forms.ModelForm):
         for field in self.fields:
             self.fields[field].label = _(self.fields[field].label)
             if field == 'archivo':
-                self.fields[field].widget.attrs.update({'accept': 'image/*'})
+                self.fields[field].widget.attrs.update({'accept': 'image/*,.pdf'})
                 continue
             if field == 'tipo_documento':
                 self.fields[field].widget.attrs.update({'class': 'form-control tipo_doc', 'data-live-search': 'true'})
