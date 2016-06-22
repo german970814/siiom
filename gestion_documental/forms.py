@@ -3,7 +3,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
-from .models import Registro, Documento, TipoDocumento
+from .models import Registro, Documento, TipoDocumento, PalabraClave
 
 # Apss
 from organizacional.models import Departamento, Area
@@ -76,3 +76,31 @@ class FormularioDocumentos(forms.ModelForm):
                 self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()
             except:
                 self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
+
+
+class FormularioBusquedaRegistro(forms.Form):
+    """
+    Formulario para la busqueda de registros que se han ingresado en la app
+    """
+
+    error_css_class = 'has-error'
+
+    tipo_documento = forms.ModelChoiceField(queryset=TipoDocumento.objects.all(), label=_("Tipo de Documento"))
+    fecha_inicial = forms.DateField(label=_("Fecha Inicial"))
+    fecha_final = forms.DateField(label=_("Fecha Final"))
+    palabras_claves = forms.CharField(max_length=255, label=_("Palabras Claves"))
+    descripcion = forms.CharField(label=_("Descripción"))
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioBusquedaRegistro, self).__init__(*args, **kwargs)
+
+        self.fields['tipo_documento'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['fecha_inicial'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_final'].widget.attrs.update({'class': 'form-control'})
+        self.fields['palabras_claves'].widget.attrs.update({'class': 'form-control'})
+        self.fields['descripcion'].widget.attrs.update({'class': 'form-control', 'rows': '5'})
+        self.fields['palabras_claves'].required = False
+
+    def clean_palabras_claves(self):
+        data = self.cleaned_data['palabras_claves'].split(',')
+        return [PalabraClave.objects.get(nombre__iexact=palabra) for palabra in data if palabra != '']

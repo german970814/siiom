@@ -167,15 +167,12 @@
 					<div class="card-body card-padding">
 						<div class="row">
 							<div class="col-md-6">
-								<div class="input-group {{form_d.archivo.css_classes}}">
+								<div class="input-group {{ form_d.archivo.css_classes }}">
 		                            <span class="input-group-addon">
 		                                <i class="zmdi zmdi-file"></i>
 		                            </span>
-		                            <label for="id_archivo" class="fg-label requerido control-label">{{ form_d.archivo.label|title }}:</label>
+		                            <label for="{{ form_d.archivo.id_for_label }}" class="fg-label requerido control-label">{{ form_d.archivo.label|title }}:</label>
 		                            <br>
-		                            <!--<div class="fg-line requerido">
-		                                {# {{ form_d.archivo }} #}
-		                            </div>-->
 		                            <div class="fileinput fileinput-new" data-provides="fileinput">
 						                <span class="btn btn-primary btn-file m-r-10">
 						                    <span class="fileinput-new">Seleccionar Archivo</span>
@@ -197,7 +194,7 @@
 		                                <i class="zmdi zmdi-file-text"></i>
 		                            </span>
 		                            <div class="fg-line requerido">
-		                                <label for="id_tipo_documento" class="fg-label requerido control-label">{{ form_d.tipo_documento.label|title }}:</label>
+		                                <label for="{{ form_d.tipo_documento.id_for_label }}" class="fg-label requerido control-label">{{ form_d.tipo_documento.label|title }}:</label>
 		                                {{ form_d.tipo_documento }}
 		                            </div>
 		                            {% for error in form_d.tipo_documento.errors %}
@@ -245,6 +242,7 @@
 			$('.form-documentos').formset({
 	            addText: 'Agregar Beneficiario',
 	            deleteText: 'Quitar',
+	            prefix: 'documentos',
 	            especial: true,
 	            added: function (row) {
 	            	var $tipo = row.find('.tipo_doc');

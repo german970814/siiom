@@ -1,6 +1,7 @@
 # Django Package
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,7 +12,7 @@ from django.contrib.auth.decorators import permission_required
 
 # Locale Apps
 from .models import Registro, Documento, PalabraClave
-from .forms import FormularioRegistroDocumento, FormularioDocumentos
+from .forms import FormularioRegistroDocumento, FormularioDocumentos, FormularioBusquedaRegistro
 
 # Apps
 from waffle.decorators import waffle_switch
@@ -102,3 +103,56 @@ def area_tipo_documento_json(request):
         response = [{'id': tipo.id, 'tipo': tipo.nombre} for tipo in area.tipos_documento.all()]
 
         return HttpResponse(json.dumps(response), content_type="application/json")
+
+
+def busqueda_registros(request):
+    """
+    Vista para realizar la busqueda de registros
+    """
+
+    data = {}
+
+    if request.method == 'POST':
+        form = FormularioBusquedaRegistro(data=request.POST)
+
+        if form.is_valid():
+            tipo_documento = form.cleaned_data['tipo_documento']
+            fecha_inicial = form.cleaned_data['fecha_inicial']
+            fecha_final = form.cleaned_data['fecha_final']
+            palabras_claves = form.cleaned_data['palabras_claves']
+            descripcion = form.cleaned_data['descripcion'].split(' ')
+
+            registros = Registro.objects.filter(
+                fecha__range=(fecha_inicial, fecha_final),
+                documentos__tipo_documento=tipo_documento,
+            )
+
+            if palabras_claves:
+                registros = registros.filter(palabras_claves__in=palabras_claves)
+
+            # queries = [Q(descripcion__icontains=descript) for descript in descripcion]
+
+            string_to_eval = ""
+            link = "Q(descripcion__icontains='%s')"
+            pipe = " | "
+
+            for x in range(len(descripcion)):
+                if x == len(descripcion) - 1:
+                    string_to_eval += (link % descripcion[x])
+                else:
+                    string_to_eval += (link % descripcion[x]) + pipe
+
+            # registros = registros.filter(*queries)
+            registros = registros.filter(eval(string_to_eval))
+
+            data['registros'] = registros
+
+            messages.success(request, _("Todo salió bien"))
+        else:
+            messages.error(request, _("No todo salió bien"))
+    else:
+        form = FormularioBusquedaRegistro()
+
+    data['form'] = form
+
+    return render(request, 'gestion_documental/busqueda_registros.html', data)
