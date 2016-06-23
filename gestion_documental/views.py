@@ -105,6 +105,7 @@ def area_tipo_documento_json(request):
         return HttpResponse(json.dumps(response), content_type="application/json")
 
 
+@waffle_switch('gestion_documental')
 def busqueda_registros(request):
     """
     Vista para realizar la busqueda de registros

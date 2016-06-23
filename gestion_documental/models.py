@@ -54,6 +54,9 @@ class Registro(models.Model):
         verbose_name = _('registro')
         verbose_name_plural = _('registros')
 
+    def __str__(self):
+        return "{}".format(self.id)
+
 
 class Documento(models.Model):
     """Modelo que guarda los archivos relacionados a un registro."""
@@ -71,4 +74,4 @@ class Documento(models.Model):
         verbose_name_plural = _('documentos')
 
     def __str__(self):
-        return str(self.id)
+        return "{}".format(self.id)

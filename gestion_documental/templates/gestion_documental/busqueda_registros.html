@@ -174,8 +174,8 @@
 	                            <thead>
 	                                <tr>
 	                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
-	                                    <th data-identifier="true" data-column-id="nombre">Descripcion</th>
-	                                    <th data-identifier="true" data-column-id="modulo">Fecha</th>
+	                                    <th data-identifier="true" data-column-id="nombre">{% trans "Desccripción" %}</th>
+	                                    <th data-identifier="true" data-column-id="modulo">{% trans "Fecha" %}</th>
 	                                </tr>
 	                            </thead>
 	                            <tbody>
@@ -188,7 +188,7 @@
 	                                {% empty %}
 	                                    <tr>
 	                                        <td></td>
-	                                        <td colspan="5" style="text-align:center;">NO se encontraron registros con estas caracteristicas</td>
+	                                        <td colspan="5" style="text-align:center;">{% trans "No se encontraron registros con estas caracteristicas" %}</td>
 	                                    </tr>
 	                                {% endfor %}
 	                            </tbody>
