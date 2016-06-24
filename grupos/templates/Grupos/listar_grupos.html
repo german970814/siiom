@@ -88,8 +88,8 @@
                             <tr>
                                 <td>{{grupo.id}}</td>
                                 <td>{{grupo.nombre|capfirst}}</td>
-                                <td>{{grupo.lider1.nombre|capfirst}}</td>
-                                <td>{{grupo.lider2.nombre|capfirst}}</td>
+                                <td>{{grupo.lider1|title}}</td>
+                                <td>{% if grupo.lider2 %}{{ grupo.lider2|title }}{% else %}No tiene Líder 2{% endif %}</td>
                                 <td>{{grupo.get_estado_display}}</td>
                                 <td>{{grupo.fechaApertura|capfirst}}</td>
                             </tr>
