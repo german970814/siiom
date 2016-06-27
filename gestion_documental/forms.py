@@ -89,7 +89,7 @@ class FormularioBusquedaRegistro(forms.Form):
     fecha_inicial = forms.DateField(label=_("Fecha Inicial"))
     fecha_final = forms.DateField(label=_("Fecha Final"))
     palabras_claves = forms.CharField(max_length=255, label=_("Palabras Claves"))
-    descripcion = forms.CharField(label=_("Descripción"))
+    descripcion = forms.CharField(label=_("Descripción"), required=False)
 
     def __init__(self, *args, **kwargs):
         super(FormularioBusquedaRegistro, self).__init__(*args, **kwargs)

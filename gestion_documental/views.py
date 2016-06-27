@@ -106,6 +106,7 @@ def area_tipo_documento_json(request):
 
 
 @waffle_switch('gestion_documental')
+@permission_required('gestion_documental.add_registro')
 def busqueda_registros(request):
     """
     Vista para realizar la busqueda de registros
@@ -120,40 +121,56 @@ def busqueda_registros(request):
             tipo_documento = form.cleaned_data['tipo_documento']
             fecha_inicial = form.cleaned_data['fecha_inicial']
             fecha_final = form.cleaned_data['fecha_final']
+            # Las palabras claves que vienen del formulario ya vienen en una lista
             palabras_claves = form.cleaned_data['palabras_claves']
+            # Se dividen las palabras de la descripcion para hacer una mejor busqueda individual
             descripcion = form.cleaned_data['descripcion'].split(' ')
 
+            # se buscan los registros en base a la fecha y al tipo de documento principalmente
             registros = Registro.objects.filter(
                 fecha__range=(fecha_inicial, fecha_final),
                 documentos__tipo_documento=tipo_documento,
             )
 
+            # si hay palabras claves se filtran por las palabras claves
             if palabras_claves:
                 registros = registros.filter(palabras_claves__in=palabras_claves)
 
             # queries = [Q(descripcion__icontains=descript) for descript in descripcion]
 
+            # este seria el filtro por descripcion
             string_to_eval = ""
             link = "Q(descripcion__icontains='%s')"
             pipe = " | "
 
+            # El siguiente ciclo se hace para enviar un queryset con "OR" de otro mododo
+            # Quedaria sentencias para queries de " AND "
+
+            # Ciclo para crear los querysets a partir de strings que luego seran evaluados
             for x in range(len(descripcion)):
+                # cuando llegue al final del ciclo no agregara el pipe " | "
                 if x == len(descripcion) - 1:
                     string_to_eval += (link % descripcion[x])
+                # Mientras este en rango se agrega el pipe en la cadena para formar el " OR "
                 else:
                     string_to_eval += (link % descripcion[x]) + pipe
 
             # registros = registros.filter(*queries)
+            # Se evaluan los registros y se hace el filtro
             registros = registros.filter(eval(string_to_eval))
 
+            # se añaden los registros a los datos que seran enviados a la vista,
+            # que estan previamente cargados
             data['registros'] = registros
 
-            messages.success(request, _("Todo salió bien"))
+            messages.success(request, _("Se muestran los resultados"))
         else:
-            messages.error(request, _("No todo salió bien"))
+            # Ocurrieron errores
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
         form = FormularioBusquedaRegistro()
 
+    # se empaqueta el formulario
     data['form'] = form
 
     return render(request, 'gestion_documental/busqueda_registros.html', data)

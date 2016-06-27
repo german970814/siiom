@@ -75,3 +75,15 @@ class Documento(models.Model):
 
     def __str__(self):
         return "{}".format(self.id)
+
+    @property
+    def is_image(self):
+        if self.get_absolute_url().endswith('.pdf'):
+            return False
+        return True
+
+    def get_absolute_url(self):
+        """
+        Devuelve la ruta url de el documento
+        """
+        return self.archivo.url

@@ -1459,13 +1459,13 @@ def ver_informacion_miembro(request, pk=None):
 
                 cambio = CambioTipo.objects.filter(miembro=miembro)
                 tipos_cambio = [c.nuevoTipo for c in cambio]
-                eliminar = [cambio for cambio in tipos_cambio if cambio not in tipos]
+                eliminar = [cambi for cambi in tipos_cambio if cambi not in tipos]
                 if len(eliminar):
                     for e in eliminar:
                         c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
-                    tipos_cambio = [c.nuevoTipo for c in cambio]
+                    tipos_cambio = [ca.nuevoTipo for ca in cambio]
                 for tipo in tipos:
                     if tipo not in tipos_cambio:
                         cambio = CambioTipo()
