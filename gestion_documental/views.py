@@ -163,7 +163,7 @@ def busqueda_registros(request):
             # que estan previamente cargados
             data['registros'] = registros
 
-            messages.success(request, _("Se muestran los resultados"))
+            messages.success(request, _("Se han encontrado %d resultados") % registros.count())
         else:
             # Ocurrieron errores
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
