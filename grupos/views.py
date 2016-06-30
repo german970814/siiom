@@ -98,9 +98,9 @@ def reunionReportada(fecha, grupo, tipo):
     fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
 
     if tipo == 1:  # GAR
-        reunion = grupo.reuniongar_set.filter(fecha__gte=ini_semana, fecha__lt=fin_semana)
+        reunion = grupo.reuniongar_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
     else:  # DISCIPULADO
-        reunion = grupo.reuniondiscipulado_set.filter(fecha__gte=ini_semana, fecha__lt=fin_semana)
+        reunion = grupo.reuniondiscipulado_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
 
     if reunion:
         return True

@@ -29,6 +29,14 @@
     {% endif %}
     
     $(document).ready(function(){
+        $('#idGrupo_i').parent().parent().parent().on('focus mouseover', function (event){
+            $(this).css('overflow', '');
+        })
+
+        $('#idGrupo_i').parent().parent().parent().on('blur mouseleave', function (event){
+            $(this).css('overflow', 'hidden');
+        })
+
         $('#id_fechai').datetimepicker({
             format: 'DD/MM/YY',
             // daysOfWeekDisabled: [0,2,3,4,5,6],
