@@ -167,11 +167,13 @@
                 </table>
                 <br>
                 <br>
-                <!--<div class="row">
+                {% if perms.miembros.es_administrador %}
+                <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <Button type="submit" class="btn btn-warning btn-block" name ="Enviar">Enviar E-mail</Button>
                     </div>
-                </div>-->
+                </div>
+                {% endif %}
                 <br>
                 <br>
             </form>
