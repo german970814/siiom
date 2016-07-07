@@ -7,12 +7,12 @@ from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render, get_object_or_404
 from django.template import RequestContext
 
 # Apps Imports
 from .forms import *
-from grupos.models import Grupo
+from grupos.models import Grupo, Red
 from grupos.forms import FormularioEditarDiscipulado
 from academia.models import Curso
 from reportes.views import listaGruposDescendientes
@@ -1611,3 +1611,15 @@ def transladar_miembros(request, id_miembro):
     else:
         form = FormularioTransladarMiembro()
     return render_to_response('Miembros/transladar_miembro.html', locals(), context_instance=RequestContext(request))
+
+
+@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+def ver_lideres_red(request, id_red):
+    """
+    Devuelve la lista de lideres de acuerdo a la red
+    """
+    red = get_object_or_404(Red, id=id_red)
+
+    miembros = Miembro.objects.lideres().filter(grupo__red=red).select_related('usuario')
+
+    return render(request, 'Miembros/ver_lideres_red.html', {'miembros': miembros, 'red': red})

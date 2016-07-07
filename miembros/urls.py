@@ -56,4 +56,5 @@ urlpatterns = [
     url(r'^discipulos/(?P<pk>\d*)$', ver_discipulos, name="ver_discipulos"),
     url(r'^informacion_iglesia/(?P<pk>\d*)$', ver_informacion_miembro, name="ver_informacion"),
     url(r'^eliminar_foto_perfil/(?P<pk>\d*)$', eliminar_foto_perfil, name="eliminar_foto"),
+    url(r'^ver_lideres_red/(?P<id_red>\d*)$', ver_lideres_red, name="ver_lideres_red"),
 ]
