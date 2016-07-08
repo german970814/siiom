@@ -1144,48 +1144,80 @@ def ConsultarReportesSinEnviar(request, sobres=False):
             sendMassMail(tuple(correos))
             return HttpResponseRedirect('/reportes/reportes_reuniones_sin_enviar/')
 
-        form = FormularioReportesSinEnviar(request.POST)
+        # formulario principal
+        form = FormularioReportesSinEnviar(data=request.POST, miembro=miembro)
         if 'verMorosos' in request.POST:
+            # si se ven los morosos (boton de aceptar)
             if form.is_valid():
+                # si el formuario es valido
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
+                grupo_from_form = form.cleaned_data['grupo']
+                descendientes = form.cleaned_data['descendientes']
+                # se crea una lista vacia inicialmente de grupos
                 grupos = []
                 gruposSinReporte = {}
                 sw = True
 
-                if miembro.usuario.has_perm("miembros.es_administrador"):
-                    gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(
-                                              Miembro.objects.get(
-                                                  id=Grupo.objects.get(red=None).listaLideres()[0])))
+                # if miembro.usuario.has_perm("miembros.es_administrador"):
+                #     # si es administrador se buscan todos los descenndientes del pastor
+                #     # podria ser mejor cambiarlo a todos los grupos en estado activo
+                #     # -- Example --
+                #     # gr = Grupo.objects.filter(estado='A')
+                #     # -- EndExample
+
+                #     # block possible change
+                #     gr = Grupo.objects.filter(
+                #         id__in=listaGruposDescendientes_id(
+                #             Miembro.objects.get(id=Grupo.objects.get(red=None).listaLideres()[0])
+                #         )
+                #     )
+                #     # endchange
+                # else:
+                # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
+                if descendientes:
+                    gr = Grupo.objects.filter(
+                        id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_from_form.listaLideres()[0]))
+                    )
                 else:
-                    gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
+                    gr = Grupo.objects.filter(id=grupo_from_form.id)
 
                 while sw:
                     sig = fechai + datetime.timedelta(weeks=1)
 
                     if sobres:  # Entra si se escoge el reporte de entregas de sobres
-                        gru = gr.filter(estado='A',
-                                        fechaApertura__lt=sig).exclude(
-                                            reuniongar__fecha__range=(fechai, sig),
-                                            reuniongar__confirmacionentregaofrenda=True)
+                        gru = gr.filter(
+                            estado='A', fechaApertura__lt=sig
+                        ).exclude(
+                            reuniongar__fecha__range=(fechai, sig),
+                            reuniongar__confirmacionEntregaOfrenda=True
+                        )
                     else:  # Entra si se escoge el reporte de reuniones
-                        gru = gr.filter(estado='A',
-                                        fechaApertura__lt=sig).exclude(
-                                            reuniongar__fecha__range=(fechai, sig))
+                        gru = gr.filter(
+                            estado='A', fechaApertura__lt=sig
+                        ).exclude(
+                            reuniongar__fecha__range=(fechai, sig)
+                        )
 
                     for g in gru:
                         try:
+                            # si existe se guarda la posicion del grupo en la lista
                             i = grupos.index(g)
                             fecha = fechai + datetime.timedelta(days=int(g.diaGAR))
+                            # si ya no hay tiempo
                             if fecha <= datetime.date.today():
+                                # se guardan los datos en la lista y hash
                                 grupos[i].fecha_reunion.append(fecha)
                                 gruposSinReporte[g.id].append(str(fecha))
                         except:
-                            # print(g.id)
+                            # la primera vez que entra
                             fecha = fechai + datetime.timedelta(days=int(g.diaGAR))
+                            # siempre y cuando no sea la fecha superior a hoy porque si no implica que aun hay tiempo
                             if fecha <= datetime.date.today():
+                                # se crean variables en memoria por objeto
                                 g.fecha_reunion = [fecha]
                                 g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
+                                # se agrega a la lista de grupos y al hash de fechas
                                 grupos.append(g)
                                 strFecha = str(fecha)
                                 gruposSinReporte[g.id] = [strFecha]
@@ -1197,7 +1229,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                 request.session['grupos_sin_reporte'] = gruposSinReporte
                 request.session['sobres'] = sobres
     else:
-        form = FormularioReportesSinEnviar()
+        form = FormularioReportesSinEnviar(miembro=miembro)
 
     return render_to_response('reportes/morososGAR.html', locals(), context_instance=RequestContext(request))
 
