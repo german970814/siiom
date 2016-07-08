@@ -345,7 +345,7 @@ def pasosPorMiembros(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         #  listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
     pasos = Pasos.objects.all().order_by('prioridad')
@@ -355,8 +355,10 @@ def pasosPorMiembros(request):
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, content_type="application/javascript")
+            # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
+            grupos = listaGruposDescendientes(lider_i)
+            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
+            return HttpResponse(json.dumps(data), content_type="application/json")
 
         if 'verReporte' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
@@ -394,7 +396,7 @@ def PasosTotales(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
     pasos = Pasos.objects.all().order_by('prioridad')
@@ -406,8 +408,10 @@ def PasosTotales(request):
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, content_type="application/javascript")
+            # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
+            grupos = listaGruposDescendientes(lider_i)
+            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
+            return HttpResponse(json.dumps(data), content_type="application/json")
         else:
             grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
             opciones = {'gi': grupo_i.nombre.capitalize()}
@@ -463,7 +467,7 @@ def PasosRangoFecha(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
     pasos = Pasos.objects.all().order_by('prioridad')
@@ -474,8 +478,10 @@ def PasosRangoFecha(request):
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, content_type="application/javascript")
+            grupos = listaGruposDescendientes(lider_i)
+            # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
+            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
+            return HttpResponse(json.dumps(data), content_type="application/json")
         else:
             form = FormularioRangoFechas(request.POST)
             if form.is_valid():
@@ -726,7 +732,7 @@ def estadisticoReunionesDiscipulado(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
     descendientes = False
@@ -738,8 +744,10 @@ def estadisticoReunionesDiscipulado(request):
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, content_type="application/javascript")
+            grupos = listaGruposDescendientes(lider_i)
+            # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
+            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
+            return HttpResponse(json.dumps(data), content_type="application/json")
         else:
             form = FormularioPredicas(miembro=miembro, data=request.POST)
             if form.is_valid():
@@ -807,7 +815,9 @@ def estadisticoReunionesDiscipulado(request):
         form = FormularioPredicas(miembro=miembro)
         sw = False
 
-    return render_to_response('reportes/estadistico_discipulado.html', locals(), context_instance=RequestContext(request))
+    return render_to_response(
+        'reportes/estadistico_discipulado.html', locals(), context_instance=RequestContext(request)
+    )
 
 
 @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")

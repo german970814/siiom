@@ -77,6 +77,15 @@
             border-color: #fff;
             background-color: initial;
         }
+
+        .bootstrap-select.btn-group .dropdown-toggle .filter-option {
+            display: inline-block;
+            overflow: hidden;
+            width: 100%;
+            text-align: left;
+            position: absolute !important;
+            left: 1px !important;
+        }
     </style>
     {% block css %}
     {% endblock %}
@@ -334,7 +343,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_administrador %}
+                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
                     <ul>
