@@ -65,6 +65,21 @@
 				{% csrf_token %}
 				<div class="card-body card-padding">
 					<div class="row">
+						<div class="col-md-4">
+	                        <div class="input-group {{form.area.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-crop"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_area" class="fg-label requerido control-label">{{ form.area.label }}:</label>
+	                                {{ form.area }}
+	                            </div>
+	                            {% for error in form.area.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
 	                    <div class="col-md-4">
 	                        <div class="input-group {{form.tipo_documento.css_classes}}">
 	                            <span class="input-group-addon">
@@ -94,8 +109,11 @@
 	                            {% endfor %}
 	                        </div>
 	                    </div>
-	                    <br class="space">
-	                    <div class="col-md-4">
+	                </div>
+	                <br class="space-down">
+	                <br>
+	                <div class="row">
+	                	<div class="col-md-4">
 	                        <div class="input-group {{form.fecha_final.css_classes}}">
 	                            <span class="input-group-addon">
 	                                <i class="zmdi zmdi-calendar"></i>
@@ -109,10 +127,7 @@
 	                            {% endfor %}
 	                        </div>
 	                    </div>
-	                </div>
-	                <br class="space-down">
-	                <br>
-	                <div class="row">
+	                    <br class="space">
 						<div class="col-md-4">
 	                        <div class="input-group {{form.descripcion.css_classes}}">
 	                            <span class="input-group-addon">
@@ -336,6 +351,29 @@
         			return false;
         		}
         	})
+
+        	// area_tipo_documento_json
+        	function agregarOpciones(data, idCombo){
+				var opciones = '<option value="-1" selected="selected">------</option>';
+				data.forEach(function(item){
+					opciones += '<option value="' + item['id'] + '">' + item['tipo'] + '</option>';
+				});
+				//$("#"+idCombo).empty();
+			    $("#"+idCombo).html(opciones);
+			    $("#"+idCombo).trigger('chosen:updated');
+			}
+
+        	$('#id_area').change(function(event) {
+        		$.ajax({
+        			url: '{% url "sgd:area_tipo_documento_json" %}',
+        			type: 'POST',
+        			data: {'id_area': $(this).val()},
+        			success: function(data) {
+        				agregarOpciones(data, 'id_tipo_documento');
+        				$('#id_tipo_documento').selectpicker('refresh');
+        			}
+        		})
+        	});
 
 		});
 	</script>

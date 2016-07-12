@@ -85,13 +85,15 @@ class FormularioBusquedaRegistro(forms.Form):
 
     error_css_class = 'has-error'
 
-    tipo_documento = forms.ModelChoiceField(queryset=TipoDocumento.objects.all(), label=_("Tipo de Documento"))
+    tipo_documento = forms.ModelChoiceField(queryset=TipoDocumento.objects.none(), label=_("Tipo de Documento"))
     fecha_inicial = forms.DateField(label=_("Fecha Inicial"))
     fecha_final = forms.DateField(label=_("Fecha Final"))
     palabras_claves = forms.CharField(max_length=255, label=_("Palabras Claves"))
     descripcion = forms.CharField(label=_("Descripción"), required=False)
+    area = forms.ModelChoiceField(queryset=Area.objects.none(), label=_("Área"))
 
     def __init__(self, *args, **kwargs):
+        empleado = kwargs.pop('empleado')
         super(FormularioBusquedaRegistro, self).__init__(*args, **kwargs)
 
         self.fields['tipo_documento'].widget.attrs.update({'class': 'selectpicker'})
@@ -100,6 +102,20 @@ class FormularioBusquedaRegistro(forms.Form):
         self.fields['palabras_claves'].widget.attrs.update({'class': 'form-control'})
         self.fields['descripcion'].widget.attrs.update({'class': 'form-control', 'rows': '5'})
         self.fields['palabras_claves'].required = False
+        self.fields['area'].widget.attrs.update({'class': 'selectpicker'})
+
+        if empleado:
+            self.fields['area'].queryset = empleado.areas.all()
+
+        if self.is_bound:
+            area_id = self.data.get('area', None)
+            if area_id:
+                area = Area.objects.get(id=area_id)
+                try:
+                    query_tipo_documento = TipoDocumento.objects.filter(areas=area)
+                    self.fields['tipo_documento'].queryset = query_tipo_documento
+                except Area.DoesNotExist:
+                    self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
     def clean_palabras_claves(self):
         data = self.cleaned_data['palabras_claves'].split(',')

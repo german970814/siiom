@@ -7,7 +7,7 @@ from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 # from django.forms.models import modelformset_factory
 
 # Locale Apps
@@ -81,6 +81,8 @@ def ingresar_registro(request):
     return render(request, 'gestion_documental/ingresar_registro.html', data)
 
 
+@login_required
+@csrf_exempt
 def palabras_claves_json(request):
     """
     Vista que devuelve una lista con los nombres de las palabras claves para typeahead.js
@@ -92,6 +94,7 @@ def palabras_claves_json(request):
     return HttpResponse(json.dumps(response), content_type="application/javascript")
 
 
+@login_required
 @csrf_exempt
 def area_tipo_documento_json(request):
     """
@@ -106,16 +109,18 @@ def area_tipo_documento_json(request):
 
 
 @waffle_switch('gestion_documental')
-@permission_required('gestion_documental.add_registro')
+@permission_required('organizacional.buscar_registros')
 def busqueda_registros(request):
     """
     Vista para realizar la busqueda de registros
     """
 
     data = {}
+    from organizacional.models import Empleado
+    empleado = Empleado.objects.get(usuario=request.user)
 
     if request.method == 'POST':
-        form = FormularioBusquedaRegistro(data=request.POST)
+        form = FormularioBusquedaRegistro(data=request.POST, empleado=empleado)
 
         if form.is_valid():
             tipo_documento = form.cleaned_data['tipo_documento']
@@ -168,7 +173,7 @@ def busqueda_registros(request):
             # Ocurrieron errores
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
-        form = FormularioBusquedaRegistro()
+        form = FormularioBusquedaRegistro(empleado=empleado)
 
     # se empaqueta el formulario
     data['form'] = form

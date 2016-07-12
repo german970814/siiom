@@ -47,6 +47,10 @@ class Empleado(models.Model):
     class Meta:
         verbose_name = _('empleado')
         verbose_name_plural = _('empleados')
+        permissions = (
+            ('es_administrador_sgd', 'Es Administrador de Sistema Gestion Documental'),
+            ('buscar_registros', 'Puede Buscar Registros'),
+        )
 
     def __str__(self):
-        return self.usuario
+        return '{}'.format(self.usuario)
