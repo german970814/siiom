@@ -8,11 +8,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import permission_required, login_required
+from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic import ListView
+from django.core.urlresolvers import reverse_lazy
 # from django.forms.models import modelformset_factory
 
 # Locale Apps
-from .models import Registro, Documento, PalabraClave
-from .forms import FormularioRegistroDocumento, FormularioDocumentos, FormularioBusquedaRegistro
+from .models import Registro, Documento, PalabraClave, TipoDocumento
+from .forms import (
+    FormularioRegistroDocumento, FormularioDocumentos,
+    FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm
+)
 
 # Apps
 from waffle.decorators import waffle_switch
@@ -179,3 +185,131 @@ def busqueda_registros(request):
     data['form'] = form
 
     return render(request, 'gestion_documental/busqueda_registros.html', data)
+
+
+class TipoDocumentoCreateView(CreateView):
+    """CreateView for TipoDocumentoCreateView"""
+    model = TipoDocumento
+    form_class = TipoDocumentoForm
+    # fields = ['nombre', 'codigo']
+    success_url = reverse_lazy('sgd:crear_tipo_documento')
+    template_name = 'gestion_documental/crear_tipo_documento.html'
+    group_required = ['administrador sgd']
+
+    def form_valid(self, form):
+        messages.success(self.request, "Se ha creado exitosamente el Tipo de Documento")
+        return super(TipoDocumentoCreateView, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Ha ocurrido un error al enviar el formulario")
+        return super(TipoDocumentoCreateView, self).form_invalid(form)
+
+    def render_to_response(self, context, **response_kwargs):
+        response_kwargs.setdefault('content_type', self.content_type)
+        context['accion'] = 'Crear'
+        # context['tipo'] = 'Area'
+        return self.response_class(
+            request=self.request,
+            template=self.get_template_names(),
+            context=context,
+            **response_kwargs
+        )
+
+
+class TipoDocumentoUpdateView(UpdateView):
+    """UpdateView for TipoDocumentoUpdateView"""
+    model = TipoDocumento
+    form_class = TipoDocumentoForm
+    # success_url = reverse_lazy('organizacional:editar_Departamento')
+    template_name = 'gestion_documental/crear_tipo_documento.html'
+    group_required = ['administrador sgd']
+
+    def form_valid(self, form):
+        messages.success(self.request, _("Se ha editado exitosamente el Área"))
+        self.success_url = reverse_lazy('sgd:editar_tipo_documento', args=(form.instance.id, ))
+        return super(TipoDocumentoUpdateView, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
+        return super(TipoDocumentoUpdateView, self).form_invalid(form)
+
+    def render_to_response(self, context, **response_kwargs):
+        response_kwargs.setdefault('content_type', self.content_type)
+        context['accion'] = _('Editar')
+        return self.response_class(
+            request=self.request,
+            template=self.get_template_names(),
+            context=context,
+            **response_kwargs
+        )
+
+
+class ListaTipoDocumentosView(ListView):
+    """Devuelve una lista de areas ingresadas en el sistema."""
+    model = TipoDocumento
+    template_name = 'gestion_documental/listar_tipo_documentos.html'
+    group_required = ['administrador sgd']
+
+
+class PalabraClaveCreateView(CreateView):
+    """CreateView for PalabraClaveCreateView"""
+    model = PalabraClave
+    form_class = PalabraClaveForm
+    # fields = ['nombre', 'codigo']
+    success_url = reverse_lazy('sgd:crear_palabra_clave')
+    template_name = 'gestion_documental/crear_palabra_clave.html'
+    group_required = ['administrador sgd']
+
+    def form_valid(self, form):
+        messages.success(self.request, "Se ha creado exitosamente la Palabra Clave")
+        return super(PalabraClaveCreateView, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Ha ocurrido un error al enviar el formulario")
+        return super(PalabraClaveCreateView, self).form_invalid(form)
+
+    def render_to_response(self, context, **response_kwargs):
+        response_kwargs.setdefault('content_type', self.content_type)
+        context['accion'] = 'Crear'
+        # context['tipo'] = 'Area'
+        return self.response_class(
+            request=self.request,
+            template=self.get_template_names(),
+            context=context,
+            **response_kwargs
+        )
+
+
+class PalabraClaveUpdateView(UpdateView):
+    """UpdateView for PalabraClaveUpdateView"""
+    model = PalabraClave
+    form_class = PalabraClaveForm
+    # success_url = reverse_lazy('organizacional:editar_Departamento')
+    template_name = 'gestion_documental/crear_palabra_clave.html'
+    group_required = ['administrador sgd']
+
+    def form_valid(self, form):
+        messages.success(self.request, _("Se ha editado exitosamente el Área"))
+        self.success_url = reverse_lazy('sgd:editar_palabra_clave', args=(form.instance.id, ))
+        return super(PalabraClaveUpdateView, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
+        return super(PalabraClaveUpdateView, self).form_invalid(form)
+
+    def render_to_response(self, context, **response_kwargs):
+        response_kwargs.setdefault('content_type', self.content_type)
+        context['accion'] = _('Editar')
+        return self.response_class(
+            request=self.request,
+            template=self.get_template_names(),
+            context=context,
+            **response_kwargs
+        )
+
+
+class ListaPalabrasClavesView(ListView):
+    """Devuelve una lista de areas ingresadas en el sistema."""
+    model = PalabraClave
+    template_name = 'gestion_documental/listar_palabras_claves.html'
+    group_required = ['administrador sgd']

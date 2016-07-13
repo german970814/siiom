@@ -120,3 +120,34 @@ class FormularioBusquedaRegistro(forms.Form):
     def clean_palabras_claves(self):
         data = self.cleaned_data['palabras_claves'].split(',')
         return [PalabraClave.objects.get(nombre__iexact=palabra) for palabra in data if palabra != '']
+
+
+class TipoDocumentoForm(forms.ModelForm):
+    """
+    Formulario para la creacion de tipos de documentos en SGD
+    """
+    error_css_class = 'has-error'
+
+    class Meta:
+        model = TipoDocumento
+        fields = ['nombre', 'areas']
+
+    def __init__(self, *args, **kwargs):
+        super(TipoDocumentoForm, self).__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
+
+
+class PalabraClaveForm(forms.ModelForm):
+    """
+    Formulario para la creacion de tipos de documentos en SGD
+    """
+    error_css_class = 'has-error'
+
+    class Meta:
+        model = PalabraClave
+        fields = ['nombre']
+
+    def __init__(self, *args, **kwargs):
+        super(PalabraClaveForm, self).__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})

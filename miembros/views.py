@@ -79,7 +79,7 @@ def autenticarUsario(request):
                 if Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
                     if sig is not None or sig != '':
                         return HttpResponseRedirect(sig)
-                    return HttpResponseRedirect("/miembro/")
+                    return HttpResponseRedirect("/administracion/")
                 elif Group.objects.get(name__iexact='Lider') in usuario.groups.all()      \
                         or Group.objects.get(name__iexact='Maestro') in usuario.groups.all()\
                         or Group.objects.get(name__iexact='Agente') in usuario.groups.all()\
