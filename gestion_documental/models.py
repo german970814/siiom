@@ -49,13 +49,15 @@ class Registro(models.Model):
         related_name='registros',
         blank=True
     )
+    estante = models.IntegerField(verbose_name=_('estante'))
+    caja = models.IntegerField(verbose_name=_('caja'))
 
     class Meta:
         verbose_name = _('registro')
         verbose_name_plural = _('registros')
 
     def __str__(self):
-        return "{}".format(self.id)
+        return "Estante {0} Caja {1}".format(self.estante, self.caja)
 
 
 class Documento(models.Model):

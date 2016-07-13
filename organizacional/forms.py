@@ -1,7 +1,7 @@
 # Django Package
 from django import forms
 from django.utils.translation import ugettext as _
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.db.models.functions import Lower
 
 # Locale Apps
@@ -60,19 +60,37 @@ class EmpleadoForm(forms.ModelForm):
 
     class Meta:
         model = Empleado
-        fields = ['areas']
+        fields = ['areas', 'cedula', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido']
 
     def __init__(self, *args, **kwargs):
         super(EmpleadoForm, self).__init__(*args, **kwargs)
         self.fields['correo'].widget.attrs.update({'class': 'form-control'})
         self.fields['contrasena'].widget.attrs.update({'class': 'form-control'})
         self.fields['contrasena_confirmacion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['tipo_usuario'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
 
     def clean(self, *args, **kwargs):
         cleaned_data = super(EmpleadoForm, self).clean(*args, **kwargs)
-        if 'contrasena' in cleaned_data and 'contrasena_confirmacion' in cleaned_data:
-            if cleaned_data['contrasena'] != cleaned_data['contrasena_confirmacion']:
-                self.add_error('contrasena', _('Las contraseñas no coinciden'))
-                self.add_error('contrasena_confirmacion', _('Las contraseñas no coinciden'))
+        usuario_existente = None
+        if 'correo' in cleaned_data:
+            try:
+                usuario_existente = User.objects.get(email=cleaned_data['correo'])
+                try:
+                    if usuario_existente.empleado:
+                        self.add_error('correo', _('Ya existe un empleado con este correo'))
+                except Empleado.DoesNotExist:
+                    pass
+
+            except User.DoesNotExist:
+                pass
+        if usuario_existente is None:
+            if 'contrasena' in cleaned_data and 'contrasena_confirmacion' in cleaned_data:
+                if cleaned_data['contrasena'] != cleaned_data['contrasena_confirmacion']:
+                    self.add_error('contrasena', _('Las contraseñas no coinciden'))
+                    self.add_error('contrasena_confirmacion', _('Las contraseñas no coinciden'))

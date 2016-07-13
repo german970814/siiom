@@ -142,6 +142,36 @@
 	                            {% endfor %}
 	                        </div>
 	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-2">
+	                        <div class="input-group {{form.estante.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-grid"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="{{ form.estante.id_for_label }}" class="fg-label requerido control-label">{{ form.estante.label|title }}:</label>
+	                                {{ form.estante }}
+	                            </div>
+	                            {% for error in form.estante.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-2">
+	                        <div class="input-group {{form.caja.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-stack-overflow"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="{{ form.caja.id_for_label }}" class="fg-label requerido control-label">{{ form.caja.label|title }}:</label>
+	                                {{ form.caja }}
+	                            </div>
+	                            {% for error in form.caja.errors %}
+	                                <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
 	                </div>
 				</div>
 			</div>

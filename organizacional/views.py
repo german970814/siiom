@@ -174,13 +174,20 @@ def crear_empleado(request):
 
         if form.is_valid():
             empleado = form.save(commit=False)
-            usuario = User()
-            usuario.email = form.cleaned_data['correo']
-            usuario.set_password(form.cleaned_data['contrasena'])
-            usuario.save()
+            # get_or_create
+            usuario, created = User.objects.get_or_create(
+                email=form.cleaned_data['correo'], defaults={
+                    'password': '123456', 'username': form.cleaned_data['cedula']
+                }
+            )
+            # usuario.email = form.cleaned_data['correo']
+            if created:
+                usuario.set_password(form.cleaned_data['contrasena'])
+                usuario.save()
             usuario.groups.add(form.cleaned_data['tipo_usuario'])
             empleado.usuario = usuario
             empleado.save()
+            form.save_m2m()
             messages.success(request, _('Empleado creado exitosamente'))
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
