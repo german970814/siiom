@@ -207,7 +207,7 @@ class TipoDocumentoCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView
     # fields = ['nombre', 'codigo']
     success_url = reverse_lazy('sgd:crear_tipo_documento')
     template_name = 'gestion_documental/crear_tipo_documento.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, "Se ha creado exitosamente el Tipo de Documento")
@@ -235,7 +235,7 @@ class TipoDocumentoUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView
     form_class = TipoDocumentoForm
     # success_url = reverse_lazy('organizacional:editar_Departamento')
     template_name = 'gestion_documental/crear_tipo_documento.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, _("Se ha editado exitosamente el Área"))
@@ -261,7 +261,7 @@ class ListaTipoDocumentosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = TipoDocumento
     template_name = 'gestion_documental/listar_tipo_documentos.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
 
 class PalabraClaveCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
@@ -271,7 +271,7 @@ class PalabraClaveCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView)
     # fields = ['nombre', 'codigo']
     success_url = reverse_lazy('sgd:crear_palabra_clave')
     template_name = 'gestion_documental/crear_palabra_clave.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, "Se ha creado exitosamente la Palabra Clave")
@@ -299,7 +299,7 @@ class PalabraClaveUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView)
     form_class = PalabraClaveForm
     # success_url = reverse_lazy('organizacional:editar_Departamento')
     template_name = 'gestion_documental/crear_palabra_clave.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, _("Se ha editado exitosamente el Área"))

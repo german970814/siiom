@@ -45,7 +45,7 @@ class AreaCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     # fields = ['nombre', 'codigo']
     success_url = reverse_lazy('organizacional:crear_area')
     template_name = 'organizacional/crear_area.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, _("Se ha creado exitosamente el Area"))
@@ -73,7 +73,7 @@ class AreaUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
     form_class = AreaForm
     # success_url = reverse_lazy('organizacional:editar_area')
     template_name = 'organizacional/crear_area.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, _("Se ha editado exitosamente el Área"))
@@ -99,7 +99,7 @@ class ListaAreasView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = Area
     template_name = 'organizacional/listar_areas.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
 
 class DepartamentoCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
@@ -109,7 +109,7 @@ class DepartamentoCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView)
     # fields = ['nombre', 'codigo']
     success_url = reverse_lazy('organizacional:crear_departamento')
     template_name = 'organizacional/crear_departamento.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, _("Se ha creado exitosamente el Departamento"))
@@ -137,7 +137,7 @@ class DepartamentoUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView)
     form_class = DepartamentoForm
     # success_url = reverse_lazy('organizacional:editar_Departamento')
     template_name = 'organizacional/crear_departamento.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
     def form_valid(self, form):
         messages.success(self.request, _("Se ha editado exitosamente el Área"))
@@ -163,7 +163,7 @@ class ListaDepartamentosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = Departamento
     template_name = 'organizacional/listar_departamentos.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
 
 
 @login_required
@@ -219,4 +219,4 @@ class ListaEmpleadosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = Empleado
     template_name = 'organizacional/listar_empleados.html'
-    group_required = ['administrador sgd']
+    group_required = ['Administrador SGD']
