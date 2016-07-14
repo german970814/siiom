@@ -174,18 +174,30 @@ def crear_empleado(request):
 
         if form.is_valid():
             empleado = form.save(commit=False)
-            # get_or_create
+            # se intenta buscar o crear el usuario
             usuario, created = User.objects.get_or_create(
                 email=form.cleaned_data['correo'], defaults={
                     'password': '123456', 'username': form.cleaned_data['cedula']
                 }
             )
-            # usuario.email = form.cleaned_data['correo']
+            # si fue creado, le asigna la contraseña del formulario
             if created:
                 usuario.set_password(form.cleaned_data['contrasena'])
                 usuario.save()
+            else:
+                # si no fue creado, quiere decir que algun miembro puede tener ese usuario
+                miembro = usuario.miembro_set.first()  # Si no tiene puede devolver None
+                if miembro:
+                    # de tener un miembro se reemplazan los campos por los del miembro
+                    empleado.primer_nombre = miembro.nombre
+                    empleado.cedula = miembro.cedula
+                    empleado.primer_apellido = miembro.primerApellido
+                    if miembro.segundoApellido:
+                        empleado.segundo_apellido = miembro.segundoApellido
+            # se agrega el tipo de usuario
             usuario.groups.add(form.cleaned_data['tipo_usuario'])
             empleado.usuario = usuario
+            # se crea el empleado
             empleado.save()
             form.save_m2m()
             messages.success(request, _('Empleado creado exitosamente'))

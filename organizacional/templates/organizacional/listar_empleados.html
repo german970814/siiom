@@ -50,6 +50,8 @@
                 <tr>
                     <th data-visible="false" data-identifier="true" data-column-id="id"></th>
                     <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                    <th data-column-id="cedula" data-identifier="true">Cédula</th>
+                    <th data-column-id="correo" data-identifier="true">Correo</th>
                     <th data-column-id="area" data-identifier="true">Área</th>
                     <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                 </tr>
@@ -58,7 +60,9 @@
                 {% for empleado in empleado_list %}
                     <tr>
                         <td>{{ empleado.id }}</td>
-                        <td>{{ empleado.usuario|upper }}</td>
+                        <td>{{ empleado.primer_nombre|upper }} {{empleado.segundo_nombre|upper}} {{empleado.primer_apellido|upper}} {{empleado.segundo_apellido|upper}}</td>
+                        <td>{{ empleado.cedula }}</td>
+                        <td>{{ empleado.usuario.email }}</td>
                         <td>{% for area in empleado.areas.all %}{% if forloop.first %}{{ area.nombre|upper }}{% else %}, {{ area.nombre|upper }}{% endif %}{% empty %}SIN AREAS{% endfor %}</td>
                     </tr>
                 {% empty %}

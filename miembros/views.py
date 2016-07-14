@@ -59,7 +59,6 @@ def divorciar(miembro, conyugue, estado_civil):
 
 def autenticarUsario(request):
     siguiente = request.session.get('next', '')
-
     if request.user.is_authenticated():
         if request.user.has_perm("miembros.es_administrador"):
             return HttpResponseRedirect("/administracion/")

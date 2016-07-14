@@ -22,7 +22,7 @@ from .forms import (
 
 # Apps
 from waffle.decorators import waffle_switch
-from organizacional.models import Area
+from organizacional.models import Area, Empleado
 
 # Python Package
 import json
@@ -122,8 +122,7 @@ def busqueda_registros(request):
     """
 
     data = {}
-    from organizacional.models import Empleado
-    empleado = Empleado.objects.get(usuario=request.user)
+    empleado = get_object_or_404(Empleado, usuario=request.user)
 
     if request.method == 'POST':
         form = FormularioBusquedaRegistro(data=request.POST, empleado=empleado)
