@@ -444,13 +444,17 @@
                             <li class="sub-menu">
                                 <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
                                 <ul>
+                                    {% if perms.gestion_documental.add_registro %}
                                     <li>
                                         <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
                                     </li>
+                                    {% endif %}
+                                    {% if perms.organizacional.buscar_registros %}
                                     <li>
                                         <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
                                     </li>
-                                    {% if perms.orgranizacional.es_administrador_sgd %}
+                                    {% endif %}
+                                    {% if perms.organizacional.es_administrador_sgd %}
                                     <li class="sub-menu">
                                         <a href="#">{% trans "Administracion" %}</a>
                                         <ul>

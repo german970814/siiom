@@ -10,6 +10,9 @@ from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
+# Third Apps
+from braces.views import LoginRequiredMixin, GroupRequiredMixin
+
 # Locale Apps
 # from gestion_documental.models import Documento
 from .models import Area, Departamento, Empleado
@@ -35,7 +38,7 @@ def areas_departamento_json(request):
         return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-class AreaCreateView(CreateView):
+class AreaCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     """CreateView for AreaCreateView"""
     model = Area
     form_class = AreaForm
@@ -64,7 +67,7 @@ class AreaCreateView(CreateView):
         )
 
 
-class AreaUpdateView(UpdateView):
+class AreaUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
     """UpdateView for AreaUpdateView"""
     model = Area
     form_class = AreaForm
@@ -92,14 +95,14 @@ class AreaUpdateView(UpdateView):
         )
 
 
-class ListaAreasView(ListView):
+class ListaAreasView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = Area
     template_name = 'organizacional/listar_areas.html'
     group_required = ['administrador sgd']
 
 
-class DepartamentoCreateView(CreateView):
+class DepartamentoCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     """CreateView for AreaCreateView"""
     model = Departamento
     form_class = DepartamentoForm
@@ -128,7 +131,7 @@ class DepartamentoCreateView(CreateView):
         )
 
 
-class DepartamentoUpdateView(UpdateView):
+class DepartamentoUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
     """UpdateView for DepartamentoUpdateView"""
     model = Departamento
     form_class = DepartamentoForm
@@ -156,7 +159,7 @@ class DepartamentoUpdateView(UpdateView):
         )
 
 
-class ListaDepartamentosView(ListView):
+class ListaDepartamentosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = Departamento
     template_name = 'organizacional/listar_departamentos.html'
@@ -212,7 +215,7 @@ def crear_empleado(request):
     return render(request, 'organizacional/crear_empleado.html', data)
 
 
-class ListaEmpleadosView(ListView):
+class ListaEmpleadosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     """Devuelve una lista de areas ingresadas en el sistema."""
     model = Empleado
     template_name = 'organizacional/listar_empleados.html'

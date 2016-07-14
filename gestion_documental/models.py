@@ -59,6 +59,15 @@ class Registro(models.Model):
     def __str__(self):
         return "Estante {0} Caja {1}".format(self.estante, self.caja)
 
+    @property
+    def solicitado(self):
+        """
+        Retorna True si el registro esta solicitado
+        """
+        if self.solicitudregistro_set.exclude(estado=SolicitudRegistro.DEVUELTO_CONSULTA):
+            return True
+        return False
+
 
 class Documento(models.Model):
     """Modelo que guarda los archivos relacionados a un registro."""
@@ -89,3 +98,38 @@ class Documento(models.Model):
         Devuelve la ruta url de el documento
         """
         return self.archivo.url
+
+
+class SolicitudRegistro(models.Model):
+    """
+    Modelo de solicitud de registros
+    """
+    PENDIENTE = 'PE'
+    ENTREGADO_DIGITADOR = 'ED'
+    DEVUELTO_CONSULTA = 'DC'
+
+    OPCIONES_ESTADO = (
+        (PENDIENTE, 'PENDIENTE'),
+        (ENTREGADO_DIGITADOR, 'ENTREGADO POR DIGITADOR'),
+        (DEVUELTO_CONSULTA, 'DEVUELTO POR USUARIO DE CONSULTA'),
+    )
+
+    registro = models.ForeignKey(Registro, verbose_name=_('Registro'))
+    usuario_solicita = models.ForeignKey(
+        'organizacional.Empleado', related_name='solicitudes', verbose_name=_('Solicitante')
+    )
+    estado = models.CharField(max_length=2, verbose_name=_('Estado Solicitud'), choices=OPCIONES_ESTADO)
+    fecha_solicitud = models.DateField(auto_now_add=True, verbose_name=_('Fecha Solicitud'))
+    fecha_devolucion = models.DateField(blank=True, verbose_name=_('Fecha Devolución'), null=True)
+    comentario = models.TextField(verbose_name=_('Comentario'), blank=True)
+    usuario_autoriza = models.ForeignKey(
+        'organizacional.Empleado', related_name='autorizaciones', verbose_name=_('Autoriza'),
+        blank=True, null=True
+    )
+
+    class Meta:
+        verbose_name = _('Solicitud de Registro')
+        verbose_name_plural = _('Solicitudes de Registro')
+
+    def __str__(self):
+        return "Solicitud No. {}".format(self.id)

@@ -59,3 +59,10 @@ class Empleado(models.Model):
 
     def __str__(self):
         return '{}'.format(self.usuario)
+
+    def get_solicitudes(self):
+        """
+        Retorna las solicitudes actuales
+        """
+        from gestion_documental.models import SolicitudRegistro as Solicitud
+        return self.solicitudes.filter(estado__in=[Solicitud.PENDIENTE, Solicitud.ENTREGADO_DIGITADOR])

@@ -40,206 +40,217 @@
 			top: 8px !important;
 			left: -5px !important;
 		}
+
+		.waves-button, .waves-circle {
+			-webkit-mask-image: inherit;
+		}
+
+		.thumbnai.btn {
+			box-shadow: inherit;
+		}
 	</style>
 {% endblock css %}
 
 {% block contenido %}
-	<div class="container">
-		<form action="" method="post" enctype="multipart/form-data">
-			<div class="card">
-				<div class="card-header">
-					<h2>
-						<legend><h3>{% trans "Búsqueda de Documentos" %}</h3></legend>
-					</h2>
-					{% if messages %}
-						{% for message in messages %}
-							<div class="row">
-				                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
-				                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-				                    <p>{{ message|safe }}</p>
-				                </div>
-				            </div>
-						{% endfor %}
-					{% endif %}
-				</div>
-				{% csrf_token %}
-				<div class="card-body card-padding">
-					<div class="row">
-						<div class="col-md-4">
-	                        <div class="input-group {{form.area.css_classes}}">
-	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-share"></i>
-	                            </span>
-	                            <div class="fg-line requerido">
-	                                <label for="id_area" class="fg-label requerido control-label">{{ form.area.label }}:</label>
-	                                {{ form.area }}
-	                            </div>
-	                            {% for error in form.area.errors %}
-	                                <small class="help-block">{{error}}</small>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-	                    <br class="space">
-	                    <div class="col-md-4">
-	                        <div class="input-group {{form.tipo_documento.css_classes}}">
-	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-file-text"></i>
-	                            </span>
-	                            <div class="fg-line requerido">
-	                                <label for="id_tipo_documento" class="fg-label requerido control-label">{{ form.tipo_documento.label }}:</label>
-	                                {{ form.tipo_documento }}
-	                            </div>
-	                            {% for error in form.tipo_documento.errors %}
-	                                <small class="help-block">{{error}}</small>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-	                    <br class="space">
-	                    <div class="col-md-4">
-	                        <div class="input-group {{form.fecha_inicial.css_classes}}">
-	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-calendar"></i>
-	                            </span>
-	                            <div class="fg-line requerido">
-	                                <label for="id_fecha_inicial" class="fg-label requerido control-label">{{ form.fecha_inicial.label }}:</label>
-	                                {{ form.fecha_inicial }}
-	                            </div>
-	                            {% for error in form.fecha_inicial.errors %}
-	                                <small class="help-block">{{error}}</small>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-	                </div>
-	                <br class="space-down">
-	                <br>
-	                <div class="row">
-	                	<div class="col-md-4">
-	                        <div class="input-group {{form.fecha_final.css_classes}}">
-	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-calendar"></i>
-	                            </span>
-	                            <div class="fg-line requerido">
-	                                <label for="id_fecha_final" class="fg-label requerido control-label">{{ form.fecha_final.label }}:</label>
-	                                {{ form.fecha_final }}
-	                            </div>
-	                            {% for error in form.fecha_final.errors %}
-	                                <small class="help-block">{{error}}</small>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-	                    <br class="space">
-						<div class="col-md-4">
-	                        <div class="input-group {{form.descripcion.css_classes}}">
-	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-comment-alt-text"></i>
-	                            </span>
-	                            <div class="fg-line requerido">
-	                                <label for="id_descripcion" class="fg-label requerido control-label">{{ form.descripcion.label|title }}:</label>
-	                                {{ form.descripcion }}
-	                                <!--<div id="descripcion" class="form-control"></div>-->
-	                            </div>
-	                            {% for error in form.descripcion.errors %}
-	                                <small class="help-block">{{error}}</small>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-	                	<br class="space">
-	                    <div class="col-md-4">
-	                        <div class="input-group {{form.palabras_claves.css_classes}}">
-	                            <span class="input-group-addon">
-	                                <i class="zmdi zmdi-key"></i>
-	                            </span>
-	                            <div class="fg-line requerido">
-	                                <label for="id_palabras_claves" class="fg-label requerido control-label">{{ form.palabras_claves.label|title }}:</label>
-	                                {{ form.palabras_claves }}
-	                                <!--<div id="palabras_claves" class="form-control"></div>-->
-	                            </div>
-	                            {% for error in form.palabras_claves.errors %}
-	                                <small class="help-block">{{error}}</small>
-	                            {% endfor %}
-	                        </div>
-	                    </div>
-	                </div>
-				</div>
-				<br>
-				<br class="space">
+<div class="container">
+	<form action="" method="post" enctype="multipart/form-data">
+		<div class="card">
+			<div class="card-header">
+				<h2>
+					<legend><h3>{% trans "Búsqueda de Documentos" %}</h3></legend>
+				</h2>
+				{% if messages %}
+					{% for message in messages %}
+						<div class="row">
+			                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+			                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+			                    <p>{{ message|safe }}</p>
+			                </div>
+			            </div>
+					{% endfor %}
+				{% endif %}
+			</div>
+			{% csrf_token %}
+			<div class="card-body card-padding">
 				<div class="row">
-					<div class="col-md-4 col-md-offset-4">
-						<button class="btn btn-block btn-primary" type="submit">
-							{% trans "Aceptar" %}
-						</button>
-					</div>
+					<div class="col-md-4">
+                        <div class="input-group {{form.area.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-share"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_area" class="fg-label requerido control-label">{{ form.area.label }}:</label>
+                                {{ form.area }}
+                            </div>
+                            {% for error in form.area.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{form.tipo_documento.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-file-text"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_tipo_documento" class="fg-label requerido control-label">{{ form.tipo_documento.label }}:</label>
+                                {{ form.tipo_documento }}
+                            </div>
+                            {% for error in form.tipo_documento.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{form.fecha_inicial.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fecha_inicial" class="fg-label requerido control-label">{{ form.fecha_inicial.label }}:</label>
+                                {{ form.fecha_inicial }}
+                            </div>
+                            {% for error in form.fecha_inicial.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br class="space-down">
+                <br>
+                <div class="row">
+                	<div class="col-md-4">
+                        <div class="input-group {{form.fecha_final.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-calendar"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_fecha_final" class="fg-label requerido control-label">{{ form.fecha_final.label }}:</label>
+                                {{ form.fecha_final }}
+                            </div>
+                            {% for error in form.fecha_final.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br class="space">
+					<div class="col-md-4">
+                        <div class="input-group {{form.descripcion.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-comment-alt-text"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_descripcion" class="fg-label requerido control-label">{{ form.descripcion.label|title }}:</label>
+                                {{ form.descripcion }}
+                                <!--<div id="descripcion" class="form-control"></div>-->
+                            </div>
+                            {% for error in form.descripcion.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                	<br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{form.palabras_claves.css_classes}}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-key"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_palabras_claves" class="fg-label requerido control-label">{{ form.palabras_claves.label|title }}:</label>
+                                {{ form.palabras_claves }}
+                                <!--<div id="palabras_claves" class="form-control"></div>-->
+                            </div>
+                            {% for error in form.palabras_claves.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+			</div>
+			<br>
+			<br class="space">
+			<div class="row">
+				<div class="col-md-4 col-md-offset-4">
+					<button class="btn btn-block btn-primary" type="submit">
+						{% trans "Aceptar" %}
+					</button>
 				</div>
-				<br>
-				<br>
 			</div>
-	    </form>
-		
-		<br>
-		<br>
-		<br>
-	    {% if registros %}
-	    	<div class="card">
-	    		<div class="card-header">
-	    			
-	    		</div>
-	    		<div class="card-body card-padding">
-	    			<div class="row table-responsive">
-	                    <div class="col-md-12">
-	                        <table id="data-table-command" class="table table-striped table-vmiddle">
-	                            <thead>
-	                                <tr>
-	                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
-	                                    <th data-visible="false" data-identifier="true" data-column-id="docs"></th>
-	                                    <th data-identifier="true" data-column-id="nombre">{% trans "Descripción" %}</th>
-	                                    <th data-identifier="true" data-column-id="modulo">{% trans "Fecha" %}</th>
-	                                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
-	                                </tr>
-	                            </thead>
-	                            <tbody>
-	                                {% for registro in registros %}
-	                                    <tr>
-	                                        <td>{{ registro.id }}</td>
-	                                        <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{{ documento.get_absolute_url }}{% else %},{{ documento.get_absolute_url }}{% endif %}{% endfor %}</td>
-	                                        <td>{{ registro.descripcion|title }}</td>
-	                                        <td>{{ registro.fecha }}</td>
-	                                    </tr>
-	                                {% empty %}
-	                                    <tr>
-	                                        <td></td>
-	                                        <td colspan="5" style="text-align:center;">{% trans "No se encontraron registros con estas caracteristicas" %}</td>
-	                                    </tr>
-	                                {% endfor %}
-	                            </tbody>
-	                        </table>
-	                    </div>
-	                </div>
-	    		</div>
-	    	</div>
-	    {% endif %}
-	</div>
-
-
-	<!--<div class="thumbnai btn btn-icon">
-	{# {% for documento in documentos %} #}
-
-		{# {% if documento.is_image %} #}
-		<div class="" data-src="{# {{ documento.get_absolute_url }} #}" {# {% if not forloop.first %} #}style="display: none !important;"{# {% endif %} #}>
-			<div class="lightbox-item p-item">
-				<img src="{# {{ documento.get_absolute_url }} #}" style="display: none !important;" alt="">
-				<button class="btn btn-icon"><span class="zmdi zmdi-edit"></span></button>
-	        </div>
+			<br>
+			<br>
 		</div>
-		{# {% else %} #}
-		<div class="" data-iframe="true" data-src="{# {{ documento.get_absolute_url }} #}" {# {% if not forloop.first %} #}style="display: none !important;"{# {% endif %} #}>
-			<div class="lightbox-item p-item">
-				<button class="btn btn-icon open-website"><span class="zmdi zmdi-edit"></span></button>
-			</div>
-		</div>
-		{# {% endif %} #}
-	{# {% endfor %} #}
-	</div>-->
+    </form>
+	
+	<br>
+	<br>
+	<br>
+    {% if registros %}
+    	<div class="card">
+    		<div class="card-header">
+    			
+    		</div>
+    		<div class="card-body card-padding">
+    			<div class="row table-responsive">
+                    <div class="col-md-12">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
+                            <thead>
+                                <tr>
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                    <th data-visible="false" data-identifier="true" data-column-id="docs"></th>
+                                    <th data-visible="false" data-identifier="true" data-column-id="solicitado"></th>
+                                    <th data-identifier="true" data-column-id="nombre">{% trans "Descripción" %}</th>
+                                    <th data-identifier="true" data-column-id="modulo">{% trans "Fecha" %}</th>
+                                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                                    <th data-column-id="solicitud" data-formatter="solicitud" data-sortable="false">Solicitud</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for registro in registros %}
+                                    <tr>
+                                        <td>{{ registro.id }}</td>
+                                        <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{{ documento.get_absolute_url }}{% else %},{{ documento.get_absolute_url }}{% endif %}{% endfor %}</td>
+                                        <td>{% if registro.solicitado %}true{% else %}false{% endif %}</td>
+                                        <td>{{ registro.descripcion|title }}</td>
+                                        <td>{{ registro.fecha }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td></td>
+                                        <td colspan="5" style="text-align:center;">{% trans "No se encontraron registros con estas caracteristicas" %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+    		</div>
+    	</div>
+    {% endif %}
+</div>
 
+<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Modal title</h4>
+            </div>
+	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+		                <p>¿Seguro que quiere Solicitar este Registro?.</p>
+		                <input type="hidden" name="solicitud">
+	            </div>
+	            <div class="modal-footer">
+	                <button type="submit" name="solicitar_registro" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
 
 {% endblock contenido %}
 
@@ -267,7 +278,7 @@
                     "commands" : function(column, row) {
                         
                         var urls = row.docs.split(',');
-                        var base = "<div class=\"thumbnai \">0</div>";
+                        var base = "<div class=\"thumbnai btn\">0</div>";
 
                         var data = "";
 
@@ -280,13 +291,21 @@
                         		var display = display_none;
                         	}
                         	if (urls[i].endsWith('.pdf')) {
-                        		data += "<div class=\"\" data-iframe=\"true\" " + display + " data-src=\"" + urls[i] + "\"><div class=\"lightbox-item p-item\"><button class=\"btn btn-icon \"><span class=\"zmdi zmdi-eye\"></span></button></div><div>"
+                        		data += "<div class=\"\" data-iframe=\"true\" " + display + " data-src=\"" + urls[i] + "\"><div class=\"lightbox-item p-item\"><button class=\"btn btn-icon command-delete waves-effect waves-circle\"><span class=\"zmdi zmdi-eye\"></span></button></div><div>"
                         	} else {	
-                        		data += "<div class=\"\" " + display + " data-src=\"" + urls[i] + "\"><div class=\"lightbox-item p-item\"><img src=\"" + urls[i] + "\" style=\"display: none !important;\"><button class=\"btn btn-icon\"><span class=\"zmdi zmdi-eye\"></span></button></div></div>"
+                        		data += "<div class=\"\" " + display + " data-src=\"" + urls[i] + "\"><div class=\"lightbox-item p-item\"><img src=\"" + urls[i] + "\" style=\"display: none !important;\"><button class=\"btn btn-icon command-delete waves-effect waves-circle\"><span class=\"zmdi zmdi-eye\"></span></button></div></div>"
                         	}
                         }
                     	return base.replace('0', data);
                     },
+                    "solicitud" : function(column, row) {
+                    	var solicitado = eval(row.solicitado);
+                    	if (solicitado) {
+                    		return "Ya fue solicitado"
+                    	} else {
+                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-pin\"></span></button>";
+                    	}
+                    }
                 }
             });
 
@@ -375,6 +394,14 @@
         		})
         	});
 
+
+        	$("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
+	        	$('.tomodal').click(function(event) {
+	        		var $id = $(this).attr('data-row-id');
+	        		$('#toggleModal').click();
+	        		$('input[name="solicitud"]').val($id)
+	        	});
+        	})
 		});
 	</script>
 {% endblock js %}

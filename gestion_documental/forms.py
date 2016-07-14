@@ -105,7 +105,10 @@ class FormularioBusquedaRegistro(forms.Form):
         self.fields['area'].widget.attrs.update({'class': 'selectpicker'})
 
         if empleado:
-            self.fields['area'].queryset = empleado.areas.all()
+            if empleado.usuario.has_perm('organizacional.es_administrador_sgd'):
+                self.fields['area'].queryset = Area.objects.all()
+            else:
+                self.fields['area'].queryset = empleado.areas.all()
 
         if self.is_bound:
             area_id = self.data.get('area', None)
