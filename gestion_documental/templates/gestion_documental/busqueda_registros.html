@@ -202,7 +202,7 @@
                                     <th data-visible="false" data-identifier="true" data-column-id="solicitado"></th>
                                     <th data-identifier="true" data-column-id="nombre">{% trans "Descripción" %}</th>
                                     <th data-identifier="true" data-column-id="modulo">{% trans "Fecha" %}</th>
-                                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Ver</th>
                                     <th data-column-id="solicitud" data-formatter="solicitud" data-sortable="false">Solicitud</th>
                                 </tr>
                             </thead>
@@ -234,7 +234,7 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Modal title</h4>
+                <h4 class="modal-title">Confirmación de Solicitud</h4>
             </div>
 	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
 	        	{% csrf_token %}
@@ -301,9 +301,9 @@
                     "solicitud" : function(column, row) {
                     	var solicitado = eval(row.solicitado);
                     	if (solicitado) {
-                    		return "Ya fue solicitado"
+                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>"
                     	} else {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-pin\"></span></button>";
+                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
                     	}
                     }
                 }
