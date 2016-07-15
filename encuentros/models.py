@@ -77,7 +77,7 @@ class Encontrista(models.Model):
     segundo_apellido = models.CharField(max_length=60, blank=True, verbose_name='Segundo Apellido')
     talla = models.CharField(max_length=3, verbose_name='Talla', blank=True)
     genero = models.CharField(max_length=1, choices=OPCIONES_GENERO, verbose_name='Género')
-    identificacion = models.IntegerField(verbose_name='Identificación')
+    identificacion = models.BigIntegerField(verbose_name='Identificación')
     email = models.EmailField(verbose_name='Email')
     grupo = models.ForeignKey('grupos.Grupo', verbose_name='Grupo')
     encuentro = models.ForeignKey(Encuentro, verbose_name='Encuentro')
