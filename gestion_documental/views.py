@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import permission_required, login_required
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils import timezone
 # from django.forms.models import modelformset_factory
 
@@ -18,9 +18,12 @@ from django.utils import timezone
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
 # Locale Apps
-from .models import Registro, Documento, PalabraClave, TipoDocumento, SolicitudRegistro
+from .models import (
+    Registro, Documento, PalabraClave, TipoDocumento,
+    SolicitudRegistro, SolicitudCustodiaDocumento
+)
 from .forms import (
-    FormularioRegistroDocumento, FormularioDocumentos,
+    FormularioRegistroDocumento, FormularioDocumentos, FormularioCustodiaDocumento,
     FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario
 )
 
@@ -114,6 +117,20 @@ def area_tipo_documento_json(request):
     if request.method == 'POST':
         area = get_object_or_404(Area, pk=request.POST['id_area'])
         response = [{'id': tipo.id, 'tipo': tipo.nombre} for tipo in area.tipos_documento.all()]
+
+        return HttpResponse(json.dumps(response), content_type="application/json")
+
+
+@login_required
+@csrf_exempt
+def empleado_area_json(request):
+    """
+    Retorna las areas en la que pertenece cada empleado
+    """
+
+    if request.method == 'POST':
+        empleado = get_object_or_404(Empleado, pk=request.POST['id_solicitante'])
+        response = [{'id': area.id, 'tipo': area.nombre} for area in empleado.areas.all()]
 
         return HttpResponse(json.dumps(response), content_type="application/json")
 
@@ -212,11 +229,11 @@ class TipoDocumentoCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView
     group_required = ['Administrador SGD']
 
     def form_valid(self, form):
-        messages.success(self.request, "Se ha creado exitosamente el Tipo de Documento")
+        messages.success(self.request, _("Se ha creado exitosamente el Tipo de Documento"))
         return super(TipoDocumentoCreateView, self).form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Ha ocurrido un error al enviar el formulario")
+        messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
         return super(TipoDocumentoCreateView, self).form_invalid(form)
 
     def render_to_response(self, context, **response_kwargs):
@@ -276,11 +293,11 @@ class PalabraClaveCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView)
     group_required = ['Administrador SGD']
 
     def form_valid(self, form):
-        messages.success(self.request, "Se ha creado exitosamente la Palabra Clave")
+        messages.success(self.request, _("Se ha creado exitosamente la Palabra Clave"))
         return super(PalabraClaveCreateView, self).form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Ha ocurrido un error al enviar el formulario")
+        messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
         return super(PalabraClaveCreateView, self).form_invalid(form)
 
     def render_to_response(self, context, **response_kwargs):
@@ -365,3 +382,52 @@ def lista_solicitudes(request):
     data = {'solicitudes': solicitudes, 'form': form}
 
     return render(request, 'gestion_documental/lista_solicitudes.html', data)
+
+
+@waffle_switch('gestion_documental')
+@permission_required('gestion_documental.add_registro')
+def custodia_documentos(request):
+    """
+    Vista para recibir custodias de documentos
+    """
+
+    if request.method == 'POST':
+
+        form = FormularioCustodiaDocumento(data=request.POST)
+        if form.is_valid():
+            custodia = form.save(commit=False)
+            custodia.usuario_recibe = request.user.empleado
+            custodia.save()
+            messages.success(request, _("Se ha creado la solicitud de custodia de documentos satisfactoriamente"))
+            return redirect(reverse('sgd:custodia_documentos'))
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+
+    else:
+        form = FormularioCustodiaDocumento()
+
+    data = {'form': form}
+
+    return render(request, 'gestion_documental/custodia_documentos.html', data)
+
+
+def lista_custodias_documentos(request):
+    """
+    Listado de las custodias de documentos
+    """
+
+    if request.method == 'POST':
+        if 'finalizar' in request.POST:
+            id_custodia = request.POST.get('id_custodia', None)
+            if id_custodia:
+                custodia_documento = get_object_or_404(SolicitudCustodiaDocumento, pk=id_custodia)
+                custodia_documento.estado = SolicitudCustodiaDocumento.REALIZADO
+                custodia_documento.save()
+            else:
+                messages.error(request, _("Ha ocurrido un error inesperado"))
+
+    custodias = SolicitudCustodiaDocumento.objects.all()[:30]
+
+    data = {'custodias': custodias}
+
+    return render(request, 'gestion_documental/lista_custodias.html', data)

@@ -479,6 +479,19 @@
                                         </ul>
                                     </li>
                                     {% endif %}
+                                    {% if perms.gestion_documental.add_registro %}
+                                    <li class="sub-menu">
+                                        <a href="#">{% trans "Solicitudes Custodia Documentos" %}</a>
+                                        <ul>
+                                            <li>
+                                                <a href="{% url 'sgd:custodia_documentos' %}">{% trans "Custodia de Documento" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:lista_custodias_documentos' %}">{% trans "Listar Custodias de Documentos" %}</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% endif %}
                                 </ul>
                             </li>                            
                         {% endif %}

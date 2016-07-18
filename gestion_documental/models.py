@@ -139,3 +139,29 @@ class SolicitudRegistro(models.Model):
 
     def __str__(self):
         return "Solicitud No. {}".format(self.id)
+
+
+class SolicitudCustodiaDocumento(models.Model):
+    """
+    Modelo para las solicitudes de custodia de documentos
+    """
+    PENDIENTE = 'PE'
+    REALIZADO = 'RE'
+
+    OPCIONES_ESTADO = (
+        (PENDIENTE, 'PENDIENTE'),
+        (REALIZADO, 'REALIZADO'),
+    )
+
+    fecha_solicitud = models.DateField(auto_now_add=True, verbose_name=_('Fecha Solicitud'))
+    solicitante = models.ForeignKey(
+        'organizacional.Empleado', verbose_name=_('Solicitante'), related_name='solicitudes_custodia'
+    )
+    area = models.ForeignKey('organizacional.Area', verbose_name=_('Área'))
+    tipo_documento = models.ForeignKey(TipoDocumento, verbose_name=_('Tipo de Documento'))
+    descripcion = models.TextField(verbose_name=_('Descripción'))
+    estado = models.CharField(max_length=2, choices=OPCIONES_ESTADO, verbose_name=_('Estado'), default=PENDIENTE)
+    usuario_recibe = models.ForeignKey(
+        'organizacional.Empleado', verbose_name=_('Usuario Recibe Documento'),
+        related_name='solicitudes_custodia_recibidas'
+    )

@@ -15,15 +15,13 @@
                 iconUp: 'zmdi-expand-less'
                 },
             caseSensitive: false,
-            {% if solicitudes %}
+            {% if custodias %}
             formatters: {
                 "commands": function(column, row) {
                     var clase;
                     if (row.color == 'red') {
                         clase = 'proceso';
-                    } else if (row.color == 'yellow') {
-                        clase = 'devolver';
-                    } else {
+                    } else  {
                         clase = '';
                     }
 
@@ -37,14 +35,8 @@
             $('.proceso').click(function(event) {
                 var $id = $(this).attr('data-row-id');
                 $('#toggleModal').click();
-                $('input[name="solicitud"]').val($id);
+                $('input[name="id_custodia"]').val($id);
             })
-
-            $('.devolver').click(function(event) {
-                var $id = $(this).attr('data-row-id');
-                $('#toggleModal2').click();
-                $('input[name="solicitud"]').val($id);
-            });
         });
 
     })
@@ -77,31 +69,29 @@
                     <th data-column-id="nombre" data-identifier="true">Fecha Solicitud</th>
                     <th data-column-id="cedula" data-identifier="true">Nombre Solicitante</th>
                     <th data-column-id="area" data-identifier="true">Área</th>
+                    <th data-column-id="ubicacion" data-identifier="true">Tipo Documento</th>
                     <th data-column-id="correo" data-identifier="true">Descripción</th>
-                    <th data-column-id="ubicacion" data-identifier="true">Ubicación</th>
-                    <th data-column-id="comentario" data-identifier="true">Comentarios</th>
                     <th data-column-id="estado" data-identifier="true">Estado</th>
                     <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                 </tr>
             </thead>
             <tbody>
-                {% for solicitud in solicitudes %}
+                {% for custodia in custodias %}
                     <tr>
-                        <td>{{ solicitud.id }}</td>
-                        <td>{% if solicitud.estado == 'PE' %}red{% elif solicitud.estado == 'ED' %}yellow{% else %}green{% endif %}</td>
-                        <td>{{ solicitud.fecha_solicitud }}</td>
-                        <td>{{ solicitud.usuario_solicita }}</td>
-                        <td>{{ solicitud.registro.area.nombre|upper }}</td>
-                        <td>{{ solicitud.registro.descripcion }}</td>
-                        <td>{{ solicitud.registro }}</td>
-                        <td>{% if solicitud.comentario %}{{ solicitud.comentario }}{% else %}SIN COMENTARIOS{% endif %}</td>
-                        <td>{{ solicitud.get_estado_display }}</td>
+                        <td>{{ custodia.id }}</td>
+                        <td>{% if custodia.estado == 'PE' %}red{% else  %}green{% endif %}</td>
+                        <td>{{ custodia.fecha_solicitud }}</td>
+                        <td>{{ custodia.solicitante }}</td>
+                        <td>{{ custodia.area.nombre|upper }}</td>
+                        <td>{{ custodia.tipo_documento.nombre|upper }}</td>
+                        <td>{% if custodia.descripcion %}{{ custodia.descripcion }}{% else %}SIN COMENTARIOS{% endif %}</td>
+                        <td>{{ custodia.get_estado_display }}</td>
                     </tr>
                 {% empty %}
                     <tr>
                         <td></td>
                         <td></td>
-                        <td colspan="2" class="centrarTexto">No existen solicitudes aún.</td>
+                        <td colspan="2" class="centrarTexto">No existen solicitudes de custodia aún.</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -120,22 +110,9 @@
             <form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <p>¿Seguro que quiere Cambiar el estado de esta solicitud a 'En Proceso'?.</p>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="input-group fg-float {{form.comentario.css_classes}}">
-                                <div class="fg-line requerido">
-                                    <label for="id_nombre" class="control-label requerido">Comentario:</label>
-                                    {{ form.comentario }}
-                                </div>
-                                {% for error in form.comentario.errors %}
-                                    <small class="help-block">{{error}}</small>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="solicitud">
-                    <input type="hidden" name="cambia_estado_proceso">
+                    <p>¿Seguro que quiere Cambiar el estado de esta solicitud a 'Realizado'?.</p>
+                    <input type="hidden" name="finalizar">
+                    <input type="hidden" name="id_custodia">
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="solicitar_registro" class="btn btn-link">Aceptar</button>
@@ -147,26 +124,4 @@
 </div>
 <a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
 
-<div class="modal fade" id="modalNarrower2" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">¿Seguro Cambiar Estado?</h4>
-            </div>
-            <form action="" method="POST" id="form-solicitud-terminada" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <p>¿Seguro que quiere Cambiar el estado de esta solicitud a 'Realizada'?.</p>
-                    <input type="hidden" name="solicitud">
-                    <input type="hidden" name="cambia_estado_entregado">
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" name="solicitar_registro" class="btn btn-link">Aceptar</button>
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
 {% endblock %}
