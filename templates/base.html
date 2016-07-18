@@ -448,6 +448,9 @@
                                     <li>
                                         <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
                                     </li>
+                                    <li>
+                                        <a href="{% url 'sgd:lista_solicitudes' %}">{% trans "Listado Solicitudes de Registro" %}</a>
+                                    </li>
                                     {% endif %}
                                     {% if perms.organizacional.buscar_registros %}
                                     <li>
