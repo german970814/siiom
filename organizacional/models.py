@@ -58,7 +58,7 @@ class Empleado(models.Model):
         )
 
     def __str__(self):
-        return '{}'.format(self.usuario)
+        return '{0} {1}'.format(self.primer_nombre.upper(), self.primer_apellido.upper())
 
     def get_solicitudes(self):
         """

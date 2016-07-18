@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView
 from django.core.urlresolvers import reverse_lazy
+from django.utils import timezone
 # from django.forms.models import modelformset_factory
 
 # Third Apps
@@ -20,7 +21,7 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin
 from .models import Registro, Documento, PalabraClave, TipoDocumento, SolicitudRegistro
 from .forms import (
     FormularioRegistroDocumento, FormularioDocumentos,
-    FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm
+    FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario
 )
 
 # Apps
@@ -136,6 +137,7 @@ def busqueda_registros(request):
             solicitud.usuario_solicita = request.user.empleado
             solicitud.estado = SolicitudRegistro.PENDIENTE
             solicitud.save()
+
             return redirect('sgd:busqueda_registros')
 
         else:
@@ -326,3 +328,40 @@ class ListaPalabrasClavesView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = PalabraClave
     template_name = 'gestion_documental/listar_palabras_claves.html'
     group_required = ['Administrador SGD']
+
+
+@waffle_switch('gestion_documental')
+@permission_required('gestion_documental.add_registro')
+def lista_solicitudes(request):
+    """
+    Vista que le permite a un usuario digitador ver las solicitudes de
+    registros/documentos fisicos
+    """
+
+    solicitudes = SolicitudRegistro.objects.ultimos_dos_meses()
+    form = FormularioComentario()
+
+    if request.method == 'POST':
+        if 'cambia_estado_proceso' in request.POST:
+            form = FormularioComentario(data=request.POST)
+            id_solicitud = request.POST['solicitud']
+            solicitud = get_object_or_404(SolicitudRegistro, pk=id_solicitud)
+            solicitud.estado = SolicitudRegistro.ENTREGADO_DIGITADOR
+            solicitud.usuario_autoriza = request.user.empleado
+            if 'comentario' in request.POST:
+                if form.is_valid():
+                    solicitud.comentario = form.cleaned_data['comentario']
+            solicitud.save()
+            return redirect('sgd:lista_solicitudes')
+        if 'cambia_estado_entregado' in request.POST:
+            id_solicitud = request.POST['solicitud']
+            solicitud = get_object_or_404(SolicitudRegistro, pk=id_solicitud)
+            solicitud.estado = SolicitudRegistro.DEVUELTO_CONSULTA
+            solicitud.fecha_devolucion = timezone.datetime.now().date()
+            solicitud.usuario_autoriza = request.user.empleado
+            solicitud.save()
+            return redirect('sgd:lista_solicitudes')
+
+    data = {'solicitudes': solicitudes, 'form': form}
+
+    return render(request, 'gestion_documental/lista_solicitudes.html', data)

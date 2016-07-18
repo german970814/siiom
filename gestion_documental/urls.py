@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^editar_palabra_clave/(?P<pk>\d+)$', views.PalabraClaveUpdateView.as_view(), name="editar_palabra_clave"),
     url(r'^listar_tipo_documentos/$', views.ListaTipoDocumentosView.as_view(), name="listar_tipo_documentos"),
     url(r'^listar_palabras_claves/$', views.ListaPalabrasClavesView.as_view(), name="listar_palabras_claves"),
+    url(r'^listado_solicitudes/$', views.lista_solicitudes, name="lista_solicitudes"),
 ]

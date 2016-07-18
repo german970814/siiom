@@ -154,3 +154,16 @@ class PalabraClaveForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PalabraClaveForm, self).__init__(*args, **kwargs)
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+
+
+class FormularioComentario(forms.Form):
+    """
+    Formulario de creacion de comentarios
+    """
+    error_css_class = 'has-error'
+
+    comentario = forms.CharField(label=_('Comentario'), required=False, widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioComentario, self).__init__(*args, **kwargs)
+        self.fields['comentario'].widget.attrs.update({'class': 'form-control', 'rows': '4', 'cols': '50'})

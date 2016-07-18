@@ -1,5 +1,9 @@
+# Django Packages
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+# Locale Apps
+from .managers import SolicitudRegistroManager
 
 
 class TipoDocumento(models.Model):
@@ -126,6 +130,8 @@ class SolicitudRegistro(models.Model):
         'organizacional.Empleado', related_name='autorizaciones', verbose_name=_('Autoriza'),
         blank=True, null=True
     )
+
+    objects = SolicitudRegistroManager()
 
     class Meta:
         verbose_name = _('Solicitud de Registro')
