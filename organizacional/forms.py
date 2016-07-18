@@ -76,21 +76,51 @@ class EmpleadoForm(forms.ModelForm):
         self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
 
     def clean(self, *args, **kwargs):
+        inher = kwargs.pop('inher', False)
         cleaned_data = super(EmpleadoForm, self).clean(*args, **kwargs)
         usuario_existente = None
-        if 'correo' in cleaned_data:
-            try:
-                usuario_existente = User.objects.get(email=cleaned_data['correo'])
+        if not inher:
+            if 'correo' in cleaned_data:
                 try:
-                    if usuario_existente.empleado:
-                        self.add_error('correo', _('Ya existe un empleado con este correo'))
-                except Empleado.DoesNotExist:
-                    pass
+                    usuario_existente = User.objects.get(email=cleaned_data['correo'])
+                    try:
+                        if usuario_existente.empleado:
+                            self.add_error('correo', _('Ya existe un empleado con este correo'))
+                    except Empleado.DoesNotExist:
+                        pass
 
-            except User.DoesNotExist:
-                pass
-        if usuario_existente is None:
+                except User.DoesNotExist:
+                    pass
+            if usuario_existente is None:
+                if 'contrasena' in cleaned_data and 'contrasena_confirmacion' in cleaned_data:
+                    if cleaned_data['contrasena'] != cleaned_data['contrasena_confirmacion']:
+                        self.add_error('contrasena', _('Las contraseñas no coinciden'))
+                        self.add_error('contrasena_confirmacion', _('Las contraseñas no coinciden'))
+        else:
             if 'contrasena' in cleaned_data and 'contrasena_confirmacion' in cleaned_data:
                 if cleaned_data['contrasena'] != cleaned_data['contrasena_confirmacion']:
                     self.add_error('contrasena', _('Las contraseñas no coinciden'))
                     self.add_error('contrasena_confirmacion', _('Las contraseñas no coinciden'))
+        return cleaned_data
+
+
+class FormularioEditarEmpleado(EmpleadoForm):
+    """
+    Formulario de Edicion de empleados
+    """
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarEmpleado, self).__init__(*args, **kwargs)
+        self.fields['contrasena'].required = False
+        self.fields['contrasena_confirmacion'].required = False
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(FormularioEditarEmpleado, self).clean(inher=True, *args, **kwargs)
+
+        contrasena = cleaned_data.get('contrasena', None)
+        contrasena_confirmacion = cleaned_data.get('contrasena_confirmacion', None)
+
+        if contrasena != '' and contrasena_confirmacion == '':
+            self.add_error('contrasena_confirmacion', _('Este campo es obligatorio'))
+
+        if contrasena_confirmacion != '' and contrasena == '':
+            self.add_error('contrasena', _('Este campo es obligatorio'))

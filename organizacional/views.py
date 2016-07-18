@@ -1,14 +1,15 @@
 # Django Package
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
+from django.db.models.functions import Lower
 
 # Third Apps
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
@@ -16,7 +17,7 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin
 # Locale Apps
 # from gestion_documental.models import Documento
 from .models import Area, Departamento, Empleado
-from .forms import AreaForm, DepartamentoForm, EmpleadoForm
+from .forms import AreaForm, DepartamentoForm, EmpleadoForm, FormularioEditarEmpleado
 
 # Python Package
 import json
@@ -167,10 +168,13 @@ class ListaDepartamentosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
 
 @login_required
+@permission_required('organizacional.es_administrador_sgd')
 def crear_empleado(request):
     """
     Vista de creacion de empleados y sus usuarios en el sistema de gestion documental
     """
+
+    VERBO = _('Crear')
 
     if request.method == 'POST':
         form = EmpleadoForm(data=request.POST)
@@ -210,7 +214,48 @@ def crear_empleado(request):
     else:
         form = EmpleadoForm()
 
-    data = {'form': form}
+    data = {'form': form, 'VERBO': VERBO}
+
+    return render(request, 'organizacional/crear_empleado.html', data)
+
+
+@login_required
+@permission_required('organizacional.es_administrador_sgd')
+def editar_empleado(request, id_empleado):
+    """
+    Edita los empleados
+    """
+    VERBO = 'Editar'
+    _accept = ['administrador sgd', 'digitador']
+    empleado = get_object_or_404(Empleado, pk=id_empleado)
+    try:
+        grupo = empleado.usuario.groups.annotate(nombre=Lower('name')).filter(nombre__in=_accept)[0]
+    except IndexError:
+        grupo = None
+
+    if request.method == 'POST':
+        form = FormularioEditarEmpleado(data=request.POST, instance=empleado)
+        if form.is_valid():
+            form.save()
+            if 'contrasena' in form.cleaned_data and form.cleaned_data['contrasena'] != '':
+                empleado.usuario.set_password(form.cleaned_data['contrasena'])
+            if form.cleaned_data['tipo_usuario'] != grupo:
+                empleado.usuario.groups.remove(grupo)
+                empleado.usuario.groups.add(form.cleaned_data['tipo_usuario'])
+            empleado.usuario.save()
+            messages.success(request, _('Se ha editado exitosamente'))
+            return redirect(reverse('organizacional:editar_empleado', args=(id_empleado, )))
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+    else:
+        initial = {
+            'correo': empleado.usuario.email,
+            'tipo_usuario': grupo,
+            'areas': empleado.areas.all()
+        }
+        form = FormularioEditarEmpleado(instance=empleado, initial=initial)
+
+    data = {'VERBO': VERBO, 'form': form}
 
     return render(request, 'organizacional/crear_empleado.html', data)
 
