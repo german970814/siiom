@@ -21,8 +21,7 @@
                     caseSensitive: false,
                     formatters: {
                         "commands": function(column, row) {
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_red/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " +
-                                "<button type=\"button\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/listar_grupos/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button>";
+                            return "<button type=\"button\" title=\"Editar Red\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_red/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " + "<button type=\"button\" title=\"Listar Grupos\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/listar_grupos/" + row.id + "'\"><span class=\"zmdi zmdi-eye\"></span></button>" + "<button type=\"button\" title=\"Listar Líderes\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/miembro/ver_lideres_red/" + row.id + "'\"><span class=\"zmdi zmdi-accounts\"></span></button>";
                         }
                     }
                 });

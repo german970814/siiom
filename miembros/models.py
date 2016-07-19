@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 import datetime
 from django.db.models import Q
 from django.core.validators import RegexValidator
+from .managers import MiembroManager
 
 
 class Zona(models.Model):
@@ -162,6 +163,8 @@ class Miembro(models.Model):
         verbose_name='observación de segunda llamada'
     )
     fechaRegistro = models.DateField(auto_now_add=True)
+
+    objects = MiembroManager()
 
     def __str__(self):
         return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'
