@@ -1,5 +1,8 @@
 {% load staticfiles %}
+{% load waffle_tags %}
 {% load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -155,7 +158,7 @@
                     {% if request.user.is_authenticated %}
                         {{ request.user.email }}
                     {% else %}
-                        {{nombreIglesia}}
+                        {{ nombreIglesia }}
                     {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
@@ -436,6 +439,66 @@
                         </ul>
                     </li>
                     {% endif %}
+                    {% switch "gestion_documental" %}
+                        {% if perms.gestion_documental or perms.organizacional %}
+                            <li class="sub-menu">
+                                <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
+                                <ul>
+                                    {% if perms.gestion_documental.add_registro %}
+                                    <li>
+                                        <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'sgd:lista_solicitudes' %}">{% trans "Listado Solicitudes de Registro" %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.organizacional.buscar_registros %}
+                                    <li>
+                                        <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.organizacional.es_administrador_sgd %}
+                                    <li class="sub-menu">
+                                        <a href="#">{% trans "Administracion" %}</a>
+                                        <ul>
+                                            <li>
+                                                <a href="{% url 'organizacional:listar_departamentos' %}">{% trans "Listar Departamentos" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'organizacional:listar_areas' %}">{% trans "Listar Áreas" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:listar_palabras_claves' %}">{% trans "Listar Palabras Claves" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.gestion_documental.add_registro %}
+                                    <li class="sub-menu">
+                                        <a href="#">{% trans "Solicitudes Custodia Documentos" %}</a>
+                                        <ul>
+                                            <li>
+                                                <a href="{% url 'sgd:custodia_documentos' %}">{% trans "Custodia de Documento" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:lista_custodias_documentos' %}">{% trans "Listado Custodia de Documentos" %}</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </li>                            
+                        {% endif %}
+                    {% endswitch %}
                 {% endif %} 
             </ul>
         </aside>

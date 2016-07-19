@@ -27,6 +27,7 @@ from common.tests import (
 # Python Package
 import calendar
 import datetime
+import json
 
 
 @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
@@ -539,7 +540,7 @@ def estadisticoReunionesGar(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         #  listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.all()  # filter(estado='A')
+        listaGrupo_i = Grupo.objects.select_related('lider1', 'lider2').all()  # filter(estado='A')
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
 
@@ -553,8 +554,11 @@ def estadisticoReunionesGar(request):
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            return HttpResponse(data, content_type="application/javascript")
+
+            desc = listaGruposDescendientes(lider_i)
+            descendientes = [{'pk': descendiente.pk, 'nombre': str(descendiente)} for descendiente in desc]
+
+            return HttpResponse(json.dumps(descendientes), content_type="application/json")
         else:
             form = FormularioRangoFechas(request.POST or None)
             if form.is_valid():

@@ -45,24 +45,15 @@ class CrearEncuentroForm(forms.ModelForm):
 
         if self.is_bound:
             try:
-                # grupos = self.data.getlist('grupos')
-                # queryset_grupo = Grupo.objects.filter(id__in=grupos)
                 tesorero = self.data.get('tesorero', None)
                 coordinador = self.data.get('coordinador', None)
                 queryset_tesorero = Miembro.objects.filter(id=tesorero)
                 queryset_coordinador = Miembro.objects.filter(id=coordinador)
             except:
-                # queryset_grupo = Grupo.objects.none()
                 queryset_tesorero = Miembro.objects.none()
                 queryset_coordinador = Miembro.objects.none()
-            # self.fields['grupos'].queryset = queryset_grupo
             self.fields['tesorero'].queryset = queryset_tesorero
             self.fields['coordinador'].queryset = queryset_coordinador
-
-    # def clean_fecha_inicial(self, value, *args, **kwargs):
-    #     import datetime
-    #     fecha = datetime.datetime.strptime(value, '%d/%m/%Y')
-    #     return fecha
 
 
 class NuevoEncontristaForm(forms.ModelForm):
@@ -93,3 +84,21 @@ class NuevoEncontristaForm(forms.ModelForm):
             except:
                 queryset = Grupo.objects.none()
             self.fields['grupo'].queryset = queryset
+
+
+class EditarEncuentroForm(CrearEncuentroForm):
+    def __init__(self, *args, **kwargs):
+        super(EditarEncuentroForm, self).__init__(*args, **kwargs)
+        self.fields['coordinador'].widget.attrs.update({'readonly': ''})
+        self.fields['tesorero'].widget.attrs.update({'readonly': ''})
+
+        if not self.is_bound:
+            if self.instance:
+                if any(self.instance.grupos.all()):
+                    self.fields['red'].initial = self.instance.grupos.first().red
+
+                self.fields['coordinador'].queryset = Miembro.objects.filter(id=self.instance.coordinador.id)
+                self.fields['coordinador'].initial = self.instance.coordinador
+
+                self.fields['tesorero'].queryset = Miembro.objects.filter(id=self.instance.tesorero.id)
+                self.fields['tesorero'].initial = self.instance.tesorero

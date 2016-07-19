@@ -14,6 +14,44 @@
         $("#id_horaGAR").datetimepicker({
             format: 'hh:mm:ss',
         });
+
+
+        // Validaciones para elecciones de grupos
+
+        // variable donde se almacena el ultimo campo que se ocultó
+        var $ultimo;
+
+        $('#id_lider1').change(function(event) {
+            if ($ultimo) {
+                $ultimo.fadeIn(100);
+                setTimeout(function() {
+                    $('#id_lider2').selectpicker('refresh');
+                    $('#id_lider1').selectpicker('refresh');
+                }, 500);
+            }
+            $ultimo = $('#id_lider2 option[value="' + $(this).val() + '"]')
+            $ultimo.fadeOut(100);
+            setTimeout(function() {
+                $('#id_lider2').selectpicker('refresh');
+            }, 500);
+        });
+
+        $('#id_lider2').change(function(event) {
+            if ($ultimo) {
+                $ultimo.fadeIn(100);
+                setTimeout(function() {
+                    $('#id_lider2').selectpicker('refresh');
+                    $('#id_lider1').selectpicker('refresh');
+                }, 500);
+            }
+            $ultimo = $('#id_lider1 option[value="' + $(this).val() + '"]')
+            $ultimo.fadeOut(100);
+            setTimeout(function() {
+                $('#id_lider1').selectpicker('refresh');
+            }, 500);
+        });
+
+        // Fin de Validaciones
 	});
 </script>
 {% endblock %}
