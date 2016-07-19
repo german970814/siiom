@@ -44,6 +44,17 @@ class FormularioRegistroDocumento(forms.ModelForm):
                 self.fields['area'].queryset = Area.objects.none()
 
 
+class FormularioEditarRegistroDocumento(FormularioRegistroDocumento):
+    """
+    Formulario de edicion de registros de documentos
+    """
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarRegistroDocumento, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['departamento'].initial = self.instance.area.departamento
+            self.fields['area'].queryset = Area.objects.filter(departamento=self.instance.area.departamento)
+
+
 class FormularioDocumentos(forms.ModelForm):
     """
     Formulario para el modelo de documentos

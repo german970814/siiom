@@ -451,6 +451,9 @@
                                     <li>
                                         <a href="{% url 'sgd:lista_solicitudes' %}">{% trans "Listado Solicitudes de Registro" %}</a>
                                     </li>
+                                    <li>
+                                        <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
+                                    </li>
                                     {% endif %}
                                     {% if perms.organizacional.buscar_registros %}
                                     <li>
@@ -487,7 +490,7 @@
                                                 <a href="{% url 'sgd:custodia_documentos' %}">{% trans "Custodia de Documento" %}</a>
                                             </li>
                                             <li>
-                                                <a href="{% url 'sgd:lista_custodias_documentos' %}">{% trans "Listar Custodias de Documentos" %}</a>
+                                                <a href="{% url 'sgd:lista_custodias_documentos' %}">{% trans "Listado Custodia de Documentos" %}</a>
                                             </li>
                                         </ul>
                                     </li>

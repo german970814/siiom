@@ -55,6 +55,10 @@ class Registro(models.Model):
     )
     estante = models.IntegerField(verbose_name=_('estante'))
     caja = models.IntegerField(verbose_name=_('caja'))
+    modificado_por = models.ForeignKey(
+        'organizacional.Empleado', verbose_name=_('Modificado Por'), blank=True, null=True
+    )
+    ultima_modificacion = models.DateField(verbose_name=_('Fecha Última Modificación'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('registro')

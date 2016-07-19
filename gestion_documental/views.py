@@ -24,7 +24,8 @@ from .models import (
 )
 from .forms import (
     FormularioRegistroDocumento, FormularioDocumentos, FormularioCustodiaDocumento,
-    FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario
+    FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario,
+    FormularioEditarRegistroDocumento
 )
 
 # Apps
@@ -92,6 +93,32 @@ def ingresar_registro(request):
     data = {'form': form, 'form_documentos': form_documentos}
 
     return render(request, 'gestion_documental/ingresar_registro.html', data)
+
+
+@waffle_switch('gestion_documental')
+@permission_required('organizacional.es_administrador_sgd')
+def editar_registro(request, id_registro):
+    """
+    Vista de edición de registros
+    """
+    registro = get_object_or_404(Registro, pk=id_registro)
+
+    DocumentosFormSet = inlineformset_factory(
+        Registro, Documento, fk_name='registro', form=FormularioDocumentos,
+        min_num=1, extra=0, validate_min=True, can_delete=False
+    )
+
+    if request.method == 'POST':
+        form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
+        form_documentos = DocumentosFormSet(request.POST, request.FILES, instance=Registro)
+        if form.is_valid():
+            pass
+    else:
+        form = FormularioEditarRegistroDocumento(instance=registro)
+
+    data = {'form': form}
+
+    return render(request, 'gestion_documental/editar_registro.html', data)
 
 
 @login_required
@@ -411,6 +438,8 @@ def custodia_documentos(request):
     return render(request, 'gestion_documental/custodia_documentos.html', data)
 
 
+@waffle_switch('gestion_documental')
+@permission_required('gestion_documental.add_registro')
 def lista_custodias_documentos(request):
     """
     Listado de las custodias de documentos
@@ -431,3 +460,16 @@ def lista_custodias_documentos(request):
     data = {'custodias': custodias}
 
     return render(request, 'gestion_documental/lista_custodias.html', data)
+
+
+@waffle_switch('gestion_documental')
+@permission_required('gestion_documental.add_registro')
+def historial_registros(request):
+    """
+    Vista que muestra el historial de todos los registros con sus documentos
+    """
+    registros = Registro.objects.all().select_related(
+        'area__departamento'
+    ).prefetch_related('documentos').order_by('-fecha')
+    data = {'registros': registros}
+    return render(request, 'gestion_documental/historial_registros.html', data)
