@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+
+{% block css %}
+<style>
+    /*span.filter-option.pull-left*/
+    .bootstrap-select.btn-group .dropdown-toggle .filter-option {
+        display: inline-block;
+        overflow: hidden;
+        width: 100%;
+        text-align: left;
+        position: absolute !important;
+        left: 1px !important;
+    }
+
+</style>
+{% endblock %}
+
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>

@@ -112,7 +112,7 @@ $(document).ready(function(){
                             <tbody>
                                 {% for m in miembros_grupo %}
                                     <tr>
-                                        <td>{{ m.nombre|capfirst }} {{ m.primerApellido|capfirst }}</td>
+                                        <td>{{ m.nombre|upper }} {{ m.primerApellido|upper }}</td>
                                         {% for a in m.asis %}
                                             {% if a %}
                                                 <td><img src="{% static 'Imagenes/accept.png' %}" ></td>

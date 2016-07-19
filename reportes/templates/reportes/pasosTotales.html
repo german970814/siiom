@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+
+{% block css %}
+<style>
+    /*span.filter-option.pull-left*/
+    .bootstrap-select.btn-group .dropdown-toggle .filter-option {
+        display: inline-block;
+        overflow: hidden;
+        width: 100%;
+        text-align: left;
+        position: absolute !important;
+        left: 1px !important;
+    }
+
+</style>
+{% endblock %}
+
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -37,11 +53,10 @@
     });
 
     $(document).ready(function(){
-
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
                 $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
-                    agregarOpciones(data, 'idGrupo_f');
+                    agregarOpciones2(data, 'idGrupo_f');
                     $('#idGrupo_f').selectpicker('refresh');
                 }, "json");
             }
@@ -119,10 +134,10 @@
                             </span>
                             <div class="fg-line requerido">
                                 <label for="idGrupo_i" class="fg-label requerido">Grupo Inicial:</label>
-                                <select class="selectpicker" data-live-search="true" id="idGrupo_i" name="menuGrupo_i">
+                                <select class="selectpicker" data-selected-text-format="count" data-live-search="true" id="idGrupo_i" name="menuGrupo_i">
                                     <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
                                     {% for g_i in listaGrupo_i %}
-                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
+                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -130,17 +145,17 @@
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group form-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts-outline"></i>
                             </span>
                             <div class="fg-line requerido">
                                 <label for="idGrupo_f" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Para poder ver algo aqui debes escoger un grupo inicial." title="" data-original-title="Ayuda">Grupo Final:</label>
                                 <select class="selectpicker" data-live-search="true" id="idGrupo_f" name="menuGrupo_f">
-                                        <option value="-1" >------</option>
-                                        {% for g_f in listaGrupo_f %}
-                                            <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
-                                        {% endfor %}
+                                    <option value="-1" >------</option>
+                                    {% for g_f in listaGrupo_f %}
+                                        <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>
