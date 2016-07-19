@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, modelformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +25,7 @@ from .models import (
 from .forms import (
     FormularioRegistroDocumento, FormularioDocumentos, FormularioCustodiaDocumento,
     FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario,
-    FormularioEditarRegistroDocumento
+    FormularioEditarRegistroDocumento, FormularioEdicionDocumentos
 )
 
 # Apps
@@ -97,26 +97,52 @@ def ingresar_registro(request):
 
 @waffle_switch('gestion_documental')
 @permission_required('organizacional.es_administrador_sgd')
+@transaction.atomic
 def editar_registro(request, id_registro):
     """
     Vista de edición de registros
     """
     registro = get_object_or_404(Registro, pk=id_registro)
 
-    DocumentosFormSet = inlineformset_factory(
-        Registro, Documento, fk_name='registro', form=FormularioDocumentos,
+    DocumentosFormSet = modelformset_factory(
+        Documento, form=FormularioEdicionDocumentos,
         min_num=1, extra=0, validate_min=True, can_delete=False
     )
 
     if request.method == 'POST':
         form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
-        form_documentos = DocumentosFormSet(request.POST, request.FILES, instance=Registro)
-        if form.is_valid():
-            pass
+        form_documentos = DocumentosFormSet(request.POST, request.FILES)
+        print("*****************************************")
+        print(request.POST)
+        if form.is_valid() and form_documentos.is_valid():
+            _palabras_anteriores = [x.nombre for x in registro.palabras_claves.all()]
+            palabras = form.cleaned_data['palabras'].split(',')
+            # Se buscan las palabras recursivamente
+            for palabra in palabras:
+                if palabra not in _palabras_anteriores:
+                    # Se busca, si no existe la palabra se crea
+                    if palabra != '':
+                        palabra_clave, created = PalabraClave.objects.get_or_create(
+                            nombre__iexact=palabra, defaults={'nombre': palabra}
+                        )
+
+                        if palabra_clave not in registro.palabras_claves.all():
+                            registro.palabras_claves.add(palabra_clave)
+            if _palabras_anteriores:
+                eliminar = set(_palabras_anteriores) - set(palabras)
+                if eliminar:
+                    for palabra in eliminar:
+                        registro.palabras_claves.remove(palabra)
+            form.save()
+            form_documentos.save()
+            messages.success(request, _("Se ha editado correctamente el registro"))
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
         form = FormularioEditarRegistroDocumento(instance=registro)
+        form_documentos = DocumentosFormSet(queryset=registro.documentos.all())
 
-    data = {'form': form}
+    data = {'form': form, 'registro': registro, 'form_documentos': form_documentos}
 
     return render(request, 'gestion_documental/editar_registro.html', data)
 

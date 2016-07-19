@@ -80,7 +80,7 @@
 	                    </div>
 	                    <br class="space">
 	                    <div class="col-md-4">
-	                        <div class="input-group {{form.area.css_classes}}">
+	                        <div class="input-group {{ form.area.css_classes }}">
 	                            <span class="input-group-addon">
 	                                <i class="zmdi zmdi-share"></i>
 	                            </span>
@@ -189,7 +189,6 @@
 			            </li>
 			        </ul>
 				</div>
-
 				<div class="card">
 					<div class="card-header">
 						
@@ -204,12 +203,7 @@
 		                            <label for="{{ form_d.archivo.id_for_label }}" class="fg-label requerido control-label">{{ form_d.archivo.label|title }}:</label>
 		                            <br>
 		                            <div class="fileinput fileinput-new" data-provides="fileinput">
-						                <span class="btn btn-primary btn-file m-r-10">
-						                    <span class="fileinput-new">Seleccionar Archivo</span>
-						                    <span class="fileinput-exists">Cambiar</span>
-						                    {{ form_d.archivo }}
-						                </span>
-						                <span class="fileinput-filename"></span>
+						                {{ form_d.archivo }}
 						                <a href="#" class="close fileinput-exists" data-dismiss="fileinput">&times;</a>
 						            </div>
 		                            {% for error in form_d.archivo.errors %}
@@ -306,6 +300,10 @@
 			  	}
 			});
 
+			{% for palabra in registro.palabras_claves.all %}
+			$('#id_palabras').tagsinput('add', '{{ palabra.nombre }}');
+			{% endfor %}
+
 			$('.tt-input').addClass('form-control')
 
         	$('#id_palabras').keypress(function(e) {
@@ -373,7 +371,6 @@
         			}
         		})
         	});
-
 		});
 	</script>
 {% endblock js %}

@@ -55,7 +55,7 @@
 <div class="container">
 	<div class="card">
 		<div class="card-header">
-			Historial de Registros
+			<h1><legend><h3>Historial de Registros</h3></legend></h1>
 		</div>
 		<div class="card-body card-padding">
 			<div class="row table-responsive">
@@ -101,27 +101,6 @@
 	</div>
 </div>
 
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Confirmación de Solicitud</h4>
-            </div>
-	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
-	        	{% csrf_token %}
-	            <div class="modal-body">
-		                <p>¿Seguro que quiere Solicitar este Registro?.</p>
-		                <input type="hidden" name="solicitud">
-	            </div>
-	            <div class="modal-footer">
-	                <button type="submit" name="solicitar_registro" class="btn btn-link">Aceptar</button>
-	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
-	            </div>
-            </form>
-        </div>
-    </div>
-</div>
-<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
 
 {% endblock contenido %}
 

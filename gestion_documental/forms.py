@@ -89,6 +89,22 @@ class FormularioDocumentos(forms.ModelForm):
                 self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
 
+class FormularioEdicionDocumentos(FormularioDocumentos):
+    """
+    Formulario para la edicion de documentos en el sistema
+    """
+    def __init__(self, *args, **kwargs):
+        registro = kwargs.pop('registro', None)
+        super(FormularioEdicionDocumentos, self).__init__(*args, **kwargs)
+        if registro:
+            self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=registro.area)
+        if self.initial:
+            print(self.initial)
+            documento = Documento.objects.get(id=self.initial['id'])
+            self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=documento.registro.area)
+        # self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()
+
+
 class FormularioBusquedaRegistro(forms.Form):
     """
     Formulario para la busqueda de registros que se han ingresado en la app
