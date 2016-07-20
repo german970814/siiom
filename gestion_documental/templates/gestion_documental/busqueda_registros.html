@@ -300,10 +300,11 @@
                     },
                     "solicitud" : function(column, row) {
                     	var solicitado = eval(row.solicitado);
+                        var editar = "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"Editar\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "sgd:editar_registro" 0 %}'.replace(0, " + row.id + ")\"><span class=\"zmdi zmdi-edit\"></span></button>";
                     	if (solicitado) {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>"
+                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>" {% if perms.organizacional.es_administrador_sgd %} + editar{% endif %};
                     	} else {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
+                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>"{% if perms.organizacional.es_administrador_sgd %} + editar{% endif %};
                     	}
                     }
                 }

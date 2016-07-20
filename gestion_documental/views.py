@@ -102,40 +102,63 @@ def editar_registro(request, id_registro):
     """
     Vista de edición de registros
     """
+    # se obtiene el registro
     registro = get_object_or_404(Registro, pk=id_registro)
-
+    # se crea el formset de los documentos
     DocumentosFormSet = modelformset_factory(
         Documento, form=FormularioEdicionDocumentos,
-        min_num=1, extra=0, validate_min=True, can_delete=False
+        min_num=1, extra=0, validate_min=True, can_delete=True
     )
 
     if request.method == 'POST':
+        # se instancian los dos formularios
         form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
         form_documentos = DocumentosFormSet(request.POST, request.FILES)
-        print("*****************************************")
-        print(request.POST)
+        # si ammbos son validos
         if form.is_valid() and form_documentos.is_valid():
+            registro = form.save(commit=False)
+            # formset = form_documentos.save(commit=False)
+            # se sacan las palabras que tiene actualmente el registro
             _palabras_anteriores = [x.nombre for x in registro.palabras_claves.all()]
+            # se sacan las palabras que vienen del formulario
             palabras = form.cleaned_data['palabras'].split(',')
             # Se buscan las palabras recursivamente
             for palabra in palabras:
+                # si no esta en la de palabras anteriores hace lo siguiente
                 if palabra not in _palabras_anteriores:
                     # Se busca, si no existe la palabra se crea
                     if palabra != '':
                         palabra_clave, created = PalabraClave.objects.get_or_create(
                             nombre__iexact=palabra, defaults={'nombre': palabra}
                         )
-
                         if palabra_clave not in registro.palabras_claves.all():
                             registro.palabras_claves.add(palabra_clave)
+            # si hay palabras anteriores
             if _palabras_anteriores:
+                # se crea un set de palabras que sobran para luego eliminar las que no se usan
                 eliminar = set(_palabras_anteriores) - set(palabras)
                 if eliminar:
+                    # Funciona asi:
+                    # tienes una lista 'a' y una 'b':
+                    # a = [1,2,3]
+                    # b = [2,3,4]
+                    # c = set(a) - set(b)
+                    # entonces c = [1]
+                    # solo las palabras a eliminar
                     for palabra in eliminar:
-                        registro.palabras_claves.remove(palabra)
-            form.save()
-            form_documentos.save()
+                        palabra_clave = PalabraClave.objects.get(nombre__iexact=palabra)
+                        registro.palabras_claves.remove(palabra_clave)
+            registro.modificado_por = request.user.empleado
+            registro.ultima_modificacion = timezone.datetime.now().date()
+            registro.save()
+            for form_b in form_documentos:
+                if form_b.cleaned_data.get('DELETE', False):
+                    form_b.instance.delete()
+                    continue
+                form_b.instance.registro = registro
+                form_b.save()
             messages.success(request, _("Se ha editado correctamente el registro"))
+            return redirect(reverse('sgd:editar_registro', args=(registro.id, )))
         else:
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:

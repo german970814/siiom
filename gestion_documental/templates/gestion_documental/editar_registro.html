@@ -177,6 +177,7 @@
 			</div>
 
 			{% for form_d in form_documentos %}
+			{{ form_d.id }}
 			<div class="form-documentos">
 				<div class="block-header">
 					<h2>{% trans "Documentos" %}</h2>
@@ -229,10 +230,10 @@
 						</div>
 					</div>
 				</div>
-			</div>
 			{% if form_documentos.can_delete %}
 		        {{ form_d.DELETE }}
 		    {% endif %}
+			</div>
 			{% endfor %}
 			{{ form_documentos.management_form }}
 			<br>
@@ -266,14 +267,21 @@
 			$('.form-documentos').formset({
 	            addText: 'Agregar Beneficiario',
 	            deleteText: 'Quitar',
-	            prefix: 'documentos',
+	            // prefix: 'documentos',
 	            especial: true,
 	            added: function (row) {
 	            	var $tipo = row.find('.tipo_doc');
 	            	var $viejo_select = row.prev(".form-documentos").find(".tipo_doc");
 	            	$tipo.html($viejo_select.html());
 	            	// $tipo.selectpicker();
+	            },
+	            removed: function(row) {
+	            	console.log(row);
 	            }
+	        });
+
+	        $('.delete-row').click(function(event) {
+	        	console.log($(this).parent());
 	        });
 
 	        var citynames = new Bloodhound({

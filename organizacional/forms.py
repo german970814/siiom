@@ -45,9 +45,11 @@ class EmpleadoForm(forms.ModelForm):
     """
     error_css_class = 'has-error'
     correo = forms.EmailField(label=_('Correo Electronico'))
-    contrasena = forms.CharField(max_length=255, widget=forms.PasswordInput(), label=_('Contraseña'))
+    contrasena = forms.CharField(
+        max_length=255, widget=forms.PasswordInput(), label=_('Contraseña'), required=False
+    )
     contrasena_confirmacion = forms.CharField(
-        max_length=255, widget=forms.PasswordInput(), label=_('Confirmar Contraseña')
+        max_length=255, widget=forms.PasswordInput(), label=_('Confirmar Contraseña'), required=False
     )
     _accept = [
         'lider', 'administrador', 'maestro', 'pastor', 'agente',

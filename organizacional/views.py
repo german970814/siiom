@@ -23,6 +23,7 @@ from .forms import AreaForm, DepartamentoForm, EmpleadoForm, FormularioEditarEmp
 import json
 
 
+@login_required
 @csrf_exempt
 def areas_departamento_json(request):
     """
@@ -208,6 +209,7 @@ def crear_empleado(request):
             empleado.save()
             form.save_m2m()
             messages.success(request, _('Empleado creado exitosamente'))
+            return redirect(reverse('organizacional:crear_empleado'))
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
 

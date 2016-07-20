@@ -21,7 +21,7 @@ class FormularioRegistroDocumento(forms.ModelForm):
 
     class Meta:
         model = Registro
-        exclude = ('palabras_claves', )
+        exclude = ('palabras_claves', 'ultima_modificacion', 'modificado_por')
 
     def __init__(self, *args, **kwargs):
         super(FormularioRegistroDocumento, self).__init__(*args, **kwargs)
@@ -99,7 +99,7 @@ class FormularioEdicionDocumentos(FormularioDocumentos):
         if registro:
             self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=registro.area)
         if self.initial:
-            print(self.initial)
+            print(self.initial['archivo'])
             documento = Documento.objects.get(id=self.initial['id'])
             self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=documento.registro.area)
         # self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()
