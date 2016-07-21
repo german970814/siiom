@@ -99,7 +99,6 @@ class FormularioEdicionDocumentos(FormularioDocumentos):
         if registro:
             self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=registro.area)
         if self.initial:
-            print(self.initial['archivo'])
             documento = Documento.objects.get(id=self.initial['id'])
             self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=documento.registro.area)
         # self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()

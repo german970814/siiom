@@ -93,7 +93,8 @@ class Documento(models.Model):
         verbose_name_plural = _('documentos')
 
     def __str__(self):
-        return "{}".format(self.id)
+        name = self.archivo.name.split('/')
+        return "{}".format(name[len(name) - 1].split('.')[0])
 
     @property
     def is_image(self):

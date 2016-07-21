@@ -522,3 +522,21 @@ def historial_registros(request):
     ).prefetch_related('documentos').order_by('-fecha')
     data = {'registros': registros}
     return render(request, 'gestion_documental/historial_registros.html', data)
+
+
+@waffle_switch('gestion_documental')
+@permission_required('organizacional.es_administrador_sgd')
+def eliminar_registro(request, id_registro):
+    """
+    Vista para el administrador que elimina los registros
+    """
+    registro = get_object_or_404(Registro, pk=id_registro)
+    redirect = request.META.get('HTTP_REFERER', None)
+    data = {'registro': registro, 'redirect': redirect}
+
+    if request.method == 'POST':
+        if 'eliminar' in request.POST:
+            registro.delete()
+            return redirect(reverse('busqueda_registros'))
+
+    return render(request, 'gestion_documental/eliminar_registro.html', data)

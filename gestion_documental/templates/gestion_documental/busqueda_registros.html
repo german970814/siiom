@@ -204,6 +204,9 @@
                                     <th data-identifier="true" data-column-id="modulo">{% trans "Fecha" %}</th>
                                     <th data-column-id="commands" data-formatter="commands" data-sortable="false">Ver</th>
                                     <th data-column-id="solicitud" data-formatter="solicitud" data-sortable="false">Solicitud</th>
+                                    {% if perms.organizacional.es_administrador_sgd %}
+                                    <th data-column-id="com" data-formatter="com" data-sortable="false">Comandos</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
@@ -300,13 +303,20 @@
                     },
                     "solicitud" : function(column, row) {
                     	var solicitado = eval(row.solicitado);
+                        if (solicitado) {
+                            return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>";
+                        } else {
+                            return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
+                        }
+                    },
+                    {% if perms.organizacional.es_administrador_sgd %}
+                    "com": function(column, row) {
                         var editar = "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"Editar\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "sgd:editar_registro" 0 %}'.replace(0, " + row.id + ")\"><span class=\"zmdi zmdi-edit\"></span></button>";
-                    	if (solicitado) {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>" {% if perms.organizacional.es_administrador_sgd %} + editar{% endif %};
-                    	} else {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>"{% if perms.organizacional.es_administrador_sgd %} + editar{% endif %};
-                    	}
+                        var eliminar = "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"Eliminar\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "sgd:eliminar_registro" 0 %}'.replace(0, " + row.id + ")\"><span class=\"zmdi zmdi-delete\"></span></button>";
+
+                        return editar + eliminar;
                     }
+                    {% endif %}
                 }
             });
 
