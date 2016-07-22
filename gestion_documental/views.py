@@ -280,7 +280,7 @@ def busqueda_registros(request):
 
                 # se añaden los registros a los datos que seran enviados a la vista,
                 # que estan previamente cargados
-                data['registros'] = registros
+                data['registros'] = registros.prefetch_related('documentos')
 
                 messages.success(request, _("Se han encontrado %d resultados") % registros.count())
             else:
@@ -526,17 +526,18 @@ def historial_registros(request):
 
 @waffle_switch('gestion_documental')
 @permission_required('organizacional.es_administrador_sgd')
+@transaction.atomic
 def eliminar_registro(request, id_registro):
     """
     Vista para el administrador que elimina los registros
     """
     registro = get_object_or_404(Registro, pk=id_registro)
-    redirect = request.META.get('HTTP_REFERER', None)
-    data = {'registro': registro, 'redirect': redirect}
+    redirect_to = request.META.get('HTTP_REFERER', None)
+    data = {'registro': registro, 'redirect': redirect_to}
 
     if request.method == 'POST':
         if 'eliminar' in request.POST:
             registro.delete()
-            return redirect(reverse('busqueda_registros'))
+            return redirect(reverse('sgd:busqueda_registros'))
 
     return render(request, 'gestion_documental/eliminar_registro.html', data)

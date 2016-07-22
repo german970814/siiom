@@ -4,6 +4,10 @@ from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
 from .managers import SolicitudRegistroManager
+from .utils import pdf_to_png, get_media_url
+
+# Python Packages
+# import os
 
 
 class TipoDocumento(models.Model):
@@ -98,7 +102,7 @@ class Documento(models.Model):
 
     @property
     def is_image(self):
-        if self.get_absolute_url().endswith('.pdf'):
+        if self.archivo.path.endswith('.pdf'):
             return False
         return True
 
@@ -106,7 +110,16 @@ class Documento(models.Model):
         """
         Devuelve la ruta url de el documento
         """
-        return self.archivo.url
+        if self.is_image:
+            return self.archivo.url
+        # ruta = pdf_to_png(self.archivo, ruta=True)
+        ruta, archivos = pdf_to_png(self.archivo)
+        return [get_media_url(ruta + x) for x in archivos]
+
+    def save(self, *args, **kwargs):
+        super(Documento, self).save(*args, **kwargs)
+        if not self.is_image:
+            pdf_to_png(self.archivo, save=True)
 
 
 class SolicitudRegistro(models.Model):
