@@ -31,9 +31,11 @@ def areas_departamento_json(request):
     """
 
     if request.method == 'POST':
-        departamento = get_object_or_404(Departamento, pk=request.POST['id_departamento'])
-
-        areas = Area.objects.filter(departamento__id=departamento.id)
+        try:
+            departamento = get_object_or_404(Departamento, pk=request.POST['id_departamento'])
+            areas = Area.objects.filter(departamento__id=departamento.id)
+        except:
+            areas = Area.objects.none()
 
         response = [{'id': area.id, 'area': area.nombre} for area in areas]
 

@@ -78,7 +78,7 @@
                             {% for registro in registros %}
                                 <tr>
                                     <td>{{ registro.id }}</td>
-                                    <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{{ documento.get_absolute_url }}{% else %},{{ documento.get_absolute_url }}{% endif %}{% endfor %}</td>
+                                    <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{% if documento.is_image %}{{ documento.get_absolute_url }}{% else %}{% for ruta in documento.get_absolute_url %}{% if forloop.first %}{{ ruta }}{% else %}, {{ ruta }} {% endif %}{% endfor %}{% endif %}{% else %},{% if documento.is_image %}{{ documento.get_absolute_url }}{% else %}{% for ruta in documento.get_absolute_url %}{% if forloop.first %}{{ ruta }}{% else %}, {{ ruta }}{% endif %}{% endfor %}{% endif %}{% endif %}{% endfor %}</td>
                                     <td>{{ registro.area.departamento.nombre|upper }}</td>
                                     <td>{{ registro.area.nombre|upper }}</td>
                                     <td>{{ registro.descripcion|upper }}</td>

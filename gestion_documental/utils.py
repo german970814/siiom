@@ -37,7 +37,7 @@ def get_filenames(archivo):
     return glob.glob(file_name.split('.')[0] + '*')
 
 
-def pdf_to_png(archivo, extencion='png', _ruta=False, save=False):
+def pdf_to_png(archivo, extencion='jpg', _ruta=False, save=False):
     """
     Funcion que se encarga de pasar los archivos de pdf en png y agruparlos en carpetas
     """
@@ -69,7 +69,7 @@ def pdf_to_png(archivo, extencion='png', _ruta=False, save=False):
             _return_ruta = ruta + CARPETA_PDF_TO_IMAGE
             return _return_ruta
         os.chdir(ruta + CARPETA_PDF_TO_IMAGE)
-        return ruta + CARPETA_PDF_TO_IMAGE, glob.glob(file_name.split('.')[0] + '*')
+        return ruta + CARPETA_PDF_TO_IMAGE  # , glob.glob(file_name.split('.')[0] + '*')
 
     return None
 

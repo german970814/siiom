@@ -4,10 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
 from .managers import SolicitudRegistroManager
-from .utils import pdf_to_png, get_media_url
+from .utils import pdf_to_png, get_media_url, get_filenames
 
 # Python Packages
 # import os
+import re
 
 
 class TipoDocumento(models.Model):
@@ -85,6 +86,12 @@ class Documento(models.Model):
     """Modelo que guarda los archivos relacionados a un registro."""
 
     def ruta_archivo(self, filename):
+        match = re.compile(r'[a-zA-ZñNáÁéÉíÍóÓúÚ\s0-9_]')
+        data_name = filename.split('.')
+        ext = data_name[len(data_name) - 1]
+        del data_name[data_name.index(ext)]
+        name = ''.join(match.findall(''.join(data_name)))
+        filename = name + '.' + ext
         registro = self.registro
         return 'gestion_documental/area_{}/registro_{}/{}'.format(registro.area.id, registro.id, filename)
 
@@ -113,7 +120,8 @@ class Documento(models.Model):
         if self.is_image:
             return self.archivo.url
         # ruta = pdf_to_png(self.archivo, ruta=True)
-        ruta, archivos = pdf_to_png(self.archivo)
+        ruta = pdf_to_png(self.archivo)
+        archivos = get_filenames(self.archivo)
         return [get_media_url(ruta + x) for x in archivos]
 
     def save(self, *args, **kwargs):

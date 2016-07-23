@@ -37,9 +37,9 @@ class FormularioRegistroDocumento(forms.ModelForm):
         self.fields['area'].queryset = Area.objects.none()
 
         if self.is_bound:
-            id_area = self.data.get('area', None)
+            id_departamento = self.data.get('departamento', None)
             try:
-                self.fields['area'].queryset = Area.objects.filter(id=id_area)
+                self.fields['area'].queryset = Departamento.objects.get(id=id_departamento).areas.all()
             except:
                 self.fields['area'].queryset = Area.objects.none()
 
@@ -75,16 +75,19 @@ class FormularioDocumentos(forms.ModelForm):
                 self.fields[field].widget.attrs.update({'accept': 'image/*,.pdf'})
                 continue
             if field == 'tipo_documento':
-                self.fields[field].widget.attrs.update({'class': 'form-control tipo_doc', 'data-live-search': 'true'})
+                self.fields[field].widget.attrs.update({'class': 'form-control tipo_doc'})
                 continue
             self.fields[field].widget.attrs.update({'class': 'form-control'})
 
         self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
         if self.is_bound:
-            # id_tipo = self.data.get('tipo_documento', None)
+            id_area = self.data.get('area', None)
             try:
-                self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()
+                print("*************")
+                print(id_area)
+                print()
+                self.fields['tipo_documento'].queryset = Area.objects.get(id=id_area).tipos_documento.all()
             except:
                 self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
