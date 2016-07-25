@@ -6,7 +6,10 @@ def listaGruposDescendientes_id(miembro):
         usada en un choice field."""
 
     grupo = miembro.grupoLidera()
-    listaG = [grupo.id]
+    if grupo:
+        listaG = [grupo.id]
+    else:
+        listaG = []
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)

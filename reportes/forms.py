@@ -73,6 +73,7 @@ class FormularioReportesSinEnviar(forms.Form):
 
     def __init__(self, *args, **kwargs):
         miembro = kwargs.pop('miembro', None)
+        grupos = []
         if miembro:
             grupos = listaGruposDescendientes_id(miembro)
         super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
