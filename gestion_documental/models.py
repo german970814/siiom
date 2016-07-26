@@ -172,11 +172,13 @@ class SolicitudCustodiaDocumento(models.Model):
     Modelo para las solicitudes de custodia de documentos
     """
     PENDIENTE = 'PE'
+    PROCESO = 'PR'
     REALIZADO = 'RE'
 
     OPCIONES_ESTADO = (
         (PENDIENTE, 'PENDIENTE'),
         (REALIZADO, 'REALIZADO'),
+        (PROCESO, 'PROCESO'),
     )
 
     fecha_solicitud = models.DateField(auto_now_add=True, verbose_name=_('Fecha Solicitud'))

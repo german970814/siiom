@@ -499,7 +499,10 @@ def lista_custodias_documentos(request):
             id_custodia = request.POST.get('id_custodia', None)
             if id_custodia:
                 custodia_documento = get_object_or_404(SolicitudCustodiaDocumento, pk=id_custodia)
-                custodia_documento.estado = SolicitudCustodiaDocumento.REALIZADO
+                if custodia_documento.estado == SolicitudCustodiaDocumento.PROCESO:
+                    custodia_documento.estado = SolicitudCustodiaDocumento.REALIZADO
+                elif custodia_documento.estado == SolicitudCustodiaDocumento.PENDIENTE:
+                    custodia_documento.estado = SolicitudCustodiaDocumento.PROCESO
                 custodia_documento.save()
             else:
                 messages.error(request, _("Ha ocurrido un error inesperado"))

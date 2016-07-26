@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from .models import Registro, Documento, TipoDocumento, PalabraClave, SolicitudCustodiaDocumento
 
 # Apss
-from organizacional.models import Departamento, Area
+from organizacional.models import Departamento, Area, Empleado
 
 
 class FormularioRegistroDocumento(forms.ModelForm):
@@ -218,14 +218,15 @@ class FormularioCustodiaDocumento(forms.ModelForm):
         self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
         if self.is_bound:
+            id_empleado = self.data.get('solicitante', None)
             id_area = self.data.get('area', None)
-            id_tipo_documento = self.data.get('tipo_documento', None)
+            # id_tipo_documento = self.data.get('tipo_documento', None)
             try:
-                query_area = Area.objects.filter(id=id_area)
+                query_area = Empleado.objects.get(id=id_empleado).areas.all()
             except:
                 query_area = Area.objects.none()
             try:
-                query_tipo_documento = TipoDocumento.objects.filter(id=id_tipo_documento)
+                query_tipo_documento = Area.objects.get(id=id_area).tipos_documento.all()
             except:
                 query_tipo_documento = TipoDocumento.objects.none()
             self.fields['area'].queryset = query_area
