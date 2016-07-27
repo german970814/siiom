@@ -111,6 +111,7 @@ def editar_registro(request, id_registro):
     )
 
     if request.method == 'POST':
+        # print(request.POST)
         # se instancian los dos formularios
         form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
         form_documentos = DocumentosFormSet(request.POST, request.FILES)
@@ -152,10 +153,14 @@ def editar_registro(request, id_registro):
             registro.ultima_modificacion = timezone.datetime.now().date()
             registro.save()
             for form_b in form_documentos:
-                if form_b.cleaned_data.get('DELETE', False):
-                    form_b.instance.delete()
+                if form_b.cleaned_data.get('DELETE', False) and hasattr(form_b.instance, 'pk'):
+                    if form_b.instance.id is not None or form_b.instance.pk is not None:
+                        form_b.instance.delete()
                     continue
                 form_b.instance.registro = registro
+                if not form_b.cleaned_data.get('archivo', False) \
+                   or not form_b.cleaned_data.get('tipo_documento', False):
+                    continue
                 form_b.save()
             messages.success(request, _("Se ha editado correctamente el registro"))
             return redirect(reverse('sgd:editar_registro', args=(registro.id, )))

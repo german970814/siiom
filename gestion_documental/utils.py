@@ -22,7 +22,8 @@ def get_route(archivo):
             else:
                 del _rutas[len(_rutas) - 1]
 
-    return ruta
+        return ruta
+    return None
 
 
 def get_filenames(archivo):

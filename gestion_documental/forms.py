@@ -84,9 +84,6 @@ class FormularioDocumentos(forms.ModelForm):
         if self.is_bound:
             id_area = self.data.get('area', None)
             try:
-                print("*************")
-                print(id_area)
-                print()
                 self.fields['tipo_documento'].queryset = Area.objects.get(id=id_area).tipos_documento.all()
             except:
                 self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
