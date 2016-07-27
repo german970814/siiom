@@ -281,7 +281,7 @@ def busqueda_registros(request):
 
                 # registros = registros.filter(*queries)
                 # Se evaluan los registros y se hace el filtro
-                registros = registros.filter(eval(string_to_eval))
+                registros = registros.filter(eval(string_to_eval)).distinct()
 
                 # se añaden los registros a los datos que seran enviados a la vista,
                 # que estan previamente cargados
