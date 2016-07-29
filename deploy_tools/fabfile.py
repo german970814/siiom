@@ -4,7 +4,8 @@ import random
 
 REPO_URL = 'https://taniamhn@bitbucket.org/ingeniarte/iglesia.git'
 
-env.hosts = ['iglesia.webfactional.com', 'panama.iglesia.webfactional.com', 'gng.iglesia.webfactional.com']
+env.hosts = ['iglesia.webfactional.com', 'panama.iglesia.webfactional.com',
+            'gng.iglesia.webfactional.com', 'cdo.iglesia.webfactional.com']
 env.user = 'iglesia'
 
 enviroments = {
@@ -35,6 +36,14 @@ enviroments = {
     'gng.iglesia.webfactional.com': {
         'name': 'gng',
         'db': 'gng',
+        'user': 'iglesia',
+        'pass': 'ecbddac9',
+        'source': 'master'
+    },
+
+    'cdo.iglesia.webfactional.com': {
+        'name': 'cdo',
+        'db': 'cdo',
         'user': 'iglesia',
         'pass': 'ecbddac9',
         'source': 'master'
@@ -98,6 +107,7 @@ def _update_virtualenv(user, site_name, source_folder):
     virtualenv_folder = '/home/%s/.envs/%s' % (user, site_name)
     if not exists(virtualenv_folder + '/bin/pip'):
         run('virtualenv --python=python3 %s' % (virtualenv_folder,))
+        run('%s/bin/pip install newrelic' % (virtualenv_folder,))
 
     run('%s/bin/pip install -r %s/requirements.txt' % (
         virtualenv_folder, source_folder
