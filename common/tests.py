@@ -51,7 +51,8 @@ def miembroTest(user):
         (Group.objects.get(name__iexact='Maestro') in user.groups.all() or
          LIDER in user.groups.all() or Group.objects.get(name__iexact='Agente') in user.groups.all() or
          Group.objects.get(name__iexact='Receptor') in user.groups.all() or
-         ADMINISTRADOR in user.groups.all())
+         ADMINISTRADOR in user.groups.all() or user.has_perm('organizacional.es_administrador_sgd') or
+         user.has_perm('organizacional.buscar_registros') or user.has_perm('gestion_documental.add_registro'))
     )
 
 

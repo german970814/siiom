@@ -281,7 +281,7 @@ class CumplimientoPasos(models.Model):
 class CambioEscalafon(models.Model):
     miembro = models.ForeignKey(Miembro)
     escalafon = models.ForeignKey(Escalafon)
-    fecha = models.DateField(default=datetime.datetime.now())
+    fecha = models.DateField(default=datetime.datetime.now)
 
     def __str__(self):
         return self.miembro.nombre + " - " + self.escalafon.rango
