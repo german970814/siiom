@@ -55,7 +55,7 @@
 <div class="container">
 	<div class="card">
 		<div class="card-header">
-			Historial de Registros
+			<h1><legend><h3>Historial de Registros</h3></legend></h1>
 		</div>
 		<div class="card-body card-padding">
 			<div class="row table-responsive">
@@ -78,7 +78,7 @@
                             {% for registro in registros %}
                                 <tr>
                                     <td>{{ registro.id }}</td>
-                                    <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{{ documento.get_absolute_url }}{% else %},{{ documento.get_absolute_url }}{% endif %}{% endfor %}</td>
+                                    <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{% if documento.is_image %}{{ documento.get_absolute_url }}{% else %}{% for ruta in documento.get_absolute_url %}{% if forloop.first %}{{ ruta }}{% else %}, {{ ruta }} {% endif %}{% endfor %}{% endif %}{% else %},{% if documento.is_image %}{{ documento.get_absolute_url }}{% else %}{% for ruta in documento.get_absolute_url %}{% if forloop.first %}{{ ruta }}{% else %}, {{ ruta }}{% endif %}{% endfor %}{% endif %}{% endif %}{% endfor %}</td>
                                     <td>{{ registro.area.departamento.nombre|upper }}</td>
                                     <td>{{ registro.area.nombre|upper }}</td>
                                     <td>{{ registro.descripcion|upper }}</td>
@@ -101,27 +101,6 @@
 	</div>
 </div>
 
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Confirmación de Solicitud</h4>
-            </div>
-	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
-	        	{% csrf_token %}
-	            <div class="modal-body">
-		                <p>¿Seguro que quiere Solicitar este Registro?.</p>
-		                <input type="hidden" name="solicitud">
-	            </div>
-	            <div class="modal-footer">
-	                <button type="submit" name="solicitar_registro" class="btn btn-link">Aceptar</button>
-	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
-	            </div>
-            </form>
-        </div>
-    </div>
-</div>
-<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
 
 {% endblock contenido %}
 

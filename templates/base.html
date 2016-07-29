@@ -80,6 +80,15 @@
             border-color: #fff;
             background-color: initial;
         }
+
+        .bootstrap-select.btn-group .dropdown-toggle .filter-option {
+            display: inline-block;
+            overflow: hidden;
+            width: 100%;
+            text-align: left;
+            position: absolute !important;
+            left: 1px !important;
+        }
     </style>
     {% block css %}
     {% endblock %}
@@ -107,17 +116,21 @@
                             <label for="tw-switch" class="ts-helper"></label>
                         </div>
                     </li>
+                    {% if mi %}
                     <li id="top-search">
                         <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
                     </li>
+                    {% endif %}
                     <!-- opciones -->
                     <li class="dropdown">
                         <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
                         <ul class="dropdown-menu dm-icon pull-right">
                         {% if request.user.is_authenticated %}
+                            {% if mi %}
                             <li class="hidden-xs">
                                 <a  href="/miembro/perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
+                            {% endif %}
                             <li>
                                 <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
                             </li>
@@ -136,6 +149,7 @@
             </li>
         </ul>
         <!-- Top Search Content -->
+        {% if mi %}
         <div id="top-search-wrap">
             <div class="tsw-inner">
             <form action="/resultado/miembro/" method="POST">
@@ -145,6 +159,7 @@
             </form>
             </div>
         </div>
+        {% endif %}
     </header>
     <!-- start -->
     <section id="main" data-layout="layout-1">
@@ -165,9 +180,11 @@
                 </a>
                 {% if request.user.is_authenticated %}
                 <ul class="main-menu">
+                    {% if mi %}
                     <li>
                         <a href="/miembro/perfil/"><i class="zmdi zmdi-account"></i> Perfil</a>
                     </li>
+                    {% endif %}
                     <li>
                         <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
                     </li>
@@ -282,6 +299,7 @@
                     </ul>
                 </li>
                 {% endif %}
+                {% if mi.grupoLidera %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
@@ -296,6 +314,8 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if mi.grupoLidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
@@ -307,6 +327,8 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if mi.grupoLidera %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
@@ -321,6 +343,7 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
                 {% if perms.miembros.es_maestro %}  
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-graduation-cap"></i> Academias</a>
@@ -337,7 +360,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_administrador %}
+                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
                     <ul>

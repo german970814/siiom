@@ -4,6 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
 from .managers import SolicitudRegistroManager
+from .utils import pdf_to_png, get_media_url, get_filenames
+
+# Python Packages
+# import os
+import re
 
 
 class TipoDocumento(models.Model):
@@ -81,6 +86,12 @@ class Documento(models.Model):
     """Modelo que guarda los archivos relacionados a un registro."""
 
     def ruta_archivo(self, filename):
+        match = re.compile(r'[a-zA-ZñNáÁéÉíÍóÓúÚ\s0-9_]')
+        data_name = filename.split('.')
+        ext = data_name[len(data_name) - 1]
+        del data_name[data_name.index(ext)]
+        name = ''.join(match.findall(''.join(data_name)))
+        filename = name + '.' + ext
         registro = self.registro
         return 'gestion_documental/area_{}/registro_{}/{}'.format(registro.area.id, registro.id, filename)
 
@@ -93,11 +104,12 @@ class Documento(models.Model):
         verbose_name_plural = _('documentos')
 
     def __str__(self):
-        return "{}".format(self.id)
+        name = self.archivo.name.split('/')
+        return "{}".format(name[len(name) - 1].split('.')[0])
 
     @property
     def is_image(self):
-        if self.get_absolute_url().endswith('.pdf'):
+        if self.archivo.path.endswith('.pdf'):
             return False
         return True
 
@@ -105,7 +117,17 @@ class Documento(models.Model):
         """
         Devuelve la ruta url de el documento
         """
-        return self.archivo.url
+        if self.is_image:
+            return self.archivo.url
+        # ruta = pdf_to_png(self.archivo, ruta=True)
+        ruta = pdf_to_png(self.archivo)
+        archivos = get_filenames(self.archivo)
+        return [get_media_url(ruta + x) for x in archivos]
+
+    def save(self, *args, **kwargs):
+        super(Documento, self).save(*args, **kwargs)
+        if not self.is_image:
+            pdf_to_png(self.archivo, save=True)
 
 
 class SolicitudRegistro(models.Model):
@@ -150,11 +172,13 @@ class SolicitudCustodiaDocumento(models.Model):
     Modelo para las solicitudes de custodia de documentos
     """
     PENDIENTE = 'PE'
+    PROCESO = 'PR'
     REALIZADO = 'RE'
 
     OPCIONES_ESTADO = (
         (PENDIENTE, 'PENDIENTE'),
         (REALIZADO, 'REALIZADO'),
+        (PROCESO, 'PROCESO'),
     )
 
     fecha_solicitud = models.DateField(auto_now_add=True, verbose_name=_('Fecha Solicitud'))

@@ -31,17 +31,6 @@ def async(function):
     return decorator
 
 
-# def async(function):
-#     from functools import wraps
-
-#     @wraps(function)
-#     def decorator(*args, **kwargs):
-#         func = Thread(target=function, args=args, kwargs=kwargs)
-#         func.start()
-#         return func
-#     return decorator
-
-
 @async
 def crear_miembros_con_encontristas(encontristas):
     """

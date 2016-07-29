@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from .models import Registro, Documento, TipoDocumento, PalabraClave, SolicitudCustodiaDocumento
 
 # Apss
-from organizacional.models import Departamento, Area
+from organizacional.models import Departamento, Area, Empleado
 
 
 class FormularioRegistroDocumento(forms.ModelForm):
@@ -21,7 +21,7 @@ class FormularioRegistroDocumento(forms.ModelForm):
 
     class Meta:
         model = Registro
-        exclude = ('palabras_claves', )
+        exclude = ('palabras_claves', 'ultima_modificacion', 'modificado_por')
 
     def __init__(self, *args, **kwargs):
         super(FormularioRegistroDocumento, self).__init__(*args, **kwargs)
@@ -37,9 +37,9 @@ class FormularioRegistroDocumento(forms.ModelForm):
         self.fields['area'].queryset = Area.objects.none()
 
         if self.is_bound:
-            id_area = self.data.get('area', None)
+            id_departamento = self.data.get('departamento', None)
             try:
-                self.fields['area'].queryset = Area.objects.filter(id=id_area)
+                self.fields['area'].queryset = Departamento.objects.get(id=id_departamento).areas.all()
             except:
                 self.fields['area'].queryset = Area.objects.none()
 
@@ -75,18 +75,33 @@ class FormularioDocumentos(forms.ModelForm):
                 self.fields[field].widget.attrs.update({'accept': 'image/*,.pdf'})
                 continue
             if field == 'tipo_documento':
-                self.fields[field].widget.attrs.update({'class': 'form-control tipo_doc', 'data-live-search': 'true'})
+                self.fields[field].widget.attrs.update({'class': 'form-control tipo_doc'})
                 continue
             self.fields[field].widget.attrs.update({'class': 'form-control'})
 
         self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
         if self.is_bound:
-            # id_tipo = self.data.get('tipo_documento', None)
+            id_area = self.data.get('area', None)
             try:
-                self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()
+                self.fields['tipo_documento'].queryset = Area.objects.get(id=id_area).tipos_documento.all()
             except:
                 self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
+
+
+class FormularioEdicionDocumentos(FormularioDocumentos):
+    """
+    Formulario para la edicion de documentos en el sistema
+    """
+    def __init__(self, *args, **kwargs):
+        registro = kwargs.pop('registro', None)
+        super(FormularioEdicionDocumentos, self).__init__(*args, **kwargs)
+        if registro:
+            self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=registro.area)
+        if self.initial:
+            documento = Documento.objects.get(id=self.initial['id'])
+            self.fields['tipo_documento'].queryset = TipoDocumento.objects.filter(areas=documento.registro.area)
+        # self.fields['tipo_documento'].queryset = TipoDocumento.objects.all()
 
 
 class FormularioBusquedaRegistro(forms.Form):
@@ -200,14 +215,15 @@ class FormularioCustodiaDocumento(forms.ModelForm):
         self.fields['tipo_documento'].queryset = TipoDocumento.objects.none()
 
         if self.is_bound:
+            id_empleado = self.data.get('solicitante', None)
             id_area = self.data.get('area', None)
-            id_tipo_documento = self.data.get('tipo_documento', None)
+            # id_tipo_documento = self.data.get('tipo_documento', None)
             try:
-                query_area = Area.objects.filter(id=id_area)
+                query_area = Empleado.objects.get(id=id_empleado).areas.all()
             except:
                 query_area = Area.objects.none()
             try:
-                query_tipo_documento = TipoDocumento.objects.filter(id=id_tipo_documento)
+                query_tipo_documento = Area.objects.get(id=id_area).tipos_documento.all()
             except:
                 query_tipo_documento = TipoDocumento.objects.none()
             self.fields['area'].queryset = query_area

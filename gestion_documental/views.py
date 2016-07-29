@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, modelformset_factory
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +25,7 @@ from .models import (
 from .forms import (
     FormularioRegistroDocumento, FormularioDocumentos, FormularioCustodiaDocumento,
     FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario,
-    FormularioEditarRegistroDocumento
+    FormularioEditarRegistroDocumento, FormularioEdicionDocumentos
 )
 
 # Apps
@@ -97,26 +97,80 @@ def ingresar_registro(request):
 
 @waffle_switch('gestion_documental')
 @permission_required('organizacional.es_administrador_sgd')
+@transaction.atomic
 def editar_registro(request, id_registro):
     """
     Vista de edición de registros
     """
+    # se obtiene el registro
     registro = get_object_or_404(Registro, pk=id_registro)
-
-    DocumentosFormSet = inlineformset_factory(
-        Registro, Documento, fk_name='registro', form=FormularioDocumentos,
-        min_num=1, extra=0, validate_min=True, can_delete=False
+    # se crea el formset de los documentos
+    DocumentosFormSet = modelformset_factory(
+        Documento, form=FormularioEdicionDocumentos,
+        min_num=1, extra=0, validate_min=True, can_delete=True
     )
 
     if request.method == 'POST':
+        # print(request.POST)
+        # se instancian los dos formularios
         form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
-        form_documentos = DocumentosFormSet(request.POST, request.FILES, instance=Registro)
-        if form.is_valid():
-            pass
+        form_documentos = DocumentosFormSet(request.POST, request.FILES)
+        # si ammbos son validos
+        if form.is_valid() and form_documentos.is_valid():
+            registro = form.save(commit=False)
+            # formset = form_documentos.save(commit=False)
+            # se sacan las palabras que tiene actualmente el registro
+            _palabras_anteriores = [x.nombre for x in registro.palabras_claves.all()]
+            # se sacan las palabras que vienen del formulario
+            palabras = form.cleaned_data['palabras'].split(',')
+            # Se buscan las palabras recursivamente
+            for palabra in palabras:
+                # si no esta en la de palabras anteriores hace lo siguiente
+                if palabra not in _palabras_anteriores:
+                    # Se busca, si no existe la palabra se crea
+                    if palabra != '':
+                        palabra_clave, created = PalabraClave.objects.get_or_create(
+                            nombre__iexact=palabra, defaults={'nombre': palabra}
+                        )
+                        if palabra_clave not in registro.palabras_claves.all():
+                            registro.palabras_claves.add(palabra_clave)
+            # si hay palabras anteriores
+            if _palabras_anteriores:
+                # se crea un set de palabras que sobran para luego eliminar las que no se usan
+                eliminar = set(_palabras_anteriores) - set(palabras)
+                if eliminar:
+                    # Funciona asi:
+                    # tienes una lista 'a' y una 'b':
+                    # a = [1,2,3]
+                    # b = [2,3,4]
+                    # c = set(a) - set(b)
+                    # entonces c = [1]
+                    # solo las palabras a eliminar
+                    for palabra in eliminar:
+                        palabra_clave = PalabraClave.objects.get(nombre__iexact=palabra)
+                        registro.palabras_claves.remove(palabra_clave)
+            registro.modificado_por = request.user.empleado
+            registro.ultima_modificacion = timezone.datetime.now().date()
+            registro.save()
+            for form_b in form_documentos:
+                if form_b.cleaned_data.get('DELETE', False) and hasattr(form_b.instance, 'pk'):
+                    if form_b.instance.id is not None or form_b.instance.pk is not None:
+                        form_b.instance.delete()
+                    continue
+                form_b.instance.registro = registro
+                if not form_b.cleaned_data.get('archivo', False) \
+                   or not form_b.cleaned_data.get('tipo_documento', False):
+                    continue
+                form_b.save()
+            messages.success(request, _("Se ha editado correctamente el registro"))
+            return redirect(reverse('sgd:editar_registro', args=(registro.id, )))
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
         form = FormularioEditarRegistroDocumento(instance=registro)
+        form_documentos = DocumentosFormSet(queryset=registro.documentos.all())
 
-    data = {'form': form}
+    data = {'form': form, 'registro': registro, 'form_documentos': form_documentos}
 
     return render(request, 'gestion_documental/editar_registro.html', data)
 
@@ -227,11 +281,11 @@ def busqueda_registros(request):
 
                 # registros = registros.filter(*queries)
                 # Se evaluan los registros y se hace el filtro
-                registros = registros.filter(eval(string_to_eval))
+                registros = registros.filter(eval(string_to_eval)).distinct()
 
                 # se añaden los registros a los datos que seran enviados a la vista,
                 # que estan previamente cargados
-                data['registros'] = registros
+                data['registros'] = registros.prefetch_related('documentos')
 
                 messages.success(request, _("Se han encontrado %d resultados") % registros.count())
             else:
@@ -450,7 +504,10 @@ def lista_custodias_documentos(request):
             id_custodia = request.POST.get('id_custodia', None)
             if id_custodia:
                 custodia_documento = get_object_or_404(SolicitudCustodiaDocumento, pk=id_custodia)
-                custodia_documento.estado = SolicitudCustodiaDocumento.REALIZADO
+                if custodia_documento.estado == SolicitudCustodiaDocumento.PROCESO:
+                    custodia_documento.estado = SolicitudCustodiaDocumento.REALIZADO
+                elif custodia_documento.estado == SolicitudCustodiaDocumento.PENDIENTE:
+                    custodia_documento.estado = SolicitudCustodiaDocumento.PROCESO
                 custodia_documento.save()
             else:
                 messages.error(request, _("Ha ocurrido un error inesperado"))
@@ -473,3 +530,22 @@ def historial_registros(request):
     ).prefetch_related('documentos').order_by('-fecha')
     data = {'registros': registros}
     return render(request, 'gestion_documental/historial_registros.html', data)
+
+
+@waffle_switch('gestion_documental')
+@permission_required('organizacional.es_administrador_sgd')
+@transaction.atomic
+def eliminar_registro(request, id_registro):
+    """
+    Vista para el administrador que elimina los registros
+    """
+    registro = get_object_or_404(Registro, pk=id_registro)
+    redirect_to = request.META.get('HTTP_REFERER', None)
+    data = {'registro': registro, 'redirect': redirect_to}
+
+    if request.method == 'POST':
+        if 'eliminar' in request.POST:
+            registro.delete()
+            return redirect(reverse('sgd:busqueda_registros'))
+
+    return render(request, 'gestion_documental/eliminar_registro.html', data)

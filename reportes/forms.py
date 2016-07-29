@@ -4,6 +4,7 @@ from django import forms
 from django.db.models.aggregates import Count
 from grupos.models import Red, Predica, Grupo
 from miembros.models import Miembro
+from .utils import listaGruposDescendientes_id
 
 __author__ = 'Tania'
 
@@ -63,14 +64,28 @@ class FormularioVisitasRedPorMes(forms.Form):
 
 class FormularioReportesSinEnviar(forms.Form):
     required_css_class = 'requerido'
+    error_css_class = 'has-error'
 
     fechai = forms.DateField(label='Fecha inicial', required=True, widget=forms.DateInput(attrs={'size': 10}))
     fechaf = forms.DateField(label='Fecha final', required=True, widget=forms.DateInput(attrs={'size': 10}))
+    grupo = forms.ModelChoiceField(label='Grupo', required=True, queryset=Grupo.objects.none())
+    descendientes = forms.BooleanField(label='Descendientes', widget=forms.CheckboxInput(), required=False)
 
     def __init__(self, *args, **kwargs):
+        miembro = kwargs.pop('miembro', None)
+        grupos = []
+        if miembro:
+            grupos = listaGruposDescendientes_id(miembro)
         super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
         self.fields['fechai'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/00'})
         self.fields['fechaf'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/00'})
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        if miembro and miembro.usuario.has_perm('miembros.es_administrador'):
+            self.fields['grupo'].queryset = Grupo.objects.all().select_related('lider1', 'lider2')
+        else:
+            self.fields['grupo'].queryset = Grupo.objects.filter(
+                id__in=grupos
+            ).select_related('lider1', 'lider2')
 
 
 class FormularioPredicas(forms.Form):

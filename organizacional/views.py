@@ -23,6 +23,7 @@ from .forms import AreaForm, DepartamentoForm, EmpleadoForm, FormularioEditarEmp
 import json
 
 
+@login_required
 @csrf_exempt
 def areas_departamento_json(request):
     """
@@ -30,9 +31,11 @@ def areas_departamento_json(request):
     """
 
     if request.method == 'POST':
-        departamento = get_object_or_404(Departamento, pk=request.POST['id_departamento'])
-
-        areas = Area.objects.filter(departamento__id=departamento.id)
+        try:
+            departamento = get_object_or_404(Departamento, pk=request.POST['id_departamento'])
+            areas = Area.objects.filter(departamento__id=departamento.id)
+        except:
+            areas = Area.objects.none()
 
         response = [{'id': area.id, 'area': area.nombre} for area in areas]
 
@@ -208,6 +211,7 @@ def crear_empleado(request):
             empleado.save()
             form.save_m2m()
             messages.success(request, _('Empleado creado exitosamente'))
+            return redirect(reverse('organizacional:crear_empleado'))
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
 

@@ -6,8 +6,18 @@
         .table>tbody>tr>td:first-child{
             padding-left: 10px;
         }
+
+        .bootstrap-select.btn-group .dropdown-toggle .filter-option {
+            display: inline-block;
+            overflow: hidden;
+            width: 100%;
+            text-align: left;
+            position: absolute !important;
+            left: 1px !important;
+        }
     </style>
 {% endblock css %}
+
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript">
@@ -21,7 +31,7 @@
         $("#idGrupo_i").change(function(){
             if($(this).val() != -1){
                 $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
-                    agregarOpciones(data, 'idGrupo_f');
+                    agregarOpciones2(data, 'idGrupo_f');
                     $('#idGrupo_f').selectpicker('refresh');
                 }, "json");
             }
@@ -89,7 +99,7 @@
                                 <select class="selectpicker" data-live-search="true" id="idGrupo_i" name="menuGrupo_i">
                                     <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
                                     {% for g_i in listaGrupo_i %}
-                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i.nombre|capfirst }}</option>
+                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -106,7 +116,7 @@
                                 <select class="selectpicker" data-live-search="true" id="idGrupo_f" name="menuGrupo_f">
                                         <option value="-1" >------</option>
                                         {% for g_f in listaGrupo_f %}
-                                            <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f.nombre|capfirst }}</option>
+                                            <option value="{{ g_f.id }}" {% if g_f == grupo_f %} selected="selected" {% endif %} >{{ g_f }}</option>
                                         {% endfor %}
                                 </select>
                             </div>

@@ -19,7 +19,7 @@
             formatters: {
                 "commands": function(column, row) {
                     var clase;
-                    if (row.color == 'red') {
+                    if (row.color == 'red' || row.color == 'yellow') {
                         clase = 'proceso';
                     } else  {
                         clase = '';
@@ -79,7 +79,7 @@
                 {% for custodia in custodias %}
                     <tr>
                         <td>{{ custodia.id }}</td>
-                        <td>{% if custodia.estado == 'PE' %}red{% else  %}green{% endif %}</td>
+                        <td>{% if custodia.estado == 'PE' %}red{% elif custodia.estado == 'PR' %}yellow{% else %}green{% endif %}</td>
                         <td>{{ custodia.fecha_solicitud }}</td>
                         <td>{{ custodia.solicitante }}</td>
                         <td>{{ custodia.area.nombre|upper }}</td>
@@ -110,7 +110,7 @@
             <form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <p>¿Seguro que quiere Cambiar el estado de esta solicitud a 'Realizado'?.</p>
+                    <p>¿Seguro que quiere Cambiar el estado de esta solicitud?.</p>
                     <input type="hidden" name="finalizar">
                     <input type="hidden" name="id_custodia">
                 </div>

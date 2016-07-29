@@ -29,13 +29,13 @@
     {% endif %}
     
     $(document).ready(function(){
-        $('#idGrupo_i').parent().parent().parent().on('focus mouseover', function (event){
-            $(this).css('overflow', '');
-        })
+        // $('#idGrupo_i').parent().parent().parent().on('focus mouseover', function (event){
+        //     $(this).css('overflow', '');
+        // })
 
-        $('#idGrupo_i').parent().parent().parent().on('blur mouseleave', function (event){
-            $(this).css('overflow', 'hidden');
-        })
+        // $('#idGrupo_i').parent().parent().parent().on('blur mouseleave', function (event){
+        //     $(this).css('overflow', 'hidden');
+        // })
 
         $('#id_fechai').datetimepicker({
             format: 'DD/MM/YY',
@@ -298,8 +298,8 @@
                     <div class="col-md-4 col-md-offset-2">
                         <div class="input-group">
                             <div class="fg-line">
-                                <label for="" class="checkbox m-r-20">
-                                    <input type="checkbox" name="ofrenda" value="S" {% if ofrenda %} checked="checked" {% endif %}>
+                                <label for="ofrenda_id" class="checkbox m-r-20">
+                                    <input id="ofrenda_id" type="checkbox" name="ofrenda" value="S" {% if ofrenda %} checked="checked" {% endif %}>
                                     <i class="input-helper m-r-20"></i>
                                     Ofrenda
                                 </label>

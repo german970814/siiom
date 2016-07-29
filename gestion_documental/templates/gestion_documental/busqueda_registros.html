@@ -204,13 +204,16 @@
                                     <th data-identifier="true" data-column-id="modulo">{% trans "Fecha" %}</th>
                                     <th data-column-id="commands" data-formatter="commands" data-sortable="false">Ver</th>
                                     <th data-column-id="solicitud" data-formatter="solicitud" data-sortable="false">Solicitud</th>
+                                    {% if perms.organizacional.es_administrador_sgd %}
+                                    <th data-column-id="com" data-formatter="com" data-sortable="false">Comandos</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for registro in registros %}
                                     <tr>
                                         <td>{{ registro.id }}</td>
-                                        <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{{ documento.get_absolute_url }}{% else %},{{ documento.get_absolute_url }}{% endif %}{% endfor %}</td>
+                                        <td>{% for documento in registro.documentos.all %}{% if forloop.first %}{% if documento.is_image %}{{ documento.get_absolute_url }}{% else %}{% for ruta in documento.get_absolute_url %}{% if forloop.first %}{{ ruta }}{% else %}, {{ ruta }} {% endif %}{% endfor %}{% endif %}{% else %},{% if documento.is_image %}{{ documento.get_absolute_url }}{% else %}{% for ruta in documento.get_absolute_url %}{% if forloop.first %}{{ ruta }}{% else %}, {{ ruta }}{% endif %}{% endfor %}{% endif %}{% endif %}{% endfor %}</td>
                                         <td>{% if registro.solicitado %}true{% else %}false{% endif %}</td>
                                         <td>{{ registro.descripcion|title }}</td>
                                         <td>{{ registro.fecha }}</td>
@@ -300,12 +303,20 @@
                     },
                     "solicitud" : function(column, row) {
                     	var solicitado = eval(row.solicitado);
-                    	if (solicitado) {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>"
-                    	} else {
-                    		return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
-                    	}
+                        if (solicitado) {
+                            return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>";
+                        } else {
+                            return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
+                        }
+                    },
+                    {% if perms.organizacional.es_administrador_sgd %}
+                    "com": function(column, row) {
+                        var editar = "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"Editar\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "sgd:editar_registro" 0 %}'.replace(0, " + row.id + ")\"><span class=\"zmdi zmdi-edit\"></span></button>";
+                        var eliminar = "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"Eliminar\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "sgd:eliminar_registro" 0 %}'.replace(0, " + row.id + ")\"><span class=\"zmdi zmdi-delete\"></span></button>";
+
+                        return editar + eliminar;
                     }
+                    {% endif %}
                 }
             });
 

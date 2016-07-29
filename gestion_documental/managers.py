@@ -17,4 +17,6 @@ class SolicitudRegistroManager(models.Manager):
         hoy = datetime.date.today() + datetime.timedelta(days=1)
         hace_dos_meses = hoy - datetime.timedelta(weeks=8)
         # [self.PENDIENTE, self.ENTREGADO_DIGITADOR, self.DEVUELTO_CONSULTA]
-        return self.exclude(estado=self.model.DEVUELTO_CONSULTA, fecha_devolucion__lte=hace_dos_meses)
+        return self.exclude(
+            estado=self.model.DEVUELTO_CONSULTA, fecha_devolucion__lte=hace_dos_meses
+        ).order_by('-fecha_solicitud')

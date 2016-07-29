@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^lista_custodia_documentos/$', views.lista_custodias_documentos, name="lista_custodias_documentos"),
     url(r'^historial_registros/$', views.historial_registros, name="historial_registros"),
     url(r'^editar_registro/(?P<id_registro>\d+)$', views.editar_registro, name="editar_registro"),
+    url(r'^eliminar_registro/(?P<id_registro>\d+)$', views.eliminar_registro, name="eliminar_registro"),
 ]
