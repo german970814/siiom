@@ -164,6 +164,7 @@
                         <th data-column-id="Grupo">Grupo</th>
                         <th data-column-id="lideres">Líderes</th>
                         <th data-column-id="fecha">Fecha Reunión</th>
+                        <th data-column-id="sobres">No. Sobres</th>
                     </thead>
                     <tbody>
                     {% for grupo in grupos %}
@@ -188,6 +189,7 @@
                                     {% endif %}
                                 {% endfor %}
                             </td>
+                            <td>{{ grupo.fecha_reunion|length }}</td>
                         </tr>
                     {% empty %}
                         <tr>
