@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+import re
+
 
 class Requisicion(models.Model):
     """Modelo que guarda las requisiciones que hechas por los empleados."""
@@ -51,7 +53,7 @@ class DetalleRequisicion(models.Model):
 
     OPCIONES_FORMA_PAGO = (
         (EFECTIVO, 'EFECTIVO'),
-        (DEBITO, 'DEBITO'),
+        (DEBITO, 'DÉBITO'),
         (CREDITO, 'CRÉDITO'),
     )
 
@@ -60,7 +62,7 @@ class DetalleRequisicion(models.Model):
     referencia = models.CharField(max_length=50, verbose_name=_('referncia'), blank=True)
     marca = models.CharField(max_length=100, verbose_name=_('marca'), blank=True)
     valor_aprobado = models.PositiveIntegerField(verbose_name=_('valor aprobado'), blank=True, null=True)
-    valor_pago = models.PositiveIntegerField(verbose_name=_('valor pago'), blank=True, null=True)
+    total_aprobado = models.PositiveIntegerField(verbose_name=_('total aprobado'), blank=True, null=True)
     forma_pago = models.CharField(_('forma de pago'), choices=OPCIONES_FORMA_PAGO, max_length=1, blank=True)
     requisicion = models.ForeignKey(Requisicion, verbose_name=_('requisición'))
 
@@ -75,7 +77,16 @@ class DetalleRequisicion(models.Model):
 class Adjunto(models.Model):
     """Modelo que guarda los archivos adjuntos que tienen las requisiciones."""
 
-    archivo = models.FileField(verbose_name=_('archivo'))
+    def ruta_adjuntos(self, filename):
+        match = re.compile(r'[a-zA-ZñNáÁéÉíÍóÓúÚ\s0-9_]')
+        data_name = filename.split('.')
+        ext = data_name[len(data_name) - 1]
+        del data_name[data_name.index(ext)]
+        name = ''.join(match.findall(''.join(data_name)))
+        filename = name + '.' + ext
+        return 'compras/requisicion_{}/{}'.format(self.requisicion.id, filename)
+
+    archivo = models.FileField(verbose_name=_('archivo'), upload_to=ruta_adjuntos)
     requisicion = models.ForeignKey(Requisicion, verbose_name=_('requisición'))
 
     class Meta:
