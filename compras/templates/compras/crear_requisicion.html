@@ -38,8 +38,11 @@
                         </thead>
                         <tbody>
                         	{% for form_detalle in formset_detalles %}
-                        	{% if requisicion %}{{ form_detalle.id }}{% endif %}
+                        	{% for hidden in form_detalle.hidden_fields %}
+							    {{ hidden }}
+							{% endfor %}
                             <tr class="form_detalles">
+                        		{% if requisicion %}{{ form_detalle.id }}{% endif %}
                                 <td class="{{ form_detalle.cantidad.css_classes }}">{{ form_detalle.cantidad }}</td>
                                 <td class="{{ form_detalle.descripcion.css_classes }}">{{ form_detalle.descripcion }}</td>
                                 <td class="{{ form_detalle.referencia.css_classes }}">{{ form_detalle.referencia }}</td>
@@ -48,8 +51,8 @@
                                 <td class="{{ form_detalle.total_aprobado.css_classes }}">{{ form_detalle.total_aprobado }}</td>
                                 <td class="{{ form_detalle.forma_pago.css_classes }}">{{ form_detalle.forma_pago }}</td>
                                 {% if formset_detalles.can_delete %}
-							        {{ form_detalle.DELETE }}
-							    {% endif %}
+                                	<td>{{ form_detalle.DELETE }}</td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -155,10 +158,10 @@
 					</div>
 				</div>
 			</div>
+			{% if formset_adjunto.can_delete %}
+		        {{ form_adjunto.DELETE }}
+		    {% endif %}
 		</div>
-		{% if formset_adjunto.can_delete %}
-	        {{ form_adjunto.DELETE }}
-	    {% endif %}
 		{% endfor %}
 		{{ formset_adjunto.management_form }}
 		<br>
@@ -174,26 +177,14 @@
 </div>
 {% endblock contenido %}
 
-<div class="col-md-2">
-    <div class="input-group {{form.caja.css_classes}}">
-        <span class="input-group-addon">
-            <i class="zmdi zmdi-stack-overflow"></i>
-        </span>
-        <div class="fg-line requerido">
-            <label for="{{ form.caja.id_for_label }}" class="fg-label requerido control-label">{{ form.caja.label|title }}:</label>
-            {{ form.caja }}
-        </div>
-        {% for error in form.caja.errors %}
-            <small class="help-block">{{error}}</small>
-        {% endfor %}
-    </div>
-</div>
-
 {% block js %}
 	<script src="{% static 'Scripts/jquery.formset.js' %}"></script>
 	<script src="{% static 'Scripts/tagsinput/bootstrap-tagsinput.js' %}"></script>
 	<script>
 		jQuery(document).ready(function($) {
+			// $('input[id $="-DELETE"]').each(function(ind, obj) {
+			// 	$(this).addClass('hidden');
+			// })
 			$('.form_detalles').formset({
 	            addText: 'Agregar Item',
 	            deleteText: 'Quitar',
@@ -205,6 +196,13 @@
 	            	// $tipo.html($viejo_select.html());
 	            	// $tipo.selectpicker();
 	            }
+	            {% if requisicion %}
+	            // ,removed: function (row) {
+	            // 	console.log(row.children().first().val());
+	            // 	var $id = row.children().first().val()
+	            // 	$('input[name="detallerequisicion_set-' + $id.toString() + '-DELETE"]').prop('checked', true)
+	            // }
+	            {% endif %}
 	        });
 
 	        $('.form-adjuntos').formset({

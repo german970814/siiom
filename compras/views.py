@@ -78,6 +78,9 @@ def editar_requisicion(request, id_requisicion):
             raise Http404
     except Requisicion.DoesNotExist:
         raise Http404
+    empleado = requisicion.empleado
+    if empleado != request.user.empleado:
+        return redirect('sin_permiso')
 
     DetalleRequisicionFormSet = modelformset_factory(
         DetalleRequisicion, form=FormularioDetalleRequisicion,
@@ -90,9 +93,15 @@ def editar_requisicion(request, id_requisicion):
     )
 
     if request.method == 'POST':
-        print("**********************************")
-        print(request.POST)
         form = FormularioSolicitudRequisicion(data=request.POST, instance=requisicion)
+        formset_detalles = DetalleRequisicionFormSet(
+            prefix='detallerequisicion_set',
+            queryset=requisicion.detallerequisicion_set.all()
+        )
+        formset_adjunto = AdjuntoFormset(
+            prefix='adjunto_set',
+            queryset=requisicion.adjunto_set.all()
+        )
         if form.is_valid():
             formset_detalles = DetalleRequisicionFormSet(
                 data=request.POST, prefix='detallerequisicion_set',
