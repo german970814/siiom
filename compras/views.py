@@ -6,8 +6,10 @@ from django.contrib import messages
 from django.utils.translation import ugettext as _
 from django.db import transaction
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 
+# Third Apps
+from waffle.decorators import waffle_switch
 
 # Locale Apps
 from .forms import (
@@ -17,7 +19,8 @@ from .forms import (
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
 
 
-# @permission_required('')
+@waffle_switch('compras')
+@login_required
 @transaction.atomic
 def crear_requisicion(request):
     """
@@ -70,6 +73,8 @@ def crear_requisicion(request):
     return render(request, 'compras/crear_requisicion.html', data)
 
 
+@waffle_switch('compras')
+@login_required
 @transaction.atomic
 def editar_requisicion(request, id_requisicion):
     """
@@ -161,6 +166,8 @@ def editar_requisicion(request, id_requisicion):
     return render(request, 'compras/crear_requisicion.html', data)
 
 
+@waffle_switch('compras')
+@login_required
 def ver_requisiciones_empleado(request):
     """
     Vista para la vista de las requisiciones hechas por el empleado del request
@@ -177,6 +184,8 @@ def ver_requisiciones_empleado(request):
     return render(request, 'compras/ver_requisiciones_empleado.html', data)
 
 
+@waffle_switch('compras')
+@login_required
 def ver_requisiciones_jefe_departamento(request):
     """
     Vista para ver las requisiciones que se han hecho a un departamento
@@ -217,6 +226,7 @@ def ver_requisiciones_jefe_departamento(request):
     return render(request, 'compras/ver_requisiciones_jefe_departamento.html', data)
 
 
+@waffle_switch('compras')
 @permission_required('organizacional.es_compras')
 def ver_requisiciones_compras(request):
     """
@@ -264,6 +274,7 @@ def ver_requisiciones_compras(request):
     return render(request, 'compras/ver_requisiciones_compras.html', data)
 
 
+@waffle_switch('compras')
 @permission_required('organizacional.es_compras')
 def adjuntar_archivos_requisicion(request, id_requisicion):
     """
