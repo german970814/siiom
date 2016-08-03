@@ -1,17 +1,20 @@
 # Django Packages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.forms import inlineformset_factory, modelformset_factory
 from django.contrib import messages
 from django.utils.translation import ugettext as _
 from django.db import transaction
 from django.core.urlresolvers import reverse
-# from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required
 
 
 # Locale Apps
-from .forms import FormularioSolicitudRequisicion, FormularioDetalleRequisicion, FormularioAdjunto
-from .models import DetalleRequisicion, Requisicion, Adjunto
+from .forms import (
+    FormularioSolicitudRequisicion, FormularioDetalleRequisicion, FormularioAdjunto,
+    FormularioRequisicionesJefe, FormularioRequisicionesCompras, FormularioObservacionHistorial
+)
+from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
 
 
 # @permission_required('')
@@ -172,3 +175,133 @@ def ver_requisiciones_empleado(request):
     data = {'requisiciones': requisiciones}
 
     return render(request, 'compras/ver_requisiciones_empleado.html', data)
+
+
+def ver_requisiciones_jefe_departamento(request):
+    """
+    Vista para ver las requisiciones que se han hecho a un departamento
+    """
+    empleado = request.user.empleado
+    if not empleado.jefe_departamento:
+        return redirect('sin_permiso')
+
+    requisiciones = Requisicion.objects.filter(
+        empleado__areas__departamento__in=request.user.empleado.areas.departamentos()
+    ).exclude(historial__estado=Historial.RECHAZADA).order_by('-fecha_ingreso')
+
+    if request.method == 'POST':
+        form = FormularioRequisicionesJefe(data=request.POST)
+        if form.is_valid():
+            requisicion = Requisicion.objects.get(id=form.cleaned_data['id_requisicion'])
+            if 'aprobar' in request.POST:
+                historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
+                mensaje = 'aprobado'
+                requisicion.estado = Requisicion.PROCESO
+                requisicion.save()
+            elif 'rechazar' in request.POST:
+                historial = requisicion.crear_historial(empleado=empleado, estado=Historial.RECHAZADA)
+                mensaje = 'rechazado'
+            historial.save()
+            messages.success(
+                request,
+                _("Se ha {} la requisicion No.{} exitosamente").format(mensaje, requisicion.id)
+            )
+            return redirect('compras:ver_requisiciones_jefe_departamento')
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+    else:
+        form = FormularioRequisicionesJefe()
+
+    data = {'requisiciones': requisiciones, 'form': form}
+
+    return render(request, 'compras/ver_requisiciones_jefe_departamento.html', data)
+
+
+@permission_required('organizacional.es_compras')
+def ver_requisiciones_compras(request):
+    """
+    Vista para ver las requisiciones que se han hecho desde un usuario de compras
+    """
+    empleado = request.user.empleado
+
+    requisiciones = Requisicion.objects.aprobadas_jefe_departamento().order_by('-fecha_ingreso')
+
+    if request.method == 'POST':
+        form = FormularioRequisicionesCompras(data=request.POST)
+        if form.is_valid():
+            requisicion = Requisicion.objects.get(id=form.cleaned_data['id_requisicion'])
+            if 'aprobar' in request.POST:
+                if 'observacion' in form.cleaned_data:
+                    historial = requisicion.crear_historial(
+                        empleado=empleado, estado=Historial.APROBADA,
+                        observacion=form.cleaned_data['observacion']
+                    )
+                else:
+                    historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
+                mensaje = 'aprobado'
+            elif 'rechazar' in request.POST:
+                if 'observacion' in form.cleaned_data:
+                    historial = requisicion.crear_historial(
+                        empleado=empleado, estado=Historial.RECHAZADA,
+                        observacion=form.cleaned_data['observacion']
+                    )
+                else:
+                    historial = requisicion.crear_historial(empleado=empleado, estado=Historial.RECHAZADA)
+                mensaje = 'rechazado'
+            historial.save()
+            messages.success(
+                request,
+                _("Se ha {} la requisición No.{} con exito".format(mensaje, requisicion.id))
+            )
+            return redirect('compras:ver_requisiciones_compras')
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+    else:
+        form = FormularioRequisicionesCompras()
+
+    data = {'requisiciones': requisiciones, 'form': form}
+
+    return render(request, 'compras/ver_requisiciones_compras.html', data)
+
+
+@permission_required('organizacional.es_compras')
+def adjuntar_archivos_requisicion(request, id_requisicion):
+    """
+    Vista para adjuntar archivos a una requisicion
+    """
+
+    requisicion = get_object_or_404(Requisicion, pk=id_requisicion)
+
+    AdjuntoFormset = modelformset_factory(
+        Adjunto, form=FormularioAdjunto, min_num=0, extra=1,
+        validate_min=False, can_delete=True
+    )
+
+    if request.method == 'POST':
+        form_historial = FormularioObservacionHistorial(data=request.POST, instance=requisicion.historial_set.last())
+        formset_adjunto = AdjuntoFormset(data=request.POST, files=request.FILES, queryset=requisicion.adjunto_set.all())
+
+        if formset_adjunto.is_valid() and form_historial.is_valid():
+            for form_adjunto in formset_adjunto:
+                if form_adjunto.cleaned_data.get('DELETE', False) and hasattr(form_adjunto.instance, 'pk'):
+                    if form_adjunto.instance.id is not None or form_adjunto.instance.pk is not None:
+                        form_adjunto.instance.delete()
+                    continue
+                form_adjunto.instance.requisicion = requisicion
+                if not form_adjunto.cleaned_data.get('archivo', False):
+                    continue
+                form_adjunto.save()
+
+            messages.success(request, _("Se ha editado la requisicion No.{} exitosamente".format(requisicion.id)))
+            return redirect(reverse('compras:adjuntar_archivos_requisicion', args=(requisicion.id, )))
+
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+
+    else:
+        form_historial = FormularioObservacionHistorial()
+        formset_adjunto = AdjuntoFormset(queryset=requisicion.adjunto_set.all())
+
+    data = {'formset_adjunto': formset_adjunto, 'form': form_historial}
+
+    return render(request, 'compras/adjuntar_archivos_requisicion.html', data)

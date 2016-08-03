@@ -1,5 +1,9 @@
+# Django Package
+from django.utils.translation import ugettext as _
 from django import forms
-from .models import Requisicion, DetalleRequisicion, Adjunto
+
+# Locale Apps
+from .models import Requisicion, DetalleRequisicion, Adjunto, Historial
 
 
 class FormularioSolicitudRequisicion(forms.ModelForm):
@@ -54,3 +58,60 @@ class FormularioAdjunto(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FormularioAdjunto, self).__init__(*args, **kwargs)
+
+
+class FormularioRequisicionesJefe(forms.Form):
+    """
+    Formulario para las requisiciones que puede aprobar el jefe
+    """
+
+    error_css_class = 'has-error'
+
+    id_requisicion = forms.IntegerField()
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioRequisicionesJefe, self).__init__(*args, **kwargs)
+
+        self.fields['id_requisicion'].widget = forms.HiddenInput()
+
+
+class FormularioRequisicionesCompras(forms.Form):
+    """
+    Formulario para las requisiciones que pueden ver los usuarios de compras
+    """
+
+    error_css_class = 'has-error'
+
+    id_requisicion = forms.IntegerField()
+
+    observacion = forms.CharField(widget=forms.Textarea())
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioRequisicionesCompras, self).__init__(*args, **kwargs)
+        self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['id_requisicion'].widget = forms.HiddenInput()
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(FormularioRequisicionesCompras, self).clean(*args, **kwargs)
+        if 'id_requisicion' in cleaned_data and 'observacion' in cleaned_data:
+            if 'rechazar' in self.data and cleaned_data['observacion'] == '':
+                self.add_error('observacion', _("Este campo debe ser obligatorio"))
+
+
+class FormularioObservacionHistorial(forms.ModelForm):
+    """
+    Formulario para la creaciond de observaciones de el historial de una requisicion
+    """
+
+    error_css_class = 'has-error'
+
+    class Meta:
+        model = Historial
+        fields = ('observacion', )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioObservacionHistorial, self).__init__(*args, **kwargs)
+        self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
+
+        if self.initial and 'observacion' in self.initial:
+            self.fields['observacion'].widget.attrs.update({'readonly': ''})

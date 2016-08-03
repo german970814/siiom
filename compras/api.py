@@ -1,0 +1,74 @@
+# Django Package
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+# Locale Apps
+from .models import Requisicion
+
+# Python Package
+import json
+
+
+@login_required
+@csrf_exempt
+def detalles_requisicion_api(request, id_requisicion):
+    """
+    Devuelve en formato json los detalles de una requisicion
+    """
+
+    try:
+        requisicion = Requisicion.objects.get(id=id_requisicion)
+
+        data = [
+            {
+                'cantidad': detalle.cantidad or 1, 'descripcion': detalle.descripcion,
+                'referencia': detalle.referencia or '', 'marca': detalle.marca or '',
+                'valor_aprobado': detalle.valor_aprobado or 0, 'total_aprobado': detalle.total_aprobado or 0,
+                'forma_pago': detalle.get_forma_pago_display()
+            } for detalle in requisicion.detallerequisicion_set.all()
+        ]
+
+        return HttpResponse(json.dumps(data), content_type='application/json')
+    except:
+        return HttpResponse('', content_type='text/plain')
+
+
+@login_required
+@csrf_exempt
+def observaciones_requisicion(request, id_requisicion):
+    """
+    Devuelve la observacion ligada a la requisicion y el nombre del usuario
+    """
+
+    try:
+        requisicion = Requisicion.objects.get(id=id_requisicion)
+
+        data = [
+            {
+                'observacion': historia.observacion,
+                'usuario': historia.empleado.__str__()
+            } for historia in requisicion.historial_set.all() if historia.observacion
+        ]
+
+        return HttpResponse(json.dumps(data), content_type='application/json')
+    except:
+        return HttpResponse('', content_type='text/plain')
+
+
+@login_required
+@csrf_exempt
+def requisicion_comentada_api(request, id_requisicion):
+    """
+    Retorna un valor para ser evaluado en javascript con true o false si esta comentada
+    """
+    # if requisicion.historial_set.last().empleado.usuario.has_perm('organizacional.es_compras'):
+    try:
+        requisicion = Requisicion.objects.get(id=id_requisicion)
+
+        if Requisicion.DATA_SET['administrativo'] == requisicion.get_rastreo():
+            return HttpResponse('true', content_type='text/plain')
+        else:
+            return HttpResponse('false', content_type='text/plain')
+    except:
+        return HttpResponse('', content_type='text/plain')

@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
+from .managers import AreaManager
+
 
 class Departamento(models.Model):
     """Modelo para guardar los departamentos de una iglesia."""
@@ -25,6 +27,8 @@ class Area(models.Model):
 
     nombre = models.CharField(_('nombre'), max_length=100)
     departamento = models.ForeignKey(Departamento, verbose_name=_('departamento'), related_name='areas')
+
+    objects = AreaManager()
 
     class Meta:
         verbose_name = _('área')
@@ -56,6 +60,7 @@ class Empleado(models.Model):
         permissions = (
             ('es_administrador_sgd', 'Es Administrador de Sistema Gestion Documental'),
             ('buscar_registros', 'Puede Buscar Registros'),
+            ('es_compras', 'Es usuario de compras'),
         )
 
     def __str__(self):

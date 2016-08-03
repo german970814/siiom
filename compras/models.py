@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from .managers import RequisicionManager
+
 import re
 
 
@@ -30,11 +32,22 @@ class Requisicion(models.Model):
         (ANULADA, 'ANULADA'),
     )
 
+    DATA_SET = {
+        'administrativo': 'En Jefe Administrativo',
+        'compras': 'En Área de Compras',
+        'departamento': 'En Jefe de Departamento',
+        'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
+        'rechaza_compras': 'Rechazada por Usuario de compras %s',
+        'rechaza_departamento': 'Rechazada por Jefe de Departamento'
+    }
+
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
     empleado = models.ForeignKey('organizacional.Empleado', verbose_name=_('empleado'))
     observaciones = models.TextField(verbose_name=_('observaciones'))
     prioridad = models.CharField(max_length=1, verbose_name=_('prioridad'), choices=OPCIONES_PRIORIDAD)
     estado = models.CharField(max_length=2, verbose_name=_('estado'), choices=OPCIONES_ESTADO, default=PENDIENTE)
+
+    objects = RequisicionManager()
 
     class Meta:
         verbose_name = _('requisición')
@@ -42,6 +55,46 @@ class Requisicion(models.Model):
 
     def __str__(self):
         return "{0}".format(self.id)
+
+    def crear_historial(self, empleado, estado, observacion=''):
+        """
+        Método para crear el historial de una requisicion y devuelve el objeto de Historial
+        sin guardar
+        """
+        historia = Historial()
+        historia.empleado = empleado
+        historia.observacion = observacion
+        historia.estado = estado
+        historia.requisicion = self
+        return historia
+
+    def get_rastreo(self):
+        """
+        Método de rastreo que determina en que lugar se encuentra actualmente una requisición
+        (nombre dado por Google)
+        """
+
+        if self.historial_set.all():
+            ultimo = self.historial_set.last()
+            if ultimo.estado == Historial.APROBADA:
+                if ultimo.empleado.usuario.has_perm('organizacional.es_compras') \
+                   and ultimo.empleado.jefe_departamento is True:
+                    return self.__class__.DATA_SET['administrativo']
+                elif ultimo.empleado.jefe_departamento is True:
+                    return self.__class__.DATA_SET['compras']
+                elif ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
+                    return self.__class__.DATA_SET['administrativo']
+            else:
+                if ultimo.empleado.jefe_departamento is True \
+                   and ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
+                    if self.historial_set.count() > 1:
+                        return self.__class__.DATA_SET['rechaza_compras'] % ultimo.empleado.__str__()
+                    return self.__class__.DATA_SET['rechaza_departamento']
+                if ultimo.empleado.jefe_departamento is True:
+                    return self.__class__.DATA_SET['rechaza_departamento']
+                elif ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
+                    return self.__class__.DATA_SET['rechaza_compras'] % ultimo.empleado.__str__()
+        return 'Digitada por Empleado y en Jefe de Departamento'
 
 
 class DetalleRequisicion(models.Model):
@@ -59,7 +112,7 @@ class DetalleRequisicion(models.Model):
 
     cantidad = models.PositiveIntegerField(verbose_name=_('cantidad'), blank=True, null=True)
     descripcion = models.TextField(verbose_name=_('descripción'))
-    referencia = models.CharField(max_length=50, verbose_name=_('referncia'), blank=True)
+    referencia = models.CharField(max_length=50, verbose_name=_('referencia'), blank=True)
     marca = models.CharField(max_length=100, verbose_name=_('marca'), blank=True)
     valor_aprobado = models.PositiveIntegerField(verbose_name=_('valor aprobado'), blank=True, null=True)
     total_aprobado = models.PositiveIntegerField(verbose_name=_('total aprobado'), blank=True, null=True)

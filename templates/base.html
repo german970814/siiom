@@ -522,6 +522,29 @@
                             </li>                            
                         {% endif %}
                     {% endswitch %}
+                    {% switch "compras" %}
+                        <li class="sub-menu">
+                            <a href=""><i class="zmdi zmdi-shopping-cart"></i>{% trans "Compras" %}</a>
+                            <ul>
+                                <li>
+                                    <a href="{% url 'compras:crear_requisicion' %}">{% trans "Nueva Requisición" %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_empleado' %}">{% trans "Mis Requisiciones" %}</a>
+                                </li>
+                                {% if request.user.empleado.jefe_departamento %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_jefe_departamento' %}">{% trans "Requisiciones de mi Departamento" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if perms.organizacional.es_compras %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_compras' %}">{% trans "Requiciones Totales" %}</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>     
+                    {% endswitch %}
                 {% endif %} 
             </ul>
         </aside>

@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from .models import Adjunto
 
 # Python Package
-# import os
+import os
 
 __author__ = 'German Alzate'
 
@@ -16,5 +16,6 @@ __author__ = 'German Alzate'
 @receiver(signal=post_delete, sender=Adjunto)
 def model_post_delete(sender, **kwargs):
     instance = kwargs['instance']
-    print("*******************************************")
-    print("Se borran Documentos pertenecientes a {}".format(instance.id))
+
+    if os.path.exists(instance.archivo._get_path()) and os.path.isfile(instance.archivo._get_path()):
+        os.remove(instance.archivo._get_path())
