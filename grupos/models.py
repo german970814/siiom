@@ -26,6 +26,7 @@ class Grupo(models.Model):
         ('6', 'Domingo'),
     )
 
+    parent = models.ForeignKey('self', related_name='children_set', null=True, db_index=True)
     lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno')
     lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
     direccion = models.CharField(max_length=50)  # poner opcion de asignar la misma del lider por defecto(cual lider?)
