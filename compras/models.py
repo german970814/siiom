@@ -29,16 +29,26 @@ class Requisicion(models.Model):
         (PENDIENTE, 'PENDIENTE'),
         (PROCESO, 'PROCESO'),
         (TERMINADA, 'TERMINADA'),
-        (ANULADA, 'ANULADA'),
+        (ANULADA, 'RECHAZADA'),
+    )
+
+    EFECTIVO = 'E'
+    CREDITO = 'C'
+
+    OPCIONES_FORMA_PAGO = (
+        (EFECTIVO, 'EFECTIVO'),
+        (CREDITO, 'CRÉDITO'),
     )
 
     DATA_SET = {
+        'digitada': 'Digitada por Empleado y en Jefe de Departamento',
         'administrativo': 'En Jefe Administrativo',
         'compras': 'En Área de Compras',
         'departamento': 'En Jefe de Departamento',
         'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'rechaza_compras': 'Rechazada por Usuario de compras %s',
-        'rechaza_departamento': 'Rechazada por Jefe de Departamento'
+        'rechaza_departamento': 'Rechazada por Jefe de Departamento',
+        'terminada': 'Requisicion en su etapa finalizada'
     }
 
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
@@ -46,6 +56,11 @@ class Requisicion(models.Model):
     observaciones = models.TextField(verbose_name=_('observaciones'))
     prioridad = models.CharField(max_length=1, verbose_name=_('prioridad'), choices=OPCIONES_PRIORIDAD)
     estado = models.CharField(max_length=2, verbose_name=_('estado'), choices=OPCIONES_ESTADO, default=PENDIENTE)
+
+    fecha_pago = models.DateField(verbose_name=_('fecha de pago'), blank=True, null=True)
+    form_pago = models.CharField(
+        max_length=1, verbose_name=_('forma de pago'), blank=True, choices=OPCIONES_FORMA_PAGO
+    )
 
     objects = RequisicionManager()
 
@@ -55,6 +70,19 @@ class Requisicion(models.Model):
 
     def __str__(self):
         return "{0}".format(self.id)
+
+    def __len__(self):
+        cls = self.__class__
+        rastreo = self.get_rastreo()
+        if rastreo == cls.DATA_SET['digitada']:
+            return 1
+        elif rastreo == cls.DATA_SET['departamento']:
+            return 2
+        elif rastreo == cls.DATA_SET['compras']:
+            return 3
+        elif rastreo == cls.DATA_SET['administrativo']:
+            return 4
+        return 0
 
     def crear_historial(self, empleado, estado, observacion=''):
         """
@@ -73,7 +101,8 @@ class Requisicion(models.Model):
         Método de rastreo que determina en que lugar se encuentra actualmente una requisición
         (nombre dado por Google)
         """
-
+        if self.estado == self.__class__.TERMINADA:
+            return self.__class__.DATA_SET['terminada']
         if self.historial_set.all():
             ultimo = self.historial_set.last()
             if ultimo.estado == Historial.APROBADA:
@@ -94,7 +123,18 @@ class Requisicion(models.Model):
                     return self.__class__.DATA_SET['rechaza_departamento']
                 elif ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
                     return self.__class__.DATA_SET['rechaza_compras'] % ultimo.empleado.__str__()
-        return 'Digitada por Empleado y en Jefe de Departamento'
+        return self.__class__.DATA_SET['digitada']
+
+    @property
+    def is_anulada(self):
+        """
+        Retorna Verdadero si la requisicion fue anulada
+        """
+
+        if self.estado == self.__class__.ANULADA or \
+           any([x for x in self.historial_set.all().distinct() if x.estado == Historial.RECHAZADA]):
+            return True
+        return False
 
 
 class DetalleRequisicion(models.Model):

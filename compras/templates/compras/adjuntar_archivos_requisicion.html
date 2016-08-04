@@ -8,7 +8,7 @@
 		<div class="card">
 			<div class="card-header">
 				<h2>
-					<legend><h3>{% trans "Adjuntar Archivo" %}</h3></legend>
+					<legend><h3>{% trans "Adjuntar Archivo a Requición No." %}{{ requisicion.id }}</h3></legend>
 				</h2>
 				{% if messages %}
 					{% for message in messages %}
@@ -66,17 +66,10 @@
 	                            <span class="input-group-addon">
 	                                <i class="zmdi zmdi-file"></i>
 	                            </span>
-	                            <label for="{{ form_adjunto.archivo.id_for_label }}" class="fg-label requerido control-label">{{ form_adjunto.archivo.label|title }}:</label>
-	                            <br>
-	                            <div class="fileinput fileinput-new" data-provides="fileinput">
-					                <span class="btn btn-primary btn-file m-r-10">
-					                    <span class="fileinput-new">Seleccionar Archivo</span>
-					                    <span class="fileinput-exists">Cambiar</span>
-					                    {{ form_adjunto.archivo }}
-					                </span>
-					                <span class="fileinput-filename"></span>
-					                <a href="#" class="close fileinput-exists" data-dismiss="fileinput">&times;</a>
-					            </div>
+	                            <div class="fg-line requerido">
+						            <label for="{{ form_adjunto.archivo.id_for_label }}" class="fg-label requerido control-label">{{ form_adjunto.archivo.label|title }}:</label>
+						            {{ form_adjunto.archivo }}
+						        </div>
 	                            {% for error in form_adjunto.archivo.errors %}
 	                                <small class="help-block">{{ error }}</small>
 	                            {% endfor %}

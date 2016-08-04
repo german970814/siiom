@@ -12,11 +12,11 @@
             {% if messages %}
                 {% for message in messages %}
                     <div class="row">
-                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
-                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>{{ message }}</p>
+                        <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p>{{ message|safe }}</p>
+                        </div>
                     </div>
-                </div>
                 {% endfor %}
             {% endif %}
 		</div>
@@ -86,7 +86,25 @@
                             </tbody>
                         </table>
                     </div>
+                    <br>
+                    <br>
                     <div id="contenido"></div>
+                    <div class="row to_hidden">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="input-group fg-float {{ form.observacion.css_classes }}">
+                                <span class="input-group-addon">
+                                    <i class="zmdi zmdi-"></i>
+                                </span>
+                                <div class="fg-line requerido">
+                                    <label for="id_observacion" class="control-label requerido">Observaciones:</label>
+                                    {{ form.observacion }}
+                                </div>
+                                {% for error in form.observacion.errors %}
+                                    <small class="help-block">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="aprobar" class="btn btn-link to_hidden">Aprobar</button>
@@ -183,6 +201,12 @@
                     })
                     $('#toggleModal').click();
                 })
+
+
+                {% if CLICK %}
+                var $id_to_error = '{{ CLICK }}';
+                $('tr[data-row-id="' + $id_to_error + '"]').find('button.proceso').click();
+                {% endif %}
             });
 		});
 	</script>

@@ -17,6 +17,11 @@ urlpatterns = [
         name="ver_requisiciones_jefe_departamento"
     ),
     url(
+        r'^requisiciones_jefe_administrativo/$',
+        views.ver_requisiciones_jefe_administrativo,
+        name="ver_requisiciones_jefe_administrativo"
+    ),
+    url(
         r'^api/detalles/(?P<id_requisicion>\d+)$',
         api.detalles_requisicion_api,
         name="detalles_requisicion_api"
@@ -30,5 +35,10 @@ urlpatterns = [
         r'^api/comentada/(?P<id_requisicion>\d+)$',
         api.requisicion_comentada_api,
         name="requisicion_comentada_api"
+    ),
+    url(
+        r'^api/comentada_compras/(?P<id_requisicion>\d+)$',
+        api.requisicion_comentada_compras_api,
+        name="requisicion_comentada_compras_api"
     ),
 ]

@@ -72,3 +72,13 @@ class Empleado(models.Model):
         """
         from gestion_documental.models import SolicitudRegistro as Solicitud
         return self.solicitudes.filter(estado__in=[Solicitud.PENDIENTE, Solicitud.ENTREGADO_DIGITADOR])
+
+    @property
+    def is_jefe_administrativo(self):
+        """
+        Retorna verdadero si es jefe administrativo
+        """
+        if self.jefe_departamento:
+            if any(self.areas.filter(departamento__nombre__icontains='administra')):
+                return True
+        return False

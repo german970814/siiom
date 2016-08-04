@@ -84,7 +84,7 @@ class FormularioRequisicionesCompras(forms.Form):
 
     id_requisicion = forms.IntegerField()
 
-    observacion = forms.CharField(widget=forms.Textarea())
+    observacion = forms.CharField(widget=forms.Textarea(), required=False)
 
     def __init__(self, *args, **kwargs):
         super(FormularioRequisicionesCompras, self).__init__(*args, **kwargs)
@@ -114,4 +114,5 @@ class FormularioObservacionHistorial(forms.ModelForm):
         self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
 
         if self.initial and 'observacion' in self.initial:
-            self.fields['observacion'].widget.attrs.update({'readonly': ''})
+            # self.fields['observacion'].widget.attrs.update({'readonly': ''})
+            pass

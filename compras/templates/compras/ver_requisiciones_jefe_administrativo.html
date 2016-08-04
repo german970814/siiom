@@ -6,7 +6,19 @@
 <div class="container">
 	<div class="card">
 		<div class="card-header">
-			<h1><legend><h3>Mis Requisiciones</h3></legend></h1>
+			<h1>
+                <legend><h3>Requisiciones Aprobadas por Compras</h3></legend>
+            </h1>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="row">
+                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{ message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
 		</div>
 		<div class="card-body card-padding">
 			<div class="row table-responsive">
@@ -16,10 +28,10 @@
                             <tr>
                                 <th data-identifier="true" data-column-id="id">{% trans "No." %}</th>
                                 <th data-identifier="true" data-column-id="nombre">{% trans "Justificación" %}</th>
+                                <th data-identifier="true" data-column-id="solicitnte">{% trans "Solicitante" %}</th>
                                 <th data-identifier="true" data-column-id="area">{% trans "Fecha Ingreso" %}</th>
                                 <th data-identifier="true" data-column-id="des">{% trans "Estado" %}</th>
                                 <th data-identifier="true" data-column-id="fecha">{% trans "Prioridad" %}</th>
-                                <th data-identifier="true" data-column-id="lugar">{% trans "Seguimiento" %}</th>
                                 <th data-column-id="commands" data-formatter="commands" data-sortable="false">{% trans "Comandos" %}</th>
                             </tr>
                         </thead>
@@ -28,10 +40,10 @@
                                 <tr>
                                     <td>{{ requisicion.id }}</td>
                                     <td>{{ requisicion.observaciones }}</td>
+                                    <td>{{ requisicion.empleado }}</td>
                                     <td>{{ requisicion.fecha_ingreso }}</td>
                                     <td>{{ requisicion.get_estado_display|upper }}</td>
                                     <td>{{ requisicion.get_prioridad_display|upper }}</td>
-                                    <td>{{ requisicion.get_rastreo|upper }}</td>
                                 </tr>
                             {% empty %}
                                 <tr>
@@ -77,8 +89,26 @@
                     <br>
                     <br>
                     <div id="contenido"></div>
+                    <div class="row to_hidden">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="input-group fg-float {{ form.observacion.css_classes }}">
+                                <span class="input-group-addon">
+                                    <i class="zmdi zmdi-"></i>
+                                </span>
+                                <div class="fg-line requerido">
+                                    <label for="id_observacion" class="control-label requerido">Observaciones:</label>
+                                    {{ form.observacion }}
+                                </div>
+                                {% for error in form.observacion.errors %}
+                                    <small class="help-block">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="submit" name="aprobar" class="btn btn-link to_hidden">Aprobar</button>
+                    <button type="submit" name="rechazar" class="btn btn-link to_hidden">Rechazar</button>
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
                 </div>
             </form>
@@ -110,7 +140,7 @@
                 caseSensitive: false,
                 formatters: {
                     "commands" : function(column, row) {
-                        return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/requisiciones/editar_requisicion/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " + "<button type=\"button\" class=\"btn btn-icon proceso command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button>";
+                        return "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
                     },
                 }
             });
@@ -156,6 +186,20 @@
                             $('#contenido').html(to_append)
                         },
                     });
+                    $.ajax({
+                        url: '{% url "compras:requisicion_comentada_api" 0 %}'.replace('0', $id),
+                        type: 'GET',
+                        success: function (data) {
+                            if (data.length) {
+                                if (eval(data)){
+                                    $('.to_hidden').fadeOut();
+                                } else {
+                                    $('.to_hidden').fadeIn();
+                                }
+                            }
+                        }
+                    })
+                    
                     $('#toggleModal').click();
                 })
             });

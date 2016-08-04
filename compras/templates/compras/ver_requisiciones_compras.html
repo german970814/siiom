@@ -26,6 +26,7 @@
                     <table id="data-table-command" class="table table-striped table-vmiddle">
                         <thead>
                             <tr>
+                                <th data-visible="false" data-column-id="files"></th>
                                 <th data-identifier="true" data-column-id="id">{% trans "No." %}</th>
                                 <th data-identifier="true" data-column-id="nombre">{% trans "Justificación" %}</th>
                                 <th data-identifier="true" data-column-id="solicitnte">{% trans "Solicitante" %}</th>
@@ -38,6 +39,7 @@
                         <tbody>
                             {% for requisicion in requisiciones %}
                                 <tr>
+                                    <td>{{ requisicion|length }}</td>
                                     <td>{{ requisicion.id }}</td>
                                     <td>{{ requisicion.observaciones }}</td>
                                     <td>{{ requisicion.empleado }}</td>
@@ -108,7 +110,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" name="aprobar" class="btn btn-link to_hidden">Aprobar</button>
-                    <button type="submit" name="rechazar" class="btn btn-link to_hidden">Rechazar</button>
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
                 </div>
             </form>
@@ -140,7 +141,14 @@
                 caseSensitive: false,
                 formatters: {
                     "commands" : function(column, row) {
-                        return "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
+                        var alternative = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='/requisiciones/adjuntar/" + row.id + "'\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-file\"></span></button>";
+
+                        var button = "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
+
+                        if (row.files == 3) {
+                            return button + alternative
+                        }
+                        return button
                     },
                 }
             });
@@ -187,7 +195,7 @@
                         },
                     });
                     $.ajax({
-                        url: '{% url "compras:requisicion_comentada_api" 0 %}'.replace('0', $id),
+                        url: '{% url "compras:requisicion_comentada_compras_api" 0 %}'.replace('0', $id),
                         type: 'GET',
                         success: function (data) {
                             if (data.length) {
