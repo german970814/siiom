@@ -26,13 +26,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'waffle',
+    'treebeard',
     'miembros',
     'academia',
     'grupos',
     'reportes',
     'encuentros',
     'organizacional',
-    'gestion_documental'
+    'gestion_documental',
 )
 
 MIDDLEWARE_CLASSES = (
