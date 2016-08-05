@@ -1,0 +1,72 @@
+<div class="modal fade" id="modalWider" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Detalles de la Requisición</h4>
+            </div>
+            <form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {{ form.id_requisicion }}
+                    <div class="table table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Cantidad</th>
+                                    <th>Descripción</th>
+                                    <th>Referencia</th>
+                                    <th>Marca</th>
+                                    <th>Valor Aprobado</th>
+                                    <th>Total Aprobado</th>
+                                    <th>Forma de Pago</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <br>
+                    <br>
+                    <div id="archivos">
+                        <h5>Archivos adjuntos a esta requisición</h5>
+                        <ul id="archivos_list">
+                            
+                        </ul>
+                    </div>
+                    <br>
+                    <br>
+                    <div id="contenido"></div>
+                    {% if not empleado %}
+                    <div class="row to_hidden">
+                        <div class="col-md-8 col-md-offset-2">
+                            <div class="input-group fg-float {{ form.observacion.css_classes }}">
+                                <span class="input-group-addon">
+                                    <i class="zmdi zmdi-"></i>
+                                </span>
+                                <div class="fg-line requerido">
+                                    <label for="id_observacion" class="control-label requerido">Observaciones:</label>
+                                    {{ form.observacion }}
+                                </div>
+                                {% for error in form.observacion.errors %}
+                                    <small class="help-block">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    {% if not empleado %}
+                    <button type="submit" name="aprobar" class="btn btn-link to_hidden">Aprobar</button>
+                    {% if not compras %}
+                    <button type="submit" name="rechazar" class="btn btn-link to_hidden">Rechazar</button>
+                    {% endif %}
+                    {% endif %}
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModal" href="#modalWider"></a>

@@ -43,14 +43,22 @@ def observaciones_requisicion(request, id_requisicion):
 
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
-
-        data = [
+        data = []
+        data1 = [
             {
                 'observacion': historia.observacion,
                 'usuario': historia.empleado.__str__()
             } for historia in requisicion.historial_set.all() if historia.observacion
         ]
-
+        data2 = [
+            {
+                'archivo': archivo.archivo.url,
+                'ruta': archivo.archivo.url
+            } for archivo in requisicion.adjunto_set.all()
+        ]
+        data.insert(0, data1)
+        if data2:
+            data.insert(1, data2)
         return HttpResponse(json.dumps(data), content_type='application/json')
     except:
         return HttpResponse('', content_type='text/plain')

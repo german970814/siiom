@@ -12,11 +12,11 @@
             {% if messages %}
                 {% for message in messages %}
                     <div class="row">
-                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
-                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>{{ message }}</p>
+                        <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p>{{ message|safe }}</p>
+                        </div>
                     </div>
-                </div>
                 {% endfor %}
             {% endif %}
 		</div>
@@ -33,7 +33,9 @@
                                 <th data-identifier="true" data-column-id="des">{% trans "Estado" %}</th>
                                 <th data-identifier="true" data-column-id="fecha">{% trans "Prioridad" %}</th>
                                 <th data-identifier="true" data-column-id="seg">{% trans "Seguimiento" %}</th>
+                                {% if requisiciones %}
                                 <th data-column-id="commands" data-formatter="commands" data-sortable="false">{% trans "Comandos" %}</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -60,156 +62,35 @@
 	</div>
 </div>
 
-<div class="modal fade" id="modalWider" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Detalles de la Requisición</h4>
-            </div>
-            <form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="modal-body">
-                    {{ form.id_requisicion }}
-                    <div class="table table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Cantidad</th>
-                                    <th>Descripción</th>
-                                    <th>Referencia</th>
-                                    <th>Marca</th>
-                                    <th>Valor Aprobado</th>
-                                    <th>Total Aprobado</th>
-                                    <th>Forma de Pago</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-
-                            </tbody>
-                        </table>
-                    </div>
-                    <br>
-                    <br>
-                    <div id="contenido"></div>
-                    <div class="row to_hidden">
-                        <div class="col-md-8 col-md-offset-2">
-                            <div class="input-group fg-float {{ form.observacion.css_classes }}">
-                                <span class="input-group-addon">
-                                    <i class="zmdi zmdi-"></i>
-                                </span>
-                                <div class="fg-line requerido">
-                                    <label for="id_observacion" class="control-label requerido">Observaciones:</label>
-                                    {{ form.observacion }}
-                                </div>
-                                {% for error in form.observacion.errors %}
-                                    <small class="help-block">{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" name="aprobar" class="btn btn-link to_hidden">Aprobar</button>
-                    <button type="submit" name="rechazar" class="btn btn-link to_hidden">Rechazar</button>
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<a data-toggle="modal" id="toggleModal" href="#modalWider"></a>
+{% include "compras/detalles_requisicion.html" %}
 
 
 {% endblock contenido %}
 
 {% block js %}
-	<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
-	<script src="{% static 'Template/jquery/vendors/bower_components/lightgallery/light-gallery/js/lightGallery.min.js' %}"></script>
-	<script src="{% static 'Scripts/tagsinput/bootstrap-tagsinput.js' %}"></script>
-	<script>
-		$(window).load(function (e) {
-			window.localStorage.removeItem('__/sgd/palabras_claves_json/__data')
-		})
-		jQuery(document).ready(function($) {
-			$("#data-table-command").bootgrid({
-                css: {
-                    icon: 'zmdi icon',
-                    iconColumns: 'zmdi-view-module',
-                    iconDown: 'zmdi-expand-more',
-                    iconRefresh: 'zmdi-refresh',
-                    iconUp: 'zmdi-expand-less'
-                    },
-                caseSensitive: false,
-                formatters: {
-                    "commands" : function(column, row) {
-                        return "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
-                    },
-                }
-            });
-
-            $("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
-                $('.proceso').click(function(event) {
-                    var $id = $(this).attr('data-row-id');
-                    $('input[name="id_requisicion"]').val($id);
-
-                    $.ajax({
-                        url: '{% url "compras:detalles_requisicion_api" 0 %}'.replace('0', $id),
-                        type: 'GET',
-                        success: function(data) {
-                            var arr = ['cantidad', 'descripcion', 'referencia', 'marca', 'valor_aprobado', 'total_aprobado', 'forma_pago'];
-                            var to_append = '';
-                            for (var i = 0; i < data.length; i++) {
-                                var tr = '<tr>0</tr>'
-                                var tds = '';
-                                for (var j = 0; j < arr.length; j++) {
-                                    tds += '<td>0</td>'.replace('0', data[i][arr[j]])
-                                }
-                                to_append += tr.replace('0', tds);
-                            }
-                            $("#table-body").html(to_append);
-                        }
-                    });
-                    $.ajax({
-                        url: '{% url "compras:observaciones_requisicion" 0 %}'.replace('0', $id),
-                        type: 'GET',
-                        success: function(data) {
-                            var arr = ['observacion', 'usuario'];
-                            var div = '<div class="col-md-8">0</div>';
-                            var h5 = '<h5>0</h5>';
-                            var to_append = '';
-                            var br = '<br />';
-                            var quote = '<blockquote>0</blockquote>';
-
-                            for (var i = 0; i < data.length; i++) {
-                                str = h5.replace('0', data[i]['usuario']) + br + quote.replace('0', data[i]['observacion'])
-                                to_append += div.replace('0', str);
-                            }
-
-                            $('#contenido').html(to_append)
-                        },
-                    });
-                    $.ajax({
-                        url: '{% url "compras:requisicion_comentada_jefe_administrativo_api" 0 %}'.replace('0', $id),
-                        type: 'GET',
-                        success: function (data) {
-                            if (data.length) {
-                                if (eval(data)){
-                                    $('.to_hidden').fadeOut();
-                                } else {
-                                    $('.to_hidden').fadeIn();
-                                }
-                            }
-                        }
-                    })
-                    
-                    $('#toggleModal').click();
-                })
-
-                {% if CLICK %}
-                var $id_to_error = '{{ CLICK }}';
-                $('tr[data-row-id="' + $id_to_error + '"]').find('button.proceso').click();
-                {% endif %}
-            });
-		});
-	</script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script>
+	jQuery(document).ready(function($) {
+		$("#data-table-command").bootgrid({
+            css: {
+                icon: 'zmdi icon',
+                iconColumns: 'zmdi-view-module',
+                iconDown: 'zmdi-expand-more',
+                iconRefresh: 'zmdi-refresh',
+                iconUp: 'zmdi-expand-less'
+                },
+            caseSensitive: false,
+            formatters: {
+                "commands" : function(column, row) {
+                    return "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
+                },
+            }
+        });
+	});
+</script>
+{% if not CLICK %}
+{% include "compras/_detalles_requisicion_js.html" with jefe_administrativo="true" %}
+{% else %}
+{% include "compras/_detalles_requisicion_js.html" with jefe_administrativo="true" CLICK=CLICK%}
+{% endif %}
 {% endblock js %}

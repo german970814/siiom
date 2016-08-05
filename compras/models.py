@@ -210,6 +210,13 @@ class Adjunto(models.Model):
     def __str__(self):
         return "{0}".format(self.id)
 
+    def get_name(self):
+        """
+        Retorna el nombre del archivo
+        """
+        path = self.archivo._get_path().split('/')
+        return path[len(path) - 1]
+
 
 class Historial(models.Model):
     """"Modelo que guarda la historia de cuando y quien modifica una requisicion."""
