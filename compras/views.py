@@ -59,6 +59,9 @@ def crear_requisicion(request):
                 requisicion.save()
                 formset_adjunto.save()
                 formset_detalles.save()
+                if empleado.jefe_departamento:
+                    historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
+                    historial.save()
                 messages.success(request, _("Se ha creado la requisicion con éxito" + url))
                 return redirect('compras:crear_requisicion')
             else:
@@ -407,10 +410,12 @@ def ver_requisiciones_jefe_administrativo(request):
     y que se encuentran para que el jefe administrativo pueda aprobarlas o rechazarlas
     """
 
-    requisiciones = Requisicion.objects.aprobadas_compras().distinct()
+    requisiciones = Requisicion.objects.aprobadas_compras().distinct().order_by('-fecha_ingreso')
     empleado = request.user.empleado
     if not empleado.is_jefe_administrativo:
         return redirect('sin_permiso')
+
+    data = {'requisiciones': requisiciones}
 
     if request.method == 'POST':
         form = FormularioRequisicionesCompras(data=request.POST)
@@ -426,13 +431,10 @@ def ver_requisiciones_jefe_administrativo(request):
                     historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
                 mensaje = 'aprobado'
             elif 'rechazar' in request.POST:
-                if 'observacion' in form.cleaned_data:
-                    historial = requisicion.crear_historial(
-                        empleado=empleado, estado=Historial.RECHAZADA,
-                        observacion=form.cleaned_data['observacion']
-                    )
-                else:
-                    historial = requisicion.crear_historial(empleado=empleado, estado=Historial.RECHAZADA)
+                historial = requisicion.crear_historial(
+                    empleado=empleado, estado=Historial.RECHAZADA,
+                    observacion=form.cleaned_data['observacion']
+                )
                 requisicion.estado = Requisicion.ANULADA
                 requisicion.save()
                 mensaje = 'rechazado'
@@ -441,12 +443,22 @@ def ver_requisiciones_jefe_administrativo(request):
                 request,
                 _("Se ha {} la requisición No.{} con exito".format(mensaje, requisicion.id))
             )
-            return redirect('compras:ver_requisiciones_compras')
+            return redirect('compras:ver_requisiciones_jefe_administrativo')
         else:
+            data['CLICK'] = form.cleaned_data['id_requisicion']
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
         form = FormularioRequisicionesCompras()
 
-    data = {'requisiciones': requisiciones}
+    data['form'] = form
 
     return render(request, 'compras/ver_requisiciones_jefe_administrativo.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def ver_requisiciones_financiero(request):
+    """
+    Vista para ver las requisiciones que han llegado al sector financiero
+    """
+    pass

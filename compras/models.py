@@ -40,14 +40,26 @@ class Requisicion(models.Model):
         (CREDITO, 'CRÉDITO'),
     )
 
+    PAGO_PROVEEDOR = 'PP'
+    ANTICIPO_PROVEEDOR = 'AP'
+    EFECTIVO_PROVEEDOR = 'EP'
+
+    OPCIONES_ESTADO_PAGO = (
+        (PAGO_PROVEEDOR, 'PAGO AL PROVEEDOR'),
+        (ANTICIPO_PROVEEDOR, 'ANTICIPO AL PROVEEDOR'),
+        (EFECTIVO_PROVEEDOR, 'EFECTIVO AL PROVEEDOR'),
+    )
+
     DATA_SET = {
         'digitada': 'Digitada por Empleado y en Jefe de Departamento',
         'administrativo': 'En Jefe Administrativo',
         'compras': 'En Área de Compras',
         'departamento': 'En Jefe de Departamento',
+        'Financiero': 'En Director Financiero',
         'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'rechaza_compras': 'Rechazada por Usuario de compras %s',
         'rechaza_departamento': 'Rechazada por Jefe de Departamento',
+        'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'terminada': 'Requisicion en su etapa finalizada'
     }
 
@@ -60,6 +72,9 @@ class Requisicion(models.Model):
     fecha_pago = models.DateField(verbose_name=_('fecha de pago'), blank=True, null=True)
     form_pago = models.CharField(
         max_length=1, verbose_name=_('forma de pago'), blank=True, choices=OPCIONES_FORMA_PAGO
+    )
+    estado_pago = models.CharField(
+        max_length=2, verbose_name=_('estado de pago'), blank=True, choices=OPCIONES_ESTADO_PAGO
     )
 
     objects = RequisicionManager()
@@ -108,21 +123,27 @@ class Requisicion(models.Model):
             if ultimo.estado == Historial.APROBADA:
                 if ultimo.empleado.usuario.has_perm('organizacional.es_compras') \
                    and ultimo.empleado.jefe_departamento is True:
-                    return self.__class__.DATA_SET['administrativo']
+                    if self.historial_set.count() > 2:
+                        return self.__class__.DATA_SET['administrativo']
+                    else:
+                        return self.__class__.DATA_SET['compras']
+                elif ultimo.empleado.is_jefe_administrativo is True:
+                    if self.historial_set.count() > 2:
+                        return self.__class__.DATA_SET['financiero']
+                    else:
+                        return self.__class__.DATA_SET['compras']
                 elif ultimo.empleado.jefe_departamento is True:
                     return self.__class__.DATA_SET['compras']
                 elif ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
                     return self.__class__.DATA_SET['administrativo']
             else:
-                if ultimo.empleado.jefe_departamento is True \
-                   and ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
-                    if self.historial_set.count() > 1:
-                        return self.__class__.DATA_SET['rechaza_compras'] % ultimo.empleado.__str__()
+                if ultimo.empleado.is_jefe_administrativo:
+                    return self.__class__.DATA_SET['rechaza_administrativo']
+                elif ultimo.empleado.jefe_departamento is True \
+                        and ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
                     return self.__class__.DATA_SET['rechaza_departamento']
-                if ultimo.empleado.jefe_departamento is True:
+                elif ultimo.empleado.jefe_departamento is True:
                     return self.__class__.DATA_SET['rechaza_departamento']
-                elif ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
-                    return self.__class__.DATA_SET['rechaza_compras'] % ultimo.empleado.__str__()
         return self.__class__.DATA_SET['digitada']
 
     @property

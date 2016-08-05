@@ -41,4 +41,9 @@ urlpatterns = [
         api.requisicion_comentada_compras_api,
         name="requisicion_comentada_compras_api"
     ),
+    url(
+        r'^api/comentada_jefe_administrativo/(?P<id_requisicion>\d+)$',
+        api.requisicion_comentada_jefe_administrativo_api,
+        name="requisicion_comentada_jefe_administrativo_api"
+    ),
 ]

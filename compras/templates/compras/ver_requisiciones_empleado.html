@@ -14,6 +14,7 @@
                     <table id="data-table-command" class="table table-striped table-vmiddle">
                         <thead>
                             <tr>
+                                <th data-identifier="true" data-visible="false" data-column-id="edit"></th>
                                 <th data-identifier="true" data-column-id="id">{% trans "No." %}</th>
                                 <th data-identifier="true" data-column-id="nombre">{% trans "Justificación" %}</th>
                                 <th data-identifier="true" data-column-id="area">{% trans "Fecha Ingreso" %}</th>
@@ -26,6 +27,7 @@
                         <tbody>
                             {% for requisicion in requisiciones %}
                                 <tr>
+                                    <td>{{ requisicion|length }}</td>
                                     <td>{{ requisicion.id }}</td>
                                     <td>{{ requisicion.observaciones }}</td>
                                     <td>{{ requisicion.fecha_ingreso }}</td>
@@ -110,7 +112,13 @@
                 caseSensitive: false,
                 formatters: {
                     "commands" : function(column, row) {
-                        return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/requisiciones/editar_requisicion/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " + "<button type=\"button\" class=\"btn btn-icon proceso command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button>";
+                        var editar = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/requisiciones/editar_requisicion/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
+
+                        var ver = "<button type=\"button\" class=\"btn btn-icon proceso command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button>";
+                        if (row.edit == 1) {
+                            return ver + editar;
+                        }
+                        return ver;
                     },
                 }
             });

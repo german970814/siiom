@@ -29,6 +29,12 @@ class RequisicionManager(models.Manager):
         )
         query = query1 | query2 | query3
 
-        return self.filter(query, historial__estado=Historial.APROBADA).exclude(
-            estado=self.model.ANULADA
-        ).distinct()
+        pre_query = self.annotate(
+            num_historial=models.Count('historial')
+        ).exclude(num_historial__lt=3, estado=self.model.ANULADA)
+
+        # return self.filter(query, historial__estado=Historial.APROBADA).exclude(
+        #     estado=self.model.ANULADA
+        # ).distinct()
+
+        return pre_query

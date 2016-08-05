@@ -61,6 +61,7 @@ def observaciones_requisicion(request, id_requisicion):
 def requisicion_comentada_api(request, id_requisicion):
     """
     Retorna un valor para ser evaluado en javascript con true o false si esta comentada
+    devuelve true si fue comentada por jefe de departamento
     """
     # if requisicion.historial_set.last().empleado.usuario.has_perm('organizacional.es_compras'):
     try:
@@ -79,11 +80,31 @@ def requisicion_comentada_api(request, id_requisicion):
 def requisicion_comentada_compras_api(request, id_requisicion):
     """
     Retorna un valor para ser evaluado en javascript con true o false si esta comentada
+    devuelve true si fue comentada por usuario de compras
     """
     # if requisicion.historial_set.last().empleado.usuario.has_perm('organizacional.es_compras'):
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
         _choices = [Requisicion.DATA_SET['administrativo']]
+        if requisicion.get_rastreo() in _choices:
+            return HttpResponse('true', content_type='text/plain')
+        else:
+            return HttpResponse('false', content_type='text/plain')
+    except:
+        return HttpResponse('', content_type='text/plain')
+
+
+@login_required
+@csrf_exempt
+def requisicion_comentada_jefe_administrativo_api(request, id_requisicion):
+    """
+    Retorna un valor para ser evaluado en javascript con true o false si esta comentada
+    devuelve true si fue comentada por jefe administrativo
+    """
+
+    try:
+        requisicion = Requisicion.objects.get(id=id_requisicion)
+        _choices = [Requisicion.DATA_SET['financiero']]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
         else:

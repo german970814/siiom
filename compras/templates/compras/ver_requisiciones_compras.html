@@ -33,6 +33,7 @@
                                 <th data-identifier="true" data-column-id="area">{% trans "Fecha Ingreso" %}</th>
                                 <th data-identifier="true" data-column-id="des">{% trans "Estado" %}</th>
                                 <th data-identifier="true" data-column-id="fecha">{% trans "Prioridad" %}</th>
+                                <th data-identifier="true" data-column-id="fecha">{% trans "Seguimiento" %}</th>
                                 <th data-column-id="commands" data-formatter="commands" data-sortable="false">{% trans "Comandos" %}</th>
                             </tr>
                         </thead>
@@ -46,6 +47,7 @@
                                     <td>{{ requisicion.fecha_ingreso }}</td>
                                     <td>{{ requisicion.get_estado_display|upper }}</td>
                                     <td>{{ requisicion.get_prioridad_display|upper }}</td>
+                                    <td>{{ requisicion.get_rastreo|upper }}</td>
                                 </tr>
                             {% empty %}
                                 <tr>
