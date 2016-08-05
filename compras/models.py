@@ -55,7 +55,7 @@ class Requisicion(models.Model):
         'administrativo': 'En Jefe Administrativo',
         'compras': 'En Área de Compras',
         'departamento': 'En Jefe de Departamento',
-        'Financiero': 'En Director Financiero',
+        'financiero': 'En Director Financiero',
         'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'rechaza_compras': 'Rechazada por Usuario de compras %s',
         'rechaza_departamento': 'Rechazada por Jefe de Departamento',
