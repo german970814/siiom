@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
 
 
@@ -11,7 +12,7 @@ class Red(models.Model):
         return self.nombre
 
 
-class Grupo(models.Model):
+class Grupo(AL_Node):
     opcionesEstado = (
         ('A', 'Activo'),
         ('I', 'Inactivo'),
@@ -39,6 +40,8 @@ class Grupo(models.Model):
     nombre = models.CharField(max_length=30)
     red = models.ForeignKey(Red, null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio')
+
+    node_order_by = ['nombre']
 
     def __str__(self):
         cad = self.lider1.nombre.upper() \
