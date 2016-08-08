@@ -92,3 +92,17 @@ class Empleado(models.Model):
             if any(self.areas.filter(departamento__nombre__icontains='financi')):
                 return True
         return False
+
+    def is_compras(self):
+        """
+        Retorna verdadero si el empleado es de el area de compras
+        """
+        if any(self.areas.filter(nombre__icontains='compra')):
+            return True
+        return False
+
+    def is_usuario_pago(self):
+        """
+        Retorna verdadero si el usuario es encargado de pagos
+        """
+        pass
