@@ -1,5 +1,6 @@
 <script>
 	jQuery(document).ready(function($) {
+        $('.row.infor').fadeOut();
         $("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
             $('.proceso').click(function(event) {
                 var $id = $(this).attr('data-row-id');
@@ -11,15 +12,31 @@
                     success: function(data) {
                         var arr = ['cantidad', 'descripcion', 'referencia', 'marca', 'valor_aprobado', 'total_aprobado', 'forma_pago'];
                         var to_append = '';
-                        for (var i = 0; i < data.length; i++) {
+                        for (var i = 0; i < data[0].length; i++) {
                             var tr = '<tr>0</tr>'
                             var tds = '';
                             for (var j = 0; j < arr.length; j++) {
-                                tds += '<td>0</td>'.replace('0', data[i][arr[j]])
+                                tds += '<td>0</td>'.replace('0', data[0][i][arr[j]])
                             }
                             to_append += tr.replace('0', tds);
                         }
                         $("#table-body").html(to_append);
+
+                        if (data[1].length) {
+                            if (data[1][0]['fecha_pago'] != undefined && data[1][0]['fecha_pago'] != '') {
+                                $('.row.infor').fadeIn();
+                                var fecha = 'Fecha de pago: <strong>0</strong> ';
+                                var estado = ', Estado de pago: <strong>0</strong>';
+                                var string = '';
+                                string += fecha.replace('0', data[1][0]['fecha_pago']);
+                                if (data[1][0]['estado_pago'] != undefined && data[1][0]['estado_pago'] != '') {
+                                    string += estado.replace('0', data[1][0]['estado_pago'])
+                                }
+                                $('.info-pago').html(string);
+                            } else {
+                                $('.row.infor').fadeOut();
+                            }
+                        }
                     }
                 })
                 $.ajax({

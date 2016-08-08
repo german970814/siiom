@@ -7,6 +7,13 @@
             <form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <div class="row infor">
+                        <div class="alert alert-info" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p class="info-pago"></p>
+                        </div>
+                    </div>
+                    <br>
                     {{ form.id_requisicion }}
                     <div class="table table-responsive">
                         <table class="table">
@@ -58,12 +65,12 @@
                 </div>
                 <div class="modal-footer">
                     {% if not empleado %}
-                    <button type="submit" name="aprobar" class="btn btn-link to_hidden">Aprobar</button>
+                    <button type="submit" name="aprobar" class="btn btn-link to_hidden cancelar">Aprobar</button>
                     {% if not compras %}
-                    <button type="submit" name="rechazar" class="btn btn-link to_hidden">Rechazar</button>
+                    <button type="submit" name="rechazar" class="btn btn-link to_hidden cancelar">Rechazar</button>
                     {% endif %}
                     {% endif %}
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+                    <button type="button" id="cancelar" class="btn btn-link cancelar" data-dismiss="modal">Cancelar</button>
                 </div>
             </form>
         </div>

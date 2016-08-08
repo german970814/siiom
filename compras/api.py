@@ -20,7 +20,9 @@ def detalles_requisicion_api(request, id_requisicion):
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
 
-        data = [
+        data = []
+
+        to_data_1 = [
             {
                 'cantidad': detalle.cantidad or 1, 'descripcion': detalle.descripcion,
                 'referencia': detalle.referencia or '', 'marca': detalle.marca or '',
@@ -29,9 +31,28 @@ def detalles_requisicion_api(request, id_requisicion):
             } for detalle in requisicion.detallerequisicion_set.all()
         ]
 
+        data.insert(0, to_data_1)
+
+        to_data_2 = [
+            {
+                'fecha_pago': requisicion.fecha_pago or '',
+                'estado_pago': requisicion.get_estado_pago_display() or ''
+            }
+        ]
+
+        if requisicion.fecha_pago:
+            to_data_2 = [
+                {
+                    'fecha_pago': requisicion.fecha_pago.strftime('%d/%m/%Y') or '',
+                    'estado_pago': requisicion.get_estado_pago_display() or ''
+                }
+            ]
+
+        data.insert(1, to_data_2)
+
         return HttpResponse(json.dumps(data), content_type='application/json')
-    except:
-        return HttpResponse('', content_type='text/plain')
+    except Exception as e:
+        return HttpResponse(e, content_type='text/plain')
 
 
 @login_required
@@ -74,7 +95,11 @@ def requisicion_comentada_api(request, id_requisicion):
     # if requisicion.historial_set.last().empleado.usuario.has_perm('organizacional.es_compras'):
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
-        _choices = [Requisicion.DATA_SET['administrativo'], Requisicion.DATA_SET['compras']]
+        _choices = [
+            Requisicion.DATA_SET['compras'], Requisicion.DATA_SET['administrativo'],
+            Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['pago'],
+            Requisicion.DATA_SET['terminada']
+        ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
         else:
@@ -93,7 +118,10 @@ def requisicion_comentada_compras_api(request, id_requisicion):
     # if requisicion.historial_set.last().empleado.usuario.has_perm('organizacional.es_compras'):
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
-        _choices = [Requisicion.DATA_SET['administrativo']]
+        _choices = [
+            Requisicion.DATA_SET['administrativo'], Requisicion.DATA_SET['financiero'],
+            Requisicion.DATA_SET['pago'], Requisicion.DATA_SET['terminada']
+        ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
         else:
@@ -112,7 +140,10 @@ def requisicion_comentada_jefe_administrativo_api(request, id_requisicion):
 
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
-        _choices = [Requisicion.DATA_SET['financiero']]
+        _choices = [
+            Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['pago'],
+            Requisicion.DATA_SET['terminada']
+        ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
         else:
