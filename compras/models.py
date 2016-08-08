@@ -60,7 +60,8 @@ class Requisicion(models.Model):
         'rechaza_compras': 'Rechazada por Usuario de compras %s',
         'rechaza_departamento': 'Rechazada por Jefe de Departamento',
         'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
-        'terminada': 'Requisicion en su etapa finalizada'
+        'terminada': 'Requisicion en su etapa finalizada',
+        'pago': 'Esperando usuario encargado de pago'
     }
 
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
@@ -97,6 +98,10 @@ class Requisicion(models.Model):
             return 3
         elif rastreo == cls.DATA_SET['administrativo']:
             return 4
+        elif rastreo == cls.DATA_SET['financiero']:
+            return 5
+        elif rastreo == cls.DATA_SET['pago']:
+            return 6
         return 0
 
     def crear_historial(self, empleado, estado, observacion=''):
@@ -120,6 +125,8 @@ class Requisicion(models.Model):
             return self.__class__.DATA_SET['terminada']
         if self.historial_set.all():
             ultimo = self.historial_set.last()
+            if self.fecha_pago:
+                return self.__class__.DATA_SET['pago']
             if ultimo.estado == Historial.APROBADA:
                 if ultimo.empleado.usuario.has_perm('organizacional.es_compras') \
                    and ultimo.empleado.jefe_departamento is True:

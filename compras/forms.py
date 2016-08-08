@@ -116,3 +116,38 @@ class FormularioObservacionHistorial(forms.ModelForm):
         if self.initial and 'observacion' in self.initial:
             # self.fields['observacion'].widget.attrs.update({'readonly': ''})
             pass
+
+
+class FormularioFechaPagoRequisicion(forms.ModelForm):
+    """
+    Formulario que usa el jefe de el departamento financiero para poder dar una fecha
+    de pago a una requisicion
+    """
+    error_css_class = 'has-error'
+
+    class Meta:
+        model = Requisicion
+        fields = ('fecha_pago', 'form_pago')
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioFechaPagoRequisicion, self).__init__(*args, **kwargs)
+        self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_pago'].required = True
+        self.fields['form_pago'].required = True
+        self.fields['form_pago'].widget.attrs.update({'class': 'selectpicker'})
+
+
+class FormularioEstadoPago(forms.ModelForm):
+    """
+    Formulario para dar por terminada una requisicion poniendole un estado de pago
+    """
+    error_css_class = 'has-error'
+
+    class Meta:
+        model = Requisicion
+        fields = ('estado_pago', )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioEstadoPago, self).__init__(*args, **kwargs)
+        self.fields['estado_pago'].required = True
+        self.fields['estado_pago'].widget.attrs.update({'class': 'selectpicker'})

@@ -7,7 +7,7 @@
 	<div class="card">
 		<div class="card-header">
 			<h1>
-                <legend><h3>Requisiciones Totales</h3></legend>
+                <legend><h3>Requisiciones por dar Pago</h3></legend>
             </h1>
             {% if messages %}
                 {% for message in messages %}
@@ -65,7 +65,7 @@
 	</div>
 </div>
 
-{% include "compras/detalles_requisicion.html" with compras="true" %}
+{% include "compras/detalles_requisicion.html" with empleado="true" %}
 
 
 {% endblock contenido %}
@@ -85,11 +85,11 @@
             caseSensitive: false,
             formatters: {
                 "commands" : function(column, row) {
-                    var alternative = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='/requisiciones/adjuntar/" + row.id + "'\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-file\"></span></button>";
+                    var alternative = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='/requisiciones/pago_requisicion/" + row.id + "'\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-card\"></span></button>";
 
                     var button = "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
 
-                    if (row.files == 3) {
+                    if (row.files == 5) {
                         return button + alternative
                     }
                     return button
@@ -98,5 +98,5 @@
         });
     });
 </script>
-{% include "compras/_detalles_requisicion_js.html" with compras="true" %}
+{% include "compras/_detalles_requisicion_js.html" with empleado="true" %}
 {% endblock js %}

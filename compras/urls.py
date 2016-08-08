@@ -5,14 +5,17 @@ urlpatterns = [
     url(r'^nueva/$', views.crear_requisicion, name="crear_requisicion"),
     url(r'^mis_requisiciones/$', views.ver_requisiciones_empleado, name="ver_requisiciones_empleado"),
     url(r'^editar_requisicion/(?P<id_requisicion>\d+)$', views.editar_requisicion, name="editar_requisicion"),
-    url(r'^compras/$', views.ver_requisiciones_compras, name="ver_requisiciones_compras"),
+    url(r'^requisiciones_compras/$', views.ver_requisiciones_compras, name="ver_requisiciones_compras"),
+    url(r'^pago_requisicion/(?P<id_requisicion>\d+)$', views.pre_pago_requisicion, name="pre_pago_requisicion"),
+    url(r'^pago/(?P<id_requisicion>\d+)$', views.pagar_requisicion, name="pagar_requisicion"),
+    url(r'^requisiciones_usuario_pago/$', views.ver_requisiciones_usuario_pago, name="ver_requisiciones_usuario_pago"),
     url(
         r'^adjuntar/(?P<id_requisicion>\d+)$',
         views.adjuntar_archivos_requisicion,
         name="adjuntar_archivos_requisicion"
     ),
     url(
-        r'^requisiciones/$',
+        r'^requisiciones_jefe_departamento/$',
         views.ver_requisiciones_jefe_departamento,
         name="ver_requisiciones_jefe_departamento"
     ),
@@ -20,6 +23,11 @@ urlpatterns = [
         r'^requisiciones_jefe_administrativo/$',
         views.ver_requisiciones_jefe_administrativo,
         name="ver_requisiciones_jefe_administrativo"
+    ),
+    url(
+        r'^requisiciones_financiero/$',
+        views.ver_requisiciones_financiero,
+        name="ver_requisiciones_financiero"
     ),
     url(
         r'^api/detalles/(?P<id_requisicion>\d+)$',

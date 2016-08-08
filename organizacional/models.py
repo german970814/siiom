@@ -82,3 +82,13 @@ class Empleado(models.Model):
             if any(self.areas.filter(departamento__nombre__icontains='administra')):
                 return True
         return False
+
+    @property
+    def is_jefe_financiero(self):
+        """
+        Retorna verdadero si el jefe es del departamento financiero
+        """
+        if self.jefe_departamento:
+            if any(self.areas.filter(departamento__nombre__icontains='financi')):
+                return True
+        return False
