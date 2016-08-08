@@ -108,6 +108,10 @@ def crear_requisicion(request):
             formset_detalles = DetalleRequisicionFormSet(data=request.POST, instance=requisicion)
             formset_adjunto = AdjuntoFormset(request.POST, request.FILES, instance=requisicion)
             if formset_detalles.is_valid() and formset_adjunto.is_valid():
+                # se crea la requisicion y se guardan los detalles y los adjuntos
+                requisicion.save()
+                formset_adjunto.save()
+                formset_detalles.save()
                 # se crea una url para hacer la redireccion
                 url = """
                     <a class='alert-link' href='%s'>Ver Mis Requisiciones</a>
@@ -117,10 +121,7 @@ def crear_requisicion(request):
                     historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
                     historial.save()
                     requisicion.estado = Requisicion.PROCESO
-                # se crea la requisicion y se guardan los detalles y los adjuntos
-                requisicion.save()
-                formset_adjunto.save()
-                formset_detalles.save()
+                    requisicion.save()
                 messages.success(request, _("Se ha creado la requisicion con éxito" + url))
                 return redirect('compras:crear_requisicion')
             else:
