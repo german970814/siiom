@@ -112,14 +112,15 @@ def crear_requisicion(request):
                 url = """
                     <a class='alert-link' href='%s'>Ver Mis Requisiciones</a>
                     """ % reverse_lazy('compras:ver_requisiciones_empleado')
-                # se crea la requisicion y se guardan los detalles y los adjuntos
-                requisicion.save()
-                formset_adjunto.save()
-                formset_detalles.save()
                 # si el empleado es jefe_departamento pero no es administrativo se crea un historial
                 if empleado.jefe_departamento and not empleado.is_jefe_administrativo:
                     historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
                     historial.save()
+                    requisicion.estado = Requisicion.PROCESO
+                # se crea la requisicion y se guardan los detalles y los adjuntos
+                requisicion.save()
+                formset_adjunto.save()
+                formset_detalles.save()
                 messages.success(request, _("Se ha creado la requisicion con éxito" + url))
                 return redirect('compras:crear_requisicion')
             else:
@@ -462,7 +463,7 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
                 request,
                 _("Se ha editado la requisicion No.{} exitosamente ".format(requisicion.id) + url)
             )
-            if Requisicion.DATA_SET['compras']:
+            if Requisicion.DATA_SET['compras'] == requisicion.get_rastreo():
                 return redirect(reverse('compras:adjuntar_archivos_requisicion', args=(requisicion.id, )))
             return redirect(reverse('compras:ver_requisiciones_compras'))
 
