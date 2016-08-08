@@ -73,7 +73,7 @@ def observaciones_requisicion(request, id_requisicion):
         ]
         data2 = [
             {
-                'archivo': archivo.archivo.url,
+                'archivo': archivo.get_name(),
                 'ruta': archivo.archivo.url
             } for archivo in requisicion.adjunto_set.all()
         ]
