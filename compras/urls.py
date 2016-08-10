@@ -54,4 +54,9 @@ urlpatterns = [
         api.requisicion_comentada_jefe_administrativo_api,
         name="requisicion_comentada_jefe_administrativo_api"
     ),
+    url(
+        r'^api/descargar_archivos_api/(?P<id_archivo>\d+)$',
+        api.descargar_archivos_api,
+        name="descargar_archivos_api"
+    ),
 ]

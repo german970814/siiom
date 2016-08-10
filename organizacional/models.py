@@ -93,6 +93,7 @@ class Empleado(models.Model):
                 return True
         return False
 
+    @property
     def is_compras(self):
         """
         Retorna verdadero si el empleado es de el area de compras
@@ -101,6 +102,7 @@ class Empleado(models.Model):
             return True
         return False
 
+    @property
     def is_usuario_pago(self):
         """
         Retorna verdadero si el usuario es encargado de pagos

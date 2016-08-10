@@ -59,7 +59,7 @@ from waffle.decorators import waffle_switch
 from .forms import (
     FormularioSolicitudRequisicion, FormularioDetalleRequisicion, FormularioAdjunto,
     FormularioRequisicionesCompras, FormularioObservacionHistorial, FormularioFechaPagoRequisicion,
-    FormularioEstadoPago
+    FormularioEstadoPago, FormularioEditarValoresDetallesRequisiciones
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
 from organizacional.models import Empleado
@@ -72,7 +72,8 @@ __author__ = 'German Alzate'
 @transaction.atomic
 def crear_requisicion(request):
     """
-    Vista para la creacion de requisiciones en el modulo de compras
+    Vista para la creacion de requisiciones en el modulo de compras, marca el inicio
+    de la trazabilidad
     """
     try:
         # se obtiene el empleado
@@ -145,7 +146,9 @@ def crear_requisicion(request):
 @transaction.atomic
 def editar_requisicion(request, id_requisicion):
     """
-    Vista para la edicion de requisiciones, siempre y cuando esta se encuentre en estado PENDIENTE
+    Vista para la edicion de requisiciones, siempre y cuando esta se encuentre en estado PENDIENTE,
+    es decir, nadie puede editar una requisicion, solo el que la crea y solo mientras mas nadie
+    haya hecho algo con esa misma requisicion, al momento de apsar a otra area deja de ser editable
     """
     try:
         # se obtiene la requisicion
@@ -232,6 +235,7 @@ def editar_requisicion(request, id_requisicion):
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
 
     else:
+        # se instancian los formularios para el GET
         form = FormularioSolicitudRequisicion(instance=requisicion)
         formset_detalles = DetalleRequisicionFormSet(
             prefix='detallerequisicion_set', queryset=requisicion.detallerequisicion_set.all()
@@ -252,14 +256,17 @@ def editar_requisicion(request, id_requisicion):
 @login_required
 def ver_requisiciones_empleado(request):
     """
-    Vista para la vista de las requisiciones hechas por el empleado del request
+    Vista para la vista de las requisiciones hechas por el empleado de la sesion
+    actual, donde se puede ver la trazabilidad de la requisicion en ese instante
     """
 
     try:
+        # se sacan las requisiciones de el empleado de la sesion
         empleado = request.user.empleado
     except:
         raise Http404
 
+    # se ordenan las requisiciones y se envian
     requisiciones = empleado.requisicion_set.all().order_by(
         '-fecha_ingreso'
     ).prefetch_related('detallerequisicion_set')
@@ -273,31 +280,41 @@ def ver_requisiciones_empleado(request):
 @login_required
 def ver_requisiciones_jefe_departamento(request):
     """
-    Vista para ver las requisiciones que se han hecho a un departamento
+    Vista para ver las requisiciones que se han hecho a un departamento,
+    son las que hacen empleados comunes y tienen que ser aprobadas por un jefe
+    de departamento
     """
     try:
+        # se busca el empleado a partir de la sesion
         empleado = request.user.empleado
+        # se verifica que tenga los permisos para ser jefe de departamento
         if not empleado.jefe_departamento:
             return redirect('sin_permiso')
     except:
         raise Http404
 
+    # se obtienen las requisiciones de los subalternos al jefe de departamento
     requisiciones = Requisicion.objects.filter(
         empleado__areas__departamento__in=request.user.empleado.areas.departamentos()
     ).exclude(historial__estado=Historial.RECHAZADA).order_by('-fecha_ingreso')
 
+    # se crea la variable para pasar los datos a la vista
     data = {}
 
     if request.method == 'POST':
+        # se crea la instancia de el formulario para los comentarios
         form = FormularioRequisicionesCompras(data=request.POST)
         if form.is_valid():
+            # si todo está valido se obtiene la requisicion a partir de id de el formulario
             requisicion = Requisicion.objects.get(id=form.cleaned_data['id_requisicion'])
             if 'aprobar' in request.POST:
+                # si se aprueba se crea el historial con su respectivo comentario
                 if form.cleaned_data['observacion'] != '':
                     historial = requisicion.crear_historial(
                         empleado=empleado, estado=Historial.APROBADA,
                         observacion=form.cleaned_data['observacion']
                     )
+                # si no tiene comentarios
                 else:
                     historial = requisicion.crear_historial(
                         empleado=empleado, estado=Historial.APROBADA
@@ -305,12 +322,14 @@ def ver_requisiciones_jefe_departamento(request):
                 mensaje = 'aprobado'
                 requisicion.estado = Requisicion.PROCESO
             elif 'rechazar' in request.POST:
+                # si se rechaza la requisicion la observacion es obligatoria
                 historial = requisicion.crear_historial(
                     empleado=empleado, estado=Historial.RECHAZADA,
                     observacion=form.cleaned_data['observacion']
                 )
                 mensaje = 'rechazado'
                 requisicion.estado = Requisicion.ANULADA
+            # en este punto debe llegar siempre un historial o tirará un error
             requisicion.save()
             historial.save()
             messages.success(
@@ -319,11 +338,13 @@ def ver_requisiciones_jefe_departamento(request):
             )
             return redirect('compras:ver_requisiciones_jefe_departamento')
         else:
+            # se crea una variable con el id de la requisicion para el front
             data['CLICK'] = form.cleaned_data['id_requisicion']
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
+        # se instancia el formulario en el GET
         form = FormularioRequisicionesCompras()
-
+    # se crean las variables para los templates
     data['requisiciones'] = requisiciones
     data['form'] = form
 
@@ -334,22 +355,29 @@ def ver_requisiciones_jefe_departamento(request):
 @permission_required('organizacional.es_compras')
 def ver_requisiciones_compras(request):
     """
-    Vista para ver las requisiciones que se han hecho desde un usuario de compras
+    Vista para ver las requisiciones que han llegado al area de compras, luego de ser
+    aprobadas por un usuario jefe de departamento
     """
 
     try:
+        # se obtiene el usuario a partir de la peticion
         empleado = request.user.empleado
     except:
         raise Http404
 
+    # se obtiene el queryset de requisiciones aprobadas por jefe de departamento
     requisiciones = Requisicion.objects.aprobadas_jefe_departamento().order_by(
         '-fecha_ingreso').prefetch_related('historial_set')
 
     if request.method == 'POST':
+        # se instancia el formulario
         form = FormularioRequisicionesCompras(data=request.POST)
         if form.is_valid():
+            # se obtiene la requisicion a partir de el formulario
             requisicion = Requisicion.objects.get(id=form.cleaned_data['id_requisicion'])
+            # siempre se debe aprobar, de lo contrario es invalido
             if 'aprobar' in request.POST:
+                # se crea el historial de acuerdo a si hay observaciones o no
                 if 'observacion' in form.cleaned_data:
                     historial = requisicion.crear_historial(
                         empleado=empleado, estado=Historial.APROBADA,
@@ -365,10 +393,12 @@ def ver_requisiciones_compras(request):
                 )
                 return redirect('compras:ver_requisiciones_compras')
             else:
+                # si es invalido se envia el mensaje de error
                 messages.error(request, _("Ha hecho una peticion inválida"))
         else:
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
+        # se instancia el formulario de el GET
         form = FormularioRequisicionesCompras()
 
     data = {'requisiciones': requisiciones, 'form': form}
@@ -380,7 +410,8 @@ def ver_requisiciones_compras(request):
 @permission_required('organizacional.es_compras')
 def adjuntar_archivos_requisicion(request, id_requisicion):
     """
-    Vista para adjuntar archivos a una requisicion
+    Vista para adjuntar archivos a una requisicion, solo disponible para usuarios
+    de el area de compras
     """
 
     # se obtiene el usuario
@@ -400,6 +431,12 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
     # inicializa variable para saber si instnciar el formulario o no
     _historial_nuevo = False
 
+    # se crea un formulario para los detalles de la requisicion
+    DetalleRequisicionFormSet = modelformset_factory(
+        DetalleRequisicion, form=FormularioEditarValoresDetallesRequisiciones,
+        min_num=requisicion.detallerequisicion_set.count(), extra=0, validate_min=True,
+    )
+
     # se crea el formset que manejará los formularios de documentos adjuntos
     AdjuntoFormset = modelformset_factory(
         Adjunto, form=FormularioAdjunto, min_num=0, extra=1,
@@ -407,6 +444,12 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
     )
 
     if request.method == 'POST':
+        # se instancia el formulario de detalles de requisicion
+        formset_detalles = DetalleRequisicionFormSet(
+            data=request.POST,
+            prefix='detallerequisicion_set',
+            queryset=requisicion.detallerequisicion_set.all()
+        )
         # si la requisicion en su ultimo historial fue hecho por un usuario del area de compras
         if Requisicion.DATA_SET['administrativo'] == requisicion.get_rastreo():
             # se crea el formulario instanciado
@@ -426,7 +469,7 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
         )
 
         # si todo es valido
-        if formset_adjunto.is_valid() and form_historial.is_valid():
+        if formset_adjunto.is_valid() and form_historial.is_valid() and formset_detalles.is_valid():
             url = """
                 <a href='%s' class='alert-link'>Volver a la lista de Requisiciones</a>
                 """ % reverse_lazy('compras:ver_requisiciones_compras')
@@ -460,6 +503,9 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
             if hasattr(historial, 'requisicion'):
                 historial.save()
 
+            # se guarda el formset de detalles
+            formset_detalles.save()
+
             messages.success(
                 request,
                 _("Se ha editado la requisicion No.{} exitosamente ".format(requisicion.id) + url)
@@ -483,8 +529,16 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
             form_historial = FormularioObservacionHistorial()
         # se instancia el formulario de archivos adjuntos
         formset_adjunto = AdjuntoFormset(queryset=requisicion.adjunto_set.all(), prefix='adjunto_set')
+        # se instancia el formset de los detalles de requisiciones
+        formset_detalles = DetalleRequisicionFormSet(
+            prefix='detallerequisicion_set',
+            queryset=requisicion.detallerequisicion_set.all()
+        )
 
-    data = {'formset_adjunto': formset_adjunto, 'form': form_historial, 'requisicion': requisicion}
+    data = {
+        'formset_adjunto': formset_adjunto, 'form': form_historial,
+        'requisicion': requisicion, 'formset_detalles': formset_detalles
+    }
 
     return render(request, 'compras/adjuntar_archivos_requisicion.html', data)
 
@@ -543,6 +597,16 @@ def ver_requisiciones_jefe_administrativo(request):
     data['form'] = form
 
     return render(request, 'compras/ver_requisiciones_jefe_administrativo.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def editar_valores_jefe_administrativo(request, id_requisicion):
+    """
+    Vista para poder editar los valores y la forma de pago de los detalles de una requisicion
+    solo se puede hacer mientras la requisicion esté en el area de el jefe administrativo
+    """
+    pass
 
 
 @waffle_switch('compras')

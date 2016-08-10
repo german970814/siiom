@@ -28,7 +28,7 @@
                             <tr>
                                 <th data-visible="false" data-column-id="files"></th>
                                 <th data-identifier="true" data-column-id="id">{% trans "No." %}</th>
-                                <th data-identifier="true" data-column-id="nombre">{% trans "Justificación" %}</th>
+                                <th data-identifier="true" data-column-id="nombre">{% trans "Asunto" %}</th>
                                 <th data-identifier="true" data-column-id="solicitnte">{% trans "Solicitante" %}</th>
                                 <th data-identifier="true" data-column-id="area">{% trans "Fecha Ingreso" %}</th>
                                 <th data-identifier="true" data-column-id="des">{% trans "Estado" %}</th>
@@ -44,7 +44,7 @@
                                 <tr>
                                     <td>{{ requisicion|length }}</td>
                                     <td>{{ requisicion.id }}</td>
-                                    <td>{{ requisicion.observaciones }}</td>
+                                    <td>{{ requisicion.asunto }}</td>
                                     <td>{{ requisicion.empleado }}</td>
                                     <td>{{ requisicion.fecha_ingreso }}</td>
                                     <td>{{ requisicion.get_estado_display|upper }}</td>

@@ -67,6 +67,7 @@ class Requisicion(models.Model):
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
     empleado = models.ForeignKey('organizacional.Empleado', verbose_name=_('empleado'))
     observaciones = models.TextField(verbose_name=_('observaciones'))
+    asunto = models.CharField(verbose_name=_('asunto'), max_length=255)
     prioridad = models.CharField(max_length=1, verbose_name=_('prioridad'), choices=OPCIONES_PRIORIDAD)
     estado = models.CharField(max_length=2, verbose_name=_('estado'), choices=OPCIONES_ESTADO, default=PENDIENTE)
 
@@ -122,35 +123,57 @@ class Requisicion(models.Model):
         (nombre dado por Google)
         """
         if self.estado == self.__class__.TERMINADA:
+            # si está terminada se sale enseguida
             return self.__class__.DATA_SET['terminada']
         if self.historial_set.all():
+            # si tiene historial se saca el ultimo
             ultimo = self.historial_set.last()
+            # si ya tiene fecha de pago, quiere decir que su proceso está por terminar
             if self.fecha_pago:
                 return self.__class__.DATA_SET['pago']
+            # siempre y cuando esté aprobada por la ultima persona
             if ultimo.estado == Historial.APROBADA:
-                if ultimo.empleado.usuario.has_perm('organizacional.es_compras') \
-                   and ultimo.empleado.jefe_departamento is True:
+                # si la ultima persona en modificar es de compras y ademas es jefe de departamento
+                if ultimo.empleado.is_compras and ultimo.empleado.jefe_departamento is True:
+                    # si tiene mas de dos historiales está en administrativo
                     if self.historial_set.count() > 2:
                         return self.__class__.DATA_SET['administrativo']
+                    # de lo contrario está en compras
                     else:
                         return self.__class__.DATA_SET['compras']
+                # si el ultimo es jefe financiero
+                elif ultimo.empleado.is_jefe_financiero:
+                    # si tiene una observacion se devuelve a administrativo
+                    if ultimo.observacion != '':
+                        return self.__class__.DATA_SET['administrativo']
+                    # de lo contrario pasa a pago
+                    return self.__class__.DATA_SET['pago']
+                # si el ultimo empleado es jefe administrativo
                 elif ultimo.empleado.is_jefe_administrativo is True:
+                    # si tiene mas de dos historiales está en financiero
                     if self.historial_set.count() > 2:
                         return self.__class__.DATA_SET['financiero']
+                    # de lo contrario, está en compras
                     else:
                         return self.__class__.DATA_SET['compras']
+                # si es jefe de departamento
                 elif ultimo.empleado.jefe_departamento is True:
                     return self.__class__.DATA_SET['compras']
-                elif ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
+                # si es de compras
+                elif ultimo.empleado.is_compras:
                     return self.__class__.DATA_SET['administrativo']
+            # si no fue aprobada por la ultima persona
             else:
+                # si rechazo jefe administrativo
                 if ultimo.empleado.is_jefe_administrativo:
                     return self.__class__.DATA_SET['rechaza_administrativo']
+                # si rechazo jefe de departamento
                 elif ultimo.empleado.jefe_departamento is True \
-                        and ultimo.empleado.usuario.has_perm('organizacional.es_compras'):
+                        and ultimo.empleado.is_compras:
                     return self.__class__.DATA_SET['rechaza_departamento']
                 elif ultimo.empleado.jefe_departamento is True:
                     return self.__class__.DATA_SET['rechaza_departamento']
+        # de cualquier otro modo, la requisicion aun no ha sido revisada
         return self.__class__.DATA_SET['digitada']
 
     @property
@@ -182,8 +205,8 @@ class DetalleRequisicion(models.Model):
     descripcion = models.TextField(verbose_name=_('descripción'))
     referencia = models.CharField(max_length=50, verbose_name=_('referencia'), blank=True)
     marca = models.CharField(max_length=100, verbose_name=_('marca'), blank=True)
-    valor_aprobado = models.PositiveIntegerField(verbose_name=_('valor aprobado'), blank=True, null=True)
-    total_aprobado = models.PositiveIntegerField(verbose_name=_('total aprobado'), blank=True, null=True)
+    valor_aprobado = models.PositiveIntegerField(verbose_name=_('valor unitario'), blank=True, null=True)
+    total_aprobado = models.PositiveIntegerField(verbose_name=_('valor total'), blank=True, null=True)
     forma_pago = models.CharField(_('forma de pago'), choices=OPCIONES_FORMA_PAGO, max_length=1, blank=True)
     requisicion = models.ForeignKey(Requisicion, verbose_name=_('requisición'))
 
@@ -193,6 +216,23 @@ class DetalleRequisicion(models.Model):
 
     def __str__(self):
         return "Requisicion {0} - {1}".format(self.requisicion, self.id)
+
+    def save(self, *args, **kwargs):
+        if not self.cantidad:
+            self.cantidad = 1
+        if not self.valor_aprobado:
+            self.valor_aprobado = 0
+        self.total_aprobado = self.get_valor_total()
+        super(DetalleRequisicion, self).save(*args, **kwargs)
+
+    def get_valor_total(self):
+        """
+        Retorna el valor total de acuerdo a la cantidad y al valor unitario
+        """
+        if not self.cantidad:
+            self.cantidad = 1
+        total = self.cantidad * self.valor_aprobado
+        return total
 
 
 class Adjunto(models.Model):

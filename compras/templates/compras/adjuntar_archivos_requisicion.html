@@ -23,6 +23,42 @@
 			</div>
 			{% csrf_token %}
 			<div class="card-body card-padding">
+				<div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Cantidad" %}</th>
+                                <th>{% trans "Descripción" %}</th>
+                                <th>{% trans "Referencia" %}</th>
+                                <th>{% trans "Marca" %}</th>
+                                <th>{% trans "Valor Unitario" %}</th>
+                                <th>{% trans "Forma Pago" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        	{% for form_detalle in formset_detalles %}
+                        	{% for hidden in form_detalle.hidden_fields %}
+							    {{ hidden }}
+							{% endfor %}
+                            <tr class="form_detalles">
+                        		{% if requisicion %}{{ form_detalle.id }}{% endif %}
+                                <td class="{{ form_detalle.cantidad.css_classes }}">{{ form_detalle.cantidad }}</td>
+                                <td class="{{ form_detalle.descripcion.css_classes }}">{{ form_detalle.descripcion }}</td>
+                                <td class="{{ form_detalle.referencia.css_classes }}">{{ form_detalle.referencia }}</td>
+                                <td class="{{ form_detalle.marca.css_classes }}">{{ form_detalle.marca }}</td>
+                                <td class="{{ form_detalle.valor_aprobado.css_classes }}">{{ form_detalle.valor_aprobado }}</td>
+                                <td class="{{ form_detalle.forma_pago.css_classes }}">{{ form_detalle.forma_pago }}</td>
+                                {% if formset_detalles.can_delete %}
+                                	<td>{{ form_detalle.DELETE }}</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {{ formset_detalles.management_form }}
+				<br class="space">
+				<br class="space-down">
 				<div class="row">
 					<div class="col-md-8 col-md-offset-2">
 				    	<div class="input-group {{ form.observacion.css_classes }}">
@@ -30,7 +66,7 @@
 					            <i class="zmdi zmdi-stack-"></i>
 					        </span>
 					        <div class="fg-line requerido">
-					            <label for="{{ form.observacion.id_for_label }}" class="fg-label requerido control-label">{{ form.observacion.label|title }}:</label>
+					            <label for="{{ form.observacion.id_for_label }}" class="fg-label requerido control-label" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="{% trans 'Si agrega una observación en esta etapa, la requisicion pasará automaticamente hacia un jefe administrativo' %}" title="" data-original-title="Ayuda">{{ form.observacion.label|title }}:</label>
 					            {{ form.observacion }}
 					        </div>
 					        {% for error in form.observacion.errors %}
@@ -41,7 +77,6 @@
 				</div>
 			</div>
 		</div>
-
 
         {% for form_adjunto in formset_adjunto %}
         {% if requisicion %}{{ form_adjunto.id }}{% endif %}

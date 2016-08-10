@@ -14,10 +14,11 @@ class FormularioSolicitudRequisicion(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('observaciones', 'prioridad')
+        fields = ('observaciones', 'prioridad', 'asunto')
 
     def __init__(self, *args, **kwargs):
         super(FormularioSolicitudRequisicion, self).__init__(*args, **kwargs)
+        self.fields['asunto'].widget.attrs.update({'class': 'form-control'})
         self.fields['observaciones'].widget.attrs.update({'class': 'form-control'})
         self.fields['prioridad'].widget.attrs.update({'class': 'selectpicker'})
 
@@ -32,7 +33,7 @@ class FormularioDetalleRequisicion(forms.ModelForm):
         model = DetalleRequisicion
         fields = (
             'cantidad', 'descripcion', 'referencia',
-            'marca', 'valor_aprobado', 'total_aprobado', 'forma_pago'
+            'marca', 'valor_aprobado', 'forma_pago'
         )
 
     def __init__(self, *args, **kwargs):
@@ -42,7 +43,6 @@ class FormularioDetalleRequisicion(forms.ModelForm):
         self.fields['referencia'].widget.attrs.update({'class': 'form-control'})
         self.fields['marca'].widget.attrs.update({'class': 'form-control'})
         self.fields['valor_aprobado'].widget.attrs.update({'class': 'form-control'})
-        self.fields['total_aprobado'].widget.attrs.update({'class': 'form-control'})
         self.fields['forma_pago'].widget.attrs.update({'class': 'form-control'})
 
 
@@ -151,3 +151,20 @@ class FormularioEstadoPago(forms.ModelForm):
         super(FormularioEstadoPago, self).__init__(*args, **kwargs)
         self.fields['estado_pago'].required = True
         self.fields['estado_pago'].widget.attrs.update({'class': 'selectpicker'})
+
+
+class FormularioEditarValoresDetallesRequisiciones(FormularioDetalleRequisicion):
+    """
+    Formulario que usan los usuarios de compras y jefe administrativo para poder cada
+    valor de el detalle de una requisicion
+    """
+
+    class Meta(FormularioDetalleRequisicion.Meta):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarValoresDetallesRequisiciones, self).__init__(*args, **kwargs)
+        self.fields['cantidad'].widget.attrs.update({'readonly': 'readonly'})
+        self.fields['descripcion'].widget.attrs.update({'readonly': 'readonly'})
+        self.fields['referencia'].widget.attrs.update({'readonly': 'readonly'})
+        self.fields['marca'].widget.attrs.update({'readonly': 'readonly'})
