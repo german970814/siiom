@@ -154,6 +154,9 @@ class Requisicion(models.Model):
                 if ultimo.empleado.is_compras and ultimo.empleado.jefe_departamento is True:
                     # si tiene mas de dos historiales ya se encuentra en financiero
                     if self.historial_set.count() >= 3:
+                        # si alcanza el tope intercepta presidencia
+                        if self.get_total() > Parametros.objects.tope():
+                            return self.__class__.DATA_SET['presidencia']
                         return self.__class__.DATA_SET['financiero']
                     # si tiene mas dos historiales está en administrativo
                     if self.historial_set.count() == 2:

@@ -61,9 +61,14 @@ class RequisicionManager(models.Manager):
         administrativo
         """
         from .models import Parametros
-        return self.aprobadas_jefe_administrativo().annotate(
-            total_valores=models.Sum(models.F('detallerequisicion__total_aprobado'))
-        ).filter(total_valores__gte=Parametros.objects.tope()).exclude(estado=self.model.ANULADA)
+        # return self.aprobadas_jefe_administrativo().annotate(
+        #     total_valores=models.Sum(models.F('detallerequisicion__total_aprobado'))
+        # ).filter(total_valores__gte=Parametros.objects.tope()).exclude(estado=self.model.ANULADA)
+        return self.annotate(
+            total_valores=models.Sum('detallerequisicion__total_aprobado')
+        ).filter(
+            total_valores__gte=Parametros.objects.tope()
+        ).exclude(estado=self.model.ANULADA)
 
 
 class ParametrosManager(models.Manager):
