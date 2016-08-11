@@ -45,8 +45,8 @@
                                 <th>{% trans "Descripción" %}</th>
                                 <th>{% trans "Referencia" %}</th>
                                 <th>{% trans "Marca" %}</th>
-                                <th>{% trans "Valor Aprobado" %}</th>
-                                <th>{% trans "Total Aprobado" %}</th>
+                                <th>{% trans "Valor Unitario" %}</th>
+                                <th>{% trans "Valor Total" %}</th>
                                 <th>{% trans "Forma Pago" %}</th>
                             </tr>
                         </thead>
@@ -59,7 +59,7 @@
                                 <td>{{ detalle.marca }}</td>
                                 <td>{{ detalle.valor_aprobado }}</td>
                                 <td>{{ detalle.total_aprobado }}</td>
-                                <td>{{ detalle.forma_pago }}</td>
+                                <td>{{ detalle.get_forma_pago_display }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -86,19 +86,37 @@
                 	</div>
                 	<br class="space">
                 	<div class="col-md-4">
-	                	<div class="input-group {{ form.form_pago.css_classes }}">
+	                	<div class="input-group {{ form.presupuesto_aprobado.css_classes }}">
 					        <span class="input-group-addon">
 					            <i class="zmdi zmdi-card"></i>
 					        </span>
 					        <div class="fg-line requerido">
-					            <label for="{{ form.form_pago.id_for_label }}" class="fg-label requerido control-label">{{ form.form_pago.label|title }}:</label>
-					            {{ form.form_pago }}
+					            <label for="{{ form.presupuesto_aprobado.id_for_label }}" class="fg-label requerido control-label">{{ form.presupuesto_aprobado.label|title }}:</label>
+					            {{ form.presupuesto_aprobado }}
 					        </div>
-					        {% for error in form.form_pago.errors %}
+					        {% for error in form.presupuesto_aprobado.errors %}
 					            <small class="help-block">{{ error }}</small>
 					        {% endfor %}
 					    </div>
                 	</div>
+                </div>
+                <br class="space">
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group fg-float {{ form.observacion.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_observacion" class="control-label requerido">{% trans 'Observaciones' %}:</label>
+                                {{ form.observacion }}
+                            </div>
+                            {% for error in form.observacion.errors %}
+                                <small class="help-block">{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
 			</div>
 		</div>

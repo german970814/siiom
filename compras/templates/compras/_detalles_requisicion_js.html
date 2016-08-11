@@ -35,6 +35,17 @@
                                     string += estado.replace('0', data[2][0]['estado_pago'])
                                 }
                                 $('.info-pago').html(string);
+                                if (data[2][0]['class'] == 'warning') {
+                                    if ($('.info-pago').parent().hasClass('alert-info')) {
+                                        $('.info-pago').parent().removeClass('alert-info');
+                                    }
+                                    $('.info-pago').parent().addClass('alert-warning');
+                                } else {
+                                    if ($('.info-pago').parent().hasClass('alert-warning')) {
+                                        $('.info-pago').parent().removeClass('alert-warning')
+                                    }
+                                    $('.info-pago').parent().addClass('alert-info')
+                                }
                             } else {
                                 $('.row.infor').fadeOut();
                             }

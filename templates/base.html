@@ -557,6 +557,11 @@
                                     <a href="{% url 'compras:ver_requisiciones_financiero' %}">{% trans "Requiciones Aprobadas por Jefe Administrativo" %}</a>
                                 </li>
                                 {% endif %}
+                                {% if request.user.empleado.is_usuario_pago %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_usuario_pago' %}">{% trans "Requiciones Esperando por pago" %}</a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>     
                     {% endswitch %}

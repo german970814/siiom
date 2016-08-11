@@ -43,20 +43,32 @@ def detalles_requisicion_api(request, id_requisicion):
 
         data.insert(1, to_data_2)
 
-        to_data_3 = [
-            {
-                'fecha_pago': requisicion.fecha_pago or '',
-                'estado_pago': requisicion.get_estado_pago_display() or ''
-            }
-        ]
-
-        if requisicion.fecha_pago:
+        if requisicion.presupuesto_aprobado == Requisicion.ESPERA:
             to_data_3 = [
                 {
-                    'fecha_pago': requisicion.fecha_pago.strftime('%d/%m/%Y') or '',
-                    'estado_pago': requisicion.get_estado_pago_display() or ''
+                    'fecha_pago': 'INDEFINIDA',
+                    'estado_pago': 'EN ESPERA DE PRESUPUESTO',
+                    'class': 'warning'
                 }
             ]
+
+        else:
+            to_data_3 = [
+                {
+                    'fecha_pago': requisicion.fecha_pago or '',
+                    'estado_pago': requisicion.get_estado_pago_display() or '',
+                    'class': 'info'
+                }
+            ]
+
+            if requisicion.fecha_pago:
+                to_data_3 = [
+                    {
+                        'fecha_pago': requisicion.fecha_pago.strftime('%d/%m/%Y') or '',
+                        'estado_pago': requisicion.get_estado_pago_display() or '',
+                        'class': 'info'
+                    }
+                ]
 
         data.insert(2, to_data_3)
 

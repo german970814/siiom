@@ -69,7 +69,8 @@ class Requisicion(models.Model):
         'rechaza_departamento': 'Rechazada por Jefe de Departamento',
         'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'terminada': 'Requisicion en su etapa finalizada',
-        'pago': 'Esperando usuario encargado de pago'
+        'pago': 'Esperando usuario encargado de pago',
+        'espera_presupuesto': 'A la espera de presupuesto disponible'
     }
 
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
@@ -88,7 +89,7 @@ class Requisicion(models.Model):
     )
 
     presupuesto_aprobado = models.CharField(
-        max_length=1, verbose_name=_('presupuesto aprobado'), blank=True, choices=OPCIONES_PRESUPUESTO
+        max_length=2, verbose_name=_('presupuesto aprobado'), blank=True, choices=OPCIONES_PRESUPUESTO
     )
 
     objects = RequisicionManager()
@@ -111,7 +112,7 @@ class Requisicion(models.Model):
             return 3
         elif rastreo == cls.DATA_SET['administrativo']:
             return 4
-        elif rastreo == cls.DATA_SET['financiero']:
+        elif rastreo == cls.DATA_SET['financiero'] or rastreo == cls.DATA_SET['espera_presupuesto']:
             return 5
         elif rastreo == cls.DATA_SET['pago']:
             return 6
@@ -155,9 +156,9 @@ class Requisicion(models.Model):
                         return self.__class__.DATA_SET['compras']
                 # si el ultimo es jefe financiero
                 elif ultimo.empleado.is_jefe_financiero:
-                    # si tiene una observacion se devuelve a administrativo
-                    if ultimo.observacion != '':
-                        return self.__class__.DATA_SET['administrativo']
+                    # si tiene una observacion se pone en espera
+                    if ultimo.observacion != '' and self.presupuesto_aprobado == self.__class__.ESPERA:
+                        return self.__class__.DATA_SET['espera_presupuesto']
                     # de lo contrario pasa a pago
                     return self.__class__.DATA_SET['pago']
                 # si el ultimo empleado es jefe administrativo

@@ -107,4 +107,8 @@ class Empleado(models.Model):
         """
         Retorna verdadero si el usuario es encargado de pagos
         """
-        pass
+        if any(
+            self.areas.filter(nombre__icontains='contab') | self.areas.filter(nombre__icontains='tesore')
+        ):
+            return True
+        return False

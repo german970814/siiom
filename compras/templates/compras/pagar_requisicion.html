@@ -45,8 +45,8 @@
                                 <th>{% trans "Descripción" %}</th>
                                 <th>{% trans "Referencia" %}</th>
                                 <th>{% trans "Marca" %}</th>
-                                <th>{% trans "Valor Aprobado" %}</th>
-                                <th>{% trans "Total Aprobado" %}</th>
+                                <th>{% trans "Valor Unitario" %}</th>
+                                <th>{% trans "Valor Total" %}</th>
                                 <th>{% trans "Forma Pago" %}</th>
                             </tr>
                         </thead>
@@ -58,7 +58,7 @@
                                 <td>{{ detalle.referencia }}</td>
                                 <td>{{ detalle.marca }}</td>
                                 <td>{% if detalle.valor_aprobado %}{{ detalle.valor_aprobado }}{% else %}0{% endif %}</td>
-                                <td>{% if detalle.valor_total_aprobado %}{{ detalle.total_aprobado }}{% else %}0{% endif %}</td>
+                                <td>{% if detalle.total_aprobado %}{{ detalle.total_aprobado }}{% else %}0{% endif %}</td>
                                 <td>{{ detalle.get_forma_pago_display|upper }}</td>
                             </tr>
                             {% endfor %}

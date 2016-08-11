@@ -125,16 +125,38 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
     """
     error_css_class = 'has-error'
 
+    observacion = forms.CharField(widget=forms.Textarea, required=False)
+
     class Meta:
         model = Requisicion
-        fields = ('fecha_pago', 'form_pago')
+        fields = ('fecha_pago', 'presupuesto_aprobado')
 
     def __init__(self, *args, **kwargs):
         super(FormularioFechaPagoRequisicion, self).__init__(*args, **kwargs)
         self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fecha_pago'].required = True
-        self.fields['form_pago'].required = True
-        self.fields['form_pago'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['presupuesto_aprobado'].required = True
+        self.fields['presupuesto_aprobado'].widget.attrs.update({'class': 'selectpicker'})
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(FormularioFechaPagoRequisicion, self).clean(*args, **kwargs)
+
+        if 'presupuesto_aprobado' in cleaned_data:
+            if cleaned_data['presupuesto_aprobado'] == Requisicion.SI:
+                if 'fecha_pago' in cleaned_data:
+                    if cleaned_data['fecha_pago'] is None or cleaned_data['fecha_pago'] == '':
+                        self.add_error('fecha_pago', _('Este campo es obligatorio'))
+                else:
+                    self.add_error('fecha_pago', _('Este campo es obligatorio'))
+            else:
+                if 'fecha_pago' in cleaned_data:
+                    cleaned_data['fecha_pago'] = None
+                if 'observacion' in cleaned_data:
+                    if cleaned_data['observacion'] is None or cleaned_data['observacion'] == '':
+                        self.add_error('observacion', _('Este campo es obligatorio'))
+                else:
+                    self.add_error('observacion', _('Este campo es obligatorio'))
+        return cleaned_data
 
 
 class FormularioEstadoPago(forms.ModelForm):

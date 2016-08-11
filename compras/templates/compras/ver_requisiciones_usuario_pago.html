@@ -85,11 +85,11 @@
             caseSensitive: false,
             formatters: {
                 "commands" : function(column, row) {
-                    var alternative = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='/requisiciones/pago_requisicion/" + row.id + "'\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-card\"></span></button>";
+                    var alternative = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='{% url "compras:pagar_requisicion" 0 %}'.replace('0', " + row.id + ")\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-card\"></span></button>";
 
                     var button = "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
 
-                    if (row.files == 5) {
+                    if (row.files == 6) {
                         return button + alternative
                     }
                     return button

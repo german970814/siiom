@@ -689,8 +689,9 @@ def pre_pago_requisicion(request, id_requisicion):
     requisicion = get_object_or_404(Requisicion, pk=id_requisicion)
     try:
         empleado = request.user.empleado
+        _accepted = [Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['espera_presupuesto']]
         if not empleado.is_jefe_financiero or \
-           Requisicion.DATA_SET['financiero'] != requisicion.get_rastreo() or requisicion.fecha_pago:
+           requisicion.get_rastreo() not in _accepted or requisicion.fecha_pago:
             raise Http404
     except Empleado.DoesNotExist:
         raise Http404
@@ -700,8 +701,11 @@ def pre_pago_requisicion(request, id_requisicion):
 
         if form.is_valid():
             requisicion = form.save()
-            historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
-            requisicion.detallerequisicion_set.update(forma_pago=requisicion.form_pago)
+            if 'observacion' in form.cleaned_data:
+                historial = requisicion.crear_historial(
+                    empleado=empleado, estado=Historial.APROBADA, observacion=form.cleaned_data['observacion'])
+            else:
+                historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
             historial.save()
             messages.success(
                 request,
@@ -728,6 +732,8 @@ def ver_requisiciones_usuario_pago(request):
 
     try:
         empleado = request.user.empleado
+        if not empleado.is_usuario_pago:
+            return redirect('sin_permiso')
     except:
         raise Http404
 
