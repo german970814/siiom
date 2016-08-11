@@ -53,3 +53,21 @@ class RequisicionManager(models.Manager):
         puesto una fecha de pago
         """
         return self.aprobadas_jefe_administrativo().exclude(fecha_pago=None)
+
+
+class ParametrosManager(models.Manager):
+    """
+    Manager para la clase de parametros
+    """
+
+    def dias(self):
+        """
+        Devuelve el ultimo valor que tenga el campo de dias
+        """
+        return self.last().dias_habiles
+
+    def tope(self):
+        """
+        Devuelve el ultimo valor que tenga en el campo de tope de monto
+        """
+        return self.last().tope_monto

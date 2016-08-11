@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from .managers import RequisicionManager
+from .managers import RequisicionManager, ParametrosManager
 
 import re
 
@@ -149,7 +149,9 @@ class Requisicion(models.Model):
                 # si la ultima persona en modificar es de compras y ademas es jefe de departamento
                 if ultimo.empleado.is_compras and ultimo.empleado.jefe_departamento is True:
                     # si tiene mas de dos historiales está en administrativo
-                    if self.historial_set.count() > 2:
+                    if self.historial_set.count() >= 3:
+                        return self.__class__.DATA_SET['financiero']
+                    if self.historial_set.count() == 2:
                         return self.__class__.DATA_SET['administrativo']
                     # de lo contrario está en compras
                     else:
@@ -199,6 +201,17 @@ class Requisicion(models.Model):
            any([x for x in self.historial_set.all().distinct() if x.estado == Historial.RECHAZADA]):
             return True
         return False
+
+    def get_total(self):
+        """
+        Retorna el valor total de la requisicion, con la suma de los totales de todos los detalles
+        de la requisicion
+        """
+
+        total = 0
+        for detalle in self.detallerequisicion_set.all():
+            total += detalle.get_valor_total()
+        return total
 
 
 class DetalleRequisicion(models.Model):
@@ -310,3 +323,12 @@ class Parametros(models.Model):
     """
     dias_habiles = models.PositiveSmallIntegerField(verbose_name=_('dias hábiles'))
     tope_monto = models.PositiveIntegerField(verbose_name=_('monto tope para presidencia'))
+
+    objects = ParametrosManager()
+
+    class Meta:
+        verbose_name = _('parametro')
+        verbose_name_plural = _('parametros')
+
+    def __str__(self):
+        return '({0})-({1})'.format(self.dias_habiles, self.tope_monto)
