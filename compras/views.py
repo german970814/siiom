@@ -606,7 +606,51 @@ def editar_valores_jefe_administrativo(request, id_requisicion):
     Vista para poder editar los valores y la forma de pago de los detalles de una requisicion
     solo se puede hacer mientras la requisicion esté en el area de el jefe administrativo
     """
-    pass
+    try:
+        requisicion = get_object_or_404(Requisicion, pk=id_requisicion)
+        empleado = request.user.empleado
+        if Requisicion.DATA_SET['administrativo'] != requisicion.get_rastreo():
+            raise Http404
+        if not empleado.is_jefe_administrativo:
+            return redirect('sin_permiso')
+    except:
+        raise Http404
+
+    # se crea un formulario para los detalles de la requisicion
+    DetalleRequisicionFormSet = modelformset_factory(
+        DetalleRequisicion, form=FormularioEditarValoresDetallesRequisiciones,
+        min_num=requisicion.detallerequisicion_set.count(), extra=0, validate_min=True,
+    )
+
+    if request.method == 'POST':
+        URL = """
+            <a href="%s" class="alert-link">VOLVER A LA LISTA DE REQUISICIONES</a>
+        """ % reverse_lazy('compras:ver_requisiciones_jefe_administrativo')
+        formset_detalles = DetalleRequisicionFormSet(
+            data=request.POST,
+            prefix='detallerequisicion_set',
+            queryset=requisicion.detallerequisicion_set.all()
+        )
+
+        if formset_detalles.is_valid():
+            formset_detalles.save()
+            messages.success(
+                request,
+                _("Se ha editado la requisición NO.{} exitosamente ".format(requisicion.id) + URL)
+            )
+            return redirect(
+                reverse('compras:editar_valores_jefe_administrativo', args=(requisicion.id, ))
+            )
+        else:
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+    else:
+        formset_detalles = DetalleRequisicionFormSet(
+            prefix='detallerequisicion_set',
+            queryset=requisicion.detallerequisicion_set.all()
+        )
+
+    data = {'requisicion': requisicion, 'formset_detalles': formset_detalles}
+    return render(request, 'compras/editar_valores_jefe_administrativo.html', data)
 
 
 @waffle_switch('compras')

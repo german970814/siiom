@@ -50,6 +50,14 @@ class Requisicion(models.Model):
         (EFECTIVO_PROVEEDOR, 'EFECTIVO AL PROVEEDOR'),
     )
 
+    SI = 'SI'
+    ESPERA = 'ES'
+
+    OPCIONES_PRESUPUESTO = (
+        (SI, 'SI'),
+        (ESPERA, 'EN ESPERA'),
+    )
+
     DATA_SET = {
         'digitada': 'Digitada por Empleado y en Jefe de Departamento',
         'administrativo': 'En Jefe Administrativo',
@@ -77,6 +85,10 @@ class Requisicion(models.Model):
     )
     estado_pago = models.CharField(
         max_length=2, verbose_name=_('estado de pago'), blank=True, choices=OPCIONES_ESTADO_PAGO
+    )
+
+    presupuesto_aprobado = models.CharField(
+        max_length=1, verbose_name=_('presupuesto aprobado'), blank=True, choices=OPCIONES_PRESUPUESTO
     )
 
     objects = RequisicionManager()
@@ -288,3 +300,12 @@ class Historial(models.Model):
 
     def __str__(self):
         return "Requisicion {0} - {1}".format(self.requisicion, self.id)
+
+
+class Parametros(models.Model):
+    """
+    Modelo para parametrizar ciertos valores de los que dependen los procesos de
+    trazabilidad de la aplicacion
+    """
+    dias_habiles = models.PositiveSmallIntegerField(verbose_name=_('dias hábiles'))
+    tope_monto = models.PositiveIntegerField(verbose_name=_('monto tope para presidencia'))
