@@ -61,6 +61,7 @@ class Empleado(models.Model):
             ('es_administrador_sgd', 'Es Administrador de Sistema Gestion Documental'),
             ('buscar_registros', 'Puede Buscar Registros'),
             ('es_compras', 'Es usuario de compras'),
+            ('es_presidente', 'Es presidente'),
         )
 
     def __str__(self):

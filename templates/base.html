@@ -542,7 +542,7 @@
                                     <a href="{% url 'compras:ver_requisiciones_jefe_departamento' %}">{% trans "Requisiciones de mi Departamento" %}</a>
                                 </li>
                                 {% endif %}
-                                {% if perms.organizacional.es_compras %}
+                                {% if request.user.empleado.is_compras %}
                                 <li>
                                     <a href="{% url 'compras:ver_requisiciones_compras' %}">{% trans "Requiciones Totales" %}</a>
                                 </li>
@@ -560,6 +560,11 @@
                                 {% if request.user.empleado.is_usuario_pago %}
                                 <li>
                                     <a href="{% url 'compras:ver_requisiciones_usuario_pago' %}">{% trans "Requiciones Esperando por pago" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if perms.organizacional.es_presidente %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_presidencia' %}">{% trans "Requiciones En Presidencia" %}</a>
                                 </li>
                                 {% endif %}
                             </ul>

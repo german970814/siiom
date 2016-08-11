@@ -1,6 +1,7 @@
 <script>
 	jQuery(document).ready(function($) {
         $('.row.infor').fadeOut();
+        $('.to_hidden').fadeOut();
         $("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
             $('.proceso').click(function(event) {
                 var $id = $(this).attr('data-row-id');
@@ -92,6 +93,8 @@
                     url: '{% url "compras:requisicion_comentada_compras_api" 0 %}'.replace('0', $id),
                     {% elif jefe_administrativo %}
                     url: '{% url "compras:requisicion_comentada_jefe_administrativo_api" 0 %}'.replace('0', $id),
+                    {% elif presidencia %}
+                    url: '{% url "compras:requisicion_comentada_presidencia_api" 0 %}'.replace('0', $id),
                     {% endif %}
                     type: 'GET',
                     success: function (data) {

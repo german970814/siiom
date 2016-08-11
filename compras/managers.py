@@ -54,6 +54,17 @@ class RequisicionManager(models.Manager):
         """
         return self.aprobadas_jefe_administrativo().exclude(fecha_pago=None)
 
+    def en_presidencia(self):
+        """
+        Retorna un Queryset con las requisiciones que han superado un tope maximo definido
+        por los parametros iniciales, siempre y cuando haya sido aprobada por un usuario jefe
+        administrativo
+        """
+        from .models import Parametros
+        return self.aprobadas_jefe_administrativo().annotate(
+            total_valores=models.Sum(models.F('detallerequisicion__total_aprobado'))
+        ).filter(total_valores__gte=Parametros.objects.tope()).exclude(estado=self.model.ANULADA)
+
 
 class ParametrosManager(models.Manager):
     """

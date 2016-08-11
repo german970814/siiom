@@ -70,7 +70,9 @@ class Requisicion(models.Model):
         'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'terminada': 'Requisicion en su etapa finalizada',
         'pago': 'Esperando usuario encargado de pago',
-        'espera_presupuesto': 'A la espera de presupuesto disponible'
+        'espera_presupuesto': 'A la espera de presupuesto disponible',
+        'presidencia': 'En Presidencia',
+        'rechaza_presidencia': 'Rechazada por presidencia'
     }
 
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
@@ -116,6 +118,8 @@ class Requisicion(models.Model):
             return 5
         elif rastreo == cls.DATA_SET['pago']:
             return 6
+        elif rastreo == cls.DATA_SET['presidencia']:
+            return 7
         return 0
 
     def crear_historial(self, empleado, estado, observacion=''):
@@ -148,14 +152,18 @@ class Requisicion(models.Model):
             if ultimo.estado == Historial.APROBADA:
                 # si la ultima persona en modificar es de compras y ademas es jefe de departamento
                 if ultimo.empleado.is_compras and ultimo.empleado.jefe_departamento is True:
-                    # si tiene mas de dos historiales está en administrativo
+                    # si tiene mas de dos historiales ya se encuentra en financiero
                     if self.historial_set.count() >= 3:
                         return self.__class__.DATA_SET['financiero']
+                    # si tiene mas dos historiales está en administrativo
                     if self.historial_set.count() == 2:
                         return self.__class__.DATA_SET['administrativo']
                     # de lo contrario está en compras
                     else:
                         return self.__class__.DATA_SET['compras']
+                # si el ultimo empleado fue el presidente
+                elif ultimo.empleado.usuario.has_perm('organizacional.es_presidente'):
+                    return self.__class__.DATA_SET['financiero']
                 # si el ultimo es jefe financiero
                 elif ultimo.empleado.is_jefe_financiero:
                     # si tiene una observacion se pone en espera
@@ -164,9 +172,13 @@ class Requisicion(models.Model):
                     # de lo contrario pasa a pago
                     return self.__class__.DATA_SET['pago']
                 # si el ultimo empleado es jefe administrativo
+                # no se tiene en cuenta cuando es == 2 porque solo se da en condicional de arriba
                 elif ultimo.empleado.is_jefe_administrativo is True:
+                    # si supera el monto establecido pasa a presidencia
+                    if self.get_total() > Parametros.objects.tope():
+                        return self.__class__.DATA_SET['presidencia']
                     # si tiene mas de dos historiales está en financiero
-                    if self.historial_set.count() > 2:
+                    elif self.historial_set.count() > 2:
                         return self.__class__.DATA_SET['financiero']
                     # de lo contrario, está en compras
                     else:
@@ -179,13 +191,17 @@ class Requisicion(models.Model):
                     return self.__class__.DATA_SET['administrativo']
             # si no fue aprobada por la ultima persona
             else:
+                # si rechaza la presidencia
+                if ultimo.empleado.usuario.has_perm('organizacional:es_presidente'):
+                    return self.__class__.DATA_SET['rechaza_presidencia']
                 # si rechazo jefe administrativo
-                if ultimo.empleado.is_jefe_administrativo:
+                elif ultimo.empleado.is_jefe_administrativo:
                     return self.__class__.DATA_SET['rechaza_administrativo']
-                # si rechazo jefe de departamento
+                # si rechazo jefe de departamento y es de compras
                 elif ultimo.empleado.jefe_departamento is True \
                         and ultimo.empleado.is_compras:
                     return self.__class__.DATA_SET['rechaza_departamento']
+                # si rechaza un jefe de departamento
                 elif ultimo.empleado.jefe_departamento is True:
                     return self.__class__.DATA_SET['rechaza_departamento']
         # de cualquier otro modo, la requisicion aun no ha sido revisada

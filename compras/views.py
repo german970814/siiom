@@ -795,3 +795,66 @@ def pagar_requisicion(request, id_requisicion):
     }
 
     return render(request, 'compras/pagar_requisicion.html', data)
+
+
+@waffle_switch('compras')
+@permission_required('organizacional.es_presidente')
+def ver_requisiciones_presidencia(request):
+    """
+    Vista para ver las requisiciones que han alcanzado cierto punto de tope en su total
+    y tienen que ser aprobadas por presidencia
+    """
+    try:
+        empleado = request.user.empleado
+    except:
+        raise Http404
+
+    requisiciones = Requisicion.objects.en_presidencia()
+
+    data = {'requisiciones': requisiciones}
+
+    if request.method == 'POST':
+        # se crea la instancia de el formulario para los comentarios
+        form = FormularioRequisicionesCompras(data=request.POST)
+        if form.is_valid():
+            # si todo está valido se obtiene la requisicion a partir de id de el formulario
+            requisicion = Requisicion.objects.get(id=form.cleaned_data['id_requisicion'])
+            if 'aprobar' in request.POST:
+                # si se aprueba se crea el historial con su respectivo comentario
+                if form.cleaned_data['observacion'] != '':
+                    historial = requisicion.crear_historial(
+                        empleado=empleado, estado=Historial.APROBADA,
+                        observacion=form.cleaned_data['observacion']
+                    )
+                # si no tiene comentarios
+                else:
+                    historial = requisicion.crear_historial(
+                        empleado=empleado, estado=Historial.APROBADA
+                    )
+                mensaje = 'aprobado'
+            elif 'rechazar' in request.POST:
+                # si se rechaza la requisicion la observacion es obligatoria
+                historial = requisicion.crear_historial(
+                    empleado=empleado, estado=Historial.RECHAZADA,
+                    observacion=form.cleaned_data['observacion']
+                )
+                mensaje = 'rechazado'
+                requisicion.estado = Requisicion.ANULADA
+            # en este punto debe llegar siempre un historial o tirará un error
+            requisicion.save()
+            historial.save()
+            messages.success(
+                request,
+                _("Se ha {} la requisicion No.{} exitosamente").format(mensaje, requisicion.id)
+            )
+            return redirect('compras:ver_requisiciones_presidencia')
+        else:
+            # se crea una variable con el id de la requisicion para el front
+            data['CLICK'] = form.cleaned_data['id_requisicion']
+            messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+    else:
+        # se instancia el formulario en el GET
+        form = FormularioRequisicionesCompras()
+    data['form'] = form
+
+    return render(request, 'compras/ver_requisiciones_presidencia.html', data)
