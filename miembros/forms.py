@@ -473,4 +473,4 @@ class FormularioTransladarMiembro(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(FormularioTransladarMiembro, self).__init__(*args, **kwargs)
-        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})

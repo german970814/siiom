@@ -206,7 +206,9 @@ class FormularioCrearGrupoRaiz(ModelForm):
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
         self.fields['horaGAR'].widget.attrs.update({'class': 'form-control time-picker'})
+        self.fields['horaGAR'].required = False
         self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['diaDiscipulado'].required = False
         self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
         self.fields['estado'].widget.attrs.update({'class': 'form-control'})
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
