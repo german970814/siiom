@@ -242,7 +242,7 @@ class DetalleRequisicion(models.Model):
 
     OPCIONES_FORMA_PAGO = (
         (EFECTIVO, 'EFECTIVO'),
-        (DEBITO, 'DÉBITO'),
+        (DEBITO, 'CHEQUE'),
         (CREDITO, 'CRÉDITO'),
     )
 

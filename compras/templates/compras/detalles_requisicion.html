@@ -1,10 +1,10 @@
-<div class="modal fade" id="modalWider" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Detalles de la Requisición</h4>
-            </div>
-            <form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
+<form action="" method="POST" id="form-solicitud-proceso" enctype="multipart/form-data">
+    <div class="modal fade" id="modalWider" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Detalles de la Requisición</h4>
+                </div>
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="row infor">
@@ -47,7 +47,7 @@
                     </div>
                     <br>
                     <br>
-                    <div id="contenido"></div>
+                    <div id="contenido" class="row"></div>
                     {% if not empleado %}
                     <div class="row to_hidden">
                         <div class="col-md-8 col-md-offset-2">
@@ -76,8 +76,8 @@
                     {% endif %}
                     <button type="button" id="cancelar" class="btn btn-link cancelar" data-dismiss="modal">Cancelar</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
+</form>
 <a data-toggle="modal" id="toggleModal" href="#modalWider"></a>
