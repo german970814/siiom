@@ -461,6 +461,7 @@ class FormularioTipoMiembros(forms.ModelForm):
         if self.instance:
             tipos = CambioTipo.objects.filter(miembro=self.instance)
             self.fields['tipos'].initial = [tipo.nuevoTipo.id for tipo in tipos]
+            # self.fields['tipos'].required = False
 
     class Meta:
         model = CambioTipo

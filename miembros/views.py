@@ -1174,8 +1174,14 @@ def eliminarCambioTipoMiembro(request, id):
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Pastor'))
 
     try:
-        if len(cambio.miembro.usuario.groups.all()) == 0:
-            cambio.miembro.usuario.delete()
+        if cambio.miembro.usuario.groups.count() == 0:
+            import waffle
+            if waffle.switch_is_active('compras'):
+                if hasattr(cambio.miembro.usuario, 'empleado'):
+                    if cambio.miembro.usuario.empleado:
+                        pass
+            else:
+                cambio.miembro.usuario.delete()
             cambio.miembro.usuario = None
             cambio.miembro.save()
     except:
@@ -1426,7 +1432,11 @@ def ver_discipulos(request, pk=None):
     return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
 
 
+from django.db import transaction
+
+
 @login_required
+@transaction.atomic
 def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
@@ -1459,11 +1469,22 @@ def ver_informacion_miembro(request, pk=None):
                 tplider = TipoMiembro.objects.get(nombre__iexact='lider')
 
                 cambio = CambioTipo.objects.filter(miembro=miembro)
+                print('cambios', [x for x in cambio])
                 tipos_cambio = [c.nuevoTipo for c in cambio]
+                print('tipos_cambios', [x for x in tipos_cambio])
                 eliminar = [cambio_iter for cambio_iter in tipos_cambio if cambio_iter not in tipos]
+                print('eliminar', [x for x in eliminar])
                 if len(eliminar):
                     for e in eliminar:
-                        c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
+                        try:
+                            print("¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨")
+                            print(e)
+
+                            c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
+                        except:
+                            print("entre al else")
+                            c = CambioTipo.objects.get(miembro=miembro, anteriorTipo=e)
+                        print("enviando a eliminar")
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
                     tipos_cambio = [c_iter.nuevoTipo for c_iter in cambio]
@@ -1487,9 +1508,12 @@ def ver_informacion_miembro(request, pk=None):
                                 import re
                                 cedula = re.findall(r'\d+', cambio.miembro.cedula)
                                 cedula = ''.join(cedula)
-                                usuario = User()
-                                usuario.username = '{}'.format(cambio.miembro.cedula)
-                                usuario.email = cambio.miembro.email
+                                try:
+                                    usuario = User.objects.get(email=cambio.miembro.email)
+                                except:
+                                    usuario = User()
+                                    usuario.username = '{}'.format(cambio.miembro.cedula)
+                                    usuario.email = cambio.miembro.email
                                 usuario.set_password(cedula)
                                 usuario.save()
                                 cambio.miembro.usuario = usuario
@@ -1510,13 +1534,17 @@ def ver_informacion_miembro(request, pk=None):
                         cambio.nuevoTipo = tipo
                         cambio.save()
                     else:
+                        # return HttpResponse(eliminar, content_type='text/plain')
                         continue
 
                 ok = True
                 ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
                 if mismo:
                     ms = "Te has Editado Correctamente"
+                # return redirect(reverse('ver_informacion', args=(miembro.id, )))
             else:
+                if form_cambio_tipo.errors:
+                    form.add_error('estado', 'Error en formulario')
                 ms = "Ocurrió un Error, Por Favor Verifica el Formulario"
         else:
             form = FormularioInformacionIglesiaMiembro(instance=miembro)
