@@ -65,18 +65,20 @@
                         var quote = '<blockquote>0</blockquote>';
                         var span = '<span style="text-align:right;display:inherit;font-style:italic;font-size:14px">0</span>';
 
-                        for (var i = 0; i < data[0].length; i++) {
-                            str = h5.replace('0', data[0][i]['usuario']) + br + quote.replace('0', data[0][i]['observacion'] + span.replace('0', data[0][i]['fecha']));
+                        $('#progress-id').attr('style', 'width: 0%'.replace('0', data[0][0]['progreso'])).attr('aria-valuenow', '0'.replace('0', data[0][0]['progreso']));
+
+                        for (var i = 0; i < data[1].length; i++) {
+                            str = h5.replace('0', data[1][i]['usuario']) + br + quote.replace('0', data[1][i]['observacion'] + span.replace('0', data[1][i]['fecha']));
                             to_append += div.replace('0', str);
                         }
 
                         $('#contenido').html(to_append)
 
-                        if (data.length > 1 && data[1].length) {
+                        if (data.length > 2 && data[2].length) {
                             var li = '<li><a href="0" _blank="true">!</a></li>';
                             var append = '';
-                            for (var i = 0; i < data[1].length; i++){
-                                append += li.replace('0', data[1][i]['ruta']).replace('!', data[1][i]['archivo'])
+                            for (var i = 0; i < data[2].length; i++){
+                                append += li.replace('0', data[2][i]['ruta']).replace('!', data[2][i]['archivo'])
                             }
                             $('#archivos').fadeIn();
                             $('#archivos_list').html(append);

@@ -1,3 +1,57 @@
+"""
+
+    Update Sábado 13 Agosto 2016
+
+    Hecho por: Ingeniarte Soft
+
+
+    Datos importantes a tener en cuenta:
+
+        - Para la fecha, el numero maximo de pasos que puede tener una requisicion será de
+        7, sin contar que puede tener mas historiales que pasos y el numero minimo
+        de pasos para que una requisicion sea finalizada y aprobada será de 5
+        dada las condiciones establecidas
+
+        - Cada requisicion contara con un porcentaje de progreso el cual va de acuerdo a la
+        posicion donde se encuetre esa requisicion, y el estado de cada detalle de dicha
+        requisicion (ITEMS)
+
+        - Para saber donde está cada detalle de la requisicion, se mira la posicion de la
+        requisicion a la que pertenece, la posible cantidad de pasos que tendra de acuerdo a
+        sus valores, y si ya está pagada o no, la cual le dara un valor de el 100 porciento,
+        sabiendo que cada detalle de la requisicion tendrá un valor total de 1 = 100%,
+        y en la requisicion para saber su progreso seria el valor en porcentaje de cada detalle
+        de la requisicion entre el numero de items o detalles de requisicion que tiene la requisicion
+        por 100, dicho de otro modo, la sumatoria de los porcentajes de cada detalle de la requisicion:
+
+        a = 3 (cantidad de items)
+
+        b = [x.valor_porcentaje for x in a]
+
+        c = 0 (no puede ser mayor que a)
+
+        for x in b:
+            c += x
+
+        progreso = c / a
+
+
+        - Para saber el progreso de un detalle de requisicion se procede de la siguiente manera:
+
+        max = 1 (valor maximo que puede tomar el detalle == 100%)
+
+        a = 7 (tamaño maximo que puede tomar el ciclo, [viene de un metodo de el detalle])
+
+        b = 3 (posicion actual)
+
+        c = (b * 100) / a (porcentaje de progreso segun el ciclo)
+
+        - La trazabilidad pasa de manera transparente a ser hecha por detalle de requisicion
+        y no por requisicion de acuerdo a ciertas condiciones en el lugar donde se encuentra
+        actualmente
+
+"""
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -75,6 +129,9 @@ class Requisicion(models.Model):
         'rechaza_presidencia': 'Rechazada por presidencia'
     }
 
+    _SUCCESS = [x for x in DATA_SET if not x.startswith('rechaza') and x not in ['digitada', 'espera_presupuesto']]
+    _FAILED = [x for x in DATA_SET if x.startswith('rechaza')]
+
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
     empleado = models.ForeignKey('organizacional.Empleado', verbose_name=_('empleado'))
     observaciones = models.TextField(verbose_name=_('observaciones'))
@@ -107,20 +164,22 @@ class Requisicion(models.Model):
         cls = self.__class__
         rastreo = self.get_rastreo()
         if rastreo == cls.DATA_SET['digitada']:
-            return 1
+            return 0
         elif rastreo == cls.DATA_SET['departamento']:
-            return 2
+            return 1
         elif rastreo == cls.DATA_SET['compras']:
-            return 3
+            return 2
         elif rastreo == cls.DATA_SET['administrativo']:
+            return 3
+        elif rastreo == cls.DATA_SET['presidencia']:
             return 4
         elif rastreo == cls.DATA_SET['financiero'] or rastreo == cls.DATA_SET['espera_presupuesto']:
             return 5
         elif rastreo == cls.DATA_SET['pago']:
             return 6
-        elif rastreo == cls.DATA_SET['presidencia']:
+        elif rastreo == cls.DATA_SET['terminada']:
             return 7
-        return 0
+        return -1
 
     def crear_historial(self, empleado, estado, observacion=''):
         """
@@ -232,6 +291,18 @@ class Requisicion(models.Model):
             total += detalle.get_valor_total()
         return total
 
+    def get_progreso(self):
+        """
+        Retorna el progreso general de la requisicion de acuerdo a sus detalles de requisicion
+        """
+
+        _progreso = 0
+        if self.__len__() >= 0:
+            for detalle in self.detallerequisicion_set.all():
+                _progreso += detalle.get_progreso()
+            return _progreso / self.detallerequisicion_set.count()
+        return _progreso
+
 
 class DetalleRequisicion(models.Model):
     """Modelo que guarda el detalle de una requisición."""
@@ -254,6 +325,7 @@ class DetalleRequisicion(models.Model):
     total_aprobado = models.PositiveIntegerField(verbose_name=_('valor total'), blank=True, null=True)
     forma_pago = models.CharField(_('forma de pago'), choices=OPCIONES_FORMA_PAGO, max_length=1, blank=True)
     requisicion = models.ForeignKey(Requisicion, verbose_name=_('requisición'))
+    cumplida = models.BooleanField(verbose_name=_('cumplida'), default=False)
 
     class Meta:
         verbose_name = _('detalle de la requisición')
@@ -278,6 +350,67 @@ class DetalleRequisicion(models.Model):
             self.cantidad = 1
         total = self.cantidad * self.valor_aprobado
         return total
+
+    @property
+    def is_efectivo(self):
+        """
+        Retorna verdadero si el tipo de pago de la factura es efectivo o cheque
+        """
+        if self.forma_pago in [self.EFECTIVO, self.DEBITO]:
+            return True
+        return False
+
+    @property
+    def is_credito(self):
+        if not self.is_efectivo:
+            return True
+        return False
+
+    def get_possible_position(self):
+        """
+        Retorna la posible cantidad de escalones que tendrá una requisicion
+        """
+        if self.is_efectivo:
+            if self.requisicion.get_total() > Parametros.objects.tope():
+                return len(self.requisicion._SUCCESS)
+            return len(self.requisicion._SUCCESS) - 1
+        if self.requisicion.get_total() > Parametros.objects.tope():
+            return len(self.requisicion._SUCCESS) - 1
+        return len(self.requisicion._SUCCESS) - 2
+
+    def get_actual_position(self):
+        """
+        Retorna la posicion actual de la requisicion
+        """
+        if self.requisicion.DATA_SET['terminada'] != self.requisicion.get_rastreo():
+            requisicion_position = self.requisicion.__len__()
+            if self.is_efectivo:
+                if self.requisicion.get_total() > Parametros.objects.tope():
+                    return requisicion_position
+                if requisicion_position > 0:
+                    return requisicion_position - 1
+                return requisicion_position
+            if self.requisicion.get_total() > Parametros.objects.tope():
+                if requisicion_position > 0:
+                    return requisicion_position - 1
+                return requisicion_position
+            if requisicion_position >= 2:
+                return self.requisicion.__len__() - 2
+            return requisicion_position
+        # si esta terminada se devuelve la posisicion posible para que no haya errores de calculos
+        return self.get_possible_position()
+
+    def get_progreso(self):
+        """
+        Retorna el valor en porcentaje de progreso de el detalle de la requisicion
+        """
+
+        if self.requisicion.__len__() >= 0:
+            _max = self.get_possible_position()
+            actual = self.get_actual_position()
+
+            return float((actual * 100) / _max)
+        return 0
 
 
 class Adjunto(models.Model):

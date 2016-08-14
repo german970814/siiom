@@ -89,20 +89,27 @@ def observaciones_requisicion(request, id_requisicion):
         data = []
         data1 = [
             {
+                'progreso': requisicion.get_progreso(),
+                'clase': 'progress-bar-success'
+            }
+        ]
+        data2 = [
+            {
                 'observacion': historia.observacion,
                 'usuario': historia.empleado.__str__(),
                 'fecha': historia.fecha.strftime('%d/%m/%Y')
             } for historia in requisicion.historial_set.all() if historia.observacion
         ]
-        data2 = [
+        data3 = [
             {
                 'archivo': archivo.get_name(),
                 'ruta': reverse('compras:descargar_archivos_api', args=(archivo.id,))
             } for archivo in requisicion.adjunto_set.all()
         ]
         data.insert(0, data1)
-        if data2:
-            data.insert(1, data2)
+        data.insert(1, data2)
+        if data3:
+            data.insert(2, data3)
         return HttpResponse(json.dumps(data), content_type='application/json')
     except Exception as e:
         return HttpResponse(e, content_type='text/plain')
