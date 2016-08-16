@@ -129,11 +129,11 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('fecha_pago', 'presupuesto_aprobado')
+        fields = ('presupuesto_aprobado', )
 
     def __init__(self, *args, **kwargs):
         super(FormularioFechaPagoRequisicion, self).__init__(*args, **kwargs)
-        self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
+        # self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
         self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
         self.fields['presupuesto_aprobado'].required = True
         self.fields['presupuesto_aprobado'].widget.attrs.update({'class': 'selectpicker'})
@@ -142,15 +142,7 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
         cleaned_data = super(FormularioFechaPagoRequisicion, self).clean(*args, **kwargs)
 
         if 'presupuesto_aprobado' in cleaned_data:
-            if cleaned_data['presupuesto_aprobado'] == Requisicion.SI:
-                if 'fecha_pago' in cleaned_data:
-                    if cleaned_data['fecha_pago'] is None or cleaned_data['fecha_pago'] == '':
-                        self.add_error('fecha_pago', _('Este campo es obligatorio'))
-                else:
-                    self.add_error('fecha_pago', _('Este campo es obligatorio'))
-            else:
-                if 'fecha_pago' in cleaned_data:
-                    cleaned_data['fecha_pago'] = None
+            if cleaned_data['presupuesto_aprobado'] != Requisicion.SI:
                 if 'observacion' in cleaned_data:
                     if cleaned_data['observacion'] is None or cleaned_data['observacion'] == '':
                         self.add_error('observacion', _('Este campo es obligatorio'))
@@ -167,12 +159,14 @@ class FormularioEstadoPago(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('estado_pago', )
+        fields = ('estado_pago', 'fecha_pago')
 
     def __init__(self, *args, **kwargs):
         super(FormularioEstadoPago, self).__init__(*args, **kwargs)
         self.fields['estado_pago'].required = True
+        self.fields['fecha_pago'].required = True
         self.fields['estado_pago'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
 
 
 class FormularioEditarValoresDetallesRequisiciones(FormularioDetalleRequisicion):
@@ -190,3 +184,15 @@ class FormularioEditarValoresDetallesRequisiciones(FormularioDetalleRequisicion)
         self.fields['descripcion'].widget.attrs.update({'readonly': 'readonly'})
         self.fields['referencia'].widget.attrs.update({'readonly': 'readonly'})
         self.fields['marca'].widget.attrs.update({'readonly': 'readonly'})
+
+
+class FormularioEditarValoresJefeAdministrativo(FormularioEditarValoresDetallesRequisiciones):
+    """
+    Formulario que usa el jefe administrativo, hereda de el de compras, la unica diferencia es que hay
+    campos obligatorios
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarValoresJefeAdministrativo, self).__init__(*args, **kwargs)
+        self.fields['forma_pago'].required = True
+        self.fields['valor_aprobado'].required = True

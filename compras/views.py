@@ -59,7 +59,8 @@ from waffle.decorators import waffle_switch
 from .forms import (
     FormularioSolicitudRequisicion, FormularioDetalleRequisicion, FormularioAdjunto,
     FormularioRequisicionesCompras, FormularioObservacionHistorial, FormularioFechaPagoRequisicion,
-    FormularioEstadoPago, FormularioEditarValoresDetallesRequisiciones
+    FormularioEstadoPago, FormularioEditarValoresDetallesRequisiciones,
+    FormularioEditarValoresJefeAdministrativo
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
 from organizacional.models import Empleado
@@ -118,7 +119,8 @@ def crear_requisicion(request):
                     <a class='alert-link' href='%s'>Ver Mis Requisiciones</a>
                     """ % reverse_lazy('compras:ver_requisiciones_empleado')
                 # si el empleado es jefe_departamento pero no es administrativo se crea un historial
-                if empleado.jefe_departamento and not empleado.is_jefe_administrativo:
+                if empleado.jefe_departamento and not empleado.is_jefe_administrativo \
+                   and not empleado.is_jefe_financiero:
                     historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
                     historial.save()
                     requisicion.estado = Requisicion.PROCESO
@@ -618,7 +620,7 @@ def editar_valores_jefe_administrativo(request, id_requisicion):
 
     # se crea un formulario para los detalles de la requisicion
     DetalleRequisicionFormSet = modelformset_factory(
-        DetalleRequisicion, form=FormularioEditarValoresDetallesRequisiciones,
+        DetalleRequisicion, form=FormularioEditarValoresJefeAdministrativo,
         min_num=requisicion.detallerequisicion_set.count(), extra=0, validate_min=True,
     )
 
@@ -703,7 +705,8 @@ def pre_pago_requisicion(request, id_requisicion):
             requisicion = form.save()
             if 'observacion' in form.cleaned_data:
                 historial = requisicion.crear_historial(
-                    empleado=empleado, estado=Historial.APROBADA, observacion=form.cleaned_data['observacion'])
+                    empleado=empleado, estado=Historial.APROBADA, observacion=form.cleaned_data['observacion']
+                )
             else:
                 historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
             historial.save()
@@ -768,8 +771,8 @@ def pagar_requisicion(request, id_requisicion):
 
         if form.is_valid():
             requisicion = form.save()
-            requisicion.estado = Requisicion.TERMINADA
-            requisicion.save()
+            # requisicion.estado = Requisicion.TERMINADA
+            # requisicion.save()
             historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
             historial.save()
 
@@ -809,7 +812,7 @@ def ver_requisiciones_presidencia(request):
     except:
         raise Http404
 
-    requisiciones = Requisicion.objects.en_presidencia()
+    requisiciones = Requisicion.objects.en_presidencia().order_by('-fecha_ingreso')
 
     data = {'requisiciones': requisiciones}
 

@@ -114,22 +114,23 @@ class Requisicion(models.Model):
 
     DATA_SET = {
         'digitada': 'Digitada por Empleado y en Jefe de Departamento',
-        'administrativo': 'En Jefe Administrativo',
-        'compras': 'En Área de Compras',
         'departamento': 'En Jefe de Departamento',
+        'compras': 'En Área de Compras',
+        'administrativo': 'En Jefe Administrativo',
         'financiero': 'En Director Financiero',
-        'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
-        'rechaza_compras': 'Rechazada por Usuario de compras %s',
-        'rechaza_departamento': 'Rechazada por Jefe de Departamento',
-        'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
-        'terminada': 'Requisicion en su etapa finalizada',
-        'pago': 'Esperando usuario encargado de pago',
         'espera_presupuesto': 'A la espera de presupuesto disponible',
+        'pago': 'Esperando usuario encargado de pago',
         'presidencia': 'En Presidencia',
+        'terminada': 'Requisicion en su etapa finalizada',
+        'rechaza_departamento': 'Rechazada por Jefe de Departamento',
+        'rechaza_compras': 'Rechazada por Usuario de compras %s',
+        'rechaza_administrativo': 'Rechazada por Jefe Administrativo',
         'rechaza_presidencia': 'Rechazada por presidencia'
     }
 
+    # serian los estados de la requisicion que marcan o hacen avance de proceso
     _SUCCESS = [x for x in DATA_SET if not x.startswith('rechaza') and x not in ['digitada', 'espera_presupuesto']]
+    # serian los estados de la requisicion que marcan fallas o rechazos
     _FAILED = [x for x in DATA_SET if x.startswith('rechaza')]
 
     fecha_ingreso = models.DateTimeField(verbose_name=_('fecha de ingreso'), auto_now_add=True)
@@ -163,6 +164,7 @@ class Requisicion(models.Model):
     def __len__(self):
         cls = self.__class__
         rastreo = self.get_rastreo()
+        # se hace de forma ordenada ascendentemente de acuerdo a el orden de la trazabilidad
         if rastreo == cls.DATA_SET['digitada']:
             return 0
         elif rastreo == cls.DATA_SET['departamento']:
@@ -231,6 +233,9 @@ class Requisicion(models.Model):
                     # si tiene una observacion se pone en espera
                     if ultimo.observacion != '' and self.presupuesto_aprobado == self.__class__.ESPERA:
                         return self.__class__.DATA_SET['espera_presupuesto']
+                    # si tiene menos de dos va a compras
+                    if self.historial_set.count() < 2:
+                        return self.__class__.DATA_SET['compras']
                     # de lo contrario pasa a pago
                     return self.__class__.DATA_SET['pago']
                 # si el ultimo empleado es jefe administrativo
@@ -274,7 +279,6 @@ class Requisicion(models.Model):
         """
         Retorna Verdadero si la requisicion fue anulada
         """
-
         if self.estado == self.__class__.ANULADA or \
            any([x for x in self.historial_set.all().distinct() if x.estado == Historial.RECHAZADA]):
             return True
@@ -285,7 +289,6 @@ class Requisicion(models.Model):
         Retorna el valor total de la requisicion, con la suma de los totales de todos los detalles
         de la requisicion
         """
-
         total = 0
         for detalle in self.detallerequisicion_set.all():
             total += detalle.get_valor_total()
@@ -295,7 +298,6 @@ class Requisicion(models.Model):
         """
         Retorna el progreso general de la requisicion de acuerdo a sus detalles de requisicion
         """
-
         _progreso = 0
         if self.__len__() >= 0:
             for detalle in self.detallerequisicion_set.all():
@@ -339,8 +341,27 @@ class DetalleRequisicion(models.Model):
             self.cantidad = 1
         if not self.valor_aprobado:
             self.valor_aprobado = 0
+        # siempre se guarda el total aprobado (total) de acuerdo al valor unitario y la cantidad
         self.total_aprobado = self.get_valor_total()
         super(DetalleRequisicion, self).save(*args, **kwargs)
+
+    @property
+    def is_efectivo(self):
+        """
+        Retorna verdadero si el tipo de pago de la requisicion es efectivo o cheque
+        """
+        if self.forma_pago in [self.EFECTIVO, self.DEBITO]:
+            return True
+        return False
+
+    @property
+    def is_credito(self):
+        """
+        Retorna verdadero si el tipo de pago de la requisicion es crédito
+        """
+        if not self.is_efectivo:
+            return True
+        return False
 
     def get_valor_total(self):
         """
@@ -351,51 +372,54 @@ class DetalleRequisicion(models.Model):
         total = self.cantidad * self.valor_aprobado
         return total
 
-    @property
-    def is_efectivo(self):
-        """
-        Retorna verdadero si el tipo de pago de la factura es efectivo o cheque
-        """
-        if self.forma_pago in [self.EFECTIVO, self.DEBITO]:
-            return True
-        return False
-
-    @property
-    def is_credito(self):
-        if not self.is_efectivo:
-            return True
-        return False
-
     def get_possible_position(self):
         """
         Retorna la posible cantidad de escalones que tendrá una requisicion
         """
         if self.is_efectivo:
+            # si es efectivo y supera la cantidad maxima de dinero
             if self.requisicion.get_total() > Parametros.objects.tope():
+                # va a devolver que puede dar todos los pasos posibles
                 return len(self.requisicion._SUCCESS)
+            # si no, devuelve que no dará el paso a presidencia
             return len(self.requisicion._SUCCESS) - 1
+        # si es credito y supera la cantidad maxima de dinero
         if self.requisicion.get_total() > Parametros.objects.tope():
+            # dara un paso menos porque no ira a compras
             return len(self.requisicion._SUCCESS) - 1
+        # de lo contrario da dos pasos menos porque no irá ni a compras, ni a presidencia
         return len(self.requisicion._SUCCESS) - 2
 
     def get_actual_position(self):
         """
         Retorna la posicion actual de la requisicion
         """
+        # esta funcion NO puede retornar un numero mayor a self.get_possible_position()
         if self.requisicion.DATA_SET['terminada'] != self.requisicion.get_rastreo():
             requisicion_position = self.requisicion.__len__()
             if self.is_efectivo:
+                # si es efectivo y va a presidencia
                 if self.requisicion.get_total() > Parametros.objects.tope():
+                    # cumple todos los pasos asi que puede devolver el paso en que va la requisicion
                     return requisicion_position
+                # si no va a presidencia y es mayor que 0
                 if requisicion_position > 0:
+                    # le resta uno de el paso que no dará
                     return requisicion_position - 1
+                # si no, devuelve la posicion en la que está, que es 0 o -1
                 return requisicion_position
+            # si es credito y va a presidencia
             if self.requisicion.get_total() > Parametros.objects.tope():
                 if requisicion_position > 0:
+                    # como es credito se le quita un posible paso
                     return requisicion_position - 1
+                # si no devuelve la posicion actual que deberia ser 0 o 1
                 return requisicion_position
+            # si no va a presidencia
             if requisicion_position >= 2:
-                return self.requisicion.__len__() - 2
+                # se le deben restar 2 pasos
+                return requisicion_position - 2
+            # si no devuelve la posicion actual
             return requisicion_position
         # si esta terminada se devuelve la posisicion posible para que no haya errores de calculos
         return self.get_possible_position()
@@ -404,12 +428,13 @@ class DetalleRequisicion(models.Model):
         """
         Retorna el valor en porcentaje de progreso de el detalle de la requisicion
         """
-
+        # si no fue rechazada devuelve el progreso
         if self.requisicion.__len__() >= 0:
             _max = self.get_possible_position()
             actual = self.get_actual_position()
 
             return float((actual * 100) / _max)
+        # devuelve 0
         return 0
 
 
