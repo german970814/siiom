@@ -121,6 +121,7 @@ class Requisicion(models.Model):
         'espera_presupuesto': 'A la espera de presupuesto disponible',
         'pago': 'Esperando usuario encargado de pago',
         'presidencia': 'En Presidencia',
+        'solicitante': 'Esperando Aprobacion de Solicitante',
         'terminada': 'Requisicion en su etapa finalizada',
         'rechaza_departamento': 'Rechazada por Jefe de Departamento',
         'rechaza_compras': 'Rechazada por Usuario de compras %s',
@@ -179,8 +180,10 @@ class Requisicion(models.Model):
             return 5
         elif rastreo == cls.DATA_SET['pago']:
             return 6
-        elif rastreo == cls.DATA_SET['terminada']:
+        elif rastreo == cls.DATA_SET['solicitante']:
             return 7
+        elif rastreo == cls.DATA_SET['terminada']:
+            return 8
         return -1
 
     def crear_historial(self, empleado, estado, observacion=''):
@@ -207,7 +210,7 @@ class Requisicion(models.Model):
             # si tiene historial se saca el ultimo
             ultimo = self.historial_set.last()
             # si ya tiene fecha de pago, quiere decir que su proceso está por terminar
-            if self.fecha_pago:
+            if self.fecha_pago and not self.estado_pago:
                 return self.__class__.DATA_SET['pago']
             # siempre y cuando esté aprobada por la ultima persona
             if ultimo.estado == Historial.APROBADA:
@@ -225,6 +228,9 @@ class Requisicion(models.Model):
                     # de lo contrario está en compras
                     else:
                         return self.__class__.DATA_SET['compras']
+                # si el ultimo fue de pago y tiene fecha de pago y estado de pago
+                elif ultimo.empleado.is_usuario_pago and self.fecha_pago and self.estado_pago:
+                    return self.__class__.DATA_SET['solicitante']
                 # si el ultimo empleado fue el presidente
                 elif ultimo.empleado.usuario.has_perm('organizacional.es_presidente'):
                     return self.__class__.DATA_SET['financiero']
@@ -236,7 +242,17 @@ class Requisicion(models.Model):
                     # si tiene menos de dos va a compras
                     if self.historial_set.count() < 2:
                         return self.__class__.DATA_SET['compras']
-                    # de lo contrario pasa a pago
+                    # si tiene presupuesto
+                    if self.presupuesto_aprobado == self.__class__.SI:
+                        # si tiene items con pago en efectivo o cheque(debito)
+                        if self.detallerequisicion_set.filter(
+                            forma_pago__in=[DetalleRequisicion.EFECTIVO, DetalleRequisicion.DEBITO]
+                        ):
+                            # se envia a pagos
+                            return self.__class__.DATA_SET['pago']
+                        # si no se envia a solicitante
+                        return self.__class__.DATA_SET['solicitante']
+                    # de lo contrario pasa a pago (MOMENTANEAMENTE)
                     return self.__class__.DATA_SET['pago']
                 # si el ultimo empleado es jefe administrativo
                 # no se tiene en cuenta cuando es == 2 porque solo se da en condicional de arriba
@@ -428,14 +444,18 @@ class DetalleRequisicion(models.Model):
         """
         Retorna el valor en porcentaje de progreso de el detalle de la requisicion
         """
-        # si no fue rechazada devuelve el progreso
-        if self.requisicion.__len__() >= 0:
-            _max = self.get_possible_position()
-            actual = self.get_actual_position()
+        # si no esta cumplida
+        if not self.cumplida:
+            # si no fue rechazada devuelve el progreso
+            if self.requisicion.__len__() >= 0:
+                _max = self.get_possible_position()
+                actual = self.get_actual_position()
 
-            return float((actual * 100) / _max)
-        # devuelve 0
-        return 0
+                return float((actual * 100) / _max)
+            # devuelve 0
+            return 0
+        # retorna 100%
+        return 100
 
 
 class Adjunto(models.Model):

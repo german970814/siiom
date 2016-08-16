@@ -56,7 +56,12 @@ class RequisicionManager(models.Manager):
         Retorna un Queryset con las requisiciones a las cuales un jefe financiero ha
         puesto una fecha de pago
         """
-        return self.aprobadas_jefe_administrativo().exclude(fecha_pago=None)
+        # return self.aprobadas_jefe_administrativo().exclude(fecha_pago=None)
+        from .models import DetalleRequisicion
+        return self.filter(
+            presupuesto_aprobado=self.model.SI,
+            detallerequisicion__forma_pago__in=[DetalleRequisicion.EFECTIVO, DetalleRequisicion.DEBITO]
+        ).exclude(estado=self.model.ANULADA)
 
     def en_presidencia(self):
         """

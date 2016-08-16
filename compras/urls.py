@@ -10,6 +10,10 @@ urlpatterns = [
     url(r'^pago/(?P<id_requisicion>\d+)$', views.pagar_requisicion, name="pagar_requisicion"),
     url(r'^requisiciones_usuario_pago/$', views.ver_requisiciones_usuario_pago, name="ver_requisiciones_usuario_pago"),
     url(
+        r'^empleado/aprobar_requisicion/(?P<id_requisicion>\d+)$',
+        views.aprobar_requisiciones_empleado, name="aprobar_requisiciones_empleado"
+    ),
+    url(
         r'^editar_requisicion_jefe_administrativo/(?P<id_requisicion>\d+)$',
         views.editar_valores_jefe_administrativo,
         name="editar_valores_jefe_administrativo"

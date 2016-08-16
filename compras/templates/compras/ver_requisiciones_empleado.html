@@ -73,10 +73,18 @@
                     var editar = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/requisiciones/editar_requisicion/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
 
                     var ver = "<button type=\"button\" class=\"btn btn-icon proceso command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button>";
+
+                    var finalizar = "<button type=\"button\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "compras:aprobar_requisiciones_empleado" 0 %}'.replace('0', " + row.id + ")\"><span class=\"zmdi zmdi-card\"></span></button>";
+
+                    ret = ver;
+
                     if (row.edit == 1) {
-                        return ver + editar;
+                        ret += editar;
                     }
-                    return ver;
+                    if (row.edit == 7) {
+                        ret += finalizar;
+                    }
+                    return ret;
                 },
             }
         });

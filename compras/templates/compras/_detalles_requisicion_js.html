@@ -65,7 +65,7 @@
                         var quote = '<blockquote>0</blockquote>';
                         var span = '<span style="text-align:right;display:inherit;font-style:italic;font-size:14px">0</span>';
 
-                        $('#progress-id').attr('style', 'width: 0%'.replace('0', data[0][0]['progreso'])).attr('aria-valuenow', '0'.replace('0', data[0][0]['progreso']));
+                        $('#progress-id').attr('style', 'width: 0%'.replace('0', data[0][0]['progreso'])).attr('aria-valuenow', '0'.replace('0', data[0][0]['progreso'])).attr('data-content', '0%'.replace('0', data[0][0]['progreso']));
 
                         for (var i = 0; i < data[1].length; i++) {
                             str = h5.replace('0', data[1][i]['usuario']) + br + quote.replace('0', data[1][i]['observacion'] + span.replace('0', data[1][i]['fecha']));

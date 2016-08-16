@@ -60,7 +60,7 @@ from .forms import (
     FormularioSolicitudRequisicion, FormularioDetalleRequisicion, FormularioAdjunto,
     FormularioRequisicionesCompras, FormularioObservacionHistorial, FormularioFechaPagoRequisicion,
     FormularioEstadoPago, FormularioEditarValoresDetallesRequisiciones,
-    FormularioEditarValoresJefeAdministrativo
+    FormularioEditarValoresJefeAdministrativo, FormularioCumplirDetalleRequisicion
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
 from organizacional.models import Empleado
@@ -740,7 +740,7 @@ def ver_requisiciones_usuario_pago(request):
     except:
         raise Http404
 
-    requisiciones = Requisicion.objects.aprobadas_jefe_financiero()
+    requisiciones = Requisicion.objects.aprobadas_jefe_financiero().order_by('-fecha_ingreso')
 
     data = {'requisiciones': requisiciones}
 
@@ -773,13 +773,14 @@ def pagar_requisicion(request, id_requisicion):
             requisicion = form.save()
             # requisicion.estado = Requisicion.TERMINADA
             # requisicion.save()
-            historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
-            historial.save()
+            if requisicion.estado_pago:
+                historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
+                historial.save()
 
             messages.success(
                 request,
                 _(
-                    "Se ha culminado exitosamente el proceso de la requisicion No.{}".format(
+                    "Se ha aprobado exitosamente la requisición No.{}".format(
                         requisicion.id
                     )
                 )
@@ -861,3 +862,70 @@ def ver_requisiciones_presidencia(request):
     data['form'] = form
 
     return render(request, 'compras/ver_requisiciones_presidencia.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def aprobar_requisiciones_empleado(request, id_requisicion):
+    """
+    Vista que usa el usuario empleado digitador de la requisicion para poder aprobar los items
+    individualmente de la requisición que ha solicitado, una vez estos hayan sido aprobados
+    """
+    requisicion = get_object_or_404(Requisicion, pk=id_requisicion)
+    # HACER MODIFICACION PORQUE SI PUEDE ENTRAR CON LA CONDICION DE QUE TENGA ALGO EN CREDITO
+    try:
+        empleado = request.user.empleado
+        if empleado != requisicion.empleado:
+            raise Http404
+
+        _accepted = [Requisicion.DATA_SET['solicitante'], Requisicion.DATA_SET['pagos']]
+        if requisicion.get_rastreo() not in _accepted:
+            raise Http404
+        elif requisicion.get_rastreo() == _accepted[1]:
+            if not requisicion.detallerequisicion_set.filter(forma_pago=DetalleRequisicion.CREDITO):
+                raise Http404
+    except:
+        raise Http404
+
+    data = {}
+
+    # Se crea el formset para los detalles de la requisicion
+    DetalleRequisicionFormSet = modelformset_factory(
+        DetalleRequisicion, form=FormularioCumplirDetalleRequisicion,
+        min_num=requisicion.detallerequisicion_set.count(), extra=0,
+        validate_min=True, can_delete=False
+    )
+
+    if request.method == 'POST':
+        if requisicion.get_rastreo() == Requisicion.DATA_SET['solicitante']:
+            queryset = requisicion.detallerequisicion_set.all()
+        else:
+            queryset = requisicion.detallerequisicion_set.filter(forma_pago=DetalleRequisicion.CREDITO)
+        form = DetalleRequisicionFormSet(data=request.POST, prefix='detallerequisicion_set', queryset=queryset)
+
+        if form.is_valid():
+            form.save()
+            if not requisicion.detallerequisicion_set.filter(cumplida=False):
+                historial = requisicion.crear_historial(estado=Historial.APROBADA, empleado=empleado)
+                historial.save()
+                requisicion.estado = Requisicion.TERMINADA
+                requisicion.save()
+                messages.success(
+                    request, _('Ha culminado el proceso de la requisición NO.{} exitosamente'.format(requisicion.id))
+                )
+                return redirect(reverse('compras:ver_requisiciones_empleado'))
+            messages.success(request, _('Se ha editado correctamente el estado de la requisición'))
+            return redirect(reverse('compras:aprobar_requisiciones_empleado', args=(requisicion.id, )))
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+    else:
+        if requisicion.get_rastreo() == Requisicion.DATA_SET['solicitante']:
+            queryset = requisicion.detallerequisicion_set.all()
+        else:
+            queryset = requisicion.detallerequisicion_set.filter(forma_pago=DetalleRequisicion.CREDITO)
+        form = DetalleRequisicionFormSet(prefix='detallerequisicion_set', queryset=queryset)
+
+    data['formset_detalles'] = form
+    data['requisicion'] = requisicion
+
+    return render(request, 'compras/aprobar_requisiciones_empleado.html', data)

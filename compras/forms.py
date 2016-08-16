@@ -163,10 +163,16 @@ class FormularioEstadoPago(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FormularioEstadoPago, self).__init__(*args, **kwargs)
-        self.fields['estado_pago'].required = True
         self.fields['fecha_pago'].required = True
-        self.fields['estado_pago'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
+        if self.instance:
+            if self.instance.fecha_pago is None or self.instance.fecha_pago == '':
+                self.fields['estado_pago'].widget.attrs.update(
+                    {'class': 'form-control', 'disabled': 'true'}
+                )
+            else:
+                self.fields['estado_pago'].widget.attrs.update({'class': 'selectpicker'})
+                self.fields['estado_pago'].required = True
 
 
 class FormularioEditarValoresDetallesRequisiciones(FormularioDetalleRequisicion):
@@ -196,3 +202,28 @@ class FormularioEditarValoresJefeAdministrativo(FormularioEditarValoresDetallesR
         super(FormularioEditarValoresJefeAdministrativo, self).__init__(*args, **kwargs)
         self.fields['forma_pago'].required = True
         self.fields['valor_aprobado'].required = True
+
+
+class FormularioCumplirDetalleRequisicion(forms.ModelForm):
+    """
+    Formulario que usa el empleado para poder hacer cumplidas los items de detalles de una
+    requisicion hecha por el mismo, e ir aprobando
+    """
+    class Meta:
+        model = DetalleRequisicion
+        fields = (
+            'cantidad', 'descripcion', 'referencia',
+            'marca', 'valor_aprobado', 'forma_pago', 'cumplida'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioCumplirDetalleRequisicion, self).__init__(*args, **kwargs)
+        self.fields['cantidad'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+        self.fields['descripcion'].widget.attrs.update(
+            {'class': 'form-control', 'rows': '2', 'readonly': 'readonly'}
+        )
+        self.fields['referencia'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+        self.fields['marca'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+        self.fields['valor_aprobado'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+        self.fields['forma_pago'].widget.attrs.update({'class': 'form-control', 'disabled': 'true'})
+        self.fields['forma_pago'].required = False
