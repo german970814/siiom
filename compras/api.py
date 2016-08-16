@@ -12,7 +12,7 @@ from .models import Requisicion, Adjunto
 import json
 
 
-@login_required
+# @login_required
 @csrf_exempt
 def detalles_requisicion_api(request, id_requisicion):
     """
@@ -29,7 +29,7 @@ def detalles_requisicion_api(request, id_requisicion):
                 'cantidad': detalle.cantidad or 1, 'descripcion': detalle.descripcion,
                 'referencia': detalle.referencia or '', 'marca': detalle.marca or '',
                 'valor_aprobado': detalle.valor_aprobado or 0, 'total_aprobado': detalle.total_aprobado or 0,
-                'forma_pago': detalle.get_forma_pago_display()
+                'forma_pago': detalle.get_forma_pago_display(), 'class': 'success c-white' if detalle.cumplida else ''
             } for detalle in requisicion.detallerequisicion_set.all()
         ]
 

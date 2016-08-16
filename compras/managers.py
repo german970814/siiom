@@ -47,7 +47,8 @@ class RequisicionManager(models.Manager):
         return self.annotate(
             num_historial=models.Count('historial')
         ).exclude(
-            num_historial__lt=3, estado=self.model.ANULADA,
+            num_historial__lt=3).exclude(
+            estado=self.model.ANULADA).exclude(
             id__in=self.en_presidencia().values_list('id', flat=True)  # presidencia es excluido
         )
 

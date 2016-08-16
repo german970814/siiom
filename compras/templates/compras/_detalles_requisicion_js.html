@@ -14,12 +14,14 @@
                         var arr = ['cantidad', 'descripcion', 'referencia', 'marca', 'valor_aprobado', 'total_aprobado', 'forma_pago'];
                         var to_append = '';
                         for (var i = 0; i < data[0].length; i++) {
-                            var tr = '<tr>0</tr>'
+                            var tr = '<tr class="!">0</tr>'
                             var tds = '';
+                            var cls = '';
                             for (var j = 0; j < arr.length; j++) {
                                 tds += '<td>0</td>'.replace('0', data[0][i][arr[j]])
+                                cls = data[0][i]['class']
                             }
-                            to_append += tr.replace('0', tds);
+                            to_append += tr.replace('!', cls).replace('0', tds);
                         }
                         $("#table-body").html(to_append);
 
