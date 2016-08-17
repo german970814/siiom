@@ -149,7 +149,7 @@ def requisicion_comentada_api(request, id_requisicion):
             Requisicion.DATA_SET['compras'], Requisicion.DATA_SET['administrativo'],
             Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['pago'],
             Requisicion.DATA_SET['terminada'], Requisicion.DATA_SET['presidencia'],
-            Requisicion.DATA_SET['espera_presupuesto']
+            Requisicion.DATA_SET['espera_presupuesto'], Requisicion.DATA_SET['solicitante']
         ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
@@ -172,7 +172,8 @@ def requisicion_comentada_compras_api(request, id_requisicion):
         _choices = [
             Requisicion.DATA_SET['administrativo'], Requisicion.DATA_SET['financiero'],
             Requisicion.DATA_SET['pago'], Requisicion.DATA_SET['terminada'],
-            Requisicion.DATA_SET['presidencia'], Requisicion.DATA_SET['espera_presupuesto']
+            Requisicion.DATA_SET['presidencia'], Requisicion.DATA_SET['espera_presupuesto'],
+            Requisicion.DATA_SET['solicitante']
         ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
@@ -195,7 +196,7 @@ def requisicion_comentada_jefe_administrativo_api(request, id_requisicion):
         _choices = [
             Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['pago'],
             Requisicion.DATA_SET['terminada'], Requisicion.DATA_SET['presidencia'],
-            Requisicion.DATA_SET['espera_presupuesto']
+            Requisicion.DATA_SET['espera_presupuesto'], Requisicion.DATA_SET['solicitante']
         ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')
@@ -218,7 +219,7 @@ def requisicion_comentada_presidencia_api(request, id_requisicion):
         _choices = [
             Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['pago'],
             Requisicion.DATA_SET['terminada'], Requisicion.DATA_SET['espera_presupuesto'],
-            Requisicion.DATA_SET['administrativo']
+            Requisicion.DATA_SET['administrativo'], Requisicion.DATA_SET['solicitante']
         ]
         if requisicion.get_rastreo() in _choices:
             return HttpResponse('true', content_type='text/plain')

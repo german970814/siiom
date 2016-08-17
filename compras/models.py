@@ -65,8 +65,8 @@ class Requisicion(models.Model):
 
     # opciones
     ALTA = 'A'
-    MEDIA = 'M'
-    BAJA = 'B'
+    MEDIA = 'B'
+    BAJA = 'C'
 
     OPCIONES_PRIORIDAD = (
         (ALTA, 'ALTA'),
