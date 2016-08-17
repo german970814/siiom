@@ -7,6 +7,16 @@
 	<div class="card">
 		<div class="card-header">
 			<h1><legend><h3>Mis Requisiciones</h3></legend></h1>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="row">
+                        <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p>{{ message|safe }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
 		</div>
 		<div class="card-body card-padding">
 			<div class="row table-responsive">
@@ -29,7 +39,7 @@
                         <tbody>
                             {% for requisicion in requisiciones %}
                                 <tr>
-                                    <td>{{ requisicion|length }}</td>
+                                    <td>{{ requisicion.get_position }}</td>
                                     <td>{{ requisicion.id }}</td>
                                     <td>{{ requisicion.asunto }}</td>
                                     <td>{{ requisicion.fecha_ingreso }}</td>
@@ -78,10 +88,10 @@
 
                     ret = ver;
 
-                    if (row.edit == 1) {
+                    if (row.edit == 0) {
                         ret += editar;
                     }
-                    if (row.edit == 7) {
+                    if (row.edit == 6) {
                         ret += finalizar;
                     }
                     return ret;

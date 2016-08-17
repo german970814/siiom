@@ -19,7 +19,8 @@
         estado de proceso y es direccionada a los usuarios que pertenezcan al area de compras,
         los cuales son los encargados de hacer las cotizaciones correspondientes a cada detalle
         de la requisición, a su vez pueden agregar comentarios y archivos adjuntos para complementar
-        su trabajo con respecto a la requisicion, este usuario no puede darle un estado de rechazo a
+        su trabajo con respecto a la requisicion, tambien puede editar los precios de los items de
+        la requisicion, de acuerdo a sus cotizaciones, este usuario no puede darle un estado de rechazo a
         una requisicion. Una vez el usuario de compras haya terminado su proceso, puede darle paso a
         un Director administrativo
 
@@ -27,17 +28,38 @@
         puede tener cualquier nombre empezado por 'adminis', se sabe que es jefe de ese departamento
         si tiene un area relacionada con ese departamento, este jefe de departamento es el encargado
         de dar el ultimo visto acerca de la requisicion y tiene la potestad de aprobar o rechazar dicha
-        requisicion
+        requisicion, al igual que cambiar sus valores y declarar cual será la forma de pago definitiva
+        de cada item de la requisicion, definiendo asi el rumbo que deberá tomar la requisicion
 
-        - En caso de que el usuario administrativo apruebe la requisicion esta llega a los usuarios
+        - En este punto, si la requisicion supera un monto establecido en la aplicacion por un administrador
+        que en este caso es de 2'000.000, esta inmediatamente que el jefe administrativo la apruebe, pasa
+        a el área de presidencia, en la cual el presidente es el encargado de decir si la requisicion avanzará
+        de acuerdo a sus criterios, en caso de aceptar sigue su ciclo normal hacia el director financiero,
+        de lo contrario acaba la requisicion
+
+        - En caso de que el usuario administrativo o el presidente apruebe la requisicion esta llega a los usuarios
         de el Departamento de financiamiento haciendo una primera escala a el jefe o director de este
-        departamento, el cual debe poner a la requisicion una fecha de pago, y si quiere poner una forma
-        en la cual el dinero será entregado, una vez realizado ese paso pasa a usuarios de el mismo
-        departamento encargados de los pagos
+        departamento, el cual debe aclarar en la requisicion si hay presupuesto para satisfacerla,
+        en caso de no haber presupuesto, debe notificarlo con una observacion y poniendo el estado
+        de ´EN ESPERA´, en este estado, el jefe administrativo y el director financiero puede comentar
+        a manera de pregunta respuesta una requisicion, hasta que el jefe financiero cambie el estado a ´SI´
+        hay presupuesto
 
-        - Cuando El Director de el departamento de financiacion ha dado la fecha de pago de una requisicion
-        esta llega a un usuario encargado de hacer el pago el cual al entregar el dinero le da un estado
-        de terminado a la requisicion que viene dado a partir de otros tres posibles estados
+        - En este punto, la requisicion puede tomar dos caminos, de acuerdo a sus detalles, si la requisicion
+        es de crédito, automaticamente pasa a el usuario solicitante de la requisicion, con el fin de que una
+        vez este haya recibido lo que pidio, lo notifique y asi finalizar el proceso de la requisicion; tambien,
+        si la requisicion es de tipo DEBITO(CHEQUE) o EFECTIVO, esta tiene un escalon mas que avanzar hacia el area
+        de pagos
+
+        - Cuando El Director de el departamento de financiacion ha dado el ´SI´ de que hay presupuesto
+        para satisfacer una requisicion y la requisicion tiene articulos que seran pagados en EFECTIVO o CHEQUE,
+        entonces, esta llega a un usuario encargado de hacer el pago el cual al entregar el dinero le da un estado
+        de pago a la requisicion que viene dado a partir de otros tres posibles estados
+
+        - Como paso final de la requisición, esta llega de vuelta al solicitante de la requisicion,
+        el cual termina la requisicion una vez notifica que ha recibido todos los items de su requisición
+
+        Last Updated: 17th August 2016
 
 
 """
@@ -298,7 +320,7 @@ def ver_requisiciones_jefe_departamento(request):
     # se obtienen las requisiciones de los subalternos al jefe de departamento
     requisiciones = Requisicion.objects.filter(
         empleado__areas__departamento__in=request.user.empleado.areas.departamentos()
-    ).exclude(historial__estado=Historial.RECHAZADA).order_by('-fecha_ingreso')
+    ).exclude(estado=Requisicion.ANULADA).order_by('-fecha_ingreso')
 
     # se crea la variable para pasar los datos a la vista
     data = {}
@@ -877,8 +899,7 @@ def aprobar_requisiciones_empleado(request, id_requisicion):
         empleado = request.user.empleado
         if empleado != requisicion.empleado:
             raise Http404
-
-        _accepted = [Requisicion.DATA_SET['solicitante'], Requisicion.DATA_SET['pagos']]
+        _accepted = [Requisicion.DATA_SET['solicitante'], Requisicion.DATA_SET['pago']]
         if requisicion.get_rastreo() not in _accepted:
             raise Http404
         elif requisicion.get_rastreo() == _accepted[1]:

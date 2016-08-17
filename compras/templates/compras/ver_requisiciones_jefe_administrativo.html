@@ -87,7 +87,7 @@
                 "commands" : function(column, row) {
                     var view = "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
                     var edit = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "compras:editar_valores_jefe_administrativo" 0 %}'.replace('0', " + row.id + ")\"><span class=\"zmdi zmdi-edit\"></span></button>";
-                    if (row.len == 3) {
+                    if (row.len == 2) {
                         return view + edit;
                     } else {
                         return view;

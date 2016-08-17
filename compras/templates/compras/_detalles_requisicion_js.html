@@ -68,6 +68,29 @@
                         var span = '<span style="text-align:right;display:inherit;font-style:italic;font-size:14px">0</span>';
 
                         $('#progress-id').attr('style', 'width: 0%'.replace('0', data[0][0]['progreso'])).attr('aria-valuenow', '0'.replace('0', data[0][0]['progreso'])).attr('data-content', '0%'.replace('0', data[0][0]['progreso']));
+                        if (data[0][0]['clase'] != undefined && data[0][0]['clase'].length) {
+                            if (data[0][0]['clase'] != '') {
+                                if ($('#progress-id').hasClass('progress-bar-success') || $('#progress-id').hasClass('progress-bar-danger') || $('#progress-id').hasClass('progress-bar-warning') || $('#progress-id').hasClass('progress-bar-info')) {
+                                    $('#progress-id').removeClass('progress-bar-danger');
+                                    $('#progress-id').removeClass('progress-bar-warning');
+                                    $('#progress-id').removeClass('progress-bar-success');
+                                    $('#progress-id').removeClass('progress-bar-info');
+                                }
+                                $('#progress-id').addClass(data[0][0]['clase']);
+                            } else {
+                                $('#progress-id').removeClass('progress-bar-danger');
+                                $('#progress-id').removeClass('progress-bar-warning');
+                                $('#progress-id').removeClass('progress-bar-success');
+                                $('#progress-id').removeClass('progress-bar-info');
+                                $('#progress-id').addClass('progress-bar-warning');
+                            }
+                        } else {
+                            $('#progress-id').removeClass('progress-bar-danger');
+                            $('#progress-id').removeClass('progress-bar-warning');
+                            $('#progress-id').removeClass('progress-bar-success');
+                            $('#progress-id').removeClass('progress-bar-info');
+                            $('#progress-id').addClass('progress-bar-info');
+                        }
 
                         for (var i = 0; i < data[1].length; i++) {
                             str = h5.replace('0', data[1][i]['usuario']) + br + quote.replace('0', data[1][i]['observacion'] + span.replace('0', data[1][i]['fecha']));

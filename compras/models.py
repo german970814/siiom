@@ -114,7 +114,7 @@ class Requisicion(models.Model):
 
     DATA_SET = {
         'digitada': 'Digitada por Empleado y en Jefe de Departamento',
-        'departamento': 'En Jefe de Departamento',
+        # 'departamento': 'En Jefe de Departamento',
         'compras': 'En Área de Compras',
         'administrativo': 'En Jefe Administrativo',
         'financiero': 'En Director Financiero',
@@ -168,22 +168,52 @@ class Requisicion(models.Model):
         # se hace de forma ordenada ascendentemente de acuerdo a el orden de la trazabilidad
         if rastreo == cls.DATA_SET['digitada']:
             return 0
-        elif rastreo == cls.DATA_SET['departamento']:
-            return 1
         elif rastreo == cls.DATA_SET['compras']:
-            return 2
+            return 1
         elif rastreo == cls.DATA_SET['administrativo']:
-            return 3
+            return 2
         elif rastreo == cls.DATA_SET['presidencia']:
-            return 4
+            return 3
         elif rastreo == cls.DATA_SET['financiero'] or rastreo == cls.DATA_SET['espera_presupuesto']:
-            return 5
+            return 4
         elif rastreo == cls.DATA_SET['pago']:
-            return 6
+            return 5
         elif rastreo == cls.DATA_SET['solicitante']:
-            return 7
+            return 6
         elif rastreo == cls.DATA_SET['terminada']:
-            return 8
+            return 7
+        # para los rechazos se trabajará en negativo,
+        # ya que si no entraria en los rangos que usan unos templates para cargar los botones
+        elif rastreo == cls.DATA_SET['rechaza_departamento']:
+            return -1
+        elif rastreo == cls.DATA_SET['rechaza_compras']:
+            return -2
+        elif rastreo == cls.DATA_SET['rechaza_administrativo']:
+            return -3
+        elif rastreo == cls.DATA_SET['rechaza_presidencia']:
+            return -4
+        return -5
+
+    def get_position(self):
+        cls = self.__class__
+        rastreo = self.get_rastreo()
+        # se hace de forma ordenada ascendentemente de acuerdo a el orden de la trazabilidad
+        if rastreo == cls.DATA_SET['digitada']:
+            return 0
+        elif rastreo == cls.DATA_SET['compras']:
+            return 1
+        elif rastreo == cls.DATA_SET['administrativo']:
+            return 2
+        elif rastreo == cls.DATA_SET['presidencia']:
+            return 3
+        elif rastreo == cls.DATA_SET['financiero'] or rastreo == cls.DATA_SET['espera_presupuesto']:
+            return 4
+        elif rastreo == cls.DATA_SET['pago']:
+            return 5
+        elif rastreo == cls.DATA_SET['solicitante']:
+            return 6
+        elif rastreo == cls.DATA_SET['terminada']:
+            return 7
         # para los rechazos se trabajará en negativo,
         # ya que si no entraria en los rangos que usan unos templates para cargar los botones
         elif rastreo == cls.DATA_SET['rechaza_departamento']:
@@ -306,7 +336,7 @@ class Requisicion(models.Model):
         Retorna Verdadero si la requisicion fue anulada
         """
         if self.estado == self.__class__.ANULADA or \
-           any([x for x in self.historial_set.all().distinct() if x.estado == Historial.RECHAZADA]):
+           any(self.historial_set.filter(estado=Historial.RECHAZADA)):
             return True
         return False
 
@@ -325,7 +355,7 @@ class Requisicion(models.Model):
         Retorna el progreso general de la requisicion de acuerdo a sus detalles de requisicion
         """
         _progreso = 0
-        if self.__len__() >= 0 or \
+        if self.get_position() >= 0 or \
            self.get_rastreo() in [Requisicion.DATA_SET[x] for x in Requisicion._FAILED]:
             for detalle in self.detallerequisicion_set.all():
                 _progreso += detalle.get_progreso()
@@ -423,9 +453,9 @@ class DetalleRequisicion(models.Model):
         """
         # esta funcion NO puede retornar un numero mayor a self.get_possible_position()
         if self.requisicion.DATA_SET['terminada'] != self.requisicion.get_rastreo():
-            requisicion_position = self.requisicion.__len__()
+            requisicion_position = self.requisicion.get_position()
             if self.requisicion.is_anulada:
-                requisicion_position = abs(self.requisicion.__len__())
+                requisicion_position = abs(self.requisicion.get_position())
             if self.is_efectivo:
                 # si es efectivo y va a presidencia
                 if self.requisicion.get_total() > Parametros.objects.tope():
@@ -460,7 +490,7 @@ class DetalleRequisicion(models.Model):
         # si no esta cumplida
         if not self.cumplida:
             # si no fue rechazada devuelve el progreso
-            if self.requisicion.__len__() >= 0 or \
+            if self.requisicion.get_position() >= 0 or \
                self.requisicion.get_rastreo() in [Requisicion.DATA_SET[x] for x in Requisicion._FAILED]:
                 _max = self.get_possible_position()
                 actual = self.get_actual_position()

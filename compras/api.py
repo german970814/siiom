@@ -1,18 +1,19 @@
 # Django Package
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 
 # Locale Apps
-from .models import Requisicion, Adjunto
+from .models import Requisicion, Adjunto, Parametros
 
 # Python Package
 import json
+import datetime
 
 
-# @login_required
+@login_required
 @csrf_exempt
 def detalles_requisicion_api(request, id_requisicion):
     """
@@ -86,11 +87,30 @@ def observaciones_requisicion(request, id_requisicion):
 
     try:
         requisicion = Requisicion.objects.get(id=id_requisicion)
+        clase = ''
+        try:
+            empleado = request.user.empleado
+        except:
+            raise Http404
+        if requisicion.get_rastreo() == Requisicion.DATA_SET['compras']:
+            dias = Parametros.objects.dias()
+            ultimo = requisicion.historial_set.last()
+            fecha_plazo = ultimo.fecha + datetime.timedelta(days=dias)
+            if datetime.date.today() < fecha_plazo.date():
+                clase = 'info'
+            elif datetime.date.today() >= fecha_plazo.date() and empleado.is_compras:
+                clase = 'danger'
+            else:
+                clase = 'warning'
+        elif requisicion.get_rastreo() in [Requisicion.DATA_SET[x] for x in Requisicion._FAILED]:
+            clase = 'danger'
+        if requisicion.estado == Requisicion.TERMINADA:
+            clase = 'success'
         data = []
         data1 = [
             {
-                'progreso': requisicion.get_progreso(),
-                'clase': 'progress-bar-success'
+                'progreso': float(str(requisicion.get_progreso())[:4]),
+                'clase': 'progress-bar-' + clase if clase else ''
             }
         ]
         data2 = [
