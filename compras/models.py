@@ -184,7 +184,17 @@ class Requisicion(models.Model):
             return 7
         elif rastreo == cls.DATA_SET['terminada']:
             return 8
-        return -1
+        # para los rechazos se trabajará en negativo,
+        # ya que si no entraria en los rangos que usan unos templates para cargar los botones
+        elif rastreo == cls.DATA_SET['rechaza_departamento']:
+            return -1
+        elif rastreo == cls.DATA_SET['rechaza_compras']:
+            return -2
+        elif rastreo == cls.DATA_SET['rechaza_administrativo']:
+            return -3
+        elif rastreo == cls.DATA_SET['rechaza_presidencia']:
+            return -4
+        return -5
 
     def crear_historial(self, empleado, estado, observacion=''):
         """
@@ -315,7 +325,8 @@ class Requisicion(models.Model):
         Retorna el progreso general de la requisicion de acuerdo a sus detalles de requisicion
         """
         _progreso = 0
-        if self.__len__() >= 0:
+        if self.__len__() >= 0 or \
+           self.get_rastreo() in [Requisicion.DATA_SET[x] for x in Requisicion._FAILED]:
             for detalle in self.detallerequisicion_set.all():
                 _progreso += detalle.get_progreso()
             return _progreso / self.detallerequisicion_set.count()
@@ -413,6 +424,8 @@ class DetalleRequisicion(models.Model):
         # esta funcion NO puede retornar un numero mayor a self.get_possible_position()
         if self.requisicion.DATA_SET['terminada'] != self.requisicion.get_rastreo():
             requisicion_position = self.requisicion.__len__()
+            if self.requisicion.is_anulada:
+                requisicion_position = abs(self.requisicion.__len__())
             if self.is_efectivo:
                 # si es efectivo y va a presidencia
                 if self.requisicion.get_total() > Parametros.objects.tope():
@@ -432,7 +445,7 @@ class DetalleRequisicion(models.Model):
                 # si no devuelve la posicion actual que deberia ser 0 o 1
                 return requisicion_position
             # si no va a presidencia
-            if requisicion_position >= 2:
+            if requisicion_position > 2:  # No se si poner > 2 o >= 2
                 # se le deben restar 2 pasos
                 return requisicion_position - 2
             # si no devuelve la posicion actual
@@ -447,7 +460,8 @@ class DetalleRequisicion(models.Model):
         # si no esta cumplida
         if not self.cumplida:
             # si no fue rechazada devuelve el progreso
-            if self.requisicion.__len__() >= 0:
+            if self.requisicion.__len__() >= 0 or \
+               self.requisicion.get_rastreo() in [Requisicion.DATA_SET[x] for x in Requisicion._FAILED]:
                 _max = self.get_possible_position()
                 actual = self.get_actual_position()
 

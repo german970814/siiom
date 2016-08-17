@@ -165,6 +165,7 @@ class FormularioEstadoPago(forms.ModelForm):
         super(FormularioEstadoPago, self).__init__(*args, **kwargs)
         self.fields['fecha_pago'].required = True
         self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_pago'].label = _('Fecha aprobada de entrega de recurso')
         if self.instance:
             if self.instance.fecha_pago is None or self.instance.fecha_pago == '':
                 self.fields['estado_pago'].widget.attrs.update(
