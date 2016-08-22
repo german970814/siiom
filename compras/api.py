@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 
 # Locale Apps
 from .models import Requisicion, Adjunto, Parametros
+from organizacional.models import Departamento
 
 # Python Package
 import json
@@ -267,3 +268,19 @@ def descargar_archivos_api(request, id_archivo):
         return response
     except Exception as e:
         return HttpResponse(e, content_type='text/plain')
+
+
+@login_required
+@csrf_exempt
+def get_areas_by_departamento_json(request, id_departamento):
+    """
+    Retorna un JSON con las areas pertenecientes a un departamento
+    """
+
+    departamento = get_object_or_404(Departamento, pk=id_departamento)
+
+    data = [
+        {'area': area.nombre.upper(), 'id': area.id} for area in departamento.areas.all()
+    ]
+
+    return HttpResponse(json.dumps(data), content_type='application/json')

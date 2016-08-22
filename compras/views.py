@@ -65,14 +65,15 @@
 """
 
 # Django Packages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
-from django.forms import inlineformset_factory, modelformset_factory
 from django.contrib import messages
-from django.utils.translation import ugettext as _
-from django.db import transaction
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import permission_required, login_required
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.db import transaction
+from django.db.models import Sum
+from django.forms import inlineformset_factory, modelformset_factory
+from django.http import Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.translation import ugettext as _
 
 # Third Apps
 from waffle.decorators import waffle_switch
@@ -82,7 +83,8 @@ from .forms import (
     FormularioSolicitudRequisicion, FormularioDetalleRequisicion, FormularioAdjunto,
     FormularioRequisicionesCompras, FormularioObservacionHistorial, FormularioFechaPagoRequisicion,
     FormularioEstadoPago, FormularioEditarValoresDetallesRequisiciones,
-    FormularioEditarValoresJefeAdministrativo, FormularioCumplirDetalleRequisicion
+    FormularioEditarValoresJefeAdministrativo, FormularioCumplirDetalleRequisicion,
+    FormularioInformeTotalesAreaDerpartamento
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
 from organizacional.models import Empleado
@@ -950,3 +952,58 @@ def aprobar_requisiciones_empleado(request, id_requisicion):
     data['requisicion'] = requisicion
 
     return render(request, 'compras/aprobar_requisiciones_empleado.html', data)
+
+
+# INCOMPLETA
+@waffle_switch('compras')
+@login_required
+def informes_totales_area_departamento(request):
+    """
+    Informe para ver los totales agrupados de acuerdo a una fecha, un área o departamento
+    de las requisiciones
+    """
+
+    data = {}
+
+    if request.method == 'POST':
+        form = FormularioInformeTotalesAreaDerpartamento(data=request.POST)
+
+        if form.is_valid():
+            fecha_inicial = form.cleaned_data['fecha_inicial']
+            fecha_final = form.cleaned_data['fecha_final']
+            area = form.cleaned_data['area']
+            departamento = form.cleaned_data['departamento']
+            if form.cleaned_data['tipo'] == 1:
+                requisiciones = Requisicion.objects.filter(
+                    fecha_ingreso__range=(fecha_inicial, fecha_final),
+                    empleado__areas=area
+                )
+            else:
+                requisiciones = Requisicion.objects.filter(
+                    fecha_ingreso__range=(fecha_inicial, fecha_final),
+                    empleado__areas__departamento=departamento
+                )
+            total_requisiciones = requisiciones.count()
+            total_precio = requisiciones.aggregate(
+                total=Sum('detallerequisicion__total_aprobado')
+            )['total']
+            total_requisiciones_pagadas = requisiciones.filter(estado=Requisicion.TERMINADA).count()
+            total_pagadas = requisiciones.filter(
+                estado=Requisicion.TERMINADA
+            ).aggregate(total_pagada=Sum('detallerequisicion__total_aprobado'))['total_pagada']
+            data['total_requisiciones'] = total_requisiciones
+            data['total_precio'] = total_precio
+            data['total_pagadas'] = total_pagadas
+            data['total_requisiciones_pagadas'] = total_requisiciones_pagadas
+            data['requisiciones'] = requisiciones
+            data['asuntos'] = requisiciones.values_list('asunto', flat=True)
+            messages.success(request, _(''))
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el mensaje'))
+
+    else:
+        form = FormularioInformeTotalesAreaDerpartamento()
+
+    data['form'] = form
+
+    return render(request, 'compras/informes_totales_area_departamento.html', data)

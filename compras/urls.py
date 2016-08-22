@@ -78,4 +78,14 @@ urlpatterns = [
         api.descargar_archivos_api,
         name="descargar_archivos_api"
     ),
+    url(
+        r'^api/get_areas/(?P<id_departamento>\d+)$',
+        api.get_areas_by_departamento_json,
+        name="get_areas_by_departamento_json"
+    ),
+    url(
+        r'^informes/totales/$',
+        views.informes_totales_area_departamento,
+        name="informes_totales_area_departamento"
+    ),
 ]

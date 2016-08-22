@@ -4,6 +4,7 @@ from django import forms
 
 # Locale Apps
 from .models import Requisicion, DetalleRequisicion, Adjunto, Historial
+from organizacional.models import Area, Departamento
 
 
 class FormularioSolicitudRequisicion(forms.ModelForm):
@@ -228,3 +229,53 @@ class FormularioCumplirDetalleRequisicion(forms.ModelForm):
         self.fields['valor_aprobado'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
         self.fields['forma_pago'].widget.attrs.update({'class': 'form-control', 'disabled': 'true'})
         self.fields['forma_pago'].required = False
+
+
+class FormularioRangoFechas(forms.Form):
+    """
+    Formulario Base para el rango de fechas
+    """
+    error_css_class = 'has-error'
+
+    fecha_inicial = forms.DateField(label=_('Fecha Inicial'))
+    fecha_final = forms.DateField(label=_('Fecha Final'))
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioRangoFechas, self).__init__(*args, **kwargs)
+        self.fields['fecha_inicial'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_final'].widget.attrs.update({'class': 'form-control'})
+
+
+class FormularioInformeTotalesAreaDerpartamento(FormularioRangoFechas):
+    """
+    Formulario para el informe de totales por area y departamento
+    """
+
+    TIPO_CHOICES = (
+        ('1', 'AREA'),
+        ('2', 'DEPARTAMENTO'),
+    )
+
+    area = forms.ModelChoiceField(queryset=Area.objects.none())
+    departamento = forms.ModelChoiceField(queryset=Departamento.objects.all())
+    tipo = forms.TypedChoiceField(
+        choices=TIPO_CHOICES, coerce=int,
+        required=True, widget=forms.RadioSelect
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioInformeTotalesAreaDerpartamento, self).__init__(*args, **kwargs)
+        self.fields['area'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['departamento'].widget.attrs.update({'class': 'selectpicker'})
+
+        if self.is_bound:
+            id_departamento = self.data.get('departamento', None)
+            tipo = self.data.get('tipo', None)
+
+            try:
+                self.fields['area'].queryset = Departamento.objects.get(id=id_departamento).areas.all()
+            except:
+                self.fields['area'].queryset = Area.objects.none()
+
+            if tipo and tipo == '2':
+                self.fields['area'].required = False
