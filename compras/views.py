@@ -84,9 +84,9 @@ from .forms import (
     FormularioRequisicionesCompras, FormularioObservacionHistorial, FormularioFechaPagoRequisicion,
     FormularioEstadoPago, FormularioEditarValoresDetallesRequisiciones,
     FormularioEditarValoresJefeAdministrativo, FormularioCumplirDetalleRequisicion,
-    FormularioInformeTotalesAreaDerpartamento
+    FormularioInformeTotalesAreaDerpartamento, FormularioProveedor
 )
-from .models import DetalleRequisicion, Requisicion, Adjunto, Historial
+from .models import DetalleRequisicion, Requisicion, Adjunto, Historial, Proveedor
 from organizacional.models import Empleado
 
 __author__ = 'German Alzate'
@@ -276,6 +276,93 @@ def editar_requisicion(request, id_requisicion):
     }
 
     return render(request, 'compras/crear_requisicion.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def crear_proveedor(request):
+    """
+    Vista para la creación de proveedores en el sistema de compras, la cual solo puede
+    ser creada por un usuario administrador o de compras
+    """
+
+    try:
+        empleado = request.user.empleado
+        if not empleado.is_jefe_administrativo and (not empleado.is_compras):
+            return redirect('sin_permiso')
+    except:
+        if not request.user.is_superuser:
+            raise Http404
+
+    if request.method == 'POST':
+        form = FormularioProveedor(data=request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('Se Ha Creado el Proveedor Exitosamente'))
+            return redirect(reverse('compras:crear_proveedor'))
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+    else:
+        form = FormularioProveedor()
+
+    data = {'form': form}
+
+    return render(request, 'compras/crear_proveedor.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def editar_proveedor(request, id_proveedor):
+    """
+    Vista para la edición de el proveedor
+    """
+
+    try:
+        empleado = request.user.empleado
+        if not empleado.is_jefe_administrativo and (not empleado.is_compras):
+            return redirect('sin_permiso')
+    except:
+        if not request.user.is_superuser:
+            raise Http404
+
+    proveedor = get_object_or_404(Proveedor, pk=id_proveedor)
+
+    if request.method == 'POST':
+        form = FormularioProveedor(data=request.POST, instance=proveedor)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('Se Ha Editado el Proveedor Exitosamente'))
+            return redirect(reverse('compras:editar_proveedor', args=(proveedor.id, )))
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+    else:
+        form = FormularioProveedor(instance=proveedor)
+
+    data = {'form': form, 'proveedor': proveedor}
+
+    return render(request, 'compras/crear_proveedor.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def listar_proveedores(request):
+    """
+    Vista para la lista de proveedores
+    """
+
+    try:
+        empleado = request.user.empleado
+        if not empleado.is_jefe_administrativo and (not empleado.is_compras):
+            return redirect('sin_permiso')
+    except:
+        if not request.user.is_superuser:
+            raise Http404
+
+    proveedores = Proveedor.objects.all().prefetch_related('requisiciones')
+
+    return render(request, 'compras/listar_proveedores.html', {'proveedores': proveedores})
 
 
 @waffle_switch('compras')

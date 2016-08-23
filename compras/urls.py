@@ -9,6 +9,9 @@ urlpatterns = [
     url(r'^pago_requisicion/(?P<id_requisicion>\d+)$', views.pre_pago_requisicion, name="pre_pago_requisicion"),
     url(r'^pago/(?P<id_requisicion>\d+)$', views.pagar_requisicion, name="pagar_requisicion"),
     url(r'^requisiciones_usuario_pago/$', views.ver_requisiciones_usuario_pago, name="ver_requisiciones_usuario_pago"),
+    url(r'^proveedor/$', views.listar_proveedores, name="listar_proveedores"),
+    url(r'^proveedor/nuevo/$', views.crear_proveedor, name="crear_proveedor"),
+    url(r'^proveedor/editar/(?P<id_proveedor>\d+)$', views.editar_proveedor, name="editar_proveedor"),
     url(
         r'^empleado/aprobar_requisicion/(?P<id_requisicion>\d+)$',
         views.aprobar_requisiciones_empleado, name="aprobar_requisiciones_empleado"

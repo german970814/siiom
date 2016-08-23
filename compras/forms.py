@@ -3,7 +3,7 @@ from django.utils.translation import ugettext as _
 from django import forms
 
 # Locale Apps
-from .models import Requisicion, DetalleRequisicion, Adjunto, Historial
+from .models import Requisicion, DetalleRequisicion, Adjunto, Historial, Proveedor
 from organizacional.models import Area, Departamento
 
 
@@ -279,3 +279,45 @@ class FormularioInformeTotalesAreaDerpartamento(FormularioRangoFechas):
 
             if tipo and tipo == '2':
                 self.fields['area'].required = False
+
+
+class FormularioProveedor(forms.ModelForm):
+    """
+    Formulario para la creacion de proveedores en el sistema
+    """
+    error_css_class = 'has-error'
+
+    class Meta:
+        model = Proveedor
+        fields = (
+            'nombre', 'identificacion', 'codigo',
+            'contacto', 'correo', 'telefono', 'celular'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioProveedor, self).__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['identificacion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['codigo'].widget.attrs.update({'class': 'form-control'})
+        self.fields['contacto'].widget.attrs.update({'class': 'form-control'})
+        self.fields['correo'].widget.attrs.update({'class': 'form-control'})
+        self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
+        self.fields['celular'].widget.attrs.update({'class': 'form-control'})
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(FormularioProveedor, self).clean(*args, **kwargs)
+
+        if 'telefono' in cleaned_data:
+            telefono = cleaned_data['telefono']
+        else:
+            telefono = None
+        if 'celular' in cleaned_data:
+            celular = cleaned_data['celular']
+        else:
+            celular = None
+
+        if not telefono and not celular:
+            self.add_error('telefono', _('Este campo debe ser obligatorio'))
+            self.add_error('celular', _('Este campo debe ser obligatorio'))
+
+        return cleaned_data

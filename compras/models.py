@@ -60,6 +60,27 @@ from .managers import RequisicionManager, ParametrosManager
 import re
 
 
+class Proveedor(models.Model):
+    """
+    Modelo de creación de proveedores en el sistema
+    """
+
+    nombre = models.CharField(max_length=255, verbose_name=_('nombre'))
+    identificacion = models.BigIntegerField(verbose_name=_('identificación'))
+    codigo = models.CharField(max_length=200, verbose_name=_('código'), blank=True)
+    correo = models.EmailField(verbose_name=_('email'))
+    telefono = models.IntegerField(verbose_name='teléfono', blank=True, null=True)
+    celular = models.IntegerField(verbose_name='celular', blank=True, null=True)
+    contacto = models.CharField(max_length=255, verbose_name=_('contacto'), blank=True)
+
+    class Meta:
+        verbose_name = _('proveedor')
+        verbose_name_plural = _('proveedores')
+
+    def __str__(self):
+        return 'Proveedor "{0} ({1})"'.format(self.nombre.title(), self.identificacion)
+
+
 class Requisicion(models.Model):
     """Modelo que guarda las requisiciones que hechas por los empleados."""
 
@@ -140,7 +161,6 @@ class Requisicion(models.Model):
     asunto = models.CharField(verbose_name=_('asunto'), max_length=255)
     prioridad = models.CharField(max_length=1, verbose_name=_('prioridad'), choices=OPCIONES_PRIORIDAD)
     estado = models.CharField(max_length=2, verbose_name=_('estado'), choices=OPCIONES_ESTADO, default=PENDIENTE)
-
     fecha_pago = models.DateField(verbose_name=_('fecha de pago'), blank=True, null=True)
     form_pago = models.CharField(
         max_length=1, verbose_name=_('forma de pago'), blank=True, choices=OPCIONES_FORMA_PAGO
@@ -148,9 +168,11 @@ class Requisicion(models.Model):
     estado_pago = models.CharField(
         max_length=2, verbose_name=_('estado de pago'), blank=True, choices=OPCIONES_ESTADO_PAGO
     )
-
     presupuesto_aprobado = models.CharField(
         max_length=2, verbose_name=_('presupuesto aprobado'), blank=True, choices=OPCIONES_PRESUPUESTO
+    )
+    proveedores = models.ManyToManyField(
+        Proveedor, verbose_name=_('proveedores'), related_name='requisiciones', blank=True, null=True
     )
 
     objects = RequisicionManager()
