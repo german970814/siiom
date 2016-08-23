@@ -1175,11 +1175,9 @@ def eliminarCambioTipoMiembro(request, id):
 
     try:
         if cambio.miembro.usuario.groups.count() == 0:
-            import waffle
-            if waffle.switch_is_active('compras'):
-                if hasattr(cambio.miembro.usuario, 'empleado'):
-                    if cambio.miembro.usuario.empleado:
-                        pass
+            if hasattr(cambio.miembro.usuario, 'empleado'):
+                if not cambio.miembro.usuario.empleado:
+                    cambio.miembro.usuario.delete()
             else:
                 cambio.miembro.usuario.delete()
             cambio.miembro.usuario = None
