@@ -41,7 +41,7 @@ class Grupo(AL_Node):
     red = models.ForeignKey(Red, null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio')
 
-    node_order_by = ['nombre']
+    node_order_by = ['id']
 
     def __str__(self):
         cad = self.lider1.nombre.upper() \
