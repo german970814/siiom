@@ -1469,22 +1469,14 @@ def ver_informacion_miembro(request, pk=None):
                 tplider = TipoMiembro.objects.get(nombre__iexact='lider')
 
                 cambio = CambioTipo.objects.filter(miembro=miembro)
-                print('cambios', [x for x in cambio])
                 tipos_cambio = [c.nuevoTipo for c in cambio]
-                print('tipos_cambios', [x for x in tipos_cambio])
                 eliminar = [cambio_iter for cambio_iter in tipos_cambio if cambio_iter not in tipos]
-                print('eliminar', [x for x in eliminar])
                 if len(eliminar):
                     for e in eliminar:
                         try:
-                            print("¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨")
-                            print(e)
-
                             c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
                         except:
-                            print("entre al else")
                             c = CambioTipo.objects.get(miembro=miembro, anteriorTipo=e)
-                        print("enviando a eliminar")
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
                     tipos_cambio = [c_iter.nuevoTipo for c_iter in cambio]
