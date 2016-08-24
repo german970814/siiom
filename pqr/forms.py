@@ -51,13 +51,14 @@ class FormularioAgregarMensaje(ModelFormBase):
 
     class Meta:
         model = Comentario
-        fields = ('mensaje', 'empleado', 'caso')
+        fields = ('mensaje', 'empleado', 'caso', 'importante')
 
     def __init__(self, *args, **kwargs):
         super(FormularioAgregarMensaje, self).__init__(*args, **kwargs)
         self.fields['empleado'].widget = forms.HiddenInput()
         self.fields['caso'].widget = forms.HiddenInput()
         self.fields['mensaje'].widget.attrs.update({'placeholder': 'Ingresa un mensaje aquí...'})
+        self.fields['importante'].widget.attrs.update({'class': 'hidden'})
 
 
 class FormularioAgregarIntegrante(ModelFormBase):
@@ -85,7 +86,7 @@ class FormularioAgregarIntegrante(ModelFormBase):
             match = re.compile(r'\(([^)]+)\)')
             regex = match.findall(cleaned_data['integrante'])
             try:
-                self.receptor = Empleado.objects.get(cedula=regex)
+                self.receptor = Empleado.objects.get(cedula=regex[0])
             except:
                 self.add_error('integrante', _('Este Empleado No existe, por favor recarga la página'))
 
@@ -97,3 +98,19 @@ class FormularioAgregarIntegrante(ModelFormBase):
         if self.is_bound and not self.errors and hasattr(self, 'receptor'):
             return self.receptor
         return None
+
+
+class FormularioEliminarInvitacion(FormBase):
+    """
+    Formulario para eliminar una invitacion
+    """
+
+    integrante = forms.ModelChoiceField(queryset=Empleado.objects.none(), label=_('Integrante a eliminar'))
+
+    def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('query', None)
+        super(FormularioEliminarInvitacion, self).__init__(*args, **kwargs)
+        self.fields['integrante'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+
+        if queryset:
+            self.fields['integrante'].queryset = queryset

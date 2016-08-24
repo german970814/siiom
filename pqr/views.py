@@ -8,8 +8,8 @@ from django.http import Http404
 from django.conf import settings
 
 # Locale Apps
-from .models import Caso  # , Invitacion
-from .forms import FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante
+from .models import Caso, Invitacion
+from .forms import FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion
 from .utils import enviar_email_verificacion
 
 # Apps
@@ -135,13 +135,26 @@ def ver_bitacora_caso(request, id_caso):
 
     caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
 
+    integrantes = caso.integrantes.all()
+    for integrante in integrantes:
+        integrante.invitacion = integrante.invitaciones_recibidas.filter(caso=caso).last()
+        if integrante.comentario_set.filter(caso=caso).exists():
+            integrante.mensaje = integrante.comentario_set.filter(caso=caso).last().mensaje
+
     initial = {'caso': caso.id, 'empleado': empleado.id}
     initial_for_integrante = {'caso': caso.id, 'emisor': empleado.id}
+
+    data = {'caso': caso, 'empleado': empleado, 'integrantes': integrantes}
 
     if request.method == 'POST':
         form = FormularioAgregarMensaje(data=request.POST, initial=initial)
         if mismo:
-            form_integrante = FormularioAgregarIntegrante(data=request.POST, initial=initial_for_integrante)
+            form_integrante = FormularioAgregarIntegrante(
+                data=request.POST, initial=initial_for_integrante, prefix='integrante'
+            )
+            form_eliminar_integrante = FormularioEliminarInvitacion(
+                data=request.POST, query=caso.integrantes.all(), prefix='eliminar'
+            )
 
         if 'integrante' in request.POST:
             if form_integrante.is_valid():
@@ -149,22 +162,37 @@ def ver_bitacora_caso(request, id_caso):
                 invitacion = form_integrante.save(commit=False)
                 invitacion.receptor = receptor
                 invitacion.save()
+                caso.integrantes.add(receptor)
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
-                pass
+                # print(form_integrante.errors)
+                data['click'] = True
+        elif 'eliminar_integrante' in request.POST:
+            if form_eliminar_integrante.is_valid():
+                empleado_eliminar = form_eliminar_integrante.cleaned_data['integrante']
+                caso.integrantes.remove(empleado_eliminar)
+                Invitacion.objects.get(caso=caso, receptor=empleado_eliminar).delete()
+                return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
+            else:
+                data['click2'] = True
         else:
             if form.is_valid():
                 form.save()
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
+                # print(form.errors)
                 pass
     else:
         form = FormularioAgregarMensaje(initial=initial)
         if mismo:
-            form_integrante = FormularioAgregarIntegrante(initial=initial_for_integrante)
+            form_integrante = FormularioAgregarIntegrante(initial=initial_for_integrante, prefix='integrante')
+            form_eliminar_integrante = FormularioEliminarInvitacion(query=caso.integrantes.all(), prefix='eliminar')
         else:
             form_integrante = None
+            form_eliminar_integrante = None
 
-    data = {'caso': caso, 'empleado': empleado, 'form': form, 'form_integrante': form_integrante}
+    data['form'] = form
+    data['form_integrante'] = form_integrante
+    data['form_eliminar_integrante'] = form_eliminar_integrante
 
     return render(request, 'pqr/ver_bitacora_caso.html', data)

@@ -20,11 +20,55 @@
 	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
 	        	{% csrf_token %}
 	            <div class="modal-body">
-	                <p>Escoja un empleado para invitarlo a participar en este caso</p>
-	                <input type="text" class="form-control autocompletar" id="algo">
+	            	<div class="row">
+	            		<div class="input-group fg-float {{ form_integrante.integrante.css_classes }}">
+			                <p>Escoja un empleado para invitarlo a participar en este caso</p>
+			                {{ form_integrante.integrante }}
+			                {% for error in form_integrante.integrante.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+			            </div>
+	            	</div>
+	            	<div class="row">
+	            		{{ form_integrante.mensaje }}
+	            	</div>
 	            </div>
 	            <div class="modal-footer">
+	            	{{ form_integrante.caso }}
+	            	{{ form_integrante.emisor }}
 	                <button type="submit" name="integrante" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalNarrower2" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{% trans "Eliminar un Participante" %}</h4>
+            </div>
+	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+	            	<div class="row">
+	            		<div class="col-md-12">
+		            		<p>Escoja un Empleado para eliminar de el caso actual</p>
+		            		<div class="input-group fg-float {{ form_eliminar_integrante.integrante.css_classes }}">
+		            		<span class="input-group-addon"><i class="zmdi zmdi-"></i></span>
+                            <div class="fg-line">
+			               		{{ form_eliminar_integrante.integrante }}
+                            </div>
+			                {% for error in form_eliminar_integrante.integrante.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+				            </div>
+	            		</div>
+	            	</div>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="submit" name="eliminar_integrante" class="btn btn-link">Aceptar</button>
 	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
 	            </div>
             </form>
@@ -40,24 +84,22 @@
         <div class="ms-menu">
             <div class="listview lv-user m-t-20">
                 <div class="lv-item media active">
-                    <div class="lv-avatar bgm-{% cycle "green" "red" "orange" "blue" %} pull-left">{{ caso.empleado_cargo.primer_nombre|first }}</div>
+                    <div class="lv-avatar bgm-green pull-left" data-id-empleado="{{ caso.empleado_cargo.id }}" data-id-color="green">{{ caso.empleado_cargo.primer_nombre|first }}</div>
                     <div class="media-body">
                         <div class="lv-title">{{ caso.empleado_cargo.primer_nombre|upper }} {{ caso.empleado_cargo.primer_apellido|upper }}</div>
-                        <div class="lv-small">{% if caso.empleado_cargo.ultimo_mensaje %}{{ caso.empleado_cargo.ultimo_mensaje|truncatewords:3 }}{% else %}Caso revisado en {{ caso.fecha_registro }}{% endif %}</div>
+                        <div class="lv-small" title="{% if caso.empleado_cargo.ultimo_mensaje %}{{ caso.empleado_cargo.ultimo_mensaje }}{% else %}Caso revisado en {{ caso.fecha_registro }}{% endif %}">{% if caso.empleado_cargo.ultimo_mensaje %}{{ caso.empleado_cargo.ultimo_mensaje|truncatewords:3 }}{% else %}Caso revisado en {{ caso.fecha_registro }}{% endif %}</div>
                     </div>
                 </div>
-            	{% for integrante in caso.integrantes.all %}
+            	{% for integrante in integrantes %}
                 <div class="lv-item media active">
-                    <div class="lv-avatar bgm-{% cycle "green" "red" "orange" "blue" %} pull-left">{{ integrante.primer_nombre|first }}</div>
+                    <div class="lv-avatar bgm-{% cycle 'orange' 'red' 'blue' 'deeppurple' 'cyan' 'indigo' 'pink' 'lime' 'yellow' 'brown' 'gray' 'black' %} pull-left" data-id-color="{% cycle 'orange' 'red'  'blue' 'deeppurple' 'cyan' 'indigo' 'pink' 'lime' 'yellow' 'brown' 'gray' 'black' %}" data-id-empleado="{{ integrante.id }}">{{ integrante.primer_nombre|first }}</div>
                     <div class="media-body">
                         <div class="lv-title">{{ integrante.primer_nombre|upper }} {{ integrante.primer_apellido|upper }}</div>
-                        <div class="lv-small">Fierent fastidii recteque ad pro|truncatewords:3</div>
+                        <div class="lv-small" title="{% if not integrante.mensaje %}Fecha Invitación {{ integrante.invitacion.fecha.date }}{% else %}{{ integrante.mensaje }}{% endif %}">{% if not integrante.mensaje %}Fecha Invitación {{ integrante.invitacion.fecha.date }}{% else %}{{ integrante.mensaje|truncatewords:3 }}{% endif %}</div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-
-            
         </div>
         
         <div class="ms-body">
@@ -77,18 +119,22 @@
                     
                     <ul class="lv-actions actions">
                         <li>
-                            <a href="">
-                                <i class="zmdi zmdi-delete"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="">
-                                <i class="zmdi zmdi-check"></i>
-                            </a>
+                        	<div class="checkbox">
+		                        <label>
+		                            <input type="checkbox" value="" name="checkbox_importante">
+		                            <i class="input-helper"></i>
+		                            <i class="zmdi zmdi-star"></i>
+		                        </label>
+		                    </div>
                         </li>
                         <li>
                             <a data-toggle="modal" id="toggleModal" href="#modalNarrower">
 								<i class="zmdi zmdi-plus"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a data-toggle="modal" id="toggleModal2" href="#modalNarrower2">
+								<i class="zmdi zmdi-minus"></i>
                             </a>
                         </li>
                         <li class="dropdown">
@@ -123,10 +169,10 @@
                 </div>
                 
                 <div class="lv-body mCustomScrollbar scrollbarcustom" id="side">
-                	<div class="lv-item media">
-                        <div class="lv-avatar bgm-red pull-left">{{ caso.nombre|first }}</div>
+                	<div class="lv-item media ">
+                        <div class="lv-avatar bgm-teal pull-left">{{ caso.nombre|first }}</div>
                         <div class="media-body">
-                            <div class="ms-item">
+                            <div class="ms-item bgm-teal">
                                 {{ caso.descripcion }}
                             </div>
                             <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ caso.fecha_registro }}</small>
@@ -134,20 +180,20 @@
                     </div>
                 	{% for mensaje in caso.comentario_set.all %}
                     {% if mensaje.empleado == empleado %}
-                    <div class="lv-item media right">
-                        <div class="lv-avatar bgm-green pull-right">{{ mensaje.empleado.primer_nombre|first }}</div>
+                    <div class="lv-item media right" title="{{ mensaje.empleado.primer_nombre }} {{ mensaje.empleado.primer_apellido }}">
+                        <div class="lv-avatar pull-right change_color" data-id-empleado="{{ mensaje.empleado.id }}">{{ mensaje.empleado.primer_nombre|first }}</div>
                         <div class="media-body">
-                            <div class="ms-item">
+                            <div class="ms-item {% if mensaje.importante %}bgm-blue c-white{% endif %}">
                                 {{ mensaje.mensaje }}
                             </div>
                             <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ mensaje.fecha }}</small>
                         </div>
                     </div>
                     {% else %}
-                    <div class="lv-item media">
-                        <div class="lv-avatar bgm-red pull-left">{{ mensaje.empleado.primer_nombre|first }}</div>
+                    <div class="lv-item media" title="{{ mensaje.empleado.primer_nombre }} {{ mensaje.empleado.primer_apellido }}">
+                        <div class="lv-avatar pull-left change_color" data-id-empleado="{{ mensaje.empleado.id }}">{{ mensaje.empleado.primer_nombre|first }}</div>
                         <div class="media-body">
-                            <div class="ms-item">
+                            <div class="ms-item {% if mensaje.importante %}bgm-blue c-white{% endif %}">
                                 {{ mensaje.mensaje }}
                             </div>
                             <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ mensaje.fecha }}</small>
@@ -159,12 +205,13 @@
                 
                 <div class="lv-footer ms-reply">
                     <!--<textarea placeholder="What's on your mind..."></textarea>-->
-                    <form action="" method="POST" enctype="multipart/form-data">
+                    <form id="send_mensaje" action="" method="POST" enctype="multipart/form-data">
                     	{% csrf_token %}
 	                    {{ form.mensaje }}
 	                    <button type="submit"><i class="zmdi zmdi-mail-send"></i></button>
 	                    {{ form.caso }}
 	                    {{ form.empleado }}
+	                    {{ form.importante }}
                     </form>
                 </div>
             </div>
@@ -181,11 +228,22 @@
 <script>
 	$(window).load(function (e) {
 		window.localStorage.removeItem('__/pqr/api/empleados/__data')
+		window.localStorage.removeItem('__/pqr/api/empleados/2__data')
 	})
 	jQuery(document).ready(function($) {
 		$(".scrollbarcustom").mCustomScrollbar({
 		    axis:"y",
 		    theme: "dark"
+		});
+
+		{% if click %}
+		$('#toggleModal').click();
+		{% elif click2 %}
+		$('#toggleModal2').click();
+		{% endif %}
+
+		$('#toggleModal').click(function(event) {
+			$('.autocompletar').focus();
 		});
 
 		var states = new Bloodhound({
@@ -213,7 +271,7 @@
                     '</div>'
                 ].join('\n'),
                 suggestion: function(data) {
-                    console.log(data);
+                    // console.log(data);
                     // str = "<div><a href='" + data.url + "'>" + data.name + "</a></div>"
                     str = "<div>" + data.name + "</div>"
                     return str//$("<div>").text(data.name + data.url).addClass('tt-suggest-page')||$(this).val();
@@ -230,6 +288,17 @@
         //         window.location.href = '/' + '?q=' + $(this).val();
         //     }
         // });
+
+        $('.change_color').each(function (index, obj) {
+        	$aux = $('div[data-id-empleado=' + $(obj).attr('data-id-empleado') + ']').attr('data-id-color')
+        	$(obj).addClass('bgm-' + $aux);
+        })
+
+        $('.scrollbarcustom').mCustomScrollbar('scrollTo',['bottom',]);
+
+        $('#send_mensaje').submit(function(event) {
+        	$('#{{ form.importante.id_for_label }}').prop('checked', $('input[name="checkbox_importante"]').prop('checked'));
+        });
 	});
 </script>
 {% endblock js %}
