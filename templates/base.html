@@ -1,5 +1,8 @@
 {% load staticfiles %}
+{% load waffle_tags %}
 {% load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -113,17 +116,21 @@
                             <label for="tw-switch" class="ts-helper"></label>
                         </div>
                     </li>
+                    {% if mi %}
                     <li id="top-search">
                         <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
                     </li>
+                    {% endif %}
                     <!-- opciones -->
                     <li class="dropdown">
                         <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
                         <ul class="dropdown-menu dm-icon pull-right">
                         {% if request.user.is_authenticated %}
+                            {% if mi %}
                             <li class="hidden-xs">
                                 <a  href="/miembro/perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
+                            {% endif %}
                             <li>
                                 <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
                             </li>
@@ -142,6 +149,7 @@
             </li>
         </ul>
         <!-- Top Search Content -->
+        {% if mi %}
         <div id="top-search-wrap">
             <div class="tsw-inner">
             <form action="/resultado/miembro/" method="POST">
@@ -151,6 +159,7 @@
             </form>
             </div>
         </div>
+        {% endif %}
     </header>
     <!-- start -->
     <section id="main" data-layout="layout-1">
@@ -164,16 +173,18 @@
                     {% if request.user.is_authenticated %}
                         {{ request.user.email }}
                     {% else %}
-                        {{nombreIglesia}}
+                        {{ nombreIglesia }}
                     {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
                 </a>
                 {% if request.user.is_authenticated %}
                 <ul class="main-menu">
+                    {% if mi %}
                     <li>
                         <a href="/miembro/perfil/"><i class="zmdi zmdi-account"></i> Perfil</a>
                     </li>
+                    {% endif %}
                     <li>
                         <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
                     </li>
@@ -288,6 +299,7 @@
                     </ul>
                 </li>
                 {% endif %}
+                {% if mi.grupoLidera %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
@@ -302,6 +314,8 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if mi.grupoLidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
@@ -313,6 +327,8 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if mi.grupoLidera %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
@@ -327,6 +343,7 @@
                         </li>
                     </ul>
                 </li>
+                {% endif %}
                 {% if perms.miembros.es_maestro %}  
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-graduation-cap"></i> Academias</a>
@@ -445,6 +462,66 @@
                         </ul>
                     </li>
                     {% endif %}
+                    {% switch "gestion_documental" %}
+                        {% if perms.gestion_documental or perms.organizacional %}
+                            <li class="sub-menu">
+                                <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
+                                <ul>
+                                    {% if perms.gestion_documental.add_registro %}
+                                    <li>
+                                        <a href="{% url 'sgd:ingresar_registro' %}">{% trans "Nuevo Registro" %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'sgd:lista_solicitudes' %}">{% trans "Listado Solicitudes de Registro" %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.organizacional.buscar_registros %}
+                                    <li>
+                                        <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.organizacional.es_administrador_sgd %}
+                                    <li class="sub-menu">
+                                        <a href="#">{% trans "Administracion" %}</a>
+                                        <ul>
+                                            <li>
+                                                <a href="{% url 'organizacional:listar_departamentos' %}">{% trans "Listar Departamentos" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'organizacional:listar_areas' %}">{% trans "Listar Áreas" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:listar_palabras_claves' %}">{% trans "Listar Palabras Claves" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.gestion_documental.add_registro %}
+                                    <li class="sub-menu">
+                                        <a href="#">{% trans "Solicitudes Custodia Documentos" %}</a>
+                                        <ul>
+                                            <li>
+                                                <a href="{% url 'sgd:custodia_documentos' %}">{% trans "Custodia de Documento" %}</a>
+                                            </li>
+                                            <li>
+                                                <a href="{% url 'sgd:lista_custodias_documentos' %}">{% trans "Listado Custodia de Documentos" %}</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </li>                            
+                        {% endif %}
+                    {% endswitch %}
                 {% endif %} 
             </ul>
         </aside>

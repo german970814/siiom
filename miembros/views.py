@@ -60,7 +60,6 @@ def divorciar(miembro, conyugue, estado_civil):
 
 def autenticarUsario(request):
     siguiente = request.session.get('next', '')
-
     if request.user.is_authenticated():
         if request.user.has_perm("miembros.es_administrador"):
             return HttpResponseRedirect("/administracion/")
@@ -80,16 +79,11 @@ def autenticarUsario(request):
                 if Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
                     if sig is not None or sig != '':
                         return HttpResponseRedirect(sig)
-                    return HttpResponseRedirect("/miembro/")
-                elif Group.objects.get(name__iexact='Lider') in usuario.groups.all()      \
-                        or Group.objects.get(name__iexact='Maestro') in usuario.groups.all()\
-                        or Group.objects.get(name__iexact='Agente') in usuario.groups.all()\
-                        or Group.objects.get(name__iexact='Receptor') in usuario.groups.all():
-                        if sig is not None or sig != '':
-                            return HttpResponseRedirect(sig)
-                        return HttpResponseRedirect('/miembro/')
+                    return HttpResponseRedirect("/administracion/")
                 else:
-                    valido = False
+                    if sig is not None or sig != '':
+                        return HttpResponseRedirect(sig)
+                    return HttpResponseRedirect('/miembro/')
             else:
                 valido = False
     return render_to_response('Miembros/login.html', locals(), context_instance=RequestContext(request))
@@ -102,55 +96,66 @@ def salir(request):
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def miembroInicio(request):
-    miembro = Miembro.objects.get(usuario=request.user)
+    miembro = None
+    empleado = None
+    try:
+        miembro = Miembro.objects.get(usuario=request.user)
+    except Miembro.DoesNotExist:
+        empleado = request.user.empleado
 
     if request.user.has_perm("miembros.es_administrador"):
         return HttpResponseRedirect("/administracion/")
 
-    grupo = miembro.grupoLidera()
-    if grupo:
-        miembrosGrupo = list(grupo.miembro_set.all())
-        tipo = TipoMiembro.objects.get(nombre__iexact='visita')
-        visitantes = []
-        for mg in miembrosGrupo:
-            ct = list(CambioTipo.objects.filter(miembro=mg).order_by('id'))  # filter(nuevoTipo=tipo, anteriorTipo=tipo)
-            if len(ct) != 0 and ct is not None:
-                ct = ct.pop()
-                if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider is None)):
-                    visitantes.append(ct.miembro)
-    else:
-        visitantes = []
-
-    discipulos = list()
-    inactivos = list()
-    grupos = list()
-
-    def lid_gru(miem):
-        visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-        grupo = miem.grupoLidera()
+    if miembro:
+        grupo = miembro.grupoLidera()
         if grupo:
-            return grupo.miembro_set.filter(id__in=visitas)
+            miembrosGrupo = list(grupo.miembro_set.all())
+            tipo = TipoMiembro.objects.get(nombre__iexact='visita')
+            visitantes = []
+            for mg in miembrosGrupo:
+                ct = list(CambioTipo.objects.filter(miembro=mg).order_by('id'))
+                if len(ct) != 0 and ct is not None:
+                    ct = ct.pop()
+                    if (ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (
+                       ct.miembro.observacionLlamadaLider == '' or
+                       ct.miembro.observacionLlamadaLider is None)
+                    ):
+                        visitantes.append(ct.miembro)
         else:
-            return []
+            visitantes = []
 
-    k = listaGruposDescendientes(miembro)
-    for lid in k:
-        if lid == miembro.grupoLidera():
-            pass
-        else:
-            if lid.listaLideres():
-                for miem in lid.listaLideres():
-                    discipulos.append(Miembro.objects.get(id=miem))
+        discipulos = list()
+        inactivos = list()
+        grupos = list()
+
+        def lid_gru(miem):
+            visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
+            grupo = miem.grupoLidera()
+            if grupo:
+                return grupo.miembro_set.filter(id__in=visitas)
             else:
-                pass
-    totalLideres = len(discipulos)
-    totalGrupos = len(k)  # len(grupos)
-    lideresGrupo = len(lid_gru(miembro)) - 1
-    if lideresGrupo == -1:
-        lideresGrupo = 0
-    # totalGruposI = totalLideres - lideresGrupo
+                return []
 
-    # request.session['visitantes'] = visitantes
+        k = listaGruposDescendientes(miembro)
+        for lid in k:
+            if lid == miembro.grupoLidera():
+                pass
+            else:
+                if lid.listaLideres():
+                    for miem in lid.listaLideres():
+                        discipulos.append(Miembro.objects.get(id=miem))
+                else:
+                    pass
+        totalLideres = len(discipulos)
+        totalGrupos = len(k)  # len(grupos)
+        lideresGrupo = len(lid_gru(miembro)) - 1
+        if lideresGrupo == -1:
+            lideresGrupo = 0
+        # totalGruposI = totalLideres - lideresGrupo
+
+        # request.session['visitantes'] = visitantes
+    if empleado:
+        pass
     return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
 
@@ -388,7 +393,7 @@ def liderEditarPerfil(request, pk=None):
     return render_to_response("Miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
+@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
 def cambiarContrasena(request):
     miembroUsuario = request.user
     if request.method == 'POST':
@@ -398,6 +403,8 @@ def cambiarContrasena(request):
                form.cleaned_data['contrasenaNueva'] == form.cleaned_data['contrasenaNuevaVerificacion']):
                 miembroUsuario.set_password(form.cleaned_data['contrasenaNueva'])
                 miembroUsuario.save()
+                if hasattr(miembroUsuario, 'empleado') and not Miembro.objects.filter(usuario=miembroUsuario):
+                    return HttpResponseRedirect("/miembro/")
                 return HttpResponseRedirect("/miembro/editar_perfil/")
             else:
                 validacionContrasena = 'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
@@ -1469,6 +1476,7 @@ def ver_informacion_miembro(request, pk=None):
                 cambio = CambioTipo.objects.filter(miembro=miembro)
                 tipos_cambio = [c.nuevoTipo for c in cambio]
                 eliminar = [cambio_iter for cambio_iter in tipos_cambio if cambio_iter not in tipos]
+
                 if len(eliminar):
                     for e in eliminar:
                         try:
@@ -1478,6 +1486,7 @@ def ver_informacion_miembro(request, pk=None):
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
                     tipos_cambio = [c_iter.nuevoTipo for c_iter in cambio]
+
                 for tipo in tipos:
                     if tipo not in tipos_cambio:
                         cambio = CambioTipo()
