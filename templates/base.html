@@ -89,6 +89,10 @@
             position: absolute !important;
             left: 1px !important;
         }
+
+        .has-error.fg-float .fg-label {
+            color: #f6675d;
+        }
     </style>
     {% block css %}
     {% endblock %}
@@ -98,6 +102,7 @@
 <body class="toggled sw-toggled">
     <header id="header" class="clearfix" data-current-skin="blue">
         <ul class="header-inner">
+            {% if request.user.is_authenticated %}
             <li id="menu-trigger" data-trigger="#sidebar">
                 <div class="line-wrap">
                     <div class="line top"></div>
@@ -105,17 +110,20 @@
                     <div class="line bottom"></div>
                 </div>
             </li>
+            {% endif %}
             <li class="logo hidden-xs">
                 <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
+                    {% if request.user.is_authenticated %}
                     <li id="toggle-width">
                         <div class="toggle-switch">
                             <input id="tw-switch" type="checkbox" hidden="hidden" checked='true'>
                             <label for="tw-switch" class="ts-helper"></label>
                         </div>
                     </li>
+                    {% endif %}
                     {% if mi %}
                     <li id="top-search">
                         <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
@@ -163,6 +171,7 @@
     </header>
     <!-- start -->
     <section id="main" data-layout="layout-1">
+        {% if request.user.is_authenticated %}
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
                 <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{dominioIglesia}}.png') !important;">
@@ -522,9 +531,23 @@
                             </li>                            
                         {% endif %}
                     {% endswitch %}
+                    {% switch "pqr" %}
+                        <li class="sub-menu">
+                            <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "PQR" %}</a>
+                            <ul>
+                                <li>
+                                    <a href="{% url 'pqr:nuevo_caso' %}">{% trans "Hacer una Queja o Sugerencia" %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_servicio_cliente' %}">{% trans "Ver casos sin atención" %}</a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% endswitch %}
                 {% endif %} 
             </ul>
         </aside>
+        {% endif %}
         <section id="content">
             {% block contenido %}
             {% endblock %}

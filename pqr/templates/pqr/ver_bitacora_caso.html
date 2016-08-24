@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block css %}
+<style>
+	#side {
+		height: 400px;
+	}
+</style>
+{% endblock css %}
+
+{% block contenido %}
+<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{% trans "Añadir un Participante" %}</h4>
+            </div>
+	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+	                <p>Escoja un empleado para invitarlo a participar en este caso</p>
+	                <input type="text" class="form-control autocompletar" id="algo">
+	            </div>
+	            <div class="modal-footer">
+	                <button type="submit" name="integrante" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container">
+	<div class="block-header">
+        <h2>{{ caso.asunto }}</h2>
+    </div>
+
+    <div class="card m-b-0" id="messages-main">
+        <div class="ms-menu">
+            <div class="listview lv-user m-t-20">
+                <div class="lv-item media active">
+                    <div class="lv-avatar bgm-{% cycle "green" "red" "orange" "blue" %} pull-left">{{ caso.empleado_cargo.primer_nombre|first }}</div>
+                    <div class="media-body">
+                        <div class="lv-title">{{ caso.empleado_cargo.primer_nombre|upper }} {{ caso.empleado_cargo.primer_apellido|upper }}</div>
+                        <div class="lv-small">{% if caso.empleado_cargo.ultimo_mensaje %}{{ caso.empleado_cargo.ultimo_mensaje|truncatewords:3 }}{% else %}Caso revisado en {{ caso.fecha_registro }}{% endif %}</div>
+                    </div>
+                </div>
+            	{% for integrante in caso.integrantes.all %}
+                <div class="lv-item media active">
+                    <div class="lv-avatar bgm-{% cycle "green" "red" "orange" "blue" %} pull-left">{{ integrante.primer_nombre|first }}</div>
+                    <div class="media-body">
+                        <div class="lv-title">{{ integrante.primer_nombre|upper }} {{ integrante.primer_apellido|upper }}</div>
+                        <div class="lv-small">Fierent fastidii recteque ad pro|truncatewords:3</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            
+        </div>
+        
+        <div class="ms-body">
+            <div class="listview lv-message">
+                <div class="lv-header-alt clearfix">
+                    <div id="ms-menu-trigger">
+                        <div class="line-wrap">
+                            <div class="line top"></div>
+                            <div class="line center"></div>
+                            <div class="line bottom"></div>
+                        </div>
+                    </div>
+
+                    <div class="lvh-label hidden-xs">
+                        <span class="c-black">{% trans "Caso No." %}{{ caso.id }}</span>
+                    </div>
+                    
+                    <ul class="lv-actions actions">
+                        <li>
+                            <a href="">
+                                <i class="zmdi zmdi-delete"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <i class="zmdi zmdi-check"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a data-toggle="modal" id="toggleModal" href="#modalNarrower">
+								<i class="zmdi zmdi-plus"></i>
+                            </a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="" data-toggle="dropdown" aria-expanded="true">
+                                <i class="zmdi zmdi-sort"></i>
+                            </a>
+                
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li>
+                                    <a href="">Latest</a>
+                                </li>
+                                <li>
+                                    <a href="">Oldest</a>
+                                </li>
+                            </ul>
+                        </li>                             
+                        <li class="dropdown">
+                            <a href="" data-toggle="dropdown" aria-expanded="true">
+                                <i class="zmdi zmdi-more-vert"></i>
+                            </a>
+                
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li>
+                                    <a href="">Refresh</a>
+                                </li>
+                                <li>
+                                    <a href="">Message Settings</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="lv-body mCustomScrollbar scrollbarcustom" id="side">
+                	<div class="lv-item media">
+                        <div class="lv-avatar bgm-red pull-left">{{ caso.nombre|first }}</div>
+                        <div class="media-body">
+                            <div class="ms-item">
+                                {{ caso.descripcion }}
+                            </div>
+                            <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ caso.fecha_registro }}</small>
+                        </div>
+                    </div>
+                	{% for mensaje in caso.comentario_set.all %}
+                    {% if mensaje.empleado == empleado %}
+                    <div class="lv-item media right">
+                        <div class="lv-avatar bgm-green pull-right">{{ mensaje.empleado.primer_nombre|first }}</div>
+                        <div class="media-body">
+                            <div class="ms-item">
+                                {{ mensaje.mensaje }}
+                            </div>
+                            <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ mensaje.fecha }}</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="lv-item media">
+                        <div class="lv-avatar bgm-red pull-left">{{ mensaje.empleado.primer_nombre|first }}</div>
+                        <div class="media-body">
+                            <div class="ms-item">
+                                {{ mensaje.mensaje }}
+                            </div>
+                            <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ mensaje.fecha }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <div class="lv-footer ms-reply">
+                    <!--<textarea placeholder="What's on your mind..."></textarea>-->
+                    <form action="" method="POST" enctype="multipart/form-data">
+                    	{% csrf_token %}
+	                    {{ form.mensaje }}
+	                    <button type="submit"><i class="zmdi zmdi-mail-send"></i></button>
+	                    {{ form.caso }}
+	                    {{ form.empleado }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock contenido %}
+
+{% block js %}
+<!--<script src='{% static "Scripts/typeahead.bundle.js" %}'></script>-->
+<script src="{% static 'Template/jquery/vendors/bower_components/typeahead.js/dist/typeahead.bundle.min.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bower_components/typeahead.js/dist/bloodhound.min.js' %}"></script>
+<script>
+	$(window).load(function (e) {
+		window.localStorage.removeItem('__/pqr/api/empleados/__data')
+	})
+	jQuery(document).ready(function($) {
+		$(".scrollbarcustom").mCustomScrollbar({
+		    axis:"y",
+		    theme: "dark"
+		});
+
+		var states = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            // local: statesArray
+            prefetch: '{% url "pqr:empleados_nombres_views_api" caso.id %}',
+            // remote: {
+            //     url: '{}',// + '?q="%QUERY"',
+            //     // wildcard: '%QUERY',
+            // },
+        });
+
+        states.initialize();
+
+        $('.autocompletar').typeahead(null,{
+            name: 'states',
+            displayKey: 'name',
+            valueKey: 'name',
+            source: states.ttAdapter(),
+            templates: {
+                empty: [
+                    '<div class="empty-message p-15">',
+                    'No se ha podido encontrar lo que busca',
+                    '</div>'
+                ].join('\n'),
+                suggestion: function(data) {
+                    console.log(data);
+                    // str = "<div><a href='" + data.url + "'>" + data.name + "</a></div>"
+                    str = "<div>" + data.name + "</div>"
+                    return str//$("<div>").text(data.name + data.url).addClass('tt-suggest-page')||$(this).val();
+                }
+            },
+        })
+
+        // $('.autocompletar').bind('typeahead:select', function(ev, suggestion) {
+        //   // console.log(suggestion);
+        // });
+
+        // $('.autocompletar').keydown(function(event) {
+        //     if (event.keyCode == 13) {
+        //         window.location.href = '/' + '?q=' + $(this).val();
+        //     }
+        // });
+	});
+</script>
+{% endblock js %}

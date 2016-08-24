@@ -22,6 +22,7 @@ urlpatterns = patterns(
     url(r'^encuentro/', include("encuentros.urls")),
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
+    url(r'^pqr/', include("pqr.urls", namespace="pqr")),
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),
     url(r'^dont_have_permissions/$', without_perms, name="sin_permiso"),
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),

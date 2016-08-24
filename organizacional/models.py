@@ -43,7 +43,7 @@ class Empleado(models.Model):
 
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name=_('usuario'))
     areas = models.ManyToManyField(Area, verbose_name=_('áreas'), related_name='empleados')
-    cedula = models.BigIntegerField(verbose_name=_('cédula'))
+    cedula = models.BigIntegerField(verbose_name=_('cédula'), unique=True)
     primer_nombre = models.CharField(max_length=100, verbose_name=_('primer nombre'))
     segundo_nombre = models.CharField(max_length=100, blank=True, verbose_name=_('segundo nombre'))
     primer_apellido = models.CharField(max_length=100, verbose_name=_('primer apellido'))
