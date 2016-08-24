@@ -168,7 +168,7 @@
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_diaGAR" class="fg-label control-label">Dia del G.A.R*:</label>
+                                <label for="id_diaGAR" class="fg-label control-label">Dia del {% if dominioIglesia == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
                             	{{form.diaGAR}}
                             </div>
                             {% for error in form.diaGAR.errors %}
@@ -186,7 +186,7 @@
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_horaGAR" class="fg-label control-label">Hora del G.A.R*:</label>
+                                <label for="id_horaGAR" class="fg-label control-label">Hora del {% if dominioIglesia == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
                             	{{form.horaGAR}}
                             </div>
                             {% for error in form.horaGAR.errors %}
@@ -201,7 +201,7 @@
                                 <i class="zmdi zmdi-calendar-note"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_diaDiscipulado" class="fg-label control-label">Dia del Discipulado*:</label>
+                                <label for="id_diaDiscipulado" class="fg-label control-label">Dia del Discipulado:</label>
                             	{{form.diaDiscipulado}}
                             </div>
                             {% for error in form.diaDiscipulado.errors %}
@@ -216,7 +216,7 @@
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_horaDiscipulado" class="fg-label control-label">Hora del Discipulado*:</label>
+                                <label for="id_horaDiscipulado" class="fg-label control-label">Hora del Discipulado:</label>
                             	{{form.horaDiscipulado}}
                             </div>
                             {% for error in form.horaDiscipulado.errors %}

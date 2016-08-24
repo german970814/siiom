@@ -7,8 +7,9 @@ from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, render, get_object_or_404
+from django.shortcuts import render_to_response, render, get_object_or_404, redirect
 from django.template import RequestContext
+from django.core.urlresolvers import reverse
 
 # Apps Imports
 from .forms import *
@@ -313,7 +314,7 @@ def liderEditarPerfil(request, pk=None):
         except Miembro.DoesNotExist:
             raise Http404
 
-    if miembro.estadoCivil == 'C':
+    if miembro.estadoCivil == 'C' and miembro.conyugue is not None:
         casado = True
 
     foto = False
@@ -359,7 +360,7 @@ def liderEditarPerfil(request, pk=None):
             if form.is_valid():
                 miembroEditado = form.save()
                 if miembroEditado.usuario is not None:
-                    miembroEditado.usuario.username = miembroEditado.nombre + miembroEditado.primerApellido
+                    miembroEditado.usuario.username = '{}'.format(miembroEditado.cedula)
                     miembroEditado.usuario.email = miembroEditado.email
                     miembroEditado.usuario.save()
                     miembroEditado.save()
@@ -1116,7 +1117,7 @@ def crearUsuarioMimembro(request, id):
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
                 if request.session['tipo'].lower() == "administrador":
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
-            return HttpResponseRedirect('/miembro/perfil/' + str(miembroCambio.id) + '/')
+            return redirect(reverse('editar_perfil', args=(miembroCambio.id)))
     else:
         form = FormularioAsignarUsuario()
     form.email = miembroCambio.email
@@ -1180,8 +1181,12 @@ def eliminarCambioTipoMiembro(request, id):
         cambio.miembro.usuario.groups.remove(Group.objects.get(name__iexact='Pastor'))
 
     try:
-        if len(cambio.miembro.usuario.groups.all()) == 0:
-            cambio.miembro.usuario.delete()
+        if cambio.miembro.usuario.groups.count() == 0:
+            if hasattr(cambio.miembro.usuario, 'empleado'):
+                if not cambio.miembro.usuario.empleado:
+                    cambio.miembro.usuario.delete()
+            else:
+                cambio.miembro.usuario.delete()
             cambio.miembro.usuario = None
             cambio.miembro.save()
     except:
@@ -1432,7 +1437,11 @@ def ver_discipulos(request, pk=None):
     return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
 
 
+from django.db import transaction
+
+
 @login_required
+@transaction.atomic
 def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
@@ -1466,13 +1475,18 @@ def ver_informacion_miembro(request, pk=None):
 
                 cambio = CambioTipo.objects.filter(miembro=miembro)
                 tipos_cambio = [c.nuevoTipo for c in cambio]
-                eliminar = [cambi for cambi in tipos_cambio if cambi not in tipos]
+                eliminar = [cambio_iter for cambio_iter in tipos_cambio if cambio_iter not in tipos]
+
                 if len(eliminar):
                     for e in eliminar:
-                        c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
+                        try:
+                            c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
+                        except:
+                            c = CambioTipo.objects.get(miembro=miembro, anteriorTipo=e)
                         eliminarCambioTipoMiembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
-                    tipos_cambio = [ca.nuevoTipo for ca in cambio]
+                    tipos_cambio = [c_iter.nuevoTipo for c_iter in cambio]
+
                 for tipo in tipos:
                     if tipo not in tipos_cambio:
                         cambio = CambioTipo()
@@ -1481,7 +1495,7 @@ def ver_informacion_miembro(request, pk=None):
                         cambio.fecha = date.today()
                         if tipo not in tipos_cambio:
                             if tipo == tpvisita:
-                                cambio.anterior = tipo
+                                cambio.anteriorTipo = tipo
                             elif tipo == tpmiembro:
                                 cambio.anteriorTipo = tpvisita
                             elif tipo == tplider:
@@ -1493,9 +1507,12 @@ def ver_informacion_miembro(request, pk=None):
                                 import re
                                 cedula = re.findall(r'\d+', cambio.miembro.cedula)
                                 cedula = ''.join(cedula)
-                                usuario = User()
-                                usuario.username = cambio.miembro.nombre + cambio.miembro.primerApellido
-                                usuario.email = cambio.miembro.email
+                                try:
+                                    usuario = User.objects.get(email=cambio.miembro.email)
+                                except:
+                                    usuario = User()
+                                    usuario.username = '{}'.format(cambio.miembro.cedula)
+                                    usuario.email = cambio.miembro.email
                                 usuario.set_password(cedula)
                                 usuario.save()
                                 cambio.miembro.usuario = usuario
@@ -1516,13 +1533,17 @@ def ver_informacion_miembro(request, pk=None):
                         cambio.nuevoTipo = tipo
                         cambio.save()
                     else:
+                        # return HttpResponse(eliminar, content_type='text/plain')
                         continue
 
                 ok = True
                 ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
                 if mismo:
                     ms = "Te has Editado Correctamente"
+                # return redirect(reverse('ver_informacion', args=(miembro.id, )))
             else:
+                if form_cambio_tipo.errors:
+                    form.add_error('estado', 'Error en formulario')
                 ms = "Ocurrió un Error, Por Favor Verifica el Formulario"
         else:
             form = FormularioInformacionIglesiaMiembro(instance=miembro)
