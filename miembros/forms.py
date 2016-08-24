@@ -461,6 +461,7 @@ class FormularioTipoMiembros(forms.ModelForm):
         if self.instance:
             tipos = CambioTipo.objects.filter(miembro=self.instance)
             self.fields['tipos'].initial = [tipo.nuevoTipo.id for tipo in tipos]
+            # self.fields['tipos'].required = False
 
     class Meta:
         model = CambioTipo
@@ -473,4 +474,4 @@ class FormularioTransladarMiembro(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(FormularioTransladarMiembro, self).__init__(*args, **kwargs)
-        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})

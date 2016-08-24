@@ -35,8 +35,11 @@ class Grupo(AL_Node):
     fechaApertura = models.DateField(verbose_name="Fecha de Apertura")
     diaGAR = models.CharField(max_length=1, choices=opcionesDia, verbose_name='Dia G.A.R')
     horaGAR = models.TimeField(verbose_name='Hora G.A.R')
-    diaDiscipulado = models.CharField(max_length=1, choices=opcionesDia, verbose_name='Dia Discipulado')
-    horaDiscipulado = models.TimeField(verbose_name='Hora Discipulado')
+    diaDiscipulado = models.CharField(
+        max_length=1, choices=opcionesDia,
+        verbose_name='Dia Discipulado', blank=True, null=True
+    )
+    horaDiscipulado = models.TimeField(verbose_name='Hora Discipulado', blank=True, null=True)
     nombre = models.CharField(max_length=30)
     red = models.ForeignKey(Red, null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio')
