@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grupos', '0002_auto_20160201_0932'),
+        ('grupos', '0003_auto_20160824_1603'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='grupo',
             name='parent',
-            field=models.ForeignKey(null=True, to='grupos.Grupo', related_name='children_set'),
+            field=models.ForeignKey(null=True, related_name='children_set', to='grupos.Grupo'),
         ),
     ]
