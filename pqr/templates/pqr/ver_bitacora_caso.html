@@ -11,6 +11,7 @@
 {% endblock css %}
 
 {% block contenido %}
+{% if mismo %}
 <div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -75,6 +76,43 @@
         </div>
     </div>
 </div>
+{% endif %}
+<div class="modal fade" id="modalNarrower3" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{% trans "Datos de el caso" %}</h4>
+            </div>
+            <div class="modal-body">
+            	<div class="row">
+            		<div class="col-md-12">
+            			<h5>Nombre Solicitante:</h5>
+            			<p>{{ caso.nombre|upper }}</p>
+            			<h5>Email Solicitante:</h5>
+            			<p>{{ caso.email }}</p>
+            			<h5>Dirección Solicitante:</h5>
+            			<p>{{ caso.direccion }}</p>
+            			<h5>Telefono Solicitante:</h5>
+            			<p>{{ caso.telefono }}</p>
+            			<h5>Fecha Ingreso Caso:</h5>
+            			<p>{{ caso.fecha_registro }}</p>
+            			{% if caso.fecha_acontecimiento %}
+            			<h5>Fecha de hechos:</h5>
+            			<p>{{ caso.fecha_acontecimiento }}</p>
+            			{% endif %}
+            			<h5>Descripcion de el caso:</h5>
+            			<p>{{ caso.descripcion }}</p>
+
+            		</div>
+            	</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="container">
 	<div class="block-header">
         <h2>{{ caso.asunto }}</h2>
@@ -118,7 +156,8 @@
                     </div>
                     
                     <ul class="lv-actions actions">
-                        <li>
+                    	{% if mismo %}
+                        <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Hacer un mensaje importante" title="" data-original-title="Ayuda">
                         	<div class="checkbox">
 		                        <label>
 		                            <input type="checkbox" value="" name="checkbox_importante">
@@ -127,14 +166,20 @@
 		                        </label>
 		                    </div>
                         </li>
-                        <li>
+                        <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Agregar Integrante" title="" data-original-title="Ayuda">
                             <a data-toggle="modal" id="toggleModal" href="#modalNarrower">
 								<i class="zmdi zmdi-plus"></i>
                             </a>
                         </li>
-                        <li>
+                        <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Eliminar Integrante" title="" data-original-title="Ayuda">
                             <a data-toggle="modal" id="toggleModal2" href="#modalNarrower2">
 								<i class="zmdi zmdi-minus"></i>
+                            </a>
+                        </li>
+                    	{% endif %}
+                    	<li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Ver datos de caso" title="" data-original-title="Ayuda">
+                            <a data-toggle="modal" id="toggleModal3" href="#modalNarrower3">
+								<i class="zmdi zmdi-eye"></i>
                             </a>
                         </li>
                         <li class="dropdown">
@@ -170,7 +215,7 @@
                 
                 <div class="lv-body mCustomScrollbar scrollbarcustom" id="side">
                 	<div class="lv-item media ">
-                        <div class="lv-avatar bgm-teal pull-left">{{ caso.nombre|first }}</div>
+                        <div class="lv-avatar bgm-teal pull-left" data-trigger="hover" data-toggle="popover" data-placement="bottom right" data-content="{{ caso.nombre }}" title="" data-original-title="Nombre Solicitante">{{ caso.nombre|first }}</div>
                         <div class="media-body">
                             <div class="ms-item bgm-teal">
                                 {{ caso.descripcion }}
@@ -291,7 +336,12 @@
 
         $('.change_color').each(function (index, obj) {
         	$aux = $('div[data-id-empleado=' + $(obj).attr('data-id-empleado') + ']').attr('data-id-color')
-        	$(obj).addClass('bgm-' + $aux);
+
+        	if ($aux === undefined) {
+        		$(obj).addClass('bgm-gray')
+        	} else {
+        		$(obj).addClass('bgm-' + $aux);
+        	}
         })
 
         $('.scrollbarcustom').mCustomScrollbar('scrollTo',['bottom',]);

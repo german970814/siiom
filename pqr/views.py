@@ -29,7 +29,7 @@ def nuevo_caso(request):
     # Se intenta obtener un miembro a partir de el request, o un empleado
     if request.user.is_authenticated():
         try:
-            miembro = get_object_or_404(Miembro, usuario=request.user)
+            miembro = Miembro.objects.get(usuario=request.user)
             initial = {
                 'nombre': '{} {}'.format(miembro.nombre, miembro.primerApellido),
                 'identificacion': miembro.cedula, 'email': miembro.email,
@@ -64,6 +64,7 @@ def nuevo_caso(request):
                     from django.http import HttpResponse
                     return HttpResponse(e, content_type='text/plain')
                 pass
+            # enviar_email_verificacion(request, caso)  # Comment this line when DEBUG is True
             messages.success(request, _('Se ha enviado un correo de verificación'))
             return redirect(reverse_lazy('pqr:nuevo_caso'))
         else:
@@ -133,7 +134,8 @@ def ver_bitacora_caso(request, id_caso):
     if empleado == caso.empleado_cargo:
         mismo = True
 
-    caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
+    if caso.empleado_cargo.comentario_set.exists():
+        caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
 
     integrantes = caso.integrantes.all()
     for integrante in integrantes:
@@ -194,5 +196,6 @@ def ver_bitacora_caso(request, id_caso):
     data['form'] = form
     data['form_integrante'] = form_integrante
     data['form_eliminar_integrante'] = form_eliminar_integrante
+    data['mismo'] = mismo
 
     return render(request, 'pqr/ver_bitacora_caso.html', data)
