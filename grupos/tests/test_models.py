@@ -22,9 +22,10 @@ class GrupoModelTest(TestCase):
         ]
 
     def test_obtener_arbol_completo(self):
-        """Lista obtenida sea igual a la lista del arbol completo """
+        """Lista obtenida sea igual a la lista del arbol completo."""
 
         lista_obtenida = Grupo.obtener_arbol()
+        self.assertListEqual(lista_obtenida, self.lista_arbol_completo)
 
     def test_obtener_arbol_padre_especifico(self):
         pass
