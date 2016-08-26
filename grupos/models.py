@@ -56,6 +56,28 @@ class Grupo(AL_Node):
 
         return cad
 
+    @classmethod
+    def _obtener_arbol_recursivamente(cls, padre, resultado):
+        """Devuelve el arbol de forma recursiva."""
+
+        lista_hijos = []
+        for hijo in padre.get_children():
+            cls._obtener_arbol_recursivamente(hijo, lista_hijos)
+
+        resultado.append(padre)
+        if lista_hijos:
+            resultado.append(lista_hijos)
+
+    @classmethod
+    def obtener_arbol(cls):
+        """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
+        grupos."""
+
+        arbol = []
+        cls._obtener_arbol_recursivamente(Grupo.get_root_nodes()[0], arbol)
+
+        return arbol
+
     def listaLideres(self):
         """
         Devuelve una lista con los ids de los lideres del grupo.
