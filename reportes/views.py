@@ -1027,54 +1027,11 @@ def desarrolloGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
         raiz = Grupo.objects.get(red=None)
-        padre = Miembro.objects.get(id=raiz.listaLideres()[0])
     else:
         raiz = miembro.grupoLidera()
-        padre = miembro
-    pila = [[raiz]]
-    act = None
-    bajada = True
-    discipulos = list(padre.discipulos())
-    while len(discipulos) > 0:
-        # print 'dis:', discipulos
-        d = discipulos.pop()
-        hijo = d.grupoLidera()
-        # print 'd:', d, 'hijo:', hijo
-        if hijo:
-            if act is not None:
-                pila.append(act)
-            sw = True
-            while len(pila) > 0 and sw:
-                act = pila.pop()
-                # print 'pila:', pila
-                # print 'act:', act
-                if act[len(act) - 1] == d.grupo:
-                    act.append([hijo])
-                    bajada = True
-                    sw = False
-                elif act[len(act) - 2] == d.grupo:
-                    act[len(act) - 1].append(hijo)
-                    bajada = True
-                    sw = False
-                elif isinstance(act[-1], (tuple, list)) and bajada:
-                    pila.append(act)
-                    pila.append(act[len(act) - 1])
-                elif not isinstance(act[-1], (tuple, list)):
-                    bajada = False
-                # print '------------while pila------------'
-            lid = Miembro.objects.filter(id__in=hijo.listaLideres())
-            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
-                if l in discipulos:
-                    discipulos.remove(l)
-        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
-            discipulos.extend(list(d.discipulos()))
-        #  print '----------while disci-----------'
-    #  print 'act final:', act
-    #  print 'pila final:', pila
-    if pila:
-        arbol = pila[0]
-    else:
-        arbol = act
+
+    arbol = Grupo.obterner_arbol_viejo(raiz)
+
     return render_to_response('reportes/desarrollo_grupo.html', locals(), context_instance=RequestContext(request))
 
 

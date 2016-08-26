@@ -78,6 +78,56 @@ class Grupo(AL_Node):
 
         return arbol
 
+    # Deprecado
+    @classmethod
+    def obterner_arbol_viejo(cls, raiz):
+        """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
+        grupos."""
+
+        pila = [[raiz]]
+        act = None
+        bajada = True
+
+        discipulos = list(raiz.get_children())
+        while len(discipulos) > 0:
+            # print 'dis:', discipulos
+            hijo = discipulos.pop()
+            # print 'd:', d, 'hijo:', hijo
+            if hijo:
+                if act is not None:
+                    pila.append(act)
+                sw = True
+                while len(pila) > 0 and sw:
+                    act = pila.pop()
+                    # print 'pila:', pila
+                    # print 'act:', act
+                    if act[len(act) - 1] == hijo.parent:
+                        act.append([hijo])
+                        bajada = True
+                        sw = False
+                    elif act[len(act) - 2] == hijo.parent:
+                        act[len(act) - 1].append(hijo)
+                        bajada = True
+                        sw = False
+                    elif isinstance(act[-1], (tuple, list)) and bajada:
+                        pila.append(act)
+                        pila.append(act[len(act) - 1])
+                    elif not isinstance(act[-1], (tuple, list)):
+                        bajada = False
+                    # print '------------while pila------------'
+
+            if hijo.get_children_count() > 0:
+                discipulos.extend(list(hijo.get_children()))
+            #  print '----------while disci-----------'
+        #  print 'act final:', act
+        #  print 'pila final:', pila
+        if pila:
+            arbol = pila[0]
+        else:
+            arbol = act
+
+        return arbol
+
     def listaLideres(self):
         """
         Devuelve una lista con los ids de los lideres del grupo.
