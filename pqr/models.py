@@ -3,8 +3,12 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
+# Locale Apps
+from .resources import get_festivos
+
 # Python Package
 import datetime
+import calendar
 
 
 class Caso(models.Model):
@@ -12,6 +16,20 @@ class Caso(models.Model):
     Modelo de casos para Preguntas, Quejas y Reclamos, el cual tendrá la razón de la
     aplicación
     """
+
+    DIAS_PARA_EXPIRAR = 3  # equivale a 72 horas
+
+    LUNES = 0
+    MARTES = 1
+    MIERCOLES = 2
+    JUEVES = 3
+    VIERNES = 4
+    SABADO = 5
+    DOMINGO = 6
+
+    _DIAS_SEMANA = [LUNES, MARTES, MIERCOLES, JUEVES, VIERNES]
+
+    _FINES_SEMANA = [SABADO, DOMINGO]
 
     fecha_acontecimiento = models.DateField(verbose_name=_('fecha acontecimiento'), blank=True, null=True)
     nombre = models.CharField(verbose_name=_('nombre'), max_length=255)
@@ -34,6 +52,10 @@ class Caso(models.Model):
     llave = models.SlugField(verbose_name=_('llave'))
     valido = models.BooleanField(default=False, verbose_name=_('valido'))
 
+    class Meta:
+        verbose_name = _('Caso PQR')
+        verbose_name_plural = _('Casos PQR')
+
     def __str__(self):
         return 'Caso #{}'.format(self.id)
 
@@ -47,6 +69,39 @@ class Caso(models.Model):
             return hoy > self.fecha_registro.date() + datetime.timedelta(days=3)
         # si es valido ya se acabo el tiempo de validacion
         return True
+
+    def _add_days(self, fecha_conteo):
+        """
+        Funcion que agrega dias a una fecha para saber si esta en fin de semana o en festivo
+        """
+        dia_ingreso = calendar.weekday(
+            fecha_conteo.year, fecha_conteo.month, fecha_conteo.day
+        )
+        while dia_ingreso in self.__class__._FINES_SEMANA or \
+                fecha_conteo in get_festivos(self.fecha_registro.year):  # or fecha_conteo
+            fecha_conteo += datetime.timedelta(days=1)
+
+        return fecha_conteo
+
+    def get_fecha_expiracion(self):
+        """
+        Devuelve la fecha en que se expira el caso inicialmente para pasar a presidencia
+        """
+        if not self.cerrado:
+            dia_ingreso = calendar.weekday(
+                self.fecha_registro.year, self.fecha_registro.month, self.fecha_registro.day
+            )
+            if dia_ingreso in self.__class__._FINES_SEMANA or \
+               self.fecha_registro.date() in get_festivos(self.fecha_registro.year):
+                fecha_conteo = self._add_days(self.fecha_registro)
+            else:
+                fecha_conteo = self.fecha_registro
+
+            fecha_return = fecha_conteo + datetime.timedelta(days=self.DIAS_PARA_EXPIRAR)
+
+            # if calendar.weekday(fecha_return.day, retu)
+
+        return None
 
 
 class Comentario(models.Model):
@@ -80,6 +135,10 @@ class Invitacion(models.Model):
         'organizacional.Empleado', verbose_name=_('receptor'), related_name='invitaciones_recibidas'
     )
     caso = models.ForeignKey(Caso, verbose_name=_('caso'))
+
+    class Meta:
+        verbose_name = _('Invitación')
+        verbose_name_plural = _('Invitaciones')
 
     def __str__(self):
         return 'Invitación a {0}, caso {1}'.format(self.receptor.__str__(), self.caso.id)

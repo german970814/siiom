@@ -9,7 +9,9 @@ from django.conf import settings
 
 # Locale Apps
 from .models import Caso, Invitacion
-from .forms import FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion
+from .forms import (
+    FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
+)
 from .utils import enviar_email_verificacion
 
 # Apps
@@ -65,7 +67,11 @@ def nuevo_caso(request):
                     return HttpResponse(e, content_type='text/plain')
                 pass
             # enviar_email_verificacion(request, caso)  # Comment this line when DEBUG is True
-            messages.success(request, _('Se ha enviado un correo de verificación'))
+            messages.success(
+                request,
+                _("""Su solicitud ha sido enviada satisfactoriamente,
+                     recibirá un correo de confirmación para verificar sus datos""")
+            )
             return redirect(reverse_lazy('pqr:nuevo_caso'))
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
