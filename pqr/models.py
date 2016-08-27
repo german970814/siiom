@@ -5,6 +5,7 @@ from django.utils import timezone
 
 # Locale Apps
 from .resources import get_festivos
+from .managers import CasoManager
 
 # Python Package
 import datetime
@@ -51,6 +52,9 @@ class Caso(models.Model):
     cerrado = models.BooleanField(default=False, verbose_name=_('cerrado'))
     llave = models.SlugField(verbose_name=_('llave'))
     valido = models.BooleanField(default=False, verbose_name=_('valido'))
+    fecha_ingreso_habil = models.DateField(verbose_name=_('fecha ingreso hábil'), blank=True, null=True)
+
+    objects = CasoManager()
 
     class Meta:
         verbose_name = _('Caso PQR')
@@ -77,8 +81,9 @@ class Caso(models.Model):
         dia_ingreso = calendar.weekday(
             fecha_conteo.year, fecha_conteo.month, fecha_conteo.day
         )
-        while dia_ingreso in self.__class__._FINES_SEMANA or \
-                fecha_conteo in get_festivos(self.fecha_registro.year):  # or fecha_conteo
+        while calendar.weekday(fecha_conteo.year, fecha_conteo.month, fecha_conteo.day) \
+                in self.__class__._FINES_SEMANA or \
+                fecha_conteo.date() in get_festivos(self.fecha_registro.year):  # or fecha_conteo
             fecha_conteo += datetime.timedelta(days=1)
 
         return fecha_conteo
@@ -99,7 +104,13 @@ class Caso(models.Model):
 
             fecha_return = fecha_conteo + datetime.timedelta(days=self.DIAS_PARA_EXPIRAR)
 
-            # if calendar.weekday(fecha_return.day, retu)
+            if calendar.weekday(
+               fecha_return.year, fecha_return.month, fecha_return.day
+               ) in self.__class__._FINES_SEMANA or \
+                    fecha_return in get_festivos(fecha_return.year):
+                fecha_return = self._add_days(fecha_return)
+
+            return fecha_return
 
         return None
 

@@ -20,7 +20,7 @@
             {% if casos %}
             formatters: {
                 "commands": function(column, row) {
-                    return "<button type=\"button\" title=\"{% trans "Ver/Apropiarse de el caso" %}\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "pqr:ver_bitacora_caso" 0 %}'.replace('0', " + row.id + ")\"><span class=\"zmdi zmdi-circle\"></span></button> ";
+                    return "<button type=\"button\" title=\"{% trans "Ver caso" %}\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "pqr:ver_bitacora_caso" 0 %}'.replace('0', " + row.id + ")\"><span class=\"zmdi zmdi-eye\"></span></button> ";
                 }
             }
             {% endif %}
@@ -34,8 +34,8 @@
     <div class="card">
         <div class="card-header">
             <h1 class="f-700 f-20">
-            	<legend><h3>{% trans "Listado de los Casos" %}</h3></legend>
-	        </h1>
+            	<legend><h3>{% trans "Listado de los Casos Con Límite de Tiempo Excedido" %}</h3></legend>
+	          </h1>
             {% if messages %}
                 {% for message in messages %}
                     <div class="row">

@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
 from django.conf import settings
+from django.utils import timezone
 
 # Locale Apps
 from .models import Caso, Invitacion
@@ -58,6 +59,7 @@ def nuevo_caso(request):
             try:
                 if settings.DEBUG:
                     caso.valido = True
+                    caso.fecha_ingreso_habil = caso.get_fecha_expiracion()
                     caso.save()
                 else:
                     enviar_email_verificacion(request, caso)
@@ -95,6 +97,8 @@ def validar_caso(request, llave):
 
     if not caso.valido and not caso._validacion_expirada():
         caso.valido = True
+        caso.fecha_registro = timezone.now()
+        caso.fecha_ingreso_habil = caso.get_fecha_expiracion().date()
         caso.save()
         data = {'caso': caso}
         return render(request, 'pqr/validar_caso.html', data)
@@ -108,7 +112,7 @@ def ver_casos_servicio_cliente(request):
     Vista para listar los casos que hayan sido validados por correo
     """
 
-    casos = Caso.objects.filter(valido=True).exclude(cerrado=True)
+    casos = Caso.objects.nuevos()
 
     data = {'casos': casos}
 
@@ -205,3 +209,45 @@ def ver_bitacora_caso(request, id_caso):
     data['mismo'] = mismo
 
     return render(request, 'pqr/ver_bitacora_caso.html', data)
+
+
+@waffle_switch('pqr')
+@login_required
+def ver_casos_jefe_comercial(request):
+    """
+    Vista para ver los casos que han superado el limite de 72 horas, y que deben ser revisados por un jefe
+    de departamento
+    """
+
+    try:
+        empleado = request.user.empleado
+        if not empleado.is_jefe_comercial:
+            raise Http404
+    except Empleado.DoesNotExist:
+        raise Http404
+    casos = Caso.objects.habiles()
+    data = {'casos': casos}
+
+    return render(request, 'pqr/ver_casos_jefe_comercial.html', data)
+
+
+@waffle_switch('pqr')
+@login_required
+def ver_casos_empleado(request):
+    """
+    Vista para ver los casos en los cuales un empleado es participante
+    """
+
+    try:
+        empleado = request.user.empleado
+    except Empleado.DoesNotExist:
+        raise Http404
+
+    _casos_1 = empleado.casos_cargo.filter(cerrado=False)
+    _casos_2 = empleado.casos_implicado.filter(cerrado=False)
+
+    casos = _casos_1 | _casos_2
+
+    data = {'empleado': empleado, 'casos': casos}
+
+    return render(request, 'pqr/ver_casos_empleado.html', data)

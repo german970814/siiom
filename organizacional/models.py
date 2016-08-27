@@ -66,3 +66,11 @@ class Empleado(models.Model):
         """
         from gestion_documental.models import SolicitudRegistro as Solicitud
         return self.solicitudes.filter(estado__in=[Solicitud.PENDIENTE, Solicitud.ENTREGADO_DIGITADOR])
+
+    @property
+    def is_jefe_comercial(self):
+        """
+        Retorna Verdadero si el empleado es jefe de el departamento comercial
+        """
+        #  if self.
+        pass
