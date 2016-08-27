@@ -21,6 +21,10 @@ class GrupoModelTest(TestCase):
             padre, [cabeza_red1, cabeza_red2, [hijo1_cb2, [hijo11_cb2], hijo2_cb2], cabeza_red3, [hijo1_cb3]]
         ]
 
+        self.lista_arbol_cb2 = [
+            cabeza_red2, [hijo1_cb2, [hijo11_cb2], hijo2_cb2]
+        ]
+
     def test_obtener_arbol_completo(self):
         """Lista obtenida sea igual a la lista del arbol completo."""
 
@@ -28,4 +32,8 @@ class GrupoModelTest(TestCase):
         self.assertListEqual(lista_obtenida, self.lista_arbol_completo)
 
     def test_obtener_arbol_padre_especifico(self):
-        pass
+        """Lista obtenida sea igual a la lista del arbol de un padre especifico."""
+
+        cb2 = Grupo.objects.get(id=3)
+        lista_obtenida = Grupo.obtener_arbol(cb2)
+        self.assertListEqual(lista_obtenida, self.lista_arbol_cb2)

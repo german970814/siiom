@@ -69,12 +69,15 @@ class Grupo(AL_Node):
             resultado.append(lista_hijos)
 
     @classmethod
-    def obtener_arbol(cls):
+    def obtener_arbol(cls, padre=None):
         """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos."""
 
         arbol = []
-        cls._obtener_arbol_recursivamente(Grupo.get_root_nodes()[0], arbol)
+        if padre is None:
+            padre = Grupo.get_root_nodes()[0]
+
+        cls._obtener_arbol_recursivamente(padre, arbol)
 
         return arbol
 
