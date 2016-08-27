@@ -21,6 +21,7 @@ urlpatterns = patterns(
     url(r'^reportes/', include("reportes.urls")),
     url(r'^encuentro/', include("encuentros.urls")),
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
+    url(r'^requisiciones/', include("compras.urls", namespace="compras")),
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
     url(r'^pqr/', include("pqr.urls", namespace="pqr")),
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),

@@ -27,8 +27,8 @@
     <link href="{% static 'Template/jquery/vendors/bower_components/animate.css/animate.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/material-design-iconic-font/dist/css/material-design-iconic-font.min.css' %}" rel="stylesheet">
-    <link href="{% static 'Template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css' %}" rel="stylesheet">        
-        
+    <link href="{% static 'Template/jquery/vendors/bower_components/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css' %}" rel="stylesheet">
+
     <link href="{% static 'Template/jquery/vendors/bower_components/bootstrap-select/dist/css/bootstrap-select.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/nouislider/distribute/jquery.nouislider.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
@@ -45,9 +45,9 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-      
 
-        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. --><!-- 
+
+        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. --><!--
         <style type="text/css">
             .toggle-switch .ts-label {
                 min-width: 130px;
@@ -59,7 +59,7 @@
                 display: none;
             }
         }
-        
+
         @media screen and (max-width: 991px){
             br.space-down{
                 display: none;
@@ -93,6 +93,18 @@
         .has-error.fg-float .fg-label {
             color: #f6675d;
         }
+
+        .modal-footer button.btn.btn-link.cancelar {
+            margin-top: 20%;
+        }
+
+        blockquote {
+            padding: 9 18px;
+            margin: 0 0 18px;
+            font-size: 16.25;
+            border-left: 5px solid #770f0f;
+        }
+
     </style>
     {% block css %}
     {% endblock %}
@@ -353,7 +365,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_maestro %}  
+                {% if perms.miembros.es_maestro %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-graduation-cap"></i> Academias</a>
                     <ul>
@@ -528,7 +540,7 @@
                                     </li>
                                     {% endif %}
                                 </ul>
-                            </li>                            
+                            </li>
                         {% endif %}
                     {% endswitch %}
                     {% switch "pqr" %}
@@ -544,7 +556,50 @@
                             </ul>
                         </li>
                     {% endswitch %}
-                {% endif %} 
+                    {% switch "compras" %}
+                        <li class="sub-menu">
+                            <a href=""><i class="zmdi zmdi-shopping-cart"></i>{% trans "Compras" %}</a>
+                            <ul>
+                                <li>
+                                    <a href="{% url 'compras:crear_requisicion' %}">{% trans "Nueva Requisición" %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_empleado' %}">{% trans "Mis Requisiciones" %}</a>
+                                </li>
+                                {% if request.user.empleado.jefe_departamento %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_jefe_departamento' %}">{% trans "Requisiciones de mi Departamento" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_compras %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_compras' %}">{% trans "Requiciones Totales" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_jefe_administrativo %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_jefe_administrativo' %}">{% trans "Requiciones Aprobadas por Compras" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_jefe_financiero %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_financiero' %}">{% trans "Requiciones Aprobadas por Jefe Administrativo" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_usuario_pago %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_usuario_pago' %}">{% trans "Requiciones Esperando por pago" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if perms.organizacional.es_presidente %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_presidencia' %}">{% trans "Requiciones En Presidencia" %}</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endswitch %}
+                {% endif %}
             </ul>
         </aside>
         {% endif %}
@@ -556,7 +611,7 @@
 
     <footer id="footer">
         &copy; SIIOM Hecho por "Ingeniarte Soft."
-        
+
         <!-- <ul class="f-menu">
             <li><a href="#">Home</a></li>
             <li><a href="#">Dashboard</a></li>
@@ -583,14 +638,14 @@
 
     <script src="{% static 'Template/jquery/vendors/bower_components/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-    
+
 
     <script src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.resize.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/flot.curvedlines/curvedLines.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/sparklines/jquery.sparkline.min.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/jquery.easy-pie-chart/dist/jquery.easypiechart.min.js' %}"></script>
-    
+
     <script src="{% static 'Template/jquery/vendors/bower_components/moment/min/moment.min.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.js' %}"></script>
     <script src="{% static 'Template/jquery/vendors/bower_components/simpleWeather/jquery.simpleWeather.min.js' %}"></script>
@@ -664,12 +719,12 @@
             var nType = $(this).attr('data-type');
             var nAnimIn = $(this).attr('data-animation-in');
             var nAnimOut = $(this).attr('data-animation-out');
-            
+
             notify(nFrom, nAlign, nIcons, nType, nAnimIn, nAnimOut);
         });
 
         {% if sw %}
-            
+
             $(window).resize(function(){
                     drawChart();
                 });
@@ -710,7 +765,7 @@
     {% block js %}
     {% endblock %}
 
-        
+
 </body>
 
 </html>

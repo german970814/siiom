@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'organizacional',
     'gestion_documental',
     'pqr',
+    'compras',
 )
 
 MIDDLEWARE_CLASSES = (
