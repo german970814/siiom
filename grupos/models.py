@@ -57,6 +57,12 @@ class Grupo(AL_Node):
         return cad
 
     @classmethod
+    def obtener_raiz(cls):
+        """Devuelve la raiz del arbol de los grupos."""
+
+        return cls.get_root_nodes()[0]
+
+    @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
         """Devuelve el arbol de forma recursiva."""
 
@@ -75,7 +81,7 @@ class Grupo(AL_Node):
 
         arbol = []
         if padre is None:
-            padre = Grupo.get_root_nodes()[0]
+            padre = cls.obtener_raiz()
 
         cls._obtener_arbol_recursivamente(padre, arbol)
 

@@ -25,6 +25,13 @@ class GrupoModelTest(TestCase):
             cabeza_red2, [hijo1_cb2, [hijo11_cb2], hijo2_cb2]
         ]
 
+    def test_obtener_raiz_arbol(self):
+        """Grupo obtenido sea la raiz del arbol."""
+
+        raiz = Grupo.obtener_raiz()
+        padre = Grupo.objects.get(id=1)
+        self.assertEqual(raiz, padre)
+
     def test_obtener_arbol_completo(self):
         """Lista obtenida sea igual a la lista del arbol completo."""
 
