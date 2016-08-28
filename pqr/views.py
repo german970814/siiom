@@ -13,7 +13,7 @@ from .models import Caso, Invitacion
 from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
 )
-from .utils import enviar_email_verificacion
+from .utils import enviar_email_verificacion, enviar_email_success
 
 # Apps
 from miembros.models import Miembro
@@ -40,6 +40,7 @@ def nuevo_caso(request):
                 'direccion': miembro.direccion or ''
             }
         except Miembro.DoesNotExist:
+            #  si no existe se intenta buscar un empleado
             try:
                 empleado = request.user.empleado
                 initial = {
@@ -47,6 +48,7 @@ def nuevo_caso(request):
                     'identificacion': empleado.cedula, 'email': empleado.usuario.email
                 }
             except Empleado.DoesNotExist:
+                #  si no se encuentra ninguno se envian datos vacios
                 initial = {}
     else:
         initial = {}
@@ -57,12 +59,23 @@ def nuevo_caso(request):
         if form.is_valid():
             caso = form.save()
             try:
-                if settings.DEBUG:
-                    caso.valido = True
-                    caso.fecha_ingreso_habil = caso.get_fecha_expiracion()
-                    caso.save()
+                #  se valida el caso (para validar email)
+                caso.valido = True  # CAMPO QUE SIGUE POR NUEVA FEATURE AUNQUE NO SEA IMPORTANTE
+                #  se pone una fecha de expiracion
+                if caso.fecha_registro.hour not in range(*caso.__class__.HORAS_RANGO_HABILES):
+                    with caso.fecha_registro as fecha:
+                        caso.fecha_ingreso_habil = caso._add_days(
+                            timezone.datetime(
+                                year=fecha.year, month=fecha.month,
+                                day=fecha.day  # , hour=caso.__class__.HORAS_RANGO_HABILES[0]
+                            ).date() + datetime.timedelta(days=1)
+                        )
                 else:
-                    enviar_email_verificacion(request, caso)
+                    caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
+                caso.save()
+                if not settings.DEBUG:
+                    enviar_email_success(request, caso)
+                #  enviar_email_verificacion(request, caso)  # Si se quiere verificar email
             except Exception as e:
                 if settings.DEBUG:
                     from django.http import HttpResponse
@@ -91,6 +104,7 @@ def validar_caso(request, llave):
     """
     Vista que a partir de una llave o slug valida un modelo de Caso, solo asi puede este
     ser visto por usuarios de servicio al cliente
+    ¡¡¡ VISTA SIN USO ACTUAL !!!
     """
 
     caso = get_object_or_404(Caso, llave=llave)
@@ -133,12 +147,13 @@ def ver_bitacora_caso(request, id_caso):
 
     caso = get_object_or_404(Caso, id=id_caso)
 
-    if not caso.empleado_cargo:
+    if not caso.empleado_cargo and empleado.is_servicio_cliente:
         caso.empleado_cargo = empleado
         caso.save()
-    else:
-        if not caso.integrantes.filter(id=empleado.id).exists() and caso.empleado_cargo != empleado:
-            raise Http404
+
+    if not caso.integrantes.filter(id=empleado.id).exists() \
+       and caso.empleado_cargo != empleado and not empleado.is_jefe_comercial:
+        raise Http404
 
     mismo = False
     if empleado == caso.empleado_cargo:
@@ -159,7 +174,7 @@ def ver_bitacora_caso(request, id_caso):
     data = {'caso': caso, 'empleado': empleado, 'integrantes': integrantes}
 
     if request.method == 'POST':
-        form = FormularioAgregarMensaje(data=request.POST, initial=initial)
+        form = FormularioAgregarMensaje(data=request.POST, initial=initial, caso=caso)
         if mismo:
             form_integrante = FormularioAgregarIntegrante(
                 data=request.POST, initial=initial_for_integrante, prefix='integrante'
@@ -195,7 +210,7 @@ def ver_bitacora_caso(request, id_caso):
                 # print(form.errors)
                 pass
     else:
-        form = FormularioAgregarMensaje(initial=initial)
+        form = FormularioAgregarMensaje(initial=initial, caso=caso)
         if mismo:
             form_integrante = FormularioAgregarIntegrante(initial=initial_for_integrante, prefix='integrante')
             form_eliminar_integrante = FormularioEliminarInvitacion(query=caso.integrantes.all(), prefix='eliminar')

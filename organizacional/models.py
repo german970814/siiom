@@ -123,3 +123,10 @@ class Empleado(models.Model):
         ):
             return True
         return False
+
+    @property
+    def is_servicio_cliente(self):
+        """
+        Retorna True si el empleado es de el area de servicio al cliente
+        """
+        return self.areas.filter(nombre__icontains='servicio').exists()

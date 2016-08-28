@@ -19,6 +19,15 @@ def concurrente(function):
     return decorator
 
 
+def dias_to_horas(dia):
+    """
+    Retorna la cantidad de horas de acuerdo a los dias dados
+    """
+    if isinstance(dia, int):
+        return dia * 24
+    raise TypeError("variable 'dia' must be a int instance, %(var)s instance" % {'var': type(dia)})
+
+
 def crear_llave():
     """
     Crea un Slug al azar
@@ -36,7 +45,7 @@ def enviar_email_verificacion(request, caso):
     SENDER = 'iglesia@mail.webfaction.com'
     mensaje = """
         En hora buena!!!! \n
-        Hemos recibido su petición satisfactioriamente, por favor para confirmar tu
+        Hemos recibido su petición satisfactoriamente, por favor para confirmar tu
         correo y solicitud, haz click en el siguiente enlace:\n
         http://%(domain)s%(link)s
     """
@@ -44,6 +53,28 @@ def enviar_email_verificacion(request, caso):
     send_mail(
         'Verificación de E-mail para PQR',
         mensaje % {'link': link, 'domain': request.META['HTTP_HOST']},
+        SENDER,
+        ('{}'.format(caso.email), ),
+        fail_silently=False
+    )
+
+
+@concurrente
+def enviar_email_success(request, caso):
+    """
+    Envia un email a el responsable de el caso, cuando todo este correcto
+    """
+
+    SENDER = 'iglesia@mail.webfaction.com'
+    mensaje = """
+        En hora buena!!! \n
+        Hemos recibido su petición satisfactoriamente, Recibira su respuesta dentro
+        de las siguientes %(HORAS)d horas hábiles, gracias por su atención
+    """
+
+    send_mail(
+        'Hemos Recibido su solicitud exitosamente',
+        mensaje % {'HORAS', dias_to_horas(caso.__class__.DIAS_PARA_EXPIRAR)},
         SENDER,
         ('{}'.format(caso.email), ),
         fail_silently=False

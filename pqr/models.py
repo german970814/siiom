@@ -18,8 +18,20 @@ class Caso(models.Model):
     aplicación
     """
 
-    DIAS_PARA_EXPIRAR = 3  # equivale a 72 horas
+    # Constantes
 
+    # semaforo
+    VERDE = 'green'  # range(0, 72)
+    AMARILLO = 'yellow'  # range(73, 96)
+    ROJO = 'red'  # range(97, ^)
+
+    # horas de expiracion
+    DIAS_PARA_PRESIDENCIA = 4  # equivale a 96 horas
+    DIAS_PARA_EXPIRAR = 3  # equivale a 72 horas
+    HORAS_RANGO_HABILES = (8, 18)  # Tupla de horas habiles
+    #  HORAS_RANGO_NO_HABILES = (19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6, 7)
+
+    # valores de dias de la semana
     LUNES = 0
     MARTES = 1
     MIERCOLES = 2
@@ -28,6 +40,7 @@ class Caso(models.Model):
     SABADO = 5
     DOMINGO = 6
 
+    # dias de semana y fines de semana en listas
     _DIAS_SEMANA = [LUNES, MARTES, MIERCOLES, JUEVES, VIERNES]
 
     _FINES_SEMANA = [SABADO, DOMINGO]
@@ -113,6 +126,20 @@ class Caso(models.Model):
             return fecha_return
 
         return None
+
+    def get_semaforo(self):
+        """
+        Devuelve el color de el semaforo de acuerdo a la cantidad de horas pasadas desde que se
+        hace valida la solicitud
+        """
+        hoy = timezone.now()
+
+        with self.fecha_ingreso_habil as fecha:
+            if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_PRESIDENCIA) <= hoy:
+                return self.__class__.ROJO
+            if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_EXPIRAR) <= hoy:
+                return self.__class__.AMARILLO
+        return self.__class__.VERDE
 
 
 class Comentario(models.Model):

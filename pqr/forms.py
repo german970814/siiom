@@ -54,11 +54,15 @@ class FormularioAgregarMensaje(ModelFormBase):
         fields = ('mensaje', 'empleado', 'caso', 'importante')
 
     def __init__(self, *args, **kwargs):
+        caso = kwargs.pop('caso', None)
         super(FormularioAgregarMensaje, self).__init__(*args, **kwargs)
         self.fields['empleado'].widget = forms.HiddenInput()
         self.fields['caso'].widget = forms.HiddenInput()
         self.fields['mensaje'].widget.attrs.update({'placeholder': 'Ingresa un mensaje aquí...'})
         self.fields['importante'].widget.attrs.update({'class': 'hidden'})
+
+        if hasattr(caso, 'cerrado') and caso.cerrado:
+            self.fields['mensaje'].widget.attrs.update({'readonly': 'readonly'})
 
 
 class FormularioAgregarIntegrante(ModelFormBase):
