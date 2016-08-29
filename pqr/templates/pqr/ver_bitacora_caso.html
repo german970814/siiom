@@ -213,7 +213,7 @@
                         </li>
                         <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Cerrar Caso" title="" data-original-title="Ayuda">
                             <a data-toggle="modal" id="toggleModal4" href="#modalNarrower4">
-								<i class="zmdi zmdi-pin"></i>
+								<i class="zmdi zmdi-tag-close"></i>
                             </a>
                         </li>
                     	{% endif %}
@@ -293,7 +293,7 @@
                     <form id="send_mensaje" action="" method="POST" enctype="multipart/form-data">
                     	{% csrf_token %}
 	                    {{ form.mensaje }}
-	                    <button type="submit" {% if caso.cerrado %}disabled{% endif %}><i class="zmdi zmdi-mail-send"></i></button>
+	                    <button type="submit" {% if caso.cerrado %}disabled{% endif %} data-trigger="hover" data-toggle="popover" data-placement="top" data-content="{% if caso.get_semaforo == 'green' %}{% trans "Esta solicitud tiene menos de 3 dias de ingreso" %}{% elif caso.get_semaforo == 'yellow' %}{% trans "Esta solicitud ha superado un limite de 72 Horas" %}{% else %}{% trans "Se ha superado el limite de 96 Horas" %}{% endif %}" title="" data-original-title="Ayuda"><i class="zmdi zmdi-mail-send c-{{ caso.get_semaforo }}"></i></button>
 	                    {{ form.caso }}
 	                    {{ form.empleado }}
 	                    {{ form.importante }}

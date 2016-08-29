@@ -193,7 +193,7 @@ def ver_bitacora_caso(request, id_caso):
     if empleado == caso.empleado_cargo:
         mismo = True
 
-    if caso.empleado_cargo.comentario_set.exists():
+    if caso.empleado_cargo.comentario_set.filter(caso=caso).exists():
         caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
 
     integrantes = caso.integrantes.all()
@@ -355,8 +355,34 @@ def ver_casos_presidencia(request):
 
 @waffle_switch('compras')
 @login_required
-def ver_casos_presidencia(request):
+def nuevo_caso_servicio_cliente(request):
     """
     Permite llenar un caso de PQR por medio de un formulario sin necesidad de envios de correo
     """
-    pass
+    # Se intenta obtener un miembro a partir de el request, o un empleado
+
+    if request.method == 'POST':
+        form = FormularioCaso(data=request.POST)
+
+        if form.is_valid():
+            caso = form.save()
+            #  se valida el caso (para validar email)
+            caso.valido = True  # CAMPO QUE SIGUE POR NUEVA FEATURE AUNQUE NO SEA IMPORTANTE
+            #  se pone una fecha de ingreso habil
+            caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
+            caso.save()
+            # enviar_email_verificacion(request, caso)  # Comment this line when DEBUG is True
+            messages.success(
+                request,
+                _("""Se ha regitrado el caso exitosamente""")
+            )
+            return redirect(reverse_lazy('pqr:nuevo_caso_servicio_cliente'))
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+
+    else:
+        form = FormularioCaso()
+
+    data = {'form': form}
+
+    return render(request, 'pqr/nuevo_caso.html', data)

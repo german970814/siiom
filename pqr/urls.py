@@ -4,6 +4,7 @@ from . import api
 
 urlpatterns = [
     url(r'^$', views.nuevo_caso, name="nuevo_caso"),
+    url(r'^sc/$', views.nuevo_caso_servicio_cliente, name="nuevo_caso_servicio_cliente"),
     # url(r'^festivos/$', views.definir_festivos, name="definir_festivos"),
     url(r'^validar_email/(?P<llave>.+)$', views.validar_caso, name="validar_caso"),
     url(r'^casos/$', views.ver_casos_servicio_cliente, name="ver_casos_servicio_cliente"),

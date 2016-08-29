@@ -559,6 +559,9 @@
                                 <li>
                                     <a href="{% url 'pqr:ver_casos_servicio_cliente' %}">{% trans "Ver Casos Sin Atención" %}</a>
                                 </li>
+                                <li>
+                                    <a href="{% url 'pqr:nuevo_caso_servicio_cliente' %}">{% trans "Agregar Caso de Buzón" %}</a>
+                                </li>
                                 {% endif %}
                                 {% if request.user.empleado.is_jefe_comercial %}
                                 <li>
