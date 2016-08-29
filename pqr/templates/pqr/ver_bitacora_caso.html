@@ -191,7 +191,7 @@
                     </div>
 
                     <ul class="lv-actions actions">
-                    	{% if mismo %}
+                    	{% if mismo and not caso.cerrado %}
                         <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Hacer un mensaje importante" title="" data-original-title="Ayuda">
                         	<div class="checkbox">
 		                        <label>
@@ -293,7 +293,7 @@
                     <form id="send_mensaje" action="" method="POST" enctype="multipart/form-data">
                     	{% csrf_token %}
 	                    {{ form.mensaje }}
-	                    <button type="submit"><i class="zmdi zmdi-mail-send"></i></button>
+	                    <button type="submit" {% if caso.cerrado %}disabled{% endif %}><i class="zmdi zmdi-mail-send"></i></button>
 	                    {{ form.caso }}
 	                    {{ form.empleado }}
 	                    {{ form.importante }}
@@ -314,7 +314,20 @@
 	$(window).load(function (e) {
 		window.localStorage.removeItem('__/pqr/api/empleados/__data')
 		window.localStorage.removeItem('__/pqr/api/empleados/2__data')
-	})
+	});
+	{% if caso.cerrado %}
+	$(window).load(function() {
+			// swal("Lo sentimos", "Parece que no hay estudiantes en esta sesión/módulo");
+			swal({
+					title: "Este Caso está Cerrado",
+					text: "Recuerda que ya hay una respuesta generada en este caso y no puedes hacer nada con el",
+					type: "warning",
+					confirmButtonColor: "#DD6B55",
+					confirmButtonText: "Aceptar",
+					closeOnConfirm: false
+			});
+	});
+	{% endif %}
 	jQuery(document).ready(function($) {
 		$(".scrollbarcustom").mCustomScrollbar({
 		    axis:"y",

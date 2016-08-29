@@ -1,7 +1,7 @@
 # Django Package
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
@@ -229,6 +229,8 @@ def ver_bitacora_caso(request, id_caso):
                 invitacion.receptor = receptor
                 invitacion.save()
                 caso.integrantes.add(receptor)
+                if not settings.DEBUG:
+                    enviar_email_invitacion(request, caso, empleado, invitacion.mensaje)
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
                 # print(form_integrante.errors)
@@ -278,6 +280,7 @@ def ver_bitacora_caso(request, id_caso):
         else:
             form_integrante = None
             form_eliminar_integrante = None
+            form_cerrar_caso = None
 
     data['form'] = form
     data['form_integrante'] = form_integrante
@@ -328,3 +331,32 @@ def ver_casos_empleado(request):
     data = {'empleado': empleado, 'casos': casos}
 
     return render(request, 'pqr/ver_casos_empleado.html', data)
+
+
+@waffle_switch('compras')
+@permission_required('organizacional.es_presidente')
+def ver_casos_presidencia(request):
+    """
+    Lista los casos que han superado las 96 horas de ingresado que solo puede ver presidencia
+    """
+
+    try:
+        empleado = request.user.empleado
+    except Empleado.DoesNotExist:
+        raise Http404
+
+    query = Caso.objects.habiles()
+    casos = [caso for caso in query if caso.get_semaforo() == Caso.ROJO]
+
+    data = {'casos': casos}
+
+    return render(request, 'pqr/ver_casos_presidencia.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def ver_casos_presidencia(request):
+    """
+    Permite llenar un caso de PQR por medio de un formulario sin necesidad de envios de correo
+    """
+    pass

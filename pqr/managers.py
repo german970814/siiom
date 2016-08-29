@@ -37,4 +37,5 @@ class CasoManager(models.Manager):
                 output_field=models.DateField()
             )
         ).filter(fecha_vencimiento__lt=timezone.now()).exclude(fecha_vencimiento__in=get_festivos(timezone.now().year))
-        return (self.nuevos() | annotate).distinct()
+        # return (self.nuevos() | annotate).distinct()
+        return self.filter(valido=True).exclude(cerrado=True)

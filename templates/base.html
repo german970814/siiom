@@ -550,14 +550,19 @@
                                 <li>
                                     <a href="{% url 'pqr:nuevo_caso' %}">{% trans "Hacer una Queja o Sugerencia" %}</a>
                                 </li>
+                                {% if request.user.empleado.pqr_participa %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_empleado' %}">{% trans "Ver Casos en los Que Estoy Implicado" %}</a>
+                                </li>
+                                {% endif %}
                                 {% if request.user.empleado.is_servicio_cliente %}
                                 <li>
-                                    <a href="{% url 'pqr:ver_casos_servicio_cliente' %}">{% trans "Ver casos sin atención" %}</a>
+                                    <a href="{% url 'pqr:ver_casos_servicio_cliente' %}">{% trans "Ver Casos Sin Atención" %}</a>
                                 </li>
                                 {% endif %}
                                 {% if request.user.empleado.is_jefe_comercial %}
                                 <li>
-                                    <a href="{% url 'pqr:ver_casos_jefe_comercial' %}">{% trans "Ver Todos los casos" %}</a>
+                                    <a href="{% url 'pqr:ver_casos_jefe_comercial' %}">{% trans "Ver Todos los Casos" %}</a>
                                 </li>
                                 {% endif %}
                             </ul>

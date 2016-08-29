@@ -9,6 +9,10 @@ from threading import Thread
 from functools import wraps
 
 
+# CONSTANTS
+SENDER = 'iglesia@mail.webfaction.com'
+
+
 def concurrente(function):
     @wraps(function)
     def decorator(*args, **kwargs):
@@ -37,12 +41,13 @@ def crear_llave():
 
 @concurrente
 def enviar_email_verificacion(request, caso):
+    global SENDER
     llave = crear_llave()
     caso.llave = llave
     caso.save()
 
     link = reverse_lazy('pqr:validar_caso', args=(llave, ))
-    SENDER = 'iglesia@mail.webfaction.com'
+    # SENDER = 'iglesia@mail.webfaction.com'
     mensaje = """
         En hora buena!!!! \n
         Hemos recibido su petición satisfactoriamente, por favor para confirmar tu
@@ -61,21 +66,49 @@ def enviar_email_verificacion(request, caso):
 
 @concurrente
 def enviar_email_success(request, caso):
+    global SENDER
     """
     Envia un email a el responsable de el caso, cuando todo este correcto
     """
 
-    SENDER = 'iglesia@mail.webfaction.com'
+    # SENDER = 'iglesia@mail.webfaction.com'
     mensaje = """
         En hora buena!!! \n
         Hemos recibido su petición satisfactoriamente, Recibira su respuesta dentro
-        de las siguientes %(HORAS)d horas hábiles, gracias por su atención
+        de las siguientes %(HORAS)d horas hábiles; Su número de Caso es No.%(id_caso)d, gracias por su atención
     """
 
     send_mail(
         'Hemos Recibido su solicitud exitosamente',
-        mensaje % {'HORAS', dias_to_horas(caso.__class__.DIAS_PARA_EXPIRAR)},
+        mensaje % {'HORAS': dias_to_horas(caso.__class__.DIAS_PARA_EXPIRAR), 'id_caso': caso.id},
         SENDER,
         ('{}'.format(caso.email), ),
+        fail_silently=False
+    )
+
+
+@concurrente
+def enviar_email_invitacion(request, caso, empleado, mensaje):
+    """
+    Envia un email a un invitado
+    """
+    global SENDER
+
+    msj = """
+        %(mensaje_from_form)s\n\n
+
+        Por favor dirigete a http://%(domain)s/%(link)s para colaborar
+    """
+
+    data = {
+        'mensaje_from_form': mensaje, 'domain': request.META['HTTP_HOST'],
+        'link': reverse_lazy('pqr:ver_bitacora_caso', args=(caso.id, ))
+    }
+
+    send_mail(
+        'Ha Sido invitado a Colaborar en un Caso de PQR',
+        msj % data,
+        SENDER,
+        ('{}'.format(empleado.usuario.email), ),
         fail_silently=False
     )

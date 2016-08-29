@@ -64,7 +64,7 @@ class FormularioAgregarMensaje(ModelFormBase):
         self.fields['importante'].widget.attrs.update({'class': 'hidden'})
 
         if hasattr(caso, 'cerrado') and caso.cerrado:
-            self.fields['mensaje'].widget.attrs.update({'readonly': 'readonly'})
+            self.fields['mensaje'].widget.attrs.update({'readonly': 'readonly', 'style': 'background-color: #e6e6e6;'})
 
 
 class FormularioAgregarIntegrante(ModelFormBase):

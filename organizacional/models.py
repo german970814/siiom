@@ -130,3 +130,10 @@ class Empleado(models.Model):
         Retorna True si el empleado es de el area de servicio al cliente
         """
         return self.areas.filter(nombre__icontains='servicio').exists()
+
+    @property
+    def pqr_participa(self):
+        """
+        Retorna True si tiene pqr activas, en donde participe
+        """
+        return self.casos_implicado.filter(cerrado=False).exists()
