@@ -550,9 +550,16 @@
                                 <li>
                                     <a href="{% url 'pqr:nuevo_caso' %}">{% trans "Hacer una Queja o Sugerencia" %}</a>
                                 </li>
+                                {% if request.user.empleado.is_servicio_cliente %}
                                 <li>
                                     <a href="{% url 'pqr:ver_casos_servicio_cliente' %}">{% trans "Ver casos sin atención" %}</a>
                                 </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_jefe_comercial %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_jefe_comercial' %}">{% trans "Ver Todos los casos" %}</a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                     {% endswitch %}

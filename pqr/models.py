@@ -89,42 +89,47 @@ class Caso(models.Model):
 
     def _add_days(self, fecha_conteo):
         """
-        Funcion que agrega dias a una fecha para saber si esta en fin de semana o en festivo
+        Funcion que agrega dias a una fecha hasta que esta no sea un fin de semana o festivo
         """
-        dia_ingreso = calendar.weekday(
-            fecha_conteo.year, fecha_conteo.month, fecha_conteo.day
-        )
+        # se saca el dia de la semana a partir de la fecha parametro
         while calendar.weekday(fecha_conteo.year, fecha_conteo.month, fecha_conteo.day) \
                 in self.__class__._FINES_SEMANA or \
                 fecha_conteo.date() in get_festivos(self.fecha_registro.year):  # or fecha_conteo
+            # se agrega un dia mientras se cumpla la condicion
             fecha_conteo += datetime.timedelta(days=1)
-
+        # luego la devuelve
         return fecha_conteo
 
     def get_fecha_expiracion(self):
         """
         Devuelve la fecha en que se expira el caso inicialmente para pasar a presidencia
         """
+        # la fecha de expiracion existe mientras el caso no este cerrado
         if not self.cerrado:
+            # se saca el dia de ingreso
             dia_ingreso = calendar.weekday(
                 self.fecha_registro.year, self.fecha_registro.month, self.fecha_registro.day
             )
+            # si es un fin de semana o es festivo se agregan los dias hasta que no lo sea
             if dia_ingreso in self.__class__._FINES_SEMANA or \
                self.fecha_registro.date() in get_festivos(self.fecha_registro.year):
                 fecha_conteo = self._add_days(self.fecha_registro)
             else:
                 fecha_conteo = self.fecha_registro
 
+            # le suma los dias necesarios para saber si esta expirada
             fecha_return = fecha_conteo + datetime.timedelta(days=self.DIAS_PARA_EXPIRAR)
 
+            # se vuelve a validar que no sea festivo o fin de semana
             if calendar.weekday(
                fecha_return.year, fecha_return.month, fecha_return.day
                ) in self.__class__._FINES_SEMANA or \
                     fecha_return in get_festivos(fecha_return.year):
+                # de serlo, se le vuelven a sumar los dias hasta que no sea festivo o fin de semana
                 fecha_return = self._add_days(fecha_return)
-
+            # se devuelve la fecha
             return fecha_return
-
+        # no se devuelve nada en caso de que este cerrada
         return None
 
     def get_semaforo(self):
@@ -134,11 +139,17 @@ class Caso(models.Model):
         """
         hoy = timezone.now()
 
-        with self.fecha_ingreso_habil as fecha:
-            if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_PRESIDENCIA) <= hoy:
-                return self.__class__.ROJO
-            if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_EXPIRAR) <= hoy:
-                return self.__class__.AMARILLO
+        fecha = self.fecha_ingreso_habil
+        # Devuelve Rojo si la fecha para ir a presidencia ya paso y si la fecha de expiracion paso
+        if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_PRESIDENCIA) <= hoy.date() and \
+           self._add_days(self.get_fecha_expiracion() + datetime.timedelta(days=1)).date() <= hoy.date():
+            return self.__class__.ROJO
+        # Devuelve Amarillo si la fecha en la que hace el ingreso mas los dias que debe expirar ya pasaron
+        # y si la fecha de expiracion tambien ya paso
+        if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_EXPIRAR) <= hoy.date() \
+           and self.get_fecha_expiracion().date() <= hoy.date():
+            return self.__class__.AMARILLO
+        # De lo contrario devuelve VERDE
         return self.__class__.VERDE
 
 

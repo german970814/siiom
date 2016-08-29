@@ -20,7 +20,7 @@
             {% if casos %}
             formatters: {
                 "commands": function(column, row) {
-                    return "<button type=\"button\" title=\"{% trans "Ver caso" %}\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "pqr:ver_bitacora_caso" 0 %}'.replace('0', " + row.id + ")\"><span class=\"zmdi zmdi-eye\"></span></button> ";
+                    return "<button type=\"button\" title=\"{% trans "Ver caso" %}\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='{% url "pqr:ver_bitacora_caso" 0 %}'.replace('0', " + row.id + ")\"><span class=\"zmdi zmdi-eye c-" + row.color + "\"></span></button> ";
                 }
             }
             {% endif %}
@@ -51,10 +51,11 @@
             <thead>
                 <tr>
                     <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                    <th data-visible="false" data-identifier="false" data-column-id="color"></th>
                     <th data-column-id="nombre" data-identifier="true">{% trans "Asunto" %}</th>
                     <th data-column-id="cedula" data-identifier="true">{% trans "Peticionario" %}</th>
                     <th data-column-id="area" data-identifier="true">{% trans "Fecha Petición" %}</th>
-                    <th data-column-id="correo" data-identifier="true">{% trans "Telefono Peticionario" %}</th>
+                    <th data-column-id="telefono" data-identifier="true">{% trans "Telefono Peticionario" %}</th>
                     <th data-column-id="correo" data-identifier="true">{% trans "Email Peticionario" %}</th>
                     <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                 </tr>
@@ -63,6 +64,7 @@
                 {% for caso in casos %}
                     <tr>
                         <td>{{ caso.id }}</td>
+                        <td>{{ caso.get_semaforo }}</td>
                         <td>{{ caso.asunto }}</td>
                         <td>{{ caso.nombre|upper }}</td>
                         <td>{{ caso.fecha_registro.date }}</td>
@@ -72,7 +74,8 @@
                 {% empty %}
                     <tr>
                         <td></td>
-                        <td colspan="2" class="centrarTexto">No existen casos aún.</td>
+                        <td></td>
+                        <td colspan="2" class="centrarTexto">{% trans "No existen casos aún." %}</td>
                     </tr>
                 {% endfor %}
             </tbody>

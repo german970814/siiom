@@ -1,6 +1,8 @@
 # Django Package
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from django.core.mail import send_mail
+from django.core.exceptions import ValidationError
 
 # Locale Apps
 from .models import Caso, Comentario, Invitacion
@@ -118,3 +120,46 @@ class FormularioEliminarInvitacion(FormBase):
 
         if queryset:
             self.fields['integrante'].queryset = queryset
+
+
+class FormularioCerrarCaso(FormularioAgregarMensaje):
+    """
+    Formulario con el cual se cierra un caso, y se envia un e-mail a el usuario final
+    """
+
+    def __init__(self, *args, **kwargs):
+        caso = kwargs.pop('caso', None)
+        super(FormularioCerrarCaso, self).__init__(*args, **kwargs)
+        # self.fields['importante'].widget.attrs.update({'class': 'hidden'})
+        self.fields['mensaje'].widget.attrs.update({'class': 'form-control'})
+        self.fields['importante'].initial = True
+        self.fields['caso'].initial = caso.id
+        self.fields['empleado'].initial = caso.empleado_cargo.id
+
+    def enviar_email(self):
+        if self.is_valid() and 'mensaje' in self.cleaned_data and 'caso' in self.cleaned_data:
+            mensaje = \
+                """
+                Su solicitud No.%(id_caso)d ha sido atendida y generó una respuesta \n
+                Su solicitud: \n
+                "%(descripcion)s" \n
+                Respuesta Emitida:
+                "%(respuesta)s" \n
+                Muchas Gracias por usar nuestro servicio.
+                """
+            ASUNTO = 'Respuesta a Su Inquietud'
+            SENDER = 'iglesia@mail.webfaction.com'
+            _data = {
+                'id_caso': self.cleaned_data['caso'].id,
+                'descripcion': self.cleaned_data['caso'].descripcion,
+                'respuesta': self.cleaned_data['mensaje']
+            }
+            send_mail(
+                ASUNTO,
+                mensaje % _data,
+                SENDER,
+                ('{}'.format(self.cleaned_data['caso'].email), ),
+                fail_silently=False
+            )
+        else:
+            raise ValidationError(_('mensaje or caso not in self.cleaned_data'))

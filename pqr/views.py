@@ -7,11 +7,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
 from django.conf import settings
 from django.utils import timezone
+from django.db import transaction
 
 # Locale Apps
 from .models import Caso, Invitacion
 from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
+    FormularioCerrarCaso
 )
 from .utils import enviar_email_verificacion, enviar_email_success
 
@@ -21,6 +23,10 @@ from organizacional.models import Empleado
 
 # Third's Apps
 from waffle.decorators import waffle_switch
+
+# Python Package
+import calendar
+import datetime
 
 
 @waffle_switch('pqr')
@@ -61,15 +67,34 @@ def nuevo_caso(request):
             try:
                 #  se valida el caso (para validar email)
                 caso.valido = True  # CAMPO QUE SIGUE POR NUEVA FEATURE AUNQUE NO SEA IMPORTANTE
-                #  se pone una fecha de expiracion
-                if caso.fecha_registro.hour not in range(*caso.__class__.HORAS_RANGO_HABILES):
-                    with caso.fecha_registro as fecha:
+                #  se pone una fecha de ingreso habil
+                fecha = caso.fecha_registro
+                if fecha.hour not in range(*caso.__class__.HORAS_RANGO_HABILES) or \
+                   calendar.weekday(fecha.year, fecha.month, fecha.day) in caso.__class__._FINES_SEMANA:
+                    #  si la fecha en que fue digitada la solicitud no fue en horario habil o no fue un dia habil
+                    # Se crea una variable para saber si sumar un dia o no
+                    add_day = True
+                    #  si la fecha de registro no fue en horario laboral pero fue el mismo dia
+                    #  en la mañana, no se agrega un dia de mas
+                    if fecha.hour not in range(*caso.__class__.HORAS_RANGO_HABILES) \
+                       and fecha.hour in range(0, caso.__class__.HORAS_RANGO_HABILES[0]) and \
+                       calendar.weekday(fecha.year, fecha.month, fecha.day) \
+                       not in caso.__class__._FINES_SEMANA:
+                        add_day = False
+                    if add_day:
                         caso.fecha_ingreso_habil = caso._add_days(
                             timezone.datetime(
                                 year=fecha.year, month=fecha.month,
-                                day=fecha.day  # , hour=caso.__class__.HORAS_RANGO_HABILES[0]
-                            ).date() + datetime.timedelta(days=1)
-                        )
+                                day=fecha.day, hour=caso.__class__.HORAS_RANGO_HABILES[0]
+                            ) + datetime.timedelta(days=1)
+                        ).date()
+                    else:
+                        caso.fecha_ingreso_habil = caso._add_days(
+                            timezone.datetime(
+                                year=fecha.year, month=fecha.month,
+                                day=fecha.day, hour=caso.__class__.HORAS_RANGO_HABILES[0]
+                            )
+                        ).date()
                 else:
                     caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
                 caso.save()
@@ -123,8 +148,16 @@ def validar_caso(request, llave):
 @login_required
 def ver_casos_servicio_cliente(request):
     """
-    Vista para listar los casos que hayan sido validados por correo
+    Vista para listar los casos que hayan ingresado,
+    solo pueden ver los usuarios de servicio al cliente
     """
+
+    try:
+        empleado = request.user.empleado
+        if not empleado.is_jefe_comercial or not empleado.is_servicio_cliente:
+            raise Http404
+    except Empleado.DoesNotExist:
+        raise Http404
 
     casos = Caso.objects.nuevos()
 
@@ -135,6 +168,7 @@ def ver_casos_servicio_cliente(request):
 
 @waffle_switch('pqr')
 @login_required
+@transaction.atomic
 def ver_bitacora_caso(request, id_caso):
     """
     Vista para ver la bitacora de un caso de pqr
@@ -176,6 +210,11 @@ def ver_bitacora_caso(request, id_caso):
     if request.method == 'POST':
         form = FormularioAgregarMensaje(data=request.POST, initial=initial, caso=caso)
         if mismo:
+            if not caso.cerrado:
+                form_cerrar_caso = FormularioCerrarCaso(
+                    data=request.POST, initial=initial.update({'importante': True}), caso=caso,
+                    prefix='cerrar_caso'
+                )
             form_integrante = FormularioAgregarIntegrante(
                 data=request.POST, initial=initial_for_integrante, prefix='integrante'
             )
@@ -202,6 +241,22 @@ def ver_bitacora_caso(request, id_caso):
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
                 data['click2'] = True
+        elif 'cerrar_caso' in request.POST and not caso.cerrado:
+            if form_cerrar_caso.is_valid():
+                if not settings.DEBUG:
+                    # Se envia el correo
+                    form_cerrar_caso.enviar_email()
+                mensaje = form_cerrar_caso.save(commit=False)
+                # Se guarda el ultimo mensaje
+                mensaje.importante = True
+                mensaje.save()
+                # Se cierra el caso
+                caso.cerrado = True
+                caso.save()
+                return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
+            else:
+                # print(form_cerrar_caso.errors)
+                data['click4'] = True
         else:
             if form.is_valid():
                 form.save()
@@ -214,6 +269,12 @@ def ver_bitacora_caso(request, id_caso):
         if mismo:
             form_integrante = FormularioAgregarIntegrante(initial=initial_for_integrante, prefix='integrante')
             form_eliminar_integrante = FormularioEliminarInvitacion(query=caso.integrantes.all(), prefix='eliminar')
+            if not caso.cerrado:
+                form_cerrar_caso = FormularioCerrarCaso(
+                    initial=initial.update({'importante': True}), prefix='cerrar_caso', caso=caso
+                )
+            else:
+                form_cerrar_caso = None
         else:
             form_integrante = None
             form_eliminar_integrante = None
@@ -221,6 +282,7 @@ def ver_bitacora_caso(request, id_caso):
     data['form'] = form
     data['form_integrante'] = form_integrante
     data['form_eliminar_integrante'] = form_eliminar_integrante
+    data['form_cerrar_caso'] = form_cerrar_caso
     data['mismo'] = mismo
 
     return render(request, 'pqr/ver_bitacora_caso.html', data)

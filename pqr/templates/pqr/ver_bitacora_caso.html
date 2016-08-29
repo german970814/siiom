@@ -76,6 +76,41 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalNarrower4" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">{% trans "Mensaje Para Cerrar El Caso" %}</h4>
+            </div>
+	        <form action="" method="POST" id="form_cerrar_caso" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+	            	<div class="row">
+	            		<div class="col-md-12">
+		            		<p>Generar una respuesta a este caso:</p>
+		            		<div class="input-group fg-float {{ form_cerrar_caso.mensaje.css_classes }}">
+		            		<span class="input-group-addon"><i class="zmdi zmdi-"></i></span>
+                        <div class="fg-line">
+	               					{{ form_cerrar_caso.mensaje }}
+                        </div>
+				                {% for error in form_cerrar_caso.mensaje.errors %}
+		                        <small class="help-block">{{error}}</small>
+		                    {% endfor %}
+				            </div>
+	            		</div>
+	            	</div>
+	            </div>
+	            <div class="modal-footer">
+									{{ form_cerrar_caso.caso }}
+									{{ form_cerrar_caso.empleado }}
+									{{ form_cerrar_caso.importante }}
+	                <button type="submit" name="cerrar_caso" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endif %}
 <div class="modal fade" id="modalNarrower3" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
@@ -139,7 +174,7 @@
                 {% endfor %}
             </div>
         </div>
-        
+
         <div class="ms-body">
             <div class="listview lv-message">
                 <div class="lv-header-alt clearfix">
@@ -154,7 +189,7 @@
                     <div class="lvh-label hidden-xs">
                         <span class="c-black">{% trans "Caso No." %}{{ caso.id }}</span>
                     </div>
-                    
+
                     <ul class="lv-actions actions">
                     	{% if mismo %}
                         <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Hacer un mensaje importante" title="" data-original-title="Ayuda">
@@ -176,6 +211,11 @@
 								<i class="zmdi zmdi-minus"></i>
                             </a>
                         </li>
+                        <li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Cerrar Caso" title="" data-original-title="Ayuda">
+                            <a data-toggle="modal" id="toggleModal4" href="#modalNarrower4">
+								<i class="zmdi zmdi-pin"></i>
+                            </a>
+                        </li>
                     	{% endif %}
                     	<li data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Ver datos de caso" title="" data-original-title="Ayuda">
                             <a data-toggle="modal" id="toggleModal3" href="#modalNarrower3">
@@ -186,7 +226,7 @@
                             <a href="" data-toggle="dropdown" aria-expanded="true">
                                 <i class="zmdi zmdi-sort"></i>
                             </a>
-                
+
                             <ul class="dropdown-menu dropdown-menu-right">
                                 <li>
                                     <a href="">Latest</a>
@@ -195,12 +235,12 @@
                                     <a href="">Oldest</a>
                                 </li>
                             </ul>
-                        </li>                             
+                        </li>
                         <li class="dropdown">
                             <a href="" data-toggle="dropdown" aria-expanded="true">
                                 <i class="zmdi zmdi-more-vert"></i>
                             </a>
-                
+
                             <ul class="dropdown-menu dropdown-menu-right">
                                 <li>
                                     <a href="">Refresh</a>
@@ -212,7 +252,7 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <div class="lv-body mCustomScrollbar scrollbarcustom" id="side">
                 	<div class="lv-item media ">
                         <div class="lv-avatar bgm-teal pull-left" data-trigger="hover" data-toggle="popover" data-placement="bottom right" data-content="{{ caso.nombre }}" title="" data-original-title="Nombre Solicitante">{{ caso.nombre|first }}</div>
@@ -247,7 +287,7 @@
                     {% endif %}
                     {% endfor %}
                 </div>
-                
+
                 <div class="lv-footer ms-reply">
                     <!--<textarea placeholder="What's on your mind..."></textarea>-->
                     <form id="send_mensaje" action="" method="POST" enctype="multipart/form-data">
@@ -285,6 +325,8 @@
 		$('#toggleModal').click();
 		{% elif click2 %}
 		$('#toggleModal2').click();
+		{% elif click4 %}
+		$('#toggleModal4').click();
 		{% endif %}
 
 		$('#toggleModal').click(function(event) {
