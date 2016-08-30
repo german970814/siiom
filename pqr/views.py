@@ -154,7 +154,7 @@ def ver_casos_servicio_cliente(request):
 
     try:
         empleado = request.user.empleado
-        if not empleado.is_jefe_comercial or not empleado.is_servicio_cliente:
+        if not empleado.is_servicio_cliente and not empleado.is_jefe_comercial:
             raise Http404
     except Empleado.DoesNotExist:
         raise Http404
