@@ -21,7 +21,7 @@ from .forms import (
 )
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
-from common.tests import (
+from common.groups_tests import (
     liderAdminTest, agenteAdminTest,
 )
 # Python Package

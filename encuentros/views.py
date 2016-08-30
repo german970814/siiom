@@ -14,7 +14,7 @@ from .forms import CrearEncuentroForm, NuevoEncontristaForm, EditarEncuentroForm
 from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro, solo_encuentros_miembro
 from grupos.models import Red, Grupo
 from miembros.models import Miembro, TipoMiembro
-from common.tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
+from common.groups_tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
 
 # Python
 import json

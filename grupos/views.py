@@ -17,7 +17,7 @@ from .forms import (
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR
 )
 from miembros.models import Miembro
-from common.tests import (
+from common.groups_tests import (
     liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
 )
 

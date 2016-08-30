@@ -18,7 +18,7 @@ from .forms import (
     FormularioCrearSesion, FormularioRecibirPago
 )
 from miembros.models import Miembro, CumplimientoPasos
-from common.tests import (
+from common.groups_tests import (
     maestroTest, receptorTest, adminTest, adminMaestroTest
 )
 

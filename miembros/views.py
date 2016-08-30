@@ -17,7 +17,7 @@ from grupos.models import Grupo, Red
 from grupos.forms import FormularioEditarDiscipulado
 from academia.models import Curso
 from reportes.views import listaGruposDescendientes
-from common.tests import (
+from common.groups_tests import (
     liderTest, editarMiembroTest, llamdaAgenteTest, agregarVisitanteTest,
     cumplimientoPasosTest, asignarGrupoTest, miembroTest, adminTest,
 )
