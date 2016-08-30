@@ -15,7 +15,7 @@ from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
     FormularioCerrarCaso
 )
-from .utils import enviar_email_verificacion, enviar_email_success
+from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion
 
 # Apps
 from miembros.models import Miembro
