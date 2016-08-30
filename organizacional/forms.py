@@ -45,6 +45,7 @@ class EmpleadoForm(forms.ModelForm):
     """
     error_css_class = 'has-error'
     correo = forms.EmailField(label=_('Correo Electronico'))
+    departamento = forms.ModelChoiceField(queryset=Departamento.objects.all(), label=_('Departamento'))
     contrasena = forms.CharField(
         max_length=255, widget=forms.PasswordInput(), label=_('Contraseña'), required=False
     )
@@ -57,12 +58,15 @@ class EmpleadoForm(forms.ModelForm):
     ]
     tipo_usuario = forms.ModelChoiceField(
         queryset=Group.objects.annotate(nombre=Lower('name')).exclude(nombre__in=_accept),
-        label=_('Tipo de Usuario')
+        label=_('Tipo de Usuario'), required=False
     )
 
     class Meta:
         model = Empleado
-        fields = ['areas', 'cedula', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido']
+        fields = [
+            'areas', 'cedula', 'primer_nombre', 'segundo_nombre',
+            'primer_apellido', 'segundo_apellido', 'jefe_departamento'
+        ]
 
     def __init__(self, *args, **kwargs):
         super(EmpleadoForm, self).__init__(*args, **kwargs)
@@ -76,11 +80,27 @@ class EmpleadoForm(forms.ModelForm):
         self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['tipo_usuario'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['departamento'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['areas'].required = False
+        self.fields['areas'].queryset = Area.objects.none()
+        if self.is_bound:
+            id_departamento = self.data.get('departamento', None)
+            try:
+                self.fields['areas'].queryset = Area.objects.filter(departamento_id=id_departamento)
+            except:
+                self.fields['areas'].queryset = Area.objects.none()
 
     def clean(self, *args, **kwargs):
         inher = kwargs.pop('inher', False)
         cleaned_data = super(EmpleadoForm, self).clean(*args, **kwargs)
         usuario_existente = None
+        if 'areas' in cleaned_data and 'jefe_departamento' in cleaned_data:
+            departamento = cleaned_data.get('departamento', None)
+            jefe_departamento = cleaned_data.get('jefe_departamento', False)
+            areas = cleaned_data.get('areas', [])
+            if departamento and jefe_departamento is False and not areas:
+                self.add_error('areas', _('Este campo es obligatorio'))
+
         if not inher:
             if 'correo' in cleaned_data:
                 try:

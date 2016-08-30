@@ -277,7 +277,11 @@ def get_areas_by_departamento_json(request, id_departamento):
     Retorna un JSON con las areas pertenecientes a un departamento
     """
 
-    departamento = get_object_or_404(Departamento, pk=id_departamento)
+    try:
+        departamento = Departamento.objects.get(id=id_departamento)
+    except:
+        data = []
+        return HttpResponse(json.dumps(data), content_type='application/json')
 
     data = [
         {'area': area.nombre.upper(), 'id': area.id} for area in departamento.areas.all()

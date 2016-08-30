@@ -181,7 +181,7 @@ def ver_bitacora_caso(request, id_caso):
 
     caso = get_object_or_404(Caso, id=id_caso)
 
-    if not caso.empleado_cargo and empleado.is_servicio_cliente:
+    if not caso.empleado_cargo and empleado.is_servicio_cliente and not empleado.is_jefe_comercial:
         caso.empleado_cargo = empleado
         caso.save()
 

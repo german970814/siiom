@@ -136,4 +136,4 @@ class Empleado(models.Model):
         """
         Retorna True si tiene pqr activas, en donde participe
         """
-        return self.casos_implicado.filter(cerrado=False).exists()
+        return (self.casos_implicado.filter(cerrado=False) | self.casos_cargo.filter(cerrado=False)).exists()

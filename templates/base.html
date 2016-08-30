@@ -499,31 +499,9 @@
                                         <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
                                     </li>
                                     {% endif %}
-                                    {% if perms.organizacional.buscar_registros %}
+                                    {% if request.user.empleado %}
                                     <li>
                                         <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
-                                    </li>
-                                    {% endif %}
-                                    {% if perms.organizacional.es_administrador_sgd %}
-                                    <li class="sub-menu">
-                                        <a href="#">{% trans "Administracion" %}</a>
-                                        <ul>
-                                            <li>
-                                                <a href="{% url 'organizacional:listar_departamentos' %}">{% trans "Listar Departamentos" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'organizacional:listar_areas' %}">{% trans "Listar Áreas" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'sgd:listar_palabras_claves' %}">{% trans "Listar Palabras Claves" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
-                                            </li>
-                                        </ul>
                                     </li>
                                     {% endif %}
                                     {% if perms.gestion_documental.add_registro %}
@@ -552,7 +530,7 @@
                                 </li>
                                 {% if request.user.empleado.pqr_participa %}
                                 <li>
-                                    <a href="{% url 'pqr:ver_casos_empleado' %}">{% trans "Ver Casos en los Que Estoy Implicado" %}</a>
+                                    <a href="{% url 'pqr:ver_casos_empleado' %}">{% trans "Ver Casos Donde Participo" %}</a>
                                 </li>
                                 {% endif %}
                                 {% if request.user.empleado.is_servicio_cliente %}
@@ -575,12 +553,14 @@
                         <li class="sub-menu">
                             <a href=""><i class="zmdi zmdi-shopping-cart"></i>{% trans "Compras" %}</a>
                             <ul>
+                                {% if request.user.empleado %}
                                 <li>
                                     <a href="{% url 'compras:crear_requisicion' %}">{% trans "Nueva Requisición" %}</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'compras:ver_requisiciones_empleado' %}">{% trans "Mis Requisiciones" %}</a>
                                 </li>
+                                {% endif %}
                                 {% if request.user.empleado.jefe_departamento %}
                                 <li>
                                     <a href="{% url 'compras:ver_requisiciones_jefe_departamento' %}">{% trans "Requisiciones de mi Departamento" %}</a>
@@ -613,6 +593,30 @@
                                 {% endif %}
                             </ul>
                         </li>
+                    {% endswitch %}
+                    {% switch "gestion_documental" or switch "pqr" or switch "compras" %}
+                        {% if perms.organizacional.es_administrador_sgd %}
+                            <li class="sub-menu">
+                                <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Administración Organizacional" %}</a>
+                                <ul>
+                                      <li>
+                                          <a href="{% url 'organizacional:listar_departamentos' %}">{% trans "Listar Departamentos" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'organizacional:listar_areas' %}">{% trans "Listar Áreas" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'sgd:listar_palabras_claves' %}">{% trans "Listar Palabras Claves" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
+                                      </li>
+                                </ul>
+                            </li>
+                        {% endif %}
                     {% endswitch %}
                 {% endif %}
             </ul>

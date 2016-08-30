@@ -1049,6 +1049,8 @@ def informes_totales_area_departamento(request):
     Informe para ver los totales agrupados de acuerdo a una fecha, un área o departamento
     de las requisiciones
     """
+    from django.db import models
+    from organizacional.models import Departamento
 
     data = {}
 
@@ -1058,32 +1060,30 @@ def informes_totales_area_departamento(request):
         if form.is_valid():
             fecha_inicial = form.cleaned_data['fecha_inicial']
             fecha_final = form.cleaned_data['fecha_final']
-            area = form.cleaned_data['area']
-            departamento = form.cleaned_data['departamento']
-            if form.cleaned_data['tipo'] == 1:
-                requisiciones = Requisicion.objects.filter(
-                    fecha_ingreso__range=(fecha_inicial, fecha_final),
-                    empleado__areas=area
-                )
-            else:
-                requisiciones = Requisicion.objects.filter(
-                    fecha_ingreso__range=(fecha_inicial, fecha_final),
-                    empleado__areas__departamento=departamento
-                )
-            total_requisiciones = requisiciones.count()
-            total_precio = requisiciones.aggregate(
-                total=Sum('detallerequisicion__total_aprobado')
-            )['total']
-            total_requisiciones_pagadas = requisiciones.filter(estado=Requisicion.TERMINADA).count()
-            total_pagadas = requisiciones.filter(
-                estado=Requisicion.TERMINADA
-            ).aggregate(total_pagada=Sum('detallerequisicion__total_aprobado'))['total_pagada']
-            data['total_requisiciones'] = total_requisiciones
-            data['total_precio'] = total_precio
-            data['total_pagadas'] = total_pagadas
-            data['total_requisiciones_pagadas'] = total_requisiciones_pagadas
-            data['requisiciones'] = requisiciones
-            data['asuntos'] = requisiciones.values_list('asunto', flat=True)
+
+            query = Requisicion.objects.filter(
+                estado=Requisicion.TERMINADA,
+            ).filter(
+                historial__fecha__range=(fecha_inicial, fecha_final),
+            ).distinct()  # .prefetch_related('detallerequisicion')
+            _data = []
+            for requisicion in query:
+                departamentos = [departamento.nombre for departamento in Departamento.objects.filter(id__in=requisicion.empleado.areas.values_list('departamento', flat=True)) if departamento.nombre not in departamentos]
+                for departamento in departamentos:
+                    if departamento not in [x['departamento'] for x in _data]:
+                        data = {'departamento': departamento, 'total': requisicion.get_total()}
+                        _data.append(data)
+                    else:
+                        _res = None
+                        for x in _data:
+                            if x['departamento'] == departamento:
+                                _res = _data.index(x)
+                                break
+                        if _res is not None:
+                            _data[_res]['total'] += requisicion.get_total()
+                        else:
+                            raise IndexError("Variable _res is returning None")
+            data['requisiciones'] = _data
             messages.success(request, _(''))
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el mensaje'))
