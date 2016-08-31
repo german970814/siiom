@@ -1,9 +1,9 @@
 from django.test import TestCase
-from .base import BaseTest
 from grupos.models import Grupo
+from .base import GruposBaseTest
 
 
-class GrupoModelTest(BaseTest):
+class GrupoModelTest(GruposBaseTest):
     """
     Prueba el modelo Grupo.
     """

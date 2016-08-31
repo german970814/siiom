@@ -1,8 +1,9 @@
 from django.test import TestCase
+from common.tests.factories import UsuarioFactory
 from .factories import GrupoFactory, GrupoRaizFactory, GrupoHijoFactory
 
 
-class BaseTest(TestCase):
+class GruposBaseTest(TestCase):
     """
     Clase base para las pruebas de la app grupos.
     """
@@ -26,3 +27,10 @@ class BaseTest(TestCase):
         self.lista_arbol_cb2 = [
             cabeza_red2, [hijo1_cb2, [hijo11_cb2], hijo2_cb2]
         ]
+
+        self.usuario = UsuarioFactory()
+
+    def login_usuario(self):
+        """"Permite loguear al usuario."""
+
+        self.client.login(email=self.usuario.email, password='123456')

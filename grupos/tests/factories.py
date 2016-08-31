@@ -1,6 +1,5 @@
 import factory
 import datetime
-
 from grupos import models
 from miembros.tests.factories import MiembroFactory
 
@@ -30,4 +29,4 @@ class GrupoRaizFactory(GrupoFactory):
 
 
 class GrupoHijoFactory(GrupoFactory):
-    red = factory.lazy_attribute(lambda o: o.parent.red)
+    red = factory.LazyAttribute(lambda o: o.parent.red)
