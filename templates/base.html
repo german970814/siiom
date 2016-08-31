@@ -575,6 +575,9 @@
                                 <li>
                                     <a href="{% url 'compras:ver_requisiciones_jefe_administrativo' %}">{% trans "Requiciones Aprobadas por Compras" %}</a>
                                 </li>
+                                <li>
+                                    <a href="{% url 'compras:informes_totales_area_departamento' %}">{% trans "Informe por totales" %}</a>
+                                </li>
                                 {% endif %}
                                 {% if request.user.empleado.is_jefe_financiero %}
                                 <li>

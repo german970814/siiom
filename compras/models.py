@@ -162,6 +162,7 @@ class Requisicion(models.Model):
     prioridad = models.CharField(max_length=1, verbose_name=_('prioridad'), choices=OPCIONES_PRIORIDAD)
     estado = models.CharField(max_length=2, verbose_name=_('estado'), choices=OPCIONES_ESTADO, default=PENDIENTE)
     fecha_pago = models.DateField(verbose_name=_('fecha de pago'), blank=True, null=True)
+    fecha_termina = models.DateField(verbose_name=_('fecha terminada'), blank=True, null=True)
     form_pago = models.CharField(
         max_length=1, verbose_name=_('forma de pago'), blank=True, choices=OPCIONES_FORMA_PAGO
     )

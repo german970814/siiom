@@ -7,6 +7,16 @@
     </div>
     <div class="card">
         <div class="card-header">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="row">
+                        <div class="alert {% if message.tags == "success" %}alert-success {% elif message.tags == "warning" %}alert-warning {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p>{{ message|safe }}</p>
+                        </div>
+                    </div>
+            {% endfor %}
+          {% endif %}
         </div>
         <div class="card-body card-padding">
             <form action="" method="POST" enctype="multipart/form-data">
@@ -65,15 +75,15 @@
                     <table class="table table-inner table-vmiddle">
                         <thead>
                             <tr>
-                                <th>Notificación</th>
+                                <th>Departamento</th>
                                 <th style="width: 60px">Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for requisicion in requisiciones %}
+                            {% for departamento, total in requisiciones.items %}
                             <tr>
-                                <td class="f-500 c-cyan">{{ requisicion.departamento }}</td>
-                                <td class="f-500 c-cyan">{{ requisicion.total }}</td>
+                                <td class="f-500 c-cyan">{{ departamento|upper }}</td>
+                                <td class="f-500 c-cyan">{{ total }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

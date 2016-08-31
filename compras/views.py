@@ -74,6 +74,7 @@ from django.forms import inlineformset_factory, modelformset_factory
 from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 
 # Third Apps
 from waffle.decorators import waffle_switch
@@ -1019,6 +1020,7 @@ def aprobar_requisiciones_empleado(request, id_requisicion):
                 historial = requisicion.crear_historial(estado=Historial.APROBADA, empleado=empleado)
                 historial.save()
                 requisicion.estado = Requisicion.TERMINADA
+                requisicion.fecha_termina = timezone.now().date()
                 requisicion.save()
                 messages.success(
                     request, _('Ha culminado el proceso de la requisición NO.{} exitosamente'.format(requisicion.id))
@@ -1063,28 +1065,38 @@ def informes_totales_area_departamento(request):
 
             query = Requisicion.objects.filter(
                 estado=Requisicion.TERMINADA,
-            ).filter(
-                historial__fecha__range=(fecha_inicial, fecha_final),
-            ).distinct()  # .prefetch_related('detallerequisicion')
-            _data = []
+                fecha_termina__range=(fecha_inicial, fecha_final)
+            ).select_related('empleado')  # .prefetch_related('empleado__areas__departamento')
+            _data = {}
             for requisicion in query:
-                departamentos = [departamento.nombre for departamento in Departamento.objects.filter(id__in=requisicion.empleado.areas.values_list('departamento', flat=True)) if departamento.nombre not in departamentos]
-                for departamento in departamentos:
-                    if departamento not in [x['departamento'] for x in _data]:
-                        data = {'departamento': departamento, 'total': requisicion.get_total()}
-                        _data.append(data)
-                    else:
-                        _res = None
-                        for x in _data:
-                            if x['departamento'] == departamento:
-                                _res = _data.index(x)
-                                break
-                        if _res is not None:
-                            _data[_res]['total'] += requisicion.get_total()
-                        else:
-                            raise IndexError("Variable _res is returning None")
+                if requisicion.empleado.areas.first().departamento.nombre not in _data:
+                    _data[requisicion.empleado.areas.first().departamento.nombre] = requisicion.get_total()
+                else:
+                    _data[requisicion.empleado.areas.first().departamento.nombre] += requisicion.get_total()
+
+                # departamentos = [
+                #     departamento.nombre for departamento in Departamento.objects.filter(
+                #         id__in=requisicion.empleado.areas.values_list('departamento', flat=True)
+                #     ) if departamento.nombre not in departamentos
+                # ]
+                # for departamento in departamentos:
+                #     if departamento not in [x['departamento'] for x in _data]:
+                #         data = {'departamento': departamento, 'total': requisicion.get_total()}
+                #         _data.append(data)
+                #     else:
+                #         _res = None
+                #         for x in _data:
+                #             if x['departamento'] == departamento:
+                #                 _res = _data.index(x)
+                #                 break
+                #         if _res is not None:
+                #             _data[_res]['total'] += requisicion.get_total()
+                #         else:
+                #             raise IndexError("Variable _res is returning None")
+            print(_data)
             data['requisiciones'] = _data
-            messages.success(request, _(''))
+            if len(_data) == 0:
+                messages.warning(request, _('No se han encontrado resultados para ese rango de fecha'))
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el mensaje'))
 
