@@ -152,7 +152,7 @@
     {% if grupos %}
     <div class="card">
         <div class="card-header">
-            <h1><legend><h3>Grupos Faltantes por Reporte</h3></legend></h1>
+            <h1><legend><h3>Grupos Faltantes por Reporte: {{ form.cleaned_data.grupo.red }}</h3></legend></h1>
         </div>
         
         <div class="table-responsive">
@@ -160,26 +160,26 @@
                 {% csrf_token %}
                 <table id="data-table-basic" class="table table-striped">
                     <thead>
-                        <th data-column-id="Red">Red</th>
                         <th data-column-id="Grupo">Grupo</th>
                         <th data-column-id="lideres">Líderes</th>
+                        <th data-column-id="padres">Son Discipulos de</th>
                         <th data-column-id="fecha">Fecha Reunión</th>
                         <th data-column-id="sobres">No. Sobres</th>
                     </thead>
                     <tbody>
                     {% for grupo in grupos %}
                         <tr>
-                            <td>{% if grupo.red %}{{ grupo.red|upper }}{% else %} {% endif %}</td>
-                            <td>{{ grupo.nombre|capfirst }}</td>
+                            <td>{{ grupo.nombre|upper }}</td>
                             <td>
                                 {% for lider in grupo.lideres %}
                                     {% if forloop.first %}
-                                        {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
+                                        {{ lider.nombre|upper }} {{ lider.primerApellido|upper }}
                                     {% else %}
-                                    - {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
+                                    - {{ lider.nombre|upper }} {{ lider.primerApellido|upper }}
                                     {% endif %}
                                 {% endfor %}
                             </td>
+                            <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>
                             <td>
                                 {% for fecha in grupo.fecha_reunion %}
                                     {% if forloop.first %}

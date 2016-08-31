@@ -328,7 +328,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera %}
+                {% if mi.grupoLidera or perms.miembros.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
