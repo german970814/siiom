@@ -17,7 +17,7 @@ urlpatterns = patterns(
     url(r'^salir/$', salir),
     url(r'^resultado/(grupo|miembro)/$', resultadoBusqueda),
     url(r'^miembro/', include("miembros.urls")),
-    url(r'^grupo/', include("grupos.urls")),
+    url(r'^grupo/', include("grupos.urls", namespace='grupos')),
     url(r'^reportes/', include("reportes.urls")),
     url(r'^encuentro/', include("encuentros.urls")),
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
