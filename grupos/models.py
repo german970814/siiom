@@ -89,15 +89,18 @@ class Grupo(AL_Node):
 
     # Deprecado
     @classmethod
-    def obterner_arbol_viejo(cls, raiz):
+    def obterner_arbol_viejo(cls, raiz=None):
         """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos."""
+
+        if raiz is None:
+            raiz = cls.obtener_raiz()
 
         pila = [[raiz]]
         act = None
         bajada = True
 
-        discipulos = list(raiz.get_children())
+        discipulos = list(raiz.get_children().select_related('parent'))
         while len(discipulos) > 0:
             # print 'dis:', discipulos
             hijo = discipulos.pop()
@@ -126,7 +129,7 @@ class Grupo(AL_Node):
                     # print '------------while pila------------'
 
             if hijo.get_children_count() > 0:
-                discipulos.extend(list(hijo.get_children()))
+                discipulos.extend(list(hijo.get_children().select_related('parent')))
             #  print '----------while disci-----------'
         #  print 'act final:', act
         #  print 'pila final:', pila
