@@ -67,7 +67,7 @@ class Grupo(AL_Node):
         """Devuelve el arbol de forma recursiva."""
 
         lista_hijos = []
-        for hijo in padre.get_children():
+        for hijo in padre.get_children().select_related('lider1', 'lider2'):
             cls._obtener_arbol_recursivamente(hijo, lista_hijos)
 
         resultado.append(padre)
@@ -100,7 +100,7 @@ class Grupo(AL_Node):
         act = None
         bajada = True
 
-        discipulos = list(raiz.get_children().select_related('parent'))
+        discipulos = list(raiz.get_children().select_related('parent', 'lider1', 'lider2'))
         while len(discipulos) > 0:
             # print 'dis:', discipulos
             hijo = discipulos.pop()
@@ -127,9 +127,9 @@ class Grupo(AL_Node):
                     elif not isinstance(act[-1], (tuple, list)):
                         bajada = False
                     # print '------------while pila------------'
-
-            if hijo.get_children_count() > 0:
-                discipulos.extend(list(hijo.get_children().select_related('parent')))
+            hijos = hijo.get_children().select_related('parent', 'lider1', 'lider2')
+            if len(hijos) > 0:
+                discipulos.extend(list(hijos))
             #  print '----------while disci-----------'
         #  print 'act final:', act
         #  print 'pila final:', pila
