@@ -1026,11 +1026,10 @@ def desarrolloGrupo(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        raiz = Grupo.objects.get(red=None)
+        arbol = Grupo.obterner_arbol_viejo()
     else:
         raiz = miembro.grupoLidera()
-
-    arbol = Grupo.obterner_arbol_viejo(raiz)
+        arbol = Grupo.obterner_arbol_viejo(raiz)
 
     return render_to_response('reportes/desarrollo_grupo.html', locals(), context_instance=RequestContext(request))
 
