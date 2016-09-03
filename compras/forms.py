@@ -35,7 +35,7 @@ class FormularioDetalleRequisicion(forms.ModelForm):
         fields = (
             'cantidad', 'descripcion', 'referencia',
             'marca', 'valor_aprobado', 'forma_pago'
-        )
+        )  # lista para ser modificada por objetos hijos
 
     def __init__(self, *args, **kwargs):
         super(FormularioDetalleRequisicion, self).__init__(*args, **kwargs)
@@ -184,7 +184,10 @@ class FormularioEditarValoresDetallesRequisiciones(FormularioDetalleRequisicion)
     """
 
     class Meta(FormularioDetalleRequisicion.Meta):
-        pass
+        fields = (
+            'cantidad', 'descripcion', 'referencia',
+            'marca', 'valor_aprobado', 'forma_pago', 'proveedor'
+        )
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarValoresDetallesRequisiciones, self).__init__(*args, **kwargs)
@@ -192,6 +195,7 @@ class FormularioEditarValoresDetallesRequisiciones(FormularioDetalleRequisicion)
         self.fields['descripcion'].widget.attrs.update({'readonly': 'readonly'})
         self.fields['referencia'].widget.attrs.update({'readonly': 'readonly'})
         self.fields['marca'].widget.attrs.update({'readonly': 'readonly'})
+        self.fields['proveedor'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
 
 class FormularioEditarValoresJefeAdministrativo(FormularioEditarValoresDetallesRequisiciones):
@@ -199,6 +203,9 @@ class FormularioEditarValoresJefeAdministrativo(FormularioEditarValoresDetallesR
     Formulario que usa el jefe administrativo, hereda de el de compras, la unica diferencia es que hay
     campos obligatorios
     """
+
+    class Meta(FormularioEditarValoresDetallesRequisiciones.Meta):
+        pass
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarValoresJefeAdministrativo, self).__init__(*args, **kwargs)

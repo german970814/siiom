@@ -172,9 +172,6 @@ class Requisicion(models.Model):
     presupuesto_aprobado = models.CharField(
         max_length=2, verbose_name=_('presupuesto aprobado'), blank=True, choices=OPCIONES_PRESUPUESTO
     )
-    proveedores = models.ManyToManyField(
-        Proveedor, verbose_name=_('proveedores'), related_name='requisiciones', blank=True, null=True
-    )
 
     objects = RequisicionManager()
 
@@ -408,6 +405,7 @@ class DetalleRequisicion(models.Model):
     forma_pago = models.CharField(_('forma de pago'), choices=OPCIONES_FORMA_PAGO, max_length=1, blank=True)
     requisicion = models.ForeignKey(Requisicion, verbose_name=_('requisición'))
     cumplida = models.BooleanField(verbose_name=_('cumplida'), default=False)
+    proveedor = models.ForeignKey(Proveedor, verbose_name=_('proveedor'), blank=True, null=True)
 
     class Meta:
         verbose_name = _('detalle de la requisición')
@@ -529,7 +527,7 @@ class Adjunto(models.Model):
     """Modelo que guarda los archivos adjuntos que tienen las requisiciones."""
 
     def ruta_adjuntos(self, filename):
-        match = re.compile(r'[a-zA-ZñNáÁéÉíÍóÓúÚ\s0-9_]')
+        match = re.compile(r'[a-zA-ZñÑáÁéÉíÍóÓúÚ\s0-9_]')
         data_name = filename.split('.')
         ext = data_name[len(data_name) - 1]
         del data_name[data_name.index(ext)]

@@ -27,12 +27,13 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>{% trans "Cantidad" %}</th>
+                                <th style="width: 5%">{% trans "Cantidad" %}</th>
                                 <th>{% trans "Descripción" %}</th>
                                 <th>{% trans "Referencia" %}</th>
                                 <th>{% trans "Marca" %}</th>
                                 <th>{% trans "Valor Unitario" %}</th>
                                 <th>{% trans "Forma Pago" %}</th>
+                                <th>{% trans "Proveedor" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -48,6 +49,7 @@
                                 <td class="{{ form_detalle.marca.css_classes }}">{{ form_detalle.marca }}</td>
                                 <td class="{{ form_detalle.valor_aprobado.css_classes }}">{{ form_detalle.valor_aprobado }}</td>
                                 <td class="{{ form_detalle.forma_pago.css_classes }}">{{ form_detalle.forma_pago }}</td>
+                                <td class="{{ form_detalle.proveedor.css_classes }}">{{ form_detalle.proveedor }}</td>
                                 {% if formset_detalles.can_delete %}
                                 	<td>{{ form_detalle.DELETE }}</td>
                                 {% endif %}

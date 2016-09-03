@@ -1043,7 +1043,6 @@ def aprobar_requisiciones_empleado(request, id_requisicion):
     return render(request, 'compras/aprobar_requisiciones_empleado.html', data)
 
 
-# INCOMPLETA
 @waffle_switch('compras')
 @login_required
 def informes_totales_area_departamento(request):
