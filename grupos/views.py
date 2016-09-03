@@ -1,14 +1,19 @@
 # Django Imports
 from django.contrib import messages
 from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, render
 from django.template.context import RequestContext
+from django.views.generic.base import TemplateView
+
+# Third-Party App Imports
+from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 
 # Apps Imports
+from common.decorators import permisos_requeridos
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
@@ -714,3 +719,20 @@ def editar_runion_grupo(request, pk):
         form = FormularioEditarReunionGAR(instance=reunion)
 
     return render_to_response("Grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
+
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
+def desarrollo_grupos(request):
+    """
+    Muestra el desarrollo de la red de grupos de la iglesia. Para un adminsitrador muestra toda la red, mientras que
+    para un líder muestra su red.
+    """
+
+    usuario = request.user
+    if usuario.has_perm('miembros.es_administrador'):
+        arbol = Grupo.obtener_arbol()
+    else:
+        miembro = get_object_or_404(Miembro, usuario=usuario)
+        arbol = Grupo.obtener_arbol(miembro.grupoLidera())
+
+    return render(request, 'grupos/desarrollo_grupos.html', {'arbol': arbol})

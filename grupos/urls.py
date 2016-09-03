@@ -1,4 +1,5 @@
 from django.conf.urls import include, patterns, url
+from . import views
 from .views import *
 
 urlpatterns = [
@@ -19,4 +20,6 @@ urlpatterns = [
         faltante_confirmar_ofrenda_discipulado, name="faltantes_confirmar_ofrenda_discipulado"),
     url(r'^ver_reportes/$', ver_reportes_grupo, name="reportes_grupo"),
     url(r'^editar_reporte/(?P<pk>\d+)$', editar_runion_grupo, name="editar_reporte"),
+    # ClassBaseViews
+    url(r'^desarrollo/$', views.desarrollo_grupos, name='desarrollo'),
 ]
