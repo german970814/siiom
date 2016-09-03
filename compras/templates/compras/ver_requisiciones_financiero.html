@@ -42,7 +42,7 @@
                         <tbody>
                             {% for requisicion in requisiciones %}
                                 <tr>
-                                    <td>{{ requisicion|length }}</td>
+                                    <td>{{ requisicion.get_position }}</td>
                                     <td>{{ requisicion.id }}</td>
                                     <td>{{ requisicion.asunto }}</td>
                                     <td>{{ requisicion.empleado }}</td>
@@ -88,9 +88,11 @@
                     var alternative = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='/requisiciones/pago_requisicion/" + row.id + "'\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-card\"></span></button>";
 
                     var button = "<button type=\"button\" class=\"btn btn-icon proceso command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-eye\"></span></button> ";
+                    
+                    var toprint = "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" onClick=\"window.location.href='{% url "compras:imprimir_requisicion" 0 %}'.replace('0', " + row.id + ")\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-print\"></span></button> ";
 
                     if (row.files == 4) {
-                        return button + alternative
+                        return button + alternative + toprint
                     }
                     return button
                 },

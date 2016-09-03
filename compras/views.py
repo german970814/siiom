@@ -1105,3 +1105,23 @@ def informes_totales_area_departamento(request):
     data['form'] = form
 
     return render(request, 'compras/informes_totales_area_departamento.html', data)
+
+
+@waffle_switch('compras')
+@login_required
+def imprimir_requisicion(request, id_requisicion):
+    """
+    Vista para imprimir el detalle de una requisicion
+    """
+
+    empleado = get_object_or_404(Empleado, usuario=request.user)
+    requisicion = get_object_or_404(Requisicion, id=id_requisicion)
+
+    if not empleado.is_jefe_financiero or requisicion.get_rastreo() not in [
+        Requisicion.DATA_SET['financiero'], Requisicion.DATA_SET['espera_presupuesto']
+    ]:
+        return redirect('sin_permiso')
+
+    data = {'requisicion': requisicion}
+
+    return render(request, 'compras/imprimir_requisicion.html', data)

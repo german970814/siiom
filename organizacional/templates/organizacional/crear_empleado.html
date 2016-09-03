@@ -225,7 +225,26 @@
 	                        {% endfor %}
 	                    </div>
 	                </div>
+                  <br class="space">
 	            </div>
+				<br>
+				<br class="space-down">
+				<div class="row">
+					<div class="col-md-4">
+	                  <div class="input-group fg-float {{ form.cargo.css_classes }}">
+	                      <span class="input-group-addon">
+	                          <i class="zmdi zmdi-pin-account"></i>
+	                      </span>
+	                      <div class="fg-line requerido">
+	                          <label for="{{ form.cargo.id_for_label }}" class="control-label requerido">{{ form.cargo.label }}:</label>
+	                              {{ form.cargo }}
+	                      </div>
+	                      {% for error in form.cargo.errors %}
+	                          <small class="help-block">{{error}}</small>
+	                      {% endfor %}
+	                  </div>
+	              </div>
+				</div>
                 <br>
                 <br>
                 <div class="row">

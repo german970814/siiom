@@ -53,6 +53,7 @@ class Empleado(models.Model):
     primer_apellido = models.CharField(max_length=100, verbose_name=_('primer apellido'))
     segundo_apellido = models.CharField(max_length=100, blank=True, verbose_name=_('segundo apellido'))
     jefe_departamento = models.BooleanField(verbose_name=_('jefe de departamento'), default=False)
+    cargo = models.CharField(max_length=150, verbose_name=_('cargo'))
 
     class Meta:
         verbose_name = _('empleado')

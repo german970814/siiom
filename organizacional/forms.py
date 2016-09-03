@@ -65,7 +65,7 @@ class EmpleadoForm(forms.ModelForm):
         model = Empleado
         fields = [
             'areas', 'cedula', 'primer_nombre', 'segundo_nombre',
-            'primer_apellido', 'segundo_apellido', 'jefe_departamento'
+            'primer_apellido', 'segundo_apellido', 'jefe_departamento', 'cargo'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -78,6 +78,7 @@ class EmpleadoForm(forms.ModelForm):
         self.fields['segundo_nombre'].widget.attrs.update({'class': 'form-control'})
         self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cargo'].widget.attrs.update({'class': 'form-control'})
         self.fields['tipo_usuario'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['departamento'].widget.attrs.update({'class': 'selectpicker'})

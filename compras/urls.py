@@ -91,4 +91,9 @@ urlpatterns = [
         views.informes_totales_area_departamento,
         name="informes_totales_area_departamento"
     ),
+    url(
+        r'^imprimir/(?P<id_requisicion>\d+)/$',
+        views.imprimir_requisicion,
+        name="imprimir_requisicion"
+    ),
 ]
