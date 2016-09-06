@@ -1,4 +1,3 @@
-from django.test import TestCase
 from grupos.models import Grupo
 from .base import GruposBaseTest
 

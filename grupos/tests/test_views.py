@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, Group
 from miembros.models import Miembro
 from grupos.models import Grupo
+from grupos.forms import GrupoRaizForm
 from .base import GruposBaseTest
 
 
@@ -30,7 +31,6 @@ class OrganigramaGruposViewTest(GruposBaseTest):
 
         response = self.ingresar_pagina(login=False)
         self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
-
 
     def test_usuario_logueado_no_lider_ni_admin_redireccionado_sin_permisos(self):
         """Prueba que un usuario logueado que no sea administrador ni líder sea redireccionado a página que indique que
@@ -62,10 +62,61 @@ class OrganigramaGruposViewTest(GruposBaseTest):
         self.assertTemplateUsed(response, self.TEMPLATE)
         self.assertListEqual(response.context['arbol'], self.lista_arbol_cb2)
 
-class GrupoRaizViewTest(GruposBaseTest):
+class GrupoRaizViewTest(TestCase):
     """
     Pruebas unitarias para la vista de creación/edición del grupo raiz.
     """
 
-    # URL = reverse('grupos:raiz')
-    pass
+    TEMPLATE = 'grupos/grupo_raiz.html'
+    URL = reverse('grupos:raiz')
+
+    def login_usuario(usuario):
+        """Loguea un usuario."""
+
+        self.client.login(email=usuario.email, password='123456')
+
+    def test_usuario_no_logueado_redireccionado_login(self):
+        """Prueba que un usuario no logueado sea redireccionado al login."""
+
+        response = self.client.get(self.URL)
+        self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
+
+    def test_usuario_logueado_no_admin_redireccionado_sin_permisos(self):
+        """Prueba que un usuario logueado que no sea administrador sea redireccionado a página que indique que
+        no tiene permisos."""
+
+        usuario = UsuarioFactory()
+        self.login_usuario(usuario)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_get_template(self):
+        """Prueba que un administrador pueda ver el template."""
+
+        admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.login_usuario(admin)
+        response = self.client.get(self.URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.TEMPLATE)
+
+    def test_get_no_existe_grupo_raiz_muestra_formulario_vacio(self):
+        """Prueba que se muestre el formulario vacío, cuando no existe grupo raiz."""
+
+        admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.login_usuario(admin)
+        response = self.client.get(self.URL)
+
+        self.assertIsInstance(response.context['form'], GrupoRaizForm)
+        self.assertIsNone(request.context['form'].instance.pk)
+
+    def test_get_existe_grupo_raiz_muestra_formulario_con_raiz(self):
+        """Prueba que se muestre la información del grupo raiz si este ya existe."""
+
+        raiz = GrupoRaizFactory()
+        admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.login_usuario(admin)
+        response = self.client.get(self.URL)
+
+        self.assertIsInstance(response.context['form'], GrupoRaizForm)
+        self.assertEqual(response.context['form'].instance, raiz)
