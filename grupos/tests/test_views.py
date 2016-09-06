@@ -60,3 +60,10 @@ class DesarrolloGrupoViewTest(GruposBaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.TEMPLATE)
         self.assertListEqual(response.context['arbol'], self.lista_arbol_cb2)
+
+class GrupoRaizViewTest(GruposBaseTest):
+    """
+    Pruebas unitarias para la vista de creación/edición del grupo raiz.
+    """
+
+    URL = reverse('grupos:raiz')
