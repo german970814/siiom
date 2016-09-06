@@ -6,19 +6,20 @@ from grupos.models import Grupo
 from .base import GruposBaseTest
 
 
-class DesarrolloGrupoViewTest(GruposBaseTest):
+class OrganigramaGruposViewTest(GruposBaseTest):
     """
-    Prueba la vista de desarrollo de grupos.
+    Pruebas unitarias para la vista de organigrama de la red de grupos. Si un administrador entra a la vista podra ver
+    todo el organigrama de la iglesia.
     """
 
-    TEMPLATE = 'grupos/desarrollo_grupos.html'
-    URL = reverse('grupos:desarrollo')
+    TEMPLATE = 'grupos/organigrama_grupos.html'
+    URL = reverse('grupos:organigrama')
 
     def setUp(self):
-        super(DesarrolloGrupoViewTest, self).setUp()
+        super(OrganigramaGruposViewTest, self).setUp()
 
     def ingresar_pagina(self, login=True):
-        """Ingresa a la página de desarrollo de grupos y retorna el reponse. Por defecto loguea al usuario."""
+        """Ingresa a la página del organigrama de grupos y retorna el reponse. Por defecto loguea al usuario."""
 
         if login:
             self.login_usuario()
@@ -66,4 +67,5 @@ class GrupoRaizViewTest(GruposBaseTest):
     Pruebas unitarias para la vista de creación/edición del grupo raiz.
     """
 
-    URL = reverse('grupos:raiz')
+    # URL = reverse('grupos:raiz')
+    pass

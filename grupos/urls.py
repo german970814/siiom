@@ -3,7 +3,7 @@ from . import views
 from .views import *
 
 urlpatterns = [
-    url(r'^grupo_padre/$', grupoRaiz, name="grupo_padre"),
+    url(r'^grupo_padre/$', views.grupoRaiz, name="grupo_padre"),
     url(r'^(\d+)/$', verGrupo, name="grupo"),
     url(r'^listar_redes/$', listarRedes, name="listar_redes"),
     url(r'^crear_red/$', crearRed, name="crear_red"),
@@ -20,5 +20,5 @@ urlpatterns = [
         faltante_confirmar_ofrenda_discipulado, name="faltantes_confirmar_ofrenda_discipulado"),
     url(r'^ver_reportes/$', ver_reportes_grupo, name="reportes_grupo"),
     url(r'^editar_reporte/(?P<pk>\d+)$', editar_runion_grupo, name="editar_reporte"),
-    url(r'^desarrollo/$', views.desarrollo_grupos, name='desarrollo'),
+    url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),
 ]

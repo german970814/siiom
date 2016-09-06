@@ -722,9 +722,9 @@ def editar_runion_grupo(request, pk):
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def desarrollo_grupos(request):
+def organigrama_grupos(request):
     """
-    Muestra el desarrollo de la red de grupos de la iglesia. Para un adminsitrador muestra toda la red, mientras que
+    Muestra el organigrama de la red de grupos de la iglesia. Para un adminsitrador muestra toda la red, mientras que
     para un líder muestra su red.
     """
 
@@ -735,4 +735,4 @@ def desarrollo_grupos(request):
         miembro = get_object_or_404(Miembro, usuario=usuario)
         arbol = Grupo.obtener_arbol(miembro.grupoLidera())
 
-    return render(request, 'grupos/desarrollo_grupos.html', {'arbol': arbol})
+    return render(request, 'grupos/organigrama_grupos.html', {'arbol': arbol})
