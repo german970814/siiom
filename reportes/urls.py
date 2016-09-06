@@ -13,7 +13,6 @@ urlpatterns = [
     url(r'^pasos_totales/$', PasosTotales, name="pasos_totales"),
     url(r'^pasos_rango_fechas/$', PasosRangoFecha, name="pasos_rango_fechas"),
     url(r'^estadistico_reunionesGAR/$', estadisticoReunionesGar, name="estadistico_reunionesGAR"),
-    url(r'^desarrollo_grupos/$', desarrolloGrupo, name="desarrollo_grupos"),
     url(r'^cumplimiento_llamadas_lideres/$', cumplimiento_llamadas_lideres_red, name='cumplimiento_llamadas_lideres'),
     url(r'^reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar, {}, name="reportes_reuniones_sin_enviar"),
     url(r'^estadistico_reunionesDiscipulado/$',

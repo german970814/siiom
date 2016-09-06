@@ -1020,20 +1020,6 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     return render_to_response('reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
-def desarrolloGrupo(request):
-    """Muestra un arbol de desarrollo de tu grupo."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        arbol = Grupo.obterner_arbol_viejo()
-    else:
-        raiz = miembro.grupoLidera()
-        arbol = Grupo.obterner_arbol_viejo(raiz)
-
-    return render_to_response('reportes/desarrollo_grupo.html', locals(), context_instance=RequestContext(request))
-
-
 def listaGruposDescendientes_id(miembro):
     """Devuelve una lista con todos los ids de los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
