@@ -1,7 +1,7 @@
 # Django Imports
 from django.contrib import messages
 from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -736,3 +736,13 @@ def organigrama_grupos(request):
         arbol = Grupo.obtener_arbol(miembro.grupoLidera())
 
     return render(request, 'grupos/organigrama_grupos.html', {'arbol': arbol})
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def grupo_raiz(request):
+    """
+    Permite a un administrador crear el grupo raiz de la iglesia si aún no ha sido creado. Si ya existe lo permite
+    editar.
+    """
+
+    return render(request, 'grupos/grupo_raiz.html')

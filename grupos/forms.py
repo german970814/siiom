@@ -304,3 +304,8 @@ class FormularioEditarReunionGAR(forms.ModelForm):
     class Meta:
         model = ReunionGAR
         exclude = ('grupo', 'asistentecia')
+
+class GrupoRaizForm(forms.ModelForm):
+    """Formulario parala creación o edición del grupo raiz."""
+
+    pass
