@@ -1,9 +1,11 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, Group
+from common.tests.factories import UsuarioFactory
 from miembros.models import Miembro
 from grupos.models import Grupo
 from grupos.forms import GrupoRaizForm
+from .factories import GrupoRaizFactory
 from .base import GruposBaseTest
 
 
@@ -70,7 +72,7 @@ class GrupoRaizViewTest(TestCase):
     TEMPLATE = 'grupos/grupo_raiz.html'
     URL = reverse('grupos:raiz')
 
-    def login_usuario(usuario):
+    def login_usuario(self, usuario):
         """Loguea un usuario."""
 
         self.client.login(email=usuario.email, password='123456')
