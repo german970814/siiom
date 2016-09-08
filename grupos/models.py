@@ -2,6 +2,7 @@
 from django.db import models
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
+from .managers import GrupoManager
 
 
 class Red(models.Model):
@@ -45,6 +46,9 @@ class Grupo(AL_Node):
     barrio = models.ForeignKey('miembros.Barrio')
 
     node_order_by = ['id']
+
+    # managers
+    objects = GrupoManager()
 
     def __str__(self):
         cad = self.lider1.nombre.upper() \
