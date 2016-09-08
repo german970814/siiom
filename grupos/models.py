@@ -61,12 +61,6 @@ class Grupo(AL_Node):
         return cad
 
     @classmethod
-    def obtener_raiz(cls):
-        """Devuelve la raiz del arbol de los grupos."""
-
-        return cls.get_root_nodes()[0]
-
-    @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
         """Devuelve el arbol de forma recursiva."""
 
@@ -85,9 +79,10 @@ class Grupo(AL_Node):
 
         arbol = []
         if padre is None:
-            padre = cls.obtener_raiz()
+            padre = cls.objects.raiz()
 
-        cls._obtener_arbol_recursivamente(padre, arbol)
+        if padre is not None:
+            cls._obtener_arbol_recursivamente(padre, arbol)
 
         return arbol
 
@@ -97,50 +92,52 @@ class Grupo(AL_Node):
         """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos."""
 
+        arbol = []
         if raiz is None:
-            raiz = cls.obtener_raiz()
+            raiz = cls.objects.raiz()
 
-        pila = [[raiz]]
-        act = None
-        bajada = True
+        if raiz is not None:
+            pila = [[raiz]]
+            act = None
+            bajada = True
 
-        discipulos = list(raiz.get_children().select_related('parent', 'lider1', 'lider2'))
-        while len(discipulos) > 0:
-            # print 'dis:', discipulos
-            hijo = discipulos.pop()
-            # print 'd:', d, 'hijo:', hijo
-            if hijo:
-                if act is not None:
-                    pila.append(act)
-                sw = True
-                while len(pila) > 0 and sw:
-                    act = pila.pop()
-                    # print 'pila:', pila
-                    # print 'act:', act
-                    if act[len(act) - 1] == hijo.parent:
-                        act.append([hijo])
-                        bajada = True
-                        sw = False
-                    elif act[len(act) - 2] == hijo.parent:
-                        act[len(act) - 1].append(hijo)
-                        bajada = True
-                        sw = False
-                    elif isinstance(act[-1], (tuple, list)) and bajada:
+            discipulos = list(raiz.get_children().select_related('parent', 'lider1', 'lider2'))
+            while len(discipulos) > 0:
+                # print 'dis:', discipulos
+                hijo = discipulos.pop()
+                # print 'd:', d, 'hijo:', hijo
+                if hijo:
+                    if act is not None:
                         pila.append(act)
-                        pila.append(act[len(act) - 1])
-                    elif not isinstance(act[-1], (tuple, list)):
-                        bajada = False
-                    # print '------------while pila------------'
-            hijos = hijo.get_children().select_related('parent', 'lider1', 'lider2')
-            if len(hijos) > 0:
-                discipulos.extend(list(hijos))
-            #  print '----------while disci-----------'
-        #  print 'act final:', act
-        #  print 'pila final:', pila
-        if pila:
-            arbol = pila[0]
-        else:
-            arbol = act
+                    sw = True
+                    while len(pila) > 0 and sw:
+                        act = pila.pop()
+                        # print 'pila:', pila
+                        # print 'act:', act
+                        if act[len(act) - 1] == hijo.parent:
+                            act.append([hijo])
+                            bajada = True
+                            sw = False
+                        elif act[len(act) - 2] == hijo.parent:
+                            act[len(act) - 1].append(hijo)
+                            bajada = True
+                            sw = False
+                        elif isinstance(act[-1], (tuple, list)) and bajada:
+                            pila.append(act)
+                            pila.append(act[len(act) - 1])
+                        elif not isinstance(act[-1], (tuple, list)):
+                            bajada = False
+                        # print '------------while pila------------'
+                hijos = hijo.get_children().select_related('parent', 'lider1', 'lider2')
+                if len(hijos) > 0:
+                    discipulos.extend(list(hijos))
+                #  print '----------while disci-----------'
+            #  print 'act final:', act
+            #  print 'pila final:', pila
+            if pila:
+                arbol = pila[0]
+            else:
+                arbol = act
 
         return arbol
 
