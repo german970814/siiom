@@ -110,7 +110,7 @@ class GrupoRaizViewTest(TestCase):
         response = self.client.get(self.URL)
 
         self.assertIsInstance(response.context['form'], GrupoRaizForm)
-        self.assertIsNone(request.context['form'].instance.pk)
+        self.assertIsNone(response.context['form'].instance.pk)
 
     def test_get_existe_grupo_raiz_muestra_formulario_con_raiz(self):
         """Prueba que se muestre la información del grupo raiz si este ya existe."""

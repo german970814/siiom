@@ -19,7 +19,8 @@ from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
     FormularioTransladarGrupo, FormularioCrearGrupoRaiz, FormularioCrearPredica,
-    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR
+    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
+    GrupoRaizForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -745,4 +746,7 @@ def grupo_raiz(request):
     editar.
     """
 
-    return render(request, 'grupos/grupo_raiz.html')
+    raiz = Grupo.objects.raiz()
+    form = GrupoRaizForm(instance=raiz)
+
+    return render(request, 'grupos/grupo_raiz.html', {'form': form})
