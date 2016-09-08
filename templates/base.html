@@ -546,6 +546,11 @@
                                     <a href="{% url 'pqr:ver_casos_jefe_comercial' %}">{% trans "Ver Todos los Casos" %}</a>
                                 </li>
                                 {% endif %}
+                                {% if perms.organizacional.es_presidente %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_presidencia' %}">{% trans "Ver casos en presidencia" %}</a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                     {% endswitch %}

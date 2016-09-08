@@ -186,14 +186,15 @@ def ver_bitacora_caso(request, id_caso):
         caso.save()
 
     if not caso.integrantes.filter(id=empleado.id).exists() \
-       and caso.empleado_cargo != empleado and not empleado.is_jefe_comercial:
+       and caso.empleado_cargo != empleado and not empleado.is_jefe_comercial and not \
+       empleado.usuario.has_perm('organizacional.es_presidente'):
         raise Http404
 
     mismo = False
     if empleado == caso.empleado_cargo:
         mismo = True
 
-    if caso.empleado_cargo.comentario_set.filter(caso=caso).exists():
+    if hasattr(caso.empleado_cargo, 'comentario_set') and caso.empleado_cargo.comentario_set.filter(caso=caso).exists():
         caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
 
     integrantes = caso.integrantes.all()
