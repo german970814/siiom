@@ -1,7 +1,7 @@
 import factory
 import datetime
 from grupos import models
-from miembros.tests.factories import MiembroFactory
+from miembros.tests.factories import MiembroFactory, BarrioFactory
 
 
 class RedFactory(factory.django.DjangoModelFactory):
@@ -17,11 +17,11 @@ class GrupoFactory(factory.django.DjangoModelFactory):
         model = models.Grupo
 
     fechaApertura = factory.LazyFunction(datetime.datetime.now)
-    lider1 = factory.SubFactory(MiembroFactory)
+    lider1 = factory.SubFactory(MiembroFactory, lider=True)
     red = factory.SubFactory(RedFactory)
     horaDiscipulado = factory.Faker('time')
     horaGAR = factory.Faker('time')
-    barrio_id = 1
+    barrio = factory.SubFactory(BarrioFactory)
 
 
 class GrupoRaizFactory(GrupoFactory):
