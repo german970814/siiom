@@ -14,7 +14,7 @@ class GrupoManagerTest(TestCase):
         """
 
         raiz = GrupoRaizFactory()
-        no_raiz = GrupoFactory(parent=raiz)
+        GrupoFactory(parent=raiz)
 
         raiz_obtenida = Grupo.objects.raiz()
         self.assertEqual(raiz_obtenida, raiz)

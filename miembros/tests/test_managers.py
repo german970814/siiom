@@ -1,6 +1,6 @@
 from django.test import TestCase
-from grupos.models import Grupo
 from grupos.tests.factories import GrupoFactory
+from miembros.models import Miembro
 from .factories import MiembroFactory
 
 
@@ -17,7 +17,7 @@ class MiembroManagerTest(TestCase):
         lider_sin_grupo = MiembroFactory(lider=True)
         grupo = GrupoFactory(con_lider2=True)
 
-        lideres = Grupo.objects.lideres_disponibles()
+        lideres = Miembro.objects.lideres_disponibles()
         self.assertIn(lider_sin_grupo, lideres)
         self.assertNotIn(grupo.lider1, lideres)
         self.assertNotIn(grupo.lider2, lideres)

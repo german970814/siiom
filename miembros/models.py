@@ -164,6 +164,7 @@ class Miembro(models.Model):
     )
     fechaRegistro = models.DateField(auto_now_add=True)
 
+    # managers
     objects = MiembroManager()
 
     def __str__(self):
