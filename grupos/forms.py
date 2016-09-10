@@ -320,6 +320,18 @@ class GrupoRaizForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(GrupoRaizForm, self).__init__(*args, **kwargs)
+        self.fields['lider1'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['lider2'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
+        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control time-picker'})
+        self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['estado'].widget.attrs.update({'class': 'form-control'})
+        self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+
         self.fields['lider1'].queryset = Miembro.objects.lideres_disponibles()
         self.fields['lider2'].queryset = Miembro.objects.lideres_disponibles()
 
