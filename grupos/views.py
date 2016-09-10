@@ -721,6 +721,7 @@ def editar_runion_grupo(request, pk):
 
     return render_to_response("Grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
 
+
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def organigrama_grupos(request):
@@ -737,6 +738,7 @@ def organigrama_grupos(request):
         arbol = Grupo.obtener_arbol(miembro.grupoLidera())
 
     return render(request, 'grupos/organigrama_grupos.html', {'arbol': arbol})
+
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
