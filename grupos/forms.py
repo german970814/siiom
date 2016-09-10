@@ -305,8 +305,11 @@ class FormularioEditarReunionGAR(forms.ModelForm):
         model = ReunionGAR
         exclude = ('grupo', 'asistentecia')
 
+
 class GrupoRaizForm(forms.ModelForm):
-    """Formulario parala creación o edición del grupo raiz."""
+    """
+    Formulario parala creación o edición del grupo raiz.
+    """
 
     class Meta:
         model = Grupo
@@ -314,3 +317,15 @@ class GrupoRaizForm(forms.ModelForm):
             'lider1', 'lider2', 'direccion', 'estado', 'fechaApertura', 'diaGAR',
             'horaGAR', 'diaDiscipulado', 'horaDiscipulado', 'nombre', 'barrio'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(GrupoRaizForm, self).__init__(*args, **kwargs)
+        self.fields['lider1'].queryset = Miembro.objects.lideres_disponibles()
+        self.fields['lider2'].queryset = Miembro.objects.lideres_disponibles()
+
+        if self.instance.pk:
+            lider1 = Miembro.objects.filter(id=self.instance.lider1.id)
+            self.fields['lider1'].queryset = self.fields['lider1'].queryset | lider1
+            if self.instance.lider2:
+                lider2 = Miembro.objects.filter(id=self.instance.lider2.id)
+                self.fields['lider2'].queryset = self.fields['lider2'].queryset | lider2

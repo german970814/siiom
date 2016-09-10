@@ -19,7 +19,7 @@ class MiembroManager(models.Manager):
 
         from grupos.models import Grupo
 
-        grupos = Grupo.objects.all()
+        grupos = Grupo.objects.select_related('lider1', 'lider2').all()
         lideres_grupos = []
         for grupo in grupos:
             lideres_grupos.extend(grupo.listaLideres())
