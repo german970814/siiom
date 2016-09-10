@@ -308,4 +308,9 @@ class FormularioEditarReunionGAR(forms.ModelForm):
 class GrupoRaizForm(forms.ModelForm):
     """Formulario parala creación o edición del grupo raiz."""
 
-    pass
+    class Meta:
+        model = Grupo
+        fields = [
+            'lider1', 'lider2', 'direccion', 'estado', 'fechaApertura', 'diaGAR',
+            'horaGAR', 'diaDiscipulado', 'horaDiscipulado', 'nombre', 'barrio'
+        ]

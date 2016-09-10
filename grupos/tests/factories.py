@@ -23,9 +23,15 @@ class GrupoFactory(factory.django.DjangoModelFactory):
     horaGAR = factory.Faker('time')
     barrio = factory.SubFactory(BarrioFactory)
 
+    class Params:
+        con_lider2 = factory.Trait(
+            lider2=factory.SubFactory(MiembroFactory, lider=True)
+        )
+
 
 class GrupoRaizFactory(GrupoFactory):
     red = None
+    parent = None
 
 
 class GrupoHijoFactory(GrupoFactory):
