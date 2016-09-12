@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required, per
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404, render
+from django.shortcuts import render_to_response, get_object_or_404, render, redirect
 from django.template.context import RequestContext
 from django.views.generic.base import TemplateView
 
@@ -749,6 +749,13 @@ def grupo_raiz(request):
     """
 
     raiz = Grupo.objects.raiz()
-    form = GrupoRaizForm(instance=raiz)
+    if request.method == 'POST':
+        form = GrupoRaizForm(instance=raiz, data=request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('grupos:raiz')
+    else:
+        form = GrupoRaizForm(instance=raiz)
 
     return render(request, 'grupos/grupo_raiz.html', {'form': form})

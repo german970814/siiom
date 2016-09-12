@@ -337,7 +337,7 @@ class GrupoRaizForm(forms.ModelForm):
 
         if self.instance.pk:
             lider1 = Miembro.objects.filter(id=self.instance.lider1.id)
-            self.fields['lider1'].queryset = self.fields['lider1'].queryset | lider1
+            self.fields['lider1'].queryset = (self.fields['lider1'].queryset | lider1).distinct()
             if self.instance.lider2:
                 lider2 = Miembro.objects.filter(id=self.instance.lider2.id)
-                self.fields['lider2'].queryset = self.fields['lider2'].queryset | lider2
+                self.fields['lider2'].queryset = (self.fields['lider2'].queryset | lider2).distinct()
