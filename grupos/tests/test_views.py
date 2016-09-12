@@ -72,20 +72,29 @@ class GrupoRaizViewTest(TestCase):
     TEMPLATE = 'grupos/grupo_raiz.html'
     URL = reverse('grupos:raiz')
 
+    def setUp(self):
+        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+
     def login_usuario(self, usuario):
-        """Loguea un usuario."""
+        """
+        Loguea un usuario.
+        """
 
         self.client.login(email=usuario.email, password='123456')
 
     def test_usuario_no_logueado_redireccionado_login(self):
-        """Prueba que un usuario no logueado sea redireccionado al login."""
+        """
+        Prueba que un usuario no logueado sea redireccionado al login.
+        """
 
         response = self.client.get(self.URL)
         self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
 
     def test_usuario_logueado_no_admin_redireccionado_sin_permisos(self):
-        """Prueba que un usuario logueado que no sea administrador sea redireccionado a página que indique que
-        no tiene permisos."""
+        """
+        Prueba que un usuario logueado que no sea administrador sea redireccionado a página que indique que
+        no tiene permisos.
+        """
 
         usuario = UsuarioFactory()
         self.login_usuario(usuario)
@@ -93,31 +102,34 @@ class GrupoRaizViewTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_admin_get_template(self):
-        """Prueba que un administrador pueda ver el template."""
+        """
+        Prueba que un administrador pueda ver el template.
+        """
 
-        admin = UsuarioFactory(user_permissions=('es_administrador',))
-        self.login_usuario(admin)
+        self.login_usuario(self.admin)
         response = self.client.get(self.URL)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.TEMPLATE)
 
     def test_get_no_existe_grupo_raiz_muestra_formulario_vacio(self):
-        """Prueba que se muestre el formulario vacío, cuando no existe grupo raiz."""
+        """
+        Prueba que se muestre el formulario vacío, cuando no existe grupo raiz.
+        """
 
-        admin = UsuarioFactory(user_permissions=('es_administrador',))
-        self.login_usuario(admin)
+        self.login_usuario(self.admin)
         response = self.client.get(self.URL)
 
         self.assertIsInstance(response.context['form'], GrupoRaizForm)
         self.assertIsNone(response.context['form'].instance.pk)
 
     def test_get_existe_grupo_raiz_muestra_formulario_con_raiz(self):
-        """Prueba que se muestre la información del grupo raiz si este ya existe."""
+        """
+        Prueba que se muestre la información del grupo raiz si este ya existe.
+        """
 
         raiz = GrupoRaizFactory()
-        admin = UsuarioFactory(user_permissions=('es_administrador',))
-        self.login_usuario(admin)
+        self.login_usuario(self.admin)
         response = self.client.get(self.URL)
 
         self.assertIsInstance(response.context['form'], GrupoRaizForm)
