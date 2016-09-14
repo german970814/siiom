@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load staticfiles i18n %}
+{% load reportes_filters %}
+
 {% block js %}
 <script type="text/javascript"  src="{% static 'Scripts/jstree1.0/jquery.jstree.js' %}"></script>
 <script type="text/javascript">
@@ -9,8 +11,6 @@
 </script>
 {% endblock %}
 
-{% load reportes_filters %}
-
 {% block contenido %}
 
 <div class="container">
@@ -18,7 +18,7 @@
         <div class="card-header">
             {{a}}
             <h1 class="f-700">
-                <legend><h3>Organigrama de mi Red</h3></legend>
+                <legend><h3>{% trans 'Organigrama de mi Red' %}</h3></legend>
             </h1>
         </div>
         <div class="card-body card-padding">
