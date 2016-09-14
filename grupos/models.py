@@ -51,14 +51,11 @@ class Grupo(AL_Node):
     objects = GrupoManager()
 
     def __str__(self):
-        cad = self.lider1.nombre.upper() \
-            + " " + self.lider1.primerApellido.upper() + "(" + self.lider1.cedula + ")"
+        lideres = ["{0} {1}({2})".format(
+            lider.nombre.upper(), lider.primerApellido.upper(), lider.cedula
+        ) for lider in self.lideres.all()]
 
-        if self.lider2:
-            cad = cad + " - " + self.lider2.nombre.upper() + \
-                " " + self.lider2.primerApellido.upper() + "(" + self.lider2.cedula + ")"
-
-        return cad
+        return " - ".join(lideres)
 
     @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
