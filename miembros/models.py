@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from django.utils.translation import ugettext_lazy as _
 from .managers import MiembroManager
 
 
@@ -56,6 +57,9 @@ class Escalafon(models.Model):
 
 
 class Miembro(models.Model):
+    """
+    Modelo para guardar los miembros de una iglesia.
+    """
 
     def ruta_imagen(self, filename):
         ruta = 'media/profile_pictures/user_%s/%s' % (self.id, filename)
@@ -112,6 +116,10 @@ class Miembro(models.Model):
     pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', blank=True)
     escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon')
     grupo = models.ForeignKey('grupos.Grupo', null=True, blank=True)  # grupo al que pertenece
+    grupo_lidera = models.ForeignKey(
+        'grupos.Grupo', verbose_name=_('grupo que lidera'),
+        related_name='lideres', null=True, blank=True
+    )
     #  info GAR
     asignadoGAR = models.BooleanField(default=False, verbose_name="asignado a GAR")
     asisteGAR = models.BooleanField(default=False, verbose_name="asiste a GAR")
