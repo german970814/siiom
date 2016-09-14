@@ -62,7 +62,7 @@ class Grupo(AL_Node):
         """Devuelve el arbol de forma recursiva."""
 
         lista_hijos = []
-        for hijo in padre.get_children().select_related('lider1', 'lider2'):
+        for hijo in padre.get_children().prefetch_related('lideres'):
             cls._obtener_arbol_recursivamente(hijo, lista_hijos)
 
         resultado.append(padre)
@@ -85,7 +85,7 @@ class Grupo(AL_Node):
 
     # Deprecado
     @classmethod
-    def obterner_arbol_viejo(cls, raiz=None):
+    def obtener_arbol_viejo(cls, raiz=None):
         """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos."""
 
@@ -98,7 +98,7 @@ class Grupo(AL_Node):
             act = None
             bajada = True
 
-            discipulos = list(raiz.get_children().select_related('parent', 'lider1', 'lider2'))
+            discipulos = list(raiz.get_children().select_related('parent').prefetch_related('lideres'))
             while len(discipulos) > 0:
                 # print 'dis:', discipulos
                 hijo = discipulos.pop()
@@ -125,7 +125,7 @@ class Grupo(AL_Node):
                         elif not isinstance(act[-1], (tuple, list)):
                             bajada = False
                         # print '------------while pila------------'
-                hijos = hijo.get_children().select_related('parent', 'lider1', 'lider2')
+                hijos = hijo.get_children().select_related('parent').prefetch_related('lideres')
                 if len(hijos) > 0:
                     discipulos.extend(list(hijos))
                 #  print '----------while disci-----------'
