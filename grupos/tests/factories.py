@@ -16,12 +16,13 @@ class GrupoFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Grupo
 
-    fechaApertura = factory.LazyFunction(datetime.datetime.now)
-    lider1 = factory.SubFactory(MiembroFactory, lider=True)
+    horaGAR = factory.Faker('time')
     red = factory.SubFactory(RedFactory)
     horaDiscipulado = factory.Faker('time')
-    horaGAR = factory.Faker('time')
     barrio = factory.SubFactory(BarrioFactory)
+    lider1 = factory.SubFactory(MiembroFactory, lider=True)
+    fechaApertura = factory.LazyFunction(datetime.datetime.now)
+    lider = factory.RelatedFactory('miembros.tests.factories.MiembroFactory', 'grupo_lidera', lider=True)
 
     class Params:
         con_lider2 = factory.Trait(
