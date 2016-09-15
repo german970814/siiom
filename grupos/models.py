@@ -59,7 +59,9 @@ class Grupo(AL_Node):
 
     @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
-        """Devuelve el arbol de forma recursiva."""
+        """
+        Devuelve el arbol de forma recursiva.
+        """
 
         lista_hijos = []
         for hijo in padre.get_children().prefetch_related('lideres'):
@@ -71,8 +73,10 @@ class Grupo(AL_Node):
 
     @classmethod
     def obtener_arbol(cls, padre=None):
-        """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
-        grupos."""
+        """
+        Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
+        grupos.
+        """
 
         arbol = []
         if padre is None:
@@ -86,8 +90,10 @@ class Grupo(AL_Node):
     # Deprecado
     @classmethod
     def obtener_arbol_viejo(cls, raiz=None):
-        """Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
-        grupos."""
+        """
+        Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
+        grupos.
+        """
 
         arbol = []
         if raiz is None:
