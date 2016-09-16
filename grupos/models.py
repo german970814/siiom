@@ -144,6 +144,20 @@ class Grupo(AL_Node):
 
         return arbol
 
+    def transladar(self, nuevo_padre):
+        """
+        Translada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
+        actual, se les modifica el grupo al que pertenecen, al nuevo grupo padre.
+        """
+
+        if nuevo_padre != self.parent:
+            self.move(nuevo_padre, pos='sorted-child')
+            self.lideres.all().update(grupo=nuevo_padre)
+
+            if nuevo_padre.red != self.red:
+                grupos = [grupo.id for grupo in self.get_tree(self)]
+                Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
+
     def listaLideres(self):
         """
         Devuelve una lista con los ids de los lideres del grupo.

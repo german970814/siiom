@@ -67,5 +67,6 @@ class GrupoModelTest(GruposBaseTest):
         red_actual = grupo.red
 
         grupo.transladar(nuevo_padre)
+        grupo.refresh_from_db()
         self.assertEqual(grupo.red, nuevo_padre.red)
         self.assertTrue(all(descendiente.red == nuevo_padre.red for descendiente in grupo.get_descendants()))
