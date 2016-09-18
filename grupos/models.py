@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.db import models
+from django.db import models, transaction
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
 from .managers import GrupoManager
@@ -150,13 +150,14 @@ class Grupo(AL_Node):
         actual, se les modifica el grupo al que pertenecen, al nuevo grupo padre.
         """
 
-        if nuevo_padre != self.parent:
-            self.move(nuevo_padre, pos='sorted-child')
-            self.lideres.all().update(grupo=nuevo_padre)
+        with transaction.atomic():
+            if nuevo_padre != self.parent:
+                self.move(nuevo_padre, pos='sorted-child')
+                self.lideres.all().update(grupo=nuevo_padre)
 
-            if nuevo_padre.red != self.red:
-                grupos = [grupo.id for grupo in self.get_tree(self)]
-                Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
+                if nuevo_padre.red != self.red:
+                    grupos = [grupo.id for grupo in self.get_tree(self)]
+                    Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
     def listaLideres(self):
         """
