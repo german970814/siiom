@@ -5,7 +5,7 @@ from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from miembros.models import Miembro
 from grupos.models import Grupo
-from grupos.forms import GrupoRaizForm
+from grupos.forms import GrupoRaizForm, TransladarGrupoForm
 from .factories import GrupoRaizFactory
 from .base import GruposBaseTest
 
@@ -172,3 +172,86 @@ class GrupoRaizViewTest(TestCase):
         response = self.client.post(self.URL, self.datos_formulario())
 
         self.assertRedirects(response, self.URL)
+
+
+class TransladarGrupoViewTest(GruposBaseTest):
+    """
+    Pruebas unitarias para la vista de transladar un grupo a un nuevo padre.
+    """
+
+    TEMPLATE = 'grupos/transladar.html'
+    URL = reverse('grupos:transladar', args=(5,))
+
+    def setUp(self):
+        super(TransladarGrupoViewTest, self).setUp()
+        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+
+    def login_usuario(self, usuario):
+        """
+        Loguea un usuario.
+        """
+
+        self.client.login(email=usuario.email, password='123456')
+
+    def test_usuario_no_logueado_redireccionado_login(self):
+        """
+        Prueba que un usuario no logueado sea redireccionado a login.
+        """
+
+        response = self.client.get(self.URL)
+        self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
+
+    def test_usuario_logueado_no_admin_redireccionado_sin_permisos(self):
+        """
+        Prueba que un usuario logueado que no sea administrador sea redireccionado a página que indique que
+        no tiene permisos.
+        """
+
+        usuario = UsuarioFactory()
+        self.login_usuario(usuario)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_grupo_no_existe_url_devuelve_404(self):
+        """
+        Prueba que cuando se envia el id de un grupo que no existe en la URL, la vista devuelve un 404.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.get(reverse('grupos:transladar', args=(100,)))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_admin_get_template(self):
+        """
+        Prueba que un administrador pueda ver el template.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.get(self.URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, self.TEMPLATE)
+        self.assertIsInstance(response.context['form'], TransladarGrupoForm)
+
+    def test_post_formulario_valido_translada_grupo(self):
+        """
+        Prueba que si el formulario es valido translada el  grupo y redirecciona.
+        """
+
+        nuevo = Grupo.objects.get(id=8)
+        grupo = Grupo.objects.get(id=5)
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, {'nuevo': '8'})
+
+        self.assertRedirects(response, self.URL)
+        self.assertEqual(grupo.get_parent(), nuevo)
+
+    def test_post_formulario_no_valido_muestra_errores(self):
+        """
+        Prueba que si el formulario no es valido se muestren los errores.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, {})
+        self.assertFormError(response, 'form', 'nuevo', 'Este campo es obligatorio')
