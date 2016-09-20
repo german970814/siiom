@@ -932,7 +932,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.all()
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
     ofrenda = False
@@ -1005,7 +1005,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                 values.append(l)
                 # n.append(l)
 
-                print('------------ ' + str(values))
+                # print('------------ ' + str(values))
                 if 'reportePDF' in request.POST:
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
