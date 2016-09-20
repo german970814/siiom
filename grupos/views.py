@@ -384,7 +384,7 @@ def listaGruposDescendientes(grupo):
 
     # grupo = miembro.grupoLidera()
     miembro = grupo.lider1
-    listaG = []
+    listaG = [grupo]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
