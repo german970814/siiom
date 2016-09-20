@@ -378,6 +378,29 @@ def eliminar(request, modelo, lista):
     return ok
 
 
+def listaGruposDescendientes(grupo):
+    """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
+        usada en un choice field."""
+
+    # grupo = miembro.grupoLidera()
+    miembro = grupo.lider1
+    listaG = []
+    discipulos = list(miembro.discipulos())
+    while len(discipulos) > 0:
+        d = discipulos.pop(0)
+        g = d.grupoLidera()
+        if g:
+            if g not in listaG:
+                listaG.append(g)
+            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
+                if l in discipulos:
+                    discipulos.remove(l)
+        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
+            discipulos.extend(list(d.discipulos()))
+    return listaG
+
+
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def gruposDeRed(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
@@ -398,6 +421,8 @@ def gruposDeRed(request, id):
                 return HttpResponseRedirect('')
 
     grupos = list(Grupo.objects.filter(red=red))
+    for grupo in grupos:
+        grupo.numero_descendientes = len(listaGruposDescendientes(grupo))
 
     return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
 
