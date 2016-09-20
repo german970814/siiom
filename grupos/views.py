@@ -327,15 +327,12 @@ def crearPredica(request):
     miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
     if request.method == "POST":
-        form = FormularioCrearPredica(data=request.POST)
+        form = FormularioCrearPredica(data=request.POST, miembro=miembro)
         if form.is_valid():
-            nuevaPredica = Predica.objects.create(miembro=miembro, nombre='')
-            nuevaPredica.save()
-            form = FormularioCrearPredica(data=request.POST, instance=nuevaPredica)
-            nuevaPredica = form.save()
+            form.save()
             ok = True
     else:
-        form = FormularioCrearPredica()
+        form = FormularioCrearPredica(miembro=miembro)
     return render_to_response('Grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
 
 
@@ -343,19 +340,20 @@ def crearPredica(request):
 def editarPredica(request, pk):
     accion = 'Editar'
 
+    miembro = Miembro.objects.get(usuario=request.user)
+
     try:
         predica = Predica.objects.get(pk=pk)
     except Predica.DoesNotExist:
         raise Http404
 
     if request.method == 'POST':
-        form = FormularioCrearPredica(request.POST or None, instance=predica)
-
+        form = FormularioCrearPredica(data=request.POST, instance=predica, miembro=miembro)
         if form.is_valid():
             ok = True
             form.save()
     else:
-        form = FormularioCrearPredica(instance=predica)
+        form = FormularioCrearPredica(instance=predica, miembro=miembro)
         return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 
     return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
