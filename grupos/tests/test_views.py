@@ -212,7 +212,7 @@ class TransladarGrupoViewTest(GruposBaseTest):
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 403)
 
-    def test_get_grupo_no_existe_url_devuelve_404(self):
+    def test_get_grupo_no_existe_devuelve_404(self):
         """
         Prueba que cuando se envia el id de un grupo que no existe en la URL, la vista devuelve un 404.
         """
