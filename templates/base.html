@@ -303,9 +303,11 @@
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
+                        {% if mi.grupoLidera.estado == 'A' %}
                         <li>
                             <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
+                        {% endif %}
                         <li>
                             <a href="/miembro/editar_grupo/">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>

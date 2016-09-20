@@ -121,7 +121,7 @@ def reunionDiscipuladoReportada(predica, grupo):
 def reportarReunionGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
-    if grupo:
+    if grupo and grupo.estado == 'A':
         discipulos = miembro.discipulos()
         miembrosGrupo = grupo.miembrosGrupo()
         asistentesId = request.POST.getlist('seleccionados')

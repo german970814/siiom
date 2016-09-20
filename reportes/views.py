@@ -566,7 +566,7 @@ def estadisticoReunionesGar(request):
 
             return HttpResponse(json.dumps(descendientes), content_type="application/json")
         else:
-            form = FormularioRangoFechas(request.POST or None)
+            form = FormularioRangoFechas(data=request.POST)
             if form.is_valid():
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
@@ -598,7 +598,6 @@ def estadisticoReunionesGar(request):
                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
                     while sw_while:
                         sig = fechai + datetime.timedelta(days=6)
-
                         numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
                                                            grupo__in=grupos).aggregate(Sum('numeroLideresAsistentes'),
                                                                                        Sum('numeroVisitas'),
