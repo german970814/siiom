@@ -18,7 +18,8 @@ from .forms import (
 )
 from miembros.models import Miembro
 from common.tests import (
-    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
+    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest,
+    admin_or_director_red
 )
 
 # Python Packages
@@ -146,7 +147,7 @@ def reportarReunionGrupo(request):
     return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
 def reportarReunionGrupoAdmin(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == 'POST':
