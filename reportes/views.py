@@ -1006,9 +1006,14 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                 # n.append(l)
 
                 # print('------------ ' + str(values))
-                if 'reportePDF' in request.POST:
+
+                # se agrega un condicional que indique que l (la cual es la lista que contiene los valores)
+                # de las respuestas de acuerdo a cada opcion, siempre y cuenta esta lista tenga mas dee un
+                # valor, se puede hacer el reporte, de otro modo llegan campos vacios al PdfTemplate y lanza un error
+                if 'reportePDF' in request.POST and len(l) > 1:
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
+
                     PdfTemplate(response,
                                 'Estadistico de reuniones Discipulado totalizadas por discipulo',
                                 opciones, values, 2)
