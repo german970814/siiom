@@ -759,3 +759,14 @@ def grupo_raiz(request):
         form = GrupoRaizForm(instance=raiz)
 
     return render(request, 'grupos/grupo_raiz.html', {'form': form})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def transladar(request, pk):
+    """
+    Permite a un administrador transladar un grupo a una nueva posición en el organigrama de grupos.
+    """
+
+    grupo = get_object_or_404(Grupo, pk=pk)
+    return render(request, 'grupos/transladar.html')

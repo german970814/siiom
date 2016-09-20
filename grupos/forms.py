@@ -341,3 +341,9 @@ class GrupoRaizForm(forms.ModelForm):
             if self.instance.lider2:
                 lider2 = Miembro.objects.filter(id=self.instance.lider2.id)
                 self.fields['lider2'].queryset = (self.fields['lider2'].queryset | lider2).distinct()
+
+
+class TransladarGrupoForm(forms.Form):
+    """"""
+
+    pass
