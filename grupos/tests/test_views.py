@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, Group
@@ -219,8 +220,7 @@ class TransladarGrupoViewTest(GruposBaseTest):
 
         self.login_usuario(self.admin)
         response = self.client.get(reverse('grupos:transladar', args=(100,)))
-
-        self.assertEqual(response.status_code, 404)
+        self.assertRaises(Http404)
 
     def test_admin_get_template(self):
         """
@@ -240,10 +240,10 @@ class TransladarGrupoViewTest(GruposBaseTest):
         """
 
         nuevo = Grupo.objects.get(id=8)
-        grupo = Grupo.objects.get(id=5)
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, {'nuevo': '8'})
 
+        grupo = Grupo.objects.get(id=5)
         self.assertRedirects(response, self.URL)
         self.assertEqual(grupo.get_parent(), nuevo)
 
@@ -254,4 +254,4 @@ class TransladarGrupoViewTest(GruposBaseTest):
 
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, {})
-        self.assertFormError(response, 'form', 'nuevo', 'Este campo es obligatorio')
+        self.assertFormError(response, 'form', 'nuevo', 'Este campo es obligatorio.')

@@ -344,6 +344,18 @@ class GrupoRaizForm(forms.ModelForm):
 
 
 class TransladarGrupoForm(forms.Form):
-    """"""
+    """
+    Formulario para el translado de un grupo.
+    """
 
-    pass
+    nuevo = forms.ModelChoiceField(queryset=None)
+
+    def __init__(self, grupo, *args, **kwargs):
+        super(TransladarGrupoForm, self).__init__(*args, **kwargs)
+        self.fields['nuevo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['nuevo'].queryset = Grupo.objects.exclude(id__in=[grupo.id for grupo in Grupo.get_tree(grupo)])
+
+        self.grupo = grupo
+
+    def transladar(self):
+        self.grupo.transladar(self.cleaned_data['nuevo'])

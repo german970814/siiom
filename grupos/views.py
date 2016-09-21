@@ -20,7 +20,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
     FormularioTransladarGrupo, FormularioCrearGrupoRaiz, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm
+    GrupoRaizForm, TransladarGrupoForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -794,4 +794,12 @@ def transladar(request, pk):
     """
 
     grupo = get_object_or_404(Grupo, pk=pk)
-    return render(request, 'grupos/transladar.html')
+    if request.method == 'POST':
+        form = TransladarGrupoForm(grupo, data=request.POST)
+        if form.is_valid():
+            form.transladar()
+            return redirect('grupos:transladar', pk)
+    else:
+        form = TransladarGrupoForm(grupo)
+
+    return render(request, 'grupos/transladar.html', {'form': form})
