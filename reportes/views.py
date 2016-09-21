@@ -19,6 +19,7 @@ from .forms import (
     FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes,
     FormularioCumplimientoLlamadasLideres, FormularioReportesSinEnviar, FormularioPredicas,
 )
+from .utils import get_date_for_report
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from common.tests import (
@@ -597,12 +598,13 @@ def estadisticoReunionesGar(request):
 
                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
                     while sw_while:
-                        sig = fechai + datetime.timedelta(days=6)
+                        sig = get_date_for_report(fechai, fechaf)  # fechai + datetime.timedelta(days=6)
                         numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-                                                           grupo__in=grupos).aggregate(Sum('numeroLideresAsistentes'),
-                                                                                       Sum('numeroVisitas'),
-                                                                                       Sum('numeroTotalAsistentes'),
-                                                                                       Count('id'))
+                                                           grupo__in=grupos,
+                                                           grupo__estado='A').aggregate(Sum('numeroLideresAsistentes'),
+                                                                                        Sum('numeroVisitas'),
+                                                                                        Sum('numeroTotalAsistentes'),
+                                                                                        Count('id'))
 
                         if numPer['numeroLideresAsistentes__sum'] is None:
                             sumLid = 0
