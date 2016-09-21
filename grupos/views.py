@@ -674,29 +674,6 @@ def faltante_confirmar_ofrenda_discipulado(request):
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def transladar_grupos(request, id_grupo):
-
-    grupo = get_object_or_404(Grupo, id=id_grupo)
-    lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
-    red = grupo.red
-
-    if request.method == 'POST':
-        form = FormularioTransladarGrupo(data=request.POST, red=red, grupo_id=id_grupo)
-
-        if form.is_valid():
-            grupo_escogido = Grupo.objects.get(id=request.POST['grupo'])
-            for miembro in lideres:
-                miembro.grupo = grupo_escogido
-                miembro.save()
-            ok = True
-
-    else:
-        form = FormularioTransladarGrupo(red=red, grupo_id=id_grupo)
-
-    return render_to_response("Miembros/transladar_grupos.html", locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def ver_reportes_grupo(request):
     if request.method == 'POST' or ('post' in request.session and len(request.session['post']) > 1):
 

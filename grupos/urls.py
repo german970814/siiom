@@ -15,7 +15,6 @@ urlpatterns = [
     url(r'^crear_predica/$', crearPredica, name="crear_predica"),
     url(r'^editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),
     url(r'^faltante_confirmar_ofrenda/$', faltante_confirmar_ofrenda, name="faltantes_confirmar_ofrenda"),
-    url(r'^transladar_grupo/(?P<id_grupo>\d+)$', transladar_grupos, name="transladar_grupos"),
     url(r'^faltante_confirmar_ofrenda_discipulado/$',
         faltante_confirmar_ofrenda_discipulado, name="faltantes_confirmar_ofrenda_discipulado"),
     url(r'^ver_reportes/$', ver_reportes_grupo, name="reportes_grupo"),
