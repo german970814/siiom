@@ -345,7 +345,7 @@ class GrupoRaizForm(forms.ModelForm):
 
 class TransladarGrupoForm(forms.Form):
     """
-    Formulario para el translado de un grupo.
+    Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.
     """
 
     nuevo = forms.ModelChoiceField(queryset=None)
@@ -353,7 +353,9 @@ class TransladarGrupoForm(forms.Form):
     def __init__(self, grupo, *args, **kwargs):
         super(TransladarGrupoForm, self).__init__(*args, **kwargs)
         self.fields['nuevo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['nuevo'].queryset = Grupo.objects.exclude(id__in=[grupo.id for grupo in Grupo.get_tree(grupo)])
+
+        descendientes = [grupo.id for grupo in Grupo.get_tree(grupo)]
+        self.fields['nuevo'].queryset = Grupo.objects.exclude(id__in=descendientes).prefetch_related('lideres')
 
         self.grupo = grupo
 

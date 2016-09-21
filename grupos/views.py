@@ -802,4 +802,4 @@ def transladar(request, pk):
     else:
         form = TransladarGrupoForm(grupo)
 
-    return render(request, 'grupos/transladar.html', {'form': form})
+    return render(request, 'grupos/transladar.html', {'grupo': grupo, 'form': form})
