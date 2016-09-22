@@ -19,6 +19,7 @@ from .forms import (
     FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes,
     FormularioCumplimientoLlamadasLideres, FormularioReportesSinEnviar, FormularioPredicas,
 )
+from .utils import get_date_for_report
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from common.tests import (
@@ -566,7 +567,7 @@ def estadisticoReunionesGar(request):
 
             return HttpResponse(json.dumps(descendientes), content_type="application/json")
         else:
-            form = FormularioRangoFechas(request.POST or None)
+            form = FormularioRangoFechas(data=request.POST)
             if form.is_valid():
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
@@ -597,13 +598,13 @@ def estadisticoReunionesGar(request):
 
                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
                     while sw_while:
-                        sig = fechai + datetime.timedelta(days=6)
-
+                        sig = get_date_for_report(fechai, fechaf)  # fechai + datetime.timedelta(days=6)
                         numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-                                                           grupo__in=grupos).aggregate(Sum('numeroLideresAsistentes'),
-                                                                                       Sum('numeroVisitas'),
-                                                                                       Sum('numeroTotalAsistentes'),
-                                                                                       Count('id'))
+                                                           grupo__in=grupos,
+                                                           grupo__estado='A').aggregate(Sum('numeroLideresAsistentes'),
+                                                                                        Sum('numeroVisitas'),
+                                                                                        Sum('numeroTotalAsistentes'),
+                                                                                        Count('id'))
 
                         if numPer['numeroLideresAsistentes__sum'] is None:
                             sumLid = 0
@@ -932,7 +933,7 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
         grupoP = Grupo.objects.get(red=None)
         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A')
+        listaGrupo_i = Grupo.objects.all()
     else:
         listaGrupo_i = listaGruposDescendientes(miembro)
     ofrenda = False
@@ -1005,10 +1006,15 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                 values.append(l)
                 # n.append(l)
 
-                print('------------ ' + str(values))
-                if 'reportePDF' in request.POST:
+                # print('------------ ' + str(values))
+
+                # se agrega un condicional que indique que l (la cual es la lista que contiene los valores)
+                # de las respuestas de acuerdo a cada opcion, siempre y cuenta esta lista tenga mas dee un
+                # valor, se puede hacer el reporte, de otro modo llegan campos vacios al PdfTemplate y lanza un error
+                if 'reportePDF' in request.POST and len(l) > 1:
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
+
                     PdfTemplate(response,
                                 'Estadistico de reuniones Discipulado totalizadas por discipulo',
                                 opciones, values, 2)

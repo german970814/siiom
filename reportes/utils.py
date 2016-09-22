@@ -1,4 +1,6 @@
 from miembros.models import Miembro
+import calendar
+import datetime
 
 
 def listaGruposDescendientes_id(miembro):
@@ -24,3 +26,22 @@ def listaGruposDescendientes_id(miembro):
         if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
             discipulos.extend(list(d.discipulos()))
     return listaG
+
+
+def get_date_for_report(fecha_inicial, fecha_final):
+    """
+    Retorna una fecha a partir de otra, sin que pase de la semana en donde se encuentra la fecha inicial
+    """
+    lunes = 0
+    martes = 1
+    miercoles = 2
+    jueves = 3
+    viernes = 4
+    sabado = 5
+    domingo = 6
+
+    while calendar.weekday(
+        year=fecha_inicial.year, month=fecha_inicial.month, day=fecha_inicial.day
+    ) != domingo and not fecha_inicial >= fecha_final:
+        fecha_inicial += datetime.timedelta(days=1)
+    return fecha_inicial
