@@ -197,10 +197,11 @@
                 <li class="active">
                     <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
                 </li>
-                {% if perms.miembros.es_administrador %}
+                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-accounts-list-alt"></i> Administración</a>
                     <ul>
+                    {% if perms.miembros.es_administrador %}
                         <li class="sub-menu">
                             <a href="#">Academia</a>
                             <ul>
@@ -224,6 +225,8 @@
                                 </li>
                             </ul>
                         </li>
+                    {% endif %}
+                    {% if perms.miembros.es_administrador %}
                         <li class="sub-menu">
                             <a href="#">Miembro</a>
                             <ul>
@@ -267,9 +270,12 @@
                                 {% endif %}
                             </ul>
                         </li>
+                    {% endif %}
+                    {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
                         <li class="sub-menu">
                             <a href="#">Grupo</a>
                             <ul>
+                                {% if perms.miembros.es_administrador %}
                                 <li>
                                     <a href="/grupo/grupo_padre/">Grupo Padre</a>
                                 </li>
@@ -282,9 +288,13 @@
                                 <li>
                                     <a href="/grupo/listar_predicas/">Listar Prédicas</a>
                                 </li>
+                                {% endif %}
+                                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
                                 <li>
                                     <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
+                                {% endif %}
+                                {% if perms.miembros.es_administrador %}
                                 <li>
                                     <a href="/grupo/faltante_confirmar_ofrenda/">Grupos Faltantes Confirmar Ofrenda</a>
                                 </li>
@@ -294,8 +304,10 @@
                                 <li>
                                     <a href="{% url 'grupos:reportes_grupo' %}">Ver Reportes Enviados Por Grupos</a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
+                    {% endif %}
                     </ul>
                 </li>
                 {% endif %}
@@ -303,9 +315,11 @@
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
+                        {% if mi.grupoLidera.estado == 'A' %}
                         <li>
                             <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
+                        {% endif %}
                         <li>
                             <a href="/miembro/editar_grupo/">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>

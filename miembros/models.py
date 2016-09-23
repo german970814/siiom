@@ -241,15 +241,12 @@ class Miembro(models.Model):
 
     def es_cabeza_red(self):
         """Metodo para saber si el miembro esta dentro de los 72 del pastor principal"""
-        if self.grupo:
+        if self.grupo is not None:
             lideres = Miembro.objects.filter(id__in=self.grupo.listaLideres())
             for lider in lideres:
                 if lider.grupo.red is None:
                     return True
-                # for lid in Miembro.objects.filter(id__in=lider.grupo.listaLideres()):
-                #     if lid.grupo.red is None:
-                #         return True
-                #     return False
+
                 if any(
                     [
                         lid.grupo.red for lid in Miembro.objects.filter(

@@ -4,6 +4,7 @@ Created on Apr 12, 2011
 @author: Migue
 '''
 from django import forms
+from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.forms.models import ModelForm
 from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
@@ -236,16 +237,30 @@ class FormularioCrearPredica(ModelForm):
     required_css_class = 'requerido'
 
     def __init__(self, *args, **kwargs):
+        miembro = kwargs.pop('miembro', None)
         super(FormularioCrearPredica, self).__init__(*args, **kwargs)
-
+        print(miembro)
+        if miembro is not None:
+            if miembro.usuario.has_perm('miembros.es_administrador'):
+                print("entre aca")
+                grupo_pastor = Group.objects.get(name__iexact='pastor')
+                self.fields['miembro'].queryset = Miembro.objects.filter(usuario__groups=grupo_pastor)
+            else:
+                print("no me fui por aca")
+                self.fields['miembro'].queryset = Miembro.objects.filter(id=miembro.id)
+                self.fields['miembro'].initial = miembro.id
+        else:
+            print("error estoy aca")
+            self.fields['miembro'].queryset = Miembro.objects.none()
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['miembro'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['descripcion'].widget.attrs.update({'class': 'form-control',
                                                         'placeholder': 'Descripción...',
                                                         'rows': '3'})
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
     class Meta:
         model = Predica
-        exclude = ('miembro',)
+        fields = ('miembro', 'descripcion', 'nombre')
 
 
 class FormularioEditarDiscipulado(ModelForm):

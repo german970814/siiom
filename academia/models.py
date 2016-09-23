@@ -10,7 +10,7 @@ class Modulo(models.Model):
 
 
 class Sesion(models.Model):
-    nombre = models.CharField(max_length=20)
+    nombre = models.CharField(max_length=500)
     modulo = models.ForeignKey(Modulo)
 
     def __str__(self):
