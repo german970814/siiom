@@ -58,7 +58,7 @@ class GrupoRaizFormTest(TestCase):
         Prueba que en los campos lider1 y lider2 muestren los lideres del grupo raiz.
         """
 
-        raiz = GrupoRaizFactory(con_lider2=True)
+        raiz = GrupoRaizFactory()
         form = GrupoRaizForm(instance=raiz)
 
         self.assertIn(raiz.lider1, form.fields['lider1'].queryset)

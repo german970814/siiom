@@ -67,7 +67,7 @@ class OrganigramaGruposViewTest(GruposBaseTest):
         """
 
         self.usuario.user_permissions.add(Permission.objects.get(codename='es_lider'))
-        miembro = Grupo.objects.get(id=3).lider1
+        miembro = Grupo.objects.get(id=3).lideres.first()
         miembro.usuario = self.usuario
         miembro.save()
 

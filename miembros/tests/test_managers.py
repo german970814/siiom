@@ -15,9 +15,8 @@ class MiembroManagerTest(TestCase):
         """
 
         lider_sin_grupo = MiembroFactory(lider=True)
-        grupo = GrupoFactory(con_lider2=True)
+        grupo = GrupoFactory()
 
         lideres = Miembro.objects.lideres_disponibles()
         self.assertIn(lider_sin_grupo, lideres)
-        self.assertNotIn(grupo.lider1, lideres)
-        self.assertNotIn(grupo.lider2, lideres)
+        self.assertNotIn(grupo.lideres.first(), lideres)
