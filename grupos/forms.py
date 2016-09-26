@@ -326,17 +326,18 @@ class GrupoRaizForm(forms.ModelForm):
     Formulario parala creación o edición del grupo raiz.
     """
 
+    lideres = forms.ModelMultipleChoiceField(queryset=None)
+
     class Meta:
         model = Grupo
         fields = [
-            'lider1', 'lider2', 'direccion', 'estado', 'fechaApertura', 'diaGAR',
-            'horaGAR', 'diaDiscipulado', 'horaDiscipulado', 'nombre', 'barrio'
+            'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
+            'horaDiscipulado', 'nombre', 'barrio'
         ]
 
     def __init__(self, *args, **kwargs):
         super(GrupoRaizForm, self).__init__(*args, **kwargs)
-        self.fields['lider1'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['lider2'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
         self.fields['horaGAR'].widget.attrs.update({'class': 'form-control time-picker'})
@@ -347,15 +348,11 @@ class GrupoRaizForm(forms.ModelForm):
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-        self.fields['lider1'].queryset = Miembro.objects.lideres_disponibles()
-        self.fields['lider2'].queryset = Miembro.objects.lideres_disponibles()
+        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
 
         if self.instance.pk:
-            lider1 = Miembro.objects.filter(id=self.instance.lider1.id)
-            self.fields['lider1'].queryset = (self.fields['lider1'].queryset | lider1).distinct()
-            if self.instance.lider2:
-                lider2 = Miembro.objects.filter(id=self.instance.lider2.id)
-                self.fields['lider2'].queryset = (self.fields['lider2'].queryset | lider2).distinct()
+            self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
+            self.fields['lideres'].initial = self.instance.lideres.all()
 
 
 class TransladarGrupoForm(forms.Form):
