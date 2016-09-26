@@ -735,7 +735,7 @@ def organigrama_grupos(request):
         arbol = Grupo.obtener_arbol()
     else:
         miembro = get_object_or_404(Miembro, usuario=usuario)
-        arbol = Grupo.obtener_arbol(miembro.grupoLidera())
+        arbol = Grupo.obtener_arbol(miembro.grupo_lidera)
 
     return render(request, 'grupos/organigrama_grupos.html', {'arbol': arbol})
 

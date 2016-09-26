@@ -17,16 +17,10 @@ class MiembroManager(models.Manager):
         Devuelve un queryset con los lideres que no se encuentran liderando grupo.
         """
 
-        from grupos.models import Grupo
-
-        grupos = Grupo.objects.select_related('lider1', 'lider2').all()
-        lideres_grupos = []
-        for grupo in grupos:
-            lideres_grupos.extend(grupo.listaLideres())
-
         permiso = Permission.objects.get(codename='es_lider')
-        lideres = self.filter(
-            models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso)
+        disponibles = self.filter(
+            models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso),
+            grupo_lidera__isnull=True
         )
 
-        return lideres.exclude(id__in=lideres_grupos)
+        return disponibles

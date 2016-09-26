@@ -14,9 +14,14 @@ class MiembroManagerTest(TestCase):
         Los lideres disponibles son aquellos que no se encuentran liderando grupo.
         """
 
-        lider_sin_grupo = MiembroFactory(lider=True)
         grupo = GrupoFactory()
+        grupo2 = GrupoFactory()
+        lider_sin_grupo = MiembroFactory(lider=True)
+        lider_grupo = MiembroFactory(lider=True)
+        lider_grupo.grupo_lidera = grupo
+        lider_grupo.save()
 
-        lideres = Miembro.objects.lideres_disponibles()
-        self.assertIn(lider_sin_grupo, lideres)
-        self.assertNotIn(grupo.lideres.first(), lideres)
+        lideres_disponibles = Miembro.objects.lideres_disponibles()
+        self.assertIn(lider_sin_grupo, lideres_disponibles)
+        self.assertFalse(all(lider in lideres_disponibles for lider in grupo.lideres.all()))
+        self.assertFalse(all(lider in lideres_disponibles for lider in grupo2.lideres.all()))
