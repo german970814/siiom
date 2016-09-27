@@ -206,6 +206,7 @@ class ReunionGAR(models.Model):
     novedades = models.TextField(max_length=500, default="nada", null=True, blank=True)
     ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
+    digitada_por_miembro = models.BooleanField(default=True)
 
     def __str__(self):
         return self.grupo.nombre

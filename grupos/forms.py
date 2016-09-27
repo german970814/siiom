@@ -35,7 +35,7 @@ class FormularioReportarReunionGrupo(ModelForm):
 
     class Meta:
         model = ReunionGAR
-        exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia', 'novedades')
+        exclude = ('grupo', 'confirmacionEntregaOfrenda', 'asistentecia', 'novedades', 'digitada_por_miembro')
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupo, self).__init__(*args, **kwargs)
@@ -53,7 +53,7 @@ class FormularioReportarReunionGrupoAdmin(ModelForm):
 
     class Meta:
         model = ReunionGAR
-        exclude = ('confirmacionEntregaOfrenda', 'asistentecia', 'novedades')
+        exclude = ('confirmacionEntregaOfrenda', 'asistentecia', 'novedades', 'digitada_por_miembro')
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
@@ -315,11 +315,18 @@ class FormularioEditarReunionGAR(forms.ModelForm):
         super(FormularioEditarReunionGAR, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
-        self.fields['fecha'].widget.attrs.update({'readonly': ''})
+        # se comenta la linea que hacia que la fecha no fuera editable
+        # self.fields['fecha'].widget.attrs.update({'readonly': ''})
 
     class Meta:
         model = ReunionGAR
-        exclude = ('grupo', 'asistentecia')
+        # exclude = ('grupo', 'asistentecia')
+        # se cambia el exclude por fields
+        fields = (
+            'fecha', 'predica', 'numeroTotalAsistentes',
+            'numeroLideresAsistentes', 'numeroVisitas',
+            'ofrenda'
+        )
 
 
 class GrupoRaizForm(forms.ModelForm):

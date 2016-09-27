@@ -137,6 +137,7 @@ def reportarReunionGrupo(request):
                 r = form.save(commit=False)
                 if not reunionReportada(r.fecha, grupo, 1):
                     r.grupo = grupo
+                    r.digitada_por_miembro = True
                     r.save()
                     # for m in miembrosGrupo:
                     #     if unicode(m.id) in asistentesId:
@@ -158,9 +159,10 @@ def reportarReunionGrupoAdmin(request):
     if request.method == 'POST':
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
-            r = form.save(commit=False)
-            if not reunionReportada(r.fecha, r.grupo, 1):
-                r.save()
+            reporte = form.save(commit=False)
+            if not reunionReportada(reporte.fecha, reporte.grupo, 1):
+                reporte.digitada_por_miembro = False
+                reporte.save()
                 ok = True
             else:
                 ya_reportada = True
@@ -674,7 +676,6 @@ def faltante_confirmar_ofrenda_discipulado(request):
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def ver_reportes_grupo(request):
     if request.method == 'POST' or ('post' in request.session and len(request.session['post']) > 1):
-
         if 'combo' in request.POST:
             value = request.POST['value']
             querys = Q(lider1__nombre__icontains=value) | Q(lider1__primerApellido__icontains=value) | \
@@ -685,7 +686,42 @@ def ver_reportes_grupo(request):
             response = [{'pk': str(s.id), 'nombre': str(s)} for s in busqueda]
             return HttpResponse(json.dumps(response), content_type='aplicattion/json')
 
-        form = FormularioReportesEnviados(data=request.POST or request.session['post'])
+        data_from_session = request.session.get('post', None)
+        if 'reportar' in request.POST:
+            form_reporte = FormularioReportarReunionGrupoAdmin(data=request.POST)
+
+            if form_reporte.is_valid():
+                reporte = form_reporte.save(commit=False)
+                reporte.digitado_por_miembro = False
+                if reunionReportada(reporte.fecha, reporte.grupo, 1):
+                    messages.error(request, "El Grupo ya cuenta con un reporte en ese rango de fecha")
+                    click = True
+                    form_reporte.add_error('fecha', 'Ya hay un reporte en esta semana')
+                    if data_from_session is not None:
+                        request.POST.update(data_from_session)
+                else:
+                    reporte.save()
+                    messages.success(request, "Se Ha Reportado el Sobre Correctamente")
+                    # request.session['post'] = request.POST
+                    if data_from_session is not None:
+                        request.POST.update(data_from_session)
+                    return redirect('reportes_grupo')
+
+        else:
+            form_reporte = FormularioReportarReunionGrupoAdmin()
+
+        if 'confirmar' in request.POST:
+            try:
+                reunion = ReunionGAR.objects.get(id=request.POST['reporte'])
+                reunion.confirmacionEntregaOfrenda = True
+                reunion.save()
+            except ReunionGAR.DoesNotExist:
+                pass
+            finally:
+                if data_from_session is not None:
+                    request.POST.update(data_from_session)
+
+        form = FormularioReportesEnviados(data=request.POST or data_from_session)
 
         if form.is_valid():
             grupo = form.cleaned_data['grupo']  # get_object_or_404(Grupo, id=request.POST['grupo'])
@@ -699,6 +735,7 @@ def ver_reportes_grupo(request):
 
     else:
         form = FormularioReportesEnviados()
+        form_reporte = FormularioReportarReunionGrupoAdmin()
 
     return render_to_response("Grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
 
