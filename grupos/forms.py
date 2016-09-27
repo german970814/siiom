@@ -4,9 +4,10 @@ Created on Apr 12, 2011
 @author: Migue
 '''
 from django import forms
-from django.contrib.auth.models import Group
 from django.db.models import Q
+from django.db import transaction
 from django.forms.models import ModelForm
+from django.contrib.auth.models import Group
 from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
@@ -326,6 +327,7 @@ class GrupoRaizForm(forms.ModelForm):
     Formulario parala creación o edición del grupo raiz.
     """
 
+    error_css_class = 'has-error'
     lideres = forms.ModelMultipleChoiceField(queryset=None)
 
     class Meta:
@@ -354,12 +356,26 @@ class GrupoRaizForm(forms.ModelForm):
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
             self.fields['lideres'].initial = self.instance.lideres.all()
 
+    def save(self):
+        with transaction.atomic():
+            raiz = super(GrupoRaizForm, self).save(commit=False)
+            if raiz.pk:
+                raiz.save()
+                raiz.lideres.clear()
+            else:
+                raiz = Grupo.add_root(instance=raiz)
+
+            lideres = self.cleaned_data['lideres']
+            lideres.update(grupo_lidera=raiz)
+            return raiz
+
 
 class TransladarGrupoForm(forms.Form):
     """
     Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.
     """
 
+    error_css_class = 'has-error'
     nuevo = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, grupo, *args, **kwargs):

@@ -104,9 +104,9 @@ class GrupoRaizViewTest(TestCase):
         """
 
         data = {
-            'lider1': self.lider1.id, 'lider2': self.lider2.id, 'direccion': 'Calle 34 N 74 - 23', 'estado': 'A',
-            'fechaApertura': '2012-03-03', 'diaGAR': '1', 'horaGAR': '12:00', 'diaDiscipulado': '3',
-            'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente', 'barrio': self.barrio.id
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id]
         }
 
         return data
@@ -173,6 +173,16 @@ class GrupoRaizViewTest(TestCase):
         response = self.client.post(self.URL, self.datos_formulario())
 
         self.assertRedirects(response, self.URL)
+
+    def test_formalario_invalido_muestra_errores(self):
+        """
+        Prueba que si el formulario no es valido se muestren los errores.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, {})
+
+        self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
 
 
 class TransladarGrupoViewTest(GruposBaseTest):

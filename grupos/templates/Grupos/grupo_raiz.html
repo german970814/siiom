@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load i18n %}
+
 {% block js %}
 <script type="text/javascript">
 	$(document).ready(function(){
@@ -6,11 +8,11 @@
             maxDate : moment(),
             format: 'DD/MM/YYYY'
         });
-        
+
         $("#id_horaDiscipulado").datetimepicker({
             format: 'hh:mm:ss',
         });
-        
+
         $("#id_horaGAR").datetimepicker({
             format: 'hh:mm:ss',
         });
@@ -61,7 +63,7 @@
         <div class="card-header">
             {{a}}
             <h1 class="f-700">
-                <legend><h3>{{accion}} Grupo</h3></legend>
+                <legend><h3>{% trans 'Grupo Raiz' %}</h3></legend>
             </h1>
             {% if ok %}
                 <div class="row">
@@ -78,53 +80,38 @@
                         <p>Aún hay campos vacios, Asegurate de llenarlos todos</p>
                     </div>
                 </div>
-            {% endif %} 
+            {% endif %}
         </div>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST">
             {% csrf_token %}
             <div class="card-body card-padding">
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="input-group {{form.lider1.css_classes}}">
+                    <div class="col-md-8">
+                        <div class="input-group {{ form.lideres.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_lider1" class="fg-label control-label requerido">L&iacute;der 1*:</label>
-                            	{{form.lider1}}
+                                <label for="id_lideres" class="fg-label control-label requerido">Lideres*:</label>
+								{{ form.lideres }}
                             </div>
-                            {% for error in form.lider1.errors %}
-                                <small class="help-block">{{error}}</small>
+                            {% for error in form.lideres.errors %}
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.lider2.css_classes}}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-account-o"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="id_lider2" class="fg-label control-label requerido">L&iacute;der 2:</label>
-                            	{{form.lider2}}
-                            </div>
-                            {% for error in form.lider2.errors %}
-                                <small class="help-block">{{error}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <br class="space">
-                    <div class="col-md-4">
-                        <div class="input-group {{form.direccion.css_classes}}">
+                        <div class="input-group {{ form.direccion.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-map"></i>
                             </span>
                             <div class="fg-line">
                                 <label for="id_direccion" class="fg-label control-label">Direcci&oacute;n*:</label>
-                            	{{form.direccion}}
+                            	{{ form.direccion }}
                             </div>
                             {% for error in form.direccion.errors %}
-                                <small class="help-block">{{error}}</small>
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
