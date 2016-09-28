@@ -1,4 +1,6 @@
+from unittest import mock
 from django.test import TestCase
+from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from grupos.tests.factories import GrupoFactory, GrupoRaizFactory
 from grupos.forms import GrupoRaizForm
@@ -108,3 +110,31 @@ class GrupoRaizFormTest(TestCase):
         self.assertEqual(self.lider1.grupo_lidera, raiz)
         self.assertEqual(self.lider2.grupo_lidera, raiz)
         self.assertEqual(len(raiz.lideres.filter(id__in=lideres_viejos)), 1)
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_no_se_guarda_nada_en_db(self, update_mock):
+        """
+        Prueba que si ocurre un error al guardar el formulario no se guarde ni el grupo ni los lideres.
+        """
+
+        form = GrupoRaizForm(data=self.datos_formulario())
+        form.save()
+        self.lider1.refresh_from_db()
+        self.lider2.refresh_from_db()
+
+        self.assertTrue(update_mock.called)
+        self.assertEqual(len(Grupo.get_root_nodes()), 0)
+        self.assertEqual(self.lider1.grupo_lidera, None)
+        self.assertEqual(self.lider2.grupo_lidera, None)
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_agrega_error_form(self, update_mock):
+        """
+        Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
+        """
+
+        form = GrupoRaizForm(data=self.datos_formulario())
+        form.save()
+
+        self.assertTrue(update_mock.called)
+        self.assertEqual(len(form.non_field_errors()), 1)

@@ -5,9 +5,10 @@ Created on Apr 12, 2011
 '''
 from django import forms
 from django.db.models import Q
-from django.db import transaction
 from django.forms.models import ModelForm
 from django.contrib.auth.models import Group
+from django.db import transaction, IntegrityError
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
@@ -335,7 +336,8 @@ class GrupoRaizForm(forms.ModelForm):
     """
 
     error_css_class = 'has-error'
-    lideres = forms.ModelMultipleChoiceField(queryset=None)
+    mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
+    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('lideres'))
 
     class Meta:
         model = Grupo
@@ -364,17 +366,21 @@ class GrupoRaizForm(forms.ModelForm):
             self.fields['lideres'].initial = self.instance.lideres.all()
 
     def save(self):
-        with transaction.atomic():
-            raiz = super(GrupoRaizForm, self).save(commit=False)
-            if raiz.pk:
-                raiz.save()
-                raiz.lideres.clear()
-            else:
-                raiz = Grupo.add_root(instance=raiz)
+        try:
+            with transaction.atomic():
+                raiz = super(GrupoRaizForm, self).save(commit=False)
+                if raiz.pk:
+                    raiz.save()
+                    raiz.lideres.clear()
+                else:
+                    raiz = Grupo.add_root(instance=raiz)
 
-            lideres = self.cleaned_data['lideres']
-            lideres.update(grupo_lidera=raiz)
-            return raiz
+                lideres = self.cleaned_data['lideres']
+                lideres.update(grupo_lidera=raiz)
+                return raiz
+        except IntegrityError:
+            self.add_error(None, forms.ValidationError(self.mensaje_error))
+            return None
 
 
 class TransladarGrupoForm(forms.Form):
