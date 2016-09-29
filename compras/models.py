@@ -54,8 +54,9 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse_lazy
 
-from .managers import RequisicionManager, ParametrosManager
+from .managers import RequisicionManager, ParametrosManager, DetalleRequisicionManager
 
 import re
 
@@ -382,6 +383,16 @@ class Requisicion(models.Model):
             return _progreso / self.detallerequisicion_set.count()
         return _progreso
 
+    def get_url_progreso(self):
+        """
+        Retorna la url de progreso
+        """
+        if self.get_rastreo() == Requisicion.DATA_SET['compras']:
+            return '%s?check=%d' % (reverse_lazy('compras:ver_requisiciones_compras'), self.id)
+        elif self.get_rastreo() == Requisicion.DATA_SET['administrativo']:
+            return '%s?check=%d' % (reverse_lazy('compras:ver_requisiciones_jefe_administrativo'), self.id)
+        return '#'
+
 
 class DetalleRequisicion(models.Model):
     """Modelo que guarda el detalle de una requisición."""
@@ -406,6 +417,8 @@ class DetalleRequisicion(models.Model):
     requisicion = models.ForeignKey(Requisicion, verbose_name=_('requisición'))
     cumplida = models.BooleanField(verbose_name=_('cumplida'), default=False)
     proveedor = models.ForeignKey(Proveedor, verbose_name=_('proveedor'), blank=True, null=True)
+
+    objects = DetalleRequisicionManager()
 
     class Meta:
         verbose_name = _('detalle de la requisición')

@@ -13,15 +13,30 @@
                     success: function(data) {
                         var arr = ['cantidad', 'descripcion', 'referencia', 'marca', 'valor_aprobado', 'total_aprobado', 'forma_pago'];
                         var to_append = '';
+                        var suma_total = 0;
                         for (var i = 0; i < data[0].length; i++) {
-                            var tr = '<tr class="!">0</tr>'
+                            var tr = '<tr class="!">0</tr>';
                             var tds = '';
                             var cls = '';
                             for (var j = 0; j < arr.length; j++) {
                                 tds += '<td>0</td>'.replace('0', data[0][i][arr[j]])
+                                if (arr[j] == 'total_aprobado') {
+                                    suma_total += data[0][i][arr[j]]
+                                }
                                 cls = data[0][i]['class']
                             }
                             to_append += tr.replace('!', cls).replace('0', tds);
+
+                            if (i + 1 == data[0].length) {
+                                var tds = '';
+                                var tr = '<tr class="!">0</tr>';
+                                for (var x = 0; x < arr.length - 2; x++) {
+                                    tds += '<td></td>'
+                                }
+                                tds += '<td>0</td>'.replace('0', suma_total.toString())
+                                tds += '<td></td>'
+                                to_append += tr.replace('!', 'total').replace('0', tds)
+                            }
                         }
                         $("#table-body").html(to_append);
 

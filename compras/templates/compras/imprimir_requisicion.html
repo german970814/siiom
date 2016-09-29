@@ -80,6 +80,11 @@
                             <td>{{ detalle.get_forma_pago_display|upper }}</td>
                         </tr>
                         {% endfor %}
+                        <tr>
+                            <td colspan="5"><strong>{% trans "Total" %}</strong></td>
+                            <td>{{ requisicion.get_total }}</td>
+                            <td></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

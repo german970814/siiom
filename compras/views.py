@@ -479,6 +479,8 @@ def ver_requisiciones_compras(request):
     except:
         raise Http404
 
+    data = {}
+
     # se obtiene el queryset de requisiciones aprobadas por jefe de departamento
     requisiciones = Requisicion.objects.aprobadas_jefe_departamento().order_by(
         '-fecha_ingreso').prefetch_related('historial_set')
@@ -514,8 +516,12 @@ def ver_requisiciones_compras(request):
     else:
         # se instancia el formulario de el GET
         form = FormularioRequisicionesCompras()
+        check = request.GET.get('check', None)
+        if check is not None:
+            data['CLICK'] = check
 
-    data = {'requisiciones': requisiciones, 'form': form}
+    data['requisiciones'] = requisiciones
+    data['form'] = form
 
     return render(request, 'compras/ver_requisiciones_compras.html', data)
 
@@ -707,6 +713,9 @@ def ver_requisiciones_jefe_administrativo(request):
             messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
     else:
         form = FormularioRequisicionesCompras()
+        check = request.GET.get('check', None)
+        if check is not None:
+            data['CLICK'] = check
 
     data['form'] = form
 
