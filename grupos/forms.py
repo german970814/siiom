@@ -13,6 +13,7 @@ from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
 from reportes.forms import FormularioRangoFechas
+from common.forms import CustomModelForm
 
 
 class FormularioEditarGrupo(ModelForm):
@@ -330,7 +331,7 @@ class FormularioEditarReunionGAR(forms.ModelForm):
         )
 
 
-class GrupoRaizForm(forms.ModelForm):
+class GrupoRaizForm(CustomModelForm):
     """
     Formulario parala creación o edición del grupo raiz.
     """

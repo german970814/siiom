@@ -1,5 +1,7 @@
+from unittest import mock
 from django.http import Http404
 from django.test import TestCase
+from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, Group
 from common.tests.factories import UsuarioFactory
@@ -82,7 +84,6 @@ class GrupoRaizViewTest(TestCase):
     Pruebas unitarias para la vista de creación/edición del grupo raiz.
     """
 
-    TEMPLATE = 'grupos/grupo_raiz.html'
     URL = reverse('grupos:raiz')
 
     def setUp(self):
@@ -111,25 +112,6 @@ class GrupoRaizViewTest(TestCase):
 
         return data
 
-    def test_usuario_no_logueado_redireccionado_login(self):
-        """
-        Prueba que un usuario no logueado sea redireccionado al login.
-        """
-
-        response = self.client.get(self.URL)
-        self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
-
-    def test_usuario_logueado_no_admin_redireccionado_sin_permisos(self):
-        """
-        Prueba que un usuario logueado que no sea administrador sea redireccionado a página que indique que
-        no tiene permisos.
-        """
-
-        usuario = UsuarioFactory()
-        self.login_usuario(usuario)
-        response = self.client.get(self.URL)
-        self.assertEqual(response.status_code, 403)
-
     def test_admin_get_template(self):
         """
         Prueba que un administrador pueda ver el template.
@@ -139,7 +121,7 @@ class GrupoRaizViewTest(TestCase):
         response = self.client.get(self.URL)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, self.TEMPLATE)
+        self.assertContains(response, 'id_lideres')
 
     def test_get_no_existe_grupo_raiz_muestra_formulario_vacio(self):
         """
@@ -174,7 +156,7 @@ class GrupoRaizViewTest(TestCase):
 
         self.assertRedirects(response, self.URL)
 
-    def test_formalario_invalido_muestra_errores(self):
+    def test_formulario_invalido_muestra_errores(self):
         """
         Prueba que si el formulario no es valido se muestren los errores.
         """
@@ -183,6 +165,18 @@ class GrupoRaizViewTest(TestCase):
         response = self.client.post(self.URL, {})
 
         self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_post_save_formulario_devuelve_None_muestra_error(self, update_mock):
+        """
+        Prueba que si cuando se guarda el formulario, este devuelve None se muestre un mensaje de error.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, self.datos_formulario())
+
+        self.assertTrue(update_mock.called)
+        self.assertFormError(response, 'form', None, GrupoRaizForm.mensaje_error)
 
 
 class TransladarGrupoViewTest(GruposBaseTest):

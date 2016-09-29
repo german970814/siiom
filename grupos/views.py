@@ -790,8 +790,8 @@ def grupo_raiz(request):
         form = GrupoRaizForm(instance=raiz, data=request.POST)
 
         if form.is_valid():
-            form.save()
-            return redirect('grupos:raiz')
+            if form.save():
+                return redirect('grupos:raiz')
     else:
         form = GrupoRaizForm(instance=raiz)
 
