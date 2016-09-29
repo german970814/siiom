@@ -555,6 +555,7 @@
                         </li>
                     {% endswitch %}
                     {% switch "compras" %}
+                    {% if request.user.empleado %}
                         <li class="sub-menu">
                             <a href=""><i class="zmdi zmdi-shopping-cart"></i>{% trans "Compras" %}</a>
                             <ul>
@@ -601,6 +602,7 @@
                                 {% endif %}
                             </ul>
                         </li>
+                    {% endif %}
                     {% endswitch %}
                     {% switch "gestion_documental" or switch "pqr" or switch "compras" %}
                         {% if perms.organizacional.es_administrador_sgd %}

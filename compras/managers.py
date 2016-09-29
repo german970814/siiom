@@ -228,3 +228,17 @@ class DetalleRequisicionManager(models.Manager):
             forma_pago=self.model.CREDITO,
             cumplida=True
         ).aggregate(models.Sum('total_aprobado'))
+
+    def salida_efectivo_mes(self):
+        """
+        Retorna la cantidad de dinero que ha salido por items en efectivo
+        """
+        hoy = timezone.now().date()
+
+        return self.filter(
+            requisicion__historial__fecha__range=(
+                datetime.date(year=hoy.year, month=hoy.month, day=1), hoy + datetime.timedelta(days=1)
+            ),
+            forma_pago__in=[self.model.EFECTIVO, self.model.DEBITO],
+            cumplida=True
+        ).aggregate(models.Sum('total_aprobado'))

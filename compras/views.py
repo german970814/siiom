@@ -385,7 +385,7 @@ def ver_requisiciones_empleado(request):
         '-fecha_ingreso'
     ).prefetch_related('detallerequisicion_set')
 
-    data = {'requisiciones': requisiciones}
+    data = {'requisiciones': requisiciones, 'CLICK': request.GET.get('check', False)}
 
     return render(request, 'compras/ver_requisiciones_empleado.html', data)
 
@@ -795,7 +795,7 @@ def ver_requisiciones_financiero(request):
     if request.method == 'POST':
         pass
     else:
-        pass
+        data['CLICK'] = request.GET.get('check', False)
 
     return render(request, 'compras/ver_requisiciones_financiero.html', data)
 

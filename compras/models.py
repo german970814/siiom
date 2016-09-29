@@ -387,11 +387,20 @@ class Requisicion(models.Model):
         """
         Retorna la url de progreso
         """
+        base = '%s?check=%d'
         if self.get_rastreo() == Requisicion.DATA_SET['compras']:
-            return '%s?check=%d' % (reverse_lazy('compras:ver_requisiciones_compras'), self.id)
+            return base % (reverse_lazy('compras:ver_requisiciones_compras'), self.id)
         elif self.get_rastreo() == Requisicion.DATA_SET['administrativo']:
-            return '%s?check=%d' % (reverse_lazy('compras:ver_requisiciones_jefe_administrativo'), self.id)
+            return base % (reverse_lazy('compras:ver_requisiciones_jefe_administrativo'), self.id)
+        elif self.get_rastreo() == Requisicion.DATA_SET['espera_presupuesto']:
+            return base % (reverse_lazy('compras:ver_requisiciones_financiero'), self.id)
         return '#'
+
+    def get_url_for_solicitante(self):
+        """
+        retorna la url del progreso en la vista de el solicitante
+        """
+        return '%s?check=%d' % (reverse_lazy('compras:ver_requisiciones_empleado'), self.id)
 
 
 class DetalleRequisicion(models.Model):

@@ -22,10 +22,10 @@ from common.tests import (
     cumplimientoPasosTest, asignarGrupoTest, miembroTest, adminTest,
     miembro_empleado_test
 )
-try:
-    from compras.models import Requisicion, Parametros, DetalleRequisicion
-except:
-    pass
+from compras.models import Requisicion, Parametros, DetalleRequisicion
+
+# Third Apps
+import waffle
 
 # Python Packages
 from datetime import date
@@ -160,13 +160,10 @@ def miembroInicio(request):
 
         # request.session['visitantes'] = visitantes
     if empleado:
-        # se intenta importar el modulo
-        try:
-            module = __import__('compras.models')
-        except ImportError:
-            module = None
-        # si no falla
-        if module is not None:
+        if waffle.switch_is_active('compras'):
+            if empleado.requisicion_set.filter(estado=Requisicion.PROCESO).exists():
+                mis_requisiciones_activas = empleado.requisicion_set.filter(estado=Requisicion.PROCESO)
+
             if empleado.is_compras:
                 # se sacan las ulimas requisiciones
                 ultimas_requisiciones = Requisicion.objects.ingresadas_compras()
@@ -220,13 +217,15 @@ def miembroInicio(request):
                     historial=None, empleado__areas__departamento__nombre__icontains='financi'
                 ).count()
 
-                requisiciones_faltantes_aprobar_trazabilidad = Requisicion.objects.ingresadas_financiero()
+                requisiciones_faltantes_aprobar_trazabilidad = len(Requisicion.objects.ingresadas_financiero())
 
-                requisiciones_espera = len([requisicion for requiscion in Requisicion.objects.filter(
+                requisiciones_espera = [requisicion for requisicion in Requisicion.objects.filter(
                     estado=Requisicion.PROCESO
-                ) if requisicion.get_rastreo() == Requisicion.DATA_SET['espera_presupuesto']])
+                ) if requisicion.get_rastreo() == Requisicion.DATA_SET['espera_presupuesto']]
 
                 salida_credito = DetalleRequisicion.objects.salida_credito_mes()['total_aprobado__sum'] or 0
+
+                salida_efectivo = DetalleRequisicion.objects.salida_efectivo_mes()['total_aprobado__sum'] or 0
 
     return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
