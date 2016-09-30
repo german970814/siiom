@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^validar_email/(?P<llave>.+)$', views.validar_caso, name="validar_caso"),
     url(r'^casos/$', views.ver_casos_servicio_cliente, name="ver_casos_servicio_cliente"),
     url(r'^caso/(?P<id_caso>\d+)$', views.ver_bitacora_caso, name="ver_bitacora_caso"),
+    url(r'^editar/(?P<id_caso>\d+)$', views.editar_caso, name="editar_caso"),
     url(r'^casos/empleado/$', views.ver_casos_empleado, name="ver_casos_empleado"),
     url(r'^casos/comercial/$', views.ver_casos_jefe_comercial, name="ver_casos_jefe_comercial"),
     url(r'^casos/presidencia/$', views.ver_casos_presidencia, name="ver_casos_presidencia"),

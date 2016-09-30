@@ -24,6 +24,7 @@ class Caso(models.Model):
     VERDE = 'green'  # range(0, 72)
     AMARILLO = 'yellow'  # range(73, 96)
     ROJO = 'red'  # range(97, ^)
+    TEAL = 'teal'  # cuando esta terminada
 
     # horas de expiracion
     DIAS_PARA_PRESIDENCIA = 4  # equivale a 96 horas
@@ -49,7 +50,7 @@ class Caso(models.Model):
     nombre = models.CharField(verbose_name=_('nombre'), max_length=255)
     identificacion = models.BigIntegerField(verbose_name=_('identificación'))
     direccion = models.CharField(verbose_name=_('dirección'), max_length=255, blank=True)
-    telefono = models.BigIntegerField(verbose_name=_('teléfono'), blank=True, null=True)
+    telefono = models.BigIntegerField(verbose_name=_('teléfono'))  # se quita blank=True, null=True, 30 septiembre 2016
     email = models.EmailField(verbose_name=_('email'))
     descripcion = models.TextField(verbose_name=_('descripción'))
     asunto = models.CharField(verbose_name=_('asunto'), max_length=255)
@@ -139,18 +140,21 @@ class Caso(models.Model):
         """
         hoy = timezone.now()
 
-        fecha = self.fecha_ingreso_habil
-        # Devuelve Rojo si la fecha para ir a presidencia ya paso y si la fecha de expiracion paso
-        if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_PRESIDENCIA) <= hoy.date() and \
-           self._add_days(self.get_fecha_expiracion() + datetime.timedelta(days=1)).date() <= hoy.date():
-            return self.__class__.ROJO
-        # Devuelve Amarillo si la fecha en la que hace el ingreso mas los dias que debe expirar ya pasaron
-        # y si la fecha de expiracion tambien ya paso
-        if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_EXPIRAR) <= hoy.date() \
-           and self.get_fecha_expiracion().date() <= hoy.date():
-            return self.__class__.AMARILLO
-        # De lo contrario devuelve VERDE
-        return self.__class__.VERDE
+        if not self.cerrado:
+            fecha = self.fecha_ingreso_habil
+            # Devuelve Rojo si la fecha para ir a presidencia ya paso y si la fecha de expiracion paso
+            if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_PRESIDENCIA) <= hoy.date() and \
+               self._add_days(self.get_fecha_expiracion() + datetime.timedelta(days=1)).date() <= hoy.date():
+                return self.__class__.ROJO
+            # Devuelve Amarillo si la fecha en la que hace el ingreso mas los dias que debe expirar ya pasaron
+            # y si la fecha de expiracion tambien ya paso
+            if fecha + datetime.timedelta(days=self.__class__.DIAS_PARA_EXPIRAR) <= hoy.date() \
+               and self.get_fecha_expiracion().date() <= hoy.date():
+                return self.__class__.AMARILLO
+            # De lo contrario devuelve VERDE
+            return self.__class__.VERDE
+        # retorna otro color
+        return self.__class__.TEAL
 
 
 class Comentario(models.Model):

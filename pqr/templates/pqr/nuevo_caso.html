@@ -30,7 +30,7 @@
                         <div class="input-group fg-float {{ form.nombre.css_classes }}">
                             <span class="input-group-addon"><i class="zmdi zmdi-account"></i></span>
                             <div class="fg-line">
-                                {{ form.nombre }}
+                                {% if caso %}{{ caso.nombre }}{% else %}{{ form.nombre }}{% endif %}
                                 <label class="fg-label">{{ form.nombre.label }}</label>
                             </div>
                             {% for error in form.nombre.errors %}
@@ -44,7 +44,7 @@
                         <div class="input-group fg-float {{ form.identificacion.css_classes }}">
                             <span class="input-group-addon"><i class="zmdi zmdi-card"></i></span>
                             <div class="fg-line">
-                                {{ form.identificacion }}
+                                {% if caso %}{{ caso.identificacion }}{% else %}{{ form.identificacion }}{% endif %}
                                 <label class="fg-label">{{ form.identificacion.label }}</label>
                             </div>
                             {% for error in form.identificacion.errors %}
@@ -72,7 +72,7 @@
                         <div class="input-group fg-float {{ form.asunto.css_classes }}">
                             <span class="input-group-addon"><i class="zmdi zmdi-assignment"></i></span>
                             <div class="fg-line">
-                                {{ form.asunto }}
+                                {% if caso %}{{ caso.asunto }}{% else %}{{ form.asunto }}{% endif %}
                                 <label class="fg-label">{{ form.asunto.label }}</label>
                             </div>
                             {% for error in form.asunto.errors %}
@@ -88,7 +88,7 @@
                     <div class="col-sm-6">                       
                         <div class="input-group fg-float {{ form.fecha_acontecimiento.css_classes }}">
                             <div class="fg-line">
-                                {{ form.fecha_acontecimiento }}
+                                {% if caso %}{{ caso.fecha_acontecimiento }}{% else %}{{ form.fecha_acontecimiento }}{% endif %}
                                 <label class="fg-label">{{ form.fecha_acontecimiento.label }}</label>
                             </div>
                             {% for error in form.fecha_acontecimiento.errors %}
@@ -133,7 +133,7 @@
                 	<div class="col-md-10 col-md-offset-1">
                 		<div class="input-group fg-float {{ form.descripcion.css_classes }}">
                             <div class="fg-line">
-                                {{ form.descripcion }}
+                                {% if caso %}{{ caso.descripcion }}{% else %}{{ form.descripcion }}{% endif %}
                                 <label class="fg-label">{{ form.descripcion.label }}</label>
                             </div>
                             {% for error in form.descripcion.errors %}

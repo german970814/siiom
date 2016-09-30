@@ -13,9 +13,10 @@ from django.db import transaction
 from .models import Caso, Invitacion
 from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
-    FormularioCerrarCaso
+    FormularioCerrarCaso, FormularioEditarCaso
 )
 from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion
+from .decorators import login_empleado
 
 # Apps
 from miembros.models import Miembro
@@ -334,7 +335,7 @@ def ver_casos_empleado(request):
     return render(request, 'pqr/ver_casos_empleado.html', data)
 
 
-@waffle_switch('compras')
+@waffle_switch('pqr')
 @permission_required('organizacional.es_presidente')
 def ver_casos_presidencia(request):
     """
@@ -354,7 +355,7 @@ def ver_casos_presidencia(request):
     return render(request, 'pqr/ver_casos_presidencia.html', data)
 
 
-@waffle_switch('compras')
+@waffle_switch('pqr')
 @login_required
 def nuevo_caso_servicio_cliente(request):
     """
@@ -387,3 +388,29 @@ def nuevo_caso_servicio_cliente(request):
     data = {'form': form}
 
     return render(request, 'pqr/nuevo_caso.html', data)
+
+
+# Agregado 30 Septiembre 2016
+# @waffle_switch('pqr')
+@login_empleado('is_servicio_cliente')
+def editar_caso(request, id_caso):
+    """
+    Vista para editar los casos, solo válido para casos que ya esten cerrados
+    """
+    caso = get_object_or_404(Caso, id=id_caso)
+
+    if caso.cerrado:
+        if request.method == 'POST':
+            form = FormularioEditarCaso(data=request.POST, instance=caso)
+
+            if form.is_valid():
+                form.save()
+                messages.success(request, _('Se ha editado el caso No.{} correctamente'.format(caso.id)))
+                return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
+        else:
+            form = FormularioEditarCaso(instance=caso)
+
+        data = {'form': form, 'caso': caso}
+
+        return render(request, 'pqr/nuevo_caso.html', data)
+    return redirect(request.META.get('HTTP_REFERER', None) or 'sin_permiso')

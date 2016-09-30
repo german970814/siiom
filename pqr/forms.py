@@ -163,3 +163,22 @@ class FormularioCerrarCaso(FormularioAgregarMensaje):
             )
         else:
             raise ValidationError(_('mensaje or caso not in self.cleaned_data'))
+
+
+# Agregado 30 Septiembre de 2016
+class FormularioEditarCaso(ModelFormBase):
+    """
+    Formulario para editar los datos de la persona que ingresa un caso
+    """
+
+    class Meta:
+        model = Caso
+        fields = (
+            'email', 'telefono', 'direccion',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioEditarCaso, self).__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})

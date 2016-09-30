@@ -59,7 +59,7 @@
         - Como paso final de la requisición, esta llega de vuelta al solicitante de la requisicion,
         el cual termina la requisicion una vez notifica que ha recibido todos los items de su requisición
 
-        Last Updated: 17th August 2016
+        Last Updated: 30th September 2016
 
 
 """

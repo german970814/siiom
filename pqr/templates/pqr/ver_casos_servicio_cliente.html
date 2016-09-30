@@ -51,8 +51,8 @@
         <table id="data-table-command" class="table table-striped table-vmiddle">
             <thead>
                 <tr>
-                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>
                     <th data-visible="false" data-identifier="false" data-column-id="color"></th>
+                    <th data-identifier="true" data-column-id="id">No.</th>
                     <th data-column-id="nombre" data-identifier="true">{% trans "Asunto" %}</th>
                     <th data-column-id="cedula" data-identifier="true">{% trans "Peticionario" %}</th>
                     <th data-column-id="area" data-identifier="true">{% trans "Fecha Petición" %}</th>
@@ -64,8 +64,8 @@
             <tbody>
                 {% for caso in casos %}
                     <tr>
-                        <td>{{ caso.id }}</td>
                         <td>{{ caso.get_semaforo }}</td>
+                        <td>{{ caso.id }}</td>
                         <td>{{ caso.asunto }}</td>
                         <td>{{ caso.nombre|upper }}</td>
                         <td>{{ caso.fecha_registro.date }}</td>
