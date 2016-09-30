@@ -110,6 +110,13 @@ USE_L10N = True
 
 USE_TZ = False
 
+TIME_INPUT_FORMATS = (
+    '%H:%M:%S',     # '14:30:59'
+    '%H:%M:%S.%f',  # '14:30:59.000200'
+    '%H:%M',        # '14:30'
+    '%I:%M %p',     # '06:30 AM'
+)
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 # MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'static').replace('\\','/')
