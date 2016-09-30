@@ -277,7 +277,7 @@
                             <ul>
                                 {% if perms.miembros.es_administrador %}
                                 <li>
-                                    <a href="/grupo/grupo_padre/">Grupo Padre</a>
+                                    <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
                                 </li>
                                 <li>
                                     <a href="/grupo/listar_redes/">Listar Redes</a>

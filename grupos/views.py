@@ -18,7 +18,7 @@ from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscip
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
-    FormularioTransladarGrupo, FormularioCrearGrupoRaiz, FormularioCrearPredica,
+    FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
     GrupoRaizForm, TransladarGrupoForm
 )
@@ -30,28 +30,6 @@ from common.groups_tests import (
 # Python Packages
 import datetime
 import json
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def grupoRaiz(request):
-    """Permite a un administrador crear o editar el grupo raiz de la iglesia."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == 'POST':
-        try:
-            grupoP = Grupo.objects.get(red=None)
-            form = FormularioCrearGrupoRaiz(data=request.POST, instance=grupoP)
-        except:
-            form = FormularioCrearGrupoRaiz(data=request.POST)
-        if form.is_valid():
-            form.save()
-    else:
-        try:
-            grupoP = Grupo.objects.get(red=None)
-            form = FormularioCrearGrupoRaiz(instance=grupoP, new=False)
-        except:
-            form = FormularioCrearGrupoRaiz()
-    return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")

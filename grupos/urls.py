@@ -3,7 +3,6 @@ from . import views
 from .views import *
 
 urlpatterns = [
-    url(r'^grupo_padre/$', views.grupoRaiz, name="grupo_padre"),
     url(r'^(\d+)/$', verGrupo, name="grupo"),
     url(r'^listar_redes/$', listarRedes, name="listar_redes"),
     url(r'^crear_red/$', crearRed, name="crear_red"),

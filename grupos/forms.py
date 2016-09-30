@@ -180,49 +180,6 @@ class FormularioCrearGrupo(ModelForm):
         exclude = ('red',)
 
 
-class FormularioCrearGrupoRaiz(ModelForm):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    def __init__(self, new=True, *args, **kwargs):
-        super(FormularioCrearGrupoRaiz, self).__init__(*args, **kwargs)
-        lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-        grupos = Grupo.objects.all()
-        lidGrupos = []
-        for g in grupos:
-            lidGrupos.extend(g.listaLideres())
-        if new:
-            query1 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-            query2 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-        else:
-            lider1 = self.instance.lider1.id
-            lidGrupos.remove(lider1)
-            query1 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-            lidGrupos.append(lider1)
-            if self.instance.lider2 is not None:
-                lider2 = self.instance.lider2.id
-                lidGrupos.remove(lider2)
-            query2 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-        self.fields['lider1'].queryset = query1 | Miembro.objects.filter(id__in=self.instance.listaLideres())
-        self.fields['lider2'].queryset = query2 | Miembro.objects.filter(id__in=self.instance.listaLideres())
-        self.fields['lider1'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['lider2'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control time-picker'})
-        self.fields['horaGAR'].required = False
-        self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['diaDiscipulado'].required = False
-        self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estado'].widget.attrs.update({'class': 'form-control'})
-        self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Grupo
-        exclude = ('red',)
-
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
 
