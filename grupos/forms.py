@@ -336,9 +336,8 @@ class GrupoRaizForm(CustomModelForm):
     Formulario parala creación o edición del grupo raiz.
     """
 
-    error_css_class = 'has-error'
     mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
-    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('lideres'))
+    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('Lideres'))
 
     class Meta:
         model = Grupo

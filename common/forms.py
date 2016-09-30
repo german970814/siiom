@@ -21,6 +21,8 @@ class CustomModelForm(forms.ModelForm):
     Formulario base para ModelForm.
     """
 
+    error_css_class = 'has-error'
+
     def __init__(self, *args, **kwargs):
         super(CustomModelForm, self).__init__(error_class=CustomErrorList, *args, **kwargs)
 
@@ -29,6 +31,8 @@ class CustomForm(forms.Form):
     """
     Formulario base para Form.
     """
+
+    error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
         super(CustomForm, self).__init__(error_class=CustomErrorList, *args, **kwargs)

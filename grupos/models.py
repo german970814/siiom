@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models, transaction
+from django.utils.translation import ugettext_lazy as _lazy
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
 from .managers import GrupoManager
@@ -28,27 +29,28 @@ class Grupo(AL_Node):
         ('6', 'Domingo'),
     )
 
-    parent = models.ForeignKey('self', related_name='children_set', null=True, db_index=True)
+    parent = models.ForeignKey('self', verbose_name=_lazy('padre'), related_name='children_set', null=True, db_index=True)
     lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
     lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
-    direccion = models.CharField(max_length=50)  # poner opcion de asignar la misma del lider por defecto(cual lider?)
-    estado = models.CharField(max_length=1, choices=opcionesEstado)
-    fechaApertura = models.DateField(verbose_name="Fecha de Apertura")
-    diaGAR = models.CharField(max_length=1, choices=opcionesDia, verbose_name='Dia G.A.R')
-    horaGAR = models.TimeField(verbose_name='Hora G.A.R')
-    diaDiscipulado = models.CharField(
-        max_length=1, choices=opcionesDia,
-        verbose_name='Dia Discipulado', blank=True, null=True
-    )
-    horaDiscipulado = models.TimeField(verbose_name='Hora Discipulado', blank=True, null=True)
-    nombre = models.CharField(max_length=30)
-    red = models.ForeignKey(Red, null=True, blank=True)
-    barrio = models.ForeignKey('miembros.Barrio')
+    direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)  # poner opcion de asignar la misma del lider por defecto(cual lider?)
+    estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=opcionesEstado)
+    fechaApertura = models.DateField(verbose_name=_lazy("fecha de apertura"))
+    diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=opcionesDia)
+    horaGAR = models.TimeField(verbose_name=_lazy('hora G.A.R'))
+    diaDiscipulado = models.CharField(verbose_name=_lazy('dia discipulado'), max_length=1, choices=opcionesDia, blank=True, null=True)
+    horaDiscipulado = models.TimeField(verbose_name=_lazy('hora discipulado'), blank=True, null=True)
+    nombre = models.CharField(verbose_name=_lazy('nombre'), max_length=30)
+    red = models.ForeignKey(Red, verbose_name=('red'), null=True, blank=True)
+    barrio = models.ForeignKey('miembros.Barrio', verbose_name=_lazy('barrio'))
 
     node_order_by = ['id']
 
     # managers
     objects = GrupoManager()
+
+    class Meta:
+        verbose_name = _lazy('grupo')
+        verbose_name_plural = _lazy('grupos')
 
     def __str__(self):
         lideres = ["{0} {1}({2})".format(
