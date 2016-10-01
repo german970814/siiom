@@ -15,29 +15,49 @@ class Red(models.Model):
 
 
 class Grupo(AL_Node):
-    opcionesEstado = (
-        ('A', 'Activo'),
-        ('I', 'Inactivo'),
-    )
-    opcionesDia = (
-        ('0', 'Lunes'),
-        ('1', 'Martes'),
-        ('2', 'Miercoles'),
-        ('3', 'Jueves'),
-        ('4', 'Viernes'),
-        ('5', 'Sabado'),
-        ('6', 'Domingo'),
+    """
+    Modelo para guardar la información de los grupos de la iglesia.
+    """
+
+    # opciones
+    ACTIVO = 'A'
+    INACTIVO = 'I'
+    ESTADOS = (
+        (ACTIVO, 'Activo'),
+        (INACTIVO, 'Inactivo'),
     )
 
-    parent = models.ForeignKey('self', verbose_name=_lazy('padre'), related_name='children_set', null=True, db_index=True)
+    LUNES = '0'
+    MARTES = '1'
+    MIERCOLES = '2'
+    JUEVES = '3'
+    VIERNES = '4'
+    SABADO = '5'
+    DOMINGO = '6'
+    DIAS_SEMANA = (
+        (LUNES, 'Lunes'),
+        (MARTES, 'Martes'),
+        (MIERCOLES, 'Miercoles'),
+        (JUEVES, 'Jueves'),
+        (VIERNES, 'Viernes'),
+        (SABADO, 'Sabado'),
+        (DOMINGO, 'Domingo'),
+    )
+
+    parent = models.ForeignKey(
+        'self', verbose_name=_lazy('padre'), related_name='children_set', null=True, db_index=True
+    )
     lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
     lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
-    direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)  # poner opcion de asignar la misma del lider por defecto(cual lider?)
-    estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=opcionesEstado)
+    # poner opcion de asignar la misma del lider por defecto(cual lider?)
+    direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
+    estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
     fechaApertura = models.DateField(verbose_name=_lazy("fecha de apertura"))
-    diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=opcionesDia)
+    diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=DIAS_SEMANA)
     horaGAR = models.TimeField(verbose_name=_lazy('hora G.A.R'))
-    diaDiscipulado = models.CharField(verbose_name=_lazy('dia discipulado'), max_length=1, choices=opcionesDia, blank=True, null=True)
+    diaDiscipulado = models.CharField(
+        verbose_name=_lazy('dia discipulado'), max_length=1, choices=DIAS_SEMANA, blank=True, null=True
+    )
     horaDiscipulado = models.TimeField(verbose_name=_lazy('hora discipulado'), blank=True, null=True)
     nombre = models.CharField(verbose_name=_lazy('nombre'), max_length=30)
     red = models.ForeignKey(Red, verbose_name=('red'), null=True, blank=True)
