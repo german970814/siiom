@@ -1,6 +1,6 @@
 from django.test import TestCase
 from grupos.models import Grupo
-from .factories import GrupoRaizFactory, GrupoFactory
+from .factories import GrupoRaizFactory, GrupoFactory, RedFactory
 
 
 class GrupoManagerTest(TestCase):
@@ -26,3 +26,18 @@ class GrupoManagerTest(TestCase):
 
         raiz_obtenida = Grupo.objects.raiz()
         self.assertIsNone(raiz_obtenida)
+
+    def test_red_devuelve_grupos_correctos(self):
+        """
+        Prueba que los grupos obtenidos pertenezcan a la red ingresada.
+        """
+
+        red_jovenes = RedFactory()
+        grupo_jovenes = GrupoFactory()
+        otra_red = RedFactory(nombre='adultos')
+        otro_grupo = GrupoFactory(red=otra_red)
+
+        grupos = Grupo.objects.red(red_jovenes)
+
+        self.assertIn(grupo_jovenes, grupos)
+        self.assertNotIn(otro_grupo, grupos)

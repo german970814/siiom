@@ -3,7 +3,7 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _lazy
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
-from .managers import GrupoManager
+from .managers import GrupoManager, GrupoQuerySet
 
 
 class Red(models.Model):
@@ -66,7 +66,7 @@ class Grupo(AL_Node):
     node_order_by = ['id']
 
     # managers
-    objects = GrupoManager()
+    objects = GrupoManager.from_queryset(GrupoQuerySet)()
 
     class Meta:
         verbose_name = _lazy('grupo')
