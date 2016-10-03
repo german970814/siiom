@@ -7,10 +7,10 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, render, redirect
 from django.template.context import RequestContext
-from django.views.generic.base import TemplateView
+from django.views.generic import TemplateView, CreateView
 
 # Third-Party App Imports
-from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
+from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin, PermissionRequiredMixin
 
 # Apps Imports
 from common.decorators import permisos_requeridos
@@ -20,7 +20,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, TransladarGrupoForm
+    GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -793,3 +793,13 @@ def transladar(request, pk):
         form = TransladarGrupoForm(grupo)
 
     return render(request, 'grupos/transladar.html', {'grupo': grupo, 'form': form})
+
+
+class CrearGrupoView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """
+    Permite a un administrador crear grupos de una iglesia.
+    """
+
+    model = Grupo
+    form_class = NuevoGrupoForm
+    permission_required = 'miembros.es_administrador'

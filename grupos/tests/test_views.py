@@ -7,7 +7,7 @@ from django.contrib.auth.models import Permission, Group
 from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from miembros.models import Miembro
-from grupos.models import Grupo
+from grupos.models import Grupo, Red
 from grupos.forms import GrupoRaizForm, TransladarGrupoForm
 from .factories import GrupoRaizFactory
 from .base import GruposBaseTest
@@ -184,13 +184,16 @@ class CrearGrupoViewTest(GruposBaseTest):
     Pruebas unitarias para la vista creación de grupos.
     """
 
-    URL = reverse('grupos:nuevo')
+    URL = reverse('grupos:nuevo', args=(1,))
 
     def setUp(self):
+        super(CrearGrupoViewTest, self).setUp()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
         self.lider1 = MiembroFactory(lider=True)
         self.lider2 = MiembroFactory(lider=True)
         self.barrio = BarrioFactory()
+
+        red_jovenes = Red.objects.get(nombre='jovenes')
 
     def login_usuario(self, usuario):
         """

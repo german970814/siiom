@@ -288,6 +288,21 @@ class FormularioEditarReunionGAR(forms.ModelForm):
         )
 
 
+class BaseGrupoForm(CustomModelForm):
+    """
+    Formulario base para el manejo de grupos de una iglesia.
+    """
+
+    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('Lideres'))
+
+    class Meta:
+        model = Grupo
+        fields = [
+            'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
+            'horaDiscipulado', 'nombre', 'barrio'
+        ]
+
+
 class GrupoRaizForm(CustomModelForm):
     """
     Formulario parala creación o edición del grupo raiz.
@@ -338,6 +353,21 @@ class GrupoRaizForm(CustomModelForm):
         except IntegrityError:
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
+
+
+class NuevoGrupoForm(CustomModelForm):
+    """
+    Formulario para la creación de un grupo en una iglesia.
+    """
+
+    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('Lideres'))
+
+    class Meta:
+        model = Grupo
+        fields = [
+            'parent', 'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
+            'horaDiscipulado', 'nombre', 'barrio'
+        ]
 
 
 class TransladarGrupoForm(forms.Form):
