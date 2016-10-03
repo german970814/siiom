@@ -290,26 +290,10 @@ class FormularioEditarReunionGAR(forms.ModelForm):
 
 class BaseGrupoForm(CustomModelForm):
     """
-    Formulario base para el manejo de grupos de una iglesia.
+    Formulario base el manejo de grupo de una iglesia.
     """
 
-    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('Lideres'))
-
-    class Meta:
-        model = Grupo
-        fields = [
-            'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
-            'horaDiscipulado', 'nombre', 'barrio'
-        ]
-
-
-class GrupoRaizForm(CustomModelForm):
-    """
-    Formulario parala creación o edición del grupo raiz.
-    """
-
-    mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
-    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('Lideres'))
+    lideres = forms.ModelMultipleChoiceField(queryset=Grupo.objects.none(), label=_lazy('Lideres'))
 
     class Meta:
         model = Grupo
@@ -319,7 +303,7 @@ class GrupoRaizForm(CustomModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        super(GrupoRaizForm, self).__init__(*args, **kwargs)
+        super(BaseGrupoForm, self).__init__(*args, **kwargs)
         self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
@@ -332,6 +316,17 @@ class GrupoRaizForm(CustomModelForm):
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
         self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
+
+
+class GrupoRaizForm(BaseGrupoForm):
+    """
+    Formulario para la creación o edición del grupo raiz.
+    """
+
+    mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
+
+    def __init__(self, *args, **kwargs):
+        super(GrupoRaizForm, self).__init__(*args, **kwargs)
 
         if self.instance.pk:
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
@@ -355,19 +350,18 @@ class GrupoRaizForm(CustomModelForm):
             return None
 
 
-class NuevoGrupoForm(CustomModelForm):
+class NuevoGrupoForm(BaseGrupoForm):
     """
     Formulario para la creación de un grupo en una iglesia.
     """
 
-    lideres = forms.ModelMultipleChoiceField(queryset=None, label=_lazy('Lideres'))
+    class Meta(BaseGrupoForm.Meta):
+        fields = ['parent'] + BaseGrupoForm.Meta.fields
 
-    class Meta:
-        model = Grupo
-        fields = [
-            'parent', 'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
-            'horaDiscipulado', 'nombre', 'barrio'
-        ]
+    def __init__(self, red, *args, **kwargs):
+        super(NuevoGrupoForm, self).__init__(*args, **kwargs)
+        self.fields['parent'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['parent'].queryset = Grupo.objects.prefetch_related('lideres').all()
 
 
 class TransladarGrupoForm(forms.Form):
