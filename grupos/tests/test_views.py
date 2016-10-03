@@ -179,6 +179,72 @@ class GrupoRaizViewTest(TestCase):
         self.assertFormError(response, 'form', None, GrupoRaizForm.mensaje_error)
 
 
+class CrearGrupoViewTest(GruposBaseTest):
+    """
+    Pruebas unitarias para la vista creación de grupos.
+    """
+
+    URL = reverse('grupos:nuevo')
+
+    def setUp(self):
+        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.lider1 = MiembroFactory(lider=True)
+        self.lider2 = MiembroFactory(lider=True)
+        self.barrio = BarrioFactory()
+
+    def login_usuario(self, usuario):
+        """
+        Loguea un usuario.
+        """
+
+        self.client.login(email=usuario.email, password='123456')
+
+    def datos_formulario(self):
+        """
+        Retorna un diccionario con datos para el formulario GrupoForm.
+        """
+
+        data = {
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id]
+        }
+
+        return data
+
+    def test_admin_get_template(self):
+        """
+        Prueba que un administrador pueda ver el template.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.get(self.URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id_parent')
+
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a misma página en GET.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, self.datos_formulario())
+
+        self.assertRedirects(response, self.URL)
+
+    def test_formulario_invalido_muestra_errores(self):
+        """
+        Prueba que si el formulario no es valido se muestren los errores.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, {})
+
+        self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
+        self.assertFormError(response, 'form', 'parent', 'Este campo es obligatorio.')
+
+
 class TransladarGrupoViewTest(GruposBaseTest):
     """
     Pruebas unitarias para la vista de transladar un grupo a un nuevo padre.
