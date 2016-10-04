@@ -184,8 +184,6 @@ class CrearGrupoViewTest(GruposBaseTest):
     Pruebas unitarias para la vista creación de grupos.
     """
 
-    URL = reverse('grupos:nuevo', args=(1,))
-
     def setUp(self):
         super(CrearGrupoViewTest, self).setUp()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
@@ -194,6 +192,7 @@ class CrearGrupoViewTest(GruposBaseTest):
         self.barrio = BarrioFactory()
 
         red_jovenes = Red.objects.get(nombre='jovenes')
+        self.URL = reverse('grupos:nuevo', args=(red_jovenes.id,))
 
     def login_usuario(self, usuario):
         """
@@ -214,6 +213,15 @@ class CrearGrupoViewTest(GruposBaseTest):
         }
 
         return data
+
+    def test_get_red_no_existe_devuelve_404(self):
+        """
+        Prueba que si se envia una red que no existe la vista devuelve un status code de 404.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.get(reverse('grupos:nuevo', args=(100,)))
+        self.assertRaises(Http404)
 
     def test_admin_get_template(self):
         """

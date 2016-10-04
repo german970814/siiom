@@ -150,7 +150,7 @@ class NuevoGrupoFormTest(GruposBaseTest):
         super(NuevoGrupoFormTest, self).setUp()
         self.red_jovenes = Red.objects.get(nombre='jovenes')
 
-    def test_campo_parent_solo_muestra_grupos_red_seleccionada(self):
+    def test_campo_parent_solo_muestra_grupos_red_ingresada(self):
         """
         Prueba que el campo parent solo muestra los grupos pertenecientes a la red ingresada.
         """
@@ -171,10 +171,12 @@ class NuevoGrupoFormTest(GruposBaseTest):
         """
 
         raiz = Grupo.objects.get(id=1)
+        otro = Grupo.objects.get(id=3)
         red_nueva = RedFactory(nombre='nueva red')
 
         form = NuevoGrupoForm(red=red_nueva)
         self.assertIn(raiz, form.fields['parent'].queryset)
+        self.assertNotIn(otro, form.fields['parent'].queryset)
 
     def test_campo_lideres_solo_muestra_lideres(self):
         """
@@ -192,8 +194,40 @@ class NuevoGrupoFormTest(GruposBaseTest):
         """
 
         grupo = Grupo.objects.get(id=3)
-        lider_sin_grupo = MiembroFactory(lider=True)
+        lider_sin_grupo = MiembroFactory(lider=True, grupo=grupo)
         form = NuevoGrupoForm(red=self.red_jovenes)
 
         self.assertNotIn(grupo.lideres.first(), form.fields['lideres'].queryset)
         self.assertIn(lider_sin_grupo, form.fields['lideres'].queryset)
+
+    def test_campo_lideres_solo_muestra_lideres_red_ingresada(self):
+        """
+        Prueba que el campo lideres solo muestra lideres que pertenecen a los grupos de la red ingresada.
+        """
+
+        grupo1 = Grupo.objects.get(id=3)
+        lider_joven = MiembroFactory(lider=True, grupo=grupo1)
+
+        grupo2 = Grupo.objects.get(id=4)
+        otro_lider = MiembroFactory(lider=True, grupo=grupo2)
+
+        form = NuevoGrupoForm(red=self.red_jovenes)
+
+        self.assertIn(lider_joven, form.fields['lideres'].queryset)
+        self.assertNotIn(otro_lider, form.fields['lideres'].queryset)
+
+    def test_campo_lideres_muestra_lideres_raiz_si_red_no_tiene_grupo(self):
+        """
+        Prueba que el campo lideres muestre los lideres disponibles que asisten al grupo raiz de la iglesia si la red
+        ingresada no tiene ningún grupo.
+        """
+
+        raiz = Grupo.objects.get(id=1)
+        otro = Grupo.objects.get(id=3)
+        red_nueva = RedFactory(nombre='nueva red')
+        miembro = MiembroFactory(lider=True, grupo=raiz)
+
+        form = NuevoGrupoForm(red=red_nueva)
+
+        self.assertIn(miembro, form.fields['lideres'].queryset)
+        self.assertNotIn(otro.lideres.first(), form.fields['lideres'].queryset)

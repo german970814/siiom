@@ -363,9 +363,14 @@ class NuevoGrupoForm(BaseGrupoForm):
         self.fields['parent'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
         if grupos_query.count() == 0:
-            grupos_query = grupos_query | Grupo.objects.filter(id=Grupo.objects.raiz().id)
+            grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
 
         self.fields['parent'].queryset = grupos_query
+        query_lideres = self.fields['lideres'].queryset.red(red)
+        if query_lideres.count() == 0:
+            query_lideres = query_lideres | Grupo.objects.raiz().miembro_set.lideres_disponibles()
+
+        self.fields['lideres'].queryset = query_lideres
 
 
 class TransladarGrupoForm(forms.Form):

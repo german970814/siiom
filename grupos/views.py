@@ -778,6 +778,22 @@ def grupo_raiz(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
+def crear_grupo(request, pk):
+    """
+    Permite a un administrador crear un grupo de una iglesia en la red ingresada.
+    """
+
+    red = get_object_or_404(Red, pk=pk)
+    if request.method == 'POST':
+        form = NuevoGrupoForm(red=red, data=request.POST)
+    else:
+        form = NuevoGrupoForm(red=red)
+
+    return render(request, 'grupos/grupo_form.html', {'form': form})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def transladar(request, pk):
     """
     Permite a un administrador transladar un grupo a una nueva posición en el organigrama de grupos.
@@ -793,13 +809,3 @@ def transladar(request, pk):
         form = TransladarGrupoForm(grupo)
 
     return render(request, 'grupos/transladar.html', {'grupo': grupo, 'form': form})
-
-
-class CrearGrupoView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    """
-    Permite a un administrador crear grupos de una iglesia.
-    """
-
-    model = Grupo
-    form_class = NuevoGrupoForm
-    permission_required = 'miembros.es_administrador'
