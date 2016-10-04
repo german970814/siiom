@@ -1,3 +1,4 @@
+from miembros.tests.factories import MiembroFactory
 from grupos.models import Grupo
 from .base import GruposBaseTest
 
@@ -70,3 +71,19 @@ class GrupoModelTest(GruposBaseTest):
         grupo.refresh_from_db()
         self.assertEqual(grupo.red, nuevo_padre.red)
         self.assertTrue(all(descendiente.red == nuevo_padre.red for descendiente in grupo.get_descendants()))
+
+    def test_discipulos_devuelve_solo_miembros_grupo_son_lideres(self):
+        """
+        Prueba que los discipulos obtenidos son los miembros del grupo que son lideres.
+        """
+
+        grupo = Grupo.objects.get(id=3)
+        miembro = MiembroFactory(grupo=grupo)
+        lider = Grupo.objects.get(id=5).lideres.first()
+        otro_lider = Grupo.objects.get(id=2).lideres.first()
+
+        discipulos = list(grupo.discipulos)
+
+        self.assertIn(lider, discipulos)
+        self.assertNotIn(miembro, discipulos)
+        self.assertNotIn(otro_lider, discipulos)

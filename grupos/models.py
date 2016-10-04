@@ -166,6 +166,14 @@ class Grupo(AL_Node):
 
         return arbol
 
+    @property
+    def discipulos(self):
+        """
+        Devuelve un queryset con los miembros del grupo que son lideres.
+        """
+
+        return self.miembro_set.lideres2()
+
     def transladar(self, nuevo_padre):
         """
         Translada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
