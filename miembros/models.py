@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
-from .managers import MiembroManager
+from .managers import MiembroManager, MiembroQuerySet
 
 
 class Zona(models.Model):
@@ -173,7 +173,7 @@ class Miembro(models.Model):
     fechaRegistro = models.DateField(auto_now_add=True)
 
     # managers
-    objects = MiembroManager()
+    objects = MiembroManager.from_queryset(MiembroQuerySet)()
 
     def __str__(self):
         return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'

@@ -2,6 +2,20 @@ from django.db import models
 from django.contrib.auth.models import Permission
 
 
+class MiembroQuerySet(models.QuerySet):
+    """
+    Queryset personalizado para los miembros.
+    """
+
+    def red(self, red):
+        """
+        Devuelve un queryset con los miembros filtrados por la red ingresada. Los miembros se filtran por el grupo al
+        que pertencen.
+        """
+
+        return self.filter(grupo__red=red)
+
+
 class MiembroManager(models.Manager):
     """
     Manager para los miembros.
