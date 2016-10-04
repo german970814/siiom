@@ -2,9 +2,10 @@ from unittest import mock
 from django.test import TestCase
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from grupos.tests.factories import GrupoFactory, GrupoRaizFactory
-from grupos.forms import GrupoRaizForm
-from grupos.models import Grupo
+from grupos.tests.factories import GrupoFactory, GrupoRaizFactory, RedFactory
+from grupos.forms import GrupoRaizForm, NuevoGrupoForm
+from grupos.models import Grupo, Red
+from .base import GruposBaseTest
 
 
 class GrupoRaizFormTest(TestCase):
@@ -138,3 +139,61 @@ class GrupoRaizFormTest(TestCase):
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
+
+
+class NuevoGrupoFormTest(GruposBaseTest):
+    """
+    Pruebas unitarias para el formulario de creación de grupos de una iglesia.
+    """
+
+    def setUp(self):
+        super(NuevoGrupoFormTest, self).setUp()
+        self.red_jovenes = Red.objects.get(nombre='jovenes')
+
+    def test_campo_parent_solo_muestra_grupos_red_seleccionada(self):
+        """
+        Prueba que el campo parent solo muestra los grupos pertenecientes a la red ingresada.
+        """
+
+        raiz = Grupo.objects.get(id=1)
+        grupo1 = Grupo.objects.get(id=3)
+        grupo2 = Grupo.objects.get(id=4)
+
+        form = NuevoGrupoForm(red=self.red_jovenes)
+
+        self.assertIn(grupo1, form.fields['parent'].queryset)
+        self.assertNotIn(grupo2, form.fields['parent'].queryset)
+        self.assertNotIn(raiz, form.fields['parent'].queryset)
+
+    def test_campo_parent_muestra_raiz_sino_red_no_tiene_grupos(self):
+        """
+        Prueba que el campo parent muestre el grupo raiz de la iglesia si la red ingresada no tiene ningún grupo.
+        """
+
+        raiz = Grupo.objects.get(id=1)
+        red_nueva = RedFactory(nombre='nueva red')
+
+        form = NuevoGrupoForm(red=red_nueva)
+        self.assertIn(raiz, form.fields['parent'].queryset)
+
+    def test_campo_lideres_solo_muestra_lideres(self):
+        """
+        Prueba que el campo lideres solo se muestren miembros que sean lideres.
+        """
+
+        no_lider = MiembroFactory()
+        form = NuevoGrupoForm(red=self.red_jovenes)
+
+        self.assertNotIn(no_lider, form.fields['lideres'].queryset)
+
+    def test_campo_lideres_solo_muestra_lideres_sin_grupo(self):
+        """
+        Prueba que en el campo lideres solo se muestren miembros que sean lideres que no lideren grupo.
+        """
+
+        grupo = Grupo.objects.get(id=3)
+        lider_sin_grupo = MiembroFactory(lider=True)
+        form = NuevoGrupoForm(red=self.red_jovenes)
+
+        self.assertNotIn(grupo.lideres.first(), form.fields['lideres'].queryset)
+        self.assertIn(lider_sin_grupo, form.fields['lideres'].queryset)

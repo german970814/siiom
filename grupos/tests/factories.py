@@ -31,3 +31,7 @@ class GrupoRaizFactory(GrupoFactory):
 
 class GrupoHijoFactory(GrupoFactory):
     red = factory.LazyAttribute(lambda o: o.parent.red)
+    lider = factory.RelatedFactory(
+        'miembros.tests.factories.MiembroFactory', 'grupo_lidera',
+        grupo=factory.LazyAttribute(lambda o: o.grupo_lidera.parent), lider=True
+    )

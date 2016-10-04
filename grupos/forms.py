@@ -361,7 +361,11 @@ class NuevoGrupoForm(BaseGrupoForm):
     def __init__(self, red, *args, **kwargs):
         super(NuevoGrupoForm, self).__init__(*args, **kwargs)
         self.fields['parent'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['parent'].queryset = Grupo.objects.prefetch_related('lideres').all()
+        grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
+        if grupos_query.count() == 0:
+            grupos_query = grupos_query | Grupo.objects.filter(id=Grupo.objects.raiz().id)
+
+        self.fields['parent'].queryset = grupos_query
 
 
 class TransladarGrupoForm(forms.Form):
