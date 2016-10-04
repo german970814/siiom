@@ -42,3 +42,15 @@ class MiembroManagerTest(TestCase):
 
         self.assertIn(miembro_jovenes, miembros)
         self.assertNotIn(otro_miembro, miembros)
+
+    def test_lideres_devuelve_los_miembros_iglesia_son_lideres(self):
+        """
+        Los lideres son los miembros de una iglesia que tengan el permiso de lider.
+        """
+
+        miembro = MiembroFactory()
+        lider = MiembroFactory(lider=True)
+
+        lideres = list(Miembro.objects.lideres2())
+        self.assertIn(lider, lideres)
+        self.assertNotIn(miembro, lideres)
