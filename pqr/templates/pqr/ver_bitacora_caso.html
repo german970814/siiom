@@ -269,6 +269,18 @@
                             <small class="ms-date"><i class="zmdi zmdi-time"></i> {{ caso.fecha_registro }}</small>
                         </div>
                     </div>
+                    {% if caso.documentos.exists %}
+                    {% for documento in caso.documentos.all %}
+                	<div class="lv-item media ">
+                        <div class="lv-avatar bgm-teal pull-left" data-trigger="hover" data-toggle="popover" data-placement="bottom right" data-content="{{ caso.nombre }}" title="" data-original-title="Nombre Solicitante"><span><i class="zmdi {% if documento.is_image %}zmdi-image{% else %}zmdi-file{% endif %}"></i></span></div>
+                        <div class="media-body">
+                            <div class="ms-item bgm-teal">
+                                <strong><a href="{{ documento.get_absolute_url }}" class="c-white"><u>{{ documento.get_name }}</u></a></strong>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
                 	{% for mensaje in caso.comentario_set.all %}
                     {% if mensaje.empleado == empleado %}
                     <div class="lv-item media right" title="{{ mensaje.empleado.primer_nombre }} {{ mensaje.empleado.primer_apellido }}">

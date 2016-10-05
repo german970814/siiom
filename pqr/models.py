@@ -1,6 +1,7 @@
 # Django Package
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 # Locale Apps
@@ -10,6 +11,7 @@ from .managers import CasoManager
 # Python Package
 import datetime
 import calendar
+import re
 
 
 class Caso(models.Model):
@@ -168,6 +170,7 @@ class Comentario(models.Model):
     empleado = models.ForeignKey('organizacional.Empleado', verbose_name=_('empleado'))
     caso = models.ForeignKey(Caso, verbose_name=_('caso'))
     importante = models.BooleanField(default=False, verbose_name=_('importante'))
+    documento = models.BooleanField(default=False, verbose_name=_('documento'))
 
     def __str__(self):
         return 'Comentario Caso # {0}-{1}'.format(self.caso.id, self.id)
@@ -195,3 +198,60 @@ class Invitacion(models.Model):
 
     def __str__(self):
         return 'Invitación a {0}, caso {1}'.format(self.receptor.__str__(), self.caso.id)
+
+
+class Documento(models.Model):
+    """
+    Modelo para guardar los documentos de cada Caso
+    """
+
+    def ruta_archivo(self, filename):
+        match = re.compile(r'[a-zA-ZñNáÁéÉíÍóÓúÚ\s0-9_]')
+        data_name = filename.split('.')
+        ext = data_name[len(data_name) - 1]
+        del data_name[data_name.index(ext)]
+        name = ''.join(match.findall(''.join(data_name)))
+        filename = name + '.' + ext
+        caso = self.caso
+        return 'pqr/caso_{}/{}'.format(caso.id, filename)
+
+    archivo = models.FileField(_('Archivo'), upload_to=ruta_archivo)
+    caso = models.ForeignKey(Caso, verbose_name=_('Caso'), related_name='documentos')
+
+    def __str__(self):
+        return self.get_name()
+
+    def save(self, *args, **kwargs):
+        empleado = kwargs.pop('empleado', None)
+        if empleado is not None:
+            self.save_file_as_comment(self, empleado)
+        super(Documento, self).save(*args, **kwargs)
+
+    @property
+    def is_image(self):
+        """"""
+        from common.constants import IMAGES
+        return self.get_name().split('.')[1] in IMAGES.keys()
+
+    def get_name(self):
+        """
+        Retorna el nombre de el archivo
+        """
+        path = self.archivo._get_path().split('/')
+        return path[len(path) - 1]
+
+    def get_absolute_url(self):
+        return reverse('pqr:descargar_archivos', args=(self.id, ))
+
+    def save_file_as_comment(self, empleado):
+        """
+        Guarda un archivo como un comentario
+        """
+
+        if empleado in self.caso.integrantes.all() or empleado == self.caso.empleado_cargo:
+            return Comentario.objects.create(
+                empleado=empleado,
+                caso=self.caso,
+                mensaje=self.get_name()
+            )
+        raise TypeError("Empleado no pertenece a caso")

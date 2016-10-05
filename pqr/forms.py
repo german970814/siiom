@@ -5,10 +5,11 @@ from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 
 # Locale Apps
-from .models import Caso, Comentario, Invitacion
+from .models import Caso, Comentario, Invitacion, Documento
 
 # Apps
 from organizacional.models import Empleado
+from common.constants import CONTENT_TYPES
 
 # Python Package
 import re
@@ -182,3 +183,28 @@ class FormularioEditarCaso(ModelFormBase):
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
+
+
+class FormularioAgregarArchivoCaso(ModelFormBase):
+    """
+    Formulario para agregar archivos a los casos
+    """
+
+    class Meta:
+        model = Documento
+        fields = ('archivo', )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioAgregarArchivoCaso, self).__init__(*args, **kwargs)
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo', None)
+
+        if archivo is not None:
+            if archivo.content_type not in CONTENT_TYPES.values():
+                self.add_error('archivo', _('Formato de Archivo No Soportado'))
+            elif len(archivo.name.split('.')) == 1:
+                self.add_error('archivo', _('Formato de Archivo No Econtrado'))
+
+            return archivo
+        raise ValidationError(_("No se econtro, el archivo"))

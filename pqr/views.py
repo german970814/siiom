@@ -3,17 +3,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.utils.translation import ugettext_lazy as _
-from django.http import Http404
+from django.utils.translation import ugettext_lazy as _, ugettext
+from django.http import Http404, HttpResponse
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
 
 # Locale Apps
-from .models import Caso, Invitacion
+from .models import Caso, Invitacion, Documento
 from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
-    FormularioCerrarCaso, FormularioEditarCaso
+    FormularioCerrarCaso, FormularioEditarCaso, FormularioAgregarArchivoCaso
 )
 from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion
 from .decorators import login_empleado
@@ -21,6 +21,7 @@ from .decorators import login_empleado
 # Apps
 from miembros.models import Miembro
 from organizacional.models import Empleado
+from common.constants import CONTENT_TYPES
 
 # Third's Apps
 from waffle.decorators import waffle_switch
@@ -28,9 +29,11 @@ from waffle.decorators import waffle_switch
 # Python Package
 import calendar
 import datetime
+import json
 
 
 @waffle_switch('pqr')
+@transaction.atomic
 def nuevo_caso(request):
     """
     Vista de creacion de un nuevo caso, de queja pregunta o reclamo
@@ -98,24 +101,73 @@ def nuevo_caso(request):
                         ).date()
                 else:
                     caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
-                caso.save()
+                # caso.save()
                 if not settings.DEBUG:
                     enviar_email_success(request, caso)
                 #  enviar_email_verificacion(request, caso)  # Si se quiere verificar email
+                if request.FILES:
+                    errors = 0
+                    _errors = []
+                    for file in request.FILES:
+                        form_archivo = FormularioAgregarArchivoCaso(files={'archivo': request.FILES[file]})
+
+                        if form_archivo.is_valid():
+                            archivo = form_archivo.save(commit=False)
+                            archivo.caso = caso
+                            archivo.save()
+                        else:
+                            _errors.append(form_archivo.errors)
+                            errors += 1
+                    if errors > 0:
+                        if settings.DEBUG:
+                            print(_errors)
+                        message = ugettext(
+                            'Ha Ocurrido errores con los archivos, vuelve a intentarlo. Puede que el formato de tus archivos no sea soportado'
+                        )
+                        data = {
+                            'message': message,
+                            'response_code': 400
+                        }
+                        if request.is_ajax():
+                            return HttpResponse(json.dumps(data), content_type='application/json')
+                else:
+                    pass
+
+                message = ugettext("""Su solicitud ha sido enviada satisfactoriamente,
+                     recibirá un correo de confirmación para verificar sus datos""")
+
+                caso.save()
+                messages.success(
+                    request, message
+                )
+
+                if request.is_ajax():
+                    data = {
+                        'response_code': 200,
+                        'message': message
+                    }
+                    return HttpResponse(json.dumps(data), content_type='application/json')
             except Exception as e:
                 if settings.DEBUG:
-                    from django.http import HttpResponse
+                    raise(e)
                     return HttpResponse(e, content_type='text/plain')
                 pass
             # enviar_email_verificacion(request, caso)  # Comment this line when DEBUG is True
-            messages.success(
-                request,
-                _("""Su solicitud ha sido enviada satisfactoriamente,
-                     recibirá un correo de confirmación para verificar sus datos""")
-            )
+
             return redirect(reverse_lazy('pqr:nuevo_caso'))
         else:
-            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+            message = ugettext('Ha ocurrido un error al enviar el formulario')
+            if request.is_ajax():
+                error_fields = [field for field in form.errors]
+                data = {
+                    'error_fields': error_fields,
+                    'message': message,
+                    'response_code': 400
+                }
+                # raise Exception("aglo")
+                return HttpResponse(json.dumps(data), content_type='application/json')
+            else:
+                messages.error(request, message)
 
     else:
         form = FormularioCaso(initial=initial)
@@ -414,3 +466,25 @@ def editar_caso(request, id_caso):
 
         return render(request, 'pqr/nuevo_caso.html', data)
     return redirect(request.META.get('HTTP_REFERER', None) or 'sin_permiso')
+
+
+@login_empleado
+def descargar_archivos(request, id_documento):
+    """
+    Vista para devolver un archivo listo para descargar
+    """
+    try:
+        documento = get_object_or_404(Documento, pk=id_documento)
+
+        try:
+            ext = documento.get_name.split('.')
+            if ext:
+                ext = ext[len(ext) - 1]
+            response = HttpResponse(documento.archivo, content_type=CONTENT_TYPES[ext])
+        except:
+            response = HttpResponse(documento.archivo)
+
+        response['Content-Disposition'] = "attachment; filename='%s'" % documento.get_name()
+        return response
+    except Exception as exception:
+        return HttpResponse(exception, content_type='text/plain')
