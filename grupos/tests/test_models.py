@@ -30,7 +30,7 @@ class GrupoModelTest(GruposBaseTest):
         Prueba que la lista obtenida sea igual a la lista del arbol de un padre especifico.
         """
 
-        cb2 = Grupo.objects.get(id=3)
+        cb2 = Grupo.objects.get(id=300)
         lista_obtenida = Grupo.obtener_arbol(cb2)
         self.assertListEqual(lista_obtenida, self.lista_arbol_cb2)
 
@@ -39,7 +39,7 @@ class GrupoModelTest(GruposBaseTest):
         Prueba que cuando se quiere transladar un grupo al mismo padre no se cambie el grupo padre.
         """
 
-        grupo = Grupo.objects.get(id=5)
+        grupo = Grupo.objects.get(id=500)
         padre = grupo.get_parent()
 
         grupo.transladar(padre)
@@ -51,8 +51,8 @@ class GrupoModelTest(GruposBaseTest):
         lideres del grupo que se esta transladando.
         """
 
-        grupo = Grupo.objects.get(id=5)
-        nuevo_padre = Grupo.objects.get(id=8)
+        grupo = Grupo.objects.get(id=500)
+        nuevo_padre = Grupo.objects.get(id=800)
 
         grupo.transladar(nuevo_padre)
         self.assertTrue(all(lider.grupo == nuevo_padre for lider in grupo.lideres.all()))
@@ -63,8 +63,8 @@ class GrupoModelTest(GruposBaseTest):
         sus descendientes se mueven a la nueva red.
         """
 
-        grupo = Grupo.objects.get(id=5)
-        nuevo_padre = Grupo.objects.get(id=2)
+        grupo = Grupo.objects.get(id=500)
+        nuevo_padre = Grupo.objects.get(id=200)
         red_actual = grupo.red
 
         grupo.transladar(nuevo_padre)
@@ -77,10 +77,10 @@ class GrupoModelTest(GruposBaseTest):
         Prueba que los discipulos obtenidos son los miembros del grupo que son lideres.
         """
 
-        grupo = Grupo.objects.get(id=3)
+        grupo = Grupo.objects.get(id=300)
         miembro = MiembroFactory(grupo=grupo)
-        lider = Grupo.objects.get(id=5).lideres.first()
-        otro_lider = Grupo.objects.get(id=2).lideres.first()
+        lider = Grupo.objects.get(id=500).lideres.first()
+        otro_lider = Grupo.objects.get(id=200).lideres.first()
 
         discipulos = list(grupo.discipulos)
 

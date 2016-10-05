@@ -69,7 +69,7 @@ class OrganigramaGruposViewTest(GruposBaseTest):
         """
 
         self.usuario.user_permissions.add(Permission.objects.get(codename='es_lider'))
-        miembro = Grupo.objects.get(id=3).lideres.first()
+        miembro = Grupo.objects.get(id=300).lideres.first()
         miembro.usuario = self.usuario
         miembro.save()
 
@@ -262,7 +262,7 @@ class TransladarGrupoViewTest(GruposBaseTest):
     """
 
     TEMPLATE = 'grupos/transladar.html'
-    URL = reverse('grupos:transladar', args=(5,))
+    URL = reverse('grupos:transladar', args=(500,))
 
     def setUp(self):
         super(TransladarGrupoViewTest, self).setUp()
@@ -320,11 +320,11 @@ class TransladarGrupoViewTest(GruposBaseTest):
         Prueba que si el formulario es valido translada el  grupo y redirecciona.
         """
 
-        nuevo = Grupo.objects.get(id=8)
+        nuevo = Grupo.objects.get(id=800)
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, {'nuevo': '8'})
+        response = self.client.post(self.URL, {'nuevo': '800'})
 
-        grupo = Grupo.objects.get(id=5)
+        grupo = Grupo.objects.get(id=500)
         self.assertRedirects(response, self.URL)
         self.assertEqual(grupo.get_parent(), nuevo)
 

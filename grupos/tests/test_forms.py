@@ -148,16 +148,34 @@ class NuevoGrupoFormTest(GruposBaseTest):
 
     def setUp(self):
         super(NuevoGrupoFormTest, self).setUp()
+        grupo3 = Grupo.objects.get(id=300)
+        self.padre = Grupo.objects.get(id=800)
+        self.lider1 = MiembroFactory(lider=True,  grupo=grupo3)
+        self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
+        self.barrio = BarrioFactory()
         self.red_jovenes = Red.objects.get(nombre='jovenes')
+
+    def datos_formulario(self):
+        """
+        Retorna un diccionario con datos para el formulario GrupoRaiz.
+        """
+
+        data = {
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': self.padre.id
+        }
+
+        return data
 
     def test_campo_parent_solo_muestra_grupos_red_ingresada(self):
         """
         Prueba que el campo parent solo muestra los grupos pertenecientes a la red ingresada.
         """
 
-        raiz = Grupo.objects.get(id=1)
-        grupo1 = Grupo.objects.get(id=3)
-        grupo2 = Grupo.objects.get(id=4)
+        raiz = Grupo.objects.get(id=100)
+        grupo1 = Grupo.objects.get(id=300)
+        grupo2 = Grupo.objects.get(id=400)
 
         form = NuevoGrupoForm(red=self.red_jovenes)
 
@@ -170,8 +188,8 @@ class NuevoGrupoFormTest(GruposBaseTest):
         Prueba que el campo parent muestre el grupo raiz de la iglesia si la red ingresada no tiene ningún grupo.
         """
 
-        raiz = Grupo.objects.get(id=1)
-        otro = Grupo.objects.get(id=3)
+        raiz = Grupo.objects.get(id=100)
+        otro = Grupo.objects.get(id=300)
         red_nueva = RedFactory(nombre='nueva red')
 
         form = NuevoGrupoForm(red=red_nueva)
@@ -193,7 +211,7 @@ class NuevoGrupoFormTest(GruposBaseTest):
         Prueba que en el campo lideres solo se muestren miembros que sean lideres que no lideren grupo.
         """
 
-        grupo = Grupo.objects.get(id=3)
+        grupo = Grupo.objects.get(id=300)
         lider_sin_grupo = MiembroFactory(lider=True, grupo=grupo)
         form = NuevoGrupoForm(red=self.red_jovenes)
 
@@ -205,10 +223,10 @@ class NuevoGrupoFormTest(GruposBaseTest):
         Prueba que el campo lideres solo muestra lideres que pertenecen a los grupos de la red ingresada.
         """
 
-        grupo1 = Grupo.objects.get(id=3)
+        grupo1 = Grupo.objects.get(id=300)
         lider_joven = MiembroFactory(lider=True, grupo=grupo1)
 
-        grupo2 = Grupo.objects.get(id=4)
+        grupo2 = Grupo.objects.get(id=400)
         otro_lider = MiembroFactory(lider=True, grupo=grupo2)
 
         form = NuevoGrupoForm(red=self.red_jovenes)
@@ -222,8 +240,8 @@ class NuevoGrupoFormTest(GruposBaseTest):
         ingresada no tiene ningún grupo.
         """
 
-        raiz = Grupo.objects.get(id=1)
-        otro = Grupo.objects.get(id=3)
+        raiz = Grupo.objects.get(id=100)
+        otro = Grupo.objects.get(id=300)
         red_nueva = RedFactory(nombre='nueva red')
         miembro = MiembroFactory(lider=True, grupo=raiz)
 
@@ -231,3 +249,20 @@ class NuevoGrupoFormTest(GruposBaseTest):
 
         self.assertIn(miembro, form.fields['lideres'].queryset)
         self.assertNotIn(otro.lideres.first(), form.fields['lideres'].queryset)
+
+    def test_formulario_crea_grupo_y_se_asigna_a_lideres_escogidos(self):
+        """
+        Prueba que cuando se guarde el formulario se crea el grupo y es asignado a los lideres escogidos como grupo
+        que lidera y el padre como grupo al que pertenecen.
+        """
+
+        form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
+        grupo = form.save()
+        self.lider1.refresh_from_db()
+        self.lider2.refresh_from_db()
+
+        self.assertEqual(self.padre.get_children_count(), 1)
+        self.assertEqual(self.lider1.grupo_lidera, grupo)
+        self.assertEqual(self.lider2.grupo_lidera, grupo)
+        self.assertEqual(self.lider1.grupo, self.padre)
+        self.assertEqual(self.lider2.grupo, self.padre)
