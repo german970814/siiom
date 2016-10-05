@@ -766,7 +766,6 @@ def grupo_raiz(request):
     raiz = Grupo.objects.raiz()
     if request.method == 'POST':
         form = GrupoRaizForm(instance=raiz, data=request.POST)
-
         if form.is_valid():
             if form.save():
                 return redirect('grupos:raiz')
@@ -786,6 +785,9 @@ def crear_grupo(request, pk):
     red = get_object_or_404(Red, pk=pk)
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
+        if form.is_valid():
+            if form.save():
+                return redirect('grupos:nuevo', pk)
     else:
         form = NuevoGrupoForm(red=red)
 

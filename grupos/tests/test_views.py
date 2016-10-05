@@ -8,7 +8,7 @@ from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
-from grupos.forms import GrupoRaizForm, TransladarGrupoForm
+from grupos.forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
 from .factories import GrupoRaizFactory
 from .base import GruposBaseTest
 
@@ -187,8 +187,9 @@ class CrearGrupoViewTest(GruposBaseTest):
     def setUp(self):
         super(CrearGrupoViewTest, self).setUp()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
-        self.lider1 = MiembroFactory(lider=True)
-        self.lider2 = MiembroFactory(lider=True)
+        self.padre = Grupo.objects.get(id=800)
+        self.lider1 = MiembroFactory(lider=True, grupo=self.padre)
+        self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
         self.barrio = BarrioFactory()
 
         red_jovenes = Red.objects.get(nombre='jovenes')
@@ -209,7 +210,7 @@ class CrearGrupoViewTest(GruposBaseTest):
         data = {
             'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
             'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
-            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id]
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': self.padre.id
         }
 
         return data
@@ -254,6 +255,18 @@ class CrearGrupoViewTest(GruposBaseTest):
 
         self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
         self.assertFormError(response, 'form', 'parent', 'Este campo es obligatorio.')
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_post_save_formulario_devuelve_None_muestra_error(self, update_mock):
+        """
+        Prueba que si cuando se guarda el formulario, este devuelve None se muestre un mensaje de error.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.post(self.URL, self.datos_formulario())
+
+        self.assertTrue(update_mock.called)
+        self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
 
 
 class TransladarGrupoViewTest(GruposBaseTest):
