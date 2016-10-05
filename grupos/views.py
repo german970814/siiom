@@ -412,26 +412,6 @@ def gruposDeRed(request, id):
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def crearGrupo(request, id):
-    accion = 'Crear'
-    miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        red = Red.objects.get(id=id)
-    except:
-        raise Http404
-    if request.method == "POST":
-        form = FormularioCrearGrupo(data=request.POST, red=red, new=True)
-        if form.is_valid():
-            nuevoGrupo = form.save(commit=False)
-            nuevoGrupo.red = red
-            nuevoGrupo.save()
-            ok = True
-    else:
-        form = FormularioCrearGrupo(red=red, new=True)
-    return render_to_response('Grupos/crear_grupo_admin.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarGrupo(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
