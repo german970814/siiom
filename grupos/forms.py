@@ -293,6 +293,7 @@ class BaseGrupoForm(CustomModelForm):
     Formulario base el manejo de grupo de una iglesia.
     """
 
+    mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
     lideres = forms.ModelMultipleChoiceField(queryset=Grupo.objects.none(), label=_lazy('Lideres'))
 
     class Meta:
@@ -322,8 +323,6 @@ class GrupoRaizForm(BaseGrupoForm):
     """
     Formulario para la creación o edición del grupo raiz.
     """
-
-    mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
 
     def __init__(self, *args, **kwargs):
         super(GrupoRaizForm, self).__init__(*args, **kwargs)
@@ -371,6 +370,23 @@ class NuevoGrupoForm(BaseGrupoForm):
             query_lideres = query_lideres | Grupo.objects.raiz().miembro_set.lideres_disponibles()
 
         self.fields['lideres'].queryset = query_lideres
+        self.red = red
+
+    def save(self):
+        try:
+            with transaction.atomic():
+                grupo = super(NuevoGrupoForm, self).save(commit=False)
+                grupo.red = self.red
+
+                padre = self.cleaned_data['parent']
+                grupo = padre.add_child(instance=grupo)
+
+                lideres = self.cleaned_data['lideres']
+                lideres.update(grupo_lidera=grupo, grupo=padre)
+                return grupo
+        except IntegrityError:
+            self.add_error(None, forms.ValidationError(self.mensaje_error))
+            return None
 
 
 class TransladarGrupoForm(forms.Form):

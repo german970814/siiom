@@ -262,7 +262,36 @@ class NuevoGrupoFormTest(GruposBaseTest):
         self.lider2.refresh_from_db()
 
         self.assertEqual(self.padre.get_children_count(), 1)
+        self.assertEqual(grupo.red, self.red_jovenes)
         self.assertEqual(self.lider1.grupo_lidera, grupo)
         self.assertEqual(self.lider2.grupo_lidera, grupo)
         self.assertEqual(self.lider1.grupo, self.padre)
         self.assertEqual(self.lider2.grupo, self.padre)
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_no_se_guarda_nada_en_db(self, update_mock):
+        """
+        Prueba que si ocurre un error al guardar el formulario no se guarde ni el grupo ni los lideres.
+        """
+
+        form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
+        form.save()
+        self.lider1.refresh_from_db()
+        self.lider2.refresh_from_db()
+
+        self.assertTrue(update_mock.called)
+        self.assertEqual(self.padre.get_children_count(), 0)
+        self.assertEqual(self.lider1.grupo_lidera, None)
+        self.assertEqual(self.lider2.grupo_lidera, None)
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_agrega_error_form(self, update_mock):
+        """
+        Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
+        """
+
+        form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
+        form.save()
+
+        self.assertTrue(update_mock.called)
+        self.assertEqual(len(form.non_field_errors()), 1)
