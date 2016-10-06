@@ -89,6 +89,7 @@ from .forms import (
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial, Proveedor
 from organizacional.models import Empleado
+from pqr.decorators import login_empleado
 
 __author__ = 'German Alzate'
 
@@ -466,7 +467,7 @@ def ver_requisiciones_jefe_departamento(request):
 
 
 @waffle_switch('compras')
-@permission_required('organizacional.es_compras')
+@login_empleado('is_jefe_administrativo')
 def ver_requisiciones_compras(request):
     """
     Vista para ver las requisiciones que han llegado al area de compras, luego de ser
