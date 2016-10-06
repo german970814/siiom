@@ -173,9 +173,12 @@ def miembroInicio(request):
                 requisiciones_ingresadas_mes = Requisicion.objects.ultimo_mes().count()
 
                 # se sacan las requisiciones que fueron atendidas por el empleado
-                porcentage_atencion_mes = (Requisicion.objects.ultimo_mes(
-                    historial__empleado=empleado
-                ).count() * 100) / requisiciones_ingresadas_mes
+                if requisiciones_ingresadas_mes > 0:
+                    porcentage_atencion_mes = (Requisicion.objects.ultimo_mes(
+                        historial__empleado=empleado
+                    ).count() * 100) / requisiciones_ingresadas_mes
+                else:
+                    porcentage_atencion_mes = 0
 
                 # Requisiciones en compras
                 requisiciones_empleado = ultimas_requisiciones.count()

@@ -158,6 +158,16 @@ class Caso(models.Model):
         # retorna otro color
         return self.__class__.TEAL
 
+    def get_documentos_iniciales(self):
+        """
+        Retorna una lista de los documentos que fueron ingresados por la persona que ingreso el caso
+        """
+        documentos = []
+        for documento in self.documentos.all():
+            if not self.comentario_set.filter(mensaje__icontains=documento.get_name()).exists():
+                documentos.append(documento)
+        return documentos
+
 
 class Comentario(models.Model):
     """
@@ -174,6 +184,10 @@ class Comentario(models.Model):
 
     def __str__(self):
         return 'Comentario Caso # {0}-{1}'.format(self.caso.id, self.id)
+
+    @property
+    def is_documento(self):
+        return self.documento
 
 
 class Invitacion(models.Model):
@@ -241,7 +255,18 @@ class Documento(models.Model):
         return path[len(path) - 1]
 
     def get_absolute_url(self):
+        """
+        Retorna la url de el archivo para descargar
+        """
         return reverse('pqr:descargar_archivos', args=(self.id, ))
+
+    def get_url(self):
+        """
+        Retorna la url de el archivo para previsualizar
+        """
+        if self.is_image:
+            return self.archivo.url
+        return self.get_absolute_url()
 
     def save_file_as_comment(self, empleado):
         """
@@ -249,9 +274,13 @@ class Documento(models.Model):
         """
 
         if empleado in self.caso.integrantes.all() or empleado == self.caso.empleado_cargo:
+            mensaje = """
+                <strong><a href="{get_absolute_url}" class="c-white"><u>{get_name}</u></a></strong>
+            """.format(get_absolute_url=self.get_absolute_url(), get_name=self.get_name())
             return Comentario.objects.create(
                 empleado=empleado,
                 caso=self.caso,
-                mensaje=self.get_name()
+                mensaje=mensaje,
+                documento=True
             )
         raise TypeError("Empleado no pertenece a caso")

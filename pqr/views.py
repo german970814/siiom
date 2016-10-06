@@ -220,7 +220,7 @@ def ver_casos_servicio_cliente(request):
 
 
 @waffle_switch('pqr')
-@login_required
+@login_empleado
 @transaction.atomic
 def ver_bitacora_caso(request, id_caso):
     """
@@ -248,7 +248,10 @@ def ver_bitacora_caso(request, id_caso):
         mismo = True
 
     if hasattr(caso.empleado_cargo, 'comentario_set') and caso.empleado_cargo.comentario_set.filter(caso=caso).exists():
-        caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
+        if caso.empleado_cargo.comentario_set.filter(caso=caso).last().is_documento:
+            caso.empleado_cargo.ultimo_mensaje = 'Ha subido un archivo'
+        else:
+            caso.empleado_cargo.ultimo_mensaje = caso.empleado_cargo.comentario_set.filter(caso=caso).last().mensaje
 
     integrantes = caso.integrantes.all()
     for integrante in integrantes:
@@ -443,7 +446,7 @@ def nuevo_caso_servicio_cliente(request):
 
 
 # Agregado 30 Septiembre 2016
-# @waffle_switch('pqr')
+@waffle_switch('pqr')
 @login_empleado('is_servicio_cliente')
 def editar_caso(request, id_caso):
     """
@@ -468,6 +471,7 @@ def editar_caso(request, id_caso):
     return redirect(request.META.get('HTTP_REFERER', None) or 'sin_permiso')
 
 
+@waffle_switch('pqr')
 @login_empleado
 def descargar_archivos(request, id_documento):
     """
@@ -488,3 +492,50 @@ def descargar_archivos(request, id_documento):
         return response
     except Exception as exception:
         return HttpResponse(exception, content_type='text/plain')
+
+
+@waffle_switch('pqr')
+@login_empleado('is_servicio_cliente')
+@transaction.atomic
+def subir_archivo_como_bitacora(request, id_caso):
+    """
+    Vista que sube un archivo como bitacora
+    """
+    caso = get_object_or_404(Caso, id=id_caso)
+    empleado = request.user.empleado
+
+    if request.method == "POST":
+        if request.FILES:
+            errors = 0
+            for file in request.FILES:
+                form = FormularioAgregarArchivoCaso(files={'archivo': request.FILES[file]})
+
+                if form.is_valid():
+                    documento = form.save(commit=False)
+                    documento.caso = caso
+                    try:
+                        documento.save()
+                        documento.save_file_as_comment(empleado)
+                    except TypeError as type_error:
+                        if not empleado.is_jefe_comercial:
+                            raise type_error
+                else:
+                    errors += 1
+
+            if errors == 0:
+                return HttpResponse(
+                    json.dumps(
+                        {'response_code': 200, 'message': ugettext('Archivo Subido Con exito')}
+                    ), content_type='application/json'
+                )
+            else:
+                return HttpResponse(
+                    json.dumps(
+                        {'response_code': 400, 'message': ugettext('Han ocurrido errores')}
+                    ), content_type='application/json'
+                )
+    return HttpResponse(
+        json.dumps(
+            {'response_code': 413, 'message': 'invalid_method'}
+        ), content_type='application/json'
+    )

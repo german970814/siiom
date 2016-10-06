@@ -18,6 +18,6 @@ CONTENT_TYPES = {
 
 IMAGES = {
     'png': 'image/png', 'JPEG': 'application/JPEG', 'bmp': 'image/bmp',
-    'gif': 'image/gif', 'pdf': 'application/pdf', 'jpg': 'image/jpeg',
+    'gif': 'image/gif', 'jpg': 'image/jpeg',
     'svg': 'image/svg+xml', 'tiff': 'image/tiff',
 }
