@@ -211,9 +211,13 @@ def miembroInicio(request):
                     if requisicion.historial_set.last().fecha.date() + datetime.timedelta(days=dias) <= hoy
                 ])
 
-                porcetaje_total_en_compras = (requisiciones_faltantes_aprobar_trazabilidad * 100) / Requisicion.objects.filter(
-                    estado=Requisicion.PROCESO
-                ).count()
+                if Requisicion.objects.filter(estado=Requisicion.PROCESO).exists():
+                    porcetaje_total_en_compras = (requisiciones_faltantes_aprobar_trazabilidad * 100) / Requisicion.objects.filter(
+                        estado=Requisicion.PROCESO
+                    ).count()
+                else:
+                    porcetaje_total_en_compras = 0
+
             if empleado.is_jefe_financiero:
                 hoy = timezone.now().date()
                 requisiciones_faltantes_aprobar_departamento = Requisicion.objects.filter(
