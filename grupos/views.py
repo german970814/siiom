@@ -140,6 +140,7 @@ def reportarReunionGrupoAdmin(request):
             reporte = form.save(commit=False)
             if not reunionReportada(reporte.fecha, reporte.grupo, 1):
                 reporte.digitada_por_miembro = False
+                reporte.confirmacionEntregaOfrenda = True
                 reporte.save()
                 ok = True
             else:
@@ -645,12 +646,14 @@ def ver_reportes_grupo(request):
             return HttpResponse(json.dumps(response), content_type='aplicattion/json')
 
         data_from_session = request.session.get('post', None)
+
         if 'reportar' in request.POST:
             form_reporte = FormularioReportarReunionGrupoAdmin(data=request.POST)
 
             if form_reporte.is_valid():
                 reporte = form_reporte.save(commit=False)
-                reporte.digitado_por_miembro = False
+                reporte.digitada_por_miembro = False
+                reporte.confirmacionEntregaOfrenda = True
                 if reunionReportada(reporte.fecha, reporte.grupo, 1):
                     messages.error(request, "El Grupo ya cuenta con un reporte en ese rango de fecha")
                     click = True
@@ -664,6 +667,9 @@ def ver_reportes_grupo(request):
                     if data_from_session is not None:
                         request.POST.update(data_from_session)
                     return redirect('reportes_grupo')
+            else:
+                if data_from_session is not None:
+                    request.POST.update(data_from_session)
 
         else:
             form_reporte = FormularioReportarReunionGrupoAdmin()
