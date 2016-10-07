@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^ver_reportes/$', ver_reportes_grupo, name="reportes_grupo"),
     url(r'^editar_reporte/(?P<pk>\d+)$', editar_runion_grupo, name="editar_reporte"),
 
+    url(r'^(?P<pk>\d+)/editar/$', views.editar_grupo, name='editar'),
     url(r'^redes/(?P<pk>\d+)/nuevo/$', views.crear_grupo, name='nuevo'),
     url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar'),
     url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),

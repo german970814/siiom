@@ -20,7 +20,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -770,6 +770,22 @@ def crear_grupo(request, pk):
                 return redirect('grupos:nuevo', pk)
     else:
         form = NuevoGrupoForm(red=red)
+
+    return render(request, 'grupos/grupo_form.html', {'form': form})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def editar_grupo(request, pk):
+    """
+    Permite a un administrador editar un grupo de una iglesia.
+    """
+
+    grupo = get_object_or_404(Grupo, pk=pk)
+    if request.method == 'POST':
+        form = EditarGrupoForm(instance=grupo)
+    else:
+        form = EditarGrupoForm(instance=grupo)
 
     return render(request, 'grupos/grupo_form.html', {'form': form})
 

@@ -389,6 +389,25 @@ class NuevoGrupoForm(BaseGrupoForm):
             return None
 
 
+class EditarGrupoForm(NuevoGrupoForm):
+    """
+    Formulario para la edición de un grupo en una iglesia.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(EditarGrupoForm, self).__init__(kwargs['instance'].red, *args, **kwargs)
+
+        descendientes = [grupo.id for grupo in Grupo.get_tree(self.instance)]
+        parent_query = self.fields['parent'].queryset.exclude(id__in=descendientes)
+        if self.instance.parent.is_root():
+            parent_query = parent_query | Grupo.objects.prefetch_related('lideres').filter(id=self.instance.parent.id)
+
+        self.fields['parent'].queryset = parent_query
+
+        self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
+        self.fields['lideres'].initial = self.instance.lideres.all()
+
+
 class TransladarGrupoForm(forms.Form):
     """
     Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.

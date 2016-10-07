@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from grupos.tests.factories import GrupoFactory, GrupoRaizFactory, RedFactory
-from grupos.forms import GrupoRaizForm, NuevoGrupoForm
+from grupos.forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
 from grupos.models import Grupo, Red
 from .base import GruposBaseTest
 
@@ -295,3 +295,67 @@ class NuevoGrupoFormTest(GruposBaseTest):
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
+
+
+class EditarGrupoFormTest(GruposBaseTest):
+    """
+    Pruebas unitarias para el formulario de edición de grupos de una iglesia.
+    """
+
+    def setUp(self):
+        super(EditarGrupoFormTest, self).setUp()
+        grupo3 = Grupo.objects.get(id=300)
+        self.grupo = Grupo.objects.get(id=500)
+        self.lider1 = MiembroFactory(lider=True,  grupo=grupo3)
+        self.lider2 = MiembroFactory(lider=True, grupo=grupo3)
+        self.barrio = BarrioFactory()
+
+    def datos_formulario(self):
+        """
+        Retorna un diccionario con datos para el formulario.
+        """
+
+        data = {
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': self.padre.id
+        }
+
+        return data
+
+    def test_campo_parent_muestra_padre_del_grupo_seleccionado(self):
+        """
+        Prueba que en el campo parent se muestre el padre del grupo que se esta editando.
+        """
+
+        form = EditarGrupoForm(instance=self.grupo)
+        self.assertIn(self.grupo.parent, form.fields['parent'].queryset)
+
+    def test_campo_parent_no_muestra_grupos_esten_debajo_de_grupo_seleccionado(self):
+        """
+        Prueba que en el campo parent no se muestren los grupos que se encuentren debajo del grupo seleccionado ni el
+        grupo seleccionado.
+        """
+
+        descendiente = Grupo.objects.get(id=600)
+        form = EditarGrupoForm(instance=self.grupo)
+        self.assertNotIn(self.grupo, form.fields['parent'].queryset)
+        self.assertNotIn(descendiente, form.fields['parent'].queryset)
+
+    def test_campo_parent_muestra_raiz_si_padre_grupo_seleccionado_es_raiz(self):
+        """
+        Prueba que el campo padre muestre el grupo raiz de la iglesia si el padre del grupo seleccionado es la raiz.
+        """
+
+        raiz = Grupo.objects.get(id=100)
+        seleccionado = Grupo.objects.get(id=300)
+        form = EditarGrupoForm(instance=seleccionado)
+        self.assertIn(raiz, form.fields['parent'].queryset)
+
+    def test_campo_lideres_muestra_lideres_del_grupo_escogido(self):
+        """
+        Prueba que en el campo lideres muestren los lideres del grupo que se esta editando.
+        """
+
+        form = EditarGrupoForm(instance=self.grupo)
+        self.assertIn(self.grupo.lideres.first(), form.fields['lideres'].queryset)
