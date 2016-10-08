@@ -9,6 +9,7 @@ from django.db.models import Sum, Q, Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from django.db.models.query import QuerySet
 
 # from encodings.utf_8_sig import encode
 # from django.utils.datetime_safe import strftime
@@ -583,15 +584,21 @@ def estadisticoReunionesGar(request):
                 if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                     descendientes = True
                     opciones['grupo_final'] = 'Todos los descendientes'
-                    grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    grupos = Grupo.objects.filter(
+                        id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    )
                 else:
                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
                     opciones['grupo_final'] = grupo_f.nombre.capitalize()
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
-                total_grupos = len(grupos)
-                total_grupos_inactivos = len([grupo for grupo in grupos if grupo.estado == 'I'])
+                if isinstance(grupos, QuerySet):
+                    total_grupos = grupos.count()
+                    total_grupos_inactivos = grupos.filter(estado='I').count()
+                else:
+                    total_grupos = len(grupos)
+                    total_grupos_inactivos = len([grupo for grupo in grupos if grupo.estado == 'I'])
                 # opciones['total_grupos'] = total_grupos
                 opciones['total_grupos_inactivos'] = total_grupos_inactivos
                 sw_while = True
@@ -607,16 +614,21 @@ def estadisticoReunionesGar(request):
                     ]
 
                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
+
                     while sw_while:
                         sig = get_date_for_report(fechai, fechaf)  # fechai + datetime.timedelta(days=6)
                         if descendientes:
-                            _ids_grupos = listaGruposDescendientes_id(
-                                Miembro.objects.get(id=grupo_i.listaLideres()[0])
-                            )
-                            _grupos_semana = Grupo.objects.filter(id__in=_ids_grupos).exclude(
-                                fechaApertura__gt=sig
-                            )
-                            grupos_semana = _grupos_semana.count()
+                            if not isinstance(grupos, QuerySet):
+                                _ids_grupos = listaGruposDescendientes_id(
+                                    Miembro.objects.get(id=grupo_i.listaLideres()[0])
+                                )
+                                _grupos_semana = Grupo.objects.filter(id__in=_ids_grupos).exclude(
+                                    fechaApertura__gt=sig
+                                )
+                                grupos_semana = _grupos_semana.count()
+                            else:
+                                _grupos_semana = grupos.exclude(fechaApertura__gt=sig)
+                                grupos_semana = _grupos_semana.count()
                         else:
                             # se debe corregir
                             _grupos_semana = grupos
@@ -1258,7 +1270,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                                 strFecha = str(fecha)
                                 gruposSinReporte[g.id] = [strFecha]
 
-                    fechai = sig
+                    fechai = sig + datetime.timedelta(days=1)
                     if sig >= fechaf:
                         sw = False
 
