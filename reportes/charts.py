@@ -197,3 +197,126 @@ class PdfTemplate(SimpleDocTemplate):
             catalog.append(chart)
 
         self.build(catalog)
+
+
+class PdfReport(SimpleDocTemplate):
+
+    def __init__(self, filename, titulo, opciones, datos, tipo, total=False, tabla=None, **kw):
+        super(PdfReport, self).__init__(filename, pagesize=letter, **kw)
+
+        # Estilos
+        style = getSampleStyleSheet()
+
+        # Titulo
+        header = Paragraph(titulo, style['Title'])
+
+        # Opciones
+        _opciones = ''
+        xml_b = '<b>%(title)s:</b> %(value)s<br />'
+
+        # opciones from __init__ would be:
+        # opciones = {
+        #    'fecha_inicial', 'fecha_final', 'nombre_grupo',
+        #    'grupo_final', 'total_grupos', total_grupos_inactivos
+        # }
+
+        for title, value in opciones.items():
+            _opciones += xml_b % {
+                'title': self.__class__.get_string_options(title),
+                'value': value
+            }
+
+        # if 'fi' in opciones:
+        #     _opciones = _opciones + '<b>Fecha Inicial:</b> %s<br />' % opciones['fi']
+        # if 'ff' in opciones:
+        #     _opciones = _opciones + '<b>Fecha Final:</b> %s<br />' % opciones['ff']
+        # if 'g' in opciones:
+        #     _opciones = _opciones + '<b>Grupo:</b> %s<br />' % opciones['g']
+        # if 'gi' in opciones:
+        #     _opciones = _opciones + '<b>Grupo Inicial:</b> %s<br />' % opciones['gi']
+        # if 'gf' in opciones:
+        #     _opciones = _opciones + '<b>Grupo Final:</b> %s<br />' % opciones['gf']
+        # if 'opt' in opciones:
+        #     _opciones = _opciones + '<b>Opcion:</b> %s<br />' % opciones['opt']
+        # if 'ano' in opciones:
+        #     _opciones = _opciones + '<b>Año:</b> %s<br />' % opciones['ano']
+        # if 'red' in opciones:
+        #     _opciones = _opciones + '<b>Red:</b> %s<br />' % opciones['red']
+        # if 'predica' in opciones:
+        #     _opciones = _opciones + '<b>Predica:</b> %s<br />' % opciones['predica']
+        # if 'total_grupos' in opciones:
+        #     _opciones = _opciones + '<b>Total de grupos:</b> %s<br />' % opciones['total_grupos']
+        # if 'total_grupos_inactivos' in opciones:
+        #     _opciones = _opciones + '<b>Total de grupos inactivos:</b> %s<br />' % opciones['total_grupos_inactivos']
+
+        opciones_paragraph = Paragraph(_opciones, style['Normal'])
+
+        # Tabla
+
+        if tabla is not None:
+            f = 7
+        else:
+            tabla = datos
+            f = 10
+
+        table = Table(tabla)
+        table_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+            ('FONTSIZE', (0, 0), (-1, -1), f),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+        ]
+
+        if total:
+            table_style.append(('BACKGROUND', (0, -1), (-1, -1), colors.orange))
+        table.setStyle(TableStyle(table_style))
+
+        # Graficos
+        sw = True
+        if total:
+            datos.pop()
+        other_labels = datos.pop(0)
+        other_labels.pop(0)
+        chart_datos = list(zip(*datos))
+        # print(chart_datos)
+        labels = list(chart_datos.pop(0))
+        if tipo == 1:  # Pie chart
+            data = list(chart_datos.pop())
+            if sum(data) != 0:
+                chart = PieChart(data=data, labels=labels, legends=labels)
+            else:
+                sw = False
+        elif tipo == 2:  # Bar chart
+            data = chart_datos
+            chart = BarChart(data=data, labels=labels, legends=other_labels)
+        else:  # Line chart
+            data = chart_datos
+            chart = LineChart(data=data, labels=labels, legends=other_labels)
+
+        # Agregar al pdf
+        catalog = []
+        catalog.append(header)
+        catalog.append(Spacer(1, 50))
+        catalog.append(opciones_paragraph)
+        catalog.append(Spacer(1, 50))
+        catalog.append(table)
+        catalog.append(Spacer(1, 60))
+        if sw:
+            catalog.append(chart)
+
+        self.build(catalog)
+
+    @staticmethod
+    def get_string_options(value):
+        """
+        Retorna el valor de el string dado, cambiando el '_' por un espacio ' '
+        """
+        SPACE = ' '
+        UNDERSCORE = '_'
+        if not isinstance(value, str):
+            try:
+                value = str(value)
+            except:
+                raise TypeError("Expected String, but found '%s'." % value.__class__.__name__)
+        return value.replace(UNDERSCORE, SPACE).title()
