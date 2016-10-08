@@ -613,15 +613,17 @@ def estadisticoReunionesGar(request):
                             _ids_grupos = listaGruposDescendientes_id(
                                 Miembro.objects.get(id=grupo_i.listaLideres()[0])
                             )
-                            grupos_semana = Grupo.objects.filter(id__in=_ids_grupos).exclude(
+                            _grupos_semana = Grupo.objects.filter(id__in=_ids_grupos).exclude(
                                 fechaApertura__gt=sig
-                            ).count()
+                            )
+                            grupos_semana = _grupos_semana.count()
                         else:
                             # se debe corregir
+                            _grupos_semana = grupos
                             grupos_semana = len(grupos)
 
                         numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-                                                           grupo__in=grupos,
+                                                           grupo__in=_grupos_semana,
                                                            grupo__estado='A').aggregate(Sum('numeroLideresAsistentes'),
                                                                                         Sum('numeroVisitas'),
                                                                                         Sum('numeroTotalAsistentes'),
@@ -1217,7 +1219,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                     gr = Grupo.objects.filter(id=grupo_from_form.id)
 
                 while sw:
-                    sig = fechai + datetime.timedelta(weeks=1)
+                    sig = fechai + datetime.timedelta(days=6)
 
                     if sobres:  # Entra si se escoge el reporte de entregas de sobres
                         gru = gr.filter(
