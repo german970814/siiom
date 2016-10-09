@@ -407,6 +407,27 @@ class EditarGrupoForm(NuevoGrupoForm):
         self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
         self.fields['lideres'].initial = self.instance.lideres.all()
 
+    def save(self):
+        try:
+            with transaction.atomic():
+                grupo = BaseGrupoForm.save(self)
+
+                # if 'parent' in self.changed_data:
+                #     padre = self.cleaned_data['parent']
+                #     grupo.move(padre, pos='sorted-child')
+                #     self.lideres.all().update(grupo=nuevo_padre)
+
+                if 'lideres' in self.changed_data:
+                    grupo.lideres.clear()
+                    # padre = self.cleaned_data['parent']
+                    lideres = self.cleaned_data['lideres']
+                    lideres.update(grupo_lidera=grupo, grupo=self.instance.parent)
+
+                return grupo
+        except IntegrityError:
+            self.add_error(None, forms.ValidationError(self.mensaje_error))
+            return None
+
 
 class TransladarGrupoForm(forms.Form):
     """

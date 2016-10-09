@@ -318,7 +318,7 @@ class EditarGrupoFormTest(GruposBaseTest):
         data = {
             'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
             'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
-            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': self.padre.id
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': '300'
         }
 
         return data
@@ -359,3 +359,37 @@ class EditarGrupoFormTest(GruposBaseTest):
 
         form = EditarGrupoForm(instance=self.grupo)
         self.assertIn(self.grupo.lideres.first(), form.fields['lideres'].queryset)
+
+    def test_formulario_edita_grupo(self):
+        form = EditarGrupoForm(instance=self.grupo, data=self.datos_formulario())
+        form.save()
+
+        self.lider1.refresh_from_db()
+        self.assertEqual(self.lider1.grupo_lidera, self.grupo)
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_no_se_guarda_nada_en_db(self, update_mock):
+        """
+        Prueba que si ocurre un error al guardar el formulario no se guarde ni el grupo ni los lideres.
+        """
+
+        form = EditarGrupoForm(instance=self.grupo, data=self.datos_formulario())
+        form.save()
+        self.lider1.refresh_from_db()
+        self.lider2.refresh_from_db()
+
+        self.assertTrue(update_mock.called)
+        self.assertEqual(self.lider1.grupo_lidera, None)
+        self.assertEqual(self.lider2.grupo_lidera, None)
+
+    @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_agrega_error_form(self, update_mock):
+        """
+        Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
+        """
+
+        form = EditarGrupoForm(instance=self.grupo, data=self.datos_formulario())
+        form.save()
+
+        self.assertTrue(update_mock.called)
+        self.assertEqual(len(form.non_field_errors()), 1)
