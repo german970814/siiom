@@ -789,7 +789,10 @@ def editar_grupo(request, pk):
 
     grupo = get_object_or_404(Grupo, pk=pk)
     if request.method == 'POST':
-        form = EditarGrupoForm(instance=grupo)
+        form = EditarGrupoForm(instance=grupo, data=request.POST)
+        if form.is_valid():
+            if form.save():
+                return redirect('grupos:editar', pk)
     else:
         form = EditarGrupoForm(instance=grupo)
 
