@@ -9,12 +9,13 @@ from django.db.models import Sum, Q, Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from django.db.models.query import QuerySet
 
 # from encodings.utf_8_sig import encode
 # from django.utils.datetime_safe import strftime
 
 # Apps imports
-from .charts import PdfTemplate
+from .charts import PdfTemplate, PdfReport
 from .forms import (
     FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes,
     FormularioCumplimientoLlamadasLideres, FormularioReportesSinEnviar, FormularioPredicas,
@@ -572,35 +573,69 @@ def estadisticoReunionesGar(request):
                 fechai = form.cleaned_data['fechai']
                 fechaf = form.cleaned_data['fechaf']
                 grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-                opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
+
+                opciones = {
+                    'fecha_inicial': fechai,
+                    'fecha_final': fechaf, 'grupo_inicial': grupo_i.nombre.capitalize()
+                }
+
                 sw = True
 
                 if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                     descendientes = True
-                    opciones['gf'] = 'Todos los descendientes'
-                    grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    opciones['grupo_final'] = 'Todos los descendientes'
+                    grupos = Grupo.objects.filter(
+                        id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    )
                 else:
                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-                    opciones['gf'] = grupo_f.nombre.capitalize()
+                    opciones['grupo_final'] = grupo_f.nombre.capitalize()
                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
-                total_grupos = len(grupos)
-                total_grupos_inactivos = len([grupo for grupo in grupos if grupo.estado == 'I'])
-                opciones['total_grupos'] = total_grupos
+                if isinstance(grupos, QuerySet):
+                    total_grupos = grupos.count()
+                    total_grupos_inactivos = grupos.filter(estado='I').count()
+                else:
+                    total_grupos = len(grupos)
+                    total_grupos_inactivos = len([grupo for grupo in grupos if grupo.estado == 'I'])
+                # opciones['total_grupos'] = total_grupos
                 opciones['total_grupos_inactivos'] = total_grupos_inactivos
                 sw_while = True
 
                 if 'reportePDF' in request.POST:
-                    values = [['Rango fecha', 'Visitas', 'Regulares',
-                               'Lideres', 'Total asistentes', 'Grupos que reportaron sobres',
-                               'Grupos que no han reportado sobres', 'Porcentaje de grupos reportados']]
+                    values = [
+                        [
+                            'Rango fecha', 'Visitas', 'Regulares',
+                            'Lideres', 'Total asistentes', 'Grupos que reportaron',
+                            'Grupos sin reportar', 'Porcentaje de grupos reportados',
+                            'Total Grupos Esta semana'
+                        ]
+                    ]
 
                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
+
                     while sw_while:
                         sig = get_date_for_report(fechai, fechaf)  # fechai + datetime.timedelta(days=6)
+                        if descendientes:
+                            if not isinstance(grupos, QuerySet):
+                                _ids_grupos = listaGruposDescendientes_id(
+                                    Miembro.objects.get(id=grupo_i.listaLideres()[0])
+                                )
+                                _grupos_semana = Grupo.objects.filter(id__in=_ids_grupos).exclude(
+                                    fechaApertura__gt=sig
+                                )
+                                grupos_semana = _grupos_semana.count()
+                            else:
+                                _grupos_semana = grupos.exclude(fechaApertura__gt=sig)
+                                grupos_semana = _grupos_semana.count()
+                        else:
+                            # se debe corregir
+                            _grupos_semana = grupos
+                            grupos_semana = len(grupos)
+
                         numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-                                                           grupo__in=grupos,
+                                                           grupo__in=_grupos_semana,
                                                            grupo__estado='A').aggregate(Sum('numeroLideresAsistentes'),
                                                                                         Sum('numeroVisitas'),
                                                                                         Sum('numeroTotalAsistentes'),
@@ -628,10 +663,17 @@ def estadisticoReunionesGar(request):
                         else:
                             numSobres = numPer['id__count']
 
-                        numSobresNo = total_grupos - total_grupos_inactivos - numSobres
-                        utillizacion = round(float(numSobres) / (total_grupos - total_grupos_inactivos) * 100, 2)
+                        # numSobresNo = total_grupos - total_grupos_inactivos - numSobres
+                        numSobresNo = grupos_semana - total_grupos_inactivos - numSobres
+                        utillizacion = round(float(numSobres) / (grupos_semana - total_grupos_inactivos) * 100, 2)
 
-                        l = [fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid, sumTot, numSobres, numSobresNo, utillizacion]
+                        l = [
+                            fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y"),
+                            sumVis, numReg, sumLid, sumTot,
+                            numSobres, numSobresNo, utillizacion,
+                            # numero totales de grupos en esta semana
+                            grupos_semana - total_grupos_inactivos
+                        ]
                         lg = [fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid]
 
                         values.append(l)
@@ -643,7 +685,7 @@ def estadisticoReunionesGar(request):
 
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                    PdfTemplate(response, 'Estadistico de reuniones GAR', opciones, values_g, 3, tabla=values)
+                    PdfReport(response, 'Estadistico de reuniones GAR', opciones, values_g, 3, tabla=values)
                     return response
                 else:
                     values = [['Dates']]
@@ -1131,7 +1173,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                     gr = Grupo.objects.filter(id=grupo_from_form.id)
 
                 while sw:
-                    sig = fechai + datetime.timedelta(weeks=1)
+                    sig = fechai + datetime.timedelta(days=6)
 
                     if sobres:  # Entra si se escoge el reporte de entregas de sobres
                         gru = gr.filter(
@@ -1170,7 +1212,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                                 strFecha = str(fecha)
                                 gruposSinReporte[g.id] = [strFecha]
 
-                    fechai = sig
+                    fechai = sig + datetime.timedelta(days=1)
                     if sig >= fechaf:
                         sw = False
 
