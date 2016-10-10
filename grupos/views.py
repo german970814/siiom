@@ -7,6 +7,9 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.context import RequestContext
+from django.utils.translation import ugettext as _
+from django.core.exceptions import ValidationError
+from django.conf import settings
 
 # Apps Imports
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
@@ -120,48 +123,90 @@ def reunionDiscipuladoReportada(predica, grupo):
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionGrupo(request):
+    """
+    Vista para crear el reporte de grupos en el sistema
+    """
+
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupoLidera()
-    if grupo and grupo.estado == 'A':
-        discipulos = miembro.discipulos()
-        miembrosGrupo = grupo.miembrosGrupo()
-        asistentesId = request.POST.getlist('seleccionados')
+
+    # se verifica que exista el grupo de el miembro en la sesion y que este, esté activo
+    if grupo is not None and grupo.estado == Grupo.ACTIVO:
+
+        # Se comentan estas lineas de código, porque no están siendo usadas en la actualidad
+
+        # discipulos = miembro.discipulos()
+        # miembrosGrupo = grupo.miembrosGrupo()
+        # asistentesId = request.POST.getlist('seleccionados')
+
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
-                r = form.save(commit=False)
-                if not reunionReportada(r.fecha, grupo, 1):
-                    r.grupo = grupo
-                    r.digitada_por_miembro = True
-                    r.save()
-                    # for m in miembrosGrupo:
-                    #     if unicode(m.id) in asistentesId:
-                    #         am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=True)
-                    #     else:
-                    #         am = AsistenciaMiembro.objects.create(miembro=m, reunion = r, asistencia=False)
-                    #     am.save()
-                    ok = True
+                reunion = form.save(commit=False)
+                # se verifica que la reunion ya no haya sido reportada
+                reportada = reunionReportada(reunion.fecha, grupo, 1)  # esta variable es enviada al template
+
+                # si no esta reportada
+                if not reportada:
+                    # asigna el grupo y otros datos
+                    reunion.grupo = grupo
+                    reunion.digitada_por_miembro = True
+                    # si no hicieron grupo, cambia la predica
+                    if form.cleaned_data['no_realizo_grupo'] and not reunion.realizada:
+                        reunion.predica = 'No se hizo Grupo'
+                    # guarda el reporte en la base de datos
+                    reunion.save()
+
+                    messages.success(
+                        request, _('Se ha Registrado el Reporte Existosamente, No olvides Llenar tu reporte Físico')
+                    )
+                    return redirect('reportar_reunion_grupo')
                 else:
-                    ya_reportada = True
+                    # envia mensaje de warning si ya fue reportada
+                    messages.warning(
+                        request,
+                        _('Parece que ya se ha reportado una reunion esta semana, Preguntale a tu Co-Líder o Administrador')
+                    )
+            else:
+                # si han ocurrido errores en el formulario, los envia
+                messages.error(request, _('Ha ocurrido un error con el formulario, verifica los campos'))
         else:
+            # carga el formulario en get
             form = FormularioReportarReunionGrupo()
-    return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
+    return render_to_response(
+        'Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request)
+    )
 
 
 @user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
 def reportarReunionGrupoAdmin(request):
-    miembro = Miembro.objects.get(usuario=request.user)
+
     if request.method == 'POST':
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
-            reporte = form.save(commit=False)
-            if not reunionReportada(reporte.fecha, reporte.grupo, 1):
-                reporte.digitada_por_miembro = False
-                reporte.confirmacionEntregaOfrenda = True
-                reporte.save()
-                ok = True
+            reunion = form.save(commit=False)
+            reportada = reunionReportada(reunion.fecha, reunion.grupo, 1)
+            if not reportada:
+                reunion.digitada_por_miembro = False
+                reunion.confirmacionEntregaOfrenda = True
+                if form.cleaned_data['no_realizo_grupo'] and not reunion.realizada:
+                    reunion.predica = 'No se hizo Grupo'
+                reunion.save()
+                messages.success(
+                    request,
+                    _('Has reportado exitosamente la reunión de el grupo %s' % reunion.grupo.__str__())
+                )
+                return redirect('reportar_reunion_grupo_admin')
             else:
-                ya_reportada = True
+                messages.warning(
+                    request,
+                    _('Ya existe una reunión para esta semana')
+                )
+        else:
+            messages.error(
+                request,
+                _('Ha ocurrido un error con el formulario, verifica los campos')
+            )
     else:
         init = request.GET.get('grupo', None)
         initial = {'grupo': init}
@@ -694,7 +739,9 @@ def transladar_grupos(request, id_grupo):
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def ver_reportes_grupo(request):
-    if request.method == 'POST' or ('post' in request.session and len(request.session['post']) > 1):
+    if request.method == 'POST' or (
+        'post' in request.session and len(request.session['post']) > 1 and request.session.get('valid_post', False)
+       ):
         if 'combo' in request.POST:
             value = request.POST['value']
             querys = Q(lider1__nombre__icontains=value) | Q(lider1__primerApellido__icontains=value) | \
@@ -706,30 +753,45 @@ def ver_reportes_grupo(request):
             return HttpResponse(json.dumps(response), content_type='aplicattion/json')
 
         data_from_session = request.session.get('post', None)
+        valid_post = request.session.get('valid_post', False)
 
         if 'reportar' in request.POST:
             form_reporte = FormularioReportarReunionGrupoAdmin(data=request.POST)
 
             if form_reporte.is_valid():
-                reporte = form_reporte.save(commit=False)
-                reporte.digitada_por_miembro = False
-                reporte.confirmacionEntregaOfrenda = True
-                if reunionReportada(reporte.fecha, reporte.grupo, 1):
-                    messages.error(request, "El Grupo ya cuenta con un reporte en ese rango de fecha")
-                    click = True
+                reunion = form_reporte.save(commit=False)
+                reportada = reunionReportada(reunion.fecha, reunion.grupo, 1)
+
+                if reportada:
+                    messages.warning(request, "El Grupo ya cuenta con un reporte en esa semana")
                     form_reporte.add_error('fecha', 'Ya hay un reporte en esta semana')
+                    click = True
                     if data_from_session is not None:
                         request.POST.update(data_from_session)
+                        request.session['post'] = request.session['post']
+                        # request.session['post'] = request.POST
                 else:
-                    reporte.save()
+                    reunion.digitada_por_miembro = False
+                    reunion.confirmacionEntregaOfrenda = True
+                    if form_reporte.cleaned_data['no_realizo_grupo'] and not reunion.realizada:
+                        reunion.predica = 'No se hizo Grupo'
+                    reunion.save()
                     messages.success(request, "Se Ha Reportado el Sobre Correctamente")
                     # request.session['post'] = request.POST
                     if data_from_session is not None:
                         request.POST.update(data_from_session)
+                        request.session['post'] = request.session['post']
+                        # request.session['post'] = request.POST
+                        request.session['valid_post'] = True
                     return redirect('reportes_grupo')
             else:
                 if data_from_session is not None:
                     request.POST.update(data_from_session)
+                    request.session['post'] = request.session['post']
+                    # request.session['post'] = request.POST
+                if settings.DEBUG:
+                    print(form_reporte.errors)
+                click = True
 
         else:
             form_reporte = FormularioReportarReunionGrupoAdmin()
@@ -744,6 +806,10 @@ def ver_reportes_grupo(request):
             finally:
                 if data_from_session is not None:
                     request.POST.update(data_from_session)
+                    request.session['post'] = request.session['post']
+                    # request.session['post'] = request.POST
+                    request.session['valid_post'] = True
+                return redirect('reportes_grupo')
 
         form = FormularioReportesEnviados(data=request.POST or data_from_session)
 
@@ -751,15 +817,25 @@ def ver_reportes_grupo(request):
             grupo = form.cleaned_data['grupo']  # get_object_or_404(Grupo, id=request.POST['grupo'])
             fecha_inicial = form.cleaned_data['fechai']
             fecha_final = form.cleaned_data['fechaf']
-            request.session['post'] = request.POST
+            # se escribe la sesion con los datos de el POST
+            request.session['post'] = {
+                'grupo': form.cleaned_data['grupo'].id,
+                'fechai': request.POST.get('fechai') or data_from_session['fechai'],
+                'fechaf': request.POST.get('fechaf') or data_from_session['fechaf']
+            }
+            # request.session['valid_post'] = False
+            request.session.pop('valid_post', None)
             fecha_final += datetime.timedelta(days=1)
-            reuniones = grupo.reuniongar_set.filter(fecha__range=(fecha_inicial, fecha_final)).order_by('-fecha')
+            reuniones = grupo.reuniongar_set.filter(
+                fecha__range=(fecha_inicial, fecha_final)
+            ).order_by('-fecha')
             if len(reuniones) == 0:
                 vacio = True
 
     else:
         form = FormularioReportesEnviados()
         form_reporte = FormularioReportarReunionGrupoAdmin()
+        request.session.pop('valid_post', None)
 
     return render_to_response("Grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
 
@@ -775,7 +851,8 @@ def editar_runion_grupo(request, pk):
         if form.is_valid():
             form.save()
             ok = True
-            request.session['post'] = request.session['post']
+            request.session['post'] = request.session.pop('post', None)
+            request.session['valid_post'] = True
 
     else:
         form = FormularioEditarReunionGAR(instance=reunion)
