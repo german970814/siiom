@@ -29,7 +29,11 @@
                             </span>
                             <div class="fg-line">
                                 <label for="{{ form.parent.id_for_label }}" class="fg-label control-label">{{ form.parent.label }}*:</label>
-                                {{ form.parent }}
+                                {% if form.instance.pk %}
+                                    <p>{{ form.instance.parent }}</p>
+                                {% else %}
+                                    {{ form.parent }}
+                                {% endif %}
                             </div>
                             {{ form.parent.errors }}
                         </div>

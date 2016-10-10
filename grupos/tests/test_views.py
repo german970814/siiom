@@ -345,7 +345,7 @@ class EditarGrupoViewTest(GruposBaseTest):
         response = self.client.post(self.URL, {})
 
         self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
-        self.assertFormError(response, 'form', 'parent', 'Este campo es obligatorio.')
+        # self.assertFormError(response, 'form', 'parent', 'Este campo es obligatorio.')
 
     @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
     def test_post_save_formulario_devuelve_None_muestra_error(self, update_mock):

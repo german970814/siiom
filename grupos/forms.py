@@ -396,13 +396,13 @@ class EditarGrupoForm(NuevoGrupoForm):
 
     def __init__(self, *args, **kwargs):
         super(EditarGrupoForm, self).__init__(kwargs['instance'].red, *args, **kwargs)
+        self.fields['parent'].required = False
 
-        descendientes = [grupo.id for grupo in Grupo.get_tree(self.instance)]
-        parent_query = self.fields['parent'].queryset.exclude(id__in=descendientes)
-        if self.instance.parent.is_root():
-            parent_query = parent_query | Grupo.objects.prefetch_related('lideres').filter(id=self.instance.parent.id)
-
-        self.fields['parent'].queryset = parent_query
+        # descendientes = [grupo.id for grupo in Grupo.get_tree(self.instance)]
+        # parent_query = self.fields['parent'].queryset.exclude(id__in=descendientes)
+        # if self.instance.parent.is_root():
+        #     root_query = Grupo.objects.prefetch_related('lideres').filter(id=self.instance.parent.id)
+        #     self.fields['parent'].queryset = self.fields['parent'].queryset | root_query
 
         self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
         self.fields['lideres'].initial = self.instance.lideres.all()
