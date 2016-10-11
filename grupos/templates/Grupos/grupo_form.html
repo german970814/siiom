@@ -47,6 +47,7 @@
                                 <label for="{{ form.lideres.id_for_label }}" class="fg-label control-label">{{ form.lideres.label }}*:</label>
 								{{ form.lideres }}
                             </div>
+                            <small class="help-block">{% trans 'Recuerde que los lideres escogidos se volveran discipulos del grupo padre.' %}</small>
                             {{ form.lideres.errors }}
                         </div>
                     </div>
@@ -183,7 +184,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" value="aceptar" name="aceptar" class="btn btn-primary btn-block">{% trans 'Aceptar' %}</button>
+                        <button name="aceptar" class="btn btn-primary btn-block">{% trans 'Aceptar' %}</button>
                     </div>
                 </div>
             </div>

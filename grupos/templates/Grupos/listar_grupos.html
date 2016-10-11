@@ -22,7 +22,8 @@
                     caseSensitive: false,
                     formatters: {
                         "commands": function(column, row) {
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_grupo/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
+                            var editar_url = "{% url 'grupos:editar' 0 %}".replace('0', row.id);
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + editar_url + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
                         }
                     }
                     {% endif %}

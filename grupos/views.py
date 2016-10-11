@@ -17,7 +17,7 @@ from common.decorators import permisos_requeridos
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
-    FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
+    FormularioReportarReunionDiscipulado, FormularioCrearRed,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm
@@ -410,29 +410,6 @@ def gruposDeRed(request, id):
         grupo.numero_descendientes = len(listaGruposDescendientes(grupo))
 
     return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def editarGrupo(request, pk):
-    accion = 'Editar'
-    miembro = Miembro.objects.get(usuario=request.user)
-
-    try:
-        grupo = Grupo.objects.get(pk=pk)
-    except Grupo.DoesNotExist:
-        raise Http404
-
-    red = grupo.red
-    if request.method == 'POST':
-        form = FormularioCrearGrupo(data=request.POST or None, red=red, instance=grupo, new=False)
-
-        if form.is_valid():
-            nuevoGrupo = form.save()
-            ok = True
-    else:
-        form = FormularioCrearGrupo(instance=grupo, new=False, red=red)
-
-    return render_to_response("Grupos/crear_grupo_admin.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(verGrupoTest, login_url="/dont_have_permissions/")

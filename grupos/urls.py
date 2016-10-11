@@ -8,7 +8,6 @@ urlpatterns = [
     url(r'^crear_red/$', crearRed, name="crear_red"),
     url(r'^editar_red/(?P<pk>\d+)$', editarRed, name="editar_red"),
     url(r'^listar_grupos/(\d+)/$', gruposDeRed, name="listar_grupos"),
-    url(r'^editar_grupo/(?P<pk>\d+)$', editarGrupo, name="editar_grupo"),
     url(r'^listar_predicas/$', listarPredicas, name="listar_predicas"),
     url(r'^crear_predica/$', crearPredica, name="crear_predica"),
     url(r'^editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),
