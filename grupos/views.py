@@ -778,6 +778,18 @@ def editar_grupo(request, pk):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
+def listar_grupos(request, pk):
+    """
+    Permite a un administrador listar los grupos de la red escogida.
+    """
+
+    red = get_object_or_404(Red, pk=pk)
+    grupos = Grupo.objects.prefetch_related('lideres').red(red)
+    return render(request, 'grupos/lista_grupos.html', {'red': red, 'grupos': grupos})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def transladar(request, pk):
     """
     Permite a un administrador transladar un grupo a una nueva posición en el organigrama de grupos.

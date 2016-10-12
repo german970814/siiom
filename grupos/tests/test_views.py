@@ -360,6 +360,47 @@ class EditarGrupoViewTest(GruposBaseTest):
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
 
 
+class ListarGruposRedViewTest(GruposBaseTest):
+    """
+    Pruebas unitarias para la vista listar grupos de una red especifica.
+    """
+
+    def setUp(self):
+        super().setUp()
+        red_jovenes = Red.objects.get(nombre='jovenes')
+        self.URL = reverse('grupos:listar', args=(red_jovenes.id,))
+        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+
+    def login_usuario(self, usuario):
+        """
+        Loguea un usuario.
+        """
+
+        self.client.login(email=usuario.email, password='123456')
+
+    def test_get_red_no_existe_devuelve_404(self):
+        """
+        Prueba que si se envia una red que no existe la vista devuelve un status code de 404.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.get(reverse('grupos:listar', args=(100,)))
+        self.assertRaises(Http404)
+
+    def test_get_muestra_grupos_de_red(self):
+        """
+        Prueba que se listen los grupos de la red ingresada.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.client.get(self.URL)
+
+        grupo_red = Grupo.objects.get(id=300)
+        otro_grupo = Grupo.objects.get(id=200)
+        self.assertContains(response, str(grupo_red))
+        self.assertNotContains(response, str(otro_grupo))
+
+
 class TransladarGrupoViewTest(GruposBaseTest):
     """
     Pruebas unitarias para la vista de transladar un grupo a un nuevo padre.
