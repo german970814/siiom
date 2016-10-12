@@ -11,20 +11,12 @@
         		</legend>
         	</h1>
 			<h5><a alt="Agregar Grupo" href="{% url 'grupos:nuevo' red.id %}">{% trans 'Agregar Grupo' %}</a></h5>
-			{% if okElim == 2 %}
-				<div class="row">
-	                <div class="alert alert-danger alert-dismissible" role="alert">
-	                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-	                    <p>Hubo un error al eliminar los grupo.</p>
-	                </div>
-	            </div>
-			{% endif %}
             {% if messages %}
                 {% for message in messages %}
                     <div class="row">
-                    <div class="alert alert-{{message.tags}} alert-dismissible" role="alert">
+                    <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>{{message}}</p>
+                        <p>{{ message }}</p>
                     </div>
                 </div>
                 {% endfor %}
@@ -78,7 +70,7 @@
             <div class="row">
                 <div class="col-md-10 col-md-offset-1">
                     <div class="alert alert-warning" role="alert">
-                        <p>A&uacute;n no se han agregado grupos a esta red.</p>
+                        <p>{% trans 'Aún no se han agregado grupos a esta red.' %}</p>
                     </div>
                 </div>
             </div>
