@@ -223,7 +223,7 @@ class BaseGrupoForm(CustomModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        super(BaseGrupoForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
@@ -244,7 +244,7 @@ class GrupoRaizForm(BaseGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
-        super(GrupoRaizForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if self.instance.pk:
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
@@ -253,7 +253,7 @@ class GrupoRaizForm(BaseGrupoForm):
     def save(self):
         try:
             with transaction.atomic():
-                raiz = super(GrupoRaizForm, self).save(commit=False)
+                raiz = super().save(commit=False)
                 if raiz.pk:
                     raiz.save()
                     raiz.lideres.clear()
@@ -277,7 +277,7 @@ class NuevoGrupoForm(BaseGrupoForm):
         fields = ['parent'] + BaseGrupoForm.Meta.fields
 
     def __init__(self, red, *args, **kwargs):
-        super(NuevoGrupoForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['parent'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
         if grupos_query.count() == 0:
@@ -294,7 +294,7 @@ class NuevoGrupoForm(BaseGrupoForm):
     def save(self):
         try:
             with transaction.atomic():
-                grupo = super(NuevoGrupoForm, self).save(commit=False)
+                grupo = super().save(commit=False)
                 grupo.red = self.red
 
                 padre = self.cleaned_data['parent']
@@ -314,7 +314,7 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
-        super(EditarGrupoForm, self).__init__(kwargs['instance'].red, *args, **kwargs)
+        super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
         # descendientes = [grupo.id for grupo in Grupo.get_tree(self.instance)]
@@ -357,7 +357,7 @@ class TransladarGrupoForm(forms.Form):
     nuevo = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, grupo, *args, **kwargs):
-        super(TransladarGrupoForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['nuevo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
         descendientes = [grupo.id for grupo in Grupo.get_tree(grupo)]
