@@ -10,6 +10,7 @@ from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 # Apps Imports
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
@@ -28,6 +29,7 @@ from common.tests import (
 # Python Packages
 import datetime
 import json
+import copy
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -110,6 +112,22 @@ def reunionReportada(fecha, grupo, tipo):
         return True
     else:
         return False
+
+
+def obtener_fechas_semana(fecha):
+    """
+    Retorna las fechas de la semana de lunes a domingo a partir de una fecha
+    """
+    inicio_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
+    fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
+
+    _fechas = []
+
+    while inicio_semana <= fin_semana:
+        _fechas.append(inicio_semana)
+        inicio_semana += datetime.timedelta(days=1)
+
+    return _fechas
 
 
 def reunionDiscipuladoReportada(predica, grupo):
@@ -842,17 +860,54 @@ def ver_reportes_grupo(request):
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editar_runion_grupo(request, pk):
-
+    """
+    Funcion para editar una reunion de Grupo GAR
+    """
     reunion = get_object_or_404(ReunionGAR, pk=pk)
+    fecha_anterior = copy.deepcopy(reunion.fecha)
+
+    # se sobreescriben las variables
+    request.session['post'] = request.session.pop('post', None)
 
     if request.method == 'POST':
         form = FormularioEditarReunionGAR(data=request.POST, instance=reunion)
 
         if form.is_valid():
-            form.save()
-            ok = True
-            request.session['post'] = request.session.pop('post', None)
-            request.session['valid_post'] = True
+            reunion_formulario = form.save(commit=False)
+
+            if reunion_formulario.fecha not in obtener_fechas_semana(fecha_anterior):
+                reportada = reunionReportada(reunion_formulario.fecha, reunion_formulario.grupo, 1)
+
+                if reportada:
+                    messages.warning(
+                        request,
+                        _('Ya hay una reunion reportada en esta semana, verifica la fecha')
+                    )
+                    form.add_error('fecha', _('Fecha concuerda con otro reporte de reunion'))
+                else:
+                    # se envia que puede ir a la pagina de vista de reportes
+                    request.session['valid_post'] = True
+                    if form.cleaned_data['no_realizo_grupo'] and not reunion.realizada:
+                        reunion.predica = 'No se hizo Grupo'
+                    reunion_formulario.save()
+                    messages.success(
+                        request,
+                        _('Se ha editado la reunion exitosamente. \
+                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('reportes_grupo')})
+                    )
+            else:
+                # se envia que puede ir a la pagina de vista de reportes
+                request.session['valid_post'] = True
+                if form.cleaned_data['no_realizo_grupo'] and not reunion.realizada:
+                    reunion.predica = 'No se hizo Grupo'
+                reunion_formulario.save()
+                messages.success(
+                    request,
+                    _('Se ha editado la reunion exitosamente. \
+                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('reportes_grupo')})
+                )
+        else:
+            messages.error(request, _('Ha ocurrido un error al enviar el formulario, verifica los campos'))
 
     else:
         form = FormularioEditarReunionGAR(instance=reunion)

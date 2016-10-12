@@ -374,22 +374,7 @@ class FormularioReportesEnviados(FormularioRangoFechas):
             self.fields['grupo'].queryset = queryset
 
 
-class FormularioEditarReunionGAR(forms.ModelForm):
-    error_css_class = 'has-error'
+class FormularioEditarReunionGAR(FormularioReunionGARBase):
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarReunionGAR, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
-        # se comenta la linea que hacia que la fecha no fuera editable
-        # self.fields['fecha'].widget.attrs.update({'readonly': ''})
-
-    class Meta:
-        model = ReunionGAR
-        # exclude = ('grupo', 'asistentecia')
-        # se cambia el exclude por fields
-        fields = (
-            'fecha', 'predica', 'numeroTotalAsistentes',
-            'numeroLideresAsistentes', 'numeroVisitas',
-            'ofrenda'
-        )

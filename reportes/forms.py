@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+# Django Package
 from django import forms
 from django.db.models.aggregates import Count
+from django.utils.translation import ugettext_lazy as _
+
+# Locale Apps
 from grupos.models import Red, Predica, Grupo
 from miembros.models import Miembro
 from .utils import listaGruposDescendientes_id
@@ -127,3 +131,27 @@ class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
             grupo.llamadas_no_realizadas = grupo.personas_asignadas - grupo.llamadas_realizadas
 
         return grupos
+
+
+class FormularioEstadisticoReunionesGAR(forms.ModelForm):
+    """
+    Formulario para los estadisticos de reuniones GAR
+    """
+
+    css_error_class = 'has-error'
+
+    grupo = forms.ModelChoiceField(label=_('Grupo'), queryset=Grupo.objects.none())
+    fecha_inicial = forms.DateField(label=_('Fecha Inicial'))
+    fecha_final = forms.DateField(label=_('Fecha Final'))
+    descendientes = forms.BooleanField(label=_('Descendientes'), required=False)
+    ofrenda = forms.BooleanField(label=_('Ofrenda'), required=False)
+    lideres_asistentes = forms.BooleanField(label=_('Líderes Asistentes'))
+    visitas = forms.BooleanField(label=_('Visitas'), required=False)
+    asistentes_regulares = forms.BooleanField(label=_('Asistentes Regulares'))
+
+    def __init__(self, *args, **kwargs):
+        queryset_grupo = kwargs.pop('queryset_grupo', None)
+        super(FormularioEstadisticoReunionesGAR, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        if queryset_grupo is not None:
+            self.fields['grupo'].queryset = queryset_grupo
