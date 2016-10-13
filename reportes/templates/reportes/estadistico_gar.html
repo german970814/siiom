@@ -1,98 +1,70 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load reportes_filters %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/print.css' %}">
+{% endblock %}
+
 {% block js %}
 
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js' %}"></script>
+<!--<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.resize.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.pie.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot.tooltip/js/jquery.flot.tooltip.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot-orderBars/js/jquery.flot.orderBars.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot.curvedlines/curvedLines.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot-orderBars/js/jquery.flot.orderBars.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/curved-line-chart.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/line-chart.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/bar-chart.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/dynamic-chart.js' %}"></script>
+<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/pie-chart.js' %}"></script>
+<script type="text/javascript" src="{% static 'Scripts/Chart.js' %}"></script>-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-    //dibujando el grafico
-    {% if sw %}
-        google.load("visualization", "1", {packages:["corechart"]});
-        google.setOnLoadCallback(drawChart);
-
-        function drawChart(){
-            var data = google.visualization.arrayToDataTable({{ values|safe }});
-            var options = {
-                width: '100%',
-                height: 500,
-                vAxis: {
-                    title: "Frecuencia",
-                },
-                hAxis: {
-                    title: "Rango de Fechas",
-                }
-            };
-            var chart = new google.visualization.LineChart(document.getElementById('out'));
-            chart.draw(data, options);
-        }
-    {% endif %}
-    
     $(document).ready(function(){
-        // $('#idGrupo_i').parent().parent().parent().on('focus mouseover', function (event){
-        //     $(this).css('overflow', '');
-        // })
-
-        // $('#idGrupo_i').parent().parent().parent().on('blur mouseleave', function (event){
-        //     $(this).css('overflow', 'hidden');
-        // })
-
-        $('#id_fechai').datetimepicker({
+        $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
             format: 'DD/MM/YY',
             // daysOfWeekDisabled: [0,2,3,4,5,6],
             maxDate: moment(),
         });
 
-        $('#id_fechaf').datetimepicker({
+        $('#{{ form.fecha_final.id_for_label }}').datetimepicker({
             useCurrent: false,
             format: 'DD/MM/YY',
             // daysOfWeekDisabled: [1,2,3,4,5,6],
             maxDate: moment(),
         });
 
-        $('#id_fechai').on("dp.change",function(e){
-            $('#id_fechaf').data("DateTimePicker").minDate(e.date);
+        $('#{{ form.fecha_inicial.id_for_label }}').on("dp.change",function(e){
+            $('#{{ form.fecha_final.id_for_label }}').data("DateTimePicker").minDate(e.date);
         });
 
-        $('#id_fechaf').on("dp.change",function(e){
-            $('#id_fechai').data("DateTimePicker").maxDate(e.date);
+        $('#{{ form.fecha_final.id_for_label }}').on("dp.change",function(e){
+            $('#{{ form.fecha_inicial.id_for_label }}').data("DateTimePicker").maxDate(e.date);
         });
 
-        $("#idGrupo_i").change(function(){
-            if($(this).val() != -1){
-                $.post("", {combo: 'grupo_i', id: $(this).val(), csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()}, function(data){
-                    // console.log(data);
-                    agregarOpciones2(data, 'idGrupo_f');
-                    $('#idGrupo_f').selectpicker('refresh')
-                }, "json");
-            }
-            else{
-                $("#idGrupo_f").html('');
-            }
-        });
+        var $fechai = $('#{{ form.fecha_inicial.id_for_label }}');
+        var $fechaf = $('#{{ form.fecha_final.id_for_label }}');
+        var $grupoi = $('#{{ form.grupo.id_for_label }}');
+        // var $grupof = $('#idGrupo_f');
+        var $visitas = $("#{{ form.visitas.id_for_label }}");
+        var $lideres = $("#{{ form.lideres_asistentes.id_for_label }}");
+        var $ofrenda = $("#{{ form.ofrenda.id_for_label }}");
+        var $asis_reg = $("#{{ form.asistentes_regulares.id_for_label }}");
+        var $descendientes = $("#{{ form.descendientes.id_for_label }}");
 
-        var $fechai = $('#id_fechai');
-        var $fechaf = $('#id_fechaf');
-        var $grupoi = $('#idGrupo_i');
-        var $grupof = $('#idGrupo_f');
-        var $visitas = $("input[name='visitas']");
-        var $lideres = $("input[name='lid_asis']");
-        var $ofrenda = $("input[name='ofrenda']");
-        var $asis_reg = $("input[name='asis_reg']");
-        var $descendientes = $("input[name='descendientes']");
+
         var $sel = [];
+
         $sel.push($visitas,$lideres,$asis_reg);
 
-        $("#idCheck").click(function(){
-            if($(this).is(':checked')){
-                $("#idGrupo_f").attr('disabled', 'disabled');
-            }
-            else{
-                $("#idGrupo_f").removeAttr('disabled');
-            }
-        });
-
-        $("input[name='ofrenda']").click(function(){
+        $ofrenda.click(function(){
             for (var i = 0; i < $sel.length; i++) {
                 if ($sel[i].is(':checked')) {
                     $sel[i][0].checked = false;
@@ -102,7 +74,7 @@
             }
         });
 
-        $("input[name='lid_asis'], input[name='asis_reg'], input[name='visitas']").click(() => {
+        $("#{{ form.lideres_asistentes.id_for_label }}, #{{ form.asistentes_regulares.id_for_label }}, #{{ form.visitas.id_for_label }}").click(() => {
             for (var i = 0; i < 1; i++) {
                 if ($ofrenda.is(':checked')) {
                     $ofrenda[0].checked = false;
@@ -112,27 +84,22 @@
             }
         })
 
-        $('#form_pasosTotal').submit(function(event) {
+        $('button[name="verReporte"]').click(function(event) {
             if ($fechai.val() == '') {
                 swal("Alerta!!!","Asegurate de escoger una fecha inicial");
                 return false;
             } else if ($fechaf.val() == '' && $fechai.val() != '') {
                 swal("Alerta!!!","Asegurate de escoger una fecha final");
                 return false;
-            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() == -1) {
-                swal("Alerta!!!","Asegurate de escoger un grupo inicial");
+            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() == -1 | $grupoi.val() == '') {
+                swal("Alerta!!!","Asegurate de escoger un grupo");
                 return false;
-            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() != -1 && $grupof.val() == -1) {
-                if (!$descendientes.is(':checked')) {
-                    swal("Alerta!!!","Asegurate de escoger un grupo final o de seleccionar la opción de mostrar todos los descendientes del grupo inicial");
+            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() != -1) {
+                if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
+                    swal("Alerta", "Escoja por lo menos una opción");
                     return false;
                 } else {
-                    if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
-                        swal("Alerta", "Escoja por lo menos una opción");
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return true;
                 }
             } else {
                 if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
@@ -144,6 +111,124 @@
             }
         });
 
+        {% if values_porcentaje_utilidad %}
+        var data_porcentaje = {{ values_porcentaje_utilidad|safe }};
+        var data_asistencias = {{ values_asistencias|safe }};
+        var tabla = {{ tabla|safe }};
+
+        {% comment %}google.charts.load('current', {'packages':['bar']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            // Create the data table.
+            var data = google.visualization.arrayToDataTable(data_asistencias);
+
+            // Set chart options
+            var options = {
+                chart: {
+                    title: 'Porcentaje De grupos reportando',
+                    subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+                },
+                bars: 'vertical' // Required for Material Bar Charts.
+            };
+
+            // Instantiate and draw our chart, passing in some options.
+            var chart = new google.charts.Bar(document.getElementById('out'));
+            chart.draw(data, options);
+        }{% endcomment %}
+
+
+
+        google.charts.load('current', {packages:["corechart", 'bar']});
+        google.charts.setOnLoadCallback(drawChart);
+        // asistencias
+        function drawChart(){
+            var data = new google.visualization.DataTable();
+            for (var x = 0; x < data_asistencias[0].length; x++) {
+                if (data_asistencias[0][x] == 'Fechas') {
+                    data.addColumn('string', data_asistencias[0][x]);
+                } else {
+                    data.addColumn('number', data_asistencias[0][x]);
+                    data.addColumn({type: 'string', role: 'annotation'});
+                }
+            }
+
+            for (var x = 1; x < data_asistencias.length; x++) {
+                data.addRow(data_asistencias[x]);
+            }
+
+            var options = {
+                width: '100%', 
+                height: 500, 
+                title: 'Asistencia en Grupos de Amistad',
+                subtitle: 'Rango de fechas',
+                hAxis: {
+                    title: 'Fechas'
+                },
+                vAxis: {
+                    title: 'Numero de Personas'
+                },
+                legend: {
+                    position: 'bottom'
+                },
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById('out'));
+            chart.draw(data, options);
+        }
+
+
+
+        // Porcentaje 
+        google.charts.setOnLoadCallback(drawChartPorcentaje);
+
+        function drawChartPorcentaje(){
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Fechas');
+            data.addColumn('number', 'Porcentaje');
+            data.addColumn({type: 'string', role: 'annotation'});
+
+            for (var x = 0; x < data_porcentaje[0].length; x++) {
+                var arr = new Array();
+                arr.splice(0, 0, data_porcentaje[0][x]);
+                arr.splice(1, 0, data_porcentaje[1][x]);
+                arr.splice(2, 0, data_porcentaje[1][x].toString() + '%');
+                {% comment %}console.log(arr);{% endcomment %}
+                data.addRow(arr);
+            }
+
+            {% comment %}for (var x = 1; x < data_asistencias.length; x++) {
+                data.addRow(data_asistencias[x]);
+            }{% endcomment %}
+
+            var options = {
+                width: '100%', 
+                height: 500, 
+                title: 'Porcentaje de Grupos Reportando',
+                subtitle: 'Rango de fechas',
+                hAxis: {
+                    title: 'Fechas'
+                },
+                vAxis: {
+                    title: 'Porcentaje'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById('out2'));
+            chart.draw(data, options);
+        }
+
+
+        $(window).resize(function(){
+            drawChart();
+        });
+
+        $('#tw-switch').on('change', function() {
+            setTimeout("drawChart()", 500);
+        });
+
+        {% endif %}
     });
 </script>
 {% endblock %}
@@ -153,7 +238,7 @@
 
 {% block contenido %}
 <div class="container">
-    <div class="card">
+    <div class="card" id="card-formulario">
         <div class="card-header">
             <h1>
                 <legend>
@@ -161,15 +246,15 @@
                 </legend>
             </h1>
             {% if messages %}
-            {% for message in messages %}
-                <div class="row">
-                    <div class="alert alert-warning alert-dismissible" role="alert">
-                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>{{message}}</p>
-                    </div>
-                </div>
-            {% endfor %}
-            {% endif %}
+				{% for message in messages %}
+					<div class="row">
+		                <div class="alert {% if message.tags == "success" %}alert-success {% elif message.tags == "error" %}alert-danger {% else %}alert-warning{% endif %} alert-dismissible" role="alert">
+		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+		                    <p>{{ message }}</p>
+		                </div>
+		            </div>
+				{% endfor %}
+			{% endif %}
         </div>
 {% if miembro.grupoLidera or perms.miembros.es_administrador %}
         <form action="" method="POST" id="form_pasosTotal">
@@ -178,26 +263,32 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group form-group">
+                        <div class="input-group form-group {{ form.fecha_inicial.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechai" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Solo puedes escoger un Lunes." title="" data-original-title="Ayuda">Fecha Inicial:</label>
-                                {{form.fechai}}
+                                <label for="{{ form.fecha_inicial.id_for_label }}" class="fg-label requerido control-label" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Escoge una fecha de la cual partirán los estadisticos." title="" data-original-title="Ayuda">Fecha Inicial:</label>
+                                {{ form.fecha_inicial }}
                             </div>
+                            {% for err in form.fecha_inicial.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{ form.fecha_final.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar-note"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechaf" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Solo puedes escoger un Domingo." title="" data-original-title="Ayuda">Fecha Final:</label>
-                                {{form.fechaf}}
+                                <label for="{{ form.fecha_final.id_for_label }}" class="fg-label requerido control-label" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Escoge una fecha limite para los estadisticos." title="" data-original-title="Ayuda">Fecha Final:</label>
+                                {{ form.fecha_final }}
                             </div>
+                            {% for err in form.fecha_final.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -205,36 +296,30 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group">
+                        <div class="input-group {{ form.grupo.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="idGrupo_i" class="fg-label requerido">Grupo Inicial:</label>
-                                <select class="selectpicker" data-live-search="true" name="menuGrupo_i" id="idGrupo_i">
-                                    <option value="-1" {% if not grupo_i %} selected="selected {% endif %}">Selecciona Un Grupo</option>
-                                    {% for g_i in listaGrupo_i %}
-                                    <option value="{{g_i.id}}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{g_i|capfirst}}</option>
-                                    {% endfor %}
-                                </select>
+                                <label for="{{ form.grupo.id_for_label }}" class="fg-label requerido control-label" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Escoge El grupo de el cual quieres ver los estadisticos." title="" data-original-title="Ayuda">Grupo:</label>
+                                {{ form.grupo }}
                             </div>
+                            {% for err in form.grupo.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-accounts"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="idGrupo_f" class="fg-label requerido" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Para poder ver algo aqui debes escoger un grupo inicial." title="" data-original-title="Ayuda">Grupo Final:</label>
-                                <select class="selectpicker" name="menuGrupo_f" id="idGrupo_f">
-                                    <option value="-1" {% if not grupo_f %} selected="selected {% endif %}">Selecciona Un Grupo</option>
-                                    {% for g_f in listaGrupo_f %}
-                                    <option value="{{g_f.id}}" {% if g_f == grupo_f %} selected="selected" {% endif %}>{{g_f|capfirst}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                        <div class="input-group {{ form.descendientes.css_classes }}">
+                            <label for="{{ form.descendientes.id_for_label }}" class="checkbox control-label">
+                                {{ form.descendientes }}
+                                <i class="input-helper m-r-20"></i>
+                                {{ form.descendientes.label }}
+                            </label>
+                            {% for err in form.descendientes.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -242,26 +327,28 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group">
-                            <div class="fg-line">
-                                <label for="idCheck" class="checkbox m-r-20">
-                                    <input type="checkbox" id="idCheck" name="descendientes" value="S" {% if descendientes %} checked="checked" {% endif %}>
-                                    <i class="input-helper m-r-20"></i>
-                                    Mostrar todos los descendientes del grupo inicial
-                                </label>
-                            </div>
+                        <div class="input-group {{ form.ofrenda.css_classes }}">
+                            <label for="{{ form.ofrenda.id_for_label }}" class="checkbox control-label">
+                                {{ form.ofrenda }}
+                                <i class="input-helper m-r-20"></i>
+                                {{ form.ofrenda.label }}
+                            </label>
+                            {% for err in form.ofrenda.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
-                            <div class="fg-line">
-                                <label for="lid_asis" class="checkbox m-r-20">
-                                    <input id="lid_asis" type="checkbox" name="lid_asis" value="S" {% if lid_asis %} checked="checked" {% endif %}>
-                                    <i class="input-helper m-r-20"></i>
-                                    N&uacute;mero de L&iacute;deres Asistentes
-                                </label>
-                            </div>
+                       <div class="input-group {{ form.lideres_asistentes.css_classes }}">
+                            <label for="{{ form.lideres_asistentes.id_for_label }}" class="checkbox control-label">
+                                {{ form.lideres_asistentes }}
+                                <i class="input-helper m-r-20"></i>
+                                {{ form.lideres_asistentes.label }}
+                            </label>
+                            {% for err in form.lideres_asistentes.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -269,41 +356,28 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group">
-                            <div class="fg-line">
-                                <label for="visitas" class="checkbox m-r-20">
-                                    <input id="visitas" type="checkbox" name="visitas" value="S" {% if visitas %} checked="checked" {% endif %}>
-                                    <i class="input-helper m-r-20"></i>
-                                    N&uacute;mero de Visitas
-                                </label>
-                            </div>
+                        <div class="input-group {{ form.visitas.css_classes }}">
+                            <label for="{{ form.visitas.id_for_label }}" class="checkbox control-label">
+                                {{ form.visitas }}
+                                <i class="input-helper m-r-20"></i>
+                                {{ form.visitas.label }}
+                            </label>
+                            {% for err in form.visitas.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
-                            <div class="fg-line">
-                                <label for="asis_reg" class="checkbox m-r-20">
-                                    <input id="asis_reg" type="checkbox" name="asis_reg" value="S" {% if asis_reg %} checked="checked" {% endif %}>
-                                    <i class="input-helper m-r-20"></i>
-                                    N&uacute;mero de Asistentes Regulares
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group">
-                            <div class="fg-line">
-                                <label for="ofrenda_id" class="checkbox m-r-20">
-                                    <input id="ofrenda_id" type="checkbox" name="ofrenda" value="S" {% if ofrenda %} checked="checked" {% endif %}>
-                                    <i class="input-helper m-r-20"></i>
-                                    Ofrenda
-                                </label>
-                            </div>
+                        <div class="input-group {{ form.asistentes_regulares.css_classes }}">
+                            <label for="{{ form.asistentes_regulares.id_for_label }}" class="checkbox control-label">
+                                {{ form.asistentes_regulares }}
+                                <i class="input-helper m-r-20"></i>
+                                {{ form.asistentes_regulares.label }}
+                            </label>
+                            {% for err in form.asistentes_regulares.errors %}
+                            <small class="help-block">{{err}}</small>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -328,10 +402,87 @@
     </div>
 </div>
 {% endif %}
-    {%if sw %}
+    {% if grafico %}
     <div class="card">
         <div class="card-body card-padding">    
-            <div id="out">
+            <div id="out" style="width: 100%;">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-body card-padding">
+            <div id="out2" style="width: 100%;">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            <h3>Tabla Estadisticos</h3>
+        </div>
+        <div class="card-body card-padding">
+            <div class="table-responsive">
+                <table class="table table-striped table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Rango de Fecha</th>
+                            <th>Visitas</th>
+                            <th>Regulares</th>
+                            <th>Líderes</th>
+                            <th>Total Asistentes</th>
+                            <th>Grupos Reportaron</th>
+                            <th>Grupos sin Reportar</th>
+                            <th>Porcentaje Reportes</th>
+                            <th>Total Grupos Semana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dato in tabla %}
+                        <tr>
+                            <td>{{ dato.fecha }}</td>
+                            <td>{{ dato.reuniones.numero_visitas }}</td>
+                            <td>{{ dato.reuniones.asistentes_regulares }}</td>
+                            <td>{{ dato.reuniones.numero_lideres_asistentes }}</td>
+                            <td>{{ dato.reuniones.numero_total_asistentes }}</td>
+                            <td>{{ dato.grupos_semana|sub:dato.sin_reportar }}</td>
+                            <td>{{ dato.sin_reportar }}</td>
+                            <td>{{ dato.porcentaje }}%</td>
+                            <td>{{ dato.grupos_semana }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card">
+        <div class="card-header">
+            <h3>Tabla Faltantes Por Reporte</h3>
+        </div>
+        <div class="card-body card-padding">
+            <div class="table-responsive">
+                <table class="table table-striped table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Líderes</th>
+                            <th>Discípulos De</th>
+                            <th>Fecha Reunión</th>
+                            <th>No. Sobres</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grupo in sin_reportar %}
+                        <tr>
+                            <td>{{ grupo.lider1.nombre|upper }} {{ grupo.lider1.primerApellido|upper }} {% if grupo.lider2 %} y {{ grupo.lider2.nombre|upper }} {{ grupo.lider1.primerApellido|upper }}{% endif %}</td>
+                            <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>
+                            <td>{{ grupo.fechas }}</td>
+                            <td>{{ grupo.no_reportes }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

@@ -1,0 +1,21 @@
+@page:first{
+    size: letter portrait;
+    margin-top: -65px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+@page {
+    size: letter portrait;
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+@media print {
+    #card-formulario {
+        display: none !important;
+    }
+}

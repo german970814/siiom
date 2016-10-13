@@ -30,4 +30,5 @@ urlpatterns = [
     url(r'^consultar_sobres_discipulados_sin_enviar/$',
         ConsultarReportesDiscipuladoSinEnviar, {'sobres': True},
         name="consultar_sobres_discipulados_sin_enviar"),  # Error
+    url(r'^prueba/', estadistico_reuniones_gar, name="rueba2")
 ]

@@ -7,9 +7,10 @@ from django.core import serializers
 from django.core.mail import send_mail, send_mass_mail
 from django.db.models import Sum, Q, Count
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template.context import RequestContext
 from django.db.models.query import QuerySet
+from django.utils.translation import ugettext as _
 
 # from encodings.utf_8_sig import encode
 # from django.utils.datetime_safe import strftime
@@ -19,6 +20,7 @@ from .charts import PdfTemplate, PdfReport
 from .forms import (
     FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes,
     FormularioCumplimientoLlamadasLideres, FormularioReportesSinEnviar, FormularioPredicas,
+    FormularioEstadisticoReunionesGAR
 )
 from .utils import get_date_for_report
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
@@ -30,6 +32,7 @@ from common.tests import (
 import calendar
 import datetime
 import json
+import copy
 
 
 @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
@@ -1384,13 +1387,13 @@ def estadistico_reuniones_gar(request):
     """
 
     # se obtiene el miembro
-    miembro = Miembro.objects.get(usuario=request.user)
+    # miembro = Miembro.objects.get(usuario=request.user)
 
     # se crean los datos iniciales
     data = {}
 
     # si el usuario es administrador, tendrá una lista con todos los grupos
-    if miembro.usuario.has_perm("miembros.es_administrador"):
+    if request.user.has_perm("miembros.es_administrador"):
         queryset_grupo = Grupo.objects.select_related('lider1', 'lider2').all()
     else:
         # si no es administrador, solo puede ver los grupos debajo de el
@@ -1413,21 +1416,28 @@ def estadistico_reuniones_gar(request):
             descendientes = form.cleaned_data.get('descendientes', False)
 
             # helpers
+            _helper = []
             labels_fecha = []
             values_porcentaje_utilidad = [labels_fecha, []]
-            values_asistencias = [labels_fecha, [], []]
+            values_asistencias = [['Fechas']]
+            morosos = []
+            _morosos = {}
+            data_table = []
 
             # se empacan los datos a la vista
             data['values_porcentaje_utilidad'] = values_porcentaje_utilidad
             data['values_asistencias'] = values_asistencias
 
+            # si hay descendientes en el formulario
             if descendientes:
-                # si hay descendientes en el formulario
+                # se obtienen los grupos a partir de el lider de el grupo de el formulario
                 grupos = Grupo.objects.filter(
                     id__in=listaGruposDescendientes_id(
                         Miembro.objects.get(id=grupo.listaLideres()[0])
                     )
-                )  # se obtienen los grupos a partir de el lider de el grupo de el formulario
+                ).select_related('lider1', 'lider2').only(
+                    'lider1', 'lider2', 'fechaApertura', 'id', 'estado'
+                )
                 total_grupos = grupos.count()  # se obtiene el numero de grupos
                 # Se sacan los grupos inactivos
                 total_grupos_inactivos = grupos.filter(estado=Grupo.INACTIVO).count()
@@ -1447,7 +1457,7 @@ def estadistico_reuniones_gar(request):
                 # si hay descendientes, se sacan los grupos que hubieron esa semana
                 if descendientes:
                     # se tiene, el queryset y a parte la cantidad de ese queryset
-                    _grupos_semana = grupos.exclude(fechaApertura__gt=sig, estado=Grupo.INACTIVO)
+                    _grupos_semana = grupos.exclude(fechaApertura__gt=siguiente).exclude(estado=Grupo.INACTIVO)
                     grupos_semana = _grupos_semana.count()
                 else:
                     pass
@@ -1457,12 +1467,15 @@ def estadistico_reuniones_gar(request):
                     fecha__range=(fecha_inicial, siguiente),
                     grupo__in=_grupos_semana,  # solo busca los reportes de los grupos de la semana
                     grupo__estado=Grupo.ACTIVO  # importante, grupos Activos
+                ).defer(
+                    'confirmacionEntregaOfrenda', 'novedades',
+                    'asistentecia', 'predica'
                 ).distinct()
 
                 # se hacen las agregaciones, con los datos de los estadisticos por semana
                 reuniones = _reuniones.aggregate(
                     numero_lideres_asistentes=Sum('numeroLideresAsistentes'),
-                    numero_visitas=Sum('numerVisitas'),
+                    numero_visitas=Sum('numeroVisitas'),
                     numero_total_asistentes=Sum('numeroTotalAsistentes'),
                     grupos_reportaron=Count('id')
                 )
@@ -1478,23 +1491,52 @@ def estadistico_reuniones_gar(request):
                     reuniones['numero_lideres_asistentes']
                 )
 
-                # se sacan los grupos sin reportar, vendria de la resta de los grupos de la semana, menos los sobres
-                _sin_reportar = _grupos_semana.exclude(
-                    id__in=_reuniones.values_list('id', flat=True)
-                )
-                # se saca el conteo de los grupos sin reportar
-                sin_reportar = _sin_reportar.count()
-
-                # porcentaje grupos que estan reportando
-                grupos_reportaron = reuniones.pop('grupos_reportaron', 0)
-                porcentaje_grupos_reportando = round(float(grupos_reportaron) / (grupos_semana * 100), 2)
-
                 # se añaden las fechas
                 fechas_str = fecha_inicial.strftime("%d/%m/%y") + ' - ' + siguiente.strftime("%d/%m/%y")
                 labels_fecha.insert(len(labels_fecha), fechas_str)
 
+                # se sacan los grupos sin reportar, vendria de la resta de los grupos de la semana, menos los sobres
+                _sin_reportar = _grupos_semana.exclude(
+                    id__in=_reuniones.values_list('grupo__id', flat=True)
+                ).select_related(
+                    'lider1', 'lider2', 'lider1__grupo__lider1',
+                    'lider1__grupo__lider2', 'lider2__grupo__lider1',
+                    'lider2__grupo__lider2'
+                ).only(
+                    'lider1', 'lider2'
+                )
+                # se saca el conteo de los grupos sin reportar
+                sin_reportar = _sin_reportar.count()
+
+                # se añaden los datos a el diccionario, para la tabla
+                data_table.append(
+                    {
+                        'reuniones': reuniones,
+                        'grupos_semana': grupos_semana,
+                        'sin_reportar': sin_reportar,
+                        'fecha': fechas_str
+                    }
+                )
+
+                # se agregan a la lista de morosos
+                if sin_reportar > 0:
+                    _morosos_list_id = _sin_reportar.values_list('id', flat=True)
+                    for x in _morosos_list_id:
+                        if x.__str__() not in _morosos:
+                            _morosos[x.__str__()] = [fechas_str]
+                        else:
+                            _morosos[x.__str__()].append(fechas_str)
+
+                # porcentaje grupos que estan reportando
+                grupos_reportaron = reuniones.pop('grupos_reportaron', 0)
+                porcentaje_grupos_reportando = round(float(grupos_reportaron) / grupos_semana * 100, 2)
+
                 # empaquetado de datos para porcetaje de utilidad
                 values_porcentaje_utilidad[1].insert(len(values_porcentaje_utilidad[1]), porcentaje_grupos_reportando)
+                # porcentaje quedaria de la forma
+                # [['fecha1', 'fecha2'], [80, 30]]
+                # se empaca el porcentaje a data_table, no puede llegar la lista vacia
+                data_table[len(data_table) - 1]['porcentaje'] = porcentaje_grupos_reportando
 
                 # empaquetado de datos para asistencias
                 _auxiliar = []
@@ -1502,19 +1544,43 @@ def estadistico_reuniones_gar(request):
                 for key, item in reuniones.items():
                     # se reemplazan los '_' por espacios
                     key_to_word = key.replace('_', ' ').title()
-                    if key_to_word not in values_asistencias[1]:
-                        values_asistencias[1].insert(len(values_asistencias[1], key_to_word))
+                    if key_to_word not in values_asistencias[0]:
+                        values_asistencias[0].insert(len(values_asistencias[0]), key_to_word)
                     # se agregan los valores a la variable auxiliar
-                    _auxiliar.append(item)
-                values_asistencias[2].insert(len(values_asistencias[2], _auxiliar))
-                # quedarian los datos organizados de la forma
-                # arr = [[fecha1, fecha2], [visitas, asistentes, lideres], [[1,2,3], [1,2,3]]]
+                    # _auxiliar.append()
+                    _auxiliar.insert(len(_auxiliar), [item, item.__str__()])  # [[1,1],[2,2],[3,3],[4,4]]
+                _helper.insert(len(_helper), _auxiliar)  # [[[1,1],[2,2],[3,3],[4,4]], [[1,1],[2,2],[3,3],[4,4]]]
+
+                # Para las barras de google, los datos deben quedar organizados de la forma
+                # arr = [['Fecha', 'CAMPO1', 'CAMPO2'], ['Fecha', value1, 'value1', value2, 'value2']]
 
                 # se añade un dia para asegurase de durar la semana y se repite el ciclo
                 fecha_inicial = siguiente + datetime.timedelta(days=1)
 
             # Grafico porcentaje Grupos Reportados
-            values = [['']]
+            for x, label in enumerate(labels_fecha):  # labels fecha contiene el tamaño de objetos base (No. semanas)
+                # se agrega el label como iniacial para los valores de asistencia
+                _lista = [label]
+                for y, value in enumerate(_helper[x]):
+                    # se agrega cada elemento de la lista en el orden correspondiente
+                    _lista.append(_helper[x][y][0])
+                    _lista.append(_helper[x][y][1])
+                # se agrega a el array principal
+                values_asistencias.append(_lista)
+
+            morosos = Grupo.objects.filter(
+                id__in=[x for x in _morosos]
+            )  # .annotate(
+            #     fechas=Value(', '.join(_morosos[F('id')]))
+            # )
+            for moroso in morosos:
+                moroso.fechas = ', '.join(_morosos[moroso.id.__str__()])
+                moroso.no_reportes = len(_morosos[moroso.id.__str__()])
+
+            data['sin_reportar'] = morosos
+            data['tabla'] = data_table
+            data['grafico'] = True
+
         else:
             # se envia el mensaje de error
             messages.error(request, _("Ha ocurrido un error en el formulario, verifica los campos"))

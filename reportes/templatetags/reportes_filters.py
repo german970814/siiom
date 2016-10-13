@@ -96,4 +96,8 @@ unordered_list_grupos.is_safe = True
 unordered_list_grupos.needs_autoescape = True
 
 register.filter(unordered_list_grupos)
-  
+
+
+@register.filter
+def sub(value, arg):
+    return value - arg
