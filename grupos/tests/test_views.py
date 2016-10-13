@@ -192,8 +192,8 @@ class CrearGrupoViewTest(GruposBaseTest):
         self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
         self.barrio = BarrioFactory()
 
-        red_jovenes = Red.objects.get(nombre='jovenes')
-        self.URL = reverse('grupos:nuevo', args=(red_jovenes.id,))
+        self.red_jovenes = Red.objects.get(nombre='jovenes')
+        self.URL = reverse('grupos:nuevo', args=(self.red_jovenes.id,))
 
     def login_usuario(self, usuario):
         """
@@ -243,7 +243,7 @@ class CrearGrupoViewTest(GruposBaseTest):
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, self.datos_formulario())
 
-        self.assertRedirects(response, self.URL)
+        self.assertRedirects(response, reverse('grupos:listar', args=(self.red_jovenes.id,)))
 
     def test_formulario_invalido_muestra_errores(self):
         """
@@ -334,7 +334,8 @@ class EditarGrupoViewTest(GruposBaseTest):
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, self.datos_formulario())
 
-        self.assertRedirects(response, self.URL)
+        red = Grupo.objects.get(id=600).red
+        self.assertRedirects(response, reverse('grupos:listar', args=(red.id,)))
 
     def test_formulario_invalido_muestra_errores(self):
         """

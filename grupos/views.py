@@ -1,13 +1,14 @@
 # Django Imports
-from django.contrib import messages
-from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
-from django.core.mail import send_mail
 from django.db.models import Q
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.contrib.auth.models import Group
+from django.template.context import RequestContext
+from django.utils.translation import ugettext as _
+from django.views.generic import TemplateView, CreateView
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, render, redirect
-from django.template.context import RequestContext
-from django.views.generic import TemplateView, CreateView
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
 
 # Third-Party App Imports
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin, PermissionRequiredMixin
@@ -724,7 +725,8 @@ def crear_grupo(request, pk):
         form = NuevoGrupoForm(red=red, data=request.POST)
         if form.is_valid():
             if form.save():
-                return redirect('grupos:nuevo', pk)
+                messages.success(request, _('El grupo se ha creado correctamente.'))
+                return redirect('grupos:listar', pk)
     else:
         form = NuevoGrupoForm(red=red)
 
@@ -743,7 +745,8 @@ def editar_grupo(request, pk):
         form = EditarGrupoForm(instance=grupo, data=request.POST)
         if form.is_valid():
             if form.save():
-                return redirect('grupos:editar', pk)
+                messages.success(request, _('El grupo se ha editado correctamente.'))
+                return redirect('grupos:listar', grupo.red.id)
     else:
         form = EditarGrupoForm(instance=grupo)
 
