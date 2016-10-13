@@ -1438,29 +1438,24 @@ def estadistico_reuniones_gar(request):
                 ).select_related('lider1', 'lider2').only(
                     'lider1', 'lider2', 'fechaApertura', 'id', 'estado'
                 )
-                total_grupos = grupos.count()  # se obtiene el numero de grupos
-                # Se sacan los grupos inactivos
-                total_grupos_inactivos = grupos.filter(estado=Grupo.INACTIVO).count()
             else:
                 # Informacion que está por confirmar, cuando no hay descendientes
                 grupos = Grupo.objects.filter(
                     id=grupo.id
                 )
-                total_grupos = grupos.count()
-                total_grupos_inactivos = grupos.filter(estado=Grupo.INACTIVO).count()
+
+            total_grupos = grupos.count()  # se obtiene el numero de grupos
+            # Se sacan los grupos inactivos
+            total_grupos_inactivos = grupos.filter(estado=Grupo.INACTIVO).count()
 
             # Se sacan los datos semanales, de acuerdo a la funcion get_date_for_report
             while fecha_inicial < fecha_final:
                 # a partir de la fecha inicial y final se obtiene un rango de fechas, y una fecha despues
                 siguiente = get_date_for_report(fecha_inicial, fecha_final)
 
-                # si hay descendientes, se sacan los grupos que hubieron esa semana
-                if descendientes:
-                    # se tiene, el queryset y a parte la cantidad de ese queryset
-                    _grupos_semana = grupos.exclude(fechaApertura__gt=siguiente).exclude(estado=Grupo.INACTIVO)
-                    grupos_semana = _grupos_semana.count()
-                else:
-                    pass
+                # se sacan los grupos que hubieron esa semana
+                _grupos_semana = grupos.exclude(fechaApertura__gt=siguiente).exclude(estado=Grupo.INACTIVO)
+                grupos_semana = _grupos_semana.count()
 
                 # se sacan las reuniones que han ocurrido en la semana actual de el ciclo
                 _reuniones = ReunionGAR.objects.filter(
@@ -1529,7 +1524,12 @@ def estadistico_reuniones_gar(request):
 
                 # porcentaje grupos que estan reportando
                 grupos_reportaron = reuniones.pop('grupos_reportaron', 0)
-                porcentaje_grupos_reportando = round(float(grupos_reportaron) / grupos_semana * 100, 2)
+
+                try:
+                    # se intenta sacar el porcentaje, si grupos semana es 0, entonces no hay porcentaje
+                    porcentaje_grupos_reportando = round(float(grupos_reportaron) / grupos_semana * 100, 2)
+                except ZeroDivisionError:
+                    porcentaje_grupos_reportando = 0
 
                 # empaquetado de datos para porcetaje de utilidad
                 values_porcentaje_utilidad[1].insert(len(values_porcentaje_utilidad[1]), porcentaje_grupos_reportando)
@@ -1574,7 +1574,7 @@ def estadistico_reuniones_gar(request):
             #     fechas=Value(', '.join(_morosos[F('id')]))
             # )
             for moroso in morosos:
-                moroso.fechas = ', '.join(_morosos[moroso.id.__str__()])
+                moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
                 moroso.no_reportes = len(_morosos[moroso.id.__str__()])
 
             data['sin_reportar'] = morosos

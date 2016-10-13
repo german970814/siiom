@@ -116,29 +116,6 @@
         var data_asistencias = {{ values_asistencias|safe }};
         var tabla = {{ tabla|safe }};
 
-        {% comment %}google.charts.load('current', {'packages':['bar']});
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            // Create the data table.
-            var data = google.visualization.arrayToDataTable(data_asistencias);
-
-            // Set chart options
-            var options = {
-                chart: {
-                    title: 'Porcentaje De grupos reportando',
-                    subtitle: 'Sales, Expenses, and Profit: 2014-2017',
-                },
-                bars: 'vertical' // Required for Material Bar Charts.
-            };
-
-            // Instantiate and draw our chart, passing in some options.
-            var chart = new google.charts.Bar(document.getElementById('out'));
-            chart.draw(data, options);
-        }{% endcomment %}
-
-
-
         google.charts.load('current', {packages:["corechart", 'bar']});
         google.charts.setOnLoadCallback(drawChart);
         // asistencias
