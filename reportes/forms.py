@@ -145,9 +145,9 @@ class FormularioEstadisticoReunionesGAR(forms.Form):
     fecha_final = forms.DateField(label=_('Fecha Final'))
     descendientes = forms.BooleanField(label=_('Descendientes'), required=False)
     ofrenda = forms.BooleanField(label=_('Ofrenda'), required=False)
-    lideres_asistentes = forms.BooleanField(label=_('Líderes Asistentes'), required=False)
-    visitas = forms.BooleanField(label=_('Visitas'), required=False)
-    asistentes_regulares = forms.BooleanField(label=_('Asistentes Regulares'), required=False)
+    # lideres_asistentes = forms.BooleanField(label=_('Líderes Asistentes'), required=False)
+    # visitas = forms.BooleanField(label=_('Visitas'), required=False)
+    # asistentes_regulares = forms.BooleanField(label=_('Asistentes Regulares'), required=False)
 
     def __init__(self, *args, **kwargs):
         queryset_grupo = kwargs.pop('queryset_grupo', None)
@@ -161,15 +161,15 @@ class FormularioEstadisticoReunionesGAR(forms.Form):
     def clean(self, *args, **kwargs):
         cleaned_data = super(FormularioEstadisticoReunionesGAR, self).clean(*args, **kwargs)
 
-        boolean_fields = [
-            cleaned_data.get('ofrenda', False),
-            cleaned_data.get('lideres_asistentes', False),
-            cleaned_data.get('visitas', False),
-            cleaned_data.get('asistentes_regulares', False)
-        ]
+        # boolean_fields = [
+        #     cleaned_data.get('ofrenda', False),
+        #     cleaned_data.get('lideres_asistentes', False),
+        #     cleaned_data.get('visitas', False),
+        #     cleaned_data.get('asistentes_regulares', False)
+        # ]
 
-        if all(not x for x in boolean_fields):
-            self.add_error('ofrenda', _('Escoge una opción'))
-            self.add_error('lideres_asistentes', _('Escoge una opción'))
-            self.add_error('visitas', _('Escoge una opción'))
-            self.add_error('asistentes_regulares', _('Escoge una opción'))
+        # if all(not x for x in boolean_fields):
+        #     self.add_error('ofrenda', _('Escoge una opción'))
+        #     self.add_error('lideres_asistentes', _('Escoge una opción'))
+        #     self.add_error('visitas', _('Escoge una opción'))
+        #     self.add_error('asistentes_regulares', _('Escoge una opción'))
