@@ -386,32 +386,6 @@ def listaGruposDescendientes(grupo):
     return listaG
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def gruposDeRed(request, id):
-    miembro = Miembro.objects.get(usuario=request.user)
-
-    try:
-        red = Red.objects.get(id=id)
-    except:
-        raise Http404
-
-    if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            request.session['red'] = red
-            return HttpResponseRedirect('/grupo/editar_grupo/')
-        if 'eliminar' in request.POST:
-            okElim = eliminar(request, Grupo, request.POST.getlist('seleccionados'))
-            if okElim == 1:
-                return HttpResponseRedirect('')
-
-    grupos = list(Grupo.objects.filter(red=red))
-    for grupo in grupos:
-        grupo.numero_descendientes = len(listaGruposDescendientes(grupo))
-
-    return render_to_response('Grupos/listar_grupos.html', locals(), context_instance=RequestContext(request))
-
-
 @user_passes_test(verGrupoTest, login_url="/dont_have_permissions/")
 def verGrupo(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
