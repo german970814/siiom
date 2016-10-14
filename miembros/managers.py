@@ -44,3 +44,10 @@ class MiembroManager(models.Manager):
         disponibles = self.filter(grupo_lidera__isnull=True).lideres2()
 
         return disponibles
+
+    def lideres_red(self, red):
+        """
+        Devuelve un queryset con los lideres de la red ingresada.
+        """
+
+        return self.filter(models.Q(grupo__red=red) | models.Q(grupo_lidera__red=red)).lideres2()

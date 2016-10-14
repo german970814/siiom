@@ -1,10 +1,10 @@
-from django.test import TestCase
+from common.tests.base import BaseTest
 from grupos.tests.factories import GrupoFactory, RedFactory
 from miembros.models import Miembro
 from .factories import MiembroFactory
 
 
-class MiembroManagerTest(TestCase):
+class MiembroManagerTest(BaseTest):
     """
     Pruebas unitarias para el manager de miembros.
     """
@@ -54,3 +54,21 @@ class MiembroManagerTest(TestCase):
         lideres = list(Miembro.objects.lideres2())
         self.assertIn(lider, lideres)
         self.assertNotIn(miembro, lideres)
+
+    def test_lideres_red(self):
+        """
+        Prueba que los miembros obtenidos sean lideres y pertenezcan a la red ingresada.
+        """
+
+        from grupos.models import Grupo
+
+        self.crear_arbol()
+        grupo = Grupo.objects.get(id=300)
+        otro_grupo = Grupo.objects.get(id=200)
+        miembro = MiembroFactory(lider=True, grupo=grupo)
+
+        lideres = Miembro.objects.lideres_red(grupo.red)
+
+        self.assertIn(miembro, lideres)
+        self.assertIn(grupo.lideres.first(), lideres)
+        self.assertNotIn(otro_grupo.lideres.first(), lideres)

@@ -1,7 +1,7 @@
 # Django Imports
 from django.conf import settings
 from django.contrib import auth, messages
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
@@ -1117,7 +1117,7 @@ def crearUsuarioMimembro(request, id):
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
                 if request.session['tipo'].lower() == "administrador":
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
-            return redirect(reverse('editar_perfil', args=(miembroCambio.id)))
+            return redirect(reverse('miembros:editar_perfil', args=(miembroCambio.id)))
     else:
         form = FormularioAsignarUsuario()
     form.email = miembroCambio.email
@@ -1540,7 +1540,7 @@ def ver_informacion_miembro(request, pk=None):
                 ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
                 if mismo:
                     ms = "Te has Editado Correctamente"
-                # return redirect(reverse('ver_informacion', args=(miembro.id, )))
+                # return redirect(reverse('miembros:ver_informacion', args=(miembro.id, )))
             else:
                 if form_cambio_tipo.errors:
                     form.add_error('estado', 'Error en formulario')
@@ -1651,3 +1651,18 @@ def ver_lideres_red(request, id_red):
     miembros = Miembro.objects.lideres().filter(grupo__red=red).select_related('usuario')
 
     return render(request, 'Miembros/ver_lideres_red.html', {'miembros': miembros, 'red': red})
+
+# -----------------------------------
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def listar_lideres(request, pk):
+    """
+    Permite a un administrador listar los lideres de la red escogida.
+    """
+
+    red = get_object_or_404(Red, pk=pk)
+    lideres = Miembro.objects.lideres_red(red).select_related('usuario')
+
+    return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})

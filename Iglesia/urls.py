@@ -16,7 +16,7 @@ urlpatterns = patterns(
     url(r'^administracion/$', administracion, name="administracion"),
     url(r'^salir/$', salir),
     url(r'^resultado/(grupo|miembro)/$', resultadoBusqueda),
-    url(r'^miembro/', include("miembros.urls")),
+    url(r'^miembro/', include("miembros.urls", namespace='miembros')),
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),
     url(r'^reportes/', include("reportes.urls")),
     url(r'^encuentro/', include("encuentros.urls")),
