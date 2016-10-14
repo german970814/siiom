@@ -387,17 +387,6 @@ def listaGruposDescendientes(grupo):
     return listaG
 
 
-@user_passes_test(verGrupoTest, login_url="/dont_have_permissions/")
-def verGrupo(request, id):
-    miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        grupo = Grupo.objects.get(id=id)
-    except Grupo.DoesNotExist:
-        raise Http404
-        ok = False
-    return render_to_response('Grupos/grupo.html', locals(), context_instance=RequestContext(request))
-
-
 # def ConsultarReportesSinEnviar(request, sobres=False):
 #     """Permite a un administrador revisar que lideres no han registrado sus reportes de reuniones de grupo
 #     en un rango de fecha especificado. El administrador escoge el tipo de reunion, si la reunion es de GAR
