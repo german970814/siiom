@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response, render
 from django.template.context import RequestContext
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext as _
+from django.template.loader import render_to_string
 
 # from encodings.utf_8_sig import encode
 # from django.utils.datetime_safe import strftime
@@ -28,6 +29,7 @@ from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, C
 from common.tests import (
     liderAdminTest, agenteAdminTest,
 )
+
 # Python Package
 import calendar
 import datetime
@@ -1414,6 +1416,7 @@ def estadistico_reuniones_gar(request):
             fecha_final = form.cleaned_data['fecha_final']
             grupo = form.cleaned_data['grupo']
             descendientes = form.cleaned_data.get('descendientes', False)
+            ofrenda = form.cleaned_data.get('ofrenda', False)
 
             # helpers
             _helper = []
@@ -1423,6 +1426,7 @@ def estadistico_reuniones_gar(request):
             morosos = []
             _morosos = {}
             data_table = []
+            ofrendas = []
 
             # se empacan los datos a la vista
             data['values_porcentaje_utilidad'] = values_porcentaje_utilidad
@@ -1489,6 +1493,17 @@ def estadistico_reuniones_gar(request):
                 # se añaden las fechas
                 fechas_str = fecha_inicial.strftime("%d/%m/%y") + ' - ' + siguiente.strftime("%d/%m/%y")
                 labels_fecha.insert(len(labels_fecha), fechas_str)
+
+                # si hay ofrendas
+                if ofrenda:
+                    # se crea por aparte el agregate de ofrendas
+                    ofrenda_aggregate = _reuniones.aggregate(
+                        ofrendas=Sum('ofrenda')
+                    )
+                    # se agrega de la forma [['fecha', ofrenda]]
+                    if ofrenda_aggregate['ofrendas'] is None:
+                        ofrenda_aggregate['ofrendas'] = 0
+                    ofrendas.append([fechas_str, float(ofrenda_aggregate['ofrendas']) or 0])
 
                 # se sacan los grupos sin reportar, vendria de la resta de los grupos de la semana, menos los sobres
                 _sin_reportar = _grupos_semana.exclude(
@@ -1580,6 +1595,8 @@ def estadistico_reuniones_gar(request):
             data['sin_reportar'] = morosos
             data['tabla'] = data_table
             data['grafico'] = True
+            data['values_ofrenda'] = ofrendas or None
+            data['grupos_inactivos'] = total_grupos_inactivos
 
         else:
             # se envia el mensaje de error

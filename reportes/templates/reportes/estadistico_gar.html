@@ -4,27 +4,17 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+    #hidden_to_print {
+        display: none;
+    }
+</style>
 {% endblock %}
 
 {% block js %}
 
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<!--<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.resize.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot/jquery.flot.pie.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot.tooltip/js/jquery.flot.tooltip.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot-orderBars/js/jquery.flot.orderBars.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot.curvedlines/curvedLines.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/flot-orderBars/js/jquery.flot.orderBars.js' %}"></script>
-
-<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/curved-line-chart.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/line-chart.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/bar-chart.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/dynamic-chart.js' %}"></script>
-<script type="text/javascript" src="{% static 'Template/jquery/js/flot-charts/pie-chart.js' %}"></script>
-<script type="text/javascript" src="{% static 'Scripts/Chart.js' %}"></script>-->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
@@ -47,6 +37,10 @@
 
         $('#{{ form.fecha_final.id_for_label }}').on("dp.change",function(e){
             $('#{{ form.fecha_inicial.id_for_label }}').data("DateTimePicker").maxDate(e.date);
+        });
+
+        $('#imprimir').click(function (event) {
+            window.print();
         });
 
         var $fechai = $('#{{ form.fecha_inicial.id_for_label }}');
@@ -72,50 +66,93 @@
             }
         });
 
-        {% if values_porcentaje_utilidad %}
-        var data_porcentaje = {{ values_porcentaje_utilidad|safe }};
-        var data_asistencias = {{ values_asistencias|safe }};
+        {% if grafico %}
+
         var tabla = {{ tabla|safe }};
 
-        google.charts.load('current', {packages:["corechart", 'bar']});
-        google.charts.setOnLoadCallback(drawChart);
-        // asistencias
-        function drawChart(){
-            var data = new google.visualization.DataTable();
-            for (var x = 0; x < data_asistencias[0].length; x++) {
-                if (data_asistencias[0][x] == 'Fechas') {
-                    data.addColumn('string', data_asistencias[0][x]);
-                } else {
-                    data.addColumn('number', data_asistencias[0][x]);
-                    data.addColumn({type: 'string', role: 'annotation'});
+        google.charts.load('current', {'packages':['line', 'corechart', 'bar']}); // ["corechart", 'bar']
+
+        {% if values_ofrenda %}
+            var values_ofrenda = {{ values_ofrenda|safe }};
+
+            google.charts.setOnLoadCallback(drawChartOfrenda);
+
+            function drawChartOfrenda() {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Fechas');
+                data.addColumn('number', 'Ofrenda');
+
+                data.addRows(values_ofrenda);
+
+                var options = {
+                    chart: {
+                        title: 'Ofrendas Sobre Rango de Fechas',
+                        subtitle: 'Cantidad de ofrendas recogidas en grupos'
+                    },
+                    width: '100%',
+                    height: 500,
+                    legend: {
+                        position: 'bottom'
+                    },
+                    hAxis: {
+                        title: 'Fechas'
+                    },
+                    vAxis: {
+                        title: 'Ofrendas'
+                    },
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('out3'));
+
+                chart.draw(data, options);
+            }
+        {% endif %}
+
+        {% comment %}google.charts.load('current', {packages:["corechart", 'bar']});{% endcomment %}
+
+
+        {% if values_asistencias %}
+            google.charts.setOnLoadCallback(drawChart);
+
+            var data_asistencias = {{ values_asistencias|safe }};
+            // asistencias
+            function drawChart(){
+                var data = new google.visualization.DataTable();
+                for (var x = 0; x < data_asistencias[0].length; x++) {
+                    if (data_asistencias[0][x] == 'Fechas') {
+                        data.addColumn('string', data_asistencias[0][x]);
+                    } else {
+                        data.addColumn('number', data_asistencias[0][x]);
+                        data.addColumn({type: 'string', role: 'annotation'});
+                    }
                 }
+
+                for (var x = 1; x < data_asistencias.length; x++) {
+                    data.addRow(data_asistencias[x]);
+                }
+
+                var options = {
+                    width: '100%', 
+                    height: 500, 
+                    title: 'Asistencia en Grupos de Amistad',
+                    subtitle: 'Rango de fechas',
+                    hAxis: {
+                        title: 'Fechas'
+                    },
+                    vAxis: {
+                        title: 'Numero de Personas'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    },
+                };
+                var chart = new google.visualization.ColumnChart(document.getElementById('out'));
+                chart.draw(data, options);
             }
+        {% endif %}
 
-            for (var x = 1; x < data_asistencias.length; x++) {
-                data.addRow(data_asistencias[x]);
-            }
-
-            var options = {
-                width: '100%', 
-                height: 500, 
-                title: 'Asistencia en Grupos de Amistad',
-                subtitle: 'Rango de fechas',
-                hAxis: {
-                    title: 'Fechas'
-                },
-                vAxis: {
-                    title: 'Numero de Personas'
-                },
-                legend: {
-                    position: 'bottom'
-                },
-            };
-            var chart = new google.visualization.ColumnChart(document.getElementById('out'));
-            chart.draw(data, options);
-        }
-
-
-
+        {% if values_porcentaje_utilidad %}
+        var data_porcentaje = {{ values_porcentaje_utilidad|safe }};
         // Porcentaje 
         google.charts.setOnLoadCallback(drawChartPorcentaje);
 
@@ -133,10 +170,6 @@
                 {% comment %}console.log(arr);{% endcomment %}
                 data.addRow(arr);
             }
-
-            {% comment %}for (var x = 1; x < data_asistencias.length; x++) {
-                data.addRow(data_asistencias[x]);
-            }{% endcomment %}
 
             var options = {
                 width: '100%', 
@@ -156,17 +189,77 @@
             var chart = new google.visualization.ColumnChart(document.getElementById('out2'));
             chart.draw(data, options);
         }
+        {% endif %}
 
 
         $(window).resize(function(){
+            {% if values_asistencias %}
             drawChart();
+            {% endif %}
+            {% if values_ofrenda %}
+            drawChartOfrenda();
+            {% endif %}
+            {% if values_porcentaje_utilidad %}
+            drawChartPorcentaje();
+            {% endif %}
         });
 
         $('#tw-switch').on('change', function() {
-            setTimeout("drawChart()", 500);
+            $(window).trigger('resize');
+            $(window).trigger('resize');
         });
 
         {% endif %}
+
+
+        var $tabla_estadisticos = $('#estadisticos');
+        var $trs = $tabla_estadisticos.find('tbody').find('tr');
+
+        var _sum = new Array();
+        var _prom = new Array();
+
+        $.each($trs, function(ind, obj) {
+            var sum = new Array();
+            var prom = new Array();
+            $.each($(obj).find('.to_suma'), function (i, value) {
+                sum.push($(value).html());
+            })
+            $.each($(obj).find('.to_prom'), function (i, value) {
+                prom.push($(value).html());
+            })
+            _sum.push(sum);
+            _prom.push(prom);
+        });
+
+        var sumas = new Array();
+        var promedios = new Array();
+
+        var tr = '<tr><td><strong>Total</strong></td>0</tr>'
+
+        for (var x = 0; x < _sum.length; x++) {
+            var resultado = 0;
+            for (var y = 0; y < _sum[x].length; y++) {
+                resultado += parseInt(_sum[y][x]);
+            }
+            sumas.push('<td>0</td>'.replace('0', resultado.toString()));
+        }
+
+        for (var x = 0; x < _prom.length; x++) {
+            var resultado = 0;
+            for (var y = 0; y < _prom[x].length; y++) {
+                resultado += parseInt(_prom[y][x]);
+            }
+            promedios.push('<td>0</td>'.replace('0', (resultado / _prom.length).toString()));
+        }
+
+        $tabla_estadisticos.find('tbody').append(tr.replace('0', sumas.join(' ') + promedios.join(' ')));
+
+        $.each($tabla_estadisticos.find('tbody').find('tr').last().find('td'), function (i, obj) {
+            if (i == 7) {
+                $(obj).addClass('percent');
+                $(obj).html($(obj).html() + '%');
+            }
+        });
     });
 </script>
 {% endblock %}
@@ -327,7 +420,7 @@
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <button type="submit" name ="reportePDF" class="btn btn-warning btn-block waves-effect">Reportar PDF</button>
+                        <button type="button" id="imprimir" class="btn btn-warning btn-block waves-effect">Reportar PDF</button>
                     </div>
                 </div>
             </div>
@@ -341,6 +434,13 @@
 </div>
 {% endif %}
     {% if grafico %}
+    <div class="block-header">
+        <h2>Estadistico Reuniones {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %} de {% if form.cleaned_data.descendientes %}la red <strong>{{ form.cleaned_data.grupo.nombre|upper }}</strong>{% else %}el grupo <strong>{{ form.cleaned_data.grupo.nombre|upper }}</strong>{% endif %}</h2>
+    </div>
+    <div id="hidden_to_print">
+        <h5>GRUPOS INACTIVOS:  {{ grupos_inactivos }}</h5>
+        <h5>RANGO DE FECHAS:  {{ form.cleaned_data.fecha_inicial }} - {{ form.cleaned_data.fecha_final }}</h5>
+    </div>
     {% if values_asistencias %}
     <div class="card">
         <div class="card-body card-padding">    
@@ -351,9 +451,17 @@
     <br>
     {% endif %}
     {% if values_porcentaje_utilidad %}
-    <div class="card">
+    <div class="card" {% if not values_ofrenda %}id="issue-print"{% endif %}>
         <div class="card-body card-padding">
             <div id="out2" style="width: 100%;">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if values_ofrenda %}
+    <div class="card" id="issue-print">
+        <div class="card-body card-padding">
+            <div id="out3" style="width: 100%;">
             </div>
         </div>
     </div>
@@ -362,11 +470,11 @@
     {% if tabla %}
     <div class="card">
         <div class="card-header">
-            <h3>Tabla Estadisticos</h3>
+            <h3>Tabla Estadísticos</h3>
         </div>
         <div class="card-body card-padding">
             <div class="table-responsive">
-                <table class="table table-striped table-condensed table-bordered">
+                <table class="table table-striped table-condensed table-bordered" id="estadisticos">
                     <thead>
                         <tr>
                             <th>Rango de Fecha</th>
@@ -384,14 +492,14 @@
                         {% for dato in tabla %}
                         <tr>
                             <td>{{ dato.fecha }}</td>
-                            <td>{{ dato.reuniones.numero_visitas }}</td>
-                            <td>{{ dato.reuniones.asistentes_regulares }}</td>
-                            <td>{{ dato.reuniones.numero_lideres_asistentes }}</td>
-                            <td>{{ dato.reuniones.numero_total_asistentes }}</td>
-                            <td>{{ dato.grupos_semana|sub:dato.sin_reportar }}</td>
-                            <td>{{ dato.sin_reportar }}</td>
-                            <td>{{ dato.porcentaje }}%</td>
-                            <td>{{ dato.grupos_semana }}</td>
+                            <td class="to_suma">{{ dato.reuniones.numero_visitas }}</td>
+                            <td class="to_suma">{{ dato.reuniones.asistentes_regulares }}</td>
+                            <td class="to_suma">{{ dato.reuniones.numero_lideres_asistentes }}</td>
+                            <td class="to_suma">{{ dato.reuniones.numero_total_asistentes }}</td>
+                            <td class="to_prom">{{ dato.grupos_semana|sub:dato.sin_reportar }}</td>
+                            <td class="to_prom">{{ dato.sin_reportar }}</td>
+                            <td class="to_prom percent">{{ dato.porcentaje }}%</td>
+                            <td class="to_prom">{{ dato.grupos_semana }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
