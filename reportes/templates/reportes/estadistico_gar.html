@@ -211,6 +211,7 @@
 
         {% endif %}
 
+        {% if tabla %}
 
         var $tabla_estadisticos = $('#estadisticos');
         var $trs = $tabla_estadisticos.find('tbody').find('tr');
@@ -236,18 +237,18 @@
 
         var tr = '<tr><td><strong>Total</strong></td>0</tr>'
 
-        for (var x = 0; x < _sum.length; x++) {
+        for (var y = 0; y < _sum[0].length; y++) {
             var resultado = 0;
-            for (var y = 0; y < _sum[x].length; y++) {
-                resultado += parseInt(_sum[y][x]);
+            for (var x = 0; x < _sum.length; x++) {
+                resultado += parseInt(_sum[x][y]); // 
             }
             sumas.push('<td>0</td>'.replace('0', resultado.toString()));
         }
 
-        for (var x = 0; x < _prom.length; x++) {
+        for (var y = 0; y < _prom[0].length; y++) {
             var resultado = 0;
-            for (var y = 0; y < _prom[x].length; y++) {
-                resultado += parseInt(_prom[y][x]);
+            for (var x = 0; x < _prom.length; x++) {                
+                resultado += parseInt(_prom[x][y]);
             }
             promedios.push('<td>0</td>'.replace('0', (resultado / _prom.length).toString()));
         }
@@ -260,6 +261,8 @@
                 $(obj).html($(obj).html() + '%');
             }
         });
+
+        {% endif %}
     });
 </script>
 {% endblock %}
