@@ -418,13 +418,15 @@
                 <br>
                 <br>
                 <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
+                    <div class="col-md-4 col-md-offset-{% if not grafico %}4{% else %}2{% endif %}">
                         <button type="submit" name ="verReporte" class="btn btn-success btn-block">Ver</button>
                     </div>
                     <br class="space">
+                    {% if grafico %}
                     <div class="col-md-4">
                         <button type="button" id="imprimir" class="btn btn-warning btn-block waves-effect">Reportar PDF</button>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </form>
@@ -445,7 +447,7 @@
         <h5>RANGO DE FECHAS:  {{ form.cleaned_data.fecha_inicial }} - {{ form.cleaned_data.fecha_final }}</h5>
     </div>
     {% if values_asistencias %}
-    <div class="card">
+    <div class="card chart-g">
         <div class="card-body card-padding">    
             <div id="out" style="width: 100%;">
             </div>
@@ -454,7 +456,7 @@
     <br>
     {% endif %}
     {% if values_porcentaje_utilidad %}
-    <div class="card" {% if not values_ofrenda %}id="issue-print"{% endif %}>
+    <div class="card chart-g" {% if not values_ofrenda %}id="issue-print"{% endif %}>
         <div class="card-body card-padding">
             <div id="out2" style="width: 100%;">
             </div>
@@ -462,7 +464,7 @@
     </div>
     {% endif %}
     {% if values_ofrenda %}
-    <div class="card" id="issue-print">
+    <div class="card chart-g" id="issue-print">
         <div class="card-body card-padding">
             <div id="out3" style="width: 100%;">
             </div>
@@ -477,7 +479,7 @@
         </div>
         <div class="card-body card-padding">
             <div class="table-responsive">
-                <table class="table table-striped table-condensed table-bordered" id="estadisticos">
+                <table class="table table-condensed table-bordered" id="estadisticos">
                     <thead>
                         <tr>
                             <th>Rango de Fecha</th>
@@ -519,7 +521,7 @@
         </div>
         <div class="card-body card-padding">
             <div class="table-responsive">
-                <table class="table table-striped table-condensed table-bordered">
+                <table class="table table-condensed table-bordered">
                     <thead>
                         <tr>
                             <th>Líderes</th>

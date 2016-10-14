@@ -1,7 +1,7 @@
 @page:first{
     size: letter portrait;
     margin-top: -65px;
-    margin-left: 10px;
+    margin-left: 0px;
     margin-right: 10px;
     margin-bottom: 10px;
 }
@@ -9,7 +9,7 @@
 @page {
     size: letter portrait;
     margin-top: 20px;
-    margin-left: 10px;
+    margin-left: 0px;
     margin-right: 10px;
     margin-bottom: 10px;
 }
@@ -21,7 +21,12 @@
 
     .card {
         position: relative;
-        height: 400px;
+    }
+
+    .chart-g {
+        height: 300px !important;
+        margin-bottom: 50px;
+        width: 100%;
     }
 
     .table.table-bordered.table-striped.table-condensed {
