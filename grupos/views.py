@@ -674,6 +674,8 @@ def editar_runion_grupo(request, pk):
 
     return render_to_response("Grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
 
+# -----------------------------------
+
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')

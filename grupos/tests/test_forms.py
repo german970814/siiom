@@ -5,7 +5,7 @@ from miembros.tests.factories import MiembroFactory, BarrioFactory
 from grupos.tests.factories import GrupoFactory, GrupoRaizFactory, RedFactory
 from grupos.forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
 from grupos.models import Grupo, Red
-from .base import GruposBaseTest
+from common.tests.base import BaseTest
 
 
 class GrupoRaizFormTest(TestCase):
@@ -141,13 +141,13 @@ class GrupoRaizFormTest(TestCase):
         self.assertEqual(len(form.non_field_errors()), 1)
 
 
-class NuevoGrupoFormTest(GruposBaseTest):
+class NuevoGrupoFormTest(BaseTest):
     """
     Pruebas unitarias para el formulario de creación de grupos de una iglesia.
     """
 
     def setUp(self):
-        super(NuevoGrupoFormTest, self).setUp()
+        self.crear_arbol()
         grupo3 = Grupo.objects.get(id=300)
         self.padre = Grupo.objects.get(id=800)
         self.lider1 = MiembroFactory(lider=True,  grupo=grupo3)
@@ -297,13 +297,13 @@ class NuevoGrupoFormTest(GruposBaseTest):
         self.assertEqual(len(form.non_field_errors()), 1)
 
 
-class EditarGrupoFormTest(GruposBaseTest):
+class EditarGrupoFormTest(BaseTest):
     """
     Pruebas unitarias para el formulario de edición de grupos de una iglesia.
     """
 
     def setUp(self):
-        super(EditarGrupoFormTest, self).setUp()
+        self.crear_arbol()
         grupo3 = Grupo.objects.get(id=300)
         self.grupo = Grupo.objects.get(id=500)
         self.lider1 = MiembroFactory(lider=True,  grupo=grupo3)

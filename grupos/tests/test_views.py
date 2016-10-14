@@ -4,16 +4,16 @@ from django.test import TestCase
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission, Group
+from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
 from grupos.forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
 from .factories import GrupoRaizFactory
-from .base import GruposBaseTest
 
 
-class OrganigramaGruposViewTest(GruposBaseTest):
+class OrganigramaGruposViewTest(BaseTest):
     """
     Pruebas unitarias para la vista de organigrama de la red de grupos. Si un administrador entra a la vista podra ver
     todo el organigrama de la iglesia.
@@ -23,7 +23,8 @@ class OrganigramaGruposViewTest(GruposBaseTest):
     URL = reverse('grupos:organigrama')
 
     def setUp(self):
-        super(OrganigramaGruposViewTest, self).setUp()
+        self.crear_arbol()
+        self.usuario = UsuarioFactory()
 
     def ingresar_pagina(self, login=True):
         """
@@ -31,25 +32,8 @@ class OrganigramaGruposViewTest(GruposBaseTest):
         """
 
         if login:
-            self.login_usuario()
+            self.login_usuario(self.usuario)
         return self.client.get(self.URL)
-
-    def test_usuario_no_logueado_redireccionado_login(self):
-        """
-        Prueba que un usuario no logueado sea redireccionado al login.
-        """
-
-        response = self.ingresar_pagina(login=False)
-        self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
-
-    def test_usuario_logueado_no_lider_ni_admin_redireccionado_sin_permisos(self):
-        """
-        Prueba que un usuario logueado que no sea administrador ni líder sea redireccionado a página que indique que
-        no tiene permisos.
-        """
-
-        response = self.ingresar_pagina()
-        self.assertEqual(response.status_code, 403)
 
     def test_admin_vea_arbol_grupos_completo(self):
         """
@@ -79,7 +63,7 @@ class OrganigramaGruposViewTest(GruposBaseTest):
         self.assertListEqual(response.context['arbol'], self.lista_arbol_cb2)
 
 
-class GrupoRaizViewTest(TestCase):
+class GrupoRaizViewTest(BaseTest):
     """
     Pruebas unitarias para la vista de creación/edición del grupo raiz.
     """
@@ -91,13 +75,6 @@ class GrupoRaizViewTest(TestCase):
         self.lider1 = MiembroFactory(lider=True)
         self.lider2 = MiembroFactory(lider=True)
         self.barrio = BarrioFactory()
-
-    def login_usuario(self, usuario):
-        """
-        Loguea un usuario.
-        """
-
-        self.client.login(email=usuario.email, password='123456')
 
     def datos_formulario(self):
         """
@@ -179,13 +156,13 @@ class GrupoRaizViewTest(TestCase):
         self.assertFormError(response, 'form', None, GrupoRaizForm.mensaje_error)
 
 
-class CrearGrupoViewTest(GruposBaseTest):
+class CrearGrupoViewTest(BaseTest):
     """
     Pruebas unitarias para la vista creación de grupos.
     """
 
     def setUp(self):
-        super(CrearGrupoViewTest, self).setUp()
+        self.crear_arbol()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
         self.padre = Grupo.objects.get(id=800)
         self.lider1 = MiembroFactory(lider=True, grupo=self.padre)
@@ -194,13 +171,6 @@ class CrearGrupoViewTest(GruposBaseTest):
 
         self.red_jovenes = Red.objects.get(nombre='jovenes')
         self.URL = reverse('grupos:nuevo', args=(self.red_jovenes.id,))
-
-    def login_usuario(self, usuario):
-        """
-        Loguea un usuario.
-        """
-
-        self.client.login(email=usuario.email, password='123456')
 
     def datos_formulario(self):
         """
@@ -269,7 +239,7 @@ class CrearGrupoViewTest(GruposBaseTest):
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
 
 
-class EditarGrupoViewTest(GruposBaseTest):
+class EditarGrupoViewTest(BaseTest):
     """
     Pruebas unitarias para la vista edición de grupos.
     """
@@ -277,7 +247,7 @@ class EditarGrupoViewTest(GruposBaseTest):
     URL = reverse('grupos:editar', args=(600,))
 
     def setUp(self):
-        super(EditarGrupoViewTest, self).setUp()
+        self.crear_arbol()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
         self.padre = Grupo.objects.get(id=800)
         self.lider1 = MiembroFactory(lider=True, grupo=self.padre)
@@ -285,13 +255,6 @@ class EditarGrupoViewTest(GruposBaseTest):
         self.barrio = BarrioFactory()
 
         red_jovenes = Red.objects.get(nombre='jovenes')
-
-    def login_usuario(self, usuario):
-        """
-        Loguea un usuario.
-        """
-
-        self.client.login(email=usuario.email, password='123456')
 
     def datos_formulario(self):
         """
@@ -361,23 +324,16 @@ class EditarGrupoViewTest(GruposBaseTest):
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
 
 
-class ListarGruposRedViewTest(GruposBaseTest):
+class ListarGruposRedViewTest(BaseTest):
     """
     Pruebas unitarias para la vista listar grupos de una red especifica.
     """
 
     def setUp(self):
-        super().setUp()
+        self.crear_arbol()
         red_jovenes = Red.objects.get(nombre='jovenes')
         self.URL = reverse('grupos:listar', args=(red_jovenes.id,))
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
-
-    def login_usuario(self, usuario):
-        """
-        Loguea un usuario.
-        """
-
-        self.client.login(email=usuario.email, password='123456')
 
     def test_get_red_no_existe_devuelve_404(self):
         """
@@ -402,7 +358,7 @@ class ListarGruposRedViewTest(GruposBaseTest):
         self.assertNotContains(response, str(otro_grupo))
 
 
-class TransladarGrupoViewTest(GruposBaseTest):
+class TransladarGrupoViewTest(BaseTest):
     """
     Pruebas unitarias para la vista de transladar un grupo a un nuevo padre.
     """
@@ -411,15 +367,8 @@ class TransladarGrupoViewTest(GruposBaseTest):
     URL = reverse('grupos:transladar', args=(500,))
 
     def setUp(self):
-        super(TransladarGrupoViewTest, self).setUp()
+        self.crear_arbol()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
-
-    def login_usuario(self, usuario):
-        """
-        Loguea un usuario.
-        """
-
-        self.client.login(email=usuario.email, password='123456')
 
     def test_usuario_no_logueado_redireccionado_login(self):
         """

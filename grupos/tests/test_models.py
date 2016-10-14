@@ -1,12 +1,15 @@
 from miembros.tests.factories import MiembroFactory
 from grupos.models import Grupo
-from .base import GruposBaseTest
+from common.tests.base import BaseTest
 
 
-class GrupoModelTest(GruposBaseTest):
+class GrupoModelTest(BaseTest):
     """
     Pruebas unitarias para el modelo Grupo.
     """
+
+    def setUp(self):
+        self.crear_arbol()
 
     def test_obtener_arbol_no_hay_raiz_devuelve_lista_vacio(self):
         """
