@@ -1640,18 +1640,6 @@ def transladar_miembros(request, id_miembro):
         form = FormularioTransladarMiembro()
     return render_to_response('Miembros/transladar_miembro.html', locals(), context_instance=RequestContext(request))
 
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def ver_lideres_red(request, id_red):
-    """
-    Devuelve la lista de lideres de acuerdo a la red
-    """
-    red = get_object_or_404(Red, id=id_red)
-
-    miembros = Miembro.objects.lideres().filter(grupo__red=red).select_related('usuario')
-
-    return render(request, 'Miembros/ver_lideres_red.html', {'miembros': miembros, 'red': red})
-
 # -----------------------------------
 
 
