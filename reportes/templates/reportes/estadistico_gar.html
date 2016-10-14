@@ -53,36 +53,9 @@
         var $fechaf = $('#{{ form.fecha_final.id_for_label }}');
         var $grupoi = $('#{{ form.grupo.id_for_label }}');
         // var $grupof = $('#idGrupo_f');
-        var $visitas = $("#{{ form.visitas.id_for_label }}");
-        var $lideres = $("#{{ form.lideres_asistentes.id_for_label }}");
         var $ofrenda = $("#{{ form.ofrenda.id_for_label }}");
-        var $asis_reg = $("#{{ form.asistentes_regulares.id_for_label }}");
         var $descendientes = $("#{{ form.descendientes.id_for_label }}");
 
-
-        var $sel = [];
-
-        $sel.push($visitas,$lideres,$asis_reg);
-
-        $ofrenda.click(function(){
-            for (var i = 0; i < $sel.length; i++) {
-                if ($sel[i].is(':checked')) {
-                    $sel[i][0].checked = false;
-                } else {
-                    console.log("Does not Checked yet!");
-                }
-            }
-        });
-
-        $("#{{ form.lideres_asistentes.id_for_label }}, #{{ form.asistentes_regulares.id_for_label }}, #{{ form.visitas.id_for_label }}").click(() => {
-            for (var i = 0; i < 1; i++) {
-                if ($ofrenda.is(':checked')) {
-                    $ofrenda[0].checked = false;
-                } else {
-                    console.log("Does not checked yet!");
-                }
-            }
-        })
 
         $('button[name="verReporte"]').click(function(event) {
             if ($fechai.val() == '') {
@@ -94,20 +67,8 @@
             } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() == -1 | $grupoi.val() == '') {
                 swal("Alerta!!!","Asegurate de escoger un grupo");
                 return false;
-            } else if ($fechai.val() != '' && $fechaf.val() != '' && $grupoi.val() != -1) {
-                if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
-                    swal("Alerta", "Escoja por lo menos una opción");
-                    return false;
-                } else {
-                    return true;
-                }
             } else {
-                if (!$visitas.is(':checked') && !$ofrenda.is(':checked') && !$asis_reg.is(':checked') && !$lideres.is(':checked')) {
-                    swal("Alerta", "Escoja por lo menos una opción");
-                    return false;
-                } else {
-                    return true;
-                }
+                return true;
             }
         });
 
@@ -380,6 +341,7 @@
 </div>
 {% endif %}
     {% if grafico %}
+    {% if values_asistencias %}
     <div class="card">
         <div class="card-body card-padding">    
             <div id="out" style="width: 100%;">
@@ -387,13 +349,17 @@
         </div>
     </div>
     <br>
+    {% endif %}
+    {% if values_porcentaje_utilidad %}
     <div class="card">
         <div class="card-body card-padding">
             <div id="out2" style="width: 100%;">
             </div>
         </div>
     </div>
+    {% endif %}
     <br>
+    {% if tabla %}
     <div class="card">
         <div class="card-header">
             <h3>Tabla Estadisticos</h3>
@@ -433,7 +399,9 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <br>
+    {% if sin_reportar %}
     <div class="card">
         <div class="card-header">
             <h3>Tabla Faltantes Por Reporte</h3>
@@ -463,6 +431,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% endif %}
 </div> 
 {% endblock %}
