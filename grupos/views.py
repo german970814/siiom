@@ -562,12 +562,6 @@ def reporteVisitasPorRed(request):
 
 
 @user_passes_test(adminTest, login_url='/dont_have_permissions/')
-def faltante_confirmar_ofrenda(request):
-    grupos = ReunionGAR.objects.filter(confirmacionEntregaOfrenda=False).distinct('grupo')
-    return render_to_response('Grupos/faltante_confirmar_ofrenda.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url='/dont_have_permissions/')
 def faltante_confirmar_ofrenda_discipulado(request):
     grupos = ReunionDiscipulado.objects.filter(confirmacionEntregaOfrenda=False).distinct('grupo')
     return render_to_response('Grupos/faltante_confirmar_ofrenda_discipulado.html', locals(), context_instance=RequestContext(request))

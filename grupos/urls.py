@@ -9,7 +9,6 @@ urlpatterns = [
     url(r'^listar_predicas/$', listarPredicas, name="listar_predicas"),  # revisada
     url(r'^crear_predica/$', crearPredica, name="crear_predica"),  # revisada
     url(r'^editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),  # revisada
-    url(r'^faltante_confirmar_ofrenda/$', faltante_confirmar_ofrenda, name="faltantes_confirmar_ofrenda"),
     url(r'^faltante_confirmar_ofrenda_discipulado/$',
         faltante_confirmar_ofrenda_discipulado, name="faltantes_confirmar_ofrenda_discipulado"),
     url(r'^ver_reportes/$', ver_reportes_grupo, name="reportes_grupo"),
