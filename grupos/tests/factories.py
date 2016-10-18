@@ -35,3 +35,17 @@ class GrupoHijoFactory(GrupoFactory):
         'miembros.tests.factories.MiembroFactory', 'grupo_lidera',
         grupo=factory.LazyAttribute(lambda o: o.grupo_lidera.parent), lider=True
     )
+
+
+class ReunionGARFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = models.ReunionGAR
+
+    fecha = factory.LazyFunction(datetime.datetime.now)
+    grupo = factory.SubFactory(GrupoFactory)
+    numeroLideresAsistentes = 2
+    predica = 'Palabra de Dios'
+    numeroTotalAsistentes = 10
+    numeroVisitas = 5
+    ofrenda = 100000

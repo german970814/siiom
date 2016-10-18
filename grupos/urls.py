@@ -3,12 +3,12 @@ from . import views
 from .views import *
 
 urlpatterns = [
-    url(r'^listar_redes/$', listarRedes, name="listar_redes"),
-    url(r'^crear_red/$', crearRed, name="crear_red"),
-    url(r'^editar_red/(?P<pk>\d+)$', editarRed, name="editar_red"),
-    url(r'^listar_predicas/$', listarPredicas, name="listar_predicas"),
-    url(r'^crear_predica/$', crearPredica, name="crear_predica"),
-    url(r'^editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),
+    url(r'^listar_redes/$', listarRedes, name="listar_redes"),  # revisada
+    url(r'^crear_red/$', crearRed, name="crear_red"),  # revisada
+    url(r'^editar_red/(?P<pk>\d+)$', editarRed, name="editar_red"),  # revisada
+    url(r'^listar_predicas/$', listarPredicas, name="listar_predicas"),  # revisada
+    url(r'^crear_predica/$', crearPredica, name="crear_predica"),  # revisada
+    url(r'^editar_predica/(?P<pk>\d+)$', editarPredica, name="editar_predica"),  # revisada
     url(r'^faltante_confirmar_ofrenda/$', faltante_confirmar_ofrenda, name="faltantes_confirmar_ofrenda"),
     url(r'^faltante_confirmar_ofrenda_discipulado/$',
         faltante_confirmar_ofrenda_discipulado, name="faltantes_confirmar_ofrenda_discipulado"),

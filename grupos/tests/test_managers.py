@@ -1,6 +1,6 @@
 from django.test import TestCase
 from grupos.models import Grupo
-from .factories import GrupoRaizFactory, GrupoFactory, RedFactory
+from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory
 
 
 class GrupoManagerTest(TestCase):
@@ -41,3 +41,30 @@ class GrupoManagerTest(TestCase):
 
         self.assertIn(grupo_jovenes, grupos)
         self.assertNotIn(otro_grupo, grupos)
+
+    def test_devuelve_grupo_sin_confirmar_ofrenda(self):
+        """
+        Prueba que devuelve el grupo que falta por confirmar ofrenda reunion GAR.
+        """
+
+        sin_confirmar = ReunionGARFactory()
+        ReunionGARFactory(grupo=sin_confirmar.grupo)
+        confirmada = ReunionGARFactory(confirmacionEntregaOfrenda=True)
+
+        grupos = Grupo.objects.sin_confirmar_ofrenda_GAR()
+
+        self.assertIn(sin_confirmar.grupo, grupos)
+        self.assertNotIn(confirmada.grupo, grupos)
+
+    def test_devuelve_grupo_sin_confirmar_ofrenda_una_sola_vez(self):
+        """
+        Prueba que devuleva el grupos que falta por confirmar ofrenda reunión GAR una sola vez aunque deba confirmar
+        mas de una ofrenda.
+        """
+
+        sin_confirmar = ReunionGARFactory()
+        ReunionGARFactory(grupo=sin_confirmar.grupo)
+
+        grupos = Grupo.objects.sin_confirmar_ofrenda_GAR()
+
+        self.assertEqual(grupos.count(), 1)
