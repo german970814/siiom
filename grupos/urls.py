@@ -20,5 +20,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/editar/$', views.editar_grupo, name='editar'),
     url(r'^redes/(?P<pk>\d+)/nuevo/$', views.crear_grupo, name='nuevo'),
     url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),
-    url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar')
+    url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar'),
+    url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR')
 ]

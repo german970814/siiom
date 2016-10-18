@@ -48,7 +48,6 @@ class GrupoManagerTest(TestCase):
         """
 
         sin_confirmar = ReunionGARFactory()
-        ReunionGARFactory(grupo=sin_confirmar.grupo)
         confirmada = ReunionGARFactory(confirmacionEntregaOfrenda=True)
 
         grupos = Grupo.objects.sin_confirmar_ofrenda_GAR()

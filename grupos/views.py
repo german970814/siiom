@@ -773,3 +773,14 @@ def transladar(request, pk):
         form = TransladarGrupoForm(grupo)
 
     return render(request, 'grupos/transladar.html', {'grupo': grupo, 'form': form})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def sin_confirmar_ofrenda_GAR(request):
+    """
+    Permite a un administrador listar los grupos que faltan por confirmar la ofrenda de las reuniones GAR.
+    """
+
+    grupos = Grupo.objects.sin_confirmar_ofrenda_GAR().prefetch_related('lideres')
+    return render(request, 'grupos/sin_confirmar_ofrenda_GAR.html', {'grupos': grupos})

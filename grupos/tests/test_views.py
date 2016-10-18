@@ -10,7 +10,7 @@ from miembros.tests.factories import MiembroFactory, BarrioFactory
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
 from grupos.forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
-from .factories import GrupoRaizFactory
+from .factories import GrupoRaizFactory, ReunionGARFactory
 
 
 class OrganigramaGruposViewTest(BaseTest):
@@ -431,3 +431,26 @@ class TransladarGrupoViewTest(BaseTest):
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, {})
         self.assertFormError(response, 'form', 'nuevo', 'Este campo es obligatorio.')
+
+
+class SinConfirmarOfrendaGARViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista de grupos sin confirmar ofrenda de las reuniones GAR.
+    """
+
+    URL = reverse('grupos:sin_confirmar_ofrenda_GAR')
+
+    def test_get_muestra_grupos(self):
+        """
+        Prueba que se listen los grupos que faltan por confirmar ofrenda de la reunion GAR.
+        """
+
+        sin_confirmar = ReunionGARFactory()
+        admin = UsuarioFactory(user_permissions=('es_administrador',))
+        confirmada = ReunionGARFactory(confirmacionEntregaOfrenda=True)
+
+        self.login_usuario(admin)
+        response = self.client.get(self.URL)
+
+        self.assertContains(response, str(sin_confirmar.grupo))
+        self.assertNotContains(response, str(confirmada.grupo))
