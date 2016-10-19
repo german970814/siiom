@@ -64,7 +64,8 @@
                     caseSensitive: false,
                     formatters: {
                         "commands": function(column, row) {
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/miembro/confirmar_ofrenda_gar/" + row.id + "'\"><span class=\"zmdi zmdi-card\"></span></button> "
+							var confirmar_url = "{% url 'grupos:confirmar_ofrenda_GAR' 0 %}".replace(0, row.id)
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + confirmar_url + "'\"><span class=\"zmdi zmdi-card\"></span></button> "
                         }
                     }
                 });

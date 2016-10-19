@@ -11,7 +11,7 @@
 	                <a href="" data-toggle="dropdown">
 	                    <i class="zmdi zmdi-more-vert"></i>
 	                </a>
-	    
+
 	                <ul class="dropdown-menu dropdown-menu-right">
 	                    <li>
 	                        <a href="/miembro/editar_miembro/{{miembro.id}}/">Editar Miembro</a>
@@ -88,7 +88,7 @@
             	<legend>
             		<h3>Informaci&oacute;n General</h3>
 				</legend>
-            </h1>			
+            </h1>
             {% if ok %}
             	<p class="ok"></p>
             {% endif %}
@@ -111,7 +111,7 @@
 	                            <p> {{miembro.nombre|capfirst}} {{miembro.primerApellido|capfirst}} {{miembro.segundoApellido|capfirst}}</p>
 	                        </div>
                         </div>
-						
+
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
@@ -121,7 +121,7 @@
 	                            <p>{{miembro.cedula}}</p>
 	                        </div>
                         </div>
-						
+
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
@@ -131,7 +131,7 @@
 	                            <p>{{miembro.fechaNacimiento}}</p>
 	                        </div>
                         </div>
-						
+
 						<div class="col-md-4">
 	                        <div class="input-group">
 	                        	<span class="input-group-addon">
@@ -275,7 +275,7 @@
 		                        </div>
 		                    </div>
 							{% endif %}
-						
+
 							{% if escalafon %}
 							<div class="col-md-4">
 		                        <div class="input-group">
@@ -287,7 +287,7 @@
 		                        </div>
 		                    </div>
 							{% endif %}
-						
+
 							{% if grupoLidera %}
 							<div class="col-md-4">
 		                        <div class="input-group">
@@ -299,7 +299,7 @@
 		                        </div>
 		                    </div>
 							{% endif %}
-						
+
 							{% if miembro.grupo %}
 							<div class="col-md-4">
 		                        <div class="input-group">
@@ -311,7 +311,7 @@
 		                        </div>
 		                    </div>
 							{% endif %}
-						
+
 							{% if miembro.lider %}
 							<div class="col-md-4">
 		                        <div class="input-group">
@@ -395,7 +395,7 @@
 				            </div>
 				        </div>
 				        {% endif %}
-								
+
 						{% if miembro.observacionPrimeraLlamada %}
 						<div class="col-md-4">
 				            <div class="input-group">
@@ -518,38 +518,3 @@
 
 </div>
 {% endblock %}
-
-<!-- {% block derContenido2%}
-	{% if perms.grupos.puede_confirmar_ofrenda_GAR or perms.grupos.puede_confirmar_ofrenda_discipulado %}
-		<div class="caja">
-   			<h3>Reportar Ofrendas de {{miembro.nombre|capfirst}}</h3>
-    			<ul>
-	    			{% if perms.grupos.puede_confirmar_ofrenda_GAR %}
-	    				<li><a href="/miembro/confirmar_ofrenda_gar/{{miembro.id}}">Confirmar Ofrenda de G.A.R</a></li>
-    				{% endif %}
-    				{% if perms.grupos.puede_confirmar_ofrenda_discipulado %}<li><a href="/miembro/confirmar_ofrenda_discipulado/{{miembro.id}}">Reportar Ofrenda de Reunion de Discipulado</a></li>{% endif %}
-    			</ul>
-   		</div>  
-   	{% endif %}  			    			
-{% endblock %} -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
