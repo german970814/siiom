@@ -778,3 +778,23 @@ def sin_confirmar_ofrenda_GAR(request):
 
     grupos = Grupo.objects.sin_confirmar_ofrenda_GAR().prefetch_related('lideres')
     return render(request, 'grupos/sin_confirmar_ofrenda_GAR.html', {'grupos': grupos})
+
+
+@login_required
+@permission_required('grupos.puede_confirmar_ofrenda_GAR', raise_exception=True)
+def confirmar_ofrenda_GAR(request, pk):
+    """
+    Permite a un administrador o receptor confirmar la ofrenda de la reunion GAR del grupo especificado.
+    """
+
+    grupo = get_object_or_404(Grupo, pk=pk)
+
+    if request.method == 'POST':
+        reuniones_confirmar = request.POST.getlist('seleccionados')
+        grupo.confirmar_ofrenda_reuniones_GAR(reuniones_confirmar)
+        messages.success(request, _('Se han confirmado las reuniones escogidas.'))
+        return redirect('grupos:confirmar_ofrenda_GAR', pk)
+    else:
+        reuniones = grupo.reuniones_GAR_sin_ofrenda_confirmada
+
+    return render(request, 'grupos/confirmar_ofrenda_GAR.html', {'reuniones': reuniones})

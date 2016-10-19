@@ -1,7 +1,7 @@
 from miembros.tests.factories import MiembroFactory
-from grupos.models import Grupo
 from common.tests.base import BaseTest
-
+from grupos.models import Grupo
+from .factories import ReunionGARFactory
 
 class GrupoModelTest(BaseTest):
     """
@@ -90,3 +90,32 @@ class GrupoModelTest(BaseTest):
         self.assertIn(lider, discipulos)
         self.assertNotIn(miembro, discipulos)
         self.assertNotIn(otro_lider, discipulos)
+
+    def test_reunion_GAR_sin_ofrenda_confirmada(self):
+        """
+        Prueba que devuelva las reuniones GAR a las cuales no se les haya confirmado la ofrenda.
+        """
+
+        grupo = Grupo.objects.get(id=200)
+        confirmada = ReunionGARFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
+        no_confirmada = ReunionGARFactory(grupo=grupo, confirmacionEntregaOfrenda=False)
+
+        reuniones = grupo.reuniones_GAR_sin_ofrenda_confirmada
+        self.assertIn(no_confirmada, reuniones)
+        self.assertNotIn(confirmada, reuniones)
+
+    def test_confirmar_ofrenda_GAR(self):
+        """
+        Prueba que se confirmen la ofrenda de las reuniones GAR ingresadas.
+        """
+
+        grupo = Grupo.objects.get(id=200)
+        no_confirmada1 = ReunionGARFactory(grupo=grupo)
+        no_confirmada2 = ReunionGARFactory(grupo=grupo)
+
+        grupo.confirmar_ofrenda_reuniones_GAR([no_confirmada1.id])
+        no_confirmada1.refresh_from_db()
+        no_confirmada2.refresh_from_db()
+
+        self.assertTrue(no_confirmada1.confirmacionEntregaOfrenda)
+        self.assertFalse(no_confirmada2.confirmacionEntregaOfrenda)

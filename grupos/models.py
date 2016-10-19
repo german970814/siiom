@@ -174,6 +174,22 @@ class Grupo(AL_Node):
 
         return self.miembro_set.lideres2()
 
+    @property
+    def reuniones_GAR_sin_ofrenda_confirmada(self):
+        """
+        Devuelve un queryset con las reuniones GAR que no tienen la ofrenda confirmada.
+        """
+
+        return self.reuniongar_set.filter(confirmacionEntregaOfrenda=False)
+
+    def confirmar_ofrenda_reuniones_GAR(self, reuniones):
+        """
+        Confirma la ofrenda de las reuniones GAR ingresadas en la lista. Reuniones es una lista con los ids de las
+        reuniones a confirmar.
+        """
+
+        self.reuniongar_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
+
     def transladar(self, nuevo_padre):
         """
         Translada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
