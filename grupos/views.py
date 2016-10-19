@@ -150,7 +150,7 @@ def reportarReunionGrupoAdmin(request):
         init = request.GET.get('grupo', None)
         initial = {'grupo': init}
         form = FormularioReportarReunionGrupoAdmin(initial=initial)
-    return render_to_response('Grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -239,7 +239,7 @@ def crearRed(request):
             ok = True
     else:
         form = FormularioCrearRed()
-    return render_to_response('Grupos/crear_red.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/crear_red.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -260,9 +260,9 @@ def editarRed(request, pk):
 
     else:
         form = FormularioCrearRed(instance=red)
-        return render_to_response("Grupos/crear_red.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
-    return render_to_response("Grupos/crear_red.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
@@ -277,7 +277,7 @@ def listarPredicas(request):
 
     if Group.objects.get(name__iexact='Administrador') in request.user.groups.all():
         predicas = list(Predica.objects.all())
-    return render_to_response('Grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
@@ -291,7 +291,7 @@ def crearPredica(request):
             ok = True
     else:
         form = FormularioCrearPredica(miembro=miembro)
-    return render_to_response('Grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
@@ -312,9 +312,9 @@ def editarPredica(request, pk):
             form.save()
     else:
         form = FormularioCrearPredica(instance=predica, miembro=miembro)
-        return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 
-    return render_to_response("Grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 
 
 def eliminar(request, modelo, lista):
