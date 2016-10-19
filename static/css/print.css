@@ -31,6 +31,10 @@
         margin-top: 32px;
     }
 
+    .margin-60 {
+        margin-top: 60px !important;
+    }
+
     .chart-g div div {
         height: 200px !important;
     }
