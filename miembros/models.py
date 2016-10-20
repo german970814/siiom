@@ -178,6 +178,19 @@ class Miembro(models.Model):
     def __str__(self):
         return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'
 
+    @property
+    def es_director_red(self):
+        """
+        Indica si el miembro es director de red. Un director de red es un miembro que lidere grupo y sea discipulos
+        del pastor presidente.
+        """
+
+        if self.grupo_lidera:
+            if self.grupo_lidera.get_depth() == 2:
+                return True
+
+        return False
+
     def grupoLidera(self):
         """
         Devuelve el grupo al cual lidera el miembro o su conyugue.
@@ -238,30 +251,6 @@ class Miembro(models.Model):
                 sw = False
 
         return pastores
-
-    def es_cabeza_red(self):
-        """Metodo para saber si el miembro esta dentro de los 72 del pastor principal"""
-        if self.grupo is not None:
-            lideres = Miembro.objects.filter(id__in=self.grupo.listaLideres())
-            for lider in lideres:
-                if lider.grupo is not None:
-                    if lider.grupo.red is None:
-                        return True
-
-                    try:
-                        if any(
-                            [
-                                lid.grupo.red for lid in Miembro.objects.filter(
-                                    id__in=lider.grupo.listaLideres()
-                                ) if lid.grupo.red is None
-                            ]
-                        ):
-                            return True
-                    except AttributeError:
-                        return True
-                else:
-                    return True
-        return False
 
     class Meta:
         permissions = (

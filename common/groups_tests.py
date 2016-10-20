@@ -70,7 +70,7 @@ def admin_or_director_red(user):
     """
     Retorna verdadero si el usuario es administrador o director de red
     """
-    return adminTest(user) or user.miembro_set.first().es_cabeza_red()
+    return adminTest(user) or user.miembro_set.first().es_director_red
 
 
 def verGrupoTest(user):
