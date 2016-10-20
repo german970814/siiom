@@ -531,12 +531,6 @@ def reporteVisitasPorRed(request):
     return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url='/dont_have_permissions/')
-def faltante_confirmar_ofrenda_discipulado(request):
-    grupos = ReunionDiscipulado.objects.filter(confirmacionEntregaOfrenda=False).distinct('grupo')
-    return render_to_response('Grupos/faltante_confirmar_ofrenda_discipulado.html', locals(), context_instance=RequestContext(request))
-
-
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def ver_reportes_grupo(request):
     if request.method == 'POST' or ('post' in request.session and len(request.session['post']) > 1):
