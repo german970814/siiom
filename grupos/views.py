@@ -181,39 +181,6 @@ def reportarReunionDiscipulado(request):
     return render_to_response('Grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(receptorAdminTest, login_url="/dont_have_permissions/")
-def registrarPagoDiscipulado(request, id):
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        miembroRegistrar = Miembro.objects.get(id=int(id))
-    except:
-        raise Http404
-
-    if request.method == "POST":
-        seleccionados = request.POST.getlist('seleccionados')
-        for seleccionado in seleccionados:
-            try:
-                reunion = ReunionDiscipulado.objects.get(id=seleccionado)
-            except ValueError:
-                continue
-            reunion.confirmacionEntregaOfrenda = True
-            reunion.save()
-            success = True
-            mensaje = "Pago registrado exitosamente"
-        # return HttpResponseRedirect('/miembro/perfil/'+str(miembro.id))
-
-    grupoLidera = miembroRegistrar.grupoLidera()
-    sw = True
-    if grupoLidera is None:
-        sw = False
-        mensaje = 'El miembro %s %s no tiene ningun grupo asignado.' % \
-            (miembroRegistrar.nombre.capitalize(), miembroRegistrar.primerApellido.capitalize())
-    ofrendasPendientesDiscipulado = ReunionDiscipulado.objects.filter(grupo=grupoLidera,
-                                                                      confirmacionEntregaOfrenda=False)
-    return render_to_response("Grupos/registrar_pago_discipulado.html", locals(), context_instance=RequestContext(request))
-
-
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def listarRedes(request):
     miembro = Miembro.objects.get(usuario=request.user)

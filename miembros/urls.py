@@ -3,7 +3,7 @@ from django.views.generic import RedirectView
 from .views import *
 from . import views
 from grupos.views import editarHorarioReunionGrupo, reportarReunionGrupo, \
-    reportarReunionGrupoAdmin, reportarReunionDiscipulado, registrarPagoDiscipulado
+    reportarReunionGrupoAdmin, reportarReunionDiscipulado
 
 urlpatterns = [
     url(r'^$', miembroInicio, name="miembro_inicio"),
@@ -27,7 +27,6 @@ urlpatterns = [
     url(r'^reportar_reunion_grupo_admin/$', reportarReunionGrupoAdmin, name="reportar_reunion_grupo_admin"),  # revisada
     # url(r'^perfil/(\d+)/$',  perfilMiembro, name="perfil"),
     url(r'^reportar_reunion_discipulado/$', reportarReunionDiscipulado, name="reportar_reunion_discipulado"),
-    url(r'^confirmar_ofrenda_discipulado/(\d+)/$', registrarPagoDiscipulado, name="confirmar_ofrenda_discipulado"),
     url(r'^asignar_grupo/(\d+)/$', asignarGrupo, name="asignar_grupo"),
     url(r'^crear_zona/$', crearZona, name="crear_zona"),
     url(r'^editar_zona/(?P<pk>\d+)$', editarZona, name="editar_zona"),
