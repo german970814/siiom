@@ -7,7 +7,7 @@
 		<div class="card-header">
 			<h1>
 				<legend>
-					<h3>{% trans 'Lista Grupos Con Ofrenda Sin Confirmar' %}</h3>
+					<h3>{% trans 'Lista Discipulados Con Ofrenda Sin Confirmar' %}</h3>
 				</legend>
 			</h1>
 		</div>
@@ -25,17 +25,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                        {% for grupo in grupos %}
-                            <tr>
-                                <td>{{ grupo.id }}</td>
-                                <td>{{ grupo }}</td>
-                            </tr>
-                        {% endfor %}
+                            {% for grupo in grupos %}
+                                <tr>
+                                    <td>{{ grupo.id }}</td>
+                                    <td>{{ grupo }}</td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
 	</div>
 </div>
 {% endblock contenido %}
@@ -56,11 +57,10 @@
                     caseSensitive: false,
                     formatters: {
                         "commands": function(column, row) {
-							var confirmar_url = "{% url 'grupos:confirmar_ofrenda_GAR' 0 %}".replace(0, row.id)
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + confirmar_url + "'\"><span class=\"zmdi zmdi-card\"></span></button> "
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/miembro/confirmar_ofrenda_discipulado/" + row.id + "'\"><span class=\"zmdi zmdi-card\"></span></button> "
                         }
                     }
                 });
     })
 </script>
-{% endblock %}
+{% endblock js %}

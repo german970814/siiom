@@ -37,3 +37,10 @@ class GrupoManager(AL_NodeManager):
         """
 
         return self.filter(reuniongar__confirmacionEntregaOfrenda=False).distinct()
+
+    def sin_confirmar_ofrenda_discipulado(self):
+        """
+        Devuelve un queryset con los grupos que tienen pendientes por confirmar la ofrenda de reuniones de discipulado.
+        """
+
+        return self.filter(reuniondiscipulado__confirmacionEntregaOfrenda=False).distinct()

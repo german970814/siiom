@@ -1,6 +1,6 @@
 from django.test import TestCase
 from grupos.models import Grupo
-from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory
+from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory, ReunionDiscipuladoFactory
 
 
 class GrupoManagerTest(TestCase):
@@ -42,7 +42,7 @@ class GrupoManagerTest(TestCase):
         self.assertIn(grupo_jovenes, grupos)
         self.assertNotIn(otro_grupo, grupos)
 
-    def test_devuelve_grupo_sin_confirmar_ofrenda(self):
+    def test_devuelve_grupo_sin_confirmar_ofrenda_GAR(self):
         """
         Prueba que devuelve el grupo que falta por confirmar ofrenda reunion GAR.
         """
@@ -55,7 +55,7 @@ class GrupoManagerTest(TestCase):
         self.assertIn(sin_confirmar.grupo, grupos)
         self.assertNotIn(confirmada.grupo, grupos)
 
-    def test_devuelve_grupo_sin_confirmar_ofrenda_una_sola_vez(self):
+    def test_devuelve_grupo_sin_confirmar_ofrenda_GAR_una_sola_vez(self):
         """
         Prueba que devuleva el grupos que falta por confirmar ofrenda reunión GAR una sola vez aunque deba confirmar
         mas de una ofrenda.
@@ -65,5 +65,31 @@ class GrupoManagerTest(TestCase):
         ReunionGARFactory(grupo=sin_confirmar.grupo)
 
         grupos = Grupo.objects.sin_confirmar_ofrenda_GAR()
+
+        self.assertEqual(grupos.count(), 1)
+
+    def test_devuelve_grupo_sin_confirmar_ofrenda_discipulado(self):
+        """
+        Prueba que devuelve el grupo que falta por confirmar ofrenda reunion discipulado.
+        """
+
+        sin_confirmar = ReunionDiscipuladoFactory()
+        confirmada = ReunionDiscipuladoFactory(confirmacionEntregaOfrenda=True)
+
+        grupos = Grupo.objects.sin_confirmar_ofrenda_discipulado()
+
+        self.assertIn(sin_confirmar.grupo, grupos)
+        self.assertNotIn(confirmada.grupo, grupos)
+
+    def test_devuelve_grupo_sin_confirmar_ofrenda_discipulado_una_sola_vez(self):
+        """
+        Prueba que devuleva el grupos que falta por confirmar ofrenda reunión discipulado una sola vez aunque deba
+        confirmar mas de una ofrenda.
+        """
+
+        sin_confirmar = ReunionDiscipuladoFactory()
+        ReunionDiscipuladoFactory(grupo=sin_confirmar.grupo)
+
+        grupos = Grupo.objects.sin_confirmar_ofrenda_discipulado()
 
         self.assertEqual(grupos.count(), 1)

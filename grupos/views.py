@@ -768,3 +768,14 @@ def confirmar_ofrenda_GAR(request, pk):
         reuniones = grupo.reuniones_GAR_sin_ofrenda_confirmada
 
     return render(request, 'grupos/confirmar_ofrenda_GAR.html', {'reuniones': reuniones})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def sin_confirmar_ofrenda_discipulado(request):
+    """
+    Permite a un administrador listar los grupos que faltan por confirmar la ofrenda de las reuniones de discipulado.
+    """
+
+    grupos = Grupo.objects.sin_confirmar_ofrenda_discipulado().prefetch_related('lideres')
+    return render(request, 'grupos/sin_confirmar_ofrenda_discipulado.html', {'grupos': grupos})

@@ -10,7 +10,7 @@ from miembros.tests.factories import MiembroFactory, BarrioFactory
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
 from grupos.forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
-from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory
+from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory
 
 
 class OrganigramaGruposViewTest(BaseTest):
@@ -499,3 +499,26 @@ class ConfirmarOfrendaGARViewTest(BaseTest):
         self.sin_confirmar.refresh_from_db()
         self.assertRedirects(response, self.URL)
         self.assertTrue(self.sin_confirmar.confirmacionEntregaOfrenda)
+
+
+class SinConfirmarOfrendaDiscipuladoViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista de grupos sin confirmar ofrenda de las reuniones de discipulado.
+    """
+
+    URL = reverse('grupos:sin_confirmar_ofrenda_discipulado')
+
+    def test_get_muestra_grupos(self):
+        """
+        Prueba que se listen los grupos que faltan por confirmar ofrenda de la reunion discipulado.
+        """
+
+        sin_confirmar = ReunionDiscipuladoFactory()
+        admin = UsuarioFactory(user_permissions=('es_administrador',))
+        confirmada = ReunionDiscipuladoFactory(confirmacionEntregaOfrenda=True)
+
+        self.login_usuario(admin)
+        response = self.client.get(self.URL)
+
+        self.assertContains(response, str(sin_confirmar.grupo))
+        self.assertNotContains(response, str(confirmada.grupo))
