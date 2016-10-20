@@ -24,4 +24,8 @@ urlpatterns = [
         r'^sin_confirmar_ofrenda_discipulado/$', views.sin_confirmar_ofrenda_discipulado,
         name='sin_confirmar_ofrenda_discipulado'
     ),
+    url(
+        r'^(?P<pk>\d+)/confirmar_ofrenda_discipulado/$', views.confirmar_ofrenda_discipulado,
+        name='confirmar_ofrenda_discipulado'
+    )
 ]

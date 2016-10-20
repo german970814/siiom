@@ -182,6 +182,14 @@ class Grupo(AL_Node):
 
         return self.reuniongar_set.filter(confirmacionEntregaOfrenda=False)
 
+    @property
+    def reuniones_discipulado_sin_ofrenda_confirmada(self):
+        """
+        Devuelve un queryset con las reuniones de discipulado que no tienen la ofrenda confirmada.
+        """
+
+        return self.reuniondiscipulado_set.filter(confirmacionEntregaOfrenda=False)
+
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
         Confirma la ofrenda de las reuniones GAR ingresadas en la lista. Reuniones es una lista con los ids de las
@@ -189,6 +197,14 @@ class Grupo(AL_Node):
         """
 
         self.reuniongar_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
+
+    def confirmar_ofrenda_reuniones_discipulado(self, reuniones):
+        """
+        Confirma la ofrenda de las reuniones de discipulado ingresadas en la lista. Reuniones es una lista con los ids
+        de las reuniones a confirmar.
+        """
+
+        self.reuniondiscipulado_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
     def transladar(self, nuevo_padre):
         """

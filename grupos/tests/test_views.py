@@ -522,3 +522,49 @@ class SinConfirmarOfrendaDiscipuladoViewTest(BaseTest):
 
         self.assertContains(response, str(sin_confirmar.grupo))
         self.assertNotContains(response, str(confirmada.grupo))
+
+
+class ConfirmarOfrendaDiscipuladoViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista para confirmar ofrendas de las reuniones de discipulado.
+    """
+
+    def setUp(self):
+        self.usuario = UsuarioFactory(user_permissions=('puede_confirmar_ofrenda_discipulado',))
+        grupo = GrupoFactory()
+        self.sin_confirmar = ReunionDiscipuladoFactory(grupo=grupo)
+        confirmada = ReunionDiscipuladoFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
+
+        self.URL = reverse('grupos:confirmar_ofrenda_discipulado', args=(grupo.id,))
+
+    def test_get_grupo_no_existe_devuelve_404(self):
+        """
+        Prueba que si se envia un grupo que no existe la vista devuelve un status code de 404.
+        """
+
+        self.login_usuario(self.usuario)
+        response = self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
+        self.assertRaises(Http404)
+
+    def test_get_muestra_reuniones_sin_confirmar(self):
+        """
+        Prueba que se listen las reuniones de discipulado del grupo escogido a las cuales no se les ha confirmado la
+        ofrenda.
+        """
+
+        self.login_usuario(self.usuario)
+        response = self.client.get(self.URL)
+
+        self.assertContains(response, self.sin_confirmar.ofrenda)
+
+    def test_post_confirma_ofrenda(self):
+        """
+        Prueba que si se hace un POST se confirmen las reuniones escogidas y redirecciona a la misma página con GET.
+        """
+
+        self.login_usuario(self.usuario)
+        response = self.client.post(self.URL, {'seleccionados': [self.sin_confirmar.id]})
+
+        self.sin_confirmar.refresh_from_db()
+        self.assertRedirects(response, self.URL)
+        self.assertTrue(self.sin_confirmar.confirmacionEntregaOfrenda)

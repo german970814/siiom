@@ -1,7 +1,8 @@
 from miembros.tests.factories import MiembroFactory
 from common.tests.base import BaseTest
 from grupos.models import Grupo
-from .factories import ReunionGARFactory
+from .factories import ReunionGARFactory, ReunionDiscipuladoFactory
+
 
 class GrupoModelTest(BaseTest):
     """
@@ -114,6 +115,35 @@ class GrupoModelTest(BaseTest):
         no_confirmada2 = ReunionGARFactory(grupo=grupo)
 
         grupo.confirmar_ofrenda_reuniones_GAR([no_confirmada1.id])
+        no_confirmada1.refresh_from_db()
+        no_confirmada2.refresh_from_db()
+
+        self.assertTrue(no_confirmada1.confirmacionEntregaOfrenda)
+        self.assertFalse(no_confirmada2.confirmacionEntregaOfrenda)
+
+    def test_reunion_discipulado_sin_ofrenda_confirmada(self):
+        """
+        Prueba que devuelva las reuniones de discipulado a las cuales no se les haya confirmado la ofrenda.
+        """
+
+        grupo = Grupo.objects.get(id=200)
+        confirmada = ReunionDiscipuladoFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
+        no_confirmada = ReunionDiscipuladoFactory(grupo=grupo, confirmacionEntregaOfrenda=False)
+
+        reuniones = grupo.reuniones_discipulado_sin_ofrenda_confirmada
+        self.assertIn(no_confirmada, reuniones)
+        self.assertNotIn(confirmada, reuniones)
+
+    def test_confirmar_ofrenda_discipulado(self):
+        """
+        Prueba que se confirmen la ofrenda de las reuniones de discipulado ingresadas.
+        """
+
+        grupo = Grupo.objects.get(id=200)
+        no_confirmada1 = ReunionDiscipuladoFactory(grupo=grupo)
+        no_confirmada2 = ReunionDiscipuladoFactory(grupo=grupo)
+
+        grupo.confirmar_ofrenda_reuniones_discipulado([no_confirmada1.id])
         no_confirmada1.refresh_from_db()
         no_confirmada2.refresh_from_db()
 
