@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.css' %}"></link>
+<style>
+    #mapa {
+        height: 500px;
+    }
+</style>
+<script src="{% static 'leaflet/leaflet.js' %}"></script>
+<script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
+{% endblock css %}
+
+
+{% block contenido %}
+<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Asignar A Grupo</h4>
+            </div>
+	        <form action="" method="POST" id="" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+                    <div id="mapa"></div>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="submit" name="aceptar" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1>
+                <legend>
+                    <h3 class="f-700 f-20">Asignar A Grupo</h3>
+                </legend>
+                {% if messages %}
+					{% for message in messages %}
+						<div class="row">
+			                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+			                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+			                    <p>{{ message|safe }}</p>
+			                </div>
+			            </div>
+					{% endfor %}
+				{% endif %}
+            </h1>
+        </div>
+        <div class="card-body card-padding">
+            <br>
+            <form action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group {{ form.fecha_final.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-accounts"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="{{ form.fecha_inicial.id_for_label }}" class="fg-label requerido control-label">{{ form.fecha_inicial.label }}:</label>
+                                {{ form.fecha_inicial }}
+                            </div>
+                            {% for error in form.fecha_inicial.errors %}
+	                        	<small class="help-block">{{error}}</small>
+	                        {% endfor %}
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{ form.fecha_final.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-money-box"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="{{ form.fecha_final.id_for_label }}" class="fg-label requerido control-label">{{ form.fecha_final.label }}:</label>
+                                {{ form.fecha_final }}
+                            </div>
+                            {% for error in form.fecha_final.errors %}
+	                        	<small class="help-block">{{error}}</small>
+	                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="aceptar" class="btn btn-primary btn-block">Aceptar</button>
+                    </div>
+                </div>
+            </form>
+            {% if visitas %}
+            <div class="card-header">
+                <h1>
+                    <legend>
+                        <h3>Visitas</h3>
+                    </legend>
+                </h1>
+            </div>
+            <div class="table-responsive">
+                <table id="data-table-selection" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th data-column-id="id" data-identifier="true" data-visible="false"></th>
+                            <th data-column-id="nombre" data-identifier="true">Nombre</th>
+                            <th data-column-id="predica" data-identifier="true">Telefono</th>
+                            <th data-column-id="asistencia" data-identifier="true">Dirección</th>
+                            <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visita in visitas %}
+                            <tr>
+                                <td>{{ visita.id }}</td>
+                                <td>{{ visita.nombre|upper }} {{ visita.primerApellido|upper }}</td>
+                                <td>{{ visita.telefono }}</td>
+                                <td>{{ visita.direccion }}</td>
+                            </tr>                
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <br>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock contenido %}
+
+{% block js %}
+<script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $("#data-table-selection").bootgrid({
+            css: {
+                icon: 'zmdi icon',
+                iconColumns: 'zmdi-view-module',
+                iconDown: 'zmdi-expand-more',
+                iconRefresh: 'zmdi-refresh',
+                iconUp: 'zmdi-expand-less'
+            },
+            caseSensitive: false,
+            formatters: {
+                "commands": function(column, row) {
+                    return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle boolean\" data-row-id=\"" + row.id + "\" onClick=\"\"><span class=\"zmdi zmdi-pin\"></span></button> ";
+                }
+            }
+        });
+
+        $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
+            format: 'DD/MM/YY',
+            // daysOfWeekDisabled: [0,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+        $('#{{ form.fecha_final.id_for_label }}').datetimepicker({
+            useCurrent: false,
+            format: 'DD/MM/YY',
+            // daysOfWeekDisabled: [1,2,3,4,5,6],
+            maxDate: moment(),
+        });
+
+        $('#{{ form.fecha_inicial.id_for_label }}').on("dp.change",function(e){
+            $('#{{ form.fecha_final.id_for_label }}').data("DateTimePicker").minDate(e.date);
+        });
+
+        $('#{{ form.fecha_final.id_for_label }}').on("dp.change",function(e){
+            $('#{{ form.fecha_inicial.id_for_label }}').data("DateTimePicker").maxDate(e.date);
+        });
+
+        $("#data-table-selection").bootgrid().on("loaded.rs.jquery.bootgrid", function(e) {
+            $('.boolean').click(function(event) {
+                $('#toggleModal').click();
+                $(window).trigger('invalidateSize');
+                {% comment %}$('input[name="reporte"]').val($(this).parent().parent().attr('data-row-id').toString());{% endcomment %}
+                {% comment %}return false;{% endcomment %}
+            });
+        });
+
+        {% if click %}
+        $('#toggleModal').click();
+        {% endif %}
+    })
+</script>
+<script>
+    var mymap = L.map('mapa').setView([10.999236, -74.805117], 15);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 18,
+        id: 'your.mapbox.project.id',
+        accessToken: 'your.mapbox.public.access.token'
+    }).addTo(mymap);
+
+    var geocoder = L.Control.Geocoder.nominatim(),
+		control = L.Control.geocoder({
+			geocoder: geocoder
+		}).addTo(mymap);
+	var marker;
+    {% comment %}L.marker([10.999236, -74.805117]).addTo(mymap).bindPopup("<b>Hello World!</b><br />I am a popup.").openPopup();{% endcomment %}
+
+    $(window).on('invalidateSize', function(event) {
+        setTimeout('mymap.invalidateSize()', 3000);
+    })
+
+    mymap.on('click', function(e) {
+        console.log(e);
+        geocoder.reverse(e.latlng, mymap.options.crs.scale(mymap.getZoom()), function(results) {
+            console.log(results);
+            var r = results[0];
+            if (r) {
+                if (marker) {
+                    marker.
+                        setLatLng(r.center).
+                        setPopupContent(r.html || r.name).
+                        openPopup();
+                } else {
+                    marker = L.marker(r.center).bindPopup(r.name).addTo(mymap).openPopup();
+                }
+            }
+        })
+    })
+
+    {% for grupo in grupos %}
+        {% if grupo.get_direccion != '' %}
+        geocoder.geocode('{{ grupo.get_direccion }}', function(results){
+            {% comment %}console.log(results);{% endcomment %}
+            latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+            {% comment %}console.log(latLng);{% endcomment %}
+            marker = new L.Marker(latLng);
+            marker.addTo(mymap).bindPopup("<b>{{ grupo.get_nombre }}</b><br />{{ grupo.direccion }}");
+        });
+        {% endif %}
+    {% endfor %}
+
+</script>
+{% endblock js %}

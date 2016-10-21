@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from miembros.models import CambioTipo
+from consolidacion.utils import clean_direccion
 
 
 class Red(models.Model):
@@ -42,6 +43,10 @@ class Grupo(models.Model):
     red = models.ForeignKey(Red, null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio')
 
+    # campos para ubicaciones en mapas
+    altitud = models.DecimalField(verbose_name='Altitud', max_digits=6, decimal_places=2, blank=True, null=True)
+    latitud = models.DecimalField(verbose_name='Latitud', max_digits=6, decimal_places=2, blank=True, null=True)
+
     def __str__(self):
         cad = self.lider1.nombre.upper() \
             + " " + self.lider1.primerApellido.upper() + "(" + self.lider1.cedula + ")"
@@ -51,6 +56,11 @@ class Grupo(models.Model):
                 " " + self.lider2.primerApellido.upper() + "(" + self.lider2.cedula + ")"
 
         return cad
+
+    def get_nombre(self):
+        if self.lider2 is not None:
+            return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())
+        return self.lider1.primerApellido.upper()
 
     def listaLideres(self):
         """
@@ -76,6 +86,12 @@ class Grupo(models.Model):
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         miembros = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='miembro').values('miembro')
         return self.miembro_set.filter(id__in=miembros).exclude(id__in=lideres)
+
+    def get_direccion(self):
+        """
+        Retorna la direccion de manera legible para los buscadores de mapas
+        """
+        return clean_direccion(self.direccion)
 
 
 class Predica(models.Model):

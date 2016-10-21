@@ -32,7 +32,8 @@ INSTALLED_APPS = (
     'reportes',
     'encuentros',
     'organizacional',
-    'gestion_documental'
+    'gestion_documental',
+    'consolidacion',
 )
 
 MIDDLEWARE_CLASSES = (
