@@ -1150,7 +1150,7 @@ def graduarAlumno(request):
     else:
         puedeVer = True
         form = FormularioCumplimientoPasosMiembro()
-    return render_to_response('Miembros/graduar_estudiante.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/graduar_estudiante.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
