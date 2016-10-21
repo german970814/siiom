@@ -716,7 +716,7 @@ def crearZona(request):
             ok = True
     else:
         form = FormularioCrearZona()
-    return render_to_response('Miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -738,9 +738,9 @@ def editarZona(request, pk):
 
     else:
         form = FormularioCrearZona(instance=zona)
-        return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
-    return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
     # return HttpResponseRedirect("/miembro/listar_zonas")
 
 
@@ -755,7 +755,7 @@ def listarZonas(request):
                 messages.success(request, "Se eliminaron las zonas seleccionadas")
                 return HttpResponseRedirect('')
     zonas = list(Zona.objects.all())
-    return render_to_response('Miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -777,7 +777,7 @@ def barriosDeZona(request, id):
         if 'eliminar' in request.POST:
             okElim = eliminar(request, Barrio, request.POST.getlist('seleccionados'))
     barrios = list(Barrio.objects.filter(zona=zona))
-    return render_to_response('Miembros/barrios.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/barrios.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -801,7 +801,7 @@ def crearBarrio(request, id):
             ok = True
     else:
         form = FormularioCrearBarrio()
-    return render_to_response('Miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -824,7 +824,7 @@ def editarBarrio(request, id, pk):
             nuevoBarrio = form.save()
             ok = True
         else:
-            return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
     # if 'seleccionados' in request.session:
     #     faltantes = request.session['seleccionados']
     #     if len(faltantes) > 0:
@@ -838,7 +838,7 @@ def editarBarrio(request, id, pk):
     #         return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
     else:
         form = FormularioCrearBarrio(instance=barrio)
-        return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect('/miembro/barrios/' + str(zona.id))
 
@@ -858,7 +858,7 @@ def agregarPasoMiembro(request):
             ok = True
     else:
         form = FormularioPasos()
-    return render_to_response('Miembros/agregar_paso.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/agregar_paso.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -874,7 +874,7 @@ def listarPasos(request):
             if okElim == 1:
                 return HttpResponseRedirect('')
     pasos = Pasos.objects.all().order_by("prioridad")
-    return render_to_response('Miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -895,10 +895,10 @@ def editarPaso(request, pk):
 
     else:
         form = FormularioPasos(instance=paso)
-        return render_to_response("Miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
 
     # return HttpResponseRedirect("/miembro/listar_pasos/")
-    return render_to_response("Miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -915,7 +915,7 @@ def listarEscalafones(request):
                 return HttpResponseRedirect('')
 
     escalafones = list(Escalafon.objects.all().order_by('celulas'))
-    return render_to_response('Miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -932,7 +932,7 @@ def crearEscalafon(request):
             ok = True
     else:
         form = FormularioCrearEscalafon()
-    return render_to_response('Miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -953,10 +953,10 @@ def editarEscalafon(request, pk):
 
     else:
         form = FormularioCrearEscalafon(instance=escalafon)
-        return render_to_response("Miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
 
     # return HttpResponseRedirect("/miembro/listar_escalafones/")
-    return render_to_response("Miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -977,7 +977,7 @@ def promoverMiembroEscalafon(request):
                                "El miembro %s no cumple con los requisitos para el cambio." % (str(miembroEditar)))
     else:
         form = FormularioPromoverEscalafon()
-    return render_to_response('Miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -991,7 +991,7 @@ def crearTipoMiembro(request):
             ok = True
     else:
         form = FormularioCrearTipoMiembro()
-    return render_to_response('Miembros/crear_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1004,7 +1004,7 @@ def listarTipoMiembro(request):
         if 'eliminar' in request.POST:
             okElim = eliminar(request, TipoMiembro, request.POST.getlist('seleccionados'))
     tipos = list(TipoMiembro.objects.all().order_by('nombre'))
-    return render_to_response('Miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1025,10 +1025,10 @@ def editarTipoMiembro(request, pk):
 
     else:
         form = FormularioCrearTipoMiembro(instance=tipo)
-        return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
 
     # return HttpResponseRedirect("/miembro/listar_tipo_miembro/")
-    return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1197,13 +1197,15 @@ def eliminarCambioTipoMiembro(request, id):
 
 def calcularCelulas(miembro):
     celulas = 0
-    discipulos = list(miembro.discipulos())
-    for d in discipulos:
-        if d.grupoLidera():
-            celulas += 1
-            subdiscipulos = d.discipulos()
-            for s in subdiscipulos:
-                discipulos.append(s)
+    # discipulos = list(miembro.discipulos())
+    # for d in discipulos:
+    #     if d.grupoLidera():
+    #         celulas += 1
+    #         subdiscipulos = d.discipulos()
+    #         for s in subdiscipulos:
+    #             discipulos.append(s)
+    if miembro.grupo_lidera:
+        celulas = miembro.grupo_lidera.get_descendant_count() + 1
     return celulas
 
 
@@ -1237,7 +1239,7 @@ def AgregarDetalleLlamada(request):
             ok = True
     else:
         form = FormularioDetalleLlamada()
-    return render_to_response('Miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1251,7 +1253,7 @@ def listarDetallesLlamada(request):
 
     detallesLlamada = list(DetalleLlamada.objects.all())
 
-    return render_to_response('Miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1272,7 +1274,7 @@ def editarDetalleLlamada(request, pk):
     else:
         form = FormularioDetalleLlamada(instance=detalle)
 
-    return render_to_response("Miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(cumplimientoPasosTest, login_url="/dont_have_permissions/")
@@ -1316,7 +1318,7 @@ def cumplimientoPasos(request):
                 raise Http404
     miembro = Miembro.objects.get(usuario=request.user)
     pasos = Pasos.objects.all().exclude(nombre__iexact='lanzamiento').order_by('prioridad', 'nombre')
-    return render_to_response("Miembros/cumplimiento_pasos.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/cumplimiento_pasos.html", locals(), context_instance=RequestContext(request))
 
 
 # def sendMail(camposMail):
