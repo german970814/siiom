@@ -503,9 +503,8 @@ def ver_reportes_grupo(request):
     if request.method == 'POST' or ('post' in request.session and len(request.session['post']) > 1):
         if 'combo' in request.POST:
             value = request.POST['value']
-            querys = Q(lider1__nombre__icontains=value) | Q(lider1__primerApellido__icontains=value) | \
-                Q(lider1__cedula__icontains=value) | Q(lider2__nombre__icontains=value) | \
-                Q(lider2__primerApellido__icontains=value) | Q(lider2__cedula__icontains=value)
+            querys = Q(lideres__nombre__icontains=value) | Q(lideres__primerApellido__icontains=value) | \
+                Q(lideres__cedula__icontains=value)
             # Importante que se puedan escoger todos los grupos y no solo los 'Activos'
             busqueda = Grupo.objects.filter(querys)[:5]
             response = [{'pk': str(s.id), 'nombre': str(s)} for s in busqueda]
@@ -532,7 +531,7 @@ def ver_reportes_grupo(request):
                     # request.session['post'] = request.POST
                     if data_from_session is not None:
                         request.POST.update(data_from_session)
-                    return redirect('reportes_grupo')
+                    return redirect('grupos:reportes_grupo')
             else:
                 if data_from_session is not None:
                     request.POST.update(data_from_session)
@@ -567,7 +566,7 @@ def ver_reportes_grupo(request):
         form = FormularioReportesEnviados()
         form_reporte = FormularioReportarReunionGrupoAdmin()
 
-    return render_to_response("Grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
