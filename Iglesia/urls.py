@@ -25,7 +25,7 @@ urlpatterns = patterns(
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),
     url(r'^dont_have_permissions/$', without_perms, name="sin_permiso"),
-    url(r'^mapa/$', mapa, name="mapa"),
+    # url(r'^mapa/$', mapa, name="mapa"),
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
     # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
 )

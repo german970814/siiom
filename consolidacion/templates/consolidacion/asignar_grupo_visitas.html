@@ -3,29 +3,25 @@
 
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
-<link rel="stylesheet" href="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.css' %}"></link>
 <style>
-    #mapa {
+    #mapa2 {
         height: 500px;
     }
 </style>
-<script src="{% static 'leaflet/leaflet.js' %}"></script>
-<script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
 {% endblock css %}
 
 
 {% block contenido %}
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrower3" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Asignar A Grupo</h4>
+                <h4 class="modal-title">Asignar Visitante A Grupo</h4>
             </div>
 	        <form action="" method="POST" id="" enctype="multipart/form-data">
 	        	{% csrf_token %}
 	            <div class="modal-body">
-                    <div id="mapa"></div>
+                    <div id="mapa2"></div>
 	            </div>
 	            <div class="modal-footer">
 	                <button type="submit" name="aceptar" class="btn btn-link">Aceptar</button>
@@ -35,7 +31,7 @@
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
+<a data-toggle="modal" id="toggleModal3" href="#modalNarrower3"></a>
 <div class="container">
     <div class="card">
         <div class="card-header">
@@ -182,7 +178,7 @@
 
         $("#data-table-selection").bootgrid().on("loaded.rs.jquery.bootgrid", function(e) {
             $('.boolean').click(function(event) {
-                $('#toggleModal').click();
+                $('#toggleModal3').click();
                 $(window).trigger('invalidateSize');
                 {% comment %}$('input[name="reporte"]').val($(this).parent().parent().attr('data-row-id').toString());{% endcomment %}
                 {% comment %}return false;{% endcomment %}
@@ -190,12 +186,12 @@
         });
 
         {% if click %}
-        $('#toggleModal').click();
+        $('#toggleModal3').click();
         {% endif %}
     })
 </script>
 <script>
-    var mymap = L.map('mapa').setView([10.999236, -74.805117], 15);
+    var mymap = L.map('mapa2').setView([10.999236, -74.805117], 15);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
@@ -214,7 +210,7 @@
         setTimeout('mymap.invalidateSize()', 3000);
     })
 
-    mymap.on('click', function(e) {
+    {% comment %}mymap.on('click', function(e) {
         console.log(e);
         geocoder.reverse(e.latlng, mymap.options.crs.scale(mymap.getZoom()), function(results) {
             console.log(results);
@@ -230,16 +226,18 @@
                 }
             }
         })
-    })
+    }){% endcomment %}
 
     {% for grupo in grupos %}
         {% if grupo.get_direccion != '' %}
         geocoder.geocode('{{ grupo.get_direccion }}', function(results){
-            {% comment %}console.log(results);{% endcomment %}
-            latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
-            {% comment %}console.log(latLng);{% endcomment %}
-            marker = new L.Marker(latLng);
-            marker.addTo(mymap).bindPopup("<b>{{ grupo.get_nombre }}</b><br />{{ grupo.direccion }}");
+            try {
+                latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+                marker = new L.Marker(latLng);
+                marker.addTo(mymap).bindPopup("<b>{{ grupo.get_nombre }}</b><br />{{ grupo.direccion }}");
+            } catch (error) {
+                
+            }
         });
         {% endif %}
     {% endfor %}

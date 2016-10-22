@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='grupo',
-            name='altitud',
-            field=models.DecimalField(decimal_places=2, max_digits=6, verbose_name='Altitud', blank=True, null=True),
+            name='latitud',
+            field=models.FloatField(verbose_name='Latitud', blank=True, null=True),
         ),
         migrations.AddField(
             model_name='grupo',
-            name='latitud',
-            field=models.DecimalField(decimal_places=2, max_digits=6, verbose_name='Latitud', blank=True, null=True),
+            name='longitud',
+            field=models.FloatField(verbose_name='Longitud', blank=True, null=True),
         ),
     ]

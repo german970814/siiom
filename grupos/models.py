@@ -44,8 +44,8 @@ class Grupo(models.Model):
     barrio = models.ForeignKey('miembros.Barrio')
 
     # campos para ubicaciones en mapas
-    altitud = models.DecimalField(verbose_name='Altitud', max_digits=6, decimal_places=2, blank=True, null=True)
-    latitud = models.DecimalField(verbose_name='Latitud', max_digits=6, decimal_places=2, blank=True, null=True)
+    latitud = models.FloatField(verbose_name='Latitud', blank=True, null=True)
+    longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     def __str__(self):
         cad = self.lider1.nombre.upper() \
@@ -91,7 +91,18 @@ class Grupo(models.Model):
         """
         Retorna la direccion de manera legible para los buscadores de mapas
         """
-        return clean_direccion(self.direccion)
+        if self.get_position() is None:
+            return clean_direccion(self.direccion)
+        else:
+            return ','.join([str(x) for x in self.get_position()])
+
+    def get_position(self):
+        """
+        Retorna las coordenadas de un grupo o None
+        """
+        if self.latitud is not None and self.longitud is not None:
+            return [self.latitud, self.longitud]
+        return None
 
 
 class Predica(models.Model):

@@ -30,7 +30,7 @@ def asignar_grupo_visitas(request):
                 fechaRegistro__range=(fecha_inicial, fecha_final)
             )
 
-            grupos = Grupo.objects.filter(estado='A')
+            grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
 
             data['visitas'] = visistas
             if visistas.exists():

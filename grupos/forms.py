@@ -326,3 +326,14 @@ class FormularioEditarReunionGAR(forms.ModelForm):
             'numeroLideresAsistentes', 'numeroVisitas',
             'ofrenda'
         )
+
+
+class FormularioSetGeoPosicionGrupo(forms.ModelForm):
+    class Meta:
+        model = Grupo
+        fields = ('latitud', 'longitud', )
+
+    def __init__(self, *args, **kwargs):
+        super(FormularioSetGeoPosicionGrupo, self).__init__(*args, **kwargs)
+        self.fields['latitud'].required = True
+        self.fields['longitud'].required = True

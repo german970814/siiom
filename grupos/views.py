@@ -14,7 +14,8 @@ from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioCrearGrupo,
     FormularioTransladarGrupo, FormularioCrearGrupoRaiz, FormularioCrearPredica,
-    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR
+    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
+    FormularioSetGeoPosicionGrupo
 )
 from miembros.models import Miembro
 from common.tests import (
@@ -781,3 +782,27 @@ def editar_runion_grupo(request, pk):
         form = FormularioEditarReunionGAR(instance=reunion)
 
     return render_to_response("Grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
+
+
+def set_position_grupo(request, id_grupo):
+    """
+    Vista para setear la posicion de un grupo
+    """
+
+    grupo = get_object_or_404(Grupo, id=id_grupo)
+
+    data = {}
+
+    # latitud = request.GET.get('lat', None)
+    # longitud = request.GET.get('long', None)
+    form = FormularioSetGeoPosicionGrupo(data=request.GET, instance=grupo)
+
+    if form.is_valid():
+        form.save()
+        data['code_response'] = 200
+        data['message'] = 'Grupo %s editado correctamente' % grupo.get_nombre()
+    else:
+        data['error'] = form.errors
+        data['code_response'] = 400
+
+    return HttpResponse(json.dumps(data), content_type='application/json')

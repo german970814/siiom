@@ -70,6 +70,12 @@
                 <dt>Barrio</dt>
                 <dd>{{ grupo.barrio|upper }}</dd>
             </dl>
+            {% if puede_editar and not no_lider %}
+            <dl class="dl-horizontal">
+                <dt>Ubicar Mi Grupo</dt>
+                <dd><a href="">Haz Click Aquí para ubicar tu grupo en el mapa</a></dd>
+            </dl>
+            {% endif %}
         </div>
         
     <form action="" id="form-grupo" method="post" enctype="multpart/form-data">
