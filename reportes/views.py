@@ -1473,9 +1473,9 @@ def estadistico_reuniones_gar(request):
 
                 # se hacen las agregaciones, con los datos de los estadisticos por semana
                 reuniones = _reuniones.aggregate(
-                    numero_lideres_asistentes=Sum('numeroLideresAsistentes'),
-                    numero_visitas=Sum('numeroVisitas'),
-                    numero_total_asistentes=Sum('numeroTotalAsistentes'),
+                    lideres_asistentes=Sum('numeroLideresAsistentes'),
+                    visitas_=Sum('numeroVisitas'),
+                    total_asistentes=Sum('numeroTotalAsistentes'),
                     grupos_reportaron=Count('id')
                 )
 
@@ -1486,8 +1486,8 @@ def estadistico_reuniones_gar(request):
 
                 # se agrega una nueva llave a las reuniones, con los asistentes regulares esa semana
                 reuniones['asistentes_regulares'] = (
-                    reuniones['numero_total_asistentes'] - reuniones['numero_visitas'] -
-                    reuniones['numero_lideres_asistentes']
+                    reuniones['total_asistentes'] - reuniones['visitas_'] -
+                    reuniones['lideres_asistentes']
                 )
 
                 # se añaden las fechas

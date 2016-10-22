@@ -431,15 +431,9 @@
                 <br>
                 <br>
                 <div class="row">
-                    <div class="col-md-4 col-md-offset-{% if not grafico %}4{% else %}2{% endif %}">
+                    <div class="col-md-4 col-md-offset-4">
                         <button type="submit" name ="verReporte" class="btn btn-success btn-block">Ver</button>
                     </div>
-                    <br class="space">
-                    {% if grafico %}
-                    <div class="col-md-4">
-                        <button type="button" id="imprimir" class="btn btn-warning btn-block waves-effect">Reportar PDF</button>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </form>
@@ -510,10 +504,10 @@
                         {% for dato in tabla %}
                         <tr>
                             <td>{{ dato.fecha }}</td>
-                            <td class="to_suma">{{ dato.reuniones.numero_visitas }}</td>
+                            <td class="to_suma">{{ dato.reuniones.visitas_ }}</td>
                             <td class="to_suma">{{ dato.reuniones.asistentes_regulares }}</td>
-                            <td class="to_suma">{{ dato.reuniones.numero_lideres_asistentes }}</td>
-                            <td class="to_suma">{{ dato.reuniones.numero_total_asistentes }}</td>
+                            <td class="to_suma">{{ dato.reuniones.lideres_asistentes }}</td>
+                            <td class="to_suma">{{ dato.reuniones.total_asistentes }}</td>
                             <td class="to_prom">{{ dato.grupos_semana|sub:dato.sin_reportar }}</td>
                             <td class="to_prom">{{ dato.sin_reportar }}</td>
                             <td class="to_prom percent">{{ dato.porcentaje }}%</td>
@@ -560,4 +554,7 @@
     {% endif %}
     {% endif %}
 </div> 
+{% if grafico %}
+<button class="btn btn-float bgm-red m-btn" data-action="print"><i class="zmdi zmdi-print"></i></button>
+{% endif %}
 {% endblock %}
