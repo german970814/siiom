@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 from common.forms import FormularioRangoFechas
 from common.tests import adminTest
 from miembros.models import Miembro
-from grupos.models import Grupo
+from grupos.models import Grupo, Red
 from .utils import clean_direccion
 
 
@@ -30,9 +30,10 @@ def asignar_grupo_visitas(request):
                 fechaRegistro__range=(fecha_inicial, fecha_final)
             )
 
-            grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
+            grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2', 'red')
 
             data['visitas'] = visistas
+            data['redes'] = Red.objects.all()
             if visistas.exists():
                 data['grupos'] = grupos
 

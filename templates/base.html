@@ -861,7 +861,14 @@
                         longitud: marker._latlng.lng,
                     },
                     success: function (data) {
-                        console.log(data)   
+                        if (data['code_response'] == 400) {
+                            notify('Ha ocurrido un error al intentar cambiar la ubicacion de el grupo', undefined, undefined, undefined, 'danger', 'animated bounceIn', 5000);
+                        } else if (data['code_response'] == 200) {
+                            notify('Se ha cambiado la ubicación de su grupo exitosamente', undefined, undefined, undefined, 'success', 'animated bounceIn', 5000);
+                            $('#modalNarrower, #modalNarrower2').modal('toggle');
+                        } else {
+                            console.log(data);
+                        }
                     }
                 })
             }

@@ -191,19 +191,69 @@
     })
 </script>
 <script>
-    var mymap = L.map('mapa2').setView([10.999236, -74.805117], 15);
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        maxZoom: 18,
-        id: 'your.mapbox.project.id',
-        accessToken: 'your.mapbox.public.access.token'
-    }).addTo(mymap);
+    var littleton = L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.'),
+    denver    = L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.'),
+    aurora    = L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.'),
+    golden    = L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.');
+
+    var _cities = new Array();
+    _cities.push(littleton);
+    _cities.push(denver);
+    _cities.push(aurora);
+    _cities.push(golden);
+    console.log(_cities);
+
+    {% comment %}var cities = L.layerGroup([littleton, denver, aurora, golden]);{% endcomment %}
+    var cities = L.layerGroup(_cities);
 
     var geocoder = L.Control.Geocoder.nominatim(),
 		control = L.Control.geocoder({
 			geocoder: geocoder
-		}).addTo(mymap);
+		})
 	var marker;
+
+    var _redes = new Array();
+
+    {% for red in redes %}
+    var red_{{ red.id }} = new Array();
+    _redes.push(red_{{ red.id }})
+    {% endfor %}
+
+    {% for grupo in grupos %}
+        {% if grupo.get_direccion != '' %}
+        geocoder.geocode('{{ grupo.get_direccion }}', function (results){
+            try {
+                console.log(results[0].center)
+                latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+                mark = new L.Marker(latLng);
+                mark.bindPopup("<b>{{ grupo.get_nombre }}({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}"); // .addTo(mymap)
+                red_{{ grupo.red.id }}.push(mark);
+            } catch (error) {
+                
+            }
+        });
+        {% endif %}
+    {% endfor %}
+
+    var _redes_to_map = new Array();
+
+    for (var red of _redes) {
+        console.log(red.length);
+        console.log(red);
+        var redes = L.layerGroup(red);
+        _redes_to_map.push(redes);
+    }
+
+    var mymap = L.map('mapa2').setView([10.999236, -74.805117], 15);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 18,
+        layers: _redes_to_map,
+        {% comment %}layers: [cities],{% endcomment %}
+    }).addTo(mymap);
+
+    control.addTo(mymap);
+
     {% comment %}L.marker([10.999236, -74.805117]).addTo(mymap).bindPopup("<b>Hello World!</b><br />I am a popup.").openPopup();{% endcomment %}
 
     $(window).on('invalidateSize', function(event) {
@@ -228,19 +278,37 @@
         })
     }){% endcomment %}
 
-    {% for grupo in grupos %}
+    {% comment %}var baseMaps = {
+        "Redes": _redes_to_map
+    }
+
+    L.control.layers(baseMaps).addTo(mymap);{% endcomment %}
+
+    {% comment %}{% for grupo in grupos %}
         {% if grupo.get_direccion != '' %}
         geocoder.geocode('{{ grupo.get_direccion }}', function(results){
             try {
                 latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
-                marker = new L.Marker(latLng);
-                marker.addTo(mymap).bindPopup("<b>{{ grupo.get_nombre }}</b><br />{{ grupo.direccion }}");
+                mark = new L.Marker(latLng);
+                mark.bindPopup("<b>{{ grupo.get_nombre }}({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}").addTo(mymap); // .addTo(mymap)
             } catch (error) {
                 
             }
         });
         {% endif %}
-    {% endfor %}
+    {% endfor %}{% endcomment %}
+
+    var overlayMaps = {
+        "Cities": cities
+    };
+
+    for (var x = 0; x < _redes_to_map.length; x++) {
+        overlayMaps['red_' + x.toString()] = _redes_to_map[x];
+    }
+
+    L.control.layers(overlayMaps).addTo(mymap);
+
+    console.log("finalize");
 
 </script>
 {% endblock js %}
