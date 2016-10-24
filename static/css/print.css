@@ -1,0 +1,79 @@
+/*@page:first{
+    size: A4 portrait;
+    margin-top: -65px;
+    margin-left: 0px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}*/
+
+@page {
+    size: letter portrait;
+    margin-top: 10mm;
+    margin-left: 10mm;
+    margin-right: 10mm;
+    margin-bottom: 10mm;
+}
+
+@media print {
+    #card-formulario {
+        display: none !important;
+    }
+
+    .card {
+        position: relative;
+    }
+
+    .chart-g {
+        /*height: 200px !important;*/
+        /*margin-bottom: 50px;*/
+        height: 400px !important;
+        width: 100%;
+        margin-top: 32px;
+    }
+
+    .margin-60 {
+        margin-top: 60px !important;
+    }
+
+    .chart-g div div {
+        height: 200px !important;
+    }
+
+    .table.table-bordered.table-striped.table-condensed {
+        position: relative;
+    }
+
+    table {
+        position: relative;
+    }
+
+    #issue-print {
+        page-break-after: always;
+    }
+
+    .block-header {
+        margin: 60px 0 25px;
+        text-align: center;
+    }
+
+    #hidden_to_print {
+        display: block !important;
+    }
+
+    .infoBar, .actionBar {
+        display: none !important;
+    }
+}
+
+
+/*if 'imprimir' in request.POST:
+    ruta = "static/css/%s.css"
+    to_html = render_to_string('trazabilidad/reporte.html', data, RequestContext(request))
+    http_response = HttpResponse(content_type='application/pdf')
+    http_response['Content-Disposition'] = 'attachment; filename=report-by-%s-%s.pdf' % (request.user.username, fecha_impresion)
+    HTML(string=to_html).write_pdf(http_response, stylesheets=[ruta % 'estilos', ruta % 'bootstrap.min', ruta % 'informes'])
+    return http_response
+
+    pip install -U setuptools
+    html5lib==0.999999999
+    WeasyPrint==0.31*/

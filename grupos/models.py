@@ -12,10 +12,14 @@ class Red(models.Model):
 
 
 class Grupo(models.Model):
+    ACTIVO = 'A'
+    INACTIVO = 'I'
+
     opcionesEstado = (
-        ('A', 'Activo'),
-        ('I', 'Inactivo'),
+        (ACTIVO, 'Activo'),
+        (INACTIVO, 'Inactivo'),
     )
+
     opcionesDia = (
         ('0', 'Lunes'),
         ('1', 'Martes'),
@@ -108,6 +112,18 @@ class ReunionGAR(models.Model):
         permissions = (
             ("puede_confirmar_ofrenda_GAR", "puede confirmar la entrega de dinero GAR"),
         )
+
+    @property
+    def realizada(self):
+        """
+        Retorna True si la ReunionGAR fue realizada, de lo contrario retorna False
+        """
+        if self.numeroLideresAsistentes > 0:
+            return True
+        else:
+            if self.numeroTotalAsistentes > 0:
+                return True
+        return False
 
 
 class AsistenciaMiembro(models.Model):
