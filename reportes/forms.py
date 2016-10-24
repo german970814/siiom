@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+# Django Package
 from django import forms
 from django.db.models.aggregates import Count
+from django.utils.translation import ugettext_lazy as _
+
+# Locale Apps
 from grupos.models import Red, Predica, Grupo
 from miembros.models import Miembro
 from .utils import listaGruposDescendientes_id
@@ -127,3 +131,45 @@ class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
             grupo.llamadas_no_realizadas = grupo.personas_asignadas - grupo.llamadas_realizadas
 
         return grupos
+
+
+class FormularioEstadisticoReunionesGAR(forms.Form):
+    """
+    Formulario para los estadisticos de reuniones GAR
+    """
+
+    error_css_class = 'has-error'
+
+    grupo = forms.ModelChoiceField(label=_('Grupo'), queryset=Grupo.objects.none())
+    fecha_inicial = forms.DateField(label=_('Fecha Inicial'))
+    fecha_final = forms.DateField(label=_('Fecha Final'))
+    descendientes = forms.BooleanField(label=_('Descendientes'), required=False)
+    ofrenda = forms.BooleanField(label=_('Ofrenda'), required=False)
+    # lideres_asistentes = forms.BooleanField(label=_('Líderes Asistentes'), required=False)
+    # visitas = forms.BooleanField(label=_('Visitas'), required=False)
+    # asistentes_regulares = forms.BooleanField(label=_('Asistentes Regulares'), required=False)
+
+    def __init__(self, *args, **kwargs):
+        queryset_grupo = kwargs.pop('queryset_grupo', None)
+        super(FormularioEstadisticoReunionesGAR, self).__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['fecha_inicial'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_final'].widget.attrs.update({'class': 'form-control'})
+        if queryset_grupo is not None:
+            self.fields['grupo'].queryset = queryset_grupo
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(FormularioEstadisticoReunionesGAR, self).clean(*args, **kwargs)
+
+        # boolean_fields = [
+        #     cleaned_data.get('ofrenda', False),
+        #     cleaned_data.get('lideres_asistentes', False),
+        #     cleaned_data.get('visitas', False),
+        #     cleaned_data.get('asistentes_regulares', False)
+        # ]
+
+        # if all(not x for x in boolean_fields):
+        #     self.add_error('ofrenda', _('Escoge una opción'))
+        #     self.add_error('lideres_asistentes', _('Escoge una opción'))
+        #     self.add_error('visitas', _('Escoge una opción'))
+        #     self.add_error('asistentes_regulares', _('Escoge una opción'))

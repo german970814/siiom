@@ -153,9 +153,9 @@
                return true;
             }
         });
-
     });
 </script>
+{% include "Grupos/_reportes_js.html" with form=form_reporte %}
 
 {% endblock %}
 
@@ -166,7 +166,7 @@
             <div class="modal-header">
                 <h4 class="modal-title">Reportar Reunion {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</h4>
             </div>
-	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
+	        <form action="" method="POST" id="form-reporte" enctype="multipart/form-data">
 	        	{% csrf_token %}
 	            <div class="modal-body">
 		            {% comment %}{{ form_reporte.as_p }}{% endcomment %}
@@ -264,6 +264,21 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        <br class="space">
+                        <br class="space-down">
+                        <div class="row">
+                            <div class="col-md-4 col-md-offset-1">
+                                <div class="input-group {{ form_reporte.no_realizo_grupo.css_classes }}">
+                                    <div class="fg-line">
+                                        <label for="{{ form_reporte.no_realizo_grupo.id_for_label }}" data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Si no realizo grupo, asegurate de indicar una fecha y checkear este botón" title="" data-original-title="Ayuda" class="checkbox m-r-20">
+                                            {{ form_reporte.no_realizo_grupo }}
+                                            <i class="input-helper m-r-20"></i>
+                                            {{ form_reporte.no_realizo_grupo.label }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 	            </div>
 	            <div class="modal-footer">
@@ -311,15 +326,15 @@
                 {% endif %}
                 {% endif %}
                 {% if messages %}
-					{% for message in messages %}
-						<div class="row">
-			                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
-			                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-			                    <p>{{ message|safe }}</p>
-			                </div>
-			            </div>
-					{% endfor %}
-				{% endif %}
+                    {% for message in messages %}
+                        <div class="row">
+                            <div class="alert {% if message.tags == "success" %}alert-success {% elif message.tags == "error" %}alert-danger {% else %}alert-warning{% endif %} alert-dismissible" role="alert">
+                                <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                                <p>{{ message }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </h1>
             {% if ok %}
                 <div class="row">
@@ -343,21 +358,21 @@
             <form action="" method="POST" enctype="multipart/form-data" id="form">
                 {% csrf_token %}
                 <div class="row">
-                    <div class="col-md-6 grupo">
+                    <div class="col-md-4 grupo">
                         <div class="input-group fg-line">
-                            <label for="id_grupo" class="fg-label requerido">Grupo:</label>
-                            {{form.grupo}}
+                            <label for="{{ form.grupo.id_for_label }}" class="fg-label requerido">Grupo:</label>
+                            {{ form.grupo }}
                         </div>
                     </div>
                     <br class="space">
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-md-offset-2">
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechai" class="fg-label requerido">Fecha Incial:</label>
-                                {{form.fechai}}
+                                <label for="{{ form.fechai.id_for_label }}" class="fg-label requerido">Fecha Incial:</label>
+                                {{ form.fechai }}
                             </div>
                         </div>
                     </div>
@@ -368,8 +383,8 @@
                                 <i class="zmdi zmdi-money-box"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fechaf" class="fg-label requerido">Fecha Final:</label>
-                                {{form.fechaf}}
+                                <label for="{{ form.fechaf.id_for_label }}" class="fg-label requerido">Fecha Final:</label>
+                                {{ form.fechaf }}
                             </div>
                         </div>
                     </div>
@@ -410,15 +425,15 @@
                     <tbody>
                         {% for mg in reuniones %}
                             <tr>
-                                <td>{{mg.id}}</td>
+                                <td>{{ mg.id }}</td>
                                 <td>{% if mg.confirmacionEntregaOfrenda %}1{% else %}0{% endif %}</td>
-                                <td>{{mg.fecha}}</td>
-                                <td>{{mg.predica}}</td>
-                                <td>{{mg.numeroTotalAsistentes}}</td>
-                                <td>{{mg.numeroLideresAsistentes}}</td>
-                                <td>{{mg.numeroVisitas}}</td>
-                                <td>${{mg.ofrenda}}</td>
-                                <td>{{mg.digitada_por_miembro|yesno:"Miembro,Administrador"}}</td>
+                                <td>{{ mg.fecha }}</td>
+                                <td>{{ mg.predica }}</td>
+                                <td>{{ mg.numeroTotalAsistentes }}</td>
+                                <td>{{ mg.numeroLideresAsistentes }}</td>
+                                <td>{{ mg.numeroVisitas }}</td>
+                                <td>${{ mg.ofrenda }}</td>
+                                <td>{{ mg.digitada_por_miembro|yesno:"Miembro,Administrador" }}</td>
                                 {% comment %}<td>{% if mf.digitada_por_miembro %}Miembro{% else %}Administrador{% endif %}</td>{% endcomment %}
                             </tr>                
                         {% endfor %}
@@ -432,26 +447,3 @@
     </div>
 </div>
 {% endblock %}
-
-
-{% comment %}<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Confirmación de Solicitud</h4>
-            </div>
-	        <form action="" method="POST" id="form-solicitud" enctype="multipart/form-data">
-	        	{% csrf_token %}
-	            <div class="modal-body">
-		                <p>¿Seguro que quiere Solicitar este Registro?.</p>
-		                <input type="hidden" name="solicitud">
-	            </div>
-	            <div class="modal-footer">
-	                <button type="submit" name="solicitar_registro" class="btn btn-link">Aceptar</button>
-	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
-	            </div>
-            </form>
-        </div>
-    </div>
-</div>{% endcomment %}
-{% comment %}<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>{% endcomment %}

@@ -278,6 +278,18 @@ class ReunionGAR(models.Model):
             ("puede_confirmar_ofrenda_GAR", "puede confirmar la entrega de dinero GAR"),
         )
 
+    @property
+    def realizada(self):
+        """
+        Retorna True si la ReunionGAR fue realizada, de lo contrario retorna False
+        """
+        if self.numeroLideresAsistentes > 0:
+            return True
+        else:
+            if self.numeroTotalAsistentes > 0:
+                return True
+        return False
+
 
 class AsistenciaMiembro(models.Model):
     miembro = models.ForeignKey('miembros.Miembro')
