@@ -1389,7 +1389,7 @@ def estadistico_reuniones_gar(request):
     """
 
     # se obtiene el miembro
-    # miembro = Miembro.objects.get(usuario=request.user)
+    miembro = Miembro.objects.get(usuario=request.user)  # se vuelve el miembro, porque se estaba usando
 
     # se crean los datos iniciales
     data = {}
