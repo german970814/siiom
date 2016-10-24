@@ -105,11 +105,11 @@ def reunionDiscipuladoReportada(predica, grupo):
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo and grupo.estado == 'A':
-        discipulos = miembro.discipulos()
-        miembrosGrupo = grupo.miembrosGrupo()
-        asistentesId = request.POST.getlist('seleccionados')
+        # discipulos = miembro.discipulos()
+        # miembrosGrupo = grupo.miembrosGrupo()
+        # asistentesId = request.POST.getlist('seleccionados')
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
@@ -129,7 +129,7 @@ def reportarReunionGrupo(request):
                     ya_reportada = True
         else:
             form = FormularioReportarReunionGrupo()
-    return render_to_response('Grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
