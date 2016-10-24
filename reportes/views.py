@@ -1605,5 +1605,6 @@ def estadistico_reuniones_gar(request):
         form = FormularioEstadisticoReunionesGAR(queryset_grupo=queryset_grupo, initial={'descendientes': True})
 
     data['form'] = form
+    data['miembro'] = miembro  # se agrega miembro a la data para el template
 
     return render(request, 'reportes/estadistico_gar.html', data)
