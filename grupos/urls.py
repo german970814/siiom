@@ -1,6 +1,5 @@
-from django.conf.urls import include, patterns, url
+from django.conf.urls import url
 from . import views
-from .views import *
 
 urlpatterns = [
     url(r'^listar_redes/$', views.listarRedes, name="listar_redes"),  # revisada
@@ -10,7 +9,7 @@ urlpatterns = [
     url(r'^crear_predica/$', views.crearPredica, name="crear_predica"),  # revisada
     url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),  # revisada
     url(r'^ver_reportes/$', views.ver_reportes_grupo, name="reportes_grupo"),  # revisada
-    url(r'^editar_reporte/(?P<pk>\d+)$', editar_runion_grupo, name="editar_reporte"),
+    url(r'^editar_reporte/(?P<pk>\d+)$', views.editar_runion_grupo, name="editar_reporte"),  # revisada
 
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
     url(r'^redes/(?P<pk>\d+)/$', views.listar_grupos, name='listar'),
