@@ -191,6 +191,8 @@
     })
 </script>
 <script>
+    var _grupos = {{ grupos|safe }};
+
     var littleton = L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.'),
     denver    = L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.'),
     aurora    = L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.'),
@@ -201,7 +203,6 @@
     _cities.push(denver);
     _cities.push(aurora);
     _cities.push(golden);
-    console.log(_cities);
 
     {% comment %}var cities = L.layerGroup([littleton, denver, aurora, golden]);{% endcomment %}
     var cities = L.layerGroup(_cities);
@@ -212,14 +213,41 @@
 		})
 	var marker;
 
-    var _redes = new Array();
+    {% comment %}var _redes = new Array();{% endcomment %}
+    var _redes = {};
 
-    {% for red in redes %}
+    var _redes_array = new Array();
+
+    for (var x = 0; x < _grupos.length; x++) {
+        console.log(_grupos[x][0]);
+        geocoder.geocode(_grupos[x][0], function(results) {
+            console.log(_grupos[x][0]);
+            {% comment %}console.log(results);{% endcomment %}
+            latlng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+            mark = new L.Marker(latlng);
+            mark.bindPopup("<b>" + _grupos[x][3] + "</b><br />" + _grupos[x][0]);
+            if (_redes[_grupos[x][3]] == undefined) {
+                _redes[_grupos[x][3]]= [mark];
+            } else {
+                _redes[_grupos[x][3]].push(mark);
+            }
+
+            if (x == _grupos.length - 1) {
+                for (var key in _redes) {
+                    _redes[key] = L.layerGroup(_redes[key]);
+                    _redes_array.push(_redes[key]);
+                }
+            }
+        });
+
+    }
+
+    {% comment %}{% for red in redes %}
     var red_{{ red.id }} = new Array();
     _redes.push(red_{{ red.id }})
-    {% endfor %}
+    {% endfor %}{% endcomment %}
 
-    {% for grupo in grupos %}
+    {% comment %}{% for grupo in grupos %}
         {% if grupo.get_direccion != '' %}
         geocoder.geocode('{{ grupo.get_direccion }}', function (results){
             try {
@@ -233,23 +261,22 @@
             }
         });
         {% endif %}
-    {% endfor %}
+    {% endfor %}{% endcomment %}
 
-    var _redes_to_map = new Array();
+    {% comment %}var _redes_to_map = new Array();
 
     for (var red of _redes) {
-        console.log(red.length);
-        console.log(red);
         var redes = L.layerGroup(red);
         _redes_to_map.push(redes);
-    }
+    }{% endcomment %}
 
     var mymap = L.map('mapa2').setView([10.999236, -74.805117], 15);
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
-        layers: _redes_to_map,
+        {% comment %}layers: _redes_to_map,{% endcomment %}
         {% comment %}layers: [cities],{% endcomment %}
+        layers: _redes_array
     }).addTo(mymap);
 
     control.addTo(mymap);
@@ -302,11 +329,11 @@
         "Cities": cities
     };
 
-    for (var x = 0; x < _redes_to_map.length; x++) {
+    {% comment %}for (var x = 0; x < _redes_to_map.length; x++) {
         overlayMaps['red_' + x.toString()] = _redes_to_map[x];
-    }
+    }{% endcomment %}
 
-    L.control.layers(overlayMaps).addTo(mymap);
+    L.control.layers(_redes).addTo(mymap);
 
     console.log("finalize");
 

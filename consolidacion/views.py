@@ -30,7 +30,11 @@ def asignar_grupo_visitas(request):
                 fechaRegistro__range=(fecha_inicial, fecha_final)
             )
 
-            grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2', 'red')
+            grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2', 'red').values_list(
+                'direccion', 'id', 'nombre', 'red__nombre'
+            )
+
+            grupos = [list(x) for x in grupos]
 
             data['visitas'] = visistas
             data['redes'] = Red.objects.all()
