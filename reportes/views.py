@@ -1331,7 +1331,7 @@ def estadistico_reuniones_gar(request):
     """
 
     # se obtiene el miembro
-    # miembro = Miembro.objects.get(usuario=request.user)
+    miembro = Miembro.objects.get(usuario=request.user)  # se vuelve el miembro, porque se estaba usando
 
     # se crean los datos iniciales
     data = {}
@@ -1547,5 +1547,6 @@ def estadistico_reuniones_gar(request):
         form = FormularioEstadisticoReunionesGAR(queryset_grupo=queryset_grupo, initial={'descendientes': True})
 
     data['form'] = form
+    data['miembro'] = miembro  # se agrega miembro a la data para el template
 
     return render(request, 'reportes/estadistico_gar.html', data)
