@@ -1,4 +1,4 @@
-from django.conf.urls import include, patterns, url
+from django.conf.urls import url
 from django.views.generic import RedirectView
 from .views import *
 from . import views
@@ -6,11 +6,11 @@ from grupos.views import editarHorarioReunionGrupo, reportarReunionGrupo, \
     reportarReunionGrupoAdmin, reportarReunionDiscipulado
 
 urlpatterns = [
-    url(r'^$', miembroInicio, name="miembro_inicio"),
+    url(r'^$', views.miembroInicio, name="miembro_inicio"),  # revisada
     url(r'^agregar_miembro/$', views.liderAgregarMiembro, name="agregar_miembro"),  # revisada
-    url(r'^listar_miembros/$', liderListarMiembrosGrupo, name="listar_miembros"),  # No se usa actualmente
-    url(r'^editar_miembros/$', liderEditarMiembros, name="editar_miembros"),  # No se usa actualmente
-    url(r'^editar_miembro/(\d+)/$', editarMiembro, name="editar_miembro"),
+    url(r'^listar_miembros/$', views.liderListarMiembrosGrupo, name="listar_miembros"),  # No se usa actualmente revisada
+    url(r'^editar_miembros/$', views.liderEditarMiembros, name="editar_miembros"),  # No se usa actualmente revisada
+    url(r'^editar_miembro/(\d+)/$', views.editarMiembro, name="editar_miembro"),  # revisada
     url(r'^transladar_miembros/(?P<id_miembro>\d+)$', transladar_miembros, name="transladar_miembros"),  # No se usa actualmente
     # url(r'^editar_perfil/$', liderEditarPerfil, name="editar_perfil"),
     url(r'^editar_perfil/$', RedirectView.as_view(url='/miembro/perfil/')),

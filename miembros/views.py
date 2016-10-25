@@ -107,7 +107,7 @@ def miembroInicio(request):
         return HttpResponseRedirect("/administracion/")
 
     if miembro:
-        grupo = miembro.grupoLidera()
+        grupo = miembro.grupo_lidera
         if grupo:
             miembrosGrupo = list(grupo.miembro_set.all())
             tipo = TipoMiembro.objects.get(nombre__iexact='visita')
@@ -130,23 +130,25 @@ def miembroInicio(request):
 
         def lid_gru(miem):
             visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-            grupo = miem.grupoLidera()
+            grupo = miem.grupo_lidera
             if grupo:
                 return grupo.miembro_set.filter(id__in=visitas)
             else:
                 return []
 
-        k = listaGruposDescendientes(miembro)
-        for lid in k:
-            if lid == miembro.grupoLidera():
-                pass
-            else:
-                if lid.listaLideres():
-                    for miem in lid.listaLideres():
-                        discipulos.append(Miembro.objects.get(id=miem))
-                else:
-                    pass
-        totalLideres = len(discipulos)
+        # k = listaGruposDescendientes(miembro)
+        k = Grupo.get_tree(grupo)
+        # for lid in k:
+        #     if lid == miembro.grupoLidera():
+        #         pass
+        #     else:
+        #         if lid.listaLideres():
+        #             for miem in lid.listaLideres():
+        #                 discipulos.append(Miembro.objects.get(id=miem))
+        #         else:
+        #             pass
+        discipulos = Miembro.objects.lideres2().filter(grupo_lidera__in=k)
+        totalLideres = len(discipulos) - grupo.lideres.count()
         totalGrupos = len(k)  # len(grupos)
         lideresGrupo = len(lid_gru(miembro)) - 1
         if lideresGrupo == -1:
@@ -156,7 +158,7 @@ def miembroInicio(request):
         # request.session['visitantes'] = visitantes
     if empleado:
         pass
-    return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
 
 isOk = False
@@ -207,11 +209,11 @@ def liderListarMiembrosGrupo(request):
             return HttpResponseRedirect('/miembro/editar_miembros/')
 
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo:
-        discipulos = miembro.discipulos()
+        discipulos = grupo.discipulos
         miembrosGrupo = grupo.miembrosGrupo()
-    return render_to_response("Miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -234,7 +236,7 @@ def liderEditarMiembros(request):
                     nuevoMiembro.estadoCivil = 'C'
                     nuevoMiembro.save()
         else:
-            return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
     if 'seleccionados' in request.session:
         faltantes = request.session['seleccionados']
@@ -243,7 +245,7 @@ def liderEditarMiembros(request):
             request.session['actual'] = miembroEditar
             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
             request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
         else:
             return HttpResponseRedirect("/miembro/listar_miembros/")
     else:
@@ -670,7 +672,7 @@ def editarMiembro(request, id):
         else:
             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
             lider = True
-    return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(asignarGrupoTest, login_url="/dont_have_permissions/")
