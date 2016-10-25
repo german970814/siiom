@@ -193,7 +193,7 @@ def liderAgregarMiembro(request):
     else:
         form = FormularioLiderAgregarMiembro()
     isOk = False
-    return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -420,7 +420,8 @@ def liderLlamadasPendientesVisitantesGrupo(request):
         return HttpResponseRedirect('/miembro/registrar_llamada/lider/')
 
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    # grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     lideres = []
     if grupo:
         for lid in grupo.miembro_set.all():
@@ -443,7 +444,7 @@ def liderLlamadasPendientesVisitantesGrupo(request):
 #                if(ct.nuevoTipo ==  tipo and ct.anteriorTipo == tipo and
 #                    (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider == None)):
 #                    visitantes.append(ct.miembro)
-    return render_to_response("Miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
@@ -469,7 +470,7 @@ def llamadasPendientesVisitantes(request):
 #               (ct.miembro.observacionPrimeraLlamada == '' or ct.miembro.observacionPrimeraLlamada == None) and\
 #               (ct.miembro.observacionSegundaLlamada == '' or ct.miembro.observacionSegundaLlamada == None):
 #                miembros.append(ct.miembro)
-    return render_to_response("Miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -485,7 +486,7 @@ def liderLlamarVisitas(request):
             nuevoLlamar.fechaLlamadaLider = date.today()
             nuevoLlamar.save()
         else:
-            return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
 
     if 'visitantesSeleccionados' in request.session:
         faltantes = request.session['visitantesSeleccionados']
@@ -505,7 +506,7 @@ def liderLlamarVisitas(request):
                 request.session['visitaActual'] = miembrol  # miembroLlamar #linea que da el error
                 form = FormularioLlamadaLider(instance=miembroLlamar)
                 request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
-                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             except IndexError:
                 pass
             except ValueError:
@@ -532,7 +533,8 @@ def llamarVisitas(request):
             if llamada == 1:
                 nuevoLlamar = form.save(commit=False)
                 if nuevoLlamar.grupo is not None:  # or nuevoLlamar.grupo != '':
-                    lideres = Miembro.objects.filter(id__in=nuevoLlamar.grupo.listaLideres()).values('email')
+                    # lideres = Miembro.objects.filter(id__in=nuevoLlamar.grupo.listaLideres()).values('email')
+                    lideres = nuevoLlamar.grupo.lideres.values('email')
                     receptores = ["%s" % (k['email']) for k in lideres]
 
                     camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
@@ -549,7 +551,7 @@ def llamarVisitas(request):
                 nuevoLlamar.fechaSegundaLlamada = date.today()
             nuevoLlamar.save()
         else:
-            return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
 
     if 'miembrosSeleccionados' in request.session:
         faltantes = request.session['miembrosSeleccionados']
@@ -563,15 +565,15 @@ def llamarVisitas(request):
                 try:
                     miembroIngreso = CambioTipo.objects.get(
                         miembro=miembroLlamar, nuevoTipo__nombre__iexact='visita').autorizacion
-                    gMiembroIngreso = miembroIngreso.grupoLidera()
+                    gMiembroIngreso = miembroIngreso.grupo_lidera
                 except:
                     pass
                 form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)
-                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada is None:
                 tipo = "segunda"
                 form = FormularioSegundaLlamadaAgente(instance=miembroLlamar)
-                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
         else:
             if 'perfil' in request.session:
                 if isinstance(request.session['perfil'], int):
@@ -584,7 +586,7 @@ def llamarVisitas(request):
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderPromoverVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo:
         miembrosGrupo = list(grupo.miembro_set.all())
         if request.method == 'POST':
@@ -611,7 +613,7 @@ def liderPromoverVisitantesGrupo(request):
                 ct = ct.pop()
                 if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo):
                     visitantes.append(ct.miembro)
-    return render_to_response("Miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")

@@ -216,9 +216,9 @@ def reportarReunionGrupoAdmin(request):
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def reportarReunionDiscipulado(request):
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo:
-        discipulos = miembro.discipulos()
+        discipulos = grupo.discipulos
         asistentesId = request.POST.getlist('seleccionados')
         if request.method == 'POST':
             form = FormularioReportarReunionDiscipulado(miembro=miembro, data=request.POST)
@@ -238,7 +238,7 @@ def reportarReunionDiscipulado(request):
                     ya_reportada = True
         else:
             form = FormularioReportarReunionDiscipulado(miembro=miembro)
-    return render_to_response('Grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")

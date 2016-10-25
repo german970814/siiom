@@ -212,7 +212,7 @@ class Miembro(models.Model):
         """Devuelve los discipulos del miembro (queryset) sino tiene, devuelve una lista vacia."""
 
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-        grupo = self.grupoLidera()
+        grupo = self.grupo_lidera
         if grupo:
             return grupo.miembro_set.filter(id__in=lideres)
         else:
@@ -225,7 +225,8 @@ class Miembro(models.Model):
         tipo_pastor = TipoMiembro.objects.get(nombre__iexact='pastor')
         pastores = []
 
-        lideres = Miembro.objects.filter(id__in=self.grupoLidera().listaLideres())
+        # lideres = Miembro.objects.filter(id__in=self.grupoLidera().listaLideres())
+        lideres = self.grupo_lidera.lideres.all()
         for lider in lideres:
             tipos = CambioTipo.objects.filter(miembro=lider, nuevoTipo=tipo_pastor)
             if len(tipos) > 0:
@@ -236,17 +237,20 @@ class Miembro(models.Model):
         while sw:
 
             if grupo_actual is not None:
-                lideres = Miembro.objects.filter(id__in=grupo_actual.listaLideres())
+                # lideres = Miembro.objects.filter(id__in=grupo_actual.listaLideres())
+                lideres = grupo_actual.lideres.all()
 
                 for lider in lideres:
                     tipos = CambioTipo.objects.filter(miembro=lider, nuevoTipo=tipo_pastor)
                     if len(tipos) > 0:
                         pastores.append(lider.id)
 
-                if grupo_actual.lider1.grupo is None:
+                # if grupo_actual.lider1.grupo is None:
+                if grupo_actual.parent is None:
                     sw = False
                 else:
-                    grupo_actual = grupo_actual.lider1.grupo
+                    # grupo_actual = grupo_actual.lider1.grupo
+                    grupo_actual = grupo_actual.parent
             else:
                 sw = False
 
