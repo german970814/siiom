@@ -191,6 +191,15 @@ class Miembro(models.Model):
 
         return False
 
+    def transladar(self, nuevo_grupo):
+        """
+        Translada el miembro actual a un nuevo grupo.
+        """
+
+        if nuevo_grupo != self.grupo:
+            self.grupo = nuevo_grupo
+            self.save()
+
     def grupoLidera(self):
         """
         Devuelve el grupo al cual lidera el miembro o su conyugue.

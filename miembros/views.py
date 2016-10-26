@@ -21,6 +21,7 @@ from common.groups_tests import (
     liderTest, editarMiembroTest, llamdaAgenteTest, agregarVisitanteTest,
     cumplimientoPasosTest, asignarGrupoTest, miembroTest, adminTest,
 )
+from .forms import TransladarMiembroForm
 
 # Python Packages
 from datetime import date
@@ -1660,3 +1661,25 @@ def listar_lideres(request, pk):
     lideres = Miembro.objects.lideres_red(red).select_related('usuario')
 
     return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def transladar(request, pk):
+    """
+    Permite a un administrador transladar un miembro que no lidere grupo a que asista a otro grupo.
+    """
+
+    miembro = get_object_or_404(Miembro, pk=pk)
+    if miembro.grupo_lidera:
+        return redirect(reverse('sin_permiso'))
+
+    if request.method == 'POST':
+        form = TransladarMiembroForm(data=request.POST)
+        if form.is_valid():
+            form.transladar(miembro)
+            return redirect('miembros:transladar', pk)
+    else:
+        form = TransladarMiembroForm()
+
+    return render(request, 'miembros/transladar.html', {'miembro': miembro, 'form': form})
