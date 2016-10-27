@@ -48,6 +48,7 @@
     </style>
     <script src="{% static 'leaflet/leaflet.js' %}"></script>
     <script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
+    <srcipt src="{% static 'leaflet/icons/js/leaflet-color-markers.js' %}"></srcipt>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -846,6 +847,7 @@
             $('#toggleModal2').click();
         });
 
+        {% if mi.grupoLidera %}
         $('#send_position').click(function(event) {
             if (!marker) {
                 event.preventDefault();
@@ -873,6 +875,7 @@
                 })
             }
         });
+        {% endif %}
     })
     </script>
 

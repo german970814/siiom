@@ -19,6 +19,15 @@ class Visita(models.Model):
     def __str__(self):
         return self.primer_nombre.upper() + ' ' + self.primer_apellido.upper()
 
+    def get_nombre(self):
+        nombre = '%(primer_nombre)s %(segundo_nombre)s %(primer_apellido)s %(segundo_apellido)s' % {
+            'primer_nombre': self.primer_nombre,
+            'segundo_nombre': self.segundo_nombre or '.',
+            'primer_apellido': self.primer_apellido,
+            'segundo_apellido': self.segundo_apellido or '.'
+        }
+        return nombre.replace('.', '')
+
     def migrar_visita_miembro(self):
         """
         Funcion que migra a la visita a un miembro

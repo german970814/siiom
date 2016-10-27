@@ -24,7 +24,7 @@
                     <div id="mapa2"></div>
 	            </div>
 	            <div class="modal-footer">
-	                <button type="submit" name="aceptar" class="btn btn-link">Aceptar</button>
+	                {% comment %}<button type="submit" name="aceptar" class="btn btn-link">Aceptar</button>{% endcomment %}
 	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
 	            </div>
             </form>
@@ -32,6 +32,22 @@
     </div>
 </div>
 <a data-toggle="modal" id="toggleModal3" href="#modalNarrower3"></a>
+<div class="modal fade" id="modalNarrower4" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">¿Seguro de asignar Visita a Grupo?</h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" name="acepta-asignar" class="btn btn-link">Aceptar</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModal4" href="#modalNarrower4"></a>
 <div class="container">
     <div class="card">
         <div class="card-header">
@@ -42,7 +58,7 @@
                 {% if messages %}
 					{% for message in messages %}
 						<div class="row">
-			                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+			                <div class="alert {% if message.tags == "success" %}alert-success {% elif message.tags == "warning" %}alert-warning {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
 			                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
 			                    <p>{{ message|safe }}</p>
 			                </div>
@@ -103,6 +119,7 @@
                 </h1>
             </div>
             <div class="table-responsive">
+                <input type="hidden" name="visita" id="visita_id">
                 <table id="data-table-selection" class="table table-striped">
                     <thead>
                         <tr>
@@ -115,9 +132,9 @@
                     </thead>
                     <tbody>
                         {% for visita in visitas %}
-                            <tr>
+                            <tr id="visita_id_{{visita.id}}">
                                 <td>{{ visita.id }}</td>
-                                <td>{{ visita.nombre|upper }} {{ visita.primerApellido|upper }}</td>
+                                <td>{{ visita.get_nombre|upper }}</td>
                                 <td>{{ visita.telefono }}</td>
                                 <td>{{ visita.direccion }}</td>
                             </tr>                
@@ -138,6 +155,8 @@
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
 <script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
+    var _row;
+
     $(document).ready(function () {
         $("#data-table-selection").bootgrid({
             css: {
@@ -150,7 +169,7 @@
             caseSensitive: false,
             formatters: {
                 "commands": function(column, row) {
-                    return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle boolean\" data-row-id=\"" + row.id + "\" onClick=\"\"><span class=\"zmdi zmdi-pin\"></span></button> ";
+                    return "<button type=\"button\" id=\"visita_" + row.id + "\" class=\"btn btn-icon command-edit waves-effect waves-circle boolean\" data-row-id=\"" + row.id + "\" onClick=\"\"><span class=\"zmdi zmdi-pin\"></span></button> ";
                 }
             }
         });
@@ -180,9 +199,23 @@
             $('.boolean').click(function(event) {
                 $('#toggleModal3').click();
                 $(window).trigger('invalidateSize');
-                {% comment %}$('input[name="reporte"]').val($(this).parent().parent().attr('data-row-id').toString());{% endcomment %}
+                _row = $(this).parent().parent();
+                $('input[name="visita"]').val($(this).parent().parent().attr('data-row-id').toString());
                 {% comment %}return false;{% endcomment %}
             });
+
+            $(document).on('deleterow', function(event) {
+                _id = event._id_to_delete
+                if (_row[0]) {
+                    _row.remove();
+                    $('tr[data-row-id="' + _id.toString() + '"]').remove();
+                    $("#data-table-selection").bootgrid('remove', _id.toString());
+                    {% comment %}$("#data-table-selection").bootgrid('reload');{% endcomment %}
+                } else {
+                    console.log(_id);
+                    console.log("No existe");
+                }
+            })
         });
 
         {% if click %}
@@ -191,151 +224,109 @@
     })
 </script>
 <script>
-    var _grupos = {{ grupos|safe }};
-
-    var littleton = L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.'),
-    denver    = L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.'),
-    aurora    = L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.'),
-    golden    = L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.');
-
-    var _cities = new Array();
-    _cities.push(littleton);
-    _cities.push(denver);
-    _cities.push(aurora);
-    _cities.push(golden);
-
-    {% comment %}var cities = L.layerGroup([littleton, denver, aurora, golden]);{% endcomment %}
-    var cities = L.layerGroup(_cities);
-
-    var geocoder = L.Control.Geocoder.nominatim(),
-		control = L.Control.geocoder({
-			geocoder: geocoder
-		})
+    var geocoder = L.Control.Geocoder.nominatim();
+	var control = L.Control.geocoder({
+	    geocoder: geocoder
+	});
 	var marker;
+    var latLng;
 
-    {% comment %}var _redes = new Array();{% endcomment %}
-    var _redes = {};
-
+    var _redes_json = {};
     var _redes_array = new Array();
 
-    for (var x = 0; x < _grupos.length; x++) {
-        console.log(_grupos[x][0]);
-        geocoder.geocode(_grupos[x][0], function(results) {
-            console.log(_grupos[x][0]);
-            {% comment %}console.log(results);{% endcomment %}
-            latlng = new L.LatLng(results[0].center.lat, results[0].center.lng);
-            mark = new L.Marker(latlng);
-            mark.bindPopup("<b>" + _grupos[x][3] + "</b><br />" + _grupos[x][0]);
-            if (_redes[_grupos[x][3]] == undefined) {
-                _redes[_grupos[x][3]]= [mark];
-            } else {
-                _redes[_grupos[x][3]].push(mark);
-            }
+    {% for red in redes %}
+    _redes_json['{{ red.nombre }}'] = new Array();
+    {% endfor %}
+    {% for grupo in grupos %}
+    {% if grupo.get_position %}
+    _redes_json['{{ grupo.red.nombre }}'].push(
+        L.marker({{ grupo.get_position }}).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}</ br><button type='button' val='{{ grupo.id }}' class='asignar-grupo btn btn-block btn-primary'>Asignar A este grupo</button>") //.openPopup();
+    )
+    {% endif %}
+    {% endfor %}
 
-            if (x == _grupos.length - 1) {
-                for (var key in _redes) {
-                    _redes[key] = L.layerGroup(_redes[key]);
-                    _redes_array.push(_redes[key]);
-                }
-            }
-        });
-
+    for (var red in _redes_json) {
+        _redes_json[red] = L.layerGroup(_redes_json[red]);
+        _redes_array.push(_redes_json[red])
     }
 
-    {% comment %}{% for red in redes %}
-    var red_{{ red.id }} = new Array();
-    _redes.push(red_{{ red.id }})
-    {% endfor %}{% endcomment %}
-
-    {% comment %}{% for grupo in grupos %}
-        {% if grupo.get_direccion != '' %}
-        geocoder.geocode('{{ grupo.get_direccion }}', function (results){
-            try {
-                console.log(results[0].center)
-                latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
-                mark = new L.Marker(latLng);
-                mark.bindPopup("<b>{{ grupo.get_nombre }}({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}"); // .addTo(mymap)
-                red_{{ grupo.red.id }}.push(mark);
-            } catch (error) {
-                
-            }
-        });
-        {% endif %}
-    {% endfor %}{% endcomment %}
-
-    {% comment %}var _redes_to_map = new Array();
-
-    for (var red of _redes) {
-        var redes = L.layerGroup(red);
-        _redes_to_map.push(redes);
-    }{% endcomment %}
-
-    var mymap = L.map('mapa2').setView([10.999236, -74.805117], 15);
+    var mapa = L.map('mapa2').setView([10.999236, -74.805117], 15);
+    
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
-        {% comment %}layers: _redes_to_map,{% endcomment %}
-        {% comment %}layers: [cities],{% endcomment %}
-        layers: _redes_array
-    }).addTo(mymap);
+        layers: _redes_array,
+    }).addTo(mapa);
 
-    control.addTo(mymap);
-
-    {% comment %}L.marker([10.999236, -74.805117]).addTo(mymap).bindPopup("<b>Hello World!</b><br />I am a popup.").openPopup();{% endcomment %}
-
-    $(window).on('invalidateSize', function(event) {
-        setTimeout('mymap.invalidateSize()', 3000);
+    var _aux_to_fix_error_ = false;
+    mapa.on('mouseover', function(event){
+        if (!_aux_to_fix_error_) {
+            mapa.invalidateSize();
+            _aux_to_fix_error_ = true;
+        }
     })
 
-    {% comment %}mymap.on('click', function(e) {
-        console.log(e);
-        geocoder.reverse(e.latlng, mymap.options.crs.scale(mymap.getZoom()), function(results) {
-            console.log(results);
-            var r = results[0];
-            if (r) {
-                if (marker) {
-                    marker.
-                        setLatLng(r.center).
-                        setPopupContent(r.html || r.name).
-                        openPopup();
+
+    {% comment %}
+    // codigo que sirve
+    {% for grupo in grupos %}
+    {% if grupo.latitud %}
+    L.marker({{ grupo.get_position }}).addTo(mapa).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}") //.openPopup();
+    {% endif %}
+    {% endfor %}
+    {% endcomment %}
+
+    var id_grupo;
+    var id_visita;
+
+    mapa.on('layeradd', function(evento) {
+        $('.asignar-grupo').click(function (event){
+            id_grupo = event.currentTarget.attributes.val.value;
+            id_visita = $('input[name="visita"]').val();
+            $('#toggleModal4').click();
+        });
+    });
+
+    $('button[name="acepta-asignar"]').click(function (event) {
+        $.ajax({
+            url: '{% url "consolidacion:asignar_grupo_visitas_ajax" %}',
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                visita: id_visita,
+                grupo: id_grupo
+            },
+            success: function (data) {
+                if (data['response_code'] == 200) {
+                    _visita = data['id_visita'];
+                    {% comment %}$remove = $("tr[data-row-id='0']".replace('0', _visita.toString())){% endcomment %}
+                    {% comment %}$remove = $('#visita_' + _visita.toString()).parent().parent();{% endcomment %}
+                    {% comment %}console.log($remove);{% endcomment %}
+                    {% comment %}$remove.remove();{% endcomment %}
+                    $.event.trigger({
+                        type: 'deleterow',
+                        _id_to_delete: _visita
+                    })
+                    $('input[name="visita"]').val('');
+                    $('#data-table-selection').bootgrid('reload');
+                    $('#modalNarrower3').modal('toggle');
+                    $('#modalNarrower4').modal('toggle');
+                    swal("Buen Trabajo", "Se ha asignado exitosamente la visita a el grupo", "success");
+                    var id_grupo;
+                    var id_visita;
+                } else if (data['response_code'] == 401) {
+                    console.log(data);
+                    $('#modalNarrower4').modal('toggle');
+                    swal("Error", "No se pudo asignar la visita a el grupo", "error");
                 } else {
-                    marker = L.marker(r.center).bindPopup(r.name).addTo(mymap).openPopup();
+                    console.log(data);
                 }
             }
         })
-    }){% endcomment %}
+    });
 
-    {% comment %}var baseMaps = {
-        "Redes": _redes_to_map
-    }
-
-    L.control.layers(baseMaps).addTo(mymap);{% endcomment %}
-
-    {% comment %}{% for grupo in grupos %}
-        {% if grupo.get_direccion != '' %}
-        geocoder.geocode('{{ grupo.get_direccion }}', function(results){
-            try {
-                latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
-                mark = new L.Marker(latLng);
-                mark.bindPopup("<b>{{ grupo.get_nombre }}({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}").addTo(mymap); // .addTo(mymap)
-            } catch (error) {
-                
-            }
-        });
-        {% endif %}
-    {% endfor %}{% endcomment %}
-
-    var overlayMaps = {
-        "Cities": cities
-    };
-
-    {% comment %}for (var x = 0; x < _redes_to_map.length; x++) {
-        overlayMaps['red_' + x.toString()] = _redes_to_map[x];
-    }{% endcomment %}
-
-    L.control.layers(_redes).addTo(mymap);
-
-    console.log("finalize");
+    control.addTo(mapa);
+    L.control.layers(_redes_json).addTo(mapa);
 
 </script>
 {% endblock js %}
