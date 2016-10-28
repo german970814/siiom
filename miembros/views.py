@@ -204,7 +204,7 @@ def liderListarMiembrosGrupo(request):
     if request.method == 'POST':
         if 'transladar' in request.POST:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/transladar_miembros/')
+            # return HttpResponseRedirect('/miembro/transladar_miembros/')
         else:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             return HttpResponseRedirect('/miembro/editar_miembros/')
@@ -285,7 +285,8 @@ def liderTransaldarMiembro(request):
             actual.save()
         else:
             error = 'Estas tratando de cambiar un Discipulo de Grupo, para cambiar un Discipulo de grupo contacta al Administrador'
-            redireccion = '/miembro/transladar_miembros/'
+            # redireccion = '/miembro/transladar_miembros/'
+            redireccion = ''
             nombre = 'Transladar siguiente'
             return render_to_response("error.html", locals(), context_instance=RequestContext(request))
 
@@ -1621,31 +1622,6 @@ def eliminar_foto_perfil(request, pk):
             response['ms'] = 'Permiso denegado para hacer esta operacion'
     return HttpResponse(json.dumps(response), content_type='application/json')
 
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def transladar_miembros(request, id_miembro):
-
-    try:
-        miembro = Miembro.objects.get(id=id_miembro)
-    except Miembro.DoesNotExist:
-        raise Http404
-
-    if miembro.grupoLidera():
-        return HttpResponseRedirect('/dont_have_permissions/')
-
-    if request.method == 'POST':
-        form = FormularioTransladarMiembro(data=request.POST)
-
-        if form.is_valid():
-            grupo = form.cleaned_data['grupo']
-            miembro.grupo = grupo
-            miembro.save()
-            if miembro.conyugue:
-                miembro.conyugue.grupo = grupo
-                miembro.conyugue.save()
-    else:
-        form = FormularioTransladarMiembro()
-    return render_to_response('Miembros/transladar_miembro.html', locals(), context_instance=RequestContext(request))
 
 # -----------------------------------
 

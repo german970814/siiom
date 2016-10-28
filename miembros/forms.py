@@ -470,15 +470,6 @@ class FormularioTipoMiembros(forms.ModelForm):
         exclude = ('miembro', 'autorizacion', 'nuevoTipo', 'anteriorTipo', 'fecha')
 
 
-class FormularioTransladarMiembro(forms.Form):
-    error_css_class = 'has-error'
-    grupo = forms.ModelChoiceField(queryset=Grupo.objects.all().select_related('lider1', 'lider2'))
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioTransladarMiembro, self).__init__(*args, **kwargs)
-        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-
-
 class TransladarMiembroForm(CustomForm):
     """
     Formulario para el translado de un miembro de un grupo a otro.

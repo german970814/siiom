@@ -1,5 +1,5 @@
 {% extends "perfil_base.html" %}
-{% load staticfiles %}
+{% load staticfiles i18n %}
 
 {% block card %}
 {% if grupo %}
@@ -27,7 +27,7 @@
                         </li>
                         {% if not miembro.grupoLidera %}
                             <li>
-                                <a href="/miembro/transladar_miembros/{{miembro.id}}">Trasladar Miembro de Grupo</a>
+                                <a href="{% url 'miembros:transladar' miembro.id %}">{% trans 'Trasladar Miembro de Grupo' %}</a>
                             </li>
                         {% endif %}
                     {% endif %}

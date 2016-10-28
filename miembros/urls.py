@@ -54,7 +54,6 @@ urlpatterns = [
     url(r'^discipulos/(?P<pk>\d*)$', ver_discipulos, name="ver_discipulos"),
     url(r'^informacion_iglesia/(?P<pk>\d*)$', ver_informacion_miembro, name="ver_informacion"),
     url(r'^eliminar_foto_perfil/(?P<pk>\d*)$', eliminar_foto_perfil, name="eliminar_foto"),
-    url(r'^transladar_miembros/(?P<id_miembro>\d+)$', transladar_miembros, name="transladar_miembros"),  # No se usa actualmente
 
     url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
     url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar')
