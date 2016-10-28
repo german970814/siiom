@@ -70,7 +70,7 @@
                 <dt>Barrio</dt>
                 <dd>{{ grupo.barrio|upper }}</dd>
             </dl>
-            {% if puede_editar and not no_lider %}
+            {% if puede_editar and not no_lider or perms.miembros.es_administrador %}
             <dl class="dl-horizontal">
                 <dt>Ubicar Mi Grupo</dt>
                 <dd><a data-toggle="modal" id="editar_ubicacion" href="#modalNarrower">Haz Click Aquí para ubicar tu grupo en el mapa</a></dd>

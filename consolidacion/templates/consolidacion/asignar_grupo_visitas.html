@@ -136,7 +136,7 @@
                                 <td>{{ visita.id }}</td>
                                 <td>{{ visita.get_nombre|upper }}</td>
                                 <td>{{ visita.telefono }}</td>
-                                <td>{{ visita.direccion }}</td>
+                                <td class="direccion">{{ visita.direccion }}</td>
                             </tr>                
                         {% endfor %}
                     </tbody>
@@ -154,6 +154,7 @@
 <script type="text/javascript" src="{% static 'Template/jquery/vendors/bower_components/chosen/chosen.jquery.min.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
 <script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
+<script src="{% static 'Scripts/utils_for_maps.js' %}"></script>
 <script>
     var _row;
 
@@ -199,6 +200,10 @@
             $('.boolean').click(function(event) {
                 $('#toggleModal3').click();
                 $(window).trigger('invalidateSize');
+                $.event.trigger({
+                    type: 'triggered_search_direccion',
+                    direccion: $(this).parent().parent().children()[2].innerHTML
+                });
                 _row = $(this).parent().parent();
                 $('input[name="visita"]').val($(this).parent().parent().attr('data-row-id').toString());
                 {% comment %}return false;{% endcomment %}
@@ -266,6 +271,34 @@
         }
     })
 
+    var greenIcon = new L.Icon({
+        iconUrl: '{% static "leaflet/icons/img/marker-icon-2x-green.png" %}',
+        shadowUrl: '{% static "leaflet/icons/img/marker-shadow.png" %}',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    var marker_;
+
+    $(window).on('triggered_search_direccion', function(event) {
+        direccion = clean_direccion(event.direccion);
+        if (marker_) {
+            mapa.removeLayer(marker_);
+        }
+        geocoder.geocode(direccion, function(results){
+            {% comment %}console.log(results);{% endcomment %}
+            try {
+                latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+                marker_ = new L.Marker(latLng, {icon: greenIcon});
+                marker_.bindPopup("<b>Ubicación Actual</b>").addTo(mapa).openPopup(); // .addTo(mymap)
+                mapa.setView(latLng, 16);
+            } catch (error) {
+                
+            }
+        });
+    });
 
     {% comment %}
     // codigo que sirve
