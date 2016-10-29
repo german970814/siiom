@@ -231,27 +231,10 @@ class Miembro(models.Model):
         return pastores
 
     def es_cabeza_red(self):
-        """Metodo para saber si el miembro esta dentro de los 72 del pastor principal"""
-        if self.grupo is not None:
-            lideres = Miembro.objects.filter(id__in=self.grupo.listaLideres())
-            for lider in lideres:
-                if lider.grupo is not None:
-                    if lider.grupo.red is None:
-                        return True
-
-                    try:
-                        if any(
-                            [
-                                lid.grupo.red for lid in Miembro.objects.filter(
-                                    id__in=lider.grupo.listaLideres()
-                                ) if lid.grupo.red is None
-                            ]
-                        ):
-                            return True
-                    except AttributeError:
-                        return True
-                else:
-                    return True
+        """Metodo para saber si el miembro esta dentro de los 12 del pastor principal"""
+        if self.grupo is not None and self.grupoLidera() is not None:
+            if self.grupo.lider1.grupo is None:
+                return True
         return False
 
     class Meta:
