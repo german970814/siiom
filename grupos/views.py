@@ -52,7 +52,7 @@ def editarHorarioReunionGrupo(request, pk=None):
         except Miembro.DoesNotExist:
             raise Http404
 
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if mismo:
         puede_editar = True
     if grupo is None:
@@ -61,7 +61,7 @@ def editarHorarioReunionGrupo(request, pk=None):
         no_lider = True
     if grupo is not None:
         miembros = grupo.miembrosGrupo()
-        lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
+        lideres = grupo.lideres.all()
     else:
         miembros = None
         lideres = None
@@ -79,7 +79,7 @@ def editarHorarioReunionGrupo(request, pk=None):
     else:
         form = FormularioEditarGrupo(instance=grupo)
 
-    return render_to_response('Grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
 
 
 def reunionReportada(fecha, grupo, tipo):

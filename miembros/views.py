@@ -394,7 +394,7 @@ def liderEditarPerfil(request, pk=None):
             admin = True
         else:
             form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
-    return render_to_response("Miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
@@ -414,7 +414,7 @@ def cambiarContrasena(request):
                 validacionContrasena = 'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
     else:
         form = FormularioCambiarContrasena(request=request)
-    return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -686,7 +686,7 @@ def asignarGrupo(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
     try:
         miembroIngreso = CambioTipo.objects.get(miembro=miembroEditar, nuevoTipo__nombre__iexact='visita').autorizacion
-        gMiembroIngreso = miembroIngreso.grupoLidera()
+        gMiembroIngreso = miembroIngreso.grupo_lidera
     except:
         pass
     form = FormularioAsignarGrupo(instance=miembroEditar)
@@ -695,7 +695,8 @@ def asignarGrupo(request, id):
         if form.is_valid():
             nuevoMiembro = form.save(commit=False)
             if nuevoMiembro.grupo is not None or nuevoMiembro.grupo != '':
-                mailLideres = Miembro.objects.filter(id__in=nuevoMiembro.grupo.listaLideres()).values('email')
+                # mailLideres = Miembro.objects.filter(id__in=nuevoMiembro.grupo.listaLideres()).values('email')
+                mailLideres = nuevoMiembro.grupo.lideres.values('email')
                 receptores = ["%s" % (k['email']) for k in mailLideres]
                 camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
                         Se ha agregado un nuevo miembro a su G.A.R, por favor \
@@ -708,7 +709,7 @@ def asignarGrupo(request, id):
                 nuevoMiembro.fechaAsignacionGAR = date.today()
             nuevoMiembro.save()
             ok = True
-    return render_to_response("Miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1082,7 +1083,7 @@ def cambiarMiembroDeTipoMiembro(request, id):
                         miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
     else:
         form = FormularioCambioTipoMiembro(idm=int(id))
-    return render_to_response('Miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1127,7 +1128,7 @@ def crearUsuarioMimembro(request, id):
     else:
         form = FormularioAsignarUsuario()
     form.email = miembroCambio.email
-    return render_to_response('Miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1410,7 +1411,7 @@ def ver_discipulos(request, pk=None):
         except Miembro.DoesNotExist:
             raise Http404
 
-    grupo = miembro.grupoLidera() or None
+    grupo = miembro.grupo_lidera or None
 
     if request.method == 'POST':
         if grupo is not None or grupo != '':
@@ -1429,20 +1430,23 @@ def ver_discipulos(request, pk=None):
         if grupo is not None or grupo != '':
             form = FormularioEditarDiscipulado(instance=grupo)
 
-    discipulos = miembro.discipulos()
-    if len(discipulos) > 0:
-        discipulos = discipulos.order_by('nombre')
-    else:
-        try:
-            lista_lideres = miembro.grupo.listaLideres()
-            lideres = Miembro.objects.filter(id__in=lista_lideres)
-            discipulos = lideres[0].discipulos().order_by('nombre')
-        except AttributeError:
-            lista_lideres = None
-        finally:
+    # discipulos = miembro.discipulos()
+    if grupo is not None:
+        discipulos = grupo.discipulos
+        if len(discipulos) > 0:
+            discipulos = discipulos.order_by('nombre')
+        else:
             no_discipulos = True
+            # try:
+            #     lista_lideres = miembro.grupo.listaLideres()
+            #     lideres = Miembro.objects.filter(id__in=lista_lideres)
+            #     discipulos = lideres[0].discipulos().order_by('nombre')
+            # except AttributeError:
+            #     lista_lideres = None
+            # finally:
+            #     no_discipulos = True
 
-    return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
 
 
 from django.db import transaction
@@ -1558,14 +1562,15 @@ def ver_informacion_miembro(request, pk=None):
             form_cambio_tipo = FormularioTipoMiembros(instance=miembro)
 
     if miembro.grupo:
-        lideres_miembro = Miembro.objects.filter(id__in=miembro.grupo.listaLideres())
+        # lideres_miembro = Miembro.objects.filter(id__in=miembro.grupo.listaLideres())
+        lideres_miembro = miembro.grupo.lideres.all()
     escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
     tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
     if len(escalafones) > 0:
         escalafon = escalafones.pop()
     pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
 
-    return render_to_response("Miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
