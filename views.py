@@ -148,3 +148,7 @@ def without_perms(request):
         request.session['next'] = request.GET.get('next', '')
         return HttpResponseRedirect('/iniciar_sesion/')
     return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))
+
+
+def mapa(request):
+    return render_to_response("mapas.html", locals(), context_instance=RequestContext(request))

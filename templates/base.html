@@ -39,6 +39,17 @@
     <link href="{% static 'Template/jquery/css/app.min.1.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/css/app.min.2.css' %}" rel="stylesheet">
 
+    <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
+    <link rel="stylesheet" href="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.css' %}"></link>
+    <style>
+        #mapa {
+            height: 500px;
+        }
+    </style>
+    <script src="{% static 'leaflet/leaflet.js' %}"></script>
+    <script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
+    <srcipt src="{% static 'leaflet/icons/js/leaflet-color-markers.js' %}"></srcipt>
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -96,6 +107,48 @@
 </head>
 
 <body class="toggled sw-toggled">
+
+<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubica A Tú Grupo</h4>
+                <small>Marca la posicion de donde haces tu grupo Actualmente</small>
+            </div>
+	        <form action="" method="POST" id="" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+                    <div id="mapa"></div>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" name="aceptar" id="accept_position" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
+<div class="modal fade" id="modalNarrower2" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubica A Grupo</h4>
+                <small>Marca la posicion de donde haces tu grupo Actualmente</small>
+            </div>
+	        <form action="" method="POST" id="" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	            <div class="modal-body">
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" name="aceptar" id="send_position" class="btn btn-link">Aceptar</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
     <header id="header" class="clearfix" data-current-skin="blue">
         <ul class="header-inner">
             <li id="menu-trigger" data-trigger="#sidebar">
@@ -122,6 +175,40 @@
                     </li>
                     {% endif %}
                     <!-- opciones -->
+                    {% if mi.grupoLidera and not mi.grupoLidera.get_position %}
+                    <li class="dropdown">
+                            <a data-toggle="dropdown" href="">
+                                <i class="tm-icon zmdi zmdi-notifications"></i>
+                                <i class="tmn-counts">1</i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-lg pull-right">
+                                <div class="listview" id="notifications">
+                                    <div class="lv-header">
+                                        Notificaciones
+                                        <!--<ul class="actions">
+                                            <li class="dropdown">
+                                                <a href="" data-clear="notification">
+                                                    <i class="zmdi zmdi-check-all"></i>
+                                                </a>
+                                            </li>
+                                        </ul>-->
+                                    </div>
+                                    <div class="lv-body">
+                                        <a class="lv-item">
+                                            <div class="media" id="tomodalmap">
+                                                <div class="media-body">
+                                                    <div class="lv-title">Actualiza Datos</div>
+                                                    <small class="lv-small">Ubica a tu grupo en el mapa</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </li>
+                    {% endif %}
+
                     <li class="dropdown">
                         <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
                         <ul class="dropdown-menu dm-icon pull-right">
@@ -413,6 +500,12 @@
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-account-box-mail"></i>Consolidación</a>
                     <ul>
+                        <li>
+                            <a href="{% url 'consolidacion:crear_visita' %}">Agregar Visita</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">Asignar Visita A Grupo</a>
+                        </li>
                         <li class="sub-menu">
                             <a href="#">Agregar y Promover Visitas</a>
                             <ul>
@@ -696,6 +789,133 @@
                 }
             });
         });
+    </script>
+    <script>
+    $(document).ready(function() {
+
+        $('#tomodalmap').click(function (event) {
+            $('#toggleModal').click();
+        });
+        {% if draw_mapa %}
+            {% if mi.grupoLidera or perms.miembros.es_administrador %}
+            var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+                maxZoom: 19,
+                minZoom: 18,
+            }).addTo(mymap);
+
+            var _aux_to_fix_error = false;
+            mymap.on('mouseover', function(event){
+                if (!_aux_to_fix_error) {
+                    mymap.invalidateSize();
+                    _aux_to_fix_error = true;
+                }
+            })
+
+            var geocoder = L.Control.Geocoder.nominatim(),
+                control = L.Control.geocoder({
+                    geocoder: geocoder
+                }).addTo(mymap);
+
+            var marker;
+
+            {% if g and miembro.grupoLidera %}
+            geocoder.geocode('{{ miembro.grupoLidera.get_direccion }}', function(results){
+                try {
+                    latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+                    _marker = new L.Marker(latLng);
+
+                    mymap.setView(latLng, 18);
+                    _marker.addTo(mymap).bindPopup("<b>Actualmente el grupo está aquí</b><br />{{ miembro.grupoLidera.direccion }}");
+                } catch (err) {
+                    console.log(err);
+                }
+            })
+            {% elif mi.grupoLidera %}
+            geocoder.geocode('{{ mi.grupoLidera.get_direccion }}', function(results){
+                try {
+                    latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
+                    _marker = new L.Marker(latLng);
+
+                    mymap.setView(latLng, 18);
+                    _marker.addTo(mymap).bindPopup("<b>Actualmente Tu grupo está aquí</b><br />{{ grupo.direccion }}");
+                } catch (err) {
+                    console.log(err);
+                }
+            })
+            {% endif %}
+
+            var orangeIcon = new L.Icon({
+                iconUrl: '{% static "leaflet/icons/img/marker-icon-2x-orange.png" %}',
+                shadowUrl: '{% static "leaflet/icons/img/marker-shadow.png" %}',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            mymap.on('click', function(e) {
+                geocoder.reverse(e.latlng, mymap.options.crs.scale(mymap.getZoom()), function(results) {
+                    var r = results[0];
+                    if (r) {
+                        if (marker) {
+                            marker.
+                                setLatLng(r.center).
+                                setPopupContent(r.html || r.name).
+                                openPopup();
+                            if (!mymap.hasLayer(marker)) {
+                                marker.addTo(mymap);
+                            }
+                        } else {
+                            marker = L.marker(r.center, {icon: orangeIcon, draggable: true}).bindPopup(r.name).addTo(mymap).openPopup();
+                        }
+                    }
+                })
+            })
+
+            $('#accept_position').click(function(event) {
+                $('#toggleModal2').click();
+            });
+
+                {% if mi.grupoLidera %}
+                $('#send_position').click(function(event) {
+                    if (!marker) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return false;
+                    } else {
+                        $.ajax({
+                            url: {% if g and miembro.grupoLidera %}'{% url "posicion_grupo" miembro.grupoLidera.id %}'{% elif mi.grupoLidera %}'{% url "posicion_grupo" mi.grupoLidera.id %}'{% endif %},
+                            type: 'GET',
+                            data: {
+                                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                                latitud: marker._latlng.lat,
+                                longitud: marker._latlng.lng,
+                            },
+                            success: function (data) {
+                                if (data['code_response'] == 400) {
+                                    notify('Ha ocurrido un error al intentar cambiar la ubicacion de el grupo', undefined, undefined, undefined, 'danger', 'animated bounceIn', 5000);
+                                } else if (data['code_response'] == 200) {
+                                    notify('Se ha cambiado la ubicación de su grupo exitosamente', undefined, undefined, undefined, 'success', 'animated bounceIn', 5000);
+                                    $('#modalNarrower, #modalNarrower2').modal('toggle');
+                                    if (_marker && marker) {
+                                        mymap.removeLayer(_marker);
+                                        mymap.removeLayer(marker);
+                                        _marker = new L.Marker(marker._latlng);
+                                        _marker.addTo(mymap).bindPopup("<b>Actualmente Tu grupo está aquí</b><br />{{ grupo.direccion }}");
+                                    }
+                                } else {
+                                    console.log(data);
+                                }
+                            }
+                        })
+                    }
+                });
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    })
     </script>
 
     {% block js %}
