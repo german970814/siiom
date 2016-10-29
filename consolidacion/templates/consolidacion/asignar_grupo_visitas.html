@@ -213,12 +213,6 @@
             }
         });
 
-        {% comment %}$('#form').submit(function(event) {
-            for (var i = 0; i < $seleccion.length; i++) {
-                var x = $seleccion[i];
-                $('button[name="eliminar-visita"]').append('<input type="hidden" name="visita" value="'+ x.toString() +'">')
-            }
-        });{% endcomment %}
 
         $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
             format: 'DD/MM/YY',
@@ -247,7 +241,7 @@
                 $(window).trigger('invalidateSize');
                 $.event.trigger({
                     type: 'triggered_search_direccion',
-                    direccion: $(this).parent().parent().children()[2].innerHTML
+                    direccion: $(this).parent().parent().children()[3].innerHTML
                 });
                 _row = $(this).parent().parent();
                 $('input[name="visita"]').val($(this).parent().parent().attr('data-row-id').toString());
@@ -284,13 +278,22 @@
     var _redes_json = {};
     var _redes_array = new Array();
 
+    var yellowIcon = new L.Icon({
+        iconUrl: '{% static "leaflet/icons/img/marker-icon-2x-yellow.png" %}',
+        shadowUrl: '{% static "leaflet/icons/img/marker-shadow.png" %}',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
     {% for red in redes %}
     _redes_json['{{ red.nombre }}'] = new Array();
     {% endfor %}
     {% for grupo in grupos %}
     {% if grupo.get_position %}
     _redes_json['{{ grupo.red.nombre }}'].push(
-        L.marker({{ grupo.get_position }}).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}</ br><button type='button' val='{{ grupo.id }}' class='asignar-grupo btn btn-block btn-primary'>Asignar A este grupo</button>") //.openPopup();
+        L.marker({{ grupo.get_position }}, {icon: yellowIcon}).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}</ br><button type='button' val='{{ grupo.id }}' class='asignar-grupo btn btn-block btn-primary'>Asignar A este grupo</button>") //.openPopup();
     )
     {% endif %}
     {% endfor %}

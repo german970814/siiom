@@ -37,17 +37,8 @@ class FormularioAsignarGrupoVisita(forms.Form):
     Formulario de Asignacion de visita a grupo
     """
 
-    visita = forms.ModelChoiceField(queryset=Visita.objects.none())
-    grupo = forms.ModelChoiceField(queryset=Grupo.objects.none())
+    visita = forms.ModelChoiceField(queryset=Visita.objects.filter(retirado=False))
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.filter(estado='A'))
 
     def __init__(self, *args, **kwargs):
         super(FormularioAsignarGrupoVisita, self).__init__(*args, **kwargs)
-        if self.is_bound:
-            _visita = self.data.get('visita', None)
-            _grupo = self.data.get('grupo', None)
-            try:
-                self.fields['visita'].queryset = Visita.objects.filter(id=_visita)
-                self.fields['grupo'].queryset = Grupo.objects.filter(id=_grupo)
-            except:
-                self.fields['visita'].queryset = Visita.objects.none()
-                self.fields['grupo'].queryset = Grupo.objects.none()

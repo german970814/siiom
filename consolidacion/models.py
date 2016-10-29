@@ -20,7 +20,7 @@ class Visita(models.Model):
     segundo_apellido = models.CharField(verbose_name=_('segundo apellido'), max_length=255, blank=True)
     direccion = models.CharField(verbose_name=_('dirección'), max_length=255, blank=True)
     telefono = models.BigIntegerField(verbose_name=_('teléfono'))
-    email = models.EmailField(verbose_name=_('email'), blank=True, unique=True)
+    email = models.EmailField(verbose_name=_('email'), blank=True)
     grupo = models.ForeignKey('grupos.Grupo', verbose_name=_('grupo'), blank=True, null=True)
     fecha_ingreso = models.DateField(verbose_name=_('fecha ingreso'), auto_now_add=True)
     genero = models.CharField(verbose_name=_('género'), max_length=1, choices=OPCIONES_GENERO)
