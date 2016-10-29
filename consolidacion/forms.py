@@ -17,7 +17,7 @@ class FormularioVisita(BaseModelForm):
         model = Visita
         fields = (
             'primer_nombre', 'segundo_nombre', 'primer_apellido',
-            'segundo_apellido', 'direccion', 'telefono', 'email'
+            'segundo_apellido', 'direccion', 'telefono', 'email', 'genero'
         )
 
     def __init__(self, *args, **kwargs):
@@ -29,6 +29,7 @@ class FormularioVisita(BaseModelForm):
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
 
 
 class FormularioAsignarGrupoVisita(forms.Form):

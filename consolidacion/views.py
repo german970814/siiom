@@ -98,31 +98,63 @@ def asignar_grupo_visitas(request):
     data = {}
 
     if request.method == 'POST':
-        form = FormularioRangoFechas(data=request.POST)
+        print(request.POST)
+        if 'visita[]' in request.POST:
+            response = {}
+            _removed_ids = []
+            try:
+                print(request.POST)
+                visitas = request.POST.getlist('visita[]')
+                for visita in visitas:
+                    try:
+                        _visita = Visita.objects.get(id=visita)
+                        _visita.retirado = True
+                        _visita.save()
+                        _removed_ids.append(_visita.id)
+                    except Exception as exception:
+                        if settings.DEBUG:
+                            print(exception)
+                        response['error'] = exception.__str__()
+                        response['response_code'] = 401
+                if 'error' not in response:
+                    response['message'] = 'SUCCESS'
+                    response['response_code'] = 200
+                    response['removed_ids'] = _removed_ids
+            except Exception as exception:
+                if settings.DEBUG:
+                    print(exception)
+                response['error'] = exception.__str__()
+                response['response_code'] = 502
 
-        if form.is_valid():
-            fecha_inicial = form.cleaned_data['fecha_inicial']
-            fecha_final = form.cleaned_data['fecha_final']
+            return HttpResponse(json.dumps(response), content_type='application/json')
 
-            # visitas = Miembro.objects.visitas(
-            #     fechaRegistro__range=(fecha_inicial, fecha_final)
-            # )
-
-            visitas = Visita.objects.filter(
-                fecha_ingreso__range=(fecha_inicial, fecha_final)
-            ).exclude(grupo__isnull=False)
-
-            grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2', 'red')
-
-            data['visitas'] = visitas
-            data['redes'] = Red.objects.all()
-            if visitas.exists():
-                data['grupos'] = grupos
-                messages.success(request, _('Se muestran %d visitas para el rango de fechas escogido' % visitas.count()))
-            else:
-                messages.warning(request, _('No se encontraron resultados para el rango de fecha escogido'))
         else:
-            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
+            form = FormularioRangoFechas(data=request.POST)
+
+            if form.is_valid():
+                fecha_inicial = form.cleaned_data['fecha_inicial']
+                fecha_final = form.cleaned_data['fecha_final']
+
+                # visitas = Miembro.objects.visitas(
+                #     fechaRegistro__range=(fecha_inicial, fecha_final)
+                # )
+
+                visitas = Visita.objects.filter(
+                    fecha_ingreso__range=(fecha_inicial, fecha_final),
+                    retirado=False
+                ).exclude(grupo__isnull=False)
+
+                grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2', 'red')
+
+                if visitas.exists():
+                    data['visitas'] = visitas
+                    data['redes'] = Red.objects.all()
+                    data['grupos'] = grupos
+                    messages.success(request, _('Se muestran %d visitas para el rango de fechas escogido' % visitas.count()))
+                else:
+                    messages.warning(request, _('No se encontraron resultados para el rango de fecha escogido'))
+            else:
+                messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
     else:
         form = FormularioRangoFechas()
 

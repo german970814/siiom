@@ -144,6 +144,11 @@
             </div>
             <br>
             <br>
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <button class="btn btn-block btn-warning" type="button" name="eliminar-visita">Eliminar Visitas</button>
+                </div>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -155,6 +160,7 @@
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
 <script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script src="{% static 'Scripts/utils_for_maps.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
 <script>
     var _row;
 
@@ -167,6 +173,10 @@
                 iconRefresh: 'zmdi-refresh',
                 iconUp: 'zmdi-expand-less'
             },
+            selection: true,
+            multiSelect: true,
+            rowSelect: true,
+            keepSelection: true,
             caseSensitive: false,
             formatters: {
                 "commands": function(column, row) {
@@ -174,6 +184,41 @@
                 }
             }
         });
+
+        var $seleccion = [];
+        bootgrid_table_solution("#data-table-selection", $seleccion);
+
+         $("button[name='eliminar-visita']").click(function(event) {
+            if (!$('tr').hasClass('active') || $seleccion.length == 0) {
+                swal("Nadie para Eliminar");
+                event.preventDefault();
+            } else {
+                $.ajax({
+                    url: '{% url "consolidacion:asignar_grupo_visitas" %}',
+                    type: 'POST',
+                    data: {visita: $seleccion, csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val()},
+                    success: function(data) {
+                        if (data['response_code'] == 200) {
+                            notify('Se han removido las visitas exitosamente', undefined, undefined, undefined, 'success', 'animated bounceIn', 5000);
+                            for (var _id of data['removed_ids']) {
+                                $("#data-table-selection").bootgrid('remove', _id.toString());
+                            }
+                        } else if (data['response_code'] == 401) {
+                            console.log(data)
+                        } else {
+                            console.log(data)
+                        }
+                    },
+                })
+            }
+        });
+
+        {% comment %}$('#form').submit(function(event) {
+            for (var i = 0; i < $seleccion.length; i++) {
+                var x = $seleccion[i];
+                $('button[name="eliminar-visita"]').append('<input type="hidden" name="visita" value="'+ x.toString() +'">')
+            }
+        });{% endcomment %}
 
         $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
             format: 'DD/MM/YY',

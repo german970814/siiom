@@ -500,6 +500,12 @@
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-account-box-mail"></i>Consolidación</a>
                     <ul>
+                        <li>
+                            <a href="{% url 'consolidacion:crear_visita' %}">Agregar Visita</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">Asignar Visita A Grupo</a>
+                        </li>
                         <li class="sub-menu">
                             <a href="#">Agregar y Promover Visitas</a>
                             <ul>
@@ -858,8 +864,11 @@
                                 setLatLng(r.center).
                                 setPopupContent(r.html || r.name).
                                 openPopup();
+                            if (!mymap.hasLayer(marker)) {
+                                marker.addTo(mymap);
+                            }
                         } else {
-                            marker = L.marker(r.center, {icon: orangeIcon}).bindPopup(r.name).addTo(mymap).openPopup();
+                            marker = L.marker(r.center, {icon: orangeIcon, draggable: true}).bindPopup(r.name).addTo(mymap).openPopup();
                         }
                     }
                 })
