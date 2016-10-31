@@ -12,20 +12,20 @@ urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
-    url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),
-    url(r'^administracion/$', administracion, name="administracion"),
-    url(r'^salir/$', salir),
+    url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),  # revisada
+    url(r'^administracion/$', administracion, name="administracion"),  # revisada
+    url(r'^salir/$', salir),  # revisada
     url(r'^resultado/(grupo|miembro)/$', resultadoBusqueda),
-    url(r'^miembro/', include("miembros.urls", namespace='miembros')),
-    url(r'^grupo/', include("grupos.urls", namespace='grupos')),
-    url(r'^academia/', include("academia.urls", namespace='academia')),
+    url(r'^miembro/', include("miembros.urls", namespace='miembros')),  # revisada
+    url(r'^grupo/', include("grupos.urls", namespace='grupos')),  # revisada
+    url(r'^academia/', include("academia.urls", namespace='academia')),  # revisada
     url(r'^reportes/', include("reportes.urls")),
-    url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
-    url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
-    url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
-    url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
-    url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),
-    url(r'^dont_have_permissions/$', without_perms, name="sin_permiso"),
+    url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),  # revisada
+    url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),  # revisada
+    url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),  # revisada
+    url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),  # revisada
+    url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),  # revisada
+    url(r'^dont_have_permissions/$', without_perms, name="sin_permiso"),  # revisada
     # url(r'^mapa/$', mapa, name="mapa"),
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
     # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),

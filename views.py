@@ -59,6 +59,7 @@ def resultadoBusqueda(request, tipoBus):
 
         resultadosMiembros = list(set(resultadosMiembros))
         resultadosGrupos = list(set(resultadosGrupos))
+        # print(resultadosGrupos)
 
         if miembro.usuario.has_perm("miembros.buscar_todos"):
             resultados = []
@@ -86,61 +87,6 @@ def resultadoBusqueda(request, tipoBus):
         return render_to_response('resultado_busqueda.html', locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect('/miembro/')
-
-
-def depu(request):
-    padre = Miembro.objects.get(id=1)
-    miembros = Miembro.objects.all().order_by('id')
-    cad = ''
-    print(miembros)
-    print(padre)
-    for m in miembros:
-        if m.email != 'NN':
-            cad = cad + m.email + '<br />'
-            if m.usuario is None:
-                user = User.objects.create()
-                user.username = m.email
-                user.set_password(123456)
-                user.save()
-                m.usuario = user
-
-            if m.conyugue is not None and m.conyugue != '':
-                con = Miembro.objects.get(id=m.conyugue.id)
-                con.conyugue = m
-                con.estadoCivil = 'C'
-                con.save()
-                m.estadoCivil = 'C'
-
-            m.save()
-            print(m)
-
-            cambioTipo = CambioTipo.objects.create(
-                miembro=m, autorizacion=padre, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider"),
-                anteriorTipo=TipoMiembro.objects.get(nombre__iexact="visita"), fecha=date.today())
-            print(cambioTipo)
-            cambioTipo.save()
-
-            m.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
-
-            cp = CumplimientoPasos.objects.create(
-                miembro=m, paso=Pasos.objects.get(nombre__iexact='Lanzamiento'),
-                fecha=date.today())
-            print(cp)
-            cp.save()
-
-    return HttpResponse(cad)
-
-
-def depu2(request):
-    grupos = Grupo.objects.filter(nombre__iexact='NN')
-    for g in grupos:
-        g.nombre = g.lider1.primerApellido
-        if g.lider2 is not None:
-            g.nombre = g.nombre + " - " + g.lider2.primerApellido
-
-        g.save()
-        print(g.nombre)
-    return HttpResponse(grupos)
 
 
 def without_perms(request):
