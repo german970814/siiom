@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from django.db import transaction
 
 # Apps Imports
 from .forms import *
@@ -87,7 +88,7 @@ def autenticarUsario(request):
                     return HttpResponseRedirect('/miembro/')
             else:
                 valido = False
-    return render_to_response('Miembros/login.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/login.html', locals(), context_instance=RequestContext(request))
 
 
 def salir(request):
@@ -247,56 +248,6 @@ def liderEditarMiembros(request):
             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
             request.session['seleccionados'] = request.session['seleccionados']
             return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect("/miembro/listar_miembros/")
-    else:
-        return HttpResponseRedirect("/miembro/listar_miembros/")
-
-
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderTransaldarMiembro(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    discipulos = list(miembro.discipulos())
-    if 'grupos' not in request.session:
-        grupos = []
-        for discipulo in discipulos:
-            grupo = discipulo.grupoLidera()
-            if grupo is not None:
-                if grupo.estado == 'A' and grupo not in grupos:
-                    grupos.append(grupo.id)
-            subdiscipulos = discipulo.discipulos()
-            for subd in subdiscipulos:
-                discipulos.append(subd)
-        request.session['grupos'] = grupos
-    else:
-        grupos = request.session['grupos']
-
-    groups = []
-    for g in grupos:
-        if Grupo.objects.get(id=g) in groups:
-            continue
-        groups.append(Grupo.objects.get(id=g))
-
-    if request.method == 'POST':
-        getlist = request.POST.getlist('menu')
-        actual = Miembro.objects.get(id=request.session['actual'])
-        if actual not in discipulos or Group.objects.get(name__iexact='Administrador') in miembro.usuario.groups.all():
-            actual.grupo = Grupo.objects.get(id=request.POST.getlist('menu')[0])
-            actual.save()
-        else:
-            error = 'Estas tratando de cambiar un Discipulo de Grupo, para cambiar un Discipulo de grupo contacta al Administrador'
-            # redireccion = '/miembro/transladar_miembros/'
-            redireccion = ''
-            nombre = 'Transladar siguiente'
-            return render_to_response("error.html", locals(), context_instance=RequestContext(request))
-
-    if request.session.get('seleccionados') is not None:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
-            request.session['actual'] = int(miembroEditar.id)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/transladar_miembro.html", locals(), context_instance=RequestContext(request))
         else:
             return HttpResponseRedirect("/miembro/listar_miembros/")
     else:
@@ -620,22 +571,6 @@ def liderPromoverVisitantesGrupo(request):
     return render_to_response("miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
-def perfilMiembro(request, id):
-    try:
-        miembro = Miembro.objects.get(id=id)
-    except:
-        raise Http404
-
-    grupoLidera = miembro.grupoLidera()
-    escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
-    tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
-    if len(escalafones) > 0:
-        escalafon = escalafones.pop()
-    pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
-    return render_to_response("Miembros/perfil.html", locals(), context_instance=RequestContext(request))
-
-
 @user_passes_test(editarMiembroTest, login_url="/dont_have_permissions/")
 def editarMiembro(request, id):
     try:
@@ -748,7 +683,6 @@ def editarZona(request, pk):
         return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
     return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
-    # return HttpResponseRedirect("/miembro/listar_zonas")
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1232,7 +1166,7 @@ def administracion(request):
     totalCursosA = Curso.objects.filter(estado='A').count()
     totalCursosC = Curso.objects.filter(estado='C').count()
     # visitantes = request.session['visitantes']
-    return render_to_response('Miembros/administracion.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/administracion.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1394,7 +1328,7 @@ def recuperar_contrasena(request):
     else:
         form = FormularioRecuperarContrasenia()
 
-    return render_to_response("Miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
@@ -1447,9 +1381,6 @@ def ver_discipulos(request, pk=None):
             #     no_discipulos = True
 
     return render_to_response("miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
-
-
-from django.db import transaction
 
 
 @login_required
