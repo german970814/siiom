@@ -559,11 +559,11 @@
                         <ul>
                             {% if perms.miembros.es_administrador %}
                             <li>
-                                <a href="{% url 'crear_encuetro' %}">Crear Encuentro</a>
+                                <a href="{% url 'encuentros:crear_encuetro' %}">Crear Encuentro</a>
                             </li>
                             {% endif %}
                             <li>
-                                <a href="{% url 'listar_encuentros' %}">Listar Encuentros</a>
+                                <a href="{% url 'encuentros:listar_encuentros' %}">Listar Encuentros</a>
                             </li>
                         </ul>
                     </li>

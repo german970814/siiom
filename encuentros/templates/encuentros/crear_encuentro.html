@@ -38,7 +38,7 @@
                     for (var i = 0; i < opciones.length; i++) {
                         opciones += '<option value=">' + $oficial[i] + '">' + i.toString() + 'Grupo</option>'
                     }
-                } 
+                }
                 for (var i = 0; i < data.length; i++) {
                     opciones += '<option value="' + data[i]['pk'] + '">' + data[i]['nombre'] + '</option>';
                 }
@@ -51,7 +51,7 @@
                 // $(".grupos .bs-searchbox input").on('keydown', function(event){
                 //     if($(this).val() != ''){
                 //         $.ajax({
-                //             url: "{% url 'obtener_grupos' %}",
+                //             url: "{% url 'encuentros:obtener_grupos' %}",
                 //             data: {
                 //                 id_red: $('#id_red').val(),
                 //                 combo_grupo: $(this).val(),
@@ -237,7 +237,7 @@
                         <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el encuentro correctamente. <a alt="Listar Encuentros" class="alert-link" href="/encuentro/encuentros"> Volver a la lista de encuentros</a> <a alt="Agregar encontrista" class="alert-link" href="/encuentro/agregar_encontrista/{{ nuevo_encuentro.id }}/"> o agregar encontristas a este encuentro</a></p>
                     </div>
                 </div>
-            {% endif %} 
+            {% endif %}
                 <div class="add"></div>
             {% if form.errors %}
                 <div class="row">
@@ -246,7 +246,7 @@
                         <p>Aún hay errores en el formulario.</p>
                     </div>
                 </div>
-            {% endif %} 
+            {% endif %}
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}

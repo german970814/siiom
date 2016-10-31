@@ -44,7 +44,7 @@
                 $(".grupo .bs-searchbox input").on('keydown', function(event){
                     if($(this).val() != ''){
                         $.ajax({
-                            url: "{% url 'obtener_grupos' %}",
+                            url: "{% url 'encuentros:obtener_grupos' %}",
                             data: {
                                 id_red: {{ encuentro.coordinador.grupo.red.id }},
                                 combo_grupo: $(this).val(),
@@ -90,7 +90,7 @@
                         <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el encontrista correctamente. <a alt="Listar Encontristas" class="alert-link" href="/encuentro/listar_encontristas/{{ encuentro.id }}/"> Volver a la lista de encontristas.</a></p>
                     </div>
                 </div>
-            {% endif %} 
+            {% endif %}
 
             {% if form.errors %}
                 <div class="row">
@@ -99,7 +99,7 @@
                         <p>Aún hay errores en el formulario.</p>
                     </div>
                 </div>
-            {% endif %} 
+            {% endif %}
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}

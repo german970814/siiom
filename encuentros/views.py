@@ -25,7 +25,8 @@ URL = "/dont_have_permissions/"
 
 @user_passes_test(adminTest, login_url=URL)
 def crear_encuentro(request):
-    """Vista de Creacion de Encuentros"""
+    """Vista de Creacion de Encuentros."""
+
     accion = 'Crear'
     if request.method == 'POST':
         if 'combo_tesorero' in request.POST:
@@ -47,12 +48,13 @@ def crear_encuentro(request):
     else:
         form = CrearEncuentroForm()
 
-    return render_to_response('Encuentro/crear_encuentro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/crear_encuentro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url=URL)
 def editar_encuentro(request, id_encuentro):
-    """Vista de edicion de encuentros"""
+    """Vista de edicion de encuentros."""
+
     accion = 'Editar'
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
     tesorero = Miembro.objects.get(id=encuentro.tesorero.id)
@@ -92,20 +94,19 @@ def editar_encuentro(request, id_encuentro):
     else:
         form = EditarEncuentroForm(instance=encuentro)
 
-    return render_to_response('Encuentro/crear_encuentro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/crear_encuentro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(tesorero_administrador_test, login_url=URL)
 def obtener_grupos(request):
-    """Vista que devuelve una lista de grupos en JSON de acuerdo a un valor inicial enviado"""
+    """Vista que devuelve una lista de grupos en JSON de acuerdo a un valor inicial enviado."""
+
     if request.method == 'POST':
         if 'combo_grupo' in request.POST:
             red = Red.objects.get(id=request.POST['id_red'])
             value = request.POST.get('value', '')
-            querys = Q(lider1__nombre__icontains=value) |\
-                Q(lider1__primerApellido__icontains=value) | Q(lider1__cedula__icontains=value) |\
-                Q(lider2__nombre__icontains=value) | Q(lider2__primerApellido__icontains=value) |\
-                Q(lider2__cedula__icontains=value)
+            querys = Q(lideres__nombre__icontains=value) |\
+                Q(lideres__primerApellido__icontains=value) | Q(lideres__cedula__icontains=value)
             grupos = Grupo.objects.filter(red=red)
             grupos = grupos.filter(querys)[:10]
             response = [{'pk': str(a.id), 'nombre': str(a)} for a in grupos]
@@ -114,7 +115,8 @@ def obtener_grupos(request):
 
 @user_passes_test(admin_tesorero_coordinador_test, login_url=URL)
 def listar_encuentros(request):
-    """Lista de los Encuentros en estado activo y no completados"""
+    """Lista de los Encuentros en estado activo y no completados."""
+
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm('miembros.es_administrador'):
         encuentros = Encuentro.objects.activos()
@@ -123,12 +125,13 @@ def listar_encuentros(request):
     elif miembro.usuario.has_perm('miembros.es_tesorero'):
         encuentros = miembro.encuentros_tesorero.activos()
 
-    return render_to_response('Encuentro/listar_encuentros.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/listar_encuentros.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(tesorero_administrador_test, login_url=URL)
 def agregar_encontrista(request, id_encuentro):
-    """Vista que permite agregar un encontrista a un encuentro especifico"""
+    """Vista que permite agregar un encontrista a un encuentro especifico."""
+
     accion = 'Crear'
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
     mismo = solo_encuentros_miembro(request, encuentro)
@@ -146,12 +149,13 @@ def agregar_encontrista(request, id_encuentro):
     else:
         form = NuevoEncontristaForm(encuentro=encuentro)
 
-    return render_to_response('Encuentro/agregar_encontrista.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/agregar_encontrista.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(tesorero_administrador_test, login_url=URL)
 def editar_encontrista(request, id_encontrista):
-    """Vista para editar los encontristas agregados"""
+    """Vista para editar los encontristas agregados."""
+
     accion = 'Editar'
     encontrista = get_object_or_404(Encontrista, pk=id_encontrista)
     encuentro = encontrista.encuentro
@@ -168,7 +172,7 @@ def editar_encontrista(request, id_encontrista):
     else:
         form = NuevoEncontristaForm(instance=encontrista)
 
-    return render_to_response('Encuentro/agregar_encontrista.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/agregar_encontrista.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(tesorero_administrador_test, login_url=URL)
@@ -185,14 +189,15 @@ def borrar_encontrista(request, id_encontrista):
 
 @user_passes_test(admin_tesorero_coordinador_test, login_url=URL)
 def listar_encontristas(request, id_encuentro):
-    """Vista que lista los encontristas actuales que tiene cada encuentro"""
+    """Vista que lista los encontristas actuales que tiene cada encuentro."""
+
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
     mismo = solo_encuentros_miembro(request, encuentro)
     if mismo:
         return mismo
 
     encontristas = encuentro.encontrista_set.all()
-    return render_to_response('Encuentro/listar_encontristas.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/listar_encontristas.html', locals(), context_instance=RequestContext(request))
 
 
 @transaction.atomic
@@ -235,4 +240,4 @@ def asistencia_encuentro(request, id_encuentro):
                     encontrista.asistio = False
                 encontrista.save()
 
-    return render_to_response('Encuentro/asistencia_encuentro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('encuentros/asistencia_encuentro.html', locals(), context_instance=RequestContext(request))

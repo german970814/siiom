@@ -42,7 +42,7 @@
         function ver_encuentros_realizados() {
             // $('button.c-red, button.c-green').click(function(event) {
             //     var val = $(this).parent().parent().attr('data-row-id')
-            //     window.location.href = "{% url 'asistencia_encuentro' 0 %}".replace(0, val);
+            //     window.location.href = "{% url 'encuentros:asistencia_encuentro' 0 %}".replace(0, val);
             // });
 
             $('button.c-green').attr('title', 'Estado Activo');
@@ -61,7 +61,7 @@
             	<legend>
             		<h3>Encuentros</h3>
                 </legend>
-                {% if perms.miembros.es_administrador %}<small><a href="{% url 'crear_encuetro' %}">Agregar un nuevo encuentro</a></small>{% endif %}
+                {% if perms.miembros.es_administrador %}<small><a href="{% url 'encuentros:crear_encuetro' %}">Agregar un nuevo encuentro</a></small>{% endif %}
             </h1>
         </div>
         <div class="card-body card-padding table-responsive">
@@ -71,8 +71,8 @@
                     <table id="data-table-command" class="table table-striped table-vmiddle">
                         <thead>
 					       	<tr>
-                                <th data-visible="false" data-identifier="true" data-column-id="id"></th>  
-                                <th data-visible="false" data-identifier="true" data-column-id="class"></th>  
+                                <th data-visible="false" data-identifier="true" data-column-id="id"></th>
+                                <th data-visible="false" data-identifier="true" data-column-id="class"></th>
 					            <th data-identifier="true" data-column-id="estudiante">Fecha Inicio</th>
 					            <th data-identifier="true" data-column-id="fecha">Fecha Fin</th>
 					            <th data-identifier="true" data-column-id="modulo">Coordinador</th>

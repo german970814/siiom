@@ -20,7 +20,7 @@ urlpatterns = patterns(
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),
     url(r'^academia/', include("academia.urls", namespace='academia')),
     url(r'^reportes/', include("reportes.urls")),
-    url(r'^encuentro/', include("encuentros.urls")),
+    url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
