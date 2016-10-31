@@ -51,3 +51,13 @@ class MiembroManager(models.Manager):
         """
 
         return self.filter(models.Q(grupo__red=red) | models.Q(grupo_lidera__red=red)).lideres2()
+
+    def visitas(self, *args, **kwargs):
+        from .models import CambioTipo, TipoMiembro
+        visita = TipoMiembro.objects.filter(nombre__iexact='visita')
+        return self.annotate(
+            tipos=models.Count('miembro_cambiado')
+        ).filter(
+            tipos=1, miembro_cambiado__nuevoTipo=visita,
+            **kwargs
+        )

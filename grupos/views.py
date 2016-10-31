@@ -21,7 +21,7 @@ from common.decorators import permisos_requeridos
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
-    FormularioReportarReunionDiscipulado, FormularioCrearRed,
+    FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm
@@ -42,6 +42,7 @@ def editarHorarioReunionGrupo(request, pk=None):
     g = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
+    draw_mapa = True
     # grupo.miembro_set.all()
     if pk:
         try:
@@ -715,6 +716,30 @@ def editar_runion_grupo(request, pk):
         form = FormularioEditarReunionGAR(instance=reunion)
 
     return render_to_response("grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
+
+
+def set_position_grupo(request, id_grupo):
+    """
+    Vista para setear la posicion de un grupo.
+    """
+
+    grupo = get_object_or_404(Grupo, id=id_grupo)
+
+    data = {}
+
+    # latitud = request.GET.get('lat', None)
+    # longitud = request.GET.get('long', None)
+    form = FormularioSetGeoPosicionGrupo(data=request.GET, instance=grupo)
+
+    if form.is_valid():
+        form.save()
+        data['code_response'] = 200
+        data['message'] = 'Grupo %s editado correctamente' % grupo.get_nombre()
+    else:
+        data['error'] = form.errors
+        data['code_response'] = 400
+
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 # -----------------------------------
 

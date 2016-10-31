@@ -265,13 +265,6 @@ class Miembro(models.Model):
 
         return pastores
 
-    # def es_cabeza_red(self):
-    #     """Metodo para saber si el miembro esta dentro de los 12 del pastor principal"""
-    #     if self.grupo is not None and self.grupoLidera() is not None:
-    #         if self.grupo.lider1.grupo is None:
-    #             return True
-    #     return False
-
     class Meta:
         permissions = (
             ("es_agente", "define si un miembro es agente"),

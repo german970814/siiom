@@ -2,6 +2,7 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.utils.encoding import force_text
 from django.utils.html import format_html_join
+from django.utils.translation import ugettext_lazy as _lazy
 
 
 class CustomErrorList(ErrorList):
@@ -36,3 +37,31 @@ class CustomForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(error_class=CustomErrorList, *args, **kwargs)
+
+
+class FormularioRangoFechas(CustomForm):
+    """
+    Formulario base para rangos de fechas.
+    """
+
+    fecha_inicial = forms.DateField(label=_lazy('Fecha Inicial'))
+    fecha_final = forms.DateField(label=_lazy('Fecha Final'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['fecha_inicial'].widget.attrs.update(
+            {'class': 'form-control', 'data-mask': '00/00/00'}
+        )
+        self.fields['fecha_final'].widget.attrs.update(
+            {'class': 'form-control', 'data-mask': '00/00/00'}
+        )
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean(*args, **kwargs)
+
+        fechas = (cleaned_data.get('fecha_inicial', None), cleaned_data.get('fecha_final', None))
+
+        if all(fechas):
+            if fechas[0] > fechas[1]:
+                self.add_error('fecha_inicial', _lazy('Fecha inicial no puede ser mayor que Fecha Final'))
+                self.add_error('fecha_final', _lazy('Fecha final no puede ser menor que Fecha Inicial'))

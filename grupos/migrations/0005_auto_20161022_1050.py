@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='grupo',
-            name='parent',
-            field=models.ForeignKey(null=True, to='grupos.Grupo', related_name='children_set'),
+            name='latitud',
+            field=models.FloatField(verbose_name='Latitud', blank=True, null=True),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='grupo',
-            name='lider1',
-            field=models.ForeignKey(blank=True, null=True, to='miembros.Miembro', related_name='lider_uno'),
+            name='longitud',
+            field=models.FloatField(verbose_name='Longitud', blank=True, null=True),
         ),
     ]

@@ -110,12 +110,12 @@ def miembroInicio(request):
     if miembro:
         grupo = miembro.grupo_lidera
         if grupo:
-            miembrosGrupo = list(grupo.miembro_set.all())
+            miembrosGrupo = grupo.miembro_set.all()
             tipo = TipoMiembro.objects.get(nombre__iexact='visita')
             visitantes = []
             for mg in miembrosGrupo:
-                ct = list(CambioTipo.objects.filter(miembro=mg).order_by('id'))
-                if len(ct) != 0 and ct is not None:
+                ct = CambioTipo.objects.filter(miembro=mg).order_by('id')
+                if ct.exists():
                     ct = ct.pop()
                     if (ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (
                        ct.miembro.observacionLlamadaLider == '' or

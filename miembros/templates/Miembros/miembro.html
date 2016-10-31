@@ -1,6 +1,9 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
 {% block contenido %}
+{% if not grupo.get_posicion %}
+{% endif %}
 <div class="container">
     {% if empleado %}
     <div class="card-body card-padding">
@@ -140,3 +143,15 @@
 </div>
 {% endblock %} 
 
+
+{% block js %}
+<script>
+    {% if not grupo.get_position %}
+    $(document).ready(function() {
+        console.log("llegue");
+        $('#toggleModal').click();
+    })
+    {% endif %}
+</script>
+</script>
+{% endblock js %}

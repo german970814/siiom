@@ -37,7 +37,7 @@ def llenar_parent_grupos(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grupos', '0005_auto_20160927_1746'),
+        ('grupos', '0007_auto_20161031_1028'),
         ('miembros', '0013_auto_20160616_1632'),
     ]
 

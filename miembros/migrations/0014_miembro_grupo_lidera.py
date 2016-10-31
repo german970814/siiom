@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grupos', '0006_llenar_grupo_parent_20160927_1747'),
+        ('grupos', '0007_auto_20161031_1028'),
         ('miembros', '0013_auto_20160616_1632'),
     ]
 
@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='miembro',
             name='grupo_lidera',
-            field=models.ForeignKey(related_name='lideres', null=True, verbose_name='grupo que lidera', blank=True, to='grupos.Grupo'),
+            field=models.ForeignKey(related_name='lideres', blank=True, verbose_name='grupo que lidera', to='grupos.Grupo', null=True),
         ),
     ]

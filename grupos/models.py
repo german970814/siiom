@@ -3,6 +3,7 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _lazy
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
+from consolidacion.utils import clean_direccion
 from .managers import GrupoManager, GrupoQuerySet
 
 
@@ -71,6 +72,10 @@ class Grupo(AL_Node):
     class Meta:
         verbose_name = _lazy('grupo')
         verbose_name_plural = _lazy('grupos')
+
+    # campos para ubicaciones en mapas
+    latitud = models.FloatField(verbose_name='Latitud', blank=True, null=True)
+    longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     def __str__(self):
         lideres = ["{0} {1}({2})".format(
@@ -221,6 +226,12 @@ class Grupo(AL_Node):
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
+    # TODO cambiar despues de commit
+    def get_nombre(self):
+        if self.lider2 is not None:
+            return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())
+        return self.lider1.primerApellido.upper()
+
     def listaLideres(self):
         """
         Devuelve una lista con los ids de los lideres del grupo.
@@ -245,6 +256,23 @@ class Grupo(AL_Node):
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         miembros = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='miembro').values('miembro')
         return self.miembro_set.filter(id__in=miembros).exclude(id__in=lideres)
+
+    def get_direccion(self):
+        """
+        Retorna la direccion de manera legible para los buscadores de mapas
+        """
+        if self.get_position() is None:
+            return clean_direccion(self.direccion)
+        else:
+            return ','.join([str(x) for x in self.get_position()])
+
+    def get_position(self):
+        """
+        Retorna las coordenadas de un grupo o None
+        """
+        if self.latitud is not None and self.longitud is not None:
+            return [self.latitud, self.longitud]
+        return None
 
 
 class Predica(models.Model):

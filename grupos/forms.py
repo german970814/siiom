@@ -430,3 +430,14 @@ class TransladarGrupoForm(forms.Form):
 
     def transladar(self):
         self.grupo.transladar(self.cleaned_data['nuevo'])
+
+
+class FormularioSetGeoPosicionGrupo(CustomModelForm):
+    class Meta:
+        model = Grupo
+        fields = ('latitud', 'longitud', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['latitud'].required = True
+        self.fields['longitud'].required = True

@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('miembros', '0014_miembro_grupo_lidera'),
-        ('grupos', '0006_llenar_grupo_parent_20160927_1747'),
+        ('grupos', '0008_llenar_grupo_parent_20161031_1033'),
     ]
 
     operations = [
