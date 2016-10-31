@@ -226,11 +226,11 @@ class Grupo(AL_Node):
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
-    # TODO cambiar despues de commit
     def get_nombre(self):
-        if self.lider2 is not None:
-            return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())
-        return self.lider1.primerApellido.upper()
+        # if self.lider2 is not None:
+        #     return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())
+        # return self.lider1.primerApellido.upper()
+        return self.nombre
 
     def listaLideres(self):
         """

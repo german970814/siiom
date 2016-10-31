@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),  # revisada
     url(r'^ver_reportes/$', views.ver_reportes_grupo, name="reportes_grupo"),  # revisada
     url(r'^editar_reporte/(?P<pk>\d+)$', views.editar_runion_grupo, name="editar_reporte"),  # revisada
-    url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),
+    url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),  # revisada
 
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
     url(r'^redes/(?P<pk>\d+)/$', views.listar_grupos, name='listar'),
