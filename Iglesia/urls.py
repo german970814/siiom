@@ -18,6 +18,7 @@ urlpatterns = patterns(
     url(r'^resultado/(grupo|miembro)/$', resultadoBusqueda),
     url(r'^miembro/', include("miembros.urls", namespace='miembros')),
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),
+    url(r'^academia/', include("academia.urls", namespace='academia')),
     url(r'^reportes/', include("reportes.urls")),
     url(r'^encuentro/', include("encuentros.urls")),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
@@ -28,11 +29,6 @@ urlpatterns = patterns(
     # url(r'^mapa/$', mapa, name="mapa"),
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
     # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
-)
-
-urlpatterns += patterns(
-    '',
-    url(r'^academia/', include("academia.urls")),
 )
 
 if settings.DEBUG:
