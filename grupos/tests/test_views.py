@@ -568,3 +568,60 @@ class ConfirmarOfrendaDiscipuladoViewTest(BaseTest):
         self.sin_confirmar.refresh_from_db()
         self.assertRedirects(response, self.URL)
         self.assertTrue(self.sin_confirmar.confirmacionEntregaOfrenda)
+
+
+class DetalleGrupoViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista de detalle de un grupo.
+    """
+
+    URL_NAME = 'grupos:detalle'
+
+    def setUp(self):
+        self.usuario = UsuarioFactory(user_permissions=['buscar_todos'])
+
+    def test_get_grupo_no_existe_devuelve_404(self):
+        """
+        Prueba que si se envia un grupo que no existe la vista devuelve un status code de 404.
+        """
+
+        self.login_usuario(self.usuario)
+        response = self.client.get(reverse(self.URL_NAME, args=[1000]))
+        self.assertRaises(Http404)
+
+    def test_get_grupo_muestra_info_grupo(self):
+        """
+        prueba que se muestre la información del grupo ingresado.
+        """
+
+        grupo = GrupoFactory()
+        self.login_usuario(self.usuario)
+        response = self.client.get(reverse(self.URL_NAME, args=[grupo.id]))
+
+        self.assertContains(response, str(grupo))
+
+    def test_lider_get_grupo_no_descendiente_devuelve_403(self):
+        """
+        Prueba que si el usuario no tiene el permiso buscar_todos y grupo ingresado no hace parte de sus descendientes
+        devuelva permiso denegado.
+        """
+
+        self.crear_arbol()
+        grupo = Grupo.objects.get(id=300)
+        lider = grupo.lideres.first()
+
+        self.login_usuario(lider.usuario)
+        response = self.client.get(reverse(self.URL_NAME, args=[100]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_lider_sin_grupo_devuelve_403(self):
+        """
+        Prueba que si el usuario no lidera grupo y no tiene el permiso buscar_todos devuelva permiso denegado.
+        """
+
+        grupo = GrupoFactory()
+        lider = MiembroFactory(lider=True)
+        self.login_usuario(lider.usuario)
+        response = self.client.get(reverse(self.URL_NAME, args=[grupo.id]))
+
+        self.assertEqual(response.status_code, 403)

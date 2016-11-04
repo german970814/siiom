@@ -57,7 +57,7 @@
 					<div class="lv-item media">
 						<div class="media-body">
 							<div class="lv-title">
-								<a href="#">{{ resultado|upper }}</a>
+								<a href="{% url 'grupos:detalle' resultado.pk %}">{{ resultado|upper }}</a>
 							</div>
 							<small class="lv-small">{{ resultado.direccion|upper }}, {{ resultado.horaGAR }}, {{ resultado.nombre|upper }} ({{ resultado.get_estado_display|upper }})</small>
 						</div>

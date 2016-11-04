@@ -9,7 +9,7 @@ from django.views.generic import TemplateView, CreateView
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, render, redirect
 from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -630,6 +630,25 @@ def grupo_raiz(request):
         form = GrupoRaizForm(instance=raiz)
 
     return render(request, 'grupos/grupo_raiz.html', {'form': form})
+
+
+@login_required
+@permisos_requeridos('miembros.buscar_todos', 'miembros.es_lider')
+def detalle_grupo(request, pk):
+    """
+    Permite ver el detalle de un grupo. Si el usuario no puede buscar todos solo podrá ver sus descendientes.
+    """
+
+    grupo = get_object_or_404(Grupo, pk=pk)
+    if not request.user.has_perm('miembros.buscar_todos'):
+        grupo_lidera = Miembro.objects.get(usuario=request.user).grupo_lidera
+        if grupo_lidera:
+            if not grupo.is_descendant_of(grupo_lidera) and grupo_lidera != grupo:
+               raise PermissionDenied
+        else:
+            raise PermissionDenied
+
+    return render(request, 'grupos/detalle_grupo.html', {'grupo': grupo})
 
 
 @login_required
