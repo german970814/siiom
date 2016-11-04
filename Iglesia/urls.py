@@ -1,9 +1,11 @@
+import views
+
 from django.conf.urls import include, patterns, url
 from django.views.generic import RedirectView
 from django.contrib import admin
+from django.conf import settings
 from miembros.views import autenticarUsario, salir, administracion, recuperar_contrasena
 from views import resultadoBusqueda, without_perms, mapa
-from django.conf import settings
 admin.autodiscover()
 RedirectView.permanent = True
 handler404 = 'views.custom_404'
@@ -26,6 +28,7 @@ urlpatterns = patterns(
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),  # revisada
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),  # revisada
     url(r'^dont_have_permissions/$', without_perms, name="sin_permiso"),  # revisada
+    url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar')
     # url(r'^mapa/$', mapa, name="mapa"),
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
     # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
