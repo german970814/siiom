@@ -5,7 +5,7 @@ from django.views.generic import RedirectView
 from django.contrib import admin
 from django.conf import settings
 from miembros.views import autenticarUsario, salir, administracion, recuperar_contrasena
-from views import resultadoBusqueda, without_perms, mapa
+
 admin.autodiscover()
 RedirectView.permanent = True
 handler404 = 'views.custom_404'
@@ -17,7 +17,6 @@ urlpatterns = patterns(
     url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),  # revisada
     url(r'^administracion/$', administracion, name="administracion"),  # revisada
     url(r'^salir/$', salir),  # revisada
-    url(r'^resultado/(grupo|miembro)/$', resultadoBusqueda),
     url(r'^miembro/', include("miembros.urls", namespace='miembros')),  # revisada
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),  # revisada
     url(r'^academia/', include("academia.urls", namespace='academia')),  # revisada
@@ -27,9 +26,10 @@ urlpatterns = patterns(
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),  # revisada
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),  # revisada
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),  # revisada
-    url(r'^dont_have_permissions/$', without_perms, name="sin_permiso"),  # revisada
+    url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),  # revisada
+
     url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar')
-    # url(r'^mapa/$', mapa, name="mapa"),
+    # url(r'^mapa/$', views.mapa, name="mapa"),
     # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
     # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
 )

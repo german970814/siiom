@@ -238,8 +238,7 @@
         {% if mi %}
         <div id="top-search-wrap">
             <div class="tsw-inner">
-            <form action="/resultado/miembro/" method="POST">
-                {% csrf_token %}
+            <form action="{% url 'buscar' 'miembro' %}" method="GET">
                 <i id="top-search-close" class="zmdi zmdi-arrow-left"></i>
                 <input name="buscar" type="text" placeholder="Buscar Grupo o Miembro...">
             </form>
