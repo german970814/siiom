@@ -18,7 +18,7 @@ from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
 from reportes.forms import FormularioRangoFechas
-from common.forms import CustomModelForm
+from common.forms import CustomModelForm, CustomForm
 
 
 class FormularioReunionGARBase(forms.ModelForm):
@@ -411,12 +411,11 @@ class EditarGrupoForm(NuevoGrupoForm):
             return None
 
 
-class TransladarGrupoForm(forms.Form):
+class TransladarGrupoForm(CustomForm):
     """
     Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.
     """
 
-    error_css_class = 'has-error'
     nuevo = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, grupo, *args, **kwargs):

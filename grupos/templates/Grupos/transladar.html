@@ -8,14 +8,7 @@
             <h1 class="f-700">
                 <legend><h3>{% trans 'Trasladar Grupo' %} {{ grupo.nombre|upper }}</h3></legend>
             </h1>
-            {% if ok %}
-            <div class="row">
-                <div class="alert alert-success alert-dismissible" role="alert">
-                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>{% trans 'Se ha trasladado el grupo correctamente' %}.</p>
-                </div>
-            </div>
-            {% endif %}
+            
             {% if messages %}
             <div class="row">
                 {% for message in messages %}
@@ -60,9 +53,7 @@
                                 <label for="id_grupo" class="control-label requerido">{% trans 'Grupo a trasladar' %}*:</label>
                                 {{ form.nuevo }}
                             </div>
-                            {% for err in form.nuevo.errors %}
-                                <small class="help-block">{{ err }}</small>
-                            {% endfor %}
+                            {{ form.nuevo.errors }}
                         </div>
                     </div>
                     <br class="space">

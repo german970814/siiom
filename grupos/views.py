@@ -644,7 +644,7 @@ def detalle_grupo(request, pk):
         grupo_lidera = Miembro.objects.get(usuario=request.user).grupo_lidera
         if grupo_lidera:
             if not grupo.is_descendant_of(grupo_lidera) and grupo_lidera != grupo:
-               raise PermissionDenied
+                raise PermissionDenied
         else:
             raise PermissionDenied
 
