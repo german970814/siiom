@@ -212,6 +212,16 @@ class Grupo(AL_Node):
 
         return self.reuniondiscipulado_set.filter(confirmacionEntregaOfrenda=False)
 
+    @property
+    def grupos_red(self):
+        """
+        Devuelve un queryset con los grupos de la red del grupo actual. Entiéndase por red los descendientes del grupo
+        actual incluyéndose asimismo.
+        """
+
+        from .utils import convertir_lista_a_queryset
+        return convertir_lista_a_queryset(self.get_tree(self))
+
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
         Confirma la ofrenda de las reuniones GAR ingresadas en la lista. Reuniones es una lista con los ids de las

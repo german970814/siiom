@@ -159,3 +159,14 @@ class GrupoModelTest(BaseTest):
 
         self.assertTrue(no_confirmada1.confirmacionEntregaOfrenda)
         self.assertFalse(no_confirmada2.confirmacionEntregaOfrenda)
+
+    def test_grupos_red(self):
+        """
+        Prueba que me devuelva los grupos de la red del grupo escogido.
+        """
+
+        grupo = Grupo.objects.get(id=500)
+        red = grupo.grupos_red
+
+        self.assertEqual(grupo, red[0])
+        self.assertEqual(600, red[1].id)
