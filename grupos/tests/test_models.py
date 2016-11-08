@@ -29,6 +29,16 @@ class GrupoModelTest(BaseTest):
         lista_obtenida = Grupo.obtener_arbol()
         self.assertListEqual(lista_obtenida, self.lista_arbol_completo)
 
+    def test_obtener_ruta(self):
+        """
+        Prueba que la lista obtenida sea igual a la lista de ruta.
+        """
+
+        ruta = Grupo.objects.filter(id__in=[300, 500, 600]).order_by('id')
+        ruta_obtenida = Grupo.obtener_ruta(ruta[0], ruta[2])
+
+        self.assertListEqual(ruta_obtenida, list(ruta))
+
     def test_obtener_arbol_padre_especifico(self):
         """
         Prueba que la lista obtenida sea igual a la lista del arbol de un padre especifico.

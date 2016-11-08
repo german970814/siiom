@@ -171,6 +171,23 @@ class Grupo(AL_Node):
 
         return arbol
 
+    @classmethod
+    def obtener_ruta(cls, inicial, final):
+        """
+        Devuelve una lista con los grupos que conforman la ruta que hay desde el grupo inicial al grupo final
+        incluyendo estos grupos.
+        """
+
+        ruta = []
+        grupo = final
+
+        while grupo != inicial:
+            ruta.insert(0, grupo)
+            grupo = grupo.get_parent()
+
+        ruta.insert(0, inicial)
+        return ruta
+
     @property
     def discipulos(self):
         """
