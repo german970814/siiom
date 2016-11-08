@@ -116,7 +116,7 @@ class Grupo(AL_Node):
 
     # Deprecado
     @classmethod
-    def obtener_arbol_viejo(cls, raiz=None):
+    def obtener_arbol_viejo(cls, raiz=None):  # pragma: no cover
         """
         Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos.
