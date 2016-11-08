@@ -123,7 +123,7 @@ def asignacionGAR(request):
             # num_noInteresadoGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
             #                                              noInteresadoGAR=True).count()
 
-            num_noAsignadoGAR = num_miembros - num_AsignadoGAR - num_asisteGAR - num_noInteresadoGAR
+            num_noAsignadoGAR = abs(num_miembros - num_AsignadoGAR - num_asisteGAR - num_noInteresadoGAR)
 
             values.append(['Por asignar GAR', num_noAsignadoGAR])
             values.append(['Asignado GAR', num_AsignadoGAR])
@@ -272,6 +272,7 @@ def visitasPorMes(request, por_red):
     return render_to_response('reportes/visitas_por_mes.html', locals(), context_instance=RequestContext(request))
 
 
+# TODO La asistncia GAR ya no se registra por lo tanto esto no se puede reportar. Preguntar si eliminar
 @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def asistenciaGrupos(request):
     """Muestra la asistencia de los miembros de un grupo de amistad a las reuniones."""
@@ -282,7 +283,7 @@ def asistenciaGrupos(request):
         if form.is_valid():
             fechai = form.cleaned_data['fechai']
             fechaf = form.cleaned_data['fechaf']
-            grupo_lidera = miembro.grupoLidera()
+            grupo_lidera = miembro.grupo_lidera
 
             if grupo_lidera is not None:
                 reuniones = ReunionGAR.objects.filter(grupo=grupo_lidera,
@@ -349,21 +350,23 @@ def pasosPorMiembros(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         #  listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
     pasos = Pasos.objects.all().order_by('prioridad')
     descendientes = False
 
     if request.method == 'POST':
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
-            lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
+            # lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
             # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            grupos = listaGruposDescendientes(lider_i)
+            # grupos = listaGruposDescendientes(lider_i)
+            grupos = Grupo.get_tree(grupo_i)
             data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
             return HttpResponse(json.dumps(data), content_type="application/json")
 
@@ -371,11 +374,14 @@ def pasosPorMiembros(request):
             grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
             if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                 descendientes = True
-                grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                # grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                grupos = Grupo.get_tree(grupo_i)
             else:
                 grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-                listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
-                grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                # listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                listaGrupo_f = Grupo.get_tree(grupo_i)
+                # grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
 
             for g in grupos:
                 miembros_grupo = g.miembrosGrupo().order_by('nombre', 'primerApellido')

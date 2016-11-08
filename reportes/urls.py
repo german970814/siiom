@@ -1,15 +1,16 @@
 from django.conf.urls import include, patterns, url
 from .views import *
+from . import views
 
 urlpatterns = [
-    url(r'^visitas_por_red/$', visitasAsignadasRedes, name="visitas_por_red"),
-    url(r'^asignacion_gar/$', asignacionGAR, name="asignacion_gar"),
-    url(r'^primera_llamada/$', detalleLlamada, {'llamada': 1}, name="primera_llamada"),
-    url(r'^segunda_llamada/$', detalleLlamada, {'llamada': 2}, name="segunda_llamada"),
-    url(r'^visitas_por_mes/$', visitasPorMes, {'por_red': False}, name="visitas_por_mes"),
-    url(r'^visitas_red_por_mes/$', visitasPorMes, {'por_red': True}, name="visitas_red_por_mes"),
-    url(r'^asistencia_reuniones/$', asistenciaGrupos, name="asistencia_reuniones"),
-    url(r'^miembros_y_pasos/$', pasosPorMiembros, name="miembros_y_pasos"),
+    url(r'^visitas_por_red/$', views.visitasAsignadasRedes, name="visitas_por_red"),  # revisada
+    url(r'^asignacion_gar/$', views.asignacionGAR, name="asignacion_gar"),  # revisada
+    url(r'^primera_llamada/$', views.detalleLlamada, {'llamada': 1}, name="primera_llamada"),  # revisada
+    url(r'^segunda_llamada/$', views.detalleLlamada, {'llamada': 2}, name="segunda_llamada"),  # revisada
+    url(r'^visitas_por_mes/$', views.visitasPorMes, {'por_red': False}, name="visitas_por_mes"),  # revisada
+    url(r'^visitas_red_por_mes/$', views.visitasPorMes, {'por_red': True}, name="visitas_red_por_mes"),  # revisada
+    url(r'^asistencia_reuniones/$', views.asistenciaGrupos, name="asistencia_reuniones"),  # revisada la asistencia ya no se lleva
+    url(r'^miembros_y_pasos/$', views.pasosPorMiembros, name="miembros_y_pasos"),  # revisada
     url(r'^pasos_totales/$', PasosTotales, name="pasos_totales"),
     url(r'^pasos_rango_fechas/$', PasosRangoFecha, name="pasos_rango_fechas"),
     url(r'^estadistico_reunionesGAR/$', estadistico_reuniones_gar, name="estadistico_reunionesGAR"),
