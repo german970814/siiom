@@ -33,12 +33,12 @@
 		                </div>
 		            </div>
 				{% endfor %}
-			{% endif %}	
+			{% endif %}
 		</div>
-		<form action="" method="POST" enctype="multipart/form-data">
+		<form action="" method="POST" id="formulario-empleado" enctype="multipart/form-data">
 			{% csrf_token %}
-			<div class="card-body card-padding">
-				<div class="row">
+			  <div class="card-body card-padding">
+				    <div class="row">
 	                <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.correo.css_classes }}">
 	                        <span class="input-group-addon">
@@ -87,6 +87,21 @@
 	            <br>
 	            <br class="space-down">
 	            <div class="row">
+                  <div class="col-md-4">
+                      <div class="input-group fg-float {{ form.cedula.css_classes }}">
+                          <span class="input-group-addon">
+                              <i class="zmdi zmdi-card"></i>
+                          </span>
+                          <div class="fg-line requerido">
+                              <label for="{{ form.cedula.id_for_label }}" class="control-label requerido">{{ form.cedula.label }}:</label>
+                              {{ form.cedula }}
+                          </div>
+                          {% for error in form.cedula.errors %}
+                            <small class="help-block">{{error}}</small>
+                          {% endfor %}
+                      </div>
+                  </div>
+                  <br class="space">
 	                <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.tipo_usuario.css_classes }}">
 	                        <span class="input-group-addon">
@@ -103,6 +118,24 @@
 	                </div>
 	                <br class="space">
 	                <div class="col-md-4">
+	                    <div class="input-group fg-float {{ form.departamento.css_classes }}">
+	                        <span class="input-group-addon">
+	                            <i class="zmdi zmdi-accounts"></i>
+	                        </span>
+	                        <div class="fg-line requerido">
+	                            <label for="{{ form.departamento.id_for_label }}" class="control-label requerido">{{ form.departamento.label }}:</label>
+	                            {{ form.departamento }}
+	                        </div>
+	                        {% for error in form.departamento.errors %}
+	                        	<small class="help-block">{{ error }}</small>
+	                        {% endfor %}
+	                    </div>
+	                </div>
+              </div>
+              <br >
+              <br class="space-down">
+              <div class="row">
+	                <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.areas.css_classes }}">
 	                        <span class="input-group-addon">
 	                            <i class="zmdi zmdi-share"></i>
@@ -117,25 +150,7 @@
 	                    </div>
 	                </div>
 	                <br class="space">
-	                <div class="col-md-4">
-	                    <div class="input-group fg-float {{ form.cedula.css_classes }}">
-	                        <span class="input-group-addon">
-	                            <i class="zmdi zmdi-card"></i>
-	                        </span>
-	                        <div class="fg-line requerido">
-	                            <label for="{{ form.cedula.id_for_label }}" class="control-label requerido">{{ form.cedula.label }}:</label>
-	                            {{ form.cedula }}
-	                        </div>
-	                        {% for error in form.cedula.errors %}
-	                        	<small class="help-block">{{error}}</small>
-	                        {% endfor %}
-	                    </div>
-	                </div>
-	            </div>
-	            <br>
-	            <br class="space-down">
-	            <div class="row">
-	                <div class="col-md-4">
+                  <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.primer_nombre.css_classes }}">
 	                        <span class="input-group-addon">
 	                            <i class="zmdi zmdi-account"></i>
@@ -150,7 +165,7 @@
 	                    </div>
 	                </div>
 	                <br class="space">
-	                <div class="col-md-4">
+                  <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.segundo_nombre.css_classes }}">
 	                        <span class="input-group-addon">
 	                            <i class="zmdi zmdi-account"></i>
@@ -164,7 +179,10 @@
 	                        {% endfor %}
 	                    </div>
 	                </div>
-	                <br class="space">
+	            </div>
+	            <br>
+	            <br class="space-down">
+	            <div class="row">
 	                <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.primer_apellido.css_classes }}">
 	                        <span class="input-group-addon">
@@ -179,11 +197,8 @@
 	                        {% endfor %}
 	                    </div>
 	                </div>
-	            </div>
-                <br>
-                <br>
-                <div class="row">
-	                <div class="col-md-4">
+                  <br class="space">
+                  <div class="col-md-4">
 	                    <div class="input-group fg-float {{ form.segundo_apellido.css_classes }}">
 	                        <span class="input-group-addon">
 	                            <i class="zmdi zmdi-account"></i>
@@ -197,14 +212,47 @@
 	                        {% endfor %}
 	                    </div>
 	                </div>
-                	<br class="space">
-                </div>
+                  <br class="space">
+                  <div class="col-md-4">
+	                    <div class="input-group fg-float {{ form.jefe_departamento.css_classes }}">
+                          <label for="{{ form.jefe_departamento.id_for_label }}" class="checkbox">
+                              {{ form.jefe_departamento }}
+                              <i class="input-helper m-r-20"></i>
+                              {{ form.jefe_departamento.label }}
+                          </label>
+	                        {% for error in form.jefe_departamento.errors %}
+	                        	<small class="help-block">{{error}}</small>
+	                        {% endfor %}
+	                    </div>
+	                </div>
+                  <br class="space">
+	            </div>
+				<br>
+				<br class="space-down">
+				<div class="row">
+					<div class="col-md-4">
+	                  <div class="input-group fg-float {{ form.cargo.css_classes }}">
+	                      <span class="input-group-addon">
+	                          <i class="zmdi zmdi-pin-account"></i>
+	                      </span>
+	                      <div class="fg-line requerido">
+	                          <label for="{{ form.cargo.id_for_label }}" class="control-label requerido">{{ form.cargo.label }}:</label>
+	                              {{ form.cargo }}
+	                      </div>
+	                      {% for error in form.cargo.errors %}
+	                          <small class="help-block">{{error}}</small>
+	                      {% endfor %}
+	                  </div>
+	              </div>
+				</div>
+                <br>
+                <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <button type="submit" value="Aceptar" name="aceptar" class="btn btn-primary btn-block">Aceptar</button>
                     </div>
                 </div>
-			</div>
+			      </div>
         </form>
 	</div>
 </div>
@@ -213,6 +261,52 @@
 {% block js %}
 <script>
 	jQuery(document).ready(function($) {
+
+    $('#{{ form.departamento.id_for_label }}').change(function(event){
+        $.ajax({
+          type: 'POST',
+          data: {},
+          url: "{% url 'compras:get_areas_by_departamento_json' 0 %}".replace('0', $(this).val()),
+          success: function(data) {
+              var opciones = '';
+              data.forEach(function(item){
+                  opciones += '<option value="' + item['id'] + '">' + item['area'] + '</option>';
+              });
+              //$("#"+idCombo).empty();
+              $('#{{ form.areas.id_for_label }}').html(opciones);
+              $('#{{ form.areas.id_for_label }}').trigger('chosen:updated');
+              $('#{{ form.areas.id_for_label }}').selectpicker('refresh');
+          },
+
+        }).fail(function(){
+            var opciones = '';
+            $('#{{ form.areas.id_for_label }}').html(opciones);
+            $('#{{ form.areas.id_for_label }}').trigger('chosen:updated');
+            $('#{{ form.areas.id_for_label }}').selectpicker('refresh');
+        })
+
+    });
+
+    $('#{{ form.jefe_departamento.id_for_label }}').change(function(event) {
+        if ($(this).is(':checked')) {
+            $('#{{ form.areas.id_for_label }}').attr('disabled', true);
+            $('#{{ form.areas.id_for_label }}').selectpicker('refresh');
+        } else {
+            $('#{{ form.areas.id_for_label }}').attr('disabled', false);
+            $('#{{ form.areas.id_for_label }}').selectpicker('refresh');
+        }
+    });
+
+    $('#formulario-empleado').submit(function(event){
+        if ($('#{{ form.areas.id_for_label }}').prop('disabled')) {
+            var opciones = '';
+            $('#{{ form.areas.id_for_label }}').html(opciones);
+            $('#{{ form.areas.id_for_label }}').trigger('chosen:updated');
+            $('#{{ form.areas.id_for_label }}').prop('disabled', false)
+            $('#{{ form.areas.id_for_label }}').selectpicker('refresh');
+        }
+    });
+
 		if ($('#contrasena').hasClass('has-error')) {
             $('#id_contrasena').on('keydown', function() {
                 $('#contrasena').removeClass('has-error');
@@ -253,7 +347,7 @@
                         } else {
                             receptor.addClass('has-warning');
                         }
-                    } 
+                    }
                 }
                 setTimeout(listen, 200);
             });

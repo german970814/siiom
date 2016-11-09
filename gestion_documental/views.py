@@ -217,7 +217,7 @@ def empleado_area_json(request):
 
 
 @waffle_switch('gestion_documental')
-@permission_required('organizacional.buscar_registros')
+@login_required
 def busqueda_registros(request):
     """
     Vista para realizar la busqueda de registros

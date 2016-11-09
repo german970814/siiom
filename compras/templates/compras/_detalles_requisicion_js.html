@@ -1,0 +1,163 @@
+<script>
+	jQuery(document).ready(function($) {
+        $('.row.infor').fadeOut();
+        $('.to_hidden').fadeOut();
+        $("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
+            $('.proceso').click(function(event) {
+                var $id = $(this).attr('data-row-id');
+                $('input[name="id_requisicion"]').val($id);
+
+                $.ajax({
+                    url: '{% url "compras:detalles_requisicion_api" 0 %}'.replace('0', $id),
+                    type: 'GET',
+                    success: function(data) {
+                        var arr = ['cantidad', 'descripcion', 'referencia', 'marca', 'valor_aprobado', 'total_aprobado', 'forma_pago'];
+                        var to_append = '';
+                        var suma_total = 0;
+                        for (var i = 0; i < data[0].length; i++) {
+                            var tr = '<tr class="!">0</tr>';
+                            var tds = '';
+                            var cls = '';
+                            for (var j = 0; j < arr.length; j++) {
+                                tds += '<td>0</td>'.replace('0', data[0][i][arr[j]])
+                                if (arr[j] == 'total_aprobado') {
+                                    suma_total += data[0][i][arr[j]]
+                                }
+                                cls = data[0][i]['class']
+                            }
+                            to_append += tr.replace('!', cls).replace('0', tds);
+
+                            if (i + 1 == data[0].length) {
+                                var tds = '';
+                                var tr = '<tr class="!">0</tr>';
+                                for (var x = 0; x < arr.length - 2; x++) {
+                                    tds += '<td></td>'
+                                }
+                                tds += '<td>0</td>'.replace('0', suma_total.toString())
+                                tds += '<td></td>'
+                                to_append += tr.replace('!', 'total').replace('0', tds)
+                            }
+                        }
+                        $("#table-body").html(to_append);
+
+                        $("#justificacion-req").html('<p>0</p>'.replace('0', data[1][0]['justificacion']))
+
+                        if (data[2].length) {
+                            if (data[2][0]['fecha_pago'] != undefined && data[2][0]['fecha_pago'] != '') {
+                                $('.row.infor').fadeIn();
+                                var fecha = 'Fecha aprobada entrega de recurso: <strong>0</strong> ';
+                                var estado = ', Estado de pago: <strong>0</strong>';
+                                var string = '';
+                                string += fecha.replace('0', data[2][0]['fecha_pago']);
+                                if (data[2][0]['estado_pago'] != undefined && data[2][0]['estado_pago'] != '') {
+                                    string += estado.replace('0', data[2][0]['estado_pago'])
+                                }
+                                $('.info-pago').html(string);
+                                if (data[2][0]['class'] == 'warning') {
+                                    if ($('.info-pago').parent().hasClass('alert-info')) {
+                                        $('.info-pago').parent().removeClass('alert-info');
+                                    }
+                                    $('.info-pago').parent().addClass('alert-warning');
+                                } else {
+                                    if ($('.info-pago').parent().hasClass('alert-warning')) {
+                                        $('.info-pago').parent().removeClass('alert-warning')
+                                    }
+                                    $('.info-pago').parent().addClass('alert-info')
+                                }
+                            } else {
+                                $('.row.infor').fadeOut();
+                            }
+                        }
+                    }
+                })
+                $.ajax({
+                    url: '{% url "compras:observaciones_requisicion" 0 %}'.replace('0', $id),
+                    type: 'GET',
+                    success: function(data) {
+                        var arr = ['observacion', 'usuario'];
+                        var div = '<div class="col-md-8">0</div>';
+                        var h5 = '<h5>0</h5>';
+                        var to_append = '';
+                        var br = '<br />';
+                        var quote = '<blockquote>0</blockquote>';
+                        var span = '<span style="text-align:right;display:inherit;font-style:italic;font-size:14px">0</span>';
+
+                        $('#progress-id').attr('style', 'width: 0%'.replace('0', data[0][0]['progreso'])).attr('aria-valuenow', '0'.replace('0', data[0][0]['progreso'])).attr('data-content', '0%'.replace('0', data[0][0]['progreso']));
+                        if (data[0][0]['clase'] != undefined && data[0][0]['clase'].length) {
+                            if (data[0][0]['clase'] != '') {
+                                if ($('#progress-id').hasClass('progress-bar-success') || $('#progress-id').hasClass('progress-bar-danger') || $('#progress-id').hasClass('progress-bar-warning') || $('#progress-id').hasClass('progress-bar-info')) {
+                                    $('#progress-id').removeClass('progress-bar-danger');
+                                    $('#progress-id').removeClass('progress-bar-warning');
+                                    $('#progress-id').removeClass('progress-bar-success');
+                                    $('#progress-id').removeClass('progress-bar-info');
+                                }
+                                $('#progress-id').addClass(data[0][0]['clase']);
+                            } else {
+                                $('#progress-id').removeClass('progress-bar-danger');
+                                $('#progress-id').removeClass('progress-bar-warning');
+                                $('#progress-id').removeClass('progress-bar-success');
+                                $('#progress-id').removeClass('progress-bar-info');
+                                $('#progress-id').addClass('progress-bar-warning');
+                            }
+                        } else {
+                            $('#progress-id').removeClass('progress-bar-danger');
+                            $('#progress-id').removeClass('progress-bar-warning');
+                            $('#progress-id').removeClass('progress-bar-success');
+                            $('#progress-id').removeClass('progress-bar-info');
+                            $('#progress-id').addClass('progress-bar-info');
+                        }
+
+                        for (var i = 0; i < data[1].length; i++) {
+                            str = h5.replace('0', data[1][i]['usuario']) + br + quote.replace('0', data[1][i]['observacion'] + span.replace('0', data[1][i]['fecha']));
+                            to_append += div.replace('0', str);
+                        }
+
+                        $('#contenido').html(to_append)
+
+                        if (data.length > 2 && data[2].length) {
+                            var li = '<li><a href="0" _blank="true">!</a></li>';
+                            var append = '';
+                            for (var i = 0; i < data[2].length; i++){
+                                append += li.replace('0', data[2][i]['ruta']).replace('!', data[2][i]['archivo'])
+                            }
+                            $('#archivos').fadeIn();
+                            $('#archivos_list').html(append);
+                        } else {
+                            $('#archivos').fadeOut();
+                        }
+                    },
+                });
+                {% if not empleado %}
+                $.ajax({
+                    {% if jefe %}
+                    url: '{% url "compras:requisicion_comentada_api" 0 %}'.replace('0', $id),
+                    {% elif compras %}
+                    url: '{% url "compras:requisicion_comentada_compras_api" 0 %}'.replace('0', $id),
+                    {% elif jefe_administrativo %}
+                    url: '{% url "compras:requisicion_comentada_jefe_administrativo_api" 0 %}'.replace('0', $id),
+                    {% elif presidencia %}
+                    url: '{% url "compras:requisicion_comentada_presidencia_api" 0 %}'.replace('0', $id),
+                    {% endif %}
+                    type: 'GET',
+                    success: function (data) {
+                        if (data.length) {
+                            if (eval(data)){
+                                $('.to_hidden').fadeOut();
+                            } else {
+                                $('.to_hidden').fadeIn();
+                            }
+                        }
+                    }
+                })
+                {% endif %}
+                $('#toggleModal').click();
+            })
+
+
+            {% if CLICK %}
+            var $id_to_error = '{{ CLICK }}';
+            $('tr[data-row-id="' + $id_to_error + '"]').find('button.proceso').click();
+            {% endif %}
+        });
+	});
+</script>
