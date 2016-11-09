@@ -154,7 +154,7 @@
         <div class="card-header">
             <h1><legend><h3>Grupos Faltantes por Reporte: {{ form.cleaned_data.grupo.red }}</h3></legend></h1>
         </div>
-        
+
         <div class="table-responsive">
             <form action="" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -171,7 +171,7 @@
                         <tr>
                             <td>{{ grupo.nombre|upper }}</td>
                             <td>
-                                {% for lider in grupo.lideres %}
+                                {% for lider in grupo.lideres.all %}
                                     {% if forloop.first %}
                                         {{ lider.nombre|upper }} {{ lider.primerApellido|upper }}
                                     {% else %}
@@ -179,7 +179,8 @@
                                     {% endif %}
                                 {% endfor %}
                             </td>
-                            <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>
+                            {# <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>#}
+                            <td>{{ grupo.get_parent }}</td>
                             <td>
                                 {% for fecha in grupo.fecha_reunion %}
                                     {% if forloop.first %}
@@ -222,4 +223,3 @@
     {% endif %}
 </div>
 {% endblock %}
-

@@ -30,8 +30,6 @@ urlpatterns = patterns(
 
     url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar')
     # url(r'^mapa/$', views.mapa, name="mapa"),
-    # url(r'^grupo/reportes_reuniones_sin_enviar/$', ConsultarReportesSinEnviar),
-    # url(r'^grupo/consultar_sobres_sin_enviar/$', ConsultarSobresSinEnviar),
 )
 
 if settings.DEBUG:

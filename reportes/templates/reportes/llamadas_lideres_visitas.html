@@ -153,7 +153,7 @@
                                     <tr>
                                         <td>{{ grupo.nombre|capfirst }}</td>
                                         <td>
-                                            {% for lider in grupo.lideres %}
+                                            {% for lider in grupo.lideres.all %}
                                                 {% if forloop.first %}
                                                     {{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}
                                                 {% else %}
