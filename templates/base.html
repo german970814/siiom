@@ -99,6 +99,22 @@
             position: absolute !important;
             left: 1px !important;
         }
+
+        .has-error.fg-float .fg-label {
+            color: #f6675d;
+        }
+
+        .modal-footer button.btn.btn-link.cancelar {
+            margin-top: 20%;
+        }
+
+        blockquote {
+            padding: 9 18px;
+            margin: 0 0 18px;
+            font-size: 16.25;
+            border-left: 5px solid #770f0f;
+        }
+
     </style>
     {% block css %}
     {% endblock %}
@@ -150,6 +166,7 @@
 <a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
     <header id="header" class="clearfix" data-current-skin="blue">
         <ul class="header-inner">
+            {% if request.user.is_authenticated %}
             <li id="menu-trigger" data-trigger="#sidebar">
                 <div class="line-wrap">
                     <div class="line top"></div>
@@ -157,17 +174,20 @@
                     <div class="line bottom"></div>
                 </div>
             </li>
+            {% endif %}
             <li class="logo hidden-xs">
                 <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
+                    {% if request.user.is_authenticated %}
                     <li id="toggle-width">
                         <div class="toggle-switch">
                             <input id="tw-switch" type="checkbox" hidden="hidden" checked='true'>
                             <label for="tw-switch" class="ts-helper"></label>
                         </div>
                     </li>
+                    {% endif %}
                     {% if mi %}
                     <li id="top-search">
                         <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
@@ -248,6 +268,7 @@
     </header>
     <!-- start -->
     <section id="main" data-layout="layout-1">
+        {% if request.user.is_authenticated %}
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
                 <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{dominioIglesia}}.png') !important;">
@@ -583,31 +604,9 @@
                                         <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
                                     </li>
                                     {% endif %}
-                                    {% if perms.organizacional.buscar_registros %}
+                                    {% if request.user.empleado %}
                                     <li>
                                         <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
-                                    </li>
-                                    {% endif %}
-                                    {% if perms.organizacional.es_administrador_sgd %}
-                                    <li class="sub-menu">
-                                        <a href="#">{% trans "Administracion" %}</a>
-                                        <ul>
-                                            <li>
-                                                <a href="{% url 'organizacional:listar_departamentos' %}">{% trans "Listar Departamentos" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'organizacional:listar_areas' %}">{% trans "Listar Áreas" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'sgd:listar_palabras_claves' %}">{% trans "Listar Palabras Claves" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
-                                            </li>
-                                        </ul>
                                     </li>
                                     {% endif %}
                                     {% if perms.gestion_documental.add_registro %}
@@ -627,9 +626,117 @@
                             </li>
                         {% endif %}
                     {% endswitch %}
+                    {% switch "pqr" %}
+                        <li class="sub-menu">
+                            <a href=""><i class="zmdi zmdi-inbox"></i>{% trans "PQR" %}</a>
+                            <ul>
+                                <li>
+                                    <a href="{% url 'pqr:nuevo_caso' %}">{% trans "Hacer una Queja o Sugerencia" %}</a>
+                                </li>
+                                {% if request.user.empleado.pqr_participa %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_empleado' %}">{% trans "Ver Casos Donde Participo" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_servicio_cliente %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_servicio_cliente' %}">{% trans "Ver Casos Sin Atención" %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'pqr:nuevo_caso_servicio_cliente' %}">{% trans "Agregar Caso de Buzón" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_jefe_comercial %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_jefe_comercial' %}">{% trans "Ver Todos los Casos" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if perms.organizacional.es_presidente %}
+                                <li>
+                                    <a href="{% url 'pqr:ver_casos_presidencia' %}">{% trans "Ver casos en presidencia" %}</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endswitch %}
+                    {% switch "compras" %}
+                    {% if request.user.empleado %}
+                        <li class="sub-menu">
+                            <a href=""><i class="zmdi zmdi-shopping-cart"></i>{% trans "Compras" %}</a>
+                            <ul>
+                                {% if request.user.empleado %}
+                                <li>
+                                    <a href="{% url 'compras:crear_requisicion' %}">{% trans "Nueva Requisición" %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_empleado' %}">{% trans "Mis Requisiciones" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.jefe_departamento %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_jefe_departamento' %}">{% trans "Requisiciones de mi Departamento" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_compras %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_compras' %}">{% trans "Requiciones Totales" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_jefe_administrativo %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_jefe_administrativo' %}">{% trans "Requiciones Aprobadas por Compras" %}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'compras:informes_totales_area_departamento' %}">{% trans "Informe por totales" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_jefe_financiero %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_financiero' %}">{% trans "Requiciones Aprobadas por Jefe Administrativo" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if request.user.empleado.is_usuario_pago %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_usuario_pago' %}">{% trans "Requiciones Esperando por pago" %}</a>
+                                </li>
+                                {% endif %}
+                                {% if perms.organizacional.es_presidente %}
+                                <li>
+                                    <a href="{% url 'compras:ver_requisiciones_presidencia' %}">{% trans "Requiciones En Presidencia" %}</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                    {% endswitch %}
+                    {% switch "gestion_documental" or switch "pqr" or switch "compras" %}
+                        {% if perms.organizacional.es_administrador_sgd %}
+                            <li class="sub-menu">
+                                <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Administración Organizacional" %}</a>
+                                <ul>
+                                      <li>
+                                          <a href="{% url 'organizacional:listar_departamentos' %}">{% trans "Listar Departamentos" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'organizacional:listar_areas' %}">{% trans "Listar Áreas" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'sgd:listar_palabras_claves' %}">{% trans "Listar Palabras Claves" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
+                                      </li>
+                                      <li>
+                                          <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
+                                      </li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endswitch %}
                 {% endif %}
             </ul>
         </aside>
+        {% endif %}
         <section id="content">
             {% block contenido %}
             {% endblock %}
@@ -717,7 +824,7 @@
                     spacing: 10,
                     z_index: 1031,
                     delay: 2500,
-                    timer: 1000,
+                    timer: 5000,
                     url_target: '_blank',
                     mouse_over: false,
                     animate: {

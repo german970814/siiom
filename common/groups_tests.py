@@ -51,9 +51,15 @@ def miembroTest(user):
         (Group.objects.get(name__iexact='Maestro') in user.groups.all() or
          LIDER in user.groups.all() or Group.objects.get(name__iexact='Agente') in user.groups.all() or
          Group.objects.get(name__iexact='Receptor') in user.groups.all() or
-         ADMINISTRADOR in user.groups.all() or user.has_perm('organizacional.es_administrador_sgd') or
-         user.has_perm('organizacional.buscar_registros') or user.has_perm('gestion_documental.add_registro'))
+         ADMINISTRADOR in user.groups.all())
     )
+
+
+def miembro_empleado_test(user):
+    """
+    Retorna verdadero si el usuario es miembro o es empleado
+    """
+    return miembroTest(user) or getattr(user, 'empleado', None) is not None
 
 
 def receptorTest(user):

@@ -20,13 +20,16 @@ urlpatterns = patterns(
     url(r'^miembro/', include("miembros.urls", namespace='miembros')),  # revisada
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),  # revisada
     url(r'^academia/', include("academia.urls", namespace='academia')),  # revisada
-    url(r'^reportes/', include("reportes.urls", namespace='reportes')),
+    url(r'^reportes/', include("reportes.urls", namespace='reportes')),  # revisada
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),  # revisada
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),  # revisada
-    url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),  # revisada
-    url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),  # revisada
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),  # revisada
     url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),  # revisada
+
+    url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),  # revisada
+    url(r'^requisiciones/', include("compras.urls", namespace="compras")),
+    url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),  # revisada
+    url(r'^pqr/', include("pqr.urls", namespace="pqr")),
 
     url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar')
     # url(r'^mapa/$', views.mapa, name="mapa"),

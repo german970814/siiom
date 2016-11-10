@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response, render, get_object_or_404, redi
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.utils import timezone
 
 # Apps Imports
 from .forms import *
@@ -21,8 +22,14 @@ from reportes.views import listaGruposDescendientes
 from common.groups_tests import (
     liderTest, editarMiembroTest, llamdaAgenteTest, agregarVisitanteTest,
     cumplimientoPasosTest, asignarGrupoTest, miembroTest, adminTest,
+    miembro_empleado_test
 )
+
 from .forms import TransladarMiembroForm
+from compras.models import Requisicion, Parametros, DetalleRequisicion
+
+# Third Apps
+import waffle
 
 # Python Packages
 from datetime import date
@@ -96,7 +103,7 @@ def salir(request):
     return HttpResponseRedirect('/iniciar_sesion')
 
 
-@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
+@user_passes_test(miembro_empleado_test, login_url="/dont_have_permissions/")
 def miembroInicio(request):
     miembro = None
     empleado = None
@@ -159,7 +166,80 @@ def miembroInicio(request):
 
         # request.session['visitantes'] = visitantes
     if empleado:
-        pass
+        if waffle.switch_is_active('compras'):
+            if empleado.requisicion_set.filter(estado=Requisicion.PROCESO).exists():
+                mis_requisiciones_activas = empleado.requisicion_set.filter(estado=Requisicion.PROCESO)
+
+            if empleado.is_compras:
+                # se sacan las ulimas requisiciones
+                ultimas_requisiciones = Requisicion.objects.ingresadas_compras()
+                hoy = timezone.now().date()
+
+                # se sacan las requisiciones ingresadas en el ultimo mes
+                requisiciones_ingresadas_mes = Requisicion.objects.ultimo_mes().count()
+
+                # se sacan las requisiciones que fueron atendidas por el empleado
+                if requisiciones_ingresadas_mes > 0:
+                    porcentage_atencion_mes = (Requisicion.objects.ultimo_mes(
+                        historial__empleado=empleado
+                    ).count() * 100) / requisiciones_ingresadas_mes
+                else:
+                    porcentage_atencion_mes = 0
+
+                # Requisiciones en compras
+                requisiciones_empleado = ultimas_requisiciones.count()
+
+                # porcentaje total de requisiciones en comrpas
+                porcetaje_total_en_compras = (ultimas_requisiciones.count() * 100) / Requisicion.objects.filter(
+                    estado=Requisicion.PROCESO
+                ).count()
+            if empleado.is_jefe_administrativo:
+                dias = Parametros.objects.dias()
+                hoy = timezone.now().date()
+
+                # las terminadas en este mes
+                requisiciones_terminadas = Requisicion.objects.finalizadas_mes().count()
+
+                # que han ingresado a trazabilidad
+                requisiciones_faltantes_aprobar_trazabilidad = Requisicion.objects.ingresadas_administrativo().count()
+
+                requisiciones_recientes = Requisicion.objects.ingresadas_administrativo()
+
+                # que han ingresado a departamento
+                requisiciones_faltantes_aprobar_departamento = Requisicion.objects.filter(
+                    historial=None, empleado__areas__departamento__nombre__icontains='administra'
+                ).count()
+
+                requisiciones_mora = len([
+                    requisicion for requisicion in Requisicion.objects.ingresadas_compras().prefetch_related(
+                        'historial_set'
+                    )
+                    if requisicion.historial_set.last().fecha.date() + datetime.timedelta(days=dias) <= hoy
+                ])
+
+                if Requisicion.objects.filter(estado=Requisicion.PROCESO).exists():
+                    porcetaje_total_en_compras = (requisiciones_faltantes_aprobar_trazabilidad * 100) / Requisicion.objects.filter(
+                        estado=Requisicion.PROCESO
+                    ).count()
+                else:
+                    porcetaje_total_en_compras = 0
+
+            if empleado.is_jefe_financiero:
+                hoy = timezone.now().date()
+                requisiciones_faltantes_aprobar_departamento = Requisicion.objects.filter(
+                    historial=None, empleado__areas__departamento__nombre__icontains='financi'
+                ).count()
+
+                requisiciones_faltantes_aprobar_trazabilidad = len(Requisicion.objects.ingresadas_financiero())
+
+                requisiciones_espera = [requisicion for requisicion in Requisicion.objects.filter(
+                    estado=Requisicion.PROCESO
+                ) if requisicion.get_rastreo() == Requisicion.DATA_SET['espera_presupuesto']]
+
+                salida_credito = DetalleRequisicion.objects.salida_credito_mes()['total_aprobado__sum'] or 0
+
+                salida_efectivo = DetalleRequisicion.objects.salida_efectivo_mes()['total_aprobado__sum'] or 0
+
     return render_to_response("miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
 
