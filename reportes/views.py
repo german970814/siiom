@@ -305,16 +305,17 @@ def asistenciaGrupos(request):
     return render_to_response('reportes/asistencia_grupos.html', locals(), context_instance=RequestContext(request))
 
 
+# TODO eliminar
 def listaGruposDescendientes(miembro):
     """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     listaG = [grupo]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
-        g = d.grupoLidera()
+        g = d.grupo_lidera
         if g:
             if g not in listaG:
                 listaG.append(g)
@@ -1102,16 +1103,17 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     return render_to_response('reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request))
 
 
+# TODO eliminar
 def listaGruposDescendientes_id(miembro):
     """Devuelve una lista con todos los ids de los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     listaG = [grupo.id]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
-        g = d.grupoLidera()
+        g = d.grupo_lidera
         if g:
             if g not in listaG:
                 listaG.append(g.id)

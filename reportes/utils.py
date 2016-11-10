@@ -2,12 +2,12 @@ from miembros.models import Miembro
 import calendar
 import datetime
 
-
+# TODO eliminar
 def listaGruposDescendientes_id(miembro):
     """Devuelve una lista con todos los ids de los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo:
         listaG = [grupo.id]
     else:
@@ -15,7 +15,7 @@ def listaGruposDescendientes_id(miembro):
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
-        g = d.grupoLidera()
+        g = d.grupo_lidera
         if g:
             if g not in listaG:
                 listaG.append(g.id)

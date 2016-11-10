@@ -200,23 +200,6 @@ class Miembro(models.Model):
             self.grupo = nuevo_grupo
             self.save()
 
-    def grupoLidera(self):
-        """
-        Devuelve el grupo al cual lidera el miembro o su conyugue.
-        Si al miembro no se le ha asignado ningun grupo devuelve None.
-        """
-
-        from grupos.models import Grupo
-        try:
-            if self.conyugue:
-                return Grupo.objects.get(
-                    Q(lider1=self) | Q(lider1=self.conyugue) | Q(lider2=self) | Q(lider2=self.conyugue)
-                )
-            else:
-                return Grupo.objects.get(Q(lider1=self) | Q(lider2=self))
-        except:
-            return None
-
     def discipulos(self):
         """Devuelve los discipulos del miembro (queryset) sino tiene, devuelve una lista vacia."""
 
@@ -234,7 +217,6 @@ class Miembro(models.Model):
         tipo_pastor = TipoMiembro.objects.get(nombre__iexact='pastor')
         pastores = []
 
-        # lideres = Miembro.objects.filter(id__in=self.grupoLidera().listaLideres())
         lideres = self.grupo_lidera.lideres.all()
         for lider in lideres:
             tipos = CambioTipo.objects.filter(miembro=lider, nuevoTipo=tipo_pastor)

@@ -25,7 +25,7 @@
                         <li>
                             <a href="{% url 'grupos:transladar' grupo.id %}">Trasladar Grupo en Organigrama</a>
                         </li>
-                        {% if not miembro.grupoLidera %}
+                        {% if not miembro.grupo_lidera %}
                             <li>
                                 <a href="{% url 'miembros:transladar' miembro.id %}">{% trans 'Trasladar Miembro de Grupo' %}</a>
                             </li>

@@ -148,7 +148,7 @@ def miembroInicio(request):
         # k = listaGruposDescendientes(miembro)
         k = Grupo.get_tree(grupo)
         # for lid in k:
-        #     if lid == miembro.grupoLidera():
+        #     if lid == miembro.grupo_lidera:
         #         pass
         #     else:
         #         if lid.listaLideres():
@@ -455,7 +455,6 @@ def liderLlamadasPendientesVisitantesGrupo(request):
         return HttpResponseRedirect('/miembro/registrar_llamada/lider/')
 
     miembro = Miembro.objects.get(usuario=request.user)
-    # grupo = miembro.grupoLidera()
     grupo = miembro.grupo_lidera
     lideres = []
     if grupo:
@@ -1215,16 +1214,9 @@ def eliminarCambioTipoMiembro(request, id):
     cambio.delete()
     # return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
-
+# TODO eliminar
 def calcularCelulas(miembro):
     celulas = 0
-    # discipulos = list(miembro.discipulos())
-    # for d in discipulos:
-    #     if d.grupoLidera():
-    #         celulas += 1
-    #         subdiscipulos = d.discipulos()
-    #         for s in subdiscipulos:
-    #             discipulos.append(s)
     if miembro.grupo_lidera:
         celulas = miembro.grupo_lidera.get_descendant_count() + 1
     return celulas

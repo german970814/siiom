@@ -362,17 +362,17 @@ def eliminar(request, modelo, lista):
     return ok
 
 
+# TODO eliminar
 def listaGruposDescendientes(grupo):
     """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    # grupo = miembro.grupoLidera()
     miembro = grupo.lider1
     listaG = [grupo]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
-        g = d.grupoLidera()
+        g = d.grupo_lidera()
         if g:
             if g not in listaG:
                 listaG.append(g)

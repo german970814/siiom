@@ -194,7 +194,7 @@
                     </li>
                     {% endif %}
                     <!-- opciones -->
-                    {% if mi.grupoLidera and not mi.grupoLidera.get_position %}
+                    {% if mi.grupo_lidera and not mi.grupo_lidera.get_position %}
                     <li class="dropdown">
                             <a data-toggle="dropdown" href="">
                                 <i class="tm-icon zmdi zmdi-notifications"></i>
@@ -417,11 +417,11 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera %}
+                {% if mi.grupo_lidera %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
-                        {% if mi.grupoLidera.estado == 'A' %}
+                        {% if mi.grupo_lidera.estado == 'A' %}
                         <li>
                             <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
@@ -435,7 +435,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera or perms.miembro.es_administrador %}
+                {% if mi.grupo_lidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
@@ -448,7 +448,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera or perms.miembros.es_administrador %}
+                {% if mi.grupo_lidera or perms.miembros.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
@@ -902,7 +902,7 @@
             $('#toggleModal').click();
         });
         {% if draw_mapa %}
-            {% if mi.grupoLidera or perms.miembros.es_administrador %}
+            {% if mi.grupo_lidera or perms.miembros.es_administrador %}
             var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -925,20 +925,20 @@
 
             var marker;
 
-            {% if g and miembro.grupoLidera %}
-            geocoder.geocode('{{ miembro.grupoLidera.get_direccion }}', function(results){
+            {% if g and miembro.grupo_lidera %}
+            geocoder.geocode('{{ miembro.grupo_lidera.get_direccion }}', function(results){
                 try {
                     latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
                     _marker = new L.Marker(latLng);
 
                     mymap.setView(latLng, 18);
-                    _marker.addTo(mymap).bindPopup("<b>Actualmente el grupo está aquí</b><br />{{ miembro.grupoLidera.direccion }}");
+                    _marker.addTo(mymap).bindPopup("<b>Actualmente el grupo está aquí</b><br />{{ miembro.grupo_lidera.direccion }}");
                 } catch (err) {
                     console.log(err);
                 }
             })
-            {% elif mi.grupoLidera %}
-            geocoder.geocode('{{ mi.grupoLidera.get_direccion }}', function(results){
+            {% elif mi.grupo_lidera %}
+            geocoder.geocode('{{ mi.grupo_lidera.get_direccion }}', function(results){
                 try {
                     latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
                     _marker = new L.Marker(latLng);
@@ -983,7 +983,7 @@
                 $('#toggleModal2').click();
             });
 
-                {% if mi.grupoLidera %}
+                {% if mi.grupo_lidera %}
                 $('#send_position').click(function(event) {
                     if (!marker) {
                         event.preventDefault();
@@ -991,7 +991,7 @@
                         return false;
                     } else {
                         $.ajax({
-                            url: {% if g and miembro.grupoLidera %}'{% url "grupos:posicion_grupo" miembro.grupoLidera.id %}'{% elif mi.grupoLidera %}'{% url "grupos:posicion_grupo" mi.grupoLidera.id %}'{% endif %},
+                            url: {% if g and miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" miembro.grupo_lidera.id %}'{% elif mi.grupo_lidera %}'{% url "grupos:posicion_grupo" mi.grupo_lidera.id %}'{% endif %},
                             type: 'GET',
                             data: {
                                 csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),

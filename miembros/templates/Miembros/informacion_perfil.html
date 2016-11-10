@@ -4,14 +4,14 @@
 <div class="pmb-block">
     <div class="pmbb-header">
         <h2><i class="zmdi zmdi-chart m-r-5"></i> Infomación Géneral</h2>
-        
+
         {% if perms.miembros.es_administrador %}
         <ul class="actions">
             <li class="dropdown">
                 <a href="" data-toggle="dropdown">
                     <i class="zmdi zmdi-more-vert"></i>
                 </a>
-                
+
                 <ul class="dropdown-menu dropdown-menu-right">
                     <li>
                         <a data-pmb-action="edit" href="" class="edit-error">Editar</a>
@@ -33,7 +33,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Grupo que Lidera</dt>
-                <dd>{% if miembro.grupoLidera %}{{miembro.grupoLidera.nombre|upper}}{% else %}NINGUNO{% endif %}</dd>
+                <dd>{% if miembro.grupo_lidera %}{{miembro.grupo_lidera.nombre|upper}}{% else %}NINGUNO{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Grupo al que pertenece</dt>
@@ -45,7 +45,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Lideres</dt>
-                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}{% if not lid.grupoLidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, {% if not lid.grupoLidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}NO TIENE LÍDERES{% endif %}</dd>
+                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}{% if not lid.grupo_lidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, {% if not lid.grupo_lidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}NO TIENE LÍDERES{% endif %}</dd>
             </dl>
         </div>
         <form action="" method="POST" enctype="multipart/form-data" id="form_informacion">
@@ -158,14 +158,14 @@
 <div class="pmb-block">
     <div class="pmbb-header">
         <h2><i class="zmdi zmdi-graduation-cap m-r-5"></i> Logros</h2>
-        
+
         {% if perms.miembro.es_administrador %}
         <ul class="actions">
             <li class="dropdown">
                 <a href="" data-toggle="dropdown">
                     <i class="zmdi zmdi-more-vert"></i>
                 </a>
-                
+
                 <ul class="dropdown-menu dropdown-menu-right">
                     <li>
                         <a data-pmb-action="edit" href="" class="edit-error">Editar</a>

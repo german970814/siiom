@@ -301,7 +301,7 @@
 				{% endfor %}
 			{% endif %}
         </div>
-{% if miembro.grupoLidera or perms.miembros.es_administrador %}
+{% if miembro.grupo_lidera or perms.miembros.es_administrador %}
         <form action="" method="POST" id="form_pasosTotal">
             {% csrf_token %}
             <div class="card-body card-padding">
