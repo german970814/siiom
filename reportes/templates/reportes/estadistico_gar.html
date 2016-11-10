@@ -540,9 +540,7 @@
                     <tbody>
                         {% for grupo in sin_reportar %}
                         <tr>
-                            {# <td>{{ grupo.lider1.nombre|upper }} {{ grupo.lider1.primerApellido|upper }} {% if grupo.lider2 %} y {{ grupo.lider2.nombre|upper }} {{ grupo.lider2.primerApellido|upper }}{% endif %}</td>#}
                             <td>{{ grupo }}</td>
-                            {# <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>#}
                             <td>{{ grupo.get_parent }}</td>
                             <td>{{ grupo.fechas }}</td>
                             <td>{{ grupo.no_reportes }}</td>

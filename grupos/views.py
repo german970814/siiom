@@ -367,7 +367,7 @@ def listaGruposDescendientes(grupo):
     """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    miembro = grupo.lider1
+    miembro = grupo.lideres.first()
     listaG = [grupo]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
@@ -376,7 +376,7 @@ def listaGruposDescendientes(grupo):
         if g:
             if g not in listaG:
                 listaG.append(g)
-            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            lid = g.lideres.all()
             for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
                 if l in discipulos:
                     discipulos.remove(l)

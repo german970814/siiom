@@ -319,7 +319,7 @@ def listaGruposDescendientes(miembro):
         if g:
             if g not in listaG:
                 listaG.append(g)
-            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            lid = g.lideres.all()
             for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
                 if l in discipulos:
                     discipulos.remove(l)
@@ -328,17 +328,18 @@ def listaGruposDescendientes(miembro):
     return listaG
 
 
+# TODO eliminar
 def listaCaminoGrupos(grupoi, grupof):
     """Devuelve los grupos que se encuentran en la camino del grupo inicial, al grupo final."""
 
     listaG = [grupof]
     if grupof != grupoi:
-        m = Miembro.objects.get(id=grupof.listaLideres()[0])
+        m = grupof.lideres.first()
         padre = m.grupo
         while padre != grupoi:
             if padre not in listaG:
                 listaG.insert(0, padre)
-            m = Miembro.objects.get(id=padre.listaLideres()[0])
+            m = padre.lideres.first()
             padre = m.grupo
         if padre not in listaG:
             listaG.insert(0, padre)
@@ -570,7 +571,7 @@ def PasosRangoFecha(request):
 #         grupoP = Grupo.objects.get(red=None)
 #         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
 #         #  listaGrupo_i = listaGruposDescendientes(liderP)
-#         listaGrupo_i = Grupo.objects.select_related('lider1', 'lider2').all()  # filter(estado='A')
+#         listaGrupo_i = Grupo.objects.all()  # filter(estado='A')
 #     else:
 #         listaGrupo_i = listaGruposDescendientes(miembro)
 
@@ -607,12 +608,12 @@ def PasosRangoFecha(request):
 #                     descendientes = True
 #                     opciones['grupo_final'] = 'Todos los descendientes'
 #                     grupos = Grupo.objects.filter(
-#                         id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+#                         id__in=listaGruposDescendientes_id(grupo_i.lideres.first())
 #                     )
 #                 else:
 #                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
 #                     opciones['grupo_final'] = grupo_f.nombre.capitalize()
-#                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+#                     listaGrupo_f = listaGruposDescendientes(grupo_i.lideres.first())
 #                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
 #                 if isinstance(grupos, QuerySet):
@@ -1117,7 +1118,7 @@ def listaGruposDescendientes_id(miembro):
         if g:
             if g not in listaG:
                 listaG.append(g.id)
-            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            lid = g.lideres.all()
             for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
                 if l in discipulos:
                     discipulos.remove(l)

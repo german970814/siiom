@@ -48,8 +48,8 @@ class Grupo(AL_Node):
     parent = models.ForeignKey(
         'self', verbose_name=_lazy('padre'), related_name='children_set', null=True, db_index=True
     )
-    lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
-    lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
+    # lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
+    # lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
     # poner opcion de asignar la misma del lider por defecto(cual lider?)
     direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
     estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
@@ -259,23 +259,23 @@ class Grupo(AL_Node):
         # return self.lider1.primerApellido.upper()
         return self.nombre
 
-    def listaLideres(self):
-        """
-        Devuelve una lista con los ids de los lideres del grupo.
-        Los lideres estan definidos en los campos lider1, lider2 y sus conyugues
-        siempre y cuando estos sean lideres.
-        """
-
-        lideres = []
-        if self.lider1:
-            lideres.append(self.lider1.id)
-            if CambioTipo.objects.filter(miembro=self.lider1.conyugue, nuevoTipo__nombre__iexact='lider').exists():
-                lideres.append(self.lider1.conyugue.id)
-        if self.lider2:
-            lideres.append(self.lider2.id)
-            if CambioTipo.objects.filter(miembro=self.lider2.conyugue, nuevoTipo__nombre__iexact='lider').exists():
-                lideres.append(self.lider2.conyugue.id)
-        return lideres
+    # def listaLideres(self):
+    #     """
+    #     Devuelve una lista con los ids de los lideres del grupo.
+    #     Los lideres estan definidos en los campos lider1, lider2 y sus conyugues
+    #     siempre y cuando estos sean lideres.
+    #     """
+    #
+    #     lideres = []
+    #     if self.lider1:
+    #         lideres.append(self.lider1.id)
+    #         if CambioTipo.objects.filter(miembro=self.lider1.conyugue, nuevoTipo__nombre__iexact='lider').exists():
+    #             lideres.append(self.lider1.conyugue.id)
+    #     if self.lider2:
+    #         lideres.append(self.lider2.id)
+    #         if CambioTipo.objects.filter(miembro=self.lider2.conyugue, nuevoTipo__nombre__iexact='lider').exists():
+    #             lideres.append(self.lider2.conyugue.id)
+    #     return lideres
 
     def miembrosGrupo(self):
         """Devuelve los miembros de un grupo (queryset) sino tiene, devuelve el queryset vacio."""

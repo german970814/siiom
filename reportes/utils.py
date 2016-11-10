@@ -19,7 +19,7 @@ def listaGruposDescendientes_id(miembro):
         if g:
             if g not in listaG:
                 listaG.append(g.id)
-            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            lid = g.lideres.all()
             for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
                 if l in discipulos:
                     discipulos.remove(l)

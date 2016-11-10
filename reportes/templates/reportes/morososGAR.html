@@ -179,7 +179,6 @@
                                     {% endif %}
                                 {% endfor %}
                             </td>
-                            {# <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>#}
                             <td>{{ grupo.get_parent }}</td>
                             <td>
                                 {% for fecha in grupo.fecha_reunion %}

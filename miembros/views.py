@@ -567,7 +567,6 @@ def llamarVisitas(request):
             if llamada == 1:
                 nuevoLlamar = form.save(commit=False)
                 if nuevoLlamar.grupo is not None:  # or nuevoLlamar.grupo != '':
-                    # lideres = Miembro.objects.filter(id__in=nuevoLlamar.grupo.listaLideres()).values('email')
                     lideres = nuevoLlamar.grupo.lideres.values('email')
                     receptores = ["%s" % (k['email']) for k in lideres]
 
@@ -709,7 +708,6 @@ def asignarGrupo(request, id):
         if form.is_valid():
             nuevoMiembro = form.save(commit=False)
             if nuevoMiembro.grupo is not None or nuevoMiembro.grupo != '':
-                # mailLideres = Miembro.objects.filter(id__in=nuevoMiembro.grupo.listaLideres()).values('email')
                 mailLideres = nuevoMiembro.grupo.lideres.values('email')
                 receptores = ["%s" % (k['email']) for k in mailLideres]
                 camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
@@ -1565,7 +1563,6 @@ def ver_informacion_miembro(request, pk=None):
             form_cambio_tipo = FormularioTipoMiembros(instance=miembro)
 
     if miembro.grupo:
-        # lideres_miembro = Miembro.objects.filter(id__in=miembro.grupo.listaLideres())
         lideres_miembro = miembro.grupo.lideres.all()
     escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
     tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')

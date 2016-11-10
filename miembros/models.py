@@ -228,7 +228,6 @@ class Miembro(models.Model):
         while sw:
 
             if grupo_actual is not None:
-                # lideres = Miembro.objects.filter(id__in=grupo_actual.listaLideres())
                 lideres = grupo_actual.lideres.all()
 
                 for lider in lideres:
@@ -236,11 +235,9 @@ class Miembro(models.Model):
                     if len(tipos) > 0:
                         pastores.append(lider.id)
 
-                # if grupo_actual.lider1.grupo is None:
                 if grupo_actual.parent is None:
                     sw = False
                 else:
-                    # grupo_actual = grupo_actual.lider1.grupo
                     grupo_actual = grupo_actual.parent
             else:
                 sw = False

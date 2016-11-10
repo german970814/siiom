@@ -125,7 +125,6 @@ class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
         grupos = grupos.distinct().annotate(personas_asignadas=Count('miembro'))
 
         for grupo in grupos:
-            # grupo.lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
             miembros_asignados = grupo.miembro_set.filter(fechaAsignacionGAR__range=(fecha_inicial, fecha_final))
             grupo.llamadas_realizadas = miembros_asignados.filter(fechaLlamadaLider__isnull=True).count()
             grupo.llamadas_no_realizadas = grupo.personas_asignadas - grupo.llamadas_realizadas
