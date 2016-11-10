@@ -124,7 +124,7 @@ def miembroInicio(request):
             for mg in miembrosGrupo:
                 ct = CambioTipo.objects.filter(miembro=mg).order_by('id')
                 if ct.exists():
-                    ct = ct.pop()
+                    ct = list(ct).pop()
                     if (ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (
                        ct.miembro.observacionLlamadaLider == '' or
                        ct.miembro.observacionLlamadaLider is None)
