@@ -189,10 +189,13 @@ def miembroInicio(request):
                 # Requisiciones en compras
                 requisiciones_empleado = ultimas_requisiciones.count()
 
-                # porcentaje total de requisiciones en comrpas
-                porcetaje_total_en_compras = (ultimas_requisiciones.count() * 100) / Requisicion.objects.filter(
-                    estado=Requisicion.PROCESO
-                ).count()
+                try:
+                    # porcentaje total de requisiciones en comrpas
+                    porcetaje_total_en_compras = (ultimas_requisiciones.count() * 100) / Requisicion.objects.filter(
+                        estado=Requisicion.PROCESO
+                    ).count()
+                except ZeroDivisionError:
+                    porcetaje_total_en_compras = 0
             if empleado.is_jefe_administrativo:
                 dias = Parametros.objects.dias()
                 hoy = timezone.now().date()

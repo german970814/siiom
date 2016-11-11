@@ -467,7 +467,7 @@ def ver_requisiciones_jefe_departamento(request):
 
 
 @waffle_switch('compras')
-@login_empleado('is_jefe_administrativo')
+@login_empleado('is_compras')
 def ver_requisiciones_compras(request):
     """
     Vista para ver las requisiciones que han llegado al area de compras, luego de ser
