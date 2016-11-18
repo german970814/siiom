@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 
 # Locale Apps
 from .models import Caso, Comentario, Invitacion, Documento
+from .utils import concurrente
 
 # Apps
 from organizacional.models import Empleado
@@ -139,14 +140,22 @@ class FormularioCerrarCaso(FormularioAgregarMensaje):
 
     def enviar_email(self):
         if self.is_valid() and 'mensaje' in self.cleaned_data and 'caso' in self.cleaned_data:
+            self._enviar_email()
+        else:
+            raise ValidationError(_('mensaje or caso not in self.cleaned_data'))
+
+    @concurrente
+    def _enviar_email(self):
+        if self.is_valid() and 'mensaje' in self.cleaned_data and 'caso' in self.cleaned_data:
             mensaje = \
                 """
-                Su solicitud No.%(id_caso)d ha sido atendida y generó una respuesta \n
-                Su solicitud: \n
-                "%(descripcion)s" \n
-                Respuesta Emitida:
-                "%(respuesta)s" \n
-                Muchas Gracias por usar nuestro servicio.
+                ¡Hola!\n
+                Tenemos respuesta a su solicitud número %(id_caso)d\n
+                    Su solicitud fue:
+                        "%(descripcion)s"\n
+                    Respuesta:
+                        "%(respuesta)s"\n
+                Estamos para servirle.
                 """
             ASUNTO = 'Respuesta a Su Inquietud'
             SENDER = 'iglesia@mail.webfaction.com'

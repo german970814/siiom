@@ -174,7 +174,7 @@
 		</div>
 
 		<div class="row">
-			<div class="col-md-">
+			<div class="col-md-4" hidden>
 				<button class="" id="buttonsubmit">
 					
 				</button>
@@ -183,6 +183,7 @@
 	</form>
 </div>
 
+{% if not caso %}
 <div class="container">
 <div class="card">
     <div class="card-header">
@@ -195,7 +196,7 @@
         </form>
     </div>
 </div>
-
+{% endif %}
 
 <div class="row">
     <div class="col-md-4 col-md-offset-4">
@@ -228,7 +229,6 @@ $(document).ready(function () {
 
         $('#form-pqr').submit(function(event) {
             $('.page-loader').fadeIn();
-            console.log("hice submit");
             var formData = new FormData(this);
             for (var field of formData) {
                 $('#dropzone-upload').append('<input name="' + field[0] + '" type="hidden" value="' + field[1] + '">');

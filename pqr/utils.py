@@ -73,14 +73,16 @@ def enviar_email_success(request, caso):
 
     # SENDER = 'iglesia@mail.webfaction.com'
     mensaje = """
-        En hora buena!!! \n
-        Hemos recibido su petición satisfactoriamente, Recibira su respuesta dentro
-        de las siguientes %(HORAS)d horas hábiles; Su número de Caso es No.%(id_caso)d, gracias por su atención
+        ¡Hola!\n
+        En nuestra casa estamos para servirle. Hemos recibido su solicitud, estaremos dando una pronta respuesta.\n
+        Tenga en cuenta que su número de solicitud es: %(id_caso)d\n
+        Para consultas respecto a esta solicitud, puede llamar al %(telefono)d o escribir a %(email)s\n
+        Dios le bendiga.
     """
 
     send_mail(
         'Hemos Recibido su solicitud exitosamente',
-        mensaje % {'HORAS': dias_to_horas(caso.__class__.DIAS_PARA_EXPIRAR), 'id_caso': caso.id},
+        mensaje % {'telefono': 3688932, 'id_caso': caso.id, 'email': 'informacion@icasadelrey.org'},
         SENDER,
         ('{}'.format(caso.email), ),
         fail_silently=False

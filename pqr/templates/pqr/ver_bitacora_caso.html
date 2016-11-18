@@ -216,7 +216,7 @@
 
                     <ul class="lv-actions actions">
                     	{% if mismo and not caso.cerrado %}
-                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Hacer un mensaje importante" title="" data-original-title="Ayuda">
+                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá escribir un mensaje importante" title="" data-original-title="Importante">
                         	<div class="checkbox">
 		                        <label>
 		                            <input type="checkbox" value="" name="checkbox_importante">
@@ -225,39 +225,40 @@
 		                        </label>
 		                    </div>
                         </li>
-                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Agregar Integrante" title="" data-original-title="Ayuda">
+                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá agregar a un integrante nuevo a esta discusión" title="" data-original-title="Agregar Integrante">
                             <a data-toggle="modal" id="toggleModal" href="#modalNarrower">
 								<i class="zmdi zmdi-plus"></i>
                             </a>
                         </li>
-                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Eliminar Integrante" title="" data-original-title="Ayuda">
+                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá eliminar a un integrante perteneciente a esta discusión" title="" data-original-title="Eliminar Integrante">
                             <a data-toggle="modal" id="toggleModal2" href="#modalNarrower2">
 								<i class="zmdi zmdi-minus"></i>
                             </a>
                         </li>
-                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Cerrar Caso" title="" data-original-title="Ayuda">
+                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Enviar mensaje para finalizar el caso" title="" data-original-title="Cerrar">
                             <a data-toggle="modal" id="toggleModal4" href="#modalNarrower4">
 								<i class="zmdi zmdi-tag-close"></i>
                             </a>
                         </li>
-                        {% elif mismo and caso.cerrado %}
-                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Editar Datos de el caso" title="" data-original-title="Ayuda">
+                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Editar los datos de el caso" title="" data-original-title="Editar">
                             <a href="{% url 'pqr:editar_caso' caso.id %}">
 								<i class="zmdi zmdi-edit"></i>
                             </a>
                         </li>
                     	{% endif %}
-                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Ver archivos de el caso" title="" data-original-title="Ayuda">
+                        {% if not caso.cerrado %}
+                        <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Te permitirá agregar archivos a este caso" title="" data-original-title="Adjuntar">
                             <a id="attachment" data-toggle="modal" id="toggleModal5" href="#modalNarrower5">
 								<i class="zmdi zmdi-attachment-alt"></i>
                             </a>
                         </li>
-                    	<li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Ver archivos de el caso" title="" data-original-title="Ayuda">
+                        {% endif %}
+                    	<li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Previsualización de los archivos que pertenecen a este caso" title="" data-original-title="Ver archivos">
                             <a class="thumbnai">
 								<i class="zmdi zmdi-file"></i>
                             </a>
                         </li>
-                    	<li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Ver datos de caso" title="" data-original-title="Ayuda">
+                    	<li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Te permitirá conocer los detalles del caso" title="" data-original-title="Detalle del caso">
                             <a data-toggle="modal" id="toggleModal3" href="#modalNarrower3">
 								<i class="zmdi zmdi-eye"></i>
                             </a>
