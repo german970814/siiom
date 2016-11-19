@@ -102,8 +102,7 @@ def nuevo_caso(request):
                 else:
                     caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
                 # caso.save()
-                if not settings.DEBUG:
-                    enviar_email_success(request, caso)
+
                 #  enviar_email_verificacion(request, caso)  # Si se quiere verificar email
                 if request.FILES:
                     errors = 0
@@ -137,6 +136,10 @@ def nuevo_caso(request):
                      recibirá un correo de confirmación para verificar sus datos""")
 
                 caso.save()
+
+                if not settings.DEBUG:
+                    enviar_email_success(request, caso)
+
                 messages.success(
                     request, message
                 )
@@ -302,9 +305,6 @@ def ver_bitacora_caso(request, id_caso):
                 data['click2'] = True
         elif 'cerrar_caso' in request.POST and not caso.cerrado:
             if form_cerrar_caso.is_valid():
-                if not settings.DEBUG:
-                    # Se envia el correo
-                    form_cerrar_caso.enviar_email()
                 mensaje = form_cerrar_caso.save(commit=False)
                 # Se guarda el ultimo mensaje
                 mensaje.importante = True
@@ -312,6 +312,9 @@ def ver_bitacora_caso(request, id_caso):
                 # Se cierra el caso
                 caso.cerrado = True
                 caso.save()
+                if not settings.DEBUG:
+                    # Se envia el correo
+                    form_cerrar_caso.enviar_email()
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
                 # print(form_cerrar_caso.errors)
@@ -454,7 +457,7 @@ def editar_caso(request, id_caso):
     """
     caso = get_object_or_404(Caso, id=id_caso)
 
-    if caso.cerrado:
+    if not caso.cerrado:
         if request.method == 'POST':
             form = FormularioEditarCaso(data=request.POST, instance=caso)
 
@@ -479,14 +482,18 @@ def descargar_archivos(request, id_documento):
     """
     try:
         documento = get_object_or_404(Documento, pk=id_documento)
-
+        _file = documento.archivo
         try:
-            ext = documento.get_name.split('.')
+            ext = documento.get_name().split('.')
             if ext:
                 ext = ext[len(ext) - 1]
-            response = HttpResponse(documento.archivo, content_type=CONTENT_TYPES[ext])
-        except:
-            response = HttpResponse(documento.archivo)
+            response = HttpResponse(content_type=CONTENT_TYPES[ext])
+            response.write(_file.read())
+        except Exception as e:
+            response = HttpResponse()
+            response.write(_file.read())
+        finally:
+            _file.close()
 
         response['Content-Disposition'] = "attachment; filename='%s'" % documento.get_name()
         return response

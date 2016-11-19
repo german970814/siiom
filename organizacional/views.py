@@ -210,10 +210,13 @@ def crear_empleado(request):
             empleado.usuario = usuario
             # se crea el empleado
             empleado.save()
+            form.save_m2m()
+
             if empleado.jefe_departamento is True:
                 for area in form.cleaned_data['departamento'].areas.all():
-                    empleado.areas.add(area)
-            # form.save_m2m()
+                    if area not in empleado.areas.all():
+                        empleado.areas.add(area)
+
             messages.success(request, _('Empleado creado exitosamente'))
             return redirect(reverse('organizacional:crear_empleado'))
         else:
@@ -252,9 +255,12 @@ def editar_empleado(request, id_empleado):
                 empleado.usuario.groups.add(form.cleaned_data['tipo_usuario'])
             empleado.usuario.save()
             empleado.save()
+            form.save_m2m()
+
             if empleado.jefe_departamento is True:
                 for area in form.cleaned_data['departamento'].areas.all():
-                    empleado.areas.add(area)
+                    if area not in empleado.areas.all():
+                        empleado.areas.add(area)
             messages.success(request, _('Se ha editado exitosamente'))
             return redirect(reverse('organizacional:editar_empleado', args=(id_empleado, )))
         else:

@@ -90,6 +90,16 @@ class EmpleadoForm(forms.ModelForm):
                 self.fields['areas'].queryset = Area.objects.filter(departamento_id=id_departamento)
             except:
                 self.fields['areas'].queryset = Area.objects.none()
+        if self.initial:
+            if 'areas' in self.initial:
+                queryset = self.initial['areas']
+                if isinstance(queryset, list):
+                    if any(queryset):
+                        self.fields['departamento'].initial = Area.objects.get(id=queryset[0]).departamento
+                else:
+                    if queryset.exists():
+                        self.fields['areas'].queryset = queryset
+                        self.fields['departamento'].initial = queryset.first().departamento
 
     def clean(self, *args, **kwargs):
         inher = kwargs.pop('inher', False)
