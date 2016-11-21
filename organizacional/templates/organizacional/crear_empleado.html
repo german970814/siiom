@@ -287,6 +287,10 @@
 
     });
 
+	{% if form.jefe_departamento.value %}
+	$('#{{ form.areas.id_for_label }}').attr('disabled', true);
+	{% endif %}
+
     $('#{{ form.jefe_departamento.id_for_label }}').change(function(event) {
         if ($(this).is(':checked')) {
             $('#{{ form.areas.id_for_label }}').attr('disabled', true);

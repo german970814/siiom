@@ -16,12 +16,12 @@ from .forms import (
     FormularioCerrarCaso, FormularioEditarCaso, FormularioAgregarArchivoCaso
 )
 from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion, format_string_to_ascii
-from .decorators import login_empleado
 
 # Apps
-from miembros.models import Miembro
-from organizacional.models import Empleado
 from common.constants import CONTENT_TYPES
+from miembros.models import Miembro
+from organizacional.decorators import login_empleado
+from organizacional.models import Empleado
 
 # Third's Apps
 from waffle.decorators import waffle_switch

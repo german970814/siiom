@@ -605,8 +605,8 @@ class Parametros(models.Model):
     Modelo para parametrizar ciertos valores de los que dependen los procesos de
     trazabilidad de la aplicacion
     """
-    dias_habiles = models.PositiveSmallIntegerField(verbose_name=_('dias hábiles'))
-    tope_monto = models.PositiveIntegerField(verbose_name=_('monto tope para presidencia'))
+    dias_habiles = models.PositiveSmallIntegerField(verbose_name=_('dias hábiles'))  # cuantos dias habiles tiene una requisicion para ser atentida
+    tope_monto = models.PositiveIntegerField(verbose_name=_('monto tope para presidencia'))  # a partir de que valor, pasa a presidencia
 
     objects = ParametrosManager()
 
