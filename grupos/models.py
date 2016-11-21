@@ -46,7 +46,7 @@ class Grupo(AL_Node):
     )
 
     parent = models.ForeignKey(
-        'self', verbose_name=_lazy('padre'), related_name='children_set', null=True, db_index=True
+        'self', verbose_name=_lazy('grupo origen'), related_name='children_set', null=True, db_index=True
     )
     # lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
     # lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
