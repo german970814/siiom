@@ -70,7 +70,7 @@
                 <br class="space">
                 <br class="space-down">
                 <div class="row">
-                	<div class="col-md-4 col-md-offset-2">
+                	<div class="col-md-4">
 	                	<div class="input-group {{ form.presupuesto_aprobado.css_classes }}">
 					        <span class="input-group-addon">
 					            <i class="zmdi zmdi-card"></i>
@@ -84,6 +84,7 @@
 					        {% endfor %}
 					    </div>
                 	</div>
+					<br class="space">
                 	<div class="col-md-4">
 	                	<div class="input-group {{ form.fecha_pago.css_classes }}">
 					        <span class="input-group-addon">
@@ -94,6 +95,21 @@
 					            {{ form.fecha_pago }}
 					        </div>
 					        {% for error in form.fecha_pago.errors %}
+					            <small class="help-block">{{ error }}</small>
+					        {% endfor %}
+					    </div>
+                	</div>
+					<br class="space">
+                	<div class="col-md-4">
+	                	<div class="input-group {{ form.fecha_proyeccion.css_classes }}">
+					        <span class="input-group-addon">
+					            <i class="zmdi zmdi-calendar"></i>
+					        </span>
+					        <div class="fg-line requerido">
+					            <label for="{{ form.fecha_proyeccion.id_for_label }}" class="fg-label requerido control-label">{{ form.fecha_proyeccion.label|title }}:</label>
+					            {{ form.fecha_proyeccion }}
+					        </div>
+					        {% for error in form.fecha_proyeccion.errors %}
 					            <small class="help-block">{{ error }}</small>
 					        {% endfor %}
 					    </div>
@@ -135,6 +151,10 @@
 	<script>
 		jQuery(document).ready(function($) {
 			$('#{{ form.fecha_pago.id_for_label }}').datetimepicker({
+				format: 'DD/MM/YY',
+				minDate: moment(),
+			})
+			$('#{{ form.fecha_proyeccion.id_for_label }}').datetimepicker({
 				format: 'DD/MM/YY',
 				minDate: moment(),
 			})

@@ -89,6 +89,21 @@
 					        {% endfor %}
 					    </div>
                 	</div>
+                	<br class="space">
+                	<div class="col-md-4">
+	                	<div class="input-group {{ form.fecha_solicitud.css_classes }}">
+					        <span class="input-group-addon">
+					            <i class="zmdi zmdi-calendar"></i>
+					        </span>
+					        <div class="fg-line requerido">
+					            <label for="{{ form.fecha_solicitud.id_for_label }}" class="fg-label requerido control-label">{{ form.fecha_solicitud.label|title }}:</label>
+					            {{ form.fecha_solicitud }}
+					        </div>
+					        {% for error in form.fecha_solicitud.errors %}
+					            <small class="help-block">{{ error }}</small>
+					        {% endfor %}
+					    </div>
+                	</div>
                 </div>
                 <br>
                 <br class="space-down">
@@ -198,6 +213,11 @@
 			// $('input[id $="-DELETE"]').each(function(ind, obj) {
 			// 	$(this).addClass('hidden');
 			// })
+			$('#{{ form.fecha_solicitud.id_for_label }}').datetimepicker({
+				format: 'DD/MM/YY',
+				minDate: moment(),
+			})
+
 			$('.form_detalles').formset({
 	            addText: 'Agregar Item',
 	            deleteText: 'Quitar',

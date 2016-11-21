@@ -174,6 +174,9 @@ class Requisicion(models.Model):
         max_length=2, verbose_name=_('presupuesto aprobado'), blank=True, choices=OPCIONES_PRESUPUESTO
     )
 
+    fecha_solicitud = models.DateField('fecha solicitud recurso', blank=True, null=True)
+    fecha_proyeccion = models.DateField('fecha proyección pago', blank=True, null=True)
+
     objects = RequisicionManager()
 
     class Meta:
