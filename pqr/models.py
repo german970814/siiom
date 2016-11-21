@@ -220,7 +220,7 @@ class Documento(models.Model):
     """
 
     def ruta_archivo(self, filename):
-        match = re.compile(r'[a-zA-ZñNáÁéÉíÍóÓúÚ\s0-9_]')
+        match = re.compile(r'[a-zA-ZñÑáÁéÉíÍóÓúÚ\s0-9_]')
         data_name = filename.split('.')
         ext = data_name[len(data_name) - 1]
         del data_name[data_name.index(ext)]

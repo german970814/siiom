@@ -68,7 +68,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required, login_required
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.db import transaction
+from django.db import transaction, models
 from django.db.models import Sum
 from django.forms import inlineformset_factory, modelformset_factory
 from django.http import Http404
@@ -88,14 +88,14 @@ from .forms import (
     FormularioInformeTotalesAreaDerpartamento, FormularioProveedor
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial, Proveedor
-from organizacional.models import Empleado
-from pqr.decorators import login_empleado
+from organizacional.models import Empleado, Departamento
+from organizacional.decorators import login_empleado
 
 __author__ = 'German Alzate'
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado
 @transaction.atomic
 def crear_requisicion(request):
     """
@@ -170,7 +170,7 @@ def crear_requisicion(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado
 @transaction.atomic
 def editar_requisicion(request, id_requisicion):
     """
@@ -281,7 +281,7 @@ def editar_requisicion(request, id_requisicion):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_compras')
 def crear_proveedor(request):
     """
     Vista para la creación de proveedores en el sistema de compras, la cual solo puede
@@ -290,7 +290,7 @@ def crear_proveedor(request):
 
     try:
         empleado = request.user.empleado
-        if not empleado.is_jefe_administrativo and (not empleado.is_compras):
+        if not empleado.is_jefe_administrativo:  # and (not empleado.is_compras):
             return redirect('sin_permiso')
     except:
         if not request.user.is_superuser:
@@ -368,7 +368,7 @@ def listar_proveedores(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado
 def ver_requisiciones_empleado(request):
     """
     Vista para la vista de las requisiciones hechas por el empleado de la sesion
@@ -392,7 +392,7 @@ def ver_requisiciones_empleado(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('jefe_departamento')
 def ver_requisiciones_jefe_departamento(request):
     """
     Vista para ver las requisiciones que se han hecho a un departamento,
@@ -403,8 +403,8 @@ def ver_requisiciones_jefe_departamento(request):
         # se busca el empleado a partir de la sesion
         empleado = request.user.empleado
         # se verifica que tenga los permisos para ser jefe de departamento
-        if not empleado.jefe_departamento:
-            return redirect('sin_permiso')
+        # if not empleado.jefe_departamento:
+        #     return redirect('sin_permiso')
     except:
         raise Http404
 
@@ -528,7 +528,7 @@ def ver_requisiciones_compras(request):
 
 
 @waffle_switch('compras')
-@permission_required('organizacional.es_compras')
+@login_empleado('is_compras')
 def adjuntar_archivos_requisicion(request, id_requisicion):
     """
     Vista para adjuntar archivos a una requisicion, solo disponible para usuarios
@@ -546,7 +546,7 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
 
     # deja entrar siempre y cuando la solicitud no este anulada o terminada
     if requisicion.is_anulada or requisicion.estado == Requisicion.TERMINADA or \
-       Requisicion.DATA_SET['administrativo'] == requisicion.get_rastreo():
+       Requisicion.DATA_SET['compras'] != requisicion.get_rastreo():
         raise Http404
 
     # inicializa variable para saber si instnciar el formulario o no
@@ -665,7 +665,7 @@ def adjuntar_archivos_requisicion(request, id_requisicion):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_jefe_administrativo')
 def ver_requisiciones_jefe_administrativo(request):
     """
     Vista que lista las requisiciones que fueron aprobadas por los usuarios de compras
@@ -675,8 +675,8 @@ def ver_requisiciones_jefe_administrativo(request):
     requisiciones = Requisicion.objects.aprobadas_compras().distinct().order_by('-fecha_ingreso')
     try:
         empleado = request.user.empleado
-        if not empleado.is_jefe_administrativo:
-            return redirect('sin_permiso')
+        # if not empleado.is_jefe_administrativo:
+        #     return redirect('sin_permiso')
     except:
         raise Http404
 
@@ -724,7 +724,7 @@ def ver_requisiciones_jefe_administrativo(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_jefe_administrativo')
 def editar_valores_jefe_administrativo(request, id_requisicion):
     """
     Vista para poder editar los valores y la forma de pago de los detalles de una requisicion
@@ -735,8 +735,8 @@ def editar_valores_jefe_administrativo(request, id_requisicion):
         empleado = request.user.empleado
         if Requisicion.DATA_SET['administrativo'] != requisicion.get_rastreo():
             raise Http404
-        if not empleado.is_jefe_administrativo:
-            return redirect('sin_permiso')
+        # if not empleado.is_jefe_administrativo:
+        #     return redirect('sin_permiso')
     except:
         raise Http404
 
@@ -778,15 +778,15 @@ def editar_valores_jefe_administrativo(request, id_requisicion):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_jefe_financiero')
 def ver_requisiciones_financiero(request):
     """
     Vista para ver las requisiciones que han llegado al sector financiero
     """
     try:
         empleado = request.user.empleado
-        if not empleado.is_jefe_financiero:
-            raise Http404
+        # if not empleado.is_jefe_financiero:
+        #     raise Http404
     except Empleado.DoesNotExist:
         raise Http404
 
@@ -802,7 +802,7 @@ def ver_requisiciones_financiero(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_jefe_financiero')
 @transaction.atomic
 def pre_pago_requisicion(request, id_requisicion):
     """
@@ -848,7 +848,7 @@ def pre_pago_requisicion(request, id_requisicion):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_usuario_pago')
 def ver_requisiciones_usuario_pago(request):
     """
     Vista para listar las requisiciones que han aprobado los jefes de el departamento
@@ -857,8 +857,8 @@ def ver_requisiciones_usuario_pago(request):
 
     try:
         empleado = request.user.empleado
-        if not empleado.is_usuario_pago:
-            return redirect('sin_permiso')
+        # if not empleado.is_usuario_pago:
+        #     return redirect('sin_permiso')
     except:
         raise Http404
 
@@ -870,7 +870,7 @@ def ver_requisiciones_usuario_pago(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado
 def pagar_requisicion(request, id_requisicion):
     """
     Vista con la que acaba el proceso de trazabilidad, en la cual se le pone un estado
@@ -924,7 +924,7 @@ def pagar_requisicion(request, id_requisicion):
 
 
 @waffle_switch('compras')
-@permission_required('organizacional.es_presidente')
+@permission_required('organizacional.es_presidente', login_url='sin_permiso')
 def ver_requisiciones_presidencia(request):
     """
     Vista para ver las requisiciones que han alcanzado cierto punto de tope en su total
@@ -1054,14 +1054,12 @@ def aprobar_requisiciones_empleado(request, id_requisicion):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_jefe_administrativo')
 def informes_totales_area_departamento(request):
     """
     Informe para ver los totales agrupados de acuerdo a una fecha, un área o departamento
     de las requisiciones
     """
-    from django.db import models
-    from organizacional.models import Departamento
 
     data = {}
 
@@ -1083,26 +1081,6 @@ def informes_totales_area_departamento(request):
                 else:
                     _data[requisicion.empleado.areas.first().departamento.nombre] += requisicion.get_total()
 
-                # departamentos = [
-                #     departamento.nombre for departamento in Departamento.objects.filter(
-                #         id__in=requisicion.empleado.areas.values_list('departamento', flat=True)
-                #     ) if departamento.nombre not in departamentos
-                # ]
-                # for departamento in departamentos:
-                #     if departamento not in [x['departamento'] for x in _data]:
-                #         data = {'departamento': departamento, 'total': requisicion.get_total()}
-                #         _data.append(data)
-                #     else:
-                #         _res = None
-                #         for x in _data:
-                #             if x['departamento'] == departamento:
-                #                 _res = _data.index(x)
-                #                 break
-                #         if _res is not None:
-                #             _data[_res]['total'] += requisicion.get_total()
-                #         else:
-                #             raise IndexError("Variable _res is returning None")
-            print(_data)
             data['requisiciones'] = _data
             if len(_data) == 0:
                 messages.warning(request, _('No se han encontrado resultados para ese rango de fecha'))
@@ -1118,7 +1096,7 @@ def informes_totales_area_departamento(request):
 
 
 @waffle_switch('compras')
-@login_required
+@login_empleado('is_jefe_financiero')
 def imprimir_requisicion(request, id_requisicion):
     """
     Vista para imprimir el detalle de una requisicion

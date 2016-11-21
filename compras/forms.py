@@ -130,7 +130,7 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('presupuesto_aprobado', )
+        fields = ('presupuesto_aprobado', 'fecha_pago', )
 
     def __init__(self, *args, **kwargs):
         super(FormularioFechaPagoRequisicion, self).__init__(*args, **kwargs)
@@ -138,6 +138,9 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
         self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
         self.fields['presupuesto_aprobado'].required = True
         self.fields['presupuesto_aprobado'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['fecha_pago'].label = _('Fecha aprobada de entrega de recurso')
+        self.fields['fecha_pago'].required = True
+        self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
 
     def clean(self, *args, **kwargs):
         cleaned_data = super(FormularioFechaPagoRequisicion, self).clean(*args, **kwargs)
@@ -160,13 +163,13 @@ class FormularioEstadoPago(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('estado_pago', 'fecha_pago')
+        fields = ('estado_pago', )  # 'fecha_pago')
 
     def __init__(self, *args, **kwargs):
         super(FormularioEstadoPago, self).__init__(*args, **kwargs)
-        self.fields['fecha_pago'].required = True
-        self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fecha_pago'].label = _('Fecha aprobada de entrega de recurso')
+        # self.fields['fecha_pago'].required = True
+        # self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
+        # self.fields['fecha_pago'].label = _('Fecha aprobada de entrega de recurso')
         if self.instance:
             if self.instance.fecha_pago is None or self.instance.fecha_pago == '':
                 self.fields['estado_pago'].widget.attrs.update(

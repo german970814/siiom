@@ -93,7 +93,7 @@ class RequisicionManager(models.Manager):
                 datetime.date(year=hoy.year, month=hoy.month, day=1),
                 hoy + datetime.timedelta(days=1)
             )
-        ).filter(*args, **kwargs)
+        ).filter(*args, **kwargs).distinct()
 
     def finalizadas_mes(self, *args, **kwargs):
         """
@@ -156,7 +156,7 @@ class RequisicionManager(models.Manager):
         return self.filter(
             presupuesto_aprobado=self.model.SI,
             detallerequisicion__forma_pago__in=[DetalleRequisicion.EFECTIVO, DetalleRequisicion.DEBITO]
-        ).exclude(estado=self.model.ANULADA)
+        ).exclude(estado=self.model.ANULADA).exclude(fecha_pago=None)
 
     def en_presidencia(self):
         """

@@ -679,12 +679,12 @@
                                 {% endif %}
                                 {% if request.user.empleado.is_compras %}
                                 <li>
-                                    <a href="{% url 'compras:ver_requisiciones_compras' %}">{% trans "Requiciones Totales" %}</a>
+                                    <a href="{% url 'compras:ver_requisiciones_compras' %}">{% trans "Requisiciones Totales" %}</a>
                                 </li>
                                 {% endif %}
                                 {% if request.user.empleado.is_jefe_administrativo %}
                                 <li>
-                                    <a href="{% url 'compras:ver_requisiciones_jefe_administrativo' %}">{% trans "Requiciones Aprobadas por Compras" %}</a>
+                                    <a href="{% url 'compras:ver_requisiciones_jefe_administrativo' %}">{% trans "Requisiciones Aprobadas por Compras" %}</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'compras:informes_totales_area_departamento' %}">{% trans "Informe por totales" %}</a>
@@ -692,17 +692,17 @@
                                 {% endif %}
                                 {% if request.user.empleado.is_jefe_financiero %}
                                 <li>
-                                    <a href="{% url 'compras:ver_requisiciones_financiero' %}">{% trans "Requiciones Aprobadas por Jefe Administrativo" %}</a>
+                                    <a href="{% url 'compras:ver_requisiciones_financiero' %}">{% trans "Requisiciones Aprobadas por Jefe Administrativo" %}</a>
                                 </li>
                                 {% endif %}
                                 {% if request.user.empleado.is_usuario_pago %}
                                 <li>
-                                    <a href="{% url 'compras:ver_requisiciones_usuario_pago' %}">{% trans "Requiciones Esperando por pago" %}</a>
+                                    <a href="{% url 'compras:ver_requisiciones_usuario_pago' %}">{% trans "Requisiciones Esperando por pago" %}</a>
                                 </li>
                                 {% endif %}
                                 {% if perms.organizacional.es_presidente %}
                                 <li>
-                                    <a href="{% url 'compras:ver_requisiciones_presidencia' %}">{% trans "Requiciones En Presidencia" %}</a>
+                                    <a href="{% url 'compras:ver_requisiciones_presidencia' %}">{% trans "Requisiciones En Presidencia" %}</a>
                                 </li>
                                 {% endif %}
                             </ul>

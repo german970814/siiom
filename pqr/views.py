@@ -15,13 +15,13 @@ from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
     FormularioCerrarCaso, FormularioEditarCaso, FormularioAgregarArchivoCaso
 )
-from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion
-from .decorators import login_empleado
+from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion, format_string_to_ascii
 
 # Apps
-from miembros.models import Miembro
-from organizacional.models import Empleado
 from common.constants import CONTENT_TYPES
+from miembros.models import Miembro
+from organizacional.decorators import login_empleado
+from organizacional.models import Empleado
 
 # Third's Apps
 from waffle.decorators import waffle_switch
@@ -495,7 +495,7 @@ def descargar_archivos(request, id_documento):
         finally:
             _file.close()
 
-        response['Content-Disposition'] = "attachment; filename='%s'" % documento.get_name()
+        response['Content-Disposition'] = "attachment; filename='%s'" % format_string_to_ascii(documento.get_name())
         return response
     except Exception as exception:
         return HttpResponse(exception, content_type='text/plain')
