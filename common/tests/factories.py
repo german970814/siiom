@@ -1,10 +1,10 @@
 import factory
-from django.contrib.auth import models
+from django.contrib.auth import get_user_model, models
 
 
 class UsuarioFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = models.User
+        model = get_user_model()
 
     username = factory.Sequence(lambda n: 'user%d' % n)
     email = factory.LazyAttribute(lambda o: '%s@siiom.com' % o.username)

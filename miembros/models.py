@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-
 import datetime
 from django.db import models
-from django.db.models import Q
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from .managers import MiembroManager, MiembroQuerySet
@@ -82,7 +81,7 @@ class Miembro(models.Model):
         ('D', 'Divorciado'),
     )
     #  autenticacion
-    usuario = models.ForeignKey(User, unique=True, null=True, blank=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, null=True, blank=True)
     #  info personal
     nombre = models.CharField(max_length=30)
     primerApellido = models.CharField(max_length=20, verbose_name="primer apellido")
