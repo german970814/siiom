@@ -79,7 +79,6 @@ class GrupoModelTest(BaseTest):
 
         grupo = Grupo.objects.get(id=500)
         nuevo_padre = Grupo.objects.get(id=200)
-        red_actual = grupo.red
 
         grupo.transladar(nuevo_padre)
         grupo.refresh_from_db()
