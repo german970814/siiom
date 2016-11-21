@@ -64,18 +64,17 @@ class Grupo(AL_Node):
     red = models.ForeignKey(Red, verbose_name=('red'), null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio', verbose_name=_lazy('barrio'))
 
-    node_order_by = ['id']
+    # campos para ubicaciones en mapas
+    latitud = models.FloatField(verbose_name='Latitud', blank=True, null=True)
+    longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     # managers
     objects = GrupoManager.from_queryset(GrupoQuerySet)()
+    node_order_by = ['id']
 
     class Meta:
         verbose_name = _lazy('grupo')
         verbose_name_plural = _lazy('grupos')
-
-    # campos para ubicaciones en mapas
-    latitud = models.FloatField(verbose_name='Latitud', blank=True, null=True)
-    longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     def __str__(self):
         lideres = ["{0} {1}({2})".format(
