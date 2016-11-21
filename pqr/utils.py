@@ -7,6 +7,7 @@ import hashlib
 import random
 from threading import Thread
 from functools import wraps
+import re
 
 
 # CONSTANTS
@@ -114,3 +115,29 @@ def enviar_email_invitacion(request, caso, empleado, mensaje):
         ('{}'.format(empleado.usuario.email), ),
         fail_silently=False
     )
+
+
+def _format_string(string):
+    """Retorna un string legible para ASCII"""
+
+    REPLACES = (
+        ('á', 'a'),
+        ('é', 'e'),
+        ('í', 'i'),
+        ('ó', 'o'),
+        ('ú', 'u'),
+        ('à', 'a'),
+        ('è', 'e'),
+        ('ì', 'i'),
+        ('ò', 'o'),
+        ('ù', 'u'),
+        ('ñ', 'n'),
+        (' ', '_'),
+    )
+
+    match = re.compile(r'[a-zA-ZñÑáÁéÉíÍóÓúÚ\s0-9_]')
+    string = ''.join(match.findall(string))
+    for x in REPLACES:
+        string = string.replace(x[0], x[1])
+        string = string.replace(x[0].upper(), x[1].upper())
+    return string

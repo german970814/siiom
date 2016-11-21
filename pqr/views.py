@@ -15,7 +15,7 @@ from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
     FormularioCerrarCaso, FormularioEditarCaso, FormularioAgregarArchivoCaso
 )
-from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion
+from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion, _format_string
 from .decorators import login_empleado
 
 # Apps
@@ -495,7 +495,7 @@ def descargar_archivos(request, id_documento):
         finally:
             _file.close()
 
-        response['Content-Disposition'] = "attachment; filename='%s'" % documento.get_name()
+        response['Content-Disposition'] = "attachment; filename='%s'" % _format_string(documento.get_name())
         return response
     except Exception as exception:
         return HttpResponse(exception, content_type='text/plain')
