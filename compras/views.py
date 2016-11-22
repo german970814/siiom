@@ -672,30 +672,48 @@ def ver_requisiciones_jefe_administrativo(request):
     y que se encuentran para que el jefe administrativo pueda aprobarlas o rechazarlas
     """
 
+    # se sacan las requisiciones aprobadas por compras, y se ordenan por fecha de ingreso
     requisiciones = Requisicion.objects.aprobadas_compras().distinct().order_by('-fecha_ingreso')
     try:
         empleado = request.user.empleado
-        # if not empleado.is_jefe_administrativo:
-        #     return redirect('sin_permiso')
     except:
         raise Http404
 
     data = {'requisiciones': requisiciones}
 
+    # si la peticion es POST
     if request.method == 'POST':
+        # se crea el formulario
         form = FormularioRequisicionesCompras(data=request.POST)
         if form.is_valid():
+            # se busca la requisicion que apunta el formulario
             requisicion = Requisicion.objects.get(id=form.cleaned_data['id_requisicion'])
+            # si se aprueba
             if 'aprobar' in request.POST:
-                if 'observacion' in form.cleaned_data:
-                    historial = requisicion.crear_historial(
-                        empleado=empleado, estado=Historial.APROBADA,
-                        observacion=form.cleaned_data['observacion']
+                # se verifica que no existan detalles en la requisicion sin forma de pago
+                if requisicion.detallerequisicion_set.filter(forma_pago='').exists():
+                    # si existe, entonces, crea un error en el formulario
+                    form.add_error(
+                        'observacion', _('No se puede aprobar la requisicion si no tiene una forma de pago definida')
                     )
+                    # envia el formulario de vuelta
+                    data['CLICK'] = form.cleaned_data['id_requisicion']
+                    messages.error(request, _("Ha ocurrido un error al enviar el formulario"))
+                    data['form'] = form
+                    # envia los datos de vuelta
+                    return render(request, 'compras/ver_requisiciones_jefe_administrativo.html', data)
                 else:
-                    historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
+                    # de lo contrario, crea los historiales adecuadamente
+                    if 'observacion' in form.cleaned_data:
+                        historial = requisicion.crear_historial(
+                            empleado=empleado, estado=Historial.APROBADA,
+                            observacion=form.cleaned_data['observacion']
+                        )
+                    else:
+                        historial = requisicion.crear_historial(empleado=empleado, estado=Historial.APROBADA)
                 mensaje = 'aprobado'
             elif 'rechazar' in request.POST:
+                # rechaza la requisicion
                 historial = requisicion.crear_historial(
                     empleado=empleado, estado=Historial.RECHAZADA,
                     observacion=form.cleaned_data['observacion']
@@ -703,6 +721,7 @@ def ver_requisiciones_jefe_administrativo(request):
                 requisicion.estado = Requisicion.ANULADA
                 requisicion.save()
                 mensaje = 'rechazado'
+            # guarda el historial
             historial.save()
             messages.success(
                 request,
@@ -735,8 +754,6 @@ def editar_valores_jefe_administrativo(request, id_requisicion):
         empleado = request.user.empleado
         if Requisicion.DATA_SET['administrativo'] != requisicion.get_rastreo():
             raise Http404
-        # if not empleado.is_jefe_administrativo:
-        #     return redirect('sin_permiso')
     except:
         raise Http404
 
@@ -750,6 +767,7 @@ def editar_valores_jefe_administrativo(request, id_requisicion):
         URL = """
             <a href="%s" class="alert-link">VOLVER A LA LISTA DE REQUISICIONES</a>
         """ % reverse_lazy('compras:ver_requisiciones_jefe_administrativo')
+
         formset_detalles = DetalleRequisicionFormSet(
             data=request.POST,
             prefix='detallerequisicion_set',
@@ -857,8 +875,6 @@ def ver_requisiciones_usuario_pago(request):
 
     try:
         empleado = request.user.empleado
-        # if not empleado.is_usuario_pago:
-        #     return redirect('sin_permiso')
     except:
         raise Http404
 
