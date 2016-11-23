@@ -67,7 +67,7 @@
                                         <td>{{ grupo.nombre|capfirst }}</td>
                                         <td>
                                             <ul>
-                                            {% for lider in grupo.lideres %}
+                                            {% for lider in grupo.lideres.all %}
                                                 <li>{{ lider.nombre|capfirst }} {{ lider.primerApellido|capfirst }}</li>
                                             {% endfor %}
                                             </ul>

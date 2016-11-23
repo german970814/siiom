@@ -44,7 +44,7 @@
             var nType = $(this).attr('data-type');
             var nAnimIn = $(this).attr('data-animation-in');
             var nAnimOut = $(this).attr('data-animation-out');
-            
+
             notify('{{ms}}', nFrom, nAlign, nIcons, 'success', 'animated bounceIn', nAnimOut);
         });
         {% endif %}
@@ -56,7 +56,7 @@
             var nType = $(this).attr('data-type');
             var nAnimIn = $(this).attr('data-animation-in');
             var nAnimOut = $(this).attr('data-animation-out');
-            
+
             notify('{{ms}}', nFrom, nAlign, nIcons, 'danger', 'animated bounceIn', nAnimOut);
 
             $('.edit-error').click();
@@ -74,7 +74,7 @@
         var $direccion = $('#id_direccion').val();
         var $email = $('#id_email').val();
 
-		$("#id_fechaNacimiento").datetimepicker({ 
+		$("#id_fechaNacimiento").datetimepicker({
 			format: 'DD/MM/YYYY',
             maxDate: moment(),
 		});
@@ -83,7 +83,7 @@
         $('#change-photo').click(function(event) {
             $('#id_foto_perfil').click();
         });
-        
+
         if(!$('html').hasClass('ismobile')) {
             if($('.loader-fotop')[0]) {
                 setTimeout (function () {
@@ -225,7 +225,7 @@
                     var nType = $(this).attr('data-type');
                     var nAnimIn = $(this).attr('data-animation-in');
                     var nAnimOut = $(this).attr('data-animation-out');
-                    
+
                     notify(data.ms, nFrom, nAlign, nIcons, data.status, 'animated bounceIn', nAnimOut);
                 }
             })
@@ -241,7 +241,7 @@
     <section>
         <div class="container">
             <div class="block-header">
-                <h2>{{miembro.nombre|upper}} {{miembro.primerApellido|upper}}<small>{% if miembro.grupoLidera %}Lider del grupo '{{miembro.grupoLidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
+                <h2>{{miembro.nombre|upper}} {{miembro.primerApellido|upper}}<small>{% if miembro.grupo_lidera %}Lider del grupo '{{miembro.grupo_lidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
                 {% if perms.miembros.es_administrador %}
                 <ul class="actions m-t-20 hidden-xs">
                     <li class="dropdown">
@@ -270,7 +270,7 @@
                 </ul>
                 {% endif %}
             </div>
-            
+
             <div class="card" id="profile-main">
                 <div class="pm-overview c-overflow">
                     <div class="pmo-pic">
@@ -278,20 +278,20 @@
                             {% if mismo %}
                             <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="uploadPhotos('/miembro/perfil/')">
                             {% endif %}
-                            <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt=""> 
-                            
+                            <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
+
                             <!-- <div class="dropdown pmop-message">
                                 <a data-toggle="dropdown" href="" class="btn bgm-white btn-float z-depth-1">
                                     <i class="zmdi zmdi-comment-text-alt"></i>
                                 </a>
-                                
+
                                 <div class="dropdown-menu">
                                     <textarea placeholder="Write something..."></textarea>
-                                    
+
                                     <button class="btn bgm-green btn-float"><i class="zmdi zmdi-mail-send"></i></button>
                                 </div>
                             </div> -->
-                            
+
                             {% if mismo %}
                             <a class="pmop-edit" id="change-photo" style="width:50%; cursor:pointer;">
                                 <i class="zmdi zmdi-camera"></i> <span class="hidden-xs">Cambiar Foto de Perfil</span>
@@ -312,17 +312,17 @@
                                 <circle class="plc-path" cx="50" cy="50" r="20" />
                             </svg>
                         </div>
-                        
-                        
+
+
                         <div class="pmo-stat {% if miembro.genero == 'F' %} bgm-pink{% else %} bgm-cyan{% endif %}">
                             <h2 class="m-0 c-white">{{miembro.nombre|upper}}</h2>
                              {{miembro.cedula}}
                         </div>
                     </div>
-                    
+
                     <div class="pmo-block pmo-contact hidden-xs">
                         <h2>Contacto</h2>
-                        
+
                         <ul>
                             <li><i class="zmdi zmdi-phone"></i> {% if miembro.celular %}{{miembro.celular}}{% else %}SIN DATOS{% endif %}</li>
                             <li><i class="zmdi zmdi-email"></i> {% if miembro.email %}{{miembro.email}}{% else %}SIN DATOS{% endif %}</li>
@@ -342,7 +342,7 @@
                         <li class="{% if i %}active{% endif %} waves-effect"><a href="/miembro/informacion_iglesia/{% if pk %}{{pk}}{% endif %}">Información de la Iglesia</a></li>
                     </ul>
                 {% block card %}
-                    
+
                 {% endblock card %}
                 </div>
             </div>
