@@ -205,11 +205,18 @@ def crear_empleado(request):
                     if miembro.segundoApellido:
                         empleado.segundo_apellido = miembro.segundoApellido
             # se agrega el tipo de usuario
-            usuario.groups.add(form.cleaned_data['tipo_usuario'])
+            if 'tipo_usuario' in form.cleaned_data and form.cleaned_data['tipo_usuario'] is not None:
+                usuario.groups.add(form.cleaned_data['tipo_usuario'])
             empleado.usuario = usuario
             # se crea el empleado
             empleado.save()
             form.save_m2m()
+
+            if empleado.jefe_departamento is True:
+                for area in form.cleaned_data['departamento'].areas.all():
+                    if area not in empleado.areas.all():
+                        empleado.areas.add(area)
+
             messages.success(request, _('Empleado creado exitosamente'))
             return redirect(reverse('organizacional:crear_empleado'))
         else:
@@ -230,7 +237,7 @@ def editar_empleado(request, id_empleado):
     Edita los empleados
     """
     VERBO = 'Editar'
-    _accept = ['administrador sgd', 'digitador']
+    _accept = ['administrador sgd', 'digitador', 'presidente']
     empleado = get_object_or_404(Empleado, pk=id_empleado)
     try:
         grupo = empleado.usuario.groups.annotate(nombre=Lower('name')).filter(nombre__in=_accept)[0]
@@ -240,13 +247,20 @@ def editar_empleado(request, id_empleado):
     if request.method == 'POST':
         form = FormularioEditarEmpleado(data=request.POST, instance=empleado)
         if form.is_valid():
-            form.save()
+            empleado = form.save(commit=False)
             if 'contrasena' in form.cleaned_data and form.cleaned_data['contrasena'] != '':
                 empleado.usuario.set_password(form.cleaned_data['contrasena'])
-            if form.cleaned_data['tipo_usuario'] != grupo:
+            if form.cleaned_data['tipo_usuario'] is not None and form.cleaned_data['tipo_usuario'] != grupo:
                 empleado.usuario.groups.remove(grupo)
                 empleado.usuario.groups.add(form.cleaned_data['tipo_usuario'])
             empleado.usuario.save()
+            empleado.save()
+            form.save_m2m()
+
+            if empleado.jefe_departamento is True:
+                for area in form.cleaned_data['departamento'].areas.all():
+                    if area not in empleado.areas.all():
+                        empleado.areas.add(area)
             messages.success(request, _('Se ha editado exitosamente'))
             return redirect(reverse('organizacional:editar_empleado', args=(id_empleado, )))
         else:

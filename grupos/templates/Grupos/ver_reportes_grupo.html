@@ -43,7 +43,7 @@
                 if ($(this).find('input[type="checkbox"]').is(':checked')) {
                     return false;
                 }
-                $('#toggleModal2').click();
+                $('#toggleModalConfirmarOfrenda').click();
                 $('input[name="reporte"]').val($(this).parent().parent().attr('data-row-id').toString());
                 return false;
             });
@@ -132,7 +132,7 @@
         {% endif %}
 
         {% if click %}
-        $('#toggleModal').click();
+        $('#toggleModalCrearReporte').click();
         {% endif %}
         // $seleccionados = [];
         // bootgrid_table_solution("#data-table-selection", $seleccionados);
@@ -160,7 +160,7 @@
 {% endblock %}
 
 {% block contenido %}
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrowerCrearReporte" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -291,7 +291,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalNarrower2" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrowerConfirmarOfrenda" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -311,7 +311,7 @@
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
+<a data-toggle="modal" id="toggleModalConfirmarOfrenda" href="#modalNarrowerConfirmarOfrenda"></a>
 <div class="container">
     <div class="card">
         <div class="card-header">
@@ -322,7 +322,7 @@
                 {% if reuniones %}
                 {% if reuniones.first.grupo.id %}
                 {% comment %}<small><a href="/miembro/reportar_reunion_grupo_admin/?grupo={{ reuniones.first.grupo.id }}">Crear un reporte para este grupo</a></small>{% endcomment %}
-                <small><a data-toggle="modal" id="toggleModal" href="#modalNarrower">Crear Reporte Para Este Grupo</a></small>
+                <small><a data-toggle="modal" id="toggleModalCrearReporte" href="#modalNarrowerCrearReporte">Crear Reporte Para Este Grupo</a></small>
                 {% endif %}
                 {% endif %}
                 {% if messages %}

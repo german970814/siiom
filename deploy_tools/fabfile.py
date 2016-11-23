@@ -5,7 +5,7 @@ import random
 REPO_URL = 'https://taniamhn@bitbucket.org/ingeniarte/iglesia.git'
 
 env.hosts = ['iglesia.webfactional.com', 'panama.iglesia.webfactional.com',
-            'gng.iglesia.webfactional.com', 'cdo.iglesia.webfactional.com']
+             'gng.iglesia.webfactional.com', 'cdo.iglesia.webfactional.com']
 env.user = 'iglesia'
 
 enviroments = {
