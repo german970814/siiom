@@ -23,7 +23,7 @@ class CrearEncuentroForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CrearEncuentroForm, self).__init__(*args, **kwargs)
-        self.fields['grupos'].queryset = Grupo.objects.all().select_related('lider1', 'lider2')
+        self.fields['grupos'].queryset = Grupo.objects.prefetch_related('lideres').all()
         self.fields['coordinador'].queryset = Miembro.objects.none()
         self.fields['tesorero'].queryset = Miembro.objects.none()
         for x in self.fields:

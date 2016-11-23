@@ -18,7 +18,7 @@ from .forms import (
     FormularioCrearSesion, FormularioRecibirPago
 )
 from miembros.models import Miembro, CumplimientoPasos
-from common.tests import (
+from common.groups_tests import (
     maestroTest, receptorTest, adminTest, adminMaestroTest
 )
 
@@ -68,7 +68,7 @@ def verCursos(request, admin):
     else:
         cursos = Curso.objects.filter(profesor=miembro, estado='A')
         request.session['admin'] = False
-    return render_to_response("Academia/listar_cursos.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("academia/listar_cursos.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
@@ -81,11 +81,11 @@ def verDetalleCurso(request, curso):
     modulos = curso.modulos.all()
     for modulo in modulos:
         modulo.sesiones = Sesion.objects.filter(modulo=modulo)
-    return render_to_response("Academia/curso_detalle.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("academia/curso_detalle.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
-def editarCurso(request, admin, url, pk, template_name="Academia/crear_curso.html"):
+def editarCurso(request, admin, url, pk, template_name="academia/crear_curso.html"):
     """Permite a un maestro o administrador editar un cursos."""
     accion = 'Editar'
     curso = get_object_or_404(Curso, pk=pk)
@@ -149,7 +149,7 @@ def listarEstudiantes(request, curso):
         totalSesiones = Sesion.objects.filter(modulo=est.moduloActual).count()
         est.sesionesDadas = AsistenciaSesiones.objects.filter(matricula=est, sesion__modulo=est.moduloActual).count()
         est.sesionesFaltantes = totalSesiones - est.sesionesDadas
-    return render_to_response("Academia/listar_estudiantes.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("academia/listar_estudiantes.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
@@ -176,7 +176,7 @@ def verDetalleEstudiante(request, est):
                 sesion.asistencia = AsistenciaSesiones.objects.get(matricula=est, sesion=sesion)
             except:
                 pass
-    return render_to_response("Academia/estudiante_detalle.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("academia/estudiante_detalle.html", locals(), context_instance=RequestContext(request))
 
 
 #  ----------------------------------MAESTRO--------------------------------------
@@ -256,7 +256,7 @@ def maestroAsistencia(request):
             nadie = True
     miembro = Miembro.objects.get(usuario=request.user)
     cursos = Curso.objects.filter(profesor=miembro, estado='A')
-    return render_to_response("Academia/asistencia.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("academia/asistencia.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(maestroTest, login_url="/dont_have_permissions/")
@@ -314,7 +314,7 @@ def maestroRegistrarEntregaTareas(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     cursos = Curso.objects.filter(profesor=miembro, estado='A')
-    return render_to_response("Academia/tareas.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("academia/tareas.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(maestroTest, login_url="/dont_have_permissions/")
@@ -362,7 +362,7 @@ def evaluarModulo(request):
                 return HttpResponseRedirect("/academia/estudiantes/" + request.session['curso'] + "/")
 
     miembro = Miembro.objects.get(usuario=request.user)
-    return render_to_response('Academia/evaluar_modulo.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/evaluar_modulo.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(maestroTest, login_url="/dont_have_permissions/")
@@ -392,7 +392,7 @@ def promoverModulo(request):
                 return HttpResponseRedirect("/academia/estudiantes/" + request.session['curso'] + "/")
 
     miembro = Miembro.objects.get(usuario=request.user)
-    return render_to_response('Academia/promover_estudiante.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/promover_estudiante.html', locals(), context_instance=RequestContext(request))
 
 #  --------------------------------------------ADMINISTRADOR--------------------------------------------
 
@@ -414,7 +414,7 @@ def crearCurso(request):
     else:
         form = FormularioCrearCurso()
 
-    return render_to_response('Academia/crear_curso.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/crear_curso.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -433,7 +433,7 @@ def matricularEstudiante(request, id):
             nuevaMatricula.save()
             ok = True
 
-    return render_to_response('Academia/matricula.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/matricula.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -448,7 +448,7 @@ def listarModulos(request):
                 return HttpResponseRedirect('')
 
     modulos = Modulo.objects.all().order_by('id')
-    return render_to_response('Academia/listar_modulos.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/listar_modulos.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -465,7 +465,7 @@ def crearModulo(request):
             ok = True
 
     form = FormularioCrearModulo()
-    return render_to_response('Academia/crear_modulo.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/crear_modulo.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -489,7 +489,7 @@ def editarModulo(request, pk):
 
     else:
         form = FormularioCrearModulo(instance=modulo)
-        return render_to_response("Academia/crear_modulo.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("academia/crear_modulo.html", locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect("/academia/listar_modulos")
 
@@ -507,7 +507,7 @@ def listarSesiones(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
     modulo = Modulo.objects.get(id=int(id))
     sesiones = Sesion.objects.filter(modulo=modulo).order_by('id')
-    return render_to_response('Academia/listar_sesiones.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/listar_sesiones.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -527,7 +527,7 @@ def crearSesion(request, id):
             ok = True
 
     form = FormularioCrearSesion()
-    return render_to_response('Academia/crear_sesion.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/crear_sesion.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -550,7 +550,7 @@ def editarSesion(request, id, pk):
             sesionEditado = form.save()
             ok = True
         else:
-            return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
 
     # if 'seleccionados' in request.session:
     #     faltantes = request.session['seleccionados']
@@ -562,7 +562,7 @@ def editarSesion(request, id, pk):
 
     else:
         form = FormularioCrearSesion(instance=sesion)
-        return render_to_response("Academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect("/academia/sesiones/" + id + "/")
 
@@ -589,7 +589,7 @@ def recibirPago(request, id):
             ok = False
     else:
         form = FormularioRecibirPago(instance=miembroRecibir)
-    return render_to_response('Academia/recibir_pago.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/recibir_pago.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -600,4 +600,4 @@ def listarPagosAcademia(request):
         if 'Receptor' in g.name:
             receptor = True
     matriculas = Matricula.objects.all()
-    return render_to_response('Academia/listar_pago.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('academia/listar_pago.html', locals(), context_instance=RequestContext(request))

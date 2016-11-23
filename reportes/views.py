@@ -26,7 +26,7 @@ from .forms import (
 from .utils import get_date_for_report
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
-from common.tests import (
+from common.groups_tests import (
     liderAdminTest, agenteAdminTest,
 )
 
@@ -123,7 +123,7 @@ def asignacionGAR(request):
             # num_noInteresadoGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
             #                                              noInteresadoGAR=True).count()
 
-            num_noAsignadoGAR = num_miembros - num_AsignadoGAR - num_asisteGAR - num_noInteresadoGAR
+            num_noAsignadoGAR = abs(num_miembros - num_AsignadoGAR - num_asisteGAR - num_noInteresadoGAR)
 
             values.append(['Por asignar GAR', num_noAsignadoGAR])
             values.append(['Asignado GAR', num_AsignadoGAR])
@@ -272,6 +272,7 @@ def visitasPorMes(request, por_red):
     return render_to_response('reportes/visitas_por_mes.html', locals(), context_instance=RequestContext(request))
 
 
+# TODO La asistncia GAR ya no se registra por lo tanto esto no se puede reportar. Preguntar si eliminar
 @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
 def asistenciaGrupos(request):
     """Muestra la asistencia de los miembros de un grupo de amistad a las reuniones."""
@@ -282,7 +283,7 @@ def asistenciaGrupos(request):
         if form.is_valid():
             fechai = form.cleaned_data['fechai']
             fechaf = form.cleaned_data['fechaf']
-            grupo_lidera = miembro.grupoLidera()
+            grupo_lidera = miembro.grupo_lidera
 
             if grupo_lidera is not None:
                 reuniones = ReunionGAR.objects.filter(grupo=grupo_lidera,
@@ -304,20 +305,21 @@ def asistenciaGrupos(request):
     return render_to_response('reportes/asistencia_grupos.html', locals(), context_instance=RequestContext(request))
 
 
+# TODO eliminar
 def listaGruposDescendientes(miembro):
     """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     listaG = [grupo]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
-        g = d.grupoLidera()
+        g = d.grupo_lidera
         if g:
             if g not in listaG:
                 listaG.append(g)
-            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            lid = g.lideres.all()
             for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
                 if l in discipulos:
                     discipulos.remove(l)
@@ -326,17 +328,18 @@ def listaGruposDescendientes(miembro):
     return listaG
 
 
+# TODO eliminar
 def listaCaminoGrupos(grupoi, grupof):
     """Devuelve los grupos que se encuentran en la camino del grupo inicial, al grupo final."""
 
     listaG = [grupof]
     if grupof != grupoi:
-        m = Miembro.objects.get(id=grupof.listaLideres()[0])
+        m = grupof.lideres.first()
         padre = m.grupo
         while padre != grupoi:
             if padre not in listaG:
                 listaG.insert(0, padre)
-            m = Miembro.objects.get(id=padre.listaLideres()[0])
+            m = padre.lideres.first()
             padre = m.grupo
         if padre not in listaG:
             listaG.insert(0, padre)
@@ -349,21 +352,23 @@ def pasosPorMiembros(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         #  listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
     pasos = Pasos.objects.all().order_by('prioridad')
     descendientes = False
 
     if request.method == 'POST':
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
-            lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
+            # lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
             # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            grupos = listaGruposDescendientes(lider_i)
+            # grupos = listaGruposDescendientes(lider_i)
+            grupos = Grupo.get_tree(grupo_i)
             data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
             return HttpResponse(json.dumps(data), content_type="application/json")
 
@@ -371,11 +376,14 @@ def pasosPorMiembros(request):
             grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
             if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                 descendientes = True
-                grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                # grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                grupos = Grupo.get_tree(grupo_i)
             else:
                 grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-                listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
-                grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                # listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                listaGrupo_f = Grupo.get_tree(grupo_i)
+                # grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
 
             for g in grupos:
                 miembros_grupo = g.miembrosGrupo().order_by('nombre', 'primerApellido')
@@ -400,12 +408,13 @@ def PasosTotales(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
     pasos = Pasos.objects.all().order_by('prioridad')
     descendientes = False
     sw = False
@@ -414,9 +423,10 @@ def PasosTotales(request):
     if request.method == 'POST':
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
-            lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
+            # lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
             # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
-            grupos = listaGruposDescendientes(lider_i)
+            # grupos = listaGruposDescendientes(lider_i)
+            grupos = Grupo.get_tree(grupo_i)
             data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
             return HttpResponse(json.dumps(data), content_type="application/json")
         else:
@@ -427,12 +437,15 @@ def PasosTotales(request):
             if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                 descendientes = True
                 opciones['gf'] = 'Descendientes'
-                grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                # grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                grupos = Grupo.get_tree(grupo_i)
             else:
                 grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
                 opciones['gf'] = grupo_f.nombre.capitalize()
-                listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
-                grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                # listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                listaGrupo_f = Grupo.get_tree(grupo_i)
+                # grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
 
             miembros = []
             for g in grupos:
@@ -471,12 +484,13 @@ def PasosRangoFecha(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
     pasos = Pasos.objects.all().order_by('prioridad')
     descendientes = False
 
@@ -484,8 +498,9 @@ def PasosRangoFecha(request):
     if request.method == 'POST':
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
-            lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            grupos = listaGruposDescendientes(lider_i)
+            # lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
+            # grupos = listaGruposDescendientes(lider_i)
+            grupos = Grupo.get_tree(grupo_i)
             # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
             data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
             return HttpResponse(json.dumps(data), content_type="application/json")
@@ -501,12 +516,15 @@ def PasosRangoFecha(request):
                 if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                     descendientes = True
                     opciones['gf'] = 'Descendientes'
-                    grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    # grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    grupos = Grupo.get_tree(grupo_i)
                 else:
                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
                     opciones['gf'] = grupo_f.nombre.capitalize()
-                    listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
-                    grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                    # listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    listaGrupo_f = Grupo.get_tree(grupo_i)
+                    # grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                    grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
 
                 miembros = []
                 for g in grupos:
@@ -553,7 +571,7 @@ def PasosRangoFecha(request):
 #         grupoP = Grupo.objects.get(red=None)
 #         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
 #         #  listaGrupo_i = listaGruposDescendientes(liderP)
-#         listaGrupo_i = Grupo.objects.select_related('lider1', 'lider2').all()  # filter(estado='A')
+#         listaGrupo_i = Grupo.objects.all()  # filter(estado='A')
 #     else:
 #         listaGrupo_i = listaGruposDescendientes(miembro)
 
@@ -590,12 +608,12 @@ def PasosRangoFecha(request):
 #                     descendientes = True
 #                     opciones['grupo_final'] = 'Todos los descendientes'
 #                     grupos = Grupo.objects.filter(
-#                         id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+#                         id__in=listaGruposDescendientes_id(grupo_i.lideres.first())
 #                     )
 #                 else:
 #                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
 #                     opciones['grupo_final'] = grupo_f.nombre.capitalize()
-#                     listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+#                     listaGrupo_f = listaGruposDescendientes(grupo_i.lideres.first())
 #                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
 
 #                 if isinstance(grupos, QuerySet):
@@ -777,12 +795,13 @@ def estadisticoReunionesDiscipulado(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
     descendientes = False
     ofrenda = False
     lid_asis = False
@@ -791,8 +810,9 @@ def estadisticoReunionesDiscipulado(request):
     if request.method == 'POST':
         if 'combo' in request.POST:
             grupo_i = Grupo.objects.get(id=request.POST['id'])
-            lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-            grupos = listaGruposDescendientes(lider_i)
+            # lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
+            # grupos = listaGruposDescendientes(lider_i)
+            grupos = Grupo.get_tree(grupo_i)
             # data = serializers.serialize('json', listaGruposDescendientes(lider_i))
             data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
             return HttpResponse(json.dumps(data), content_type="application/json")
@@ -807,12 +827,16 @@ def estadisticoReunionesDiscipulado(request):
                 if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
                     descendientes = True
                     opciones['gf'] = 'Descendientes'
-                    grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    # grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    grupos = Grupo.get_tree(grupo_i)
                 else:
                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
                     opciones['gf'] = grupo_f.nombre.capitalize()
-                    listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
-                    grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                    # listaGrupo_f = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
+                    # listaGrupo_f = Grupo.get_tree(grupo_i)
+                    listaGrupo_f = grupo_i.grupos_red.prefetch_related('lideres')
+                    # grupos = listaCaminoGrupos(grupo_i, grupo_f)
+                    grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
 
                 values = [['Predica']]
                 sw_while = True
@@ -875,12 +899,13 @@ def estadisticoTotalizadoReunionesGar(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.all().select_related('lider1', 'lider2')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').all()
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
     ofrenda = False
     lid_asis = False
     visitas = False
@@ -892,8 +917,10 @@ def estadisticoTotalizadoReunionesGar(request):
             fechai = form.cleaned_data['fechai']
             fechaf = form.cleaned_data['fechaf']
             grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-            discipulos = Miembro.objects.get(id=grupo_i.listaLideres()[0]).discipulos()
-            grupoDis = Grupo.objects.filter(Q(lider1__in=discipulos) | Q(lider2__in=discipulos))
+            # discipulos = Miembro.objects.get(id=grupo_i.listaLideres()[0]).discipulos()
+            # grupoDis = Grupo.objects.filter(Q(lider1__in=discipulos) | Q(lider2__in=discipulos))
+            grupoDis = grupo_i.get_children()
+            lista_redes = [Grupo.get_tree(grupo) for grupo in grupoDis]
             opciones = {'fi': fechai, 'ff': fechaf, 'g': grupo_i.nombre.capitalize()}
             sw = True
 
@@ -905,9 +932,10 @@ def estadisticoTotalizadoReunionesGar(request):
                 sig = fechai + datetime.timedelta(days=6)
                 l = [fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y")]
 
-                for g in grupoDis:
-                    d = Miembro.objects.get(id=g.listaLideres()[0])
-                    grupos = listaGruposDescendientes(d)
+                # for g in grupoDis:
+                for grupos in lista_redes:
+                    # d = Miembro.objects.get(id=g.listaLideres()[0])
+                    # grupos = listaGruposDescendientes(d)
 
                     if 'opcion' in request.POST and request.POST['opcion'] == 'O':
                         ofrenda = True
@@ -977,12 +1005,13 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
 
     miembro = Miembro.objects.get(usuario=request.user)
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        grupoP = Grupo.objects.get(red=None)
-        liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
+        # grupoP = Grupo.objects.get(red=None)
+        # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.all()
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').all()
     else:
-        listaGrupo_i = listaGruposDescendientes(miembro)
+        # listaGrupo_i = listaGruposDescendientes(miembro)
+        listaGrupo_i = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
     ofrenda = False
     lid_asis = False
     asis_reg = False
@@ -993,8 +1022,9 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
             if form.is_valid():
                 predica = form.cleaned_data['predica']
                 grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-                discipulos = Miembro.objects.get(id=grupo_i.listaLideres()[0]).discipulos()
-                grupoDis = Grupo.objects.filter(Q(lider1__in=discipulos) | Q(lider2__in=discipulos))
+                # discipulos = Miembro.objects.get(id=grupo_i.listaLideres()[0]).discipulos()
+                # grupoDis = Grupo.objects.filter(Q(lider1__in=discipulos) | Q(lider2__in=discipulos))
+                grupoDis = grupo_i.get_children()
                 opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
                 sw = True
 
@@ -1008,8 +1038,9 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
                 l = [predica.nombre.upper()]
 
                 for g in grupoDis:
-                    d = Miembro.objects.get(id=g.listaLideres()[0])
-                    grupos = listaGruposDescendientes(d)
+                    # d = Miembro.objects.get(id=g.listaLideres()[0])
+                    # grupos = listaGruposDescendientes(d)
+                    grupos = Grupo.get_tree(g)
 
                     if 'opcion' in request.POST and request.POST['opcion'] == 'O':
                         ofrenda = True
@@ -1073,78 +1104,21 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     return render_to_response('reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
-def desarrolloGrupo(request):
-    """Muestra un arbol de desarrollo de tu grupo."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        raiz = Grupo.objects.get(red=None)
-        padre = Miembro.objects.get(id=raiz.listaLideres()[0])
-    else:
-        raiz = miembro.grupoLidera()
-        padre = miembro
-    pila = [[raiz]]
-    act = None
-    bajada = True
-    discipulos = list(padre.discipulos())
-    while len(discipulos) > 0:
-        # print 'dis:', discipulos
-        d = discipulos.pop()
-        hijo = d.grupoLidera()
-        # print 'd:', d, 'hijo:', hijo
-        if hijo:
-            if act is not None:
-                pila.append(act)
-            sw = True
-            while len(pila) > 0 and sw:
-                act = pila.pop()
-                # print 'pila:', pila
-                # print 'act:', act
-                if act[len(act) - 1] == d.grupo:
-                    act.append([hijo])
-                    bajada = True
-                    sw = False
-                elif act[len(act) - 2] == d.grupo:
-                    act[len(act) - 1].append(hijo)
-                    bajada = True
-                    sw = False
-                elif isinstance(act[-1], (tuple, list)) and bajada:
-                    pila.append(act)
-                    pila.append(act[len(act) - 1])
-                elif not isinstance(act[-1], (tuple, list)):
-                    bajada = False
-                # print '------------while pila------------'
-            lid = Miembro.objects.filter(id__in=hijo.listaLideres())
-            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
-                if l in discipulos:
-                    discipulos.remove(l)
-        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
-            discipulos.extend(list(d.discipulos()))
-        #  print '----------while disci-----------'
-    #  print 'act final:', act
-    #  print 'pila final:', pila
-    if pila:
-        arbol = pila[0]
-    else:
-        arbol = act
-    return render_to_response('reportes/desarrollo_grupo.html', locals(), context_instance=RequestContext(request))
-
-
+# TODO eliminar
 def listaGruposDescendientes_id(miembro):
     """Devuelve una lista con todos los ids de los grupos descendientes del grupo del miembro usado como parametro para ser
         usada en un choice field."""
 
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     listaG = [grupo.id]
     discipulos = list(miembro.discipulos())
     while len(discipulos) > 0:
         d = discipulos.pop(0)
-        g = d.grupoLidera()
+        g = d.grupo_lidera
         if g:
             if g not in listaG:
                 listaG.append(g.id)
-            lid = Miembro.objects.filter(id__in=g.listaLideres())
+            lid = g.lideres.all()
             for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
                 if l in discipulos:
                     discipulos.remove(l)
@@ -1187,7 +1161,8 @@ def ConsultarReportesSinEnviar(request, sobres=False):
             for ids, fechas in grupos.items():
                 receptores = list()
                 g = Grupo.objects.get(id=ids)
-                mailLideres = Miembro.objects.filter(id__in=g.listaLideres()).values('email')
+                # mailLideres = Miembro.objects.filter(id__in=g.listaLideres()).values('email')
+                mailLideres = g.lideres.values('email')
                 receptores.extend(["%s" % (k['email']) for k in mailLideres])
                 msj = mensaje + '\n'.join(map(str, fechas)) + "\n\nCordialmente,\n Admin"
                 correos.append((asunto, msj, from_mail, receptores))
@@ -1229,9 +1204,10 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                 # else:
                 # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
                 if descendientes:
-                    gr = Grupo.objects.filter(
-                        id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_from_form.listaLideres()[0]))
-                    )
+                    # gr = Grupo.objects.filter(
+                    #     id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_from_form.listaLideres()[0]))
+                    # )
+                    gr = grupo_from_form.grupos_red
                 else:
                     gr = Grupo.objects.filter(id=grupo_from_form.id)
 
@@ -1269,7 +1245,7 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                             if fecha <= datetime.date.today():
                                 # se crean variables en memoria por objeto
                                 g.fecha_reunion = [fecha]
-                                g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
+                                # g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
                                 # se agrega a la lista de grupos y al hash de fechas
                                 grupos.append(g)
                                 strFecha = str(fecha)
@@ -1326,11 +1302,13 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
                 sw = True
 
                 if miembro.usuario.has_perm("miembros.es_administrador"):
-                    gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(
-                                              Miembro.objects.get(
-                                                  id=Grupo.objects.get(red=None).listaLideres()[0])))
+                    # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(
+                    #                           Miembro.objects.get(
+                    #                               id=Grupo.objects.get(red=None).listaLideres()[0])))
+                    gr = Grupo.objects.prefetch_related('lideres').all()
                 else:
-                    gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
+                    # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
+                    gr = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
 
                 if sobres:  # Entra si se escoge el reporte de entregas de sobres
                     grupos = gr.filter(estado='A').exclude(
@@ -1338,10 +1316,10 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
                 else:  # Entra si se escoge el reporte de reuniones
                     grupos = gr.filter(estado='A').exclude(reuniondiscipulado__predica=predica)
 
-                for g in grupos:
-                    g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
+                # for g in grupos:
+                #     g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
 
-                request.session['grupos_sin_reporte'] = grupos
+                # request.session['grupos_sin_reporte'] = grupos
                 request.session['sobres'] = sobres
     else:
         form = FormularioPredicas(miembro)
@@ -1396,11 +1374,12 @@ def estadistico_reuniones_gar(request):
 
     # si el usuario es administrador, tendrá una lista con todos los grupos
     if request.user.has_perm("miembros.es_administrador"):
-        queryset_grupo = Grupo.objects.select_related('lider1', 'lider2').all()
+        queryset_grupo = Grupo.objects.prefetch_related('lideres').all()
     else:
         # si no es administrador, solo puede ver los grupos debajo de el
-        _ids_grupos = listaGruposDescendientes_id(miembro)
-        queryset_grupo = Grupo.objects.select_related('lider1', 'lider2').filter(id__in=_ids_grupos)
+        # _ids_grupos = listaGruposDescendientes_id(miembro)
+        # queryset_grupo = Grupo.objects.select_related('lider1', 'lider2').filter(id__in=_ids_grupos)
+        queryset_grupo = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
 
     # si el metodo es POST
     if request.method == 'POST':
@@ -1435,13 +1414,14 @@ def estadistico_reuniones_gar(request):
             # si hay descendientes en el formulario
             if descendientes:
                 # se obtienen los grupos a partir de el lider de el grupo de el formulario
-                grupos = Grupo.objects.filter(
-                    id__in=listaGruposDescendientes_id(
-                        Miembro.objects.get(id=grupo.listaLideres()[0])
-                    )
-                ).select_related('lider1', 'lider2').only(
-                    'lider1', 'lider2', 'fechaApertura', 'id', 'estado'
-                )
+                # grupos = Grupo.objects.filter(
+                #     id__in=listaGruposDescendientes_id(
+                #         Miembro.objects.get(id=grupo.listaLideres()[0])
+                #     )
+                # ).select_related('lider1', 'lider2').only(
+                #     'lider1', 'lider2', 'fechaApertura', 'id', 'estado'
+                # )
+                grupos = grupo.grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
             else:
                 # Informacion que está por confirmar, cuando no hay descendientes
                 grupos = Grupo.objects.filter(
@@ -1506,14 +1486,17 @@ def estadistico_reuniones_gar(request):
                     ofrendas.append([fechas_str, float(ofrenda_aggregate['ofrendas']) or 0])
 
                 # se sacan los grupos sin reportar, vendria de la resta de los grupos de la semana, menos los sobres
+                # _sin_reportar = _grupos_semana.exclude(
+                #     id__in=_reuniones.values_list('grupo__id', flat=True)
+                # ).select_related(
+                #     'lider1', 'lider2', 'lider1__grupo__lider1',
+                #     'lider1__grupo__lider2', 'lider2__grupo__lider1',
+                #     'lider2__grupo__lider2'
+                # ).only(
+                #     'lider1', 'lider2'
+                # )
                 _sin_reportar = _grupos_semana.exclude(
                     id__in=_reuniones.values_list('grupo__id', flat=True)
-                ).select_related(
-                    'lider1', 'lider2', 'lider1__grupo__lider1',
-                    'lider1__grupo__lider2', 'lider2__grupo__lider1',
-                    'lider2__grupo__lider2'
-                ).only(
-                    'lider1', 'lider2'
                 )
                 # se saca el conteo de los grupos sin reportar
                 sin_reportar = _sin_reportar.count()

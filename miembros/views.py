@@ -1,7 +1,7 @@
 # Django Imports
 from django.conf import settings
 from django.contrib import auth, messages
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.utils import timezone
 
 # Apps Imports
@@ -18,11 +19,13 @@ from grupos.models import Grupo, Red
 from grupos.forms import FormularioEditarDiscipulado
 from academia.models import Curso
 from reportes.views import listaGruposDescendientes
-from common.tests import (
+from common.groups_tests import (
     liderTest, editarMiembroTest, llamdaAgenteTest, agregarVisitanteTest,
     cumplimientoPasosTest, asignarGrupoTest, miembroTest, adminTest,
     miembro_empleado_test
 )
+
+from .forms import TransladarMiembroForm
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -92,7 +95,7 @@ def autenticarUsario(request):
                     return HttpResponseRedirect('/miembro/')
             else:
                 valido = False
-    return render_to_response('Miembros/login.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/login.html', locals(), context_instance=RequestContext(request))
 
 
 def salir(request):
@@ -113,7 +116,7 @@ def miembroInicio(request):
         return HttpResponseRedirect("/administracion/")
 
     if miembro:
-        grupo = miembro.grupoLidera()
+        grupo = miembro.grupo_lidera
         if grupo:
             miembrosGrupo = grupo.miembro_set.all()
             tipo = TipoMiembro.objects.get(nombre__iexact='visita')
@@ -121,7 +124,7 @@ def miembroInicio(request):
             for mg in miembrosGrupo:
                 ct = CambioTipo.objects.filter(miembro=mg).order_by('id')
                 if ct.exists():
-                    ct = ct.pop()
+                    ct = list(ct).pop()
                     if (ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (
                        ct.miembro.observacionLlamadaLider == '' or
                        ct.miembro.observacionLlamadaLider is None)
@@ -136,23 +139,25 @@ def miembroInicio(request):
 
         def lid_gru(miem):
             visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-            grupo = miem.grupoLidera()
+            grupo = miem.grupo_lidera
             if grupo:
                 return grupo.miembro_set.filter(id__in=visitas)
             else:
                 return []
 
-        k = listaGruposDescendientes(miembro)
-        for lid in k:
-            if lid == miembro.grupoLidera():
-                pass
-            else:
-                if lid.listaLideres():
-                    for miem in lid.listaLideres():
-                        discipulos.append(Miembro.objects.get(id=miem))
-                else:
-                    pass
-        totalLideres = len(discipulos)
+        # k = listaGruposDescendientes(miembro)
+        k = Grupo.get_tree(grupo)
+        # for lid in k:
+        #     if lid == miembro.grupo_lidera:
+        #         pass
+        #     else:
+        #         if lid.listaLideres():
+        #             for miem in lid.listaLideres():
+        #                 discipulos.append(Miembro.objects.get(id=miem))
+        #         else:
+        #             pass
+        discipulos = Miembro.objects.lideres2().filter(grupo_lidera__in=k)
+        totalLideres = len(discipulos) - grupo.lideres.count()
         totalGrupos = len(k)  # len(grupos)
         lideresGrupo = len(lid_gru(miembro)) - 1
         if lideresGrupo == -1:
@@ -238,7 +243,7 @@ def miembroInicio(request):
 
                 salida_efectivo = DetalleRequisicion.objects.salida_efectivo_mes()['total_aprobado__sum'] or 0
 
-    return render_to_response("Miembros/miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/miembro.html", locals(), context_instance=RequestContext(request))
 
 
 isOk = False
@@ -275,7 +280,7 @@ def liderAgregarMiembro(request):
     else:
         form = FormularioLiderAgregarMiembro()
     isOk = False
-    return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -283,17 +288,17 @@ def liderListarMiembrosGrupo(request):
     if request.method == 'POST':
         if 'transladar' in request.POST:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/transladar_miembros/')
+            # return HttpResponseRedirect('/miembro/transladar_miembros/')
         else:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             return HttpResponseRedirect('/miembro/editar_miembros/')
 
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo:
-        discipulos = miembro.discipulos()
+        discipulos = grupo.discipulos
         miembrosGrupo = grupo.miembrosGrupo()
-    return render_to_response("Miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -316,7 +321,7 @@ def liderEditarMiembros(request):
                     nuevoMiembro.estadoCivil = 'C'
                     nuevoMiembro.save()
         else:
-            return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
     if 'seleccionados' in request.session:
         faltantes = request.session['seleccionados']
@@ -325,56 +330,7 @@ def liderEditarMiembros(request):
             request.session['actual'] = miembroEditar
             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
             request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect("/miembro/listar_miembros/")
-    else:
-        return HttpResponseRedirect("/miembro/listar_miembros/")
-
-
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderTransaldarMiembro(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    discipulos = list(miembro.discipulos())
-    if 'grupos' not in request.session:
-        grupos = []
-        for discipulo in discipulos:
-            grupo = discipulo.grupoLidera()
-            if grupo is not None:
-                if grupo.estado == 'A' and grupo not in grupos:
-                    grupos.append(grupo.id)
-            subdiscipulos = discipulo.discipulos()
-            for subd in subdiscipulos:
-                discipulos.append(subd)
-        request.session['grupos'] = grupos
-    else:
-        grupos = request.session['grupos']
-
-    groups = []
-    for g in grupos:
-        if Grupo.objects.get(id=g) in groups:
-            continue
-        groups.append(Grupo.objects.get(id=g))
-
-    if request.method == 'POST':
-        getlist = request.POST.getlist('menu')
-        actual = Miembro.objects.get(id=request.session['actual'])
-        if actual not in discipulos or Group.objects.get(name__iexact='Administrador') in miembro.usuario.groups.all():
-            actual.grupo = Grupo.objects.get(id=request.POST.getlist('menu')[0])
-            actual.save()
-        else:
-            error = 'Estas tratando de cambiar un Discipulo de Grupo, para cambiar un Discipulo de grupo contacta al Administrador'
-            redireccion = '/miembro/transladar_miembros/'
-            nombre = 'Transladar siguiente'
-            return render_to_response("error.html", locals(), context_instance=RequestContext(request))
-
-    if request.session.get('seleccionados') is not None:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
-            request.session['actual'] = int(miembroEditar.id)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("Miembros/transladar_miembro.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
         else:
             return HttpResponseRedirect("/miembro/listar_miembros/")
     else:
@@ -472,7 +428,7 @@ def liderEditarPerfil(request, pk=None):
             admin = True
         else:
             form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
-    return render_to_response("Miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
@@ -492,7 +448,7 @@ def cambiarContrasena(request):
                 validacionContrasena = 'Error al tratar de cambiar la contraseña, verifique que la contraseña anterior sea correcta, y que concuerde la contraseña nueva y la verificación.'
     else:
         form = FormularioCambiarContrasena(request=request)
-    return render_to_response("Miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -502,7 +458,7 @@ def liderLlamadasPendientesVisitantesGrupo(request):
         return HttpResponseRedirect('/miembro/registrar_llamada/lider/')
 
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     lideres = []
     if grupo:
         for lid in grupo.miembro_set.all():
@@ -525,7 +481,7 @@ def liderLlamadasPendientesVisitantesGrupo(request):
 #                if(ct.nuevoTipo ==  tipo and ct.anteriorTipo == tipo and
 #                    (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider == None)):
 #                    visitantes.append(ct.miembro)
-    return render_to_response("Miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
@@ -551,7 +507,7 @@ def llamadasPendientesVisitantes(request):
 #               (ct.miembro.observacionPrimeraLlamada == '' or ct.miembro.observacionPrimeraLlamada == None) and\
 #               (ct.miembro.observacionSegundaLlamada == '' or ct.miembro.observacionSegundaLlamada == None):
 #                miembros.append(ct.miembro)
-    return render_to_response("Miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -567,7 +523,7 @@ def liderLlamarVisitas(request):
             nuevoLlamar.fechaLlamadaLider = date.today()
             nuevoLlamar.save()
         else:
-            return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
 
     if 'visitantesSeleccionados' in request.session:
         faltantes = request.session['visitantesSeleccionados']
@@ -587,7 +543,7 @@ def liderLlamarVisitas(request):
                 request.session['visitaActual'] = miembrol  # miembroLlamar #linea que da el error
                 form = FormularioLlamadaLider(instance=miembroLlamar)
                 request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
-                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             except IndexError:
                 pass
             except ValueError:
@@ -614,7 +570,7 @@ def llamarVisitas(request):
             if llamada == 1:
                 nuevoLlamar = form.save(commit=False)
                 if nuevoLlamar.grupo is not None:  # or nuevoLlamar.grupo != '':
-                    lideres = Miembro.objects.filter(id__in=nuevoLlamar.grupo.listaLideres()).values('email')
+                    lideres = nuevoLlamar.grupo.lideres.values('email')
                     receptores = ["%s" % (k['email']) for k in lideres]
 
                     camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
@@ -631,7 +587,7 @@ def llamarVisitas(request):
                 nuevoLlamar.fechaSegundaLlamada = date.today()
             nuevoLlamar.save()
         else:
-            return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
 
     if 'miembrosSeleccionados' in request.session:
         faltantes = request.session['miembrosSeleccionados']
@@ -645,15 +601,15 @@ def llamarVisitas(request):
                 try:
                     miembroIngreso = CambioTipo.objects.get(
                         miembro=miembroLlamar, nuevoTipo__nombre__iexact='visita').autorizacion
-                    gMiembroIngreso = miembroIngreso.grupoLidera()
+                    gMiembroIngreso = miembroIngreso.grupo_lidera
                 except:
                     pass
                 form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)
-                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
             elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada is None:
                 tipo = "segunda"
                 form = FormularioSegundaLlamadaAgente(instance=miembroLlamar)
-                return render_to_response("Miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
         else:
             if 'perfil' in request.session:
                 if isinstance(request.session['perfil'], int):
@@ -666,7 +622,7 @@ def llamarVisitas(request):
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderPromoverVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupoLidera()
+    grupo = miembro.grupo_lidera
     if grupo:
         miembrosGrupo = list(grupo.miembro_set.all())
         if request.method == 'POST':
@@ -693,23 +649,7 @@ def liderPromoverVisitantesGrupo(request):
                 ct = ct.pop()
                 if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo):
                     visitantes.append(ct.miembro)
-    return render_to_response("Miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(miembroTest, login_url="/dont_have_permissions/")
-def perfilMiembro(request, id):
-    try:
-        miembro = Miembro.objects.get(id=id)
-    except:
-        raise Http404
-
-    grupoLidera = miembro.grupoLidera()
-    escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
-    tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
-    if len(escalafones) > 0:
-        escalafon = escalafones.pop()
-    pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
-    return render_to_response("Miembros/perfil.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(editarMiembroTest, login_url="/dont_have_permissions/")
@@ -750,7 +690,7 @@ def editarMiembro(request, id):
         else:
             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
             lider = True
-    return render_to_response("Miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(asignarGrupoTest, login_url="/dont_have_permissions/")
@@ -762,7 +702,7 @@ def asignarGrupo(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
     try:
         miembroIngreso = CambioTipo.objects.get(miembro=miembroEditar, nuevoTipo__nombre__iexact='visita').autorizacion
-        gMiembroIngreso = miembroIngreso.grupoLidera()
+        gMiembroIngreso = miembroIngreso.grupo_lidera
     except:
         pass
     form = FormularioAsignarGrupo(instance=miembroEditar)
@@ -771,7 +711,7 @@ def asignarGrupo(request, id):
         if form.is_valid():
             nuevoMiembro = form.save(commit=False)
             if nuevoMiembro.grupo is not None or nuevoMiembro.grupo != '':
-                mailLideres = Miembro.objects.filter(id__in=nuevoMiembro.grupo.listaLideres()).values('email')
+                mailLideres = nuevoMiembro.grupo.lideres.values('email')
                 receptores = ["%s" % (k['email']) for k in mailLideres]
                 camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
                         Se ha agregado un nuevo miembro a su G.A.R, por favor \
@@ -784,7 +724,7 @@ def asignarGrupo(request, id):
                 nuevoMiembro.fechaAsignacionGAR = date.today()
             nuevoMiembro.save()
             ok = True
-    return render_to_response("Miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -798,7 +738,7 @@ def crearZona(request):
             ok = True
     else:
         form = FormularioCrearZona()
-    return render_to_response('Miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -820,10 +760,9 @@ def editarZona(request, pk):
 
     else:
         form = FormularioCrearZona(instance=zona)
-        return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
-    return render_to_response("Miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
-    # return HttpResponseRedirect("/miembro/listar_zonas")
+    return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -837,7 +776,7 @@ def listarZonas(request):
                 messages.success(request, "Se eliminaron las zonas seleccionadas")
                 return HttpResponseRedirect('')
     zonas = list(Zona.objects.all())
-    return render_to_response('Miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -859,7 +798,7 @@ def barriosDeZona(request, id):
         if 'eliminar' in request.POST:
             okElim = eliminar(request, Barrio, request.POST.getlist('seleccionados'))
     barrios = list(Barrio.objects.filter(zona=zona))
-    return render_to_response('Miembros/barrios.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/barrios.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -883,7 +822,7 @@ def crearBarrio(request, id):
             ok = True
     else:
         form = FormularioCrearBarrio()
-    return render_to_response('Miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -906,7 +845,7 @@ def editarBarrio(request, id, pk):
             nuevoBarrio = form.save()
             ok = True
         else:
-            return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+            return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
     # if 'seleccionados' in request.session:
     #     faltantes = request.session['seleccionados']
     #     if len(faltantes) > 0:
@@ -920,7 +859,7 @@ def editarBarrio(request, id, pk):
     #         return HttpResponseRedirect('/miembro/barrios/'+str(zona.id))
     else:
         form = FormularioCrearBarrio(instance=barrio)
-        return render_to_response("Miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
 
     return HttpResponseRedirect('/miembro/barrios/' + str(zona.id))
 
@@ -940,7 +879,7 @@ def agregarPasoMiembro(request):
             ok = True
     else:
         form = FormularioPasos()
-    return render_to_response('Miembros/agregar_paso.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/agregar_paso.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -956,7 +895,7 @@ def listarPasos(request):
             if okElim == 1:
                 return HttpResponseRedirect('')
     pasos = Pasos.objects.all().order_by("prioridad")
-    return render_to_response('Miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -977,10 +916,10 @@ def editarPaso(request, pk):
 
     else:
         form = FormularioPasos(instance=paso)
-        return render_to_response("Miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
 
     # return HttpResponseRedirect("/miembro/listar_pasos/")
-    return render_to_response("Miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -997,7 +936,7 @@ def listarEscalafones(request):
                 return HttpResponseRedirect('')
 
     escalafones = list(Escalafon.objects.all().order_by('celulas'))
-    return render_to_response('Miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1014,7 +953,7 @@ def crearEscalafon(request):
             ok = True
     else:
         form = FormularioCrearEscalafon()
-    return render_to_response('Miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1035,10 +974,10 @@ def editarEscalafon(request, pk):
 
     else:
         form = FormularioCrearEscalafon(instance=escalafon)
-        return render_to_response("Miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
 
     # return HttpResponseRedirect("/miembro/listar_escalafones/")
-    return render_to_response("Miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1059,7 +998,7 @@ def promoverMiembroEscalafon(request):
                                "El miembro %s no cumple con los requisitos para el cambio." % (str(miembroEditar)))
     else:
         form = FormularioPromoverEscalafon()
-    return render_to_response('Miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1073,7 +1012,7 @@ def crearTipoMiembro(request):
             ok = True
     else:
         form = FormularioCrearTipoMiembro()
-    return render_to_response('Miembros/crear_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/crear_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1086,7 +1025,7 @@ def listarTipoMiembro(request):
         if 'eliminar' in request.POST:
             okElim = eliminar(request, TipoMiembro, request.POST.getlist('seleccionados'))
     tipos = list(TipoMiembro.objects.all().order_by('nombre'))
-    return render_to_response('Miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1107,10 +1046,10 @@ def editarTipoMiembro(request, pk):
 
     else:
         form = FormularioCrearTipoMiembro(instance=tipo)
-        return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+        return render_to_response("miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
 
     # return HttpResponseRedirect("/miembro/listar_tipo_miembro/")
-    return render_to_response("Miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1158,7 +1097,7 @@ def cambiarMiembroDeTipoMiembro(request, id):
                         miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
     else:
         form = FormularioCambioTipoMiembro(idm=int(id))
-    return render_to_response('Miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1199,11 +1138,11 @@ def crearUsuarioMimembro(request, id):
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
                 if request.session['tipo'].lower() == "administrador":
                     miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
-            return redirect(reverse('editar_perfil', args=(miembroCambio.id)))
+            return redirect(reverse('miembros:editar_perfil', args=(miembroCambio.id)))
     else:
         form = FormularioAsignarUsuario()
     form.email = miembroCambio.email
-    return render_to_response('Miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1232,7 +1171,7 @@ def graduarAlumno(request):
     else:
         puedeVer = True
         form = FormularioCumplimientoPasosMiembro()
-    return render_to_response('Miembros/graduar_estudiante.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/graduar_estudiante.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1276,16 +1215,11 @@ def eliminarCambioTipoMiembro(request, id):
     cambio.delete()
     # return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
-
+# TODO eliminar
 def calcularCelulas(miembro):
     celulas = 0
-    discipulos = list(miembro.discipulos())
-    for d in discipulos:
-        if d.grupoLidera():
-            celulas += 1
-            subdiscipulos = d.discipulos()
-            for s in subdiscipulos:
-                discipulos.append(s)
+    if miembro.grupo_lidera:
+        celulas = miembro.grupo_lidera.get_descendant_count() + 1
     return celulas
 
 
@@ -1305,7 +1239,7 @@ def administracion(request):
     totalCursosA = Curso.objects.filter(estado='A').count()
     totalCursosC = Curso.objects.filter(estado='C').count()
     # visitantes = request.session['visitantes']
-    return render_to_response('Miembros/administracion.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/administracion.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1319,7 +1253,7 @@ def AgregarDetalleLlamada(request):
             ok = True
     else:
         form = FormularioDetalleLlamada()
-    return render_to_response('Miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1333,7 +1267,7 @@ def listarDetallesLlamada(request):
 
     detallesLlamada = list(DetalleLlamada.objects.all())
 
-    return render_to_response('Miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request))
+    return render_to_response('miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
@@ -1354,7 +1288,7 @@ def editarDetalleLlamada(request, pk):
     else:
         form = FormularioDetalleLlamada(instance=detalle)
 
-    return render_to_response("Miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(cumplimientoPasosTest, login_url="/dont_have_permissions/")
@@ -1398,7 +1332,7 @@ def cumplimientoPasos(request):
                 raise Http404
     miembro = Miembro.objects.get(usuario=request.user)
     pasos = Pasos.objects.all().exclude(nombre__iexact='lanzamiento').order_by('prioridad', 'nombre')
-    return render_to_response("Miembros/cumplimiento_pasos.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/cumplimiento_pasos.html", locals(), context_instance=RequestContext(request))
 
 
 # def sendMail(camposMail):
@@ -1467,7 +1401,7 @@ def recuperar_contrasena(request):
     else:
         form = FormularioRecuperarContrasenia()
 
-    return render_to_response("Miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
@@ -1484,7 +1418,7 @@ def ver_discipulos(request, pk=None):
         except Miembro.DoesNotExist:
             raise Http404
 
-    grupo = miembro.grupoLidera() or None
+    grupo = miembro.grupo_lidera or None
 
     if request.method == 'POST':
         if grupo is not None or grupo != '':
@@ -1503,23 +1437,23 @@ def ver_discipulos(request, pk=None):
         if grupo is not None or grupo != '':
             form = FormularioEditarDiscipulado(instance=grupo)
 
-    discipulos = miembro.discipulos()
-    if len(discipulos) > 0:
-        discipulos = discipulos.order_by('nombre')
-    else:
-        try:
-            lista_lideres = miembro.grupo.listaLideres()
-            lideres = Miembro.objects.filter(id__in=lista_lideres)
-            discipulos = lideres[0].discipulos().order_by('nombre')
-        except AttributeError:
-            lista_lideres = None
-        finally:
+    # discipulos = miembro.discipulos()
+    if grupo is not None:
+        discipulos = grupo.discipulos
+        if len(discipulos) > 0:
+            discipulos = discipulos.order_by('nombre')
+        else:
             no_discipulos = True
+            # try:
+            #     lista_lideres = miembro.grupo.listaLideres()
+            #     lideres = Miembro.objects.filter(id__in=lista_lideres)
+            #     discipulos = lideres[0].discipulos().order_by('nombre')
+            # except AttributeError:
+            #     lista_lideres = None
+            # finally:
+            #     no_discipulos = True
 
-    return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
-
-
-from django.db import transaction
+    return render_to_response("miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
@@ -1622,7 +1556,7 @@ def ver_informacion_miembro(request, pk=None):
                 ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
                 if mismo:
                     ms = "Te has Editado Correctamente"
-                # return redirect(reverse('ver_informacion', args=(miembro.id, )))
+                # return redirect(reverse('miembros:ver_informacion', args=(miembro.id, )))
             else:
                 if form_cambio_tipo.errors:
                     form.add_error('estado', 'Error en formulario')
@@ -1632,14 +1566,14 @@ def ver_informacion_miembro(request, pk=None):
             form_cambio_tipo = FormularioTipoMiembros(instance=miembro)
 
     if miembro.grupo:
-        lideres_miembro = Miembro.objects.filter(id__in=miembro.grupo.listaLideres())
+        lideres_miembro = miembro.grupo.lideres.all()
     escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
     tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
     if len(escalafones) > 0:
         escalafon = escalafones.pop()
     pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
 
-    return render_to_response("Miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
+    return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
@@ -1697,39 +1631,39 @@ def eliminar_foto_perfil(request, pk):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def transladar_miembros(request, id_miembro):
+# -----------------------------------
 
-    try:
-        miembro = Miembro.objects.get(id=id_miembro)
-    except Miembro.DoesNotExist:
-        raise Http404
 
-    if miembro.grupoLidera():
-        return HttpResponseRedirect('/dont_have_permissions/')
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def listar_lideres(request, pk):
+    """
+    Permite a un administrador listar los lideres de la red escogida.
+    """
+
+    red = get_object_or_404(Red, pk=pk)
+    lideres = Miembro.objects.lideres_red(red).select_related('usuario')
+
+    return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def transladar(request, pk):
+    """
+    Permite a un administrador transladar un miembro que no lidere grupo a que asista a otro grupo.
+    """
+
+    miembro = get_object_or_404(Miembro, pk=pk)
+    if miembro.grupo_lidera:
+        return redirect(reverse('sin_permiso'))
 
     if request.method == 'POST':
-        form = FormularioTransladarMiembro(data=request.POST)
-
+        form = TransladarMiembroForm(data=request.POST)
         if form.is_valid():
-            grupo = form.cleaned_data['grupo']
-            miembro.grupo = grupo
-            miembro.save()
-            if miembro.conyugue:
-                miembro.conyugue.grupo = grupo
-                miembro.conyugue.save()
+            form.transladar(miembro)
+            return redirect('miembros:transladar', pk)
     else:
-        form = FormularioTransladarMiembro()
-    return render_to_response('Miembros/transladar_miembro.html', locals(), context_instance=RequestContext(request))
+        form = TransladarMiembroForm()
 
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def ver_lideres_red(request, id_red):
-    """
-    Devuelve la lista de lideres de acuerdo a la red
-    """
-    red = get_object_or_404(Red, id=id_red)
-
-    miembros = Miembro.objects.lideres().filter(grupo__red=red).select_related('usuario')
-
-    return render(request, 'Miembros/ver_lideres_red.html', {'miembros': miembros, 'red': red})
+    return render(request, 'miembros/transladar.html', {'miembro': miembro, 'form': form})

@@ -22,8 +22,8 @@ def site(request):
 
             draw_mapa = False
 
-            if miembro.grupoLidera() is not None:
-                if miembro.grupoLidera().get_position() is None:
+            if miembro.grupo_lidera is not None:
+                if miembro.grupo_lidera.get_position() is None:
                     draw_mapa = True
 
             data['draw_mapa'] = draw_mapa

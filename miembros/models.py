@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
-from django.db import models
-from django.contrib.auth.models import User
 import datetime
-from django.db.models import Q
+from django.db import models
+from django.conf import settings
 from django.core.validators import RegexValidator
-from .managers import MiembroManager
+from django.utils.translation import ugettext_lazy as _
+from .managers import MiembroManager, MiembroQuerySet
 
 
 class Zona(models.Model):
@@ -56,6 +56,9 @@ class Escalafon(models.Model):
 
 
 class Miembro(models.Model):
+    """
+    Modelo para guardar los miembros de una iglesia.
+    """
 
     def ruta_imagen(self, filename):
         ruta = 'media/profile_pictures/user_%s/%s' % (self.id, filename)
@@ -78,7 +81,7 @@ class Miembro(models.Model):
         ('D', 'Divorciado'),
     )
     #  autenticacion
-    usuario = models.ForeignKey(User, unique=True, null=True, blank=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, null=True, blank=True)
     #  info personal
     nombre = models.CharField(max_length=30)
     primerApellido = models.CharField(max_length=20, verbose_name="primer apellido")
@@ -112,6 +115,10 @@ class Miembro(models.Model):
     pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', blank=True)
     escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon')
     grupo = models.ForeignKey('grupos.Grupo', null=True, blank=True)  # grupo al que pertenece
+    grupo_lidera = models.ForeignKey(
+        'grupos.Grupo', verbose_name=_('grupo que lidera'),
+        related_name='lideres', null=True, blank=True
+    )
     #  info GAR
     asignadoGAR = models.BooleanField(default=False, verbose_name="asignado a GAR")
     asisteGAR = models.BooleanField(default=False, verbose_name="asiste a GAR")
@@ -164,33 +171,39 @@ class Miembro(models.Model):
     )
     fechaRegistro = models.DateField(auto_now_add=True)
 
-    objects = MiembroManager()
+    # managers
+    objects = MiembroManager.from_queryset(MiembroQuerySet)()
 
     def __str__(self):
         return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'
 
-    def grupoLidera(self):
+    @property
+    def es_director_red(self):
         """
-        Devuelve el grupo al cual lidera el miembro o su conyugue.
-        Si al miembro no se le ha asignado ningun grupo devuelve None.
+        Indica si el miembro es director de red. Un director de red es un miembro que lidere grupo y sea discipulo
+        del pastor presidente.
         """
 
-        from grupos.models import Grupo
-        try:
-            if self.conyugue:
-                return Grupo.objects.get(
-                    Q(lider1=self) | Q(lider1=self.conyugue) | Q(lider2=self) | Q(lider2=self.conyugue)
-                )
-            else:
-                return Grupo.objects.get(Q(lider1=self) | Q(lider2=self))
-        except:
-            return None
+        if self.grupo_lidera:
+            if self.grupo_lidera.get_depth() == 2:
+                return True
+
+        return False
+
+    def transladar(self, nuevo_grupo):
+        """
+        Translada el miembro actual a un nuevo grupo.
+        """
+
+        if nuevo_grupo != self.grupo:
+            self.grupo = nuevo_grupo
+            self.save()
 
     def discipulos(self):
         """Devuelve los discipulos del miembro (queryset) sino tiene, devuelve una lista vacia."""
 
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-        grupo = self.grupoLidera()
+        grupo = self.grupo_lidera
         if grupo:
             return grupo.miembro_set.filter(id__in=lideres)
         else:
@@ -203,7 +216,7 @@ class Miembro(models.Model):
         tipo_pastor = TipoMiembro.objects.get(nombre__iexact='pastor')
         pastores = []
 
-        lideres = Miembro.objects.filter(id__in=self.grupoLidera().listaLideres())
+        lideres = self.grupo_lidera.lideres.all()
         for lider in lideres:
             tipos = CambioTipo.objects.filter(miembro=lider, nuevoTipo=tipo_pastor)
             if len(tipos) > 0:
@@ -214,28 +227,21 @@ class Miembro(models.Model):
         while sw:
 
             if grupo_actual is not None:
-                lideres = Miembro.objects.filter(id__in=grupo_actual.listaLideres())
+                lideres = grupo_actual.lideres.all()
 
                 for lider in lideres:
                     tipos = CambioTipo.objects.filter(miembro=lider, nuevoTipo=tipo_pastor)
                     if len(tipos) > 0:
                         pastores.append(lider.id)
 
-                if grupo_actual.lider1.grupo is None:
+                if grupo_actual.parent is None:
                     sw = False
                 else:
-                    grupo_actual = grupo_actual.lider1.grupo
+                    grupo_actual = grupo_actual.parent
             else:
                 sw = False
 
         return pastores
-
-    def es_cabeza_red(self):
-        """Metodo para saber si el miembro esta dentro de los 12 del pastor principal"""
-        if self.grupo is not None and self.grupoLidera() is not None:
-            if self.grupo.lider1.grupo is None:
-                return True
-        return False
 
     class Meta:
         permissions = (
