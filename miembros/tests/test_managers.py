@@ -57,7 +57,7 @@ class MiembroManagerTest(BaseTest):
 
     def test_lideres_red(self):
         """
-        Prueba que los miembros obtenidos sean lideres y pertenezcan a la red ingresada.
+        Prueba que los miembros obtenidos lideren grupo y pertenezcan a la red ingresada.
         """
 
         from grupos.models import Grupo
@@ -69,6 +69,6 @@ class MiembroManagerTest(BaseTest):
 
         lideres = Miembro.objects.lideres_red(grupo.red)
 
-        self.assertIn(miembro, lideres)
+        self.assertNotIn(miembro, lideres)
         self.assertIn(grupo.lideres.first(), lideres)
         self.assertNotIn(otro_grupo.lideres.first(), lideres)

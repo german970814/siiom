@@ -47,10 +47,10 @@ class MiembroManager(models.Manager):
 
     def lideres_red(self, red):
         """
-        Devuelve un queryset con los lideres de la red ingresada.
+        Devuelve un queryset con los lideres que lideran grupos de la red ingresada.
         """
 
-        return self.filter(models.Q(grupo__red=red) | models.Q(grupo_lidera__red=red)).lideres2()
+        return self.filter(grupo_lidera__red=red).lideres2()
 
     def visitas(self, *args, **kwargs):
         from .models import CambioTipo, TipoMiembro

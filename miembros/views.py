@@ -16,6 +16,7 @@ from django.utils import timezone
 
 # Apps Imports
 from .forms import *
+from .models import Miembro
 from grupos.models import Grupo, Red
 from grupos.forms import FormularioEditarDiscipulado
 from academia.models import Curso
