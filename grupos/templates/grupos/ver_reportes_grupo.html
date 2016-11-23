@@ -120,13 +120,13 @@
         {% if vacio %}
         $(window).load(function() {
             // swal("Lo sentimos", "Parece que no hay estudiantes en esta sesión/módulo");
-            swal({   
+            swal({
                 title: "Lo Sentimos",
-                text: "Parece que no hay reportes en este rango de fecha",   
+                text: "Parece que no hay reportes en este rango de fecha",
                 type: "warning",
-                confirmButtonColor: "#DD6B55",   
-                confirmButtonText: "Aceptar",   
-                closeOnConfirm: false 
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Aceptar",
+                closeOnConfirm: false
             });
         });
         {% endif %}
@@ -136,7 +136,7 @@
         {% endif %}
         // $seleccionados = [];
         // bootgrid_table_solution("#data-table-selection", $seleccionados);
-        // 
+        //
         var $fechai = $('#id_fechai'), $fechaf = $('#id_fechaf'), $grupo = $('#id_grupo');
 
         $('button[name="aceptar"]').click(function(event) {
@@ -155,7 +155,8 @@
         });
     });
 </script>
-{% include "Grupos/_reportes_js.html" with form=form_reporte %}
+
+{% include "grupos/_reportes_js.html" with form=form_reporte %}
 
 {% endblock %}
 
@@ -435,7 +436,7 @@
                                 <td>${{ mg.ofrenda }}</td>
                                 <td>{{ mg.digitada_por_miembro|yesno:"Miembro,Administrador" }}</td>
                                 {% comment %}<td>{% if mf.digitada_por_miembro %}Miembro{% else %}Administrador{% endif %}</td>{% endcomment %}
-                            </tr>                
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>

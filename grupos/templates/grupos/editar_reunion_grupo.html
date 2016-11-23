@@ -3,7 +3,7 @@
 {% block js %}
 {# <script type="text/javascript" src="{% static 'Scripts/js/jquery-ui-1.10.4.custom.js' %}"></script> #}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
-{% include "Grupos/_reportes_js.html" %}
+{% include "grupos/_reportes_js.html" %}
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#{{ form.fecha.id_for_label }}").datetimepicker({
