@@ -11,7 +11,7 @@ from .utils import clean_direccion
 from .models import Visita
 from .forms import FormularioVisita, FormularioAsignarGrupoVisita
 from common.forms import FormularioRangoFechas
-from common.tests import adminTest
+from common.groups_tests import adminTest
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
 
@@ -98,12 +98,12 @@ def asignar_grupo_visitas(request):
     data = {}
 
     if request.method == 'POST':
-        print(request.POST)
+        # print(request.POST)
         if 'visita[]' in request.POST:
             response = {}
             _removed_ids = []
             try:
-                print(request.POST)
+                # print(request.POST)
                 visitas = request.POST.getlist('visita[]')
                 for visita in visitas:
                     try:
@@ -112,8 +112,8 @@ def asignar_grupo_visitas(request):
                         _visita.save()
                         _removed_ids.append(_visita.id)
                     except Exception as exception:
-                        if settings.DEBUG:
-                            print(exception)
+                        # if settings.DEBUG:
+                            # print(exception)
                         response['error'] = exception.__str__()
                         response['response_code'] = 401
                 if 'error' not in response:
@@ -144,7 +144,7 @@ def asignar_grupo_visitas(request):
                     retirado=False
                 ).exclude(grupo__isnull=False)
 
-                grupos = Grupo.objects.filter(estado='A').select_related('lider1', 'lider2', 'red')
+                grupos = Grupo.objects.prefetch_related('lideres').filter(estado='A').select_related('red')
 
                 if visitas.exists():
                     data['visitas'] = visitas

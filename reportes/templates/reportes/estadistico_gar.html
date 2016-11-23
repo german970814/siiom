@@ -143,8 +143,8 @@
                 }
 
                 var options = {
-                    width: '100%', 
-                    height: 500, 
+                    width: '100%',
+                    height: 500,
                     title: 'Asistencia en Grupos de Amistad',
                     subtitle: 'Rango de fechas',
                     hAxis: {
@@ -164,7 +164,7 @@
 
         {% if values_porcentaje_utilidad %}
         var data_porcentaje = {{ values_porcentaje_utilidad|safe }};
-        // Porcentaje 
+        // Porcentaje
         google.charts.setOnLoadCallback(drawChartPorcentaje);
 
         function drawChartPorcentaje(){
@@ -183,8 +183,8 @@
             }
 
             var options = {
-                width: '100%', 
-                height: 500, 
+                width: '100%',
+                height: 500,
                 title: 'Porcentaje de Grupos Reportando',
                 subtitle: 'Rango de fechas',
                 hAxis: {
@@ -251,14 +251,14 @@
         for (var y = 0; y < _sum[0].length; y++) {
             var resultado = 0;
             for (var x = 0; x < _sum.length; x++) {
-                resultado += parseInt(_sum[x][y]); // 
+                resultado += parseInt(_sum[x][y]); //
             }
             sumas.push('<td>0</td>'.replace('0', resultado.toString()));
         }
 
         for (var y = 0; y < _prom[0].length; y++) {
             var resultado = 0;
-            for (var x = 0; x < _prom.length; x++) {                
+            for (var x = 0; x < _prom.length; x++) {
                 resultado += parseInt(_prom[x][y]);
             }
             promedios.push('<td>0</td>'.replace('0', (resultado / _prom.length).toString()));
@@ -301,7 +301,7 @@
 				{% endfor %}
 			{% endif %}
         </div>
-{% if miembro.grupoLidera or perms.miembros.es_administrador %}
+{% if miembro.grupo_lidera or perms.miembros.es_administrador %}
         <form action="" method="POST" id="form_pasosTotal">
             {% csrf_token %}
             <div class="card-body card-padding">
@@ -437,7 +437,7 @@
                 </div>
             </div>
         </form>
-    </div>  
+    </div>
 {% else %}
  <div class="card">
     <div class="card-header">
@@ -455,7 +455,7 @@
     </div>
     {% if values_asistencias %}
     <div class="card chart-g">
-        <div class="card-body card-padding">    
+        <div class="card-body card-padding">
             <div id="out" style="width: 100%;">
             </div>
         </div>
@@ -540,8 +540,8 @@
                     <tbody>
                         {% for grupo in sin_reportar %}
                         <tr>
-                            <td>{{ grupo.lider1.nombre|upper }} {{ grupo.lider1.primerApellido|upper }} {% if grupo.lider2 %} y {{ grupo.lider2.nombre|upper }} {{ grupo.lider2.primerApellido|upper }}{% endif %}</td>
-                            <td>{{ grupo.lider1.grupo.lider1.nombre|upper }} {{ grupo.lider1.grupo.lider1.primerApellido|upper }}{% if grupo.lider1.grupo.lider2 %} y {{ grupo.lider1.grupo.lider2.nombre|upper }} {{ grupo.lider1.grupo.lider2.primerApellido|upper }}{% endif %}</td>
+                            <td>{{ grupo }}</td>
+                            <td>{{ grupo.get_parent }}</td>
                             <td>{{ grupo.fechas }}</td>
                             <td>{{ grupo.no_reportes }}</td>
                         </tr>
@@ -553,7 +553,7 @@
     </div>
     {% endif %}
     {% endif %}
-</div> 
+</div>
 {% if grafico %}
 <button class="btn btn-float bgm-red m-btn" data-action="print"><i class="zmdi zmdi-print"></i></button>
 {% endif %}

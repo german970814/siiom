@@ -1,7 +1,6 @@
-{% load staticfiles %}
+{% load staticfiles i18n %}
 {% load waffle_tags %}
 {% load static %}
-{% load i18n %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -195,7 +194,7 @@
                     </li>
                     {% endif %}
                     <!-- opciones -->
-                    {% if mi.grupoLidera and not mi.grupoLidera.get_position %}
+                    {% if mi.grupo_lidera and not mi.grupo_lidera.get_position %}
                     <li class="dropdown">
                             <a data-toggle="dropdown" href="">
                                 <i class="tm-icon zmdi zmdi-notifications"></i>
@@ -259,8 +258,7 @@
         {% if mi %}
         <div id="top-search-wrap">
             <div class="tsw-inner">
-            <form action="/resultado/miembro/" method="POST">
-                {% csrf_token %}
+            <form action="{% url 'buscar' 'miembro' %}" method="GET">
                 <i id="top-search-close" class="zmdi zmdi-arrow-left"></i>
                 <input name="buscar" type="text" placeholder="Buscar Grupo o Miembro...">
             </form>
@@ -305,7 +303,7 @@
                 <li class="active">
                     <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
                 </li>
-                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
+                {% if perms.miembros.es_administrador or mi.es_director_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-accounts-list-alt"></i> Administración</a>
                     <ul>
@@ -349,11 +347,11 @@
                                 </li>
                                 <!-- <li>
                                     <a href="/miembro/crear_escalafon/">Crear Escalafón</a>
-                                </li> -->
+                                </li>
                                 <li>
                                     <a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a>
                                 </li>
-                                <!-- <li>
+                                <li>
                                     <a href="/miembro/crear_tipo_miembro/">Agregar Tipos de Miembro</a>
                                 </li> -->
                                 <li>
@@ -379,13 +377,13 @@
                             </ul>
                         </li>
                     {% endif %}
-                    {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
+                    {% if perms.miembros.es_administrador or mi.es_director_red %}
                         <li class="sub-menu">
                             <a href="#">Grupo</a>
                             <ul>
                                 {% if perms.miembros.es_administrador %}
                                 <li>
-                                    <a href="/grupo/grupo_padre/">Grupo Padre</a>
+                                    <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
                                 </li>
                                 <li>
                                     <a href="/grupo/listar_redes/">Listar Redes</a>
@@ -397,20 +395,20 @@
                                     <a href="/grupo/listar_predicas/">Listar Prédicas</a>
                                 </li>
                                 {% endif %}
-                                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
+                                {% if perms.miembros.es_administrador or mi.es_director_red %}
                                 <li>
                                     <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
                                 {% endif %}
                                 {% if perms.miembros.es_administrador %}
                                 <li>
-                                    <a href="/grupo/faltante_confirmar_ofrenda/">Grupos Faltantes Confirmar Ofrenda</a>
+                                    <a href="{% url 'grupos:sin_confirmar_ofrenda_GAR' %}">{% trans 'Grupos Faltantes Confirmar Ofrenda' %}</a>
                                 </li>
                                 <li>
-                                    <a href="/grupo/faltante_confirmar_ofrenda_discipulado/">Discipulados Faltantes Confirmar Ofrenda</a>
+                                    <a href="{% url 'grupos:sin_confirmar_ofrenda_discipulado' %}">{% trans 'Discipulados Faltantes Confirmar Ofrenda' %}</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'reportes_grupo' %}">Ver Reportes Enviados Por Grupos</a>
+                                    <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
                                 </li>
                                 {% endif %}
                             </ul>
@@ -419,11 +417,11 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera %}
+                {% if mi.grupo_lidera %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
-                        {% if mi.grupoLidera.estado == 'A' %}
+                        {% if mi.grupo_lidera.estado == 'A' %}
                         <li>
                             <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
@@ -437,7 +435,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera or perms.miembro.es_administrador %}
+                {% if mi.grupo_lidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
@@ -450,7 +448,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupoLidera or perms.miembros.es_administrador %}
+                {% if mi.grupo_lidera or perms.miembros.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
@@ -461,7 +459,7 @@
                             <a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Reporte D12</a>
                         </li>
                         <li>
-                            <a href="/reportes/desarrollo_grupos/">Organigrama de mi Red</a>
+                            <a href="{% url 'grupos:organigrama' %}">Organigrama de mi Red</a>
                         </li>
                     </ul>
                 </li>
@@ -482,7 +480,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_administrador or mi.es_cabeza_red %}
+                {% if perms.miembros.es_administrador or mi.es_director_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
                     <ul>
@@ -503,9 +501,9 @@
                         <li class="sub-menu">
                             <a href="#">Asistencia Reuniones</a>
                             <ul>
-                                <li>
+                                <!--- <li>
                                     <a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a>
-                                </li>
+                                </li> --->
                                 <li>
                                     <a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discupulado</a>
                                 </li>
@@ -527,12 +525,12 @@
                         <li>
                             <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">Asignar Visita A Grupo</a>
                         </li>
-                        <li class="sub-menu">
+                        <li>
+                            <a href="/miembro/agregar_miembro/">Agregar Miembro</a>
+                        </li>
+                        <!--<li class="sub-menu">
                             <a href="#">Agregar y Promover Visitas</a>
                             <ul>
-                                <li>
-                                    <a href="/miembro/agregar_miembro/">Agregar Visitas y Miembros</a>
-                                </li>
                                 <li>
                                     <a href="/miembro/promover_visitantes/">Promover Visitas</a>
                                 </li>
@@ -554,7 +552,7 @@
                                     <a href="/reportes/segunda_llamada/">Segunda Llamada</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'cumplimiento_llamadas_lideres' %}">Cumplimiento llamadas lideres</a>
+                                    <a href="{% url 'reportes:cumplimiento_llamadas_lideres' %}">Cumplimiento llamadas lideres</a>
                                 </li>
                             </ul>
                         </li>
@@ -571,7 +569,7 @@
                                     <a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a>
                                 </li>
                             </ul>
-                        </li>
+                        </li>-->
                     </ul>
                     {% endif %}
                 </li>
@@ -581,11 +579,11 @@
                         <ul>
                             {% if perms.miembros.es_administrador %}
                             <li>
-                                <a href="{% url 'crear_encuetro' %}">Crear Encuentro</a>
+                                <a href="{% url 'encuentros:crear_encuetro' %}">Crear Encuentro</a>
                             </li>
                             {% endif %}
                             <li>
-                                <a href="{% url 'listar_encuentros' %}">Listar Encuentros</a>
+                                <a href="{% url 'encuentros:listar_encuentros' %}">Listar Encuentros</a>
                             </li>
                         </ul>
                     </li>
@@ -904,7 +902,7 @@
             $('#toggleModal').click();
         });
         {% if draw_mapa %}
-            {% if mi.grupoLidera or perms.miembros.es_administrador %}
+            {% if mi.grupo_lidera or perms.miembros.es_administrador %}
             var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -927,20 +925,20 @@
 
             var marker;
 
-            {% if g and miembro.grupoLidera %}
-            geocoder.geocode('{{ miembro.grupoLidera.get_direccion }}', function(results){
+            {% if g and miembro.grupo_lidera %}
+            geocoder.geocode('{{ miembro.grupo_lidera.get_direccion }}', function(results){
                 try {
                     latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
                     _marker = new L.Marker(latLng);
 
                     mymap.setView(latLng, 18);
-                    _marker.addTo(mymap).bindPopup("<b>Actualmente el grupo está aquí</b><br />{{ miembro.grupoLidera.direccion }}");
+                    _marker.addTo(mymap).bindPopup("<b>Actualmente el grupo está aquí</b><br />{{ miembro.grupo_lidera.direccion }}");
                 } catch (err) {
                     console.log(err);
                 }
             })
-            {% elif mi.grupoLidera %}
-            geocoder.geocode('{{ mi.grupoLidera.get_direccion }}', function(results){
+            {% elif mi.grupo_lidera %}
+            geocoder.geocode('{{ mi.grupo_lidera.get_direccion }}', function(results){
                 try {
                     latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
                     _marker = new L.Marker(latLng);
@@ -985,7 +983,7 @@
                 $('#toggleModal2').click();
             });
 
-                {% if mi.grupoLidera %}
+                {% if mi.grupo_lidera %}
                 $('#send_position').click(function(event) {
                     if (!marker) {
                         event.preventDefault();
@@ -993,7 +991,7 @@
                         return false;
                     } else {
                         $.ajax({
-                            url: {% if g and miembro.grupoLidera %}'{% url "posicion_grupo" miembro.grupoLidera.id %}'{% elif mi.grupoLidera %}'{% url "posicion_grupo" mi.grupoLidera.id %}'{% endif %},
+                            url: {% if g and miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" miembro.grupo_lidera.id %}'{% elif mi.grupo_lidera %}'{% url "grupos:posicion_grupo" mi.grupo_lidera.id %}'{% endif %},
                             type: 'GET',
                             data: {
                                 csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),

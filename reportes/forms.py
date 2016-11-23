@@ -77,19 +77,19 @@ class FormularioReportesSinEnviar(forms.Form):
 
     def __init__(self, *args, **kwargs):
         miembro = kwargs.pop('miembro', None)
-        grupos = []
-        if miembro:
-            grupos = listaGruposDescendientes_id(miembro)
         super(FormularioReportesSinEnviar, self).__init__(*args, **kwargs)
         self.fields['fechai'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/00'})
         self.fields['fechaf'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/00'})
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         if miembro and miembro.usuario.has_perm('miembros.es_administrador'):
-            self.fields['grupo'].queryset = Grupo.objects.all().select_related('lider1', 'lider2')
+            self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres').all()
         else:
-            self.fields['grupo'].queryset = Grupo.objects.filter(
-                id__in=grupos
-            ).select_related('lider1', 'lider2')
+            grupos = []
+            if miembro:
+                # grupos = listaGruposDescendientes_id(miembro)
+                self.fields['grupo'].queryset = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
+            else:
+                self.fields['grupo'].queryset = Grupo.objects.none()
 
 
 class FormularioPredicas(forms.Form):
@@ -125,7 +125,6 @@ class FormularioCumplimientoLlamadasLideres(FormularioRangoFechas):
         grupos = grupos.distinct().annotate(personas_asignadas=Count('miembro'))
 
         for grupo in grupos:
-            grupo.lideres = Miembro.objects.filter(id__in=grupo.listaLideres())
             miembros_asignados = grupo.miembro_set.filter(fechaAsignacionGAR__range=(fecha_inicial, fecha_final))
             grupo.llamadas_realizadas = miembros_asignados.filter(fechaLlamadaLider__isnull=True).count()
             grupo.llamadas_no_realizadas = grupo.personas_asignadas - grupo.llamadas_realizadas

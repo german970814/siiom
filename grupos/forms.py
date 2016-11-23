@@ -6,9 +6,11 @@ Created on Apr 12, 2011
 
 # Django
 from django import forms
-from django.contrib.auth.models import Group
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
+from django.forms.models import ModelForm
+from django.contrib.auth.models import Group
+from django.db import transaction, IntegrityError
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 from django.core.exceptions import ValidationError
 
 # Apps
@@ -16,6 +18,7 @@ from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
 from reportes.forms import FormularioRangoFechas
+from common.forms import CustomModelForm, CustomForm
 
 
 class FormularioReunionGARBase(forms.ModelForm):
@@ -127,9 +130,7 @@ class FormularioReportarReunionGrupoAdmin(FormularioReunionGARBase):
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
-        self.fields['grupo'].queryset = Grupo.objects.filter(
-            estado=Grupo.ACTIVO
-        ).select_related('lider1', 'lider2')
+        self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres').filter(estado=Grupo.ACTIVO)
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
 
@@ -161,131 +162,6 @@ class FormularioCrearRed(forms.ModelForm):
     class Meta:
         model = Red
         fields = '__all__'
-
-
-class FormularioCrearGrupo(forms.ModelForm):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    def __init__(self, *args, **kwargs):
-        red = kwargs.pop('red', None)
-        new = kwargs.pop('new', None)
-        super(FormularioCrearGrupo, self).__init__(*args, **kwargs)
-        self.fields['lider1'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['lider2'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00:00'})
-        self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
-        self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00:00'})
-        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-
-        if red:
-            lideres = CambioTipo.objects.filter(
-                nuevoTipo__nombre__iexact='lider',
-                miembro__grupo__red=red
-            ).select_related('miembro').values_list('miembro', flat=True)
-            lideres_exclude = []
-            query = Miembro.objects.filter(id__in=lideres).select_related('conyugue')
-            # Block QuerySet que demora
-            for lider in query:
-                if lider.grupoLidera():
-                    lideres_exclude.append(lider.id)
-            query = query.exclude(id__in=lideres_exclude)
-            # endblock
-
-            self.fields['lider1'].queryset = query
-            self.fields['lider2'].queryset = query  # query2
-
-        if not new:
-            query_lider1 = self.fields['lider1'].queryset | Miembro.objects.filter(id=self.instance.lider1.id)
-            self.fields['lider1'].queryset = query_lider1
-
-            if self.instance.lider2:
-                query_lider2 = self.fields['lider2'].queryset | Miembro.objects.filter(id=self.instance.lider2.id)
-                self.fields['lider2'].queryset = query_lider2
-
-        # if red != '':
-        #     lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-        #     grupos = Grupo.objects.all().select_related('lider1', 'lider2')
-        #     lidGrupos = []
-        #     for g in grupos:
-        #         lidGrupos.extend(g.listaLideres())
-        #     if new:
-        #         query1 = Miembro.objects.filter(
-        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-        #         query2 = Miembro.objects.filter(
-        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-        #     else:
-        #         lider1 = self.instance.lider1.id
-        #         lidGrupos.remove(lider1)
-        #         query1 = Miembro.objects.filter(
-        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-        #         lidGrupos.append(lider1)
-        #         if self.instance.lider2 is not None:
-        #             lider2 = self.instance.lider2.id
-        #             lidGrupos.remove(lider2)
-        #         query2 = Miembro.objects.filter(
-        #             id__in=lideres).filter(Q(grupo__red=red) | Q(grupo__red=None)).exclude(id__in=lidGrupos)
-
-    def clean(self, *args, **kwargs):
-        cleaned_data = super(FormularioCrearGrupo, self).clean(*args, **kwargs)
-
-        if 'lider1' in cleaned_data and 'lider2' in cleaned_data:
-            if cleaned_data['lider1'] == cleaned_data['lider2']:
-                self.add_error('lider1', 'Lider1 no puede ser igual a lider2')
-                self.add_error('lider2', 'Lider2 no puede ser igual a lider1')
-
-    class Meta:
-        model = Grupo
-        exclude = ('red',)
-
-
-class FormularioCrearGrupoRaiz(forms.ModelForm):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    def __init__(self, new=True, *args, **kwargs):
-        super(FormularioCrearGrupoRaiz, self).__init__(*args, **kwargs)
-        lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
-        grupos = Grupo.objects.all()
-        lidGrupos = []
-        for g in grupos:
-            lidGrupos.extend(g.listaLideres())
-        if new:
-            query1 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-            query2 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-        else:
-            lider1 = self.instance.lider1.id
-            lidGrupos.remove(lider1)
-            query1 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-            lidGrupos.append(lider1)
-            if self.instance.lider2 is not None:
-                lider2 = self.instance.lider2.id
-                lidGrupos.remove(lider2)
-            query2 = Miembro.objects.filter(id__in=lideres).exclude(id__in=lidGrupos)
-        self.fields['lider1'].queryset = query1 | Miembro.objects.filter(id__in=self.instance.listaLideres())
-        self.fields['lider2'].queryset = query2 | Miembro.objects.filter(id__in=self.instance.listaLideres())
-        self.fields['lider1'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['lider2'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control time-picker'})
-        self.fields['horaGAR'].required = False
-        self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['diaDiscipulado'].required = False
-        self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estado'].widget.attrs.update({'class': 'form-control'})
-        self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Grupo
-        exclude = ('red',)
 
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
@@ -394,12 +270,173 @@ class FormularioEditarReunionGAR(FormularioReunionGARBase):
         )
 
 
-class FormularioSetGeoPosicionGrupo(forms.ModelForm):
+class BaseGrupoForm(CustomModelForm):
+    """
+    Formulario base el manejo de grupo de una iglesia.
+    """
+
+    mensaje_error = _lazy('Ha ocurrido un error al guardar el grupo. Por favor intentelo de nuevo.')
+    lideres = forms.ModelMultipleChoiceField(queryset=Grupo.objects.none(), label=_lazy('Lideres'))
+
+    class Meta:
+        model = Grupo
+        fields = [
+            'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
+            'horaDiscipulado', 'nombre', 'barrio'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control time-picker'})
+        self.fields['horaGAR'].widget.attrs.update({'class': 'form-control time-picker'})
+        self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+
+        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
+
+
+class GrupoRaizForm(BaseGrupoForm):
+    """
+    Formulario para la creación o edición del grupo raiz.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
+            self.fields['lideres'].initial = self.instance.lideres.all()
+
+    def save(self):
+        try:
+            with transaction.atomic():
+                raiz = super().save(commit=False)
+                if raiz.pk:
+                    raiz.save()
+                    raiz.lideres.clear()
+                else:
+                    raiz = Grupo.add_root(instance=raiz)
+
+                lideres = self.cleaned_data['lideres']
+                lideres.update(grupo_lidera=raiz)
+                return raiz
+        except IntegrityError:
+            self.add_error(None, forms.ValidationError(self.mensaje_error))
+            return None
+
+
+class NuevoGrupoForm(BaseGrupoForm):
+    """
+    Formulario para la creación de un grupo en una iglesia.
+    """
+
+    class Meta(BaseGrupoForm.Meta):
+        fields = ['parent'] + BaseGrupoForm.Meta.fields
+
+    def __init__(self, red, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['parent'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
+        if grupos_query.count() == 0:
+            grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
+
+        self.fields['parent'].queryset = grupos_query
+        query_lideres = self.fields['lideres'].queryset.red(red)
+        if query_lideres.count() == 0:
+            query_lideres = query_lideres | Grupo.objects.raiz().miembro_set.lideres_disponibles()
+
+        self.fields['lideres'].queryset = query_lideres
+        self.red = red
+
+    def save(self):
+        try:
+            with transaction.atomic():
+                grupo = super().save(commit=False)
+                grupo.red = self.red
+
+                padre = self.cleaned_data['parent']
+                grupo = padre.add_child(instance=grupo)
+
+                lideres = self.cleaned_data['lideres']
+                lideres.update(grupo_lidera=grupo, grupo=padre)
+                return grupo
+        except IntegrityError:
+            self.add_error(None, forms.ValidationError(self.mensaje_error))
+            return None
+
+
+class EditarGrupoForm(NuevoGrupoForm):
+    """
+    Formulario para la edición de un grupo en una iglesia.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(kwargs['instance'].red, *args, **kwargs)
+        self.fields['parent'].required = False
+
+        # descendientes = [grupo.id for grupo in Grupo.get_tree(self.instance)]
+        # parent_query = self.fields['parent'].queryset.exclude(id__in=descendientes)
+        # if self.instance.parent.is_root():
+        #     root_query = Grupo.objects.prefetch_related('lideres').filter(id=self.instance.parent.id)
+        #     self.fields['parent'].queryset = self.fields['parent'].queryset | root_query
+
+        self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
+        self.fields['lideres'].initial = self.instance.lideres.all()
+
+    def save(self):
+        try:
+            with transaction.atomic():
+                grupo = BaseGrupoForm.save(self)
+
+                # if 'parent' in self.changed_data:
+                #     padre = self.cleaned_data['parent']
+                #     grupo.move(padre, pos='sorted-child')
+                #     self.lideres.all().update(grupo=nuevo_padre)
+
+                if 'lideres' in self.changed_data:
+                    grupo.lideres.clear()
+                    # padre = self.cleaned_data['parent']
+                    lideres = self.cleaned_data['lideres']
+                    lideres.update(grupo_lidera=grupo, grupo=self.instance.parent)
+
+                return grupo
+        except IntegrityError:
+            self.add_error(None, forms.ValidationError(self.mensaje_error))
+            return None
+
+
+class TransladarGrupoForm(CustomForm):
+    """
+    Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.
+    """
+
+    nuevo = forms.ModelChoiceField(queryset=None)
+
+    def __init__(self, grupo, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nuevo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+
+        descendientes = [grupo.id for grupo in Grupo.get_tree(grupo)]
+        self.fields['nuevo'].queryset = Grupo.objects.exclude(id__in=descendientes).prefetch_related('lideres')
+
+        self.grupo = grupo
+
+    def transladar(self):
+        self.grupo.transladar(self.cleaned_data['nuevo'])
+
+
+class FormularioSetGeoPosicionGrupo(CustomModelForm):
     class Meta:
         model = Grupo
         fields = ('latitud', 'longitud', )
 
     def __init__(self, *args, **kwargs):
-        super(FormularioSetGeoPosicionGrupo, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['latitud'].required = True
         self.fields['longitud'].required = True
