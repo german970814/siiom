@@ -903,7 +903,11 @@
         });
         {% if draw_mapa %}
             {% if mi.grupo_lidera or perms.miembros.es_administrador %}
-            var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
+            {% if dominioIglesia == 'gng.com' %}
+                var mymap = L.map('mapa').setView([11.2009692, -74.227405], 18);
+            {%  else %}
+                var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
+            {% endif %}
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
                 maxZoom: 19,
