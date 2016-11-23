@@ -131,7 +131,7 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('presupuesto_aprobado', 'fecha_pago', )
+        fields = ('presupuesto_aprobado', 'fecha_pago', 'fecha_proyeccion')
 
     def __init__(self, *args, **kwargs):
         super(FormularioFechaPagoRequisicion, self).__init__(*args, **kwargs)
@@ -142,6 +142,7 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
         self.fields['fecha_pago'].label = _('Fecha aprobada de entrega de recurso')
         self.fields['fecha_pago'].required = True
         self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_proyeccion'].widget.attrs.update({'class': 'form-control'})
 
     def clean(self, *args, **kwargs):
         cleaned_data = super(FormularioFechaPagoRequisicion, self).clean(*args, **kwargs)
