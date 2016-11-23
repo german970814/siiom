@@ -6,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.db.models.aggregates import Count
+from django.db import transaction
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, render, get_object_or_404, redirect
 from django.template import RequestContext
@@ -1517,9 +1518,6 @@ def ver_discipulos(request, pk=None):
             no_discipulos = True
 
     return render_to_response("Miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
-
-
-from django.db import transaction
 
 
 @login_required
