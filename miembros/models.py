@@ -3,7 +3,7 @@ import datetime
 from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _lazy
 from .managers import MiembroManager, MiembroQuerySet
 
 
@@ -81,6 +81,7 @@ class Miembro(models.Model):
         ('D', 'Divorciado'),
     )
     #  autenticacion
+    iglesia = models.ForeignKey('iglesias.Iglesia', verbose_name=_lazy('iglesia'), related_name='miembros')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, null=True, blank=True)
     #  info personal
     nombre = models.CharField(max_length=30)
@@ -116,7 +117,7 @@ class Miembro(models.Model):
     escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon')
     grupo = models.ForeignKey('grupos.Grupo', null=True, blank=True)  # grupo al que pertenece
     grupo_lidera = models.ForeignKey(
-        'grupos.Grupo', verbose_name=_('grupo que lidera'),
+        'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
         related_name='lideres', null=True, blank=True
     )
     #  info GAR
