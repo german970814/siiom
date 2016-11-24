@@ -304,9 +304,9 @@
     }
 
     {% if dominioIglesia == 'gng.com' %}
-        var mymap = L.map('mapa2').setView([11.2009692, -74.227405], 15);
+        var mapa = L.map('mapa2').setView([11.2009692, -74.227405], 15);
     {%  else %}
-        var mymap = L.map('mapa2').setView([10.999236, -74.805117], 15);
+        var mapa = L.map('mapa2').setView([10.999236, -74.805117], 15);
     {% endif %}
 
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
