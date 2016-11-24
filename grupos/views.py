@@ -480,7 +480,7 @@ def ver_reportes_grupo(request):
                     request.session['post'] = request.session['post']
                     # request.session['post'] = request.POST
                     request.session['valid_post'] = True
-                return redirect('reportes_grupo')
+                return redirect('grupos:reportes_grupo')
 
         form = FormularioReportesEnviados(data=request.POST or data_from_session)
 
