@@ -1643,7 +1643,7 @@ def listar_lideres(request, pk):
     """
 
     red = get_object_or_404(Red, pk=pk)
-    lideres = Miembro.objects.lideres_red(red).select_related('usuario')
+    lideres = Miembro.objects.lideres_red(red).select_related('usuario', 'grupo_lidera')
 
     return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})
 
