@@ -1,5 +1,7 @@
 from .models import Grupo
 
+import datetime
+
 
 def convertir_lista_a_queryset(lista_grupos):
     """
