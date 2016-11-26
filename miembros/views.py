@@ -15,6 +15,7 @@ from django.utils import timezone
 
 # Apps Imports
 from .forms import *
+from .models import Miembro
 from grupos.models import Grupo, Red
 from grupos.forms import FormularioEditarDiscipulado
 from academia.models import Curso
@@ -1642,7 +1643,7 @@ def listar_lideres(request, pk):
     """
 
     red = get_object_or_404(Red, pk=pk)
-    lideres = Miembro.objects.lideres_red(red).select_related('usuario')
+    lideres = Miembro.objects.lideres_red(red).select_related('usuario', 'grupo_lidera')
 
     return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})
 

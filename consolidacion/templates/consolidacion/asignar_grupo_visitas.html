@@ -137,7 +137,7 @@
                                 <td>{{ visita.get_nombre|upper }}</td>
                                 <td>{{ visita.telefono }}</td>
                                 <td class="direccion">{{ visita.direccion }}</td>
-                            </tr>                
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -303,8 +303,12 @@
         _redes_array.push(_redes_json[red])
     }
 
-    var mapa = L.map('mapa2').setView([10.999236, -74.805117], 15);
-    
+    {% if dominioIglesia == 'gng.com' %}
+        var mapa = L.map('mapa2').setView([11.2009692, -74.227405], 15);
+    {%  else %}
+        var mapa = L.map('mapa2').setView([10.999236, -74.805117], 15);
+    {% endif %}
+
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
@@ -343,7 +347,7 @@
                 marker_.bindPopup("<b>Ubicación Actual</b>").addTo(mapa).openPopup(); // .addTo(mymap)
                 mapa.setView(latLng, 16);
             } catch (error) {
-                
+
             }
         });
     });

@@ -1335,14 +1335,16 @@ def estadistico_reuniones_gar(request):
             _exclude = []  # lista para excluir los morosos que no son morosos
 
             for moroso in morosos:
-                moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
-                moroso.no_reportes = len(_morosos[moroso.id.__str__()])
-                # for fecha in _morosos[moroso.id.__str__()]:
-                #     fecha = fecha.split(date_split)[0]
-                #     _fecha = datetime.datetime.strptime(fecha, format_date)
-                #     if reunion_reportada(fecha, moroso):
-                #         morosos.pop(morosos.index(moroso))
-                #         break
+                for fecha in _morosos[moroso.id.__str__()]:
+                    _fecha = fecha.split(date_split)[0]
+                    _fecha = datetime.datetime.strptime(_fecha, format_date)
+                    if reunion_reportada(_fecha, moroso):
+                        _morosos[moroso.id.__str__()].pop(_morosos[moroso.id.__str__()].index(fecha))
+                if len(_morosos[moroso.id.__str__()]):
+                    moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
+                    moroso.no_reportes = len(_morosos[moroso.id.__str__()])
+                else:
+                    morosos.pop(morosos.index(moroso))
 
             data['sin_reportar'] = morosos
             data['tabla'] = data_table

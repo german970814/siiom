@@ -12,7 +12,7 @@ def convertir_lista_a_queryset(lista_grupos):
     return Grupo.objects.filter(pk__in=lista_ids)
 
 
-def reunion_reportada(fecha, grupo, discipulado=True):
+def reunion_reportada(fecha, grupo, discipulado=False):
     """Retorna verdadero si la existe una reunion en la fecha dada"""
     ini_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
     fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())

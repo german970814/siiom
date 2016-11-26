@@ -521,7 +521,6 @@
     </div>
     {% endif %}
     <br>
-    {% if sin_reportar %}
     <div class="card">
         <div class="card-header">
             <h3>Tabla Faltantes Por Reporte</h3>
@@ -545,13 +544,16 @@
                             <td>{{ grupo.fechas }}</td>
                             <td>{{ grupo.no_reportes }}</td>
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td>No hay Faltantes</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    {% endif %}
     {% endif %}
 </div>
 {% if grafico %}
