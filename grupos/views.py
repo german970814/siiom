@@ -196,7 +196,7 @@ def reportarReunionGrupoAdmin(request):
                     request,
                     _('Has reportado exitosamente la reunión de el grupo %s' % reunion.grupo.__str__())
                 )
-                return redirect('reportar_reunion_grupo_admin')
+                return redirect('miembros:reportar_reunion_grupo_admin')
             else:
                 messages.warning(
                     request,
