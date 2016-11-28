@@ -36,6 +36,55 @@ $(document).ajaxSend(function(event, xhr, settings) {
     }
 });
 
+Array.prototype.Contains = function(v) {
+    for(var i = 0; i < this.length; i++) {
+        if(this[i] === v) return true;
+    }
+    return false;
+};
+
+if (!String.prototype.format) {
+    String.prototype.format = function () {
+        var args = arguments;
+        var new_string = this;
+        for (var i=0; i < args.length; i++) {
+            new_string = new_string.replace('{' + i.toString() + '}', args[i]);
+        }
+        return new_string;
+    };
+}
+
+if (!String.prototype.join) {
+    String.prototype.join = function (list) {
+        var new_string = '';
+        var separator = this.toString();
+        for (value of list) {
+            new_string += value.toString() + separator;
+        }
+        return new_string;
+    };
+}
+
+function notification(ms, code) {
+    notify(
+        ms,
+        undefined, undefined, undefined,
+        code, 'animated bounceIn', 5000
+    );
+}
+
+function success(ms) {
+    notification(ms, 'success');
+}
+
+function warning(ms) {
+    notification(ms, 'warning');
+}
+
+function danger(ms) {
+    notification(ms, 'danger');
+}
+
 // Permite checkear todos los checkboxes de una tabla con el checkbox todos.
 function checkTodos(idTabla){
 	$("#"+idTabla+" input:checkbox").attr('checked', $("#"+idTabla+" .todos").is(':checked'));
@@ -62,3 +111,4 @@ function agregarOpciones2(data, idCombo){
     $("#"+idCombo).html(opciones);
     $("#"+idCombo).trigger('chosen:updated');
 }
+

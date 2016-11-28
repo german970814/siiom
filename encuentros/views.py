@@ -15,12 +15,11 @@ from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_
 from grupos.models import Red, Grupo
 from miembros.models import Miembro, TipoMiembro
 from common.groups_tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
+from common.constants import URL_SIN_PERMISOS as URL
 
 # Python
 import json
 import time
-
-URL = "/dont_have_permissions/"
 
 
 @user_passes_test(adminTest, login_url=URL)
@@ -97,20 +96,20 @@ def editar_encuentro(request, id_encuentro):
     return render_to_response('encuentros/crear_encuentro.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(tesorero_administrador_test, login_url=URL)
-def obtener_grupos(request):
-    """Vista que devuelve una lista de grupos en JSON de acuerdo a un valor inicial enviado."""
+# @user_passes_test(tesorero_administrador_test, login_url=URL)
+# def obtener_grupos(request):
+#     """Vista que devuelve una lista de grupos en JSON de acuerdo a un valor inicial enviado."""
 
-    if request.method == 'POST':
-        if 'combo_grupo' in request.POST:
-            red = Red.objects.get(id=request.POST['id_red'])
-            value = request.POST.get('value', '')
-            querys = Q(lideres__nombre__icontains=value) |\
-                Q(lideres__primerApellido__icontains=value) | Q(lideres__cedula__icontains=value)
-            grupos = Grupo.objects.filter(red=red)
-            grupos = grupos.filter(querys)[:10]
-            response = [{'pk': str(a.id), 'nombre': str(a)} for a in grupos]
-            return HttpResponse(json.dumps(response), content_type='application/json')
+#     if request.method == 'POST':
+#         if 'combo_grupo' in request.POST:
+#             red = Red.objects.get(id=request.POST['id_red'])
+#             value = request.POST.get('value', '')
+#             querys = Q(lideres__nombre__icontains=value) |\
+#                 Q(lideres__primerApellido__icontains=value) | Q(lideres__cedula__icontains=value)
+#             grupos = Grupo.objects.filter(red=red)
+#             grupos = grupos.filter(querys)[:10]
+#             response = [{'pk': str(a.id), 'nombre': str(a)} for a in grupos]
+#             return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 @user_passes_test(admin_tesorero_coordinador_test, login_url=URL)

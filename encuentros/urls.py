@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from . import views
+from . import views, api
 
 urlpatterns = [
     url(r'^nuevo/$', views.crear_encuentro, name="crear_encuetro"),  # revisada
@@ -10,5 +10,5 @@ urlpatterns = [
     url(r'^editar_encontrista/(?P<id_encontrista>\d+)/$', views.editar_encontrista, name="editar_encontrista"),  # revisada
     url(r'^borrar_encontrista/(?P<id_encontrista>\d+)/$', views.borrar_encontrista, name="borrar_encontrista"),  # revisada
     url(r'^asistencia_encuentro/(?P<id_encuentro>\d+)/$', views.asistencia_encuentro, name="asistencia_encuentro"),  # revisada
-    url(r'^obtener_grupos/$', views.obtener_grupos, name="obtener_grupos"),  # revisada
+    url(r'^obtener_grupos/$', api.obtener_grupos, name="obtener_grupos"),  # revisada
 ]

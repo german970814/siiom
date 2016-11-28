@@ -21,3 +21,15 @@ IMAGES = {
     'gif': 'image/gif', 'jpg': 'image/jpeg',
     'svg': 'image/svg+xml', 'tiff': 'image/tiff',
 }
+
+
+URL_SIN_PERMISOS = "/dont_have_permissions/"
+
+RESPONSE_CODE = 'response_code'
+
+RESPONSE_SUCCESS = 200
+RESPONSE_NOT_FOUND = 404
+RESPONSE_DENIED = 413
+RESPONSE_ERROR = 400
+RESPONSE_REDIRECT = 302
+RESPONSE_REDIRECT_P = 301

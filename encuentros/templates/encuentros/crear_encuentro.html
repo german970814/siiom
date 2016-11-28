@@ -3,14 +3,15 @@
 
 
 {% block js %}
+<script src="{% static 'Scripts/funciones.js' %}" type="text/javascript"></script>
     <script>
         jQuery(document).ready(function($) {
-            $('#id_fecha_inicial').datetimepicker({
+            $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
                 format: 'DD/MM/YY H:m',
                 // minDate: moment(),
             });
 
-            $('#id_fecha_final').datetimepicker({
+            $('#{{ form.fecha_final.id_for_label }}').datetimepicker({
                 useCurrent: false,
                 format: 'DD/MM/YY',
                 // minDate: moment(),
@@ -29,8 +30,45 @@
             //     $('#id_fecha_inicial').data("DateTimePicker").maxDate(e.date);
             // });
 
+            var $csrftoken = $("input[name='csrfmiddlewaretoken']").val();  // guarda el nombre del token
+
             var $seleccionados = new Array();
             var $oficial = new Array();
+
+            function get_text_options(element) {
+                var $element = $('#' + element);
+                if ($element.val() instanceof Array) {
+                    var _list = new Array();
+                    for (var id of $element.val()) {
+                        aux = $element.find('option[value="' + id.toString() + '"]').html();
+                        _list.push(aux);
+                    }
+                    return _list;  // quede por aqui, 
+                } else {
+                    id = $element.val();
+                    aux = $element.find('option[value="' + id.toString() + '"]').html();
+                    return aux;
+                }
+            }
+
+            function add_selectpicker_options (data, id) {
+                var options = '';
+                var _option_tag = '<option value="{0}">{1}</option>';
+                var $element = $('#' + id);
+
+                if ($element.attr('multiple') == false) {
+                    var selected_before = new Array();
+
+                    for (var dict of data) {
+                        options += _option_tag.format(dict['id'], dict['nombre']);
+                    }
+                } else {
+                    for (var dict of data) {
+                        options += _option_tag.format(dict['id'], dict['nombre']);
+                    }
+                }
+                $element.html(options).selectpicker('refresh');
+            }
 
             function agregar_opciones(data, id){
                 var opciones = '';
@@ -42,35 +80,39 @@
                 for (var i = 0; i < data.length; i++) {
                     opciones += '<option value="' + data[i]['pk'] + '">' + data[i]['nombre'] + '</option>';
                 }
-                $("#"+id).html(opciones);
-                $("#"+id).trigger('chosen:updated');
+                $("#" + id).html(opciones);
+                $("#" + id).trigger('chosen:updated');
             }
 
             setTimeout(auxiliar, 2000);
+
             function auxiliar(){
-                // $(".grupos .bs-searchbox input").on('keydown', function(event){
-                //     if($(this).val() != ''){
-                //         $.ajax({
-                //             url: "{% url 'encuentros:obtener_grupos' %}",
-                //             data: {
-                //                 id_red: $('#id_red').val(),
-                //                 combo_grupo: $(this).val(),
-                //                 value: $(this).val(),
-                //                 csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
-                //             },
-                //             type: 'POST',
-                //             success: function(data){
-                //                 // console.log(data);
-                //                 agregar_opciones(data, 'id_grupos');
-                //                 $('#id_grupos').selectpicker('refresh');
-                //             }
-                //         });
-                //     }
-                //     else{
-                //         $("#id_grupos").html('');
-                //         $("#id_grupos").trigger('chosen:updated');
-                //     }
-                // });
+                $(".grupos .bs-searchbox input").on('keyup', function(event){
+                    if ($(this).val() != '' && $(this).val() != null) {
+                        $.ajax({
+                            url: "{% url 'encuentros:obtener_grupos' %}",
+                            data: {
+                                red: $('#{{ form.red.id_for_label }}').val(),
+                                value: $(this).val(),
+                                csrfmiddlewaretoken: $csrftoken
+                            },
+                            type: 'POST',
+                            success: function(data){
+                                if (data['response_code'] == 200) {
+                                    add_selectpicker_options(
+                                        data['grupos'], '{{ form.grupos.id_for_label }}'
+                                    );
+                                } else {
+                                    danger('Parece que ocurrió un error, ¿te aseguraste de escoger la red?');
+                                }
+                            }
+                        });
+                    } else {
+                        $("#{{ form.grupos.id_for_label }}")
+                            .html('<option selected value="">NOTHING SELECTED</option>')
+                            .selectpicker('refresh');
+                    }
+                });
 
                 $(".tesorero .bs-searchbox input").on('keydown', function(event){
                     if ($('#id_red').val() != '') {
@@ -252,88 +294,95 @@
             {% csrf_token %}
             <div class="card-body card-padding">
                 <div class="row">
-                    <div class="col-md-2">
-                        <div class="input-group {{form.fecha_inicial.css_classes}}">
+                    <div class="col-md-3">
+                        <div class="input-group {{ form.fecha_inicial.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fecha_inicial" class="fg-label requerido control-label">Fecha Inicial:</label>
-                                {{form.fecha_inicial}}
+                                <label for="{{ form.fecha_inicial.id_for_label }}" class="fg-label requerido control-label">Fecha Inicial:</label>
+                                {{ form.fecha_inicial }}
                             </div>
                             {% for error in form.fecha_inicial.errors %}
-                                <small class="help-block">{{error}}</small>
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="col-md-2">
-                        <div class="input-group {{form.fecha_final.css_classes}}">
+                    <br class="space">
+                    <div class="col-md-3">
+                        <div class="input-group {{ form.fecha_final.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_fecha_final" class="fg-label control-label requerido">Fecha Final:</label>
-                                {{form.fecha_final}}
+                                <label for="{{ form.fecha_final.id_for_label }}" class="fg-label control-label requerido">Fecha Final:</label>
+                                {{ form.fecha_final }}
                             </div>
                             {% for error in form.fecha_final.errors %}
-                                <small class="help-block">{{error}}</small>
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="input-group {{form.hotel.css_classes}}">
+                    <br class="space">
+                    <div class="col-md-6">
+                        <div class="input-group {{ form.hotel.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-hotel"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_hotel" class="fg-label requerido control-label">Hotel:</label>
-                                {{form.hotel}}
+                                <label for="{{ form.hotel.id_for_label }}" class="fg-label requerido control-label">Hotel:</label>
+                                {{ form.hotel }}
                             </div>
                             {% for error in form.hotel.errors %}
-                                <small class="help-block">{{error}}</small>
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="input-group {{form.direccion.css_classes}}">
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group {{ form.direccion.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-pin"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_direccion" class="fg-label requerido control-label">Dirección:</label>
-                                {{form.direccion}}
+                                <label for="{{ form.direccion.id_for_label }}" class="fg-label requerido control-label">Dirección:</label>
+                                {{ form.direccion }}
                             </div>
                             {% for error in form.direccion.errors %}
                                 <small class="help-block">{{error}}</small>
                             {% endfor %}
                         </div>
                     </div>
-                </div>
-                <br>
-                <br>
-                <div class="row">
+                    <br class="space">
                     <div class="col-md-6">
-                        <div class="input-group {{form.red.css_classes}}">
+                        <div class="input-group {{ form.red.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_red" class="fg-label control-label requerido">Red:</label>
-                                {{form.red}}
+                                <label for="{{ form.red.id_for_label }}" class="fg-label control-label requerido">Red:</label>
+                                {{ form.red }}
                             </div>
                             {% for error in form.red.errors %}
-                                <small class="help-block">{{error}}</small>
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="col-md-6 grupos">
-                        <div class="input-group {{form.grupos.css_classes}}">
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-12 grupos">
+                        <div class="input-group {{ form.grupos.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts-alt"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_grupos" class="fg-label control-label requerido">Grupos:</label>
-                                {{form.grupos}}
+                                <label for="{{ form.grupos.id_for_label }}" class="fg-label control-label requerido">Grupos:</label>
+                                {{ form.grupos }}
                             </div>
                             {% for error in form.grupos.errors %}
                                 <small class="help-block">{{error}}</small>
@@ -342,30 +391,31 @@
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-5 col-md-offset-1 coordinador">
-                        <div class="input-group {{form.coordinador.css_classes}}">
+                        <div class="input-group {{ form.coordinador.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-male"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_coordinador" class="fg-label requerido control-label">Coordinador:</label>
-                                {{form.coordinador}}
+                                <label for="{{ form.coordinador.id_for_label }}" class="fg-label requerido control-label">Coordinador:</label>
+                                {{ form.coordinador }}
                             </div>
                             {% for error in form.coordinador.errors %}
                                 <small class="help-block">{{error}}</small>
                             {% endfor %}
                         </div>
                     </div>
+                    <br class="space">
                     <div class="col-md-5 tesorero">
-                        <div class="input-group {{form.tesorero.css_classes}}">
+                        <div class="input-group {{ form.tesorero.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_tesorero" class="fg-label control-label requerido">Tesorero:</label>
-                                {{form.tesorero}}
+                                <label for="{{ form.tesorero.id_for_label }}" class="fg-label control-label requerido">Tesorero:</label>
+                                {{ form.tesorero }}
                             </div>
                             {% for error in form.tesorero.errors %}
                                 <small class="help-block">{{error}}</small>
@@ -374,19 +424,19 @@
                     </div>
                 </div>
                 <br>
-                <br>
+                <br class="space-down">
                 <div class="row">
                     <div class="col-md-10 col-md-offset-1">
-                        <div class="input-group {{form.observaciones.css_classes}}">
+                        <div class="input-group {{ form.observaciones.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="id_observaciones" class="fg-label control-label requerido">Observaciones:</label>
-                                {{form.observaciones}}
+                                <label for="{{ form.observaciones.id_for_label }}" class="fg-label control-label requerido">Observaciones:</label>
+                                {{ form.observaciones }}
                             </div>
                             {% for error in form.observaciones.errors %}
-                                <small class="help-block">{{error}}</small>
+                                <small class="help-block">{{ error }}</small>
                             {% endfor %}
                         </div>
                     </div>
