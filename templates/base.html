@@ -411,6 +411,9 @@
                                         <li>
                                             <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
                                         </li>
+                                        <li>
+                                            <a href="{% url 'reportes:confirmar_ofrenda_grupos_red' %}">{% trans 'Confirmar Ofrenda Grupo Por Red' %}</a>
+                                        </li>
                                     {% endif %}
                                 {% endif %}
                             </ul>
@@ -444,9 +447,9 @@
                         <li>
                             <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
-                        <li>
+                        {% comment %}<li>
                             <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                        </li>
+                        </li>{% endcomment %}
                     </ul>
                 </li>
                 {% endif %}
