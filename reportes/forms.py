@@ -183,8 +183,11 @@ class FormularioReportesSinConfirmar(CommonFormFechas):
     descendientes = forms.BooleanField(label=_('Descendientes'), required=False)
 
     def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('queryset', None)
         super().__init__(*args, **kwargs)
         self.fields['grupo'].widget.attrs.update({
             'class': 'selectpicker',
             'data-live-search': 'true'
         })
+        if queryset is not None:
+            self.fields['grupo'].queryset = queryset

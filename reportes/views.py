@@ -1595,9 +1595,14 @@ def estadistico_reuniones_gar(request):
 
 @user_passes_test(liderAdminTest)
 def confirmar_ofrenda_grupos_red(request):
-    """"""
+    """Vista para confirmar la ofrenda de los grupos de acuerdo a un grupo inicial"""
 
     data = {}
+    miembro = Miembro.objects.get(usuario=request.user)
+    if miembro.usuario.has_perm('miembros.es_administrador'):
+        queryset = Grupo.objects.prefetch_related('lideres').all().distinct()
+    else:
+        queryset = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
 
     if request.method == 'POST':
         if 'confirmar' in request.POST:
@@ -1614,7 +1619,7 @@ def confirmar_ofrenda_grupos_red(request):
 
             return HttpResponse(json.dumps(data), content_type='application/json')
 
-        form = FormularioReportesSinConfirmar(data=request.POST)
+        form = FormularioReportesSinConfirmar(data=request.POST, queryset=queryset)
 
         if form.is_valid():
             grupo = form.cleaned_data['grupo']
@@ -1641,7 +1646,7 @@ def confirmar_ofrenda_grupos_red(request):
                 data['vacio'] = True
 
     else:
-        form = FormularioReportesSinConfirmar()
+        form = FormularioReportesSinConfirmar(queryset=queryset)
 
     data['form'] = form
 
