@@ -409,7 +409,7 @@ def reporteVisitasPorRed(request):
     return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
 def ver_reportes_grupo(request):
     if request.method == 'POST' or (
         'post' in request.session and len(request.session['post']) > 1 and request.session.get('valid_post', False)

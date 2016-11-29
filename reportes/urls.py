@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^consultar_sobres_discipulados_sin_enviar/$',
         views.ConsultarReportesDiscipuladoSinEnviar, {'sobres': True},
         name="consultar_sobres_discipulados_sin_enviar"),  # Error revisada
+    url(r'^confirmar_ofrenda_grupos_red/$', views.confirmar_ofrenda_grupos_red, name="confirmar_ofrenda_grupos_red"),
 ]

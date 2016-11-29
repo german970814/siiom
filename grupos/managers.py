@@ -14,6 +14,12 @@ class GrupoQuerySet(models.QuerySet):
 
         return self.filter(red=red)
 
+    def activos(self, **kwargs):
+        """
+        Devuelve un queryset con los grupos con estado activo.
+        """
+        return self.filter(estado=self.model.ACTIVO, **kwargs)
+
 
 class GrupoManager(AL_NodeManager):
     """
