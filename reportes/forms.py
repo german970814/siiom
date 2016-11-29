@@ -177,7 +177,7 @@ class FormularioEstadisticoReunionesGAR(forms.Form):
 
 class FormularioReportesSinConfirmar(CommonFormFechas):
     grupo = forms.ModelChoiceField(
-        queryset=Grupo.objects.sin_confirmar_ofrenda_GAR().prefetch_related('lideres').distinct(),
+        queryset=Grupo.objects.prefetch_related('lideres').all().distinct(),
         label=_('grupo')
     )
     descendientes = forms.BooleanField(label=_('Descendientes'), required=False)

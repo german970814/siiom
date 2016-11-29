@@ -1631,6 +1631,7 @@ def confirmar_ofrenda_grupos_red(request):
 
             reuniones = ReunionGAR.objects.filter(
                 grupo__id__in=grupos.values_list('id', flat=True),
+                grupo__estado=Grupo.ACTIVO,
                 fecha__range=(fecha_inicial, fecha_final),
                 confirmacionEntregaOfrenda=False
             ).order_by('-fecha')
