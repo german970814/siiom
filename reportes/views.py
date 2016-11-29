@@ -21,7 +21,7 @@ from .charts import PdfTemplate, PdfReport
 from .forms import (
     FormularioRangoFechas, FormularioVisitasPorMes, FormularioVisitasRedPorMes,
     FormularioCumplimientoLlamadasLideres, FormularioReportesSinEnviar, FormularioPredicas,
-    FormularioEstadisticoReunionesGAR
+    FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar
 )
 from .utils import get_date_for_report
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
@@ -1591,3 +1591,63 @@ def estadistico_reuniones_gar(request):
     data['miembro'] = miembro  # se agrega miembro a la data para el template
 
     return render(request, 'reportes/estadistico_gar.html', data)
+
+
+@user_passes_test(liderAdminTest)
+def confirmar_ofrenda_grupos_red(request):
+    """Vista para confirmar la ofrenda de los grupos de acuerdo a un grupo inicial"""
+
+    data = {}
+    miembro = Miembro.objects.get(usuario=request.user)
+    if miembro.usuario.has_perm('miembros.es_administrador'):
+        queryset = Grupo.objects.prefetch_related('lideres').all().distinct()
+    else:
+        queryset = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
+
+    if request.method == 'POST':
+        if 'confirmar' in request.POST:
+            data = {}
+            try:
+                reunion = ReunionGAR.objects.get(id=request.POST.get('confirmar'))
+                reunion.confirmacionEntregaOfrenda = True
+                reunion.save()
+                data['response_code'] = 200
+                data['message'] = 'Reporte confirmado exitosamente'
+            except ReunionGAR.DoesNotExist:
+                data['response_code'] = 400
+                data['message'] = 'Lo sentimos pero no se ha podido confirmar el reporte'
+
+            return HttpResponse(json.dumps(data), content_type='application/json')
+
+        form = FormularioReportesSinConfirmar(data=request.POST, queryset=queryset)
+
+        if form.is_valid():
+            grupo = form.cleaned_data['grupo']
+            fecha_inicial = form.cleaned_data['fecha_inicial']
+            fecha_final = form.cleaned_data['fecha_final']
+            descendientes = form.cleaned_data['descendientes']
+
+            fecha_final += datetime.timedelta(days=1)
+
+            if descendientes:
+                grupos = grupo.grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
+            else:
+                grupos = Grupo.objects.filter(id=grupo.id)
+
+            reuniones = ReunionGAR.objects.filter(
+                grupo__id__in=grupos.values_list('id', flat=True),
+                grupo__estado=Grupo.ACTIVO,
+                fecha__range=(fecha_inicial, fecha_final),
+                confirmacionEntregaOfrenda=False
+            ).order_by('-fecha')
+
+            data['reuniones'] = reuniones
+            if len(reuniones) == 0:
+                data['vacio'] = True
+
+    else:
+        form = FormularioReportesSinConfirmar(queryset=queryset)
+
+    data['form'] = form
+
+    return render(request, 'reportes/confirmar_ofrenda_grupos_red.html', data)

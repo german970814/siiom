@@ -382,34 +382,39 @@
                             <a href="#">Grupo</a>
                             <ul>
                                 {% if perms.miembros.es_administrador %}
-                                <li>
-                                    <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
-                                </li>
-                                <li>
-                                    <a href="/grupo/listar_redes/">Listar Redes</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/grupo/crear_red/">Crear Red</a>
-                                </li> -->
-                                <li>
-                                    <a href="/grupo/listar_predicas/">Listar Prédicas</a>
-                                </li>
+                                    <li>
+                                        <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
+                                    </li>
+                                    <li>
+                                        <a href="/grupo/listar_redes/">Listar Redes</a>
+                                    </li>
+                                    <!-- <li>
+                                        <a href="/grupo/crear_red/">Crear Red</a>
+                                    </li> -->
+                                    <li>
+                                        <a href="/grupo/listar_predicas/">Listar Prédicas</a>
+                                    </li>
                                 {% endif %}
                                 {% if perms.miembros.es_administrador or mi.es_director_red %}
-                                <li>
-                                    <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                                </li>
+                                    <li>
+                                        <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                                    </li>
                                 {% endif %}
                                 {% if perms.miembros.es_administrador %}
-                                <li>
-                                    <a href="{% url 'grupos:sin_confirmar_ofrenda_GAR' %}">{% trans 'Grupos Faltantes Confirmar Ofrenda' %}</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'grupos:sin_confirmar_ofrenda_discipulado' %}">{% trans 'Discipulados Faltantes Confirmar Ofrenda' %}</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
-                                </li>
+                                    <li>
+                                        <a href="{% url 'grupos:sin_confirmar_ofrenda_GAR' %}">{% trans 'Grupos Faltantes Confirmar Ofrenda' %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'grupos:sin_confirmar_ofrenda_discipulado' %}">{% trans 'Discipulados Faltantes Confirmar Ofrenda' %}</a>
+                                    </li>
+                                {% endif %}
+                                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                                    <li>
+                                        <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'reportes:confirmar_ofrenda_grupos_red' %}">{% trans 'Confirmar Ofrenda Grupo Por Red' %}</a>
+                                    </li>
                                 {% endif %}
                             </ul>
                         </li>
@@ -442,9 +447,9 @@
                         <li>
                             <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
-                        <li>
+                        {% comment %}<li>
                             <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                        </li>
+                        </li>{% endcomment %}
                     </ul>
                 </li>
                 {% endif %}

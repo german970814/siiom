@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from grupos.models import Red, Predica, Grupo
 from miembros.models import Miembro
 from .utils import listaGruposDescendientes_id
+from common.forms import FormularioRangoFechas as CommonFormFechas
 
 __author__ = 'Tania'
 
@@ -172,3 +173,21 @@ class FormularioEstadisticoReunionesGAR(forms.Form):
         #     self.add_error('lideres_asistentes', _('Escoge una opción'))
         #     self.add_error('visitas', _('Escoge una opción'))
         #     self.add_error('asistentes_regulares', _('Escoge una opción'))
+
+
+class FormularioReportesSinConfirmar(CommonFormFechas):
+    grupo = forms.ModelChoiceField(
+        queryset=Grupo.objects.prefetch_related('lideres').all().distinct(),
+        label=_('grupo')
+    )
+    descendientes = forms.BooleanField(label=_('Descendientes'), required=False)
+
+    def __init__(self, *args, **kwargs):
+        queryset = kwargs.pop('queryset', None)
+        super().__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({
+            'class': 'selectpicker',
+            'data-live-search': 'true'
+        })
+        if queryset is not None:
+            self.fields['grupo'].queryset = queryset
