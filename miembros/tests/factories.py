@@ -35,5 +35,8 @@ class MiembroFactory(factory.django.DjangoModelFactory):
 
     class Params:
         lider = factory.Trait(
-            usuario=factory.SubFactory(UsuarioFactory, user_permissions=('es_lider',))
+            usuario=factory.SubFactory(UsuarioFactory, user_permissions=['es_lider'])
+        )
+        admin = factory.Trait(
+            usuario=factory.SubFactory(UsuarioFactory, user_permissions=['es_administrador'])
         )

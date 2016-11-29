@@ -14,7 +14,7 @@ from academia.models import Matricula
 from grupos.models import Grupo
 from PIL import Image
 from io import BytesIO
-from common.forms import CustomForm
+from common.forms import CustomForm, CustomModelForm
 
 
 class FormularioLiderAgregarMiembro(ModelForm):
@@ -468,6 +468,35 @@ class FormularioTipoMiembros(forms.ModelForm):
     class Meta:
         model = CambioTipo
         exclude = ('miembro', 'autorizacion', 'nuevoTipo', 'anteriorTipo', 'fecha')
+
+
+class NuevoMiembroForm(CustomModelForm):
+    """
+    Formulario para la creación de un miembro de una iglesia.
+    """
+
+    class Meta:
+        model = Miembro
+        fields = [
+            'nombre', 'primerApellido', 'segundoApellido', 'genero', 'telefono', 'celular', 'fechaNacimiento',
+            'cedula', 'direccion', 'barrio', 'email', 'profesion', 'estadoCivil'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
+        self.fields['celular'].widget.attrs.update({'class': 'form-control'})
+        self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
+        self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
+        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
 
 
 class TransladarMiembroForm(CustomForm):

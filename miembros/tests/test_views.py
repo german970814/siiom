@@ -104,3 +104,23 @@ class TransladarMiembroViewTest(BaseTest):
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, {})
         self.assertFormError(response, 'form', 'nuevo', 'Este campo es obligatorio.')
+
+
+class CrearMiembroViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista crear miembro de una iglesia.
+    """
+
+    URL = 'miembros:nuevo'
+
+    def setUp(self):
+        self.admin = MiembroFactory(admin=True)
+
+    def test_admin_get(self):
+        """
+        Prueba que el administrador pueda ver el template.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_nombre', html=False)

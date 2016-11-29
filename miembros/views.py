@@ -27,7 +27,7 @@ from common.groups_tests import (
     miembro_empleado_test
 )
 
-from .forms import TransladarMiembroForm
+from .forms import TransladarMiembroForm, NuevoMiembroForm
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -1634,6 +1634,16 @@ def eliminar_foto_perfil(request, pk):
 
 
 # -----------------------------------
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def crear_miembro(request):
+    """
+    Permite crear miembros para una iglesia.
+    """
+
+    form = NuevoMiembroForm()
+    return render(request, 'miembros/miembro_form.html', {'form': form})
 
 
 @login_required

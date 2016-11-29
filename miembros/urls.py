@@ -53,6 +53,7 @@ urlpatterns = [
     url(r'^informacion_iglesia/(?P<pk>\d*)$', views.ver_informacion_miembro, name="ver_informacion"),  # revisada
     url(r'^eliminar_foto_perfil/(?P<pk>\d*)$', views.eliminar_foto_perfil, name="eliminar_foto"),  # revisada
 
+    url(r'^nuevo/$', views.crear_miembro, name='nuevo'),
     url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
     url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar')
 ]
