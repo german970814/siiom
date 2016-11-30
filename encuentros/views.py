@@ -109,10 +109,11 @@ def editar_encuentro(request, id_encuentro):
                     <a alt="Agregar encontrista" class="alert-link" href="{1}"> agregar encontristas a este encuentro</a>
                     '''.format(
                             reverse('encuentros:listar_encuentros'),
-                            reverse('encuentros:agregar_encontrista', args=(nuevo_encuentro.id, ))
+                            reverse('encuentros:agregar_encontrista', args=(encuentro_editado.id, ))
                         )
                 )
             )
+            return redirect(reverse('encuentros:editar_encuentro', args=(id_encuentro)))
         else:
             if 'grupos' in request.POST:
                 grupos = Grupo.objects.filter(id__in=request.POST.getlist('grupos'))
