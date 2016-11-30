@@ -252,40 +252,6 @@ def miembroInicio(request):
 isOk = False
 
 
-@user_passes_test(agregarVisitanteTest, login_url="/dont_have_permissions/")
-def liderAgregarMiembro(request):
-    global isOk
-
-    accion = 'Guardar'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        form = FormularioLiderAgregarMiembro(data=request.POST)
-        if form.is_valid():
-            nuevoMiembro = form.save(commit=False)
-            nuevoMiembro.estado = 'A'
-            if nuevoMiembro.conyugue is not None and nuevoMiembro.conyugue != "":
-                    conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
-                    conyugue.conyugue = nuevoMiembro
-                    conyugue.estadoCivil = 'C'
-                    conyugue.save()
-                    nuevoMiembro.estadoCivil = 'C'
-            nuevoMiembro.save()
-            CambioTipo.objects.create(
-                miembro=nuevoMiembro, autorizacion=miembro,
-                fecha=date.today(), anteriorTipo=TipoMiembro.objects.get(
-                    nombre__iexact="visita"), nuevoTipo=TipoMiembro.objects.get(
-                        nombre__iexact="visita"))
-            ok = True
-        else:
-            isOk = True
-            # messages.error(request, "Debes llenar todos los campos")
-        isOk = False
-    else:
-        form = FormularioLiderAgregarMiembro()
-    isOk = False
-    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
-
-
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderListarMiembrosGrupo(request):
     if request.method == 'POST':

@@ -7,7 +7,6 @@ from grupos.views import (
 
 urlpatterns = [
     url(r'^$', views.miembroInicio, name="miembro_inicio"),  # revisada
-    url(r'^agregar_miembro/$', views.liderAgregarMiembro, name="agregar_miembro"),  # revisada
     url(r'^listar_miembros/$', views.liderListarMiembrosGrupo, name="listar_miembros"),  # No se usa actualmente revisada
     url(r'^editar_miembros/$', views.liderEditarMiembros, name="editar_miembros"),  # No se usa actualmente revisada
     url(r'^editar_miembro/(\d+)/$', views.editarMiembro, name="editar_miembro"),  # revisada
