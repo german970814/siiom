@@ -495,8 +495,12 @@ class NuevoMiembroForm(CustomModelForm):
         self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
+
+    def save(self, iglesia):
+        self.instance.iglesia = iglesia
+        return super().save()
 
 
 class TransladarMiembroForm(CustomForm):

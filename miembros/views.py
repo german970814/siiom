@@ -13,6 +13,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import ugettext as _
 
 # Apps Imports
 from .forms import *
@@ -1642,7 +1643,15 @@ def crear_miembro(request):
     Permite crear miembros para una iglesia.
     """
 
-    form = NuevoMiembroForm()
+    if request.method == 'POST':
+        form = NuevoMiembroForm(data=request.POST)
+        if form.is_valid():
+            form.save(request.iglesia)
+            messages.success(request, _('El miembro se ha creado correctamente'))
+            return redirect('miembros:nuevo')
+    else:
+        form = NuevoMiembroForm()
+
     return render(request, 'miembros/miembro_form.html', {'form': form})
 
 

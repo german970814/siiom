@@ -5,101 +5,57 @@
 <div class="container">
     <div class="card">
         <div class="card-header">
-            {{a}}
             <h1 class="f-700">
-                <legend><h3>{{accion}} Miembro</h3></legend>
+                <legend><h3>{% trans "Miembro" %}</h3></legend>
             </h1>
-            {% if ok %}
-            <div class="row">
-                <div class="alert alert-success alert-dismissible" role="alert">
-                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha agregado el miembro correctamente.</p>
-                </div>
-            </div>
-            {% endif %}
+
             {% if messages %}
-            <div class="row">
-                {% for message in messages %}
-                <div class="alert alert-danger alert-dismissible" role="alert">
-                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>{{message}}</p>
+                <div class="row">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>{{ message }}</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
             {% endif %}
-            {% if form.errors %}
+            {% if form.non_field_errors %}
                 <div class="row">
                     <div class="alert alert-danger alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Ha Ocurrido un error. Por favor valida los campos</p>
+                        {{ form.non_field_errors }}
                     </div>
                 </div>
             {% endif %}
         </div>
-        <form action="" method="POST" enctype="multipart/form-data">
+        <form action="{% url 'miembros:nuevo' %}" method="POST">
             {% csrf_token %}
+
             <div class="card-body card-padding">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{form.nombre.css_classes}}">
+                        <div class="input-group {{ form.nombre.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
-                            <div class="fg-line requerido">
-                                <label for="id_nombre" class="control-label requerido">Nombre*:</label>
-                                {{form.nombre}}
+                            <div class="fg-line">
+                                <label for="{{ form.nombre.id_for_label }}" class="control-label">{{ form.nombre.label }}*:</label>
+                                {{ form.nombre }}
                             </div>
-                            {% for err in form.nombre.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.nombre.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.primerApellido.css_classes}}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-account-o"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="id_primerApellido" class="control-label requerido">Primer Apellido*:</label>
-                                {{form.primerApellido}}
-                            </div>
-                            {% for err in form.primerApellido.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{form.segundoApellido.css_classes}}">
+                        <div class="input-group {{ form.primerApellido.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account-o"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_segundoApellido" class="control-label">Segundo Apellido:</label>
-                                {{form.segundoApellido}}
+                                <label for="{{ form.primerApellido.id_for_label }}" class="control-label">{{ form.primerApellido.label }}*:</label>
+                                {{ form.primerApellido }}
                             </div>
-                            {% for err in form.segundoApellido.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <br class="space">
-                    <div class="col-md-4">
-                        <div class="input-group {{form.genero.css_classes}}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-male-female"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="id_genero" class="control-label requerido">Género*:</label>
-                                {{form.genero}}
-                            </div>
-                            {% for err in form.genero.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.primerApellido.errors }}
                         </div>
                     </div>
                 </div>
@@ -107,32 +63,57 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{form.telefono.css_classes}}">
+                        <div class="input-group {{ form.segundoApellido.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-account-o"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="{{ form.segundoApellido.id_for_label }}" class="control-label">{{ form.segundoApellido.label }}:</label>
+                                {{ form.segundoApellido }}
+                            </div>
+                            {{ form.segundoApellido.errors }}
+                        </div>
+                    </div>
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{ form.genero.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-male-female"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="{{ form.genero.id_for_label }}" class="control-label">{{ form.genero.label }}*:</label>
+                                {{ form.genero }}
+                            </div>
+                            {{ form.genero.errors }}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="input-group {{ form.telefono.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-phone"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_telefono" class="control-label">Teléfono:</label>
-                                {{form.telefono}}
+                                <label for="{{ form.telefono.id_for_label }}" class="control-label">{{ form.telefono.label }}:</label>
+                                {{ form.telefono }}
                             </div>
-                            {% for err in form.telefono.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.telefono.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.celular.css_classes}}">
+                        <div class="input-group {{ form.celular.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-smartphone-android"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_celular" class="control-label">Celular:</label>
-                                {{form.celular}}
+                                <label for="{{ form.celular.id_for_label }}" class="control-label">{{ form.celular.label }}:</label>
+                                {{ form.celular }}
                             </div>
-                            {% for err in form.celular.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.celular.errors }}
                         </div>
                     </div>
                 </div>
@@ -140,32 +121,28 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{form.fechaNacimiento.css_classes}}">
+                        <div class="input-group {{ form.fechaNacimiento.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_fechaNacimiento" class="control-label">Fecha Nacimiento:</label>
-                                {{form.fechaNacimiento}}
+                                <label for="{{ form.fechaNacimiento.id_for_label }}" class="control-label">{{ form.fechaNacimiento.label }}:</label>
+                                {{ form.fechaNacimiento }}
                             </div>
-                            {% for err in form.fechaNacimiento.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.fechaNacimiento.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.cedula.css_classes}}">
+                        <div class="input-group {{ form.cedula.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-account"></i>
                             </span>
-                            <div class="fg-line requerido">
-                                <label for="id_cedula" class="control-label requerido">Cédula*:</label>
-                                {{form.cedula}}
+                            <div class="fg-line">
+                                <label for="{{ form.cedula.id_for_label }}" class="control-label requerido">{{ form.cedula.label }}*:</label>
+                                {{ form.cedula }}
                             </div>
-                            {% for err in form.cedula.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.cedula.errors }}
                         </div>
                     </div>
                 </div>
@@ -173,32 +150,28 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{form.direccion.css_classes}}">
+                        <div class="input-group {{ form.direccion.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-map"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_direccion" class="control-label">Dirección:</label>
-                                {{form.direccion}}
+                                <label for="{{ form.direccion.id_for_label }}" class="control-label">{{ form.direccion.label }}:</label>
+                                {{ form.direccion }}
                             </div>
-                            {% for err in form.direccion.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.direccion.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.barrio.css_classes}}">
+                        <div class="input-group {{ form.barrio.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-pin-drop"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_barrio" class="control-label">Barrio:</label>
-                                {{form.barrio}}
+                                <label for="{{ form.barrio.id_for_label }}" class="control-label">{{ form.barrio.label }}:</label>
+                                {{ form.barrio }}
                             </div>
-                            {% for err in form.barrio.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.barrio.errors }}
                         </div>
                     </div>
                 </div>
@@ -206,138 +179,52 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{form.email.css_classes}}">
+                        <div class="input-group {{ form.email.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-local-post-office"></i>
                             </span>
-                            <div class="fg-line requerido">
-                                <label for="id_email" class="control-label requerido">E-mail*:</label>
-                                {{form.email}}
+                            <div class="fg-line">
+                                <label for="{{ form.email.id_for_label }}" class="control-label">{{ form.email.label }}*:</label>
+                                {{ form.email }}
                             </div>
-                            {% for err in form.email.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.email.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{form.profesion.css_classes}}">
+                        <div class="input-group {{ form.profesion.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-male"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_profesion" class="control-label">Profesión:</label>
-                                {{form.profesion}}
+                                <label for="{{ form.profesion.id_for_label }}" class="control-label">{{ form.profesion.label }}:</label>
+                                {{ form.profesion }}
                             </div>
-                            {% for err in form.profesion.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.profesion.errors }}
                         </div>
                     </div>
                 </div>
                 <br>
                 <br class="space-down">
                 <div class="row">
-                    <div class="{%if accion == 'Editar' %}col-md-4 col-md-offset-2{% else %}col-md-8 col-md-offset-2{% endif %}">
-                        <div class="input-group {{form.estadoCivil.css_classes}}">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="input-group {{ form.estadoCivil.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-local-wc"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="id_estadoCivil" class="control-label">Estado Civil:</label>
-                                {{form.estadoCivil}}
+                                <label for="{{ form.estadoCivil.id_for_label }}" class="control-label">{{ form.estadoCivil.label}}:</label>
+                                {{ form.estadoCivil }}
                             </div>
-                            {% for err in form.estadoCivil.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
+                            {{ form.estadoCivil.errors }}
                         </div>
                     </div>
-                    {% if accion == 'Editar' %}
-                    {% if admin %}
-                    <br class="space">
-                    <div class="col-md-4 col-md-ofset-2 {% if not miembroEditar.conyugue %}hidden{% endif %}" id="conyugue">
-                        <div class="input-group {{form.conyugue.css_classes}}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-local-wc"></i>
-                            </span>
-                            <div class="fg-line">
-                                <label for="id_conyugue" class="control-label">Cónyugue:</label>
-                                {{form.conyugue}}
-                            </div>
-                            {% for err in form.conyugue.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
-                    <div class="col-md-2 col-md-offset-2">
-                        <div class="input-group {{form.estado.css_classes}}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-refresh"></i>
-                            </span>
-                            <div class="fg-line">
-                                <label for="id_estado" class="control-label">Estado:</label>
-                                {{form.estado}}
-                            </div>
-                            {% for err in form.estado.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <br class="space">
-                    <div class="col-md-2 col-md-ofsset-2">
-                        <div class="input-group {{form.convertido.css_classes}}">
-                            <div class="fg-line">
-                                <label for="id_convertido" class="control-label checkbox">
-                                {{form.convertido}}
-                                <i class="input-helper m-r-20"></i>
-                                Convertido
-                                </label>
-                            </div>
-                            {% for err in form.convertido.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-md-ofsset-2">
-                        <div class="input-group {{form.asisteGAR.css_classes}}">
-                            <div class="fg-line">
-                                <label for="id_asisteGAR" class="control-label checkbox">
-                                {{form.asisteGAR}}
-                                <i class="input-helper m-r-20"></i>
-                                Asiste a G.A.R
-                                </label>
-                            </div>
-                            {% for err in form.asisteGAR.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-md-ofsset-2">
-                        <div class="input-group {{form.asignadoGAR.css_classes}}">
-                            <div class="fg-line">
-                                <label for="id_asignadoGAR" class="control-label checkbox">
-                                {{form.asignadoGAR}}
-                                <i class="input-helper m-r-20"></i>
-                                Asignado a G.A.R
-                                </label>
-                            </div>
-                            {% for err in form.asignadoGAR.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endif %}
                 </div>
                 <br>
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" value="{{accion}}" class="btn btn-primary btn-block">{{accion}}</button>
+                        <button name="aceptar" class="btn btn-primary btn-block">{% trans "Aceptar" %}</button>
                     </div>
                 </div>
             </div>
@@ -353,45 +240,6 @@
 			format: 'DD/MM/YYYY',
             maxDate: moment(),
 		});
-
-        $campos = $('input.form-control');
-
-        $('#id_estadoCivil').on('change', () => {
-            {% if miembroEditar.conyugue %}
-            var $anterior = {{miembroEditar.conyugue.id}};
-            {% else %}
-            var $anterior;
-            {% endif %}
-
-            if ($('#id_estadoCivil').val() == 'C') {
-
-                if ($('#conyugue').hasClass('hidden')) {
-                    $('#conyugue').removeClass('hidden');
-                }
-
-                if ($anterior) {
-                    $('#id_conyugue').val($anterior);
-                    $('#id_conyugue').selectpicker('refresh');
-                }
-
-            } else {
-
-                // $anterior = $('#id_conyugue').val();
-                $('#conyugue').addClass('hidden');
-
-                $('#id_conyugue').val('');
-                $('#id_conyugue').selectpicker('refresh');
-
-            }
-        });
-	});
-
-    {% if miembroEditar.conyugue %}
-        $(window).load(function() {
-            $('#id_conyugue').val(parseInt('{{miembroEditar.conyugue.id}}'));
-            $('#id_conyugue').selectpicker('refresh');
-            console.log('{{miembroEditar.conyugue.id}}');
-        });
-    {% endif %}
+    });
 </script>
 {% endblock %}
