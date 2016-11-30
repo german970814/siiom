@@ -39,37 +39,37 @@
                 $("#"+id).trigger('chosen:updated');
             }
 
-            setTimeout(auxiliar, 2000);
-            function auxiliar(){
-                $(".grupo .bs-searchbox input").on('keydown', function(event){
-                    if($(this).val() != ''){
-                        $.ajax({
-                            url: "{% url 'encuentros:obtener_grupos' %}",
-                            data: {
-                                id_red: {{ encuentro.coordinador.grupo.red.id }},
-                                combo_grupo: $(this).val(),
-                                value: $(this).val(),
-                                csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
-                            },
-                            type: 'POST',
-                            error: function(xhr, ajaxOptions, thrownError){
-                                alert(xhr.status);
-                                alert(thrownError);
-                            },
-                            async: true,
-                            success: function(data){
-                                // console.log(data);
-                                agregar_opciones(data, 'id_grupo');
-                                $('#id_grupo').selectpicker('refresh');
-                            }
-                        });
-                    }
-                    else{
-                        $("#id_grupo").html('');
-                        $("#id_grupo").trigger('chosen:updated');
-                    }
-                });
-            }
+            // setTimeout(auxiliar, 2000);
+            // function auxiliar(){
+            //    $(".grupo .bs-searchbox input").on('keydown', function(event){
+            //         if($(this).val() != ''){
+            //             $.ajax({
+            //                 url: "{% url 'encuentros:obtener_grupos' %}",
+            //                 data: {
+            //                     id_red: {{ encuentro.coordinador.grupo.red.id }},
+            //                     combo_grupo: $(this).val(),
+            //                     value: $(this).val(),
+            //                     csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()
+            //                 },
+            //                 type: 'POST',
+            //                 error: function(xhr, ajaxOptions, thrownError){
+            //                     alert(xhr.status);
+            //                     alert(thrownError);
+            //                 },
+            //                 async: true,
+            //                 success: function(data){
+            //                     // console.log(data);
+            //                     agregar_opciones(data, 'id_grupo');
+            //                     $('#id_grupo').selectpicker('refresh');
+            //                 }
+            //             });
+            //         }
+            //         else{
+            //             $("#id_grupo").html('');
+            //             $("#id_grupo").trigger('chosen:updated');
+            //         }
+            //     });
+            // }
 
         });
     </script>
@@ -83,22 +83,15 @@
             <h1 class="f-700">
                 <legend><h3>{{accion}} Encontrista para el encuentro ({{ encuentro.hotel|upper }}-{{ encuentro.fecha_inicial }})</h3></legend>
             </h1>
-            {% if ok %}
-                <div class="row">
-                    <div class="alert alert-success alert-dismissible" role="alert">
-                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el encontrista correctamente. <a alt="Listar Encontristas" class="alert-link" href="/encuentro/listar_encontristas/{{ encuentro.id }}/"> Volver a la lista de encontristas.</a></p>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="row">
+                        <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
+                            <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                            <p>{{ message|safe }}</p>
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-
-            {% if form.errors %}
-                <div class="row">
-                    <div class="alert alert-danger alert-dismissible" role="alert">
-                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Aún hay errores en el formulario.</p>
-                    </div>
-                </div>
+                {% endfor %}
             {% endif %}
         </div>
         <form action="" method="POST" enctype="multipart/form-data">
