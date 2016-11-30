@@ -50,6 +50,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'miembros.middleware.MiembroMiddleWare',
+    'iglesias.middleware.IglesiaMiddleware'
 )
 
 ROOT_URLCONF = 'Iglesia.urls'
