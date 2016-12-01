@@ -167,7 +167,7 @@ class Miembro(models.Model):
     objects = MiembroManager.from_queryset(MiembroQuerySet)()
 
     def __str__(self):
-        return "{0} {1} ({2})".format(self.nombre, self.primerApellido, self.cedula)
+        return "{0} {1} ({2})".format(self.nombre.upper(), self.primerApellido.upper(), self.cedula)
 
     @property
     def es_director_red(self):

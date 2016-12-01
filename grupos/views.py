@@ -30,6 +30,7 @@ from miembros.models import Miembro
 from common.groups_tests import (
     liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest, admin_or_director_red
 )
+from .utils import reunion_reportada, obtener_fechas_semana
 
 # Python Packages
 import datetime
@@ -83,37 +84,6 @@ def editarHorarioReunionGrupo(request, pk=None):
     return render_to_response('grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
 
 
-def reunionReportada(fecha, grupo, tipo):
-    ini_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
-    fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
-
-    if tipo == 1:  # GAR
-        reunion = grupo.reuniongar_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
-    else:  # DISCIPULADO
-        reunion = grupo.reuniondiscipulado_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
-
-    if reunion:
-        return True
-    else:
-        return False
-
-
-def obtener_fechas_semana(fecha):
-    """
-    Retorna las fechas de la semana de lunes a domingo a partir de una fecha
-    """
-    inicio_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
-    fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
-
-    _fechas = []
-
-    while inicio_semana <= fin_semana:
-        _fechas.append(inicio_semana)
-        inicio_semana += datetime.timedelta(days=1)
-
-    return _fechas
-
-
 def reunionDiscipuladoReportada(predica, grupo):
     reunion = grupo.reuniondiscipulado_set.filter(predica=predica)
 
@@ -146,7 +116,7 @@ def reportarReunionGrupo(request):
             if form.is_valid():
                 reunion = form.save(commit=False)
                 # se verifica que la reunion ya no haya sido reportada
-                reportada = reunionReportada(reunion.fecha, grupo, 1)  # esta variable es enviada al template
+                reportada = reunion_reportada(reunion.fecha, grupo)  # esta variable es enviada al template
 
                 # si no esta reportada
                 if not reportada:
@@ -185,7 +155,7 @@ def reportarReunionGrupoAdmin(request):
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
             reunion = form.save(commit=False)
-            reportada = reunionReportada(reunion.fecha, reunion.grupo, 1)
+            reportada = reunion_reportada(reunion.fecha, reunion.grupo)
             if not reportada:
                 reunion.digitada_por_miembro = False
                 reunion.confirmacionEntregaOfrenda = True
@@ -431,7 +401,7 @@ def ver_reportes_grupo(request):
 
             if form_reporte.is_valid():
                 reunion = form_reporte.save(commit=False)
-                reportada = reunionReportada(reunion.fecha, reunion.grupo, 1)
+                reportada = reunion_reportada(reunion.fecha, reunion.grupo)
 
                 if reportada:
                     messages.warning(request, "El Grupo ya cuenta con un reporte en esa semana")
@@ -529,7 +499,7 @@ def editar_runion_grupo(request, pk):
             reunion_formulario = form.save(commit=False)
 
             if reunion_formulario.fecha not in obtener_fechas_semana(fecha_anterior):
-                reportada = reunionReportada(reunion_formulario.fecha, reunion_formulario.grupo, 1)
+                reportada = reunion_reportada(reunion_formulario.fecha, reunion_formulario.grupo)
 
                 if reportada:
                     messages.warning(
