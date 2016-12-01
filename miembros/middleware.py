@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from .models import Miembro
 
 
@@ -11,7 +12,8 @@ class MiembroMiddleWare(object):
         Agrega al request el miembro si el usuario logueado es un miembro.
         """
 
-        try:
-            request.miembro = Miembro.objects.get(usuario=request.user)
-        except Miembro.DoesNotExist:
-            pass
+        if not request.user.is_anonymous() and not request.path.startswith(reverse('admin:index')):
+            try:
+                request.miembro = Miembro.objects.get(usuario=request.user)
+            except Miembro.DoesNotExist:
+                pass
