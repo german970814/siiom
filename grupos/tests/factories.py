@@ -1,13 +1,12 @@
 import factory
 import datetime
-from grupos import models
 from miembros.tests.factories import BarrioFactory
 
 
 class RedFactory(factory.django.DjangoModelFactory):
 
     class Meta:
-        model = models.Red
+        model = 'grupos.Red'
         django_get_or_create = ('nombre',)
 
     nombre = 'jovenes'
@@ -16,7 +15,7 @@ class RedFactory(factory.django.DjangoModelFactory):
 class GrupoFactory(factory.django.DjangoModelFactory):
 
     class Meta:
-        model = models.Grupo
+        model = 'grupos.Grupo'
 
     horaGAR = factory.Faker('time')
     red = factory.SubFactory(RedFactory)
@@ -42,8 +41,9 @@ class GrupoHijoFactory(GrupoFactory):
 
 
 class PredicaFactory(factory.django.DjangoModelFactory):
+
     class Meta:
-        model = models.Predica
+        model = 'grupos.Predica'
         django_get_or_create = ('nombre',)
 
     nombre = 'la palabra de Dios'
@@ -53,7 +53,7 @@ class PredicaFactory(factory.django.DjangoModelFactory):
 class ReunionGARFactory(factory.django.DjangoModelFactory):
 
     class Meta:
-        model = models.ReunionGAR
+        model = 'grupos.ReunionGAR'
 
     fecha = factory.LazyFunction(datetime.datetime.now)
     grupo = factory.SubFactory(GrupoFactory)
@@ -67,7 +67,7 @@ class ReunionGARFactory(factory.django.DjangoModelFactory):
 class ReunionDiscipuladoFactory(factory.django.DjangoModelFactory):
 
     class Meta:
-        model = models.ReunionDiscipulado
+        model = 'grupos.ReunionDiscipulado'
 
     fecha = factory.LazyFunction(datetime.datetime.now)
     predica = factory.SubFactory(PredicaFactory)

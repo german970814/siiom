@@ -13,6 +13,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import ugettext as _
 
 # Apps Imports
 from .forms import *
@@ -27,7 +28,7 @@ from common.groups_tests import (
     miembro_empleado_test
 )
 
-from .forms import TransladarMiembroForm
+from .forms import TransladarMiembroForm, NuevoMiembroForm
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -249,40 +250,6 @@ def miembroInicio(request):
 
 
 isOk = False
-
-
-@user_passes_test(agregarVisitanteTest, login_url="/dont_have_permissions/")
-def liderAgregarMiembro(request):
-    global isOk
-
-    accion = 'Guardar'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        form = FormularioLiderAgregarMiembro(data=request.POST)
-        if form.is_valid():
-            nuevoMiembro = form.save(commit=False)
-            nuevoMiembro.estado = 'A'
-            if nuevoMiembro.conyugue is not None and nuevoMiembro.conyugue != "":
-                    conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
-                    conyugue.conyugue = nuevoMiembro
-                    conyugue.estadoCivil = 'C'
-                    conyugue.save()
-                    nuevoMiembro.estadoCivil = 'C'
-            nuevoMiembro.save()
-            CambioTipo.objects.create(
-                miembro=nuevoMiembro, autorizacion=miembro,
-                fecha=date.today(), anteriorTipo=TipoMiembro.objects.get(
-                    nombre__iexact="visita"), nuevoTipo=TipoMiembro.objects.get(
-                        nombre__iexact="visita"))
-            ok = True
-        else:
-            isOk = True
-            # messages.error(request, "Debes llenar todos los campos")
-        isOk = False
-    else:
-        form = FormularioLiderAgregarMiembro()
-    isOk = False
-    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -1634,6 +1601,24 @@ def eliminar_foto_perfil(request, pk):
 
 
 # -----------------------------------
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def crear_miembro(request):
+    """
+    Permite crear miembros para una iglesia.
+    """
+
+    if request.method == 'POST':
+        form = NuevoMiembroForm(data=request.POST)
+        if form.is_valid():
+            form.save(request.iglesia)
+            messages.success(request, _('El miembro se ha creado correctamente'))
+            return redirect('miembros:nuevo')
+    else:
+        form = NuevoMiembroForm()
+
+    return render(request, 'miembros/miembro_form.html', {'form': form})
 
 
 @login_required

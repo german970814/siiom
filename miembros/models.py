@@ -3,7 +3,7 @@ import datetime
 from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _lazy
 from .managers import MiembroManager, MiembroQuerySet
 
 
@@ -64,121 +64,110 @@ class Miembro(models.Model):
         ruta = 'media/profile_pictures/user_%s/%s' % (self.id, filename)
         return ruta
 
-    opcionesGenero = (
-        ('M', 'Masculino'),
-        ('F', 'Femenino'),
-    )
-    opcionesEstado = (
-        ('A', 'Activo'),
-        ('I', 'Inactivo'),
-        ('R', 'Restauración'),
+    # opciones
+    FEMENINO = 'F'
+    MASCULINO = 'M'
+    GENEROS = (
+        (FEMENINO, _lazy('Femenino')),
+        (MASCULINO, _lazy('Masculino')),
     )
 
-    opcionesEstadoCivil = (
-        ('C', 'Casado'),
-        ('S', 'Soltero'),
-        ('V', 'Viudo'),
-        ('D', 'Divorciado'),
+    ACTIVO = 'A'
+    INACTIVO = 'I'
+    RESTAURACION = 'R'
+    ESTADOS = (
+        (ACTIVO, _lazy('Activo')),
+        (INACTIVO, _lazy('Inactivo')),
+        (RESTAURACION, _lazy('Restauración')),
+    )
+
+    VIUDO = 'V'
+    CASADO = 'C'
+    SOLTERO = 'S'
+    DIVORCIADO = 'D'
+    ESTADOS_CIVILES = (
+        (VIUDO, _lazy('Viudo')),
+        (CASADO, _lazy('Casado')),
+        (SOLTERO, _lazy('Soltero')),
+        (DIVORCIADO, _lazy('Divorciado')),
     )
     #  autenticacion
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, null=True, blank=True)
+    iglesia = models.ForeignKey('iglesias.Iglesia', verbose_name=_lazy('iglesia'), related_name='miembros')
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_lazy('usuario'), unique=True, null=True, blank=True
+    )
     #  info personal
-    nombre = models.CharField(max_length=30)
-    primerApellido = models.CharField(max_length=20, verbose_name="primer apellido")
-    segundoApellido = models.CharField(max_length=20, verbose_name="segundo apellido", null=True, blank=True)
-    genero = models.CharField(max_length=1, choices=opcionesGenero, verbose_name='género')
-    telefono = models.CharField(max_length=50, null=True, blank=True, verbose_name='teléfono')
-    celular = models.CharField(max_length=50, null=True, blank=True)
-    fechaNacimiento = models.DateField(verbose_name="fecha de nacimiento", null=True, blank=True)
+    nombre = models.CharField(_lazy('nombre'), max_length=30)
+    primerApellido = models.CharField(_lazy('primer apellido'), max_length=20)
+    segundoApellido = models.CharField(_lazy('segundo apellido'), max_length=20, null=True, blank=True)
+    genero = models.CharField(_lazy('género'), max_length=1, choices=GENEROS)
+    telefono = models.CharField(_lazy('teléfono'), max_length=50, null=True, blank=True)
+    celular = models.CharField(_lazy('celular'), max_length=50, null=True, blank=True)
+    fechaNacimiento = models.DateField(_lazy('fecha de nacimiento'), null=True, blank=True)
     cedula = models.CharField(
-        max_length=25,
-        unique=True,
-        verbose_name='cédula',
-        validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")]
+        _lazy('cédula'), max_length=25, unique=True, validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")]
     )
-    direccion = models.CharField(max_length=50, null=True, blank=True, verbose_name='dirección')
-    barrio = models.ForeignKey(Barrio, null=True, blank=True)
-    email = models.EmailField(unique=True)
-    profesion = models.CharField(max_length=20, null=True, blank=True, verbose_name='profesión')
+    direccion = models.CharField(_lazy('dirección'), max_length=50, null=True, blank=True)
+    barrio = models.ForeignKey(Barrio, verbose_name=_lazy('barrio'), null=True, blank=True)
+    email = models.EmailField(_lazy('email'), unique=True)
+    profesion = models.CharField(_lazy('profesion'), max_length=20, null=True, blank=True)
     estadoCivil = models.CharField(
-        max_length=1,
-        choices=opcionesEstadoCivil,
-        null=True, blank=True,
-        verbose_name="estado civil"
+        _lazy('estado civil'), max_length=1, choices=ESTADOS_CIVILES, null=True, blank=True
     )
-    conyugue = models.ForeignKey('self', related_name='casado_con', null=True, blank=True, verbose_name='cónyugue')
-    foto_perfil = models.ImageField(upload_to=ruta_imagen, null=True, blank=True)
-    portada = models.ImageField(upload_to=ruta_imagen, null=True, blank=True)
+    conyugue = models.ForeignKey(
+        'self', verbose_name=_lazy('cónyugue'), related_name='casado_con', null=True, blank=True
+    )
+    foto_perfil = models.ImageField(_lazy('foto perfil'), upload_to=ruta_imagen, null=True, blank=True)
+    portada = models.ImageField(_lazy('portada'), upload_to=ruta_imagen, null=True, blank=True)
     #  info iglesia
-    convertido = models.BooleanField(default=False)
-    estado = models.CharField(max_length=1, choices=opcionesEstado)
-    pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', blank=True)
-    escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon')
-    grupo = models.ForeignKey('grupos.Grupo', null=True, blank=True)  # grupo al que pertenece
+    convertido = models.BooleanField(_lazy('convertido'), default=False)
+    estado = models.CharField(_lazy('estado'), max_length=1, choices=ESTADOS)
+    pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', verbose_name=_lazy('pasos'), blank=True)
+    escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon', verbose_name=_lazy('escalafón'))
+    grupo = models.ForeignKey('grupos.Grupo', verbose_name=_lazy('grupo'), null=True, blank=True)  # grupo al que pertenece
     grupo_lidera = models.ForeignKey(
-        'grupos.Grupo', verbose_name=_('grupo que lidera'),
+        'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
         related_name='lideres', null=True, blank=True
     )
     #  info GAR
-    asignadoGAR = models.BooleanField(default=False, verbose_name="asignado a GAR")
-    asisteGAR = models.BooleanField(default=False, verbose_name="asiste a GAR")
-    noInteresadoGAR = models.BooleanField(default=False, verbose_name="no interesado en GAR")
-    fechaAsignacionGAR = models.DateField(null=True, blank=True, verbose_name='fecha de asignación a GAR')
+    asignadoGAR = models.BooleanField(_lazy('asignado a GAR'), default=False)
+    asisteGAR = models.BooleanField(_lazy('asiste a GAR'), default=False)
+    noInteresadoGAR = models.BooleanField(_lazy('no interesado en GAR'), default=False)
+    fechaAsignacionGAR = models.DateField(_lazy('fecha de asignación a GAR'), null=True, blank=True)
     #  Llamada Lider
-    fechaLlamadaLider = models.DateField(null=True, blank=True, verbose_name='fecha de llamada del líder')
+    fechaLlamadaLider = models.DateField(_lazy('fecha de llamada del líder'), null=True, blank=True)
     detalleLlamadaLider = models.ForeignKey(
-        DetalleLlamada,
-        null=True,
-        blank=True,
-        related_name='llamada_lider',
-        verbose_name='detalle de llamada del líder'
+        DetalleLlamada, verbose_name=_lazy('detalle de llamada del líder'), null=True,
+        blank=True, related_name='llamada_lider'
     )
     observacionLlamadaLider = models.TextField(
-        max_length=300,
-        null=True,
-        blank=True,
-        verbose_name='observación de llamada del líder'
+        _lazy('observación de llamada del líder'), max_length=300, null=True, blank=True
     )
     #  Primera llamada
-    fechaPrimeraLlamada = models.DateField(null=True, blank=True, verbose_name="fecha de primera llamada")
+    fechaPrimeraLlamada = models.DateField(_lazy('fecha de primera llamada'), null=True, blank=True)
     detallePrimeraLlamada = models.ForeignKey(
-        DetalleLlamada,
-        null=True,
-        blank=True,
-        related_name='primera_llamada',
-        verbose_name="detalle de primera llamada"
+        DetalleLlamada, verbose_name=_lazy('detalle de primera llamada'), null=True,
+        blank=True, related_name='primera_llamada'
     )
     observacionPrimeraLlamada = models.TextField(
-        max_length=300,
-        null=True,
-        blank=True,
-        verbose_name='observación de primera llamada'
+        _lazy('observación de primera llamada'), max_length=300, null=True, blank=True
     )
     #  Segunda Llamada
-    fechaSegundaLlamada = models.DateField(null=True, blank=True, verbose_name="fecha de segunda llamada")
+    fechaSegundaLlamada = models.DateField(_lazy('fecha de segunda llamada'), null=True, blank=True)
     detalleSegundaLlamada = models.ForeignKey(
-        DetalleLlamada,
-        null=True,
-        blank=True,
-        related_name='segunda_llamada',
-        verbose_name="detalle de segunda llamada"
+        DetalleLlamada, verbose_name=_lazy('detalle de segunda llamada'), null=True,
+        blank=True, related_name='segunda_llamada'
     )
     observacionSegundaLlamada = models.TextField(
-        max_length=300,
-        null=True,
-        blank=True,
-        verbose_name='observación de segunda llamada'
+        _lazy('observación de segunda llamada'), max_length=300, null=True, blank=True
     )
-    fechaRegistro = models.DateField(auto_now_add=True)
+    fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers
     objects = MiembroManager.from_queryset(MiembroQuerySet)()
 
     def __str__(self):
-        # return self.nombre + " - " + self.primerApellido + '(' + str(self.cedula) + ')'
-        return "{0} {1}({2})".format(
-            self.nombre.upper(), self.primerApellido.upper(), self.cedula
-        )
+        return "{0} {1} ({2})".format(self.nombre.upper(), self.primerApellido.upper(), self.cedula)
 
     @property
     def es_director_red(self):

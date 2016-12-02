@@ -278,7 +278,7 @@ def asistencia_encuentro(request, id_encuentro):
                     encontrista.save()
                 if request.user.has_perm('miembros.es_administrador'):
                     time.sleep(1)
-                    crear_miembros_con_encontristas(seleccionados)
+                    crear_miembros_con_encontristas(seleccionados, request.iglesia)
                 return HttpResponseRedirect('/encuentro/encuentros/')
             else:
                 pass

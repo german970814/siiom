@@ -1,15 +1,13 @@
 from unittest import mock
 from django.http import Http404
-from django.test import TestCase
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from miembros.models import Miembro
-from grupos.models import Grupo, Red
-from grupos.forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
+from ..models import Grupo, Red
+from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
 from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory
 
 
@@ -191,7 +189,7 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:nuevo', args=(100,)))
+        self.client.get(reverse('grupos:nuevo', args=(100,)))
         self.assertRaises(Http404)
 
     def test_admin_get_template(self):
@@ -254,7 +252,7 @@ class EditarGrupoViewTest(BaseTest):
         self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
         self.barrio = BarrioFactory()
 
-        red_jovenes = Red.objects.get(nombre='jovenes')
+        Red.objects.get(nombre='jovenes')
 
     def datos_formulario(self):
         """
@@ -275,7 +273,7 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:editar', args=(1000,)))
+        self.client.get(reverse('grupos:editar', args=(1000,)))
         self.assertRaises(Http404)
 
     def test_admin_get_template(self):
@@ -341,7 +339,7 @@ class ListarGruposRedViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:listar', args=(100,)))
+        self.client.get(reverse('grupos:listar', args=(100,)))
         self.assertRaises(Http404)
 
     def test_get_muestra_grupos_de_red(self):
@@ -370,32 +368,13 @@ class TransladarGrupoViewTest(BaseTest):
         self.crear_arbol()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
 
-    def test_usuario_no_logueado_redireccionado_login(self):
-        """
-        Prueba que un usuario no logueado sea redireccionado a login.
-        """
-
-        response = self.client.get(self.URL)
-        self.assertRedirects(response, '{0}?next={1}'.format(reverse('inicio'), self.URL))
-
-    def test_usuario_logueado_no_admin_redireccionado_sin_permisos(self):
-        """
-        Prueba que un usuario logueado que no sea administrador sea redireccionado a página que indique que
-        no tiene permisos.
-        """
-
-        usuario = UsuarioFactory()
-        self.login_usuario(usuario)
-        response = self.client.get(self.URL)
-        self.assertEqual(response.status_code, 403)
-
     def test_get_grupo_no_existe_devuelve_404(self):
         """
         Prueba que cuando se envia el id de un grupo que no existe en la URL, la vista devuelve un 404.
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:transladar', args=(100,)))
+        self.client.get(reverse('grupos:transladar', args=(100,)))
         self.assertRaises(Http404)
 
     def test_admin_get_template(self):
@@ -465,7 +444,7 @@ class ConfirmarOfrendaGARViewTest(BaseTest):
         self.usuario = UsuarioFactory(user_permissions=('puede_confirmar_ofrenda_GAR',))
         grupo = GrupoFactory()
         self.sin_confirmar = ReunionGARFactory(grupo=grupo)
-        confirmada = ReunionGARFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
+        ReunionGARFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
 
         self.URL = reverse('grupos:confirmar_ofrenda_GAR', args=(grupo.id,))
 
@@ -475,7 +454,7 @@ class ConfirmarOfrendaGARViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        response = self.client.get(reverse('grupos:confirmar_ofrenda_GAR', args=(1000,)))
+        self.client.get(reverse('grupos:confirmar_ofrenda_GAR', args=(1000,)))
         self.assertRaises(Http404)
 
     def test_get_muestra_reuniones_sin_confirmar(self):
@@ -533,7 +512,7 @@ class ConfirmarOfrendaDiscipuladoViewTest(BaseTest):
         self.usuario = UsuarioFactory(user_permissions=('puede_confirmar_ofrenda_discipulado',))
         grupo = GrupoFactory()
         self.sin_confirmar = ReunionDiscipuladoFactory(grupo=grupo)
-        confirmada = ReunionDiscipuladoFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
+        ReunionDiscipuladoFactory(grupo=grupo, confirmacionEntregaOfrenda=True)
 
         self.URL = reverse('grupos:confirmar_ofrenda_discipulado', args=(grupo.id,))
 
@@ -543,7 +522,7 @@ class ConfirmarOfrendaDiscipuladoViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        response = self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
+        self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
         self.assertRaises(Http404)
 
     def test_get_muestra_reuniones_sin_confirmar(self):
@@ -586,7 +565,7 @@ class DetalleGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        response = self.client.get(reverse(self.URL_NAME, args=[1000]))
+        self.client.get(reverse(self.URL_NAME, args=[1000]))
         self.assertRaises(Http404)
 
     def test_get_grupo_muestra_info_grupo(self):

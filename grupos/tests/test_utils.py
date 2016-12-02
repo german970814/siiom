@@ -1,5 +1,5 @@
 from django.test import TestCase
-from grupos import utils, managers
+from .. import utils, managers
 
 
 class UtilsModuleTest(TestCase):

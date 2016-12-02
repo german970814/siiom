@@ -4,6 +4,7 @@ from grupos.models import Red, Grupo
 from grupos.tests.factories import GrupoFactory
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
+from iglesias.tests.factories import IglesiaFactory
 from .factories import MiembroFactory
 
 
@@ -104,3 +105,82 @@ class TransladarMiembroViewTest(BaseTest):
         self.login_usuario(self.admin)
         response = self.client.post(self.URL, {})
         self.assertFormError(response, 'form', 'nuevo', 'Este campo es obligatorio.')
+
+
+class CrearMiembroViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista crear miembro de una iglesia.
+    """
+
+    URL = 'miembros:nuevo'
+
+    def setUp(self):
+        self.admin = MiembroFactory(admin=True)
+
+    def datos_formulario(self):
+        """
+        Retorna un diccionario con los datos para el formulario NuevoMiembroForm
+        """
+
+        from miembros.models import Miembro
+        data = {
+            'nombre': 'Maria', 'primerApellido': 'Torres', 'genero': Miembro.FEMENINO, 'cedula': '122342312',
+            'email': 'test@siiom.com', 'segundoApellido': 'Mejia', 'telefono': '3423454', 'celular': '3003224543',
+            'fechaNacimiento': '1990-03-12', 'direccion': 'Cra 45 N 93 - 34', 'profesion': 'Ing. Civil',
+            'estadoCivil': Miembro.SOLTERO
+        }
+
+        return data
+
+    def test_admin_get(self):
+        """
+        Prueba que el administrador pueda ver el template.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_nombre', html=False)
+
+    def test_post_formulario_valido_crea_miembro_iglesia_correcta(self):
+        """
+        Prueba que cuando se haga un POST y el formulario sea valido el miembro creado pertenezca a la iglesia del
+        usuario logueado.
+        """
+        from miembros.models import Miembro
+
+        data = self.datos_formulario()
+        iglesia_correcta = self.admin.iglesia
+        iglesia_incorrecta = IglesiaFactory(nombre='nueva iglesia')
+
+        self.login_usuario(self.admin.usuario)
+        self.post(self.URL, data=data)
+
+        miembro = Miembro.objects.get(cedula=data['cedula'])
+        self.assertEqual(iglesia_correcta, miembro.iglesia)
+        self.assertNotEqual(iglesia_incorrecta, miembro.iglesia)
+
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data=self.datos_formulario())
+
+        self.assertRedirects(response, self.reverse(self.URL))
+
+    def test_post_formulario_invalido_muestra_errores(self):
+        """
+        Prueba qie si se hace un POST y el formulario es invalido se muestren los errores.
+        """
+
+        msj_obligatirio = 'Este campo es obligatorio.'
+
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data={})
+
+        self.assertFormError(response, 'form', 'email', msj_obligatirio)
+        self.assertFormError(response, 'form', 'nombre', msj_obligatirio)
+        self.assertFormError(response, 'form', 'genero', msj_obligatirio)
+        self.assertFormError(response, 'form', 'cedula', msj_obligatirio)
+        self.assertFormError(response, 'form', 'primerApellido', msj_obligatirio)

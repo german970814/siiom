@@ -2,10 +2,10 @@ from unittest import mock, skip
 from django.test import TestCase
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from grupos.tests.factories import GrupoFactory, GrupoRaizFactory, RedFactory
-from grupos.forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
-from grupos.models import Grupo, Red
 from common.tests.base import BaseTest
+from ..models import Grupo, Red
+from ..forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
+from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
 
 
 class GrupoRaizFormTest(TestCase):

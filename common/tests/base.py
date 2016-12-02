@@ -1,11 +1,14 @@
-from django.test import TestCase
+from test_plus.test import TestCase
 from grupos.tests.factories import GrupoRaizFactory, GrupoHijoFactory, GrupoFactory
+from .factories import UsuarioFactory
 
 
 class BaseTest(TestCase):
     """
     Clase base para las pruebas unitarias.
     """
+
+    user_factory = UsuarioFactory
 
     def crear_arbol(self):
         """

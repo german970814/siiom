@@ -539,9 +539,11 @@
                         <li>
                             <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">Asignar Visita A Grupo</a>
                         </li>
-                        <li>
-                            <a href="/miembro/agregar_miembro/">Agregar Miembro</a>
-                        </li>
+                        {% if perms.miembros.es_administrador %}
+                            <li>
+                                <a href="{% url 'miembros:nuevo' %}">Agregar Miembro</a>
+                            </li>
+                        {% endif %}
                         <!--<li class="sub-menu">
                             <a href="#">Agregar y Promover Visitas</a>
                             <ul>
