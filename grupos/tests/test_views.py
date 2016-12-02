@@ -6,8 +6,8 @@ from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from grupos.models import Grupo, Red
-from grupos.forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
+from ..models import Grupo, Red
+from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
 from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory
 
 

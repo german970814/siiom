@@ -1,6 +1,6 @@
 from test_plus.test import TestCase
-from .factories import UsuarioFactory
 from grupos.tests.factories import GrupoRaizFactory, GrupoHijoFactory, GrupoFactory
+from .factories import UsuarioFactory
 
 
 class BaseTest(TestCase):

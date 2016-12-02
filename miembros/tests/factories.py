@@ -1,20 +1,21 @@
 import factory
 from common.tests.factories import UsuarioFactory
 from iglesias.tests.factories import IglesiaFactory
-from miembros import models
 
 
 class ZonaFactory(factory.django.DjangoModelFactory):
+
     class Meta:
-        model = models.Zona
+        model = 'miembros.Zona'
         django_get_or_create = ('nombre',)
 
     nombre = 'zona 1'
 
 
 class BarrioFactory(factory.django.DjangoModelFactory):
+
     class Meta:
-        model = models.Barrio
+        model = 'miembros.Barrio'
         django_get_or_create = ('nombre',)
 
     nombre = 'prado'
@@ -22,8 +23,9 @@ class BarrioFactory(factory.django.DjangoModelFactory):
 
 
 class MiembroFactory(factory.django.DjangoModelFactory):
+
     class Meta:
-        model = models.Miembro
+        model = 'miembros.Miembro'
 
     grupo_lidera = None
     email = factory.Faker('email')
