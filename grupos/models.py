@@ -48,9 +48,6 @@ class Grupo(AL_Node):
     parent = models.ForeignKey(
         'self', verbose_name=_lazy('grupo origen'), related_name='children_set', null=True, db_index=True
     )
-    # lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
-    # lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
-    # poner opcion de asignar la misma del lider por defecto(cual lider?)
     direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
     estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
     fechaApertura = models.DateField(verbose_name=_lazy("fecha de apertura"))
