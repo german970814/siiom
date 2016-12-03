@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _lazy
 
 from .managers import AreaManager
 
@@ -8,11 +8,11 @@ from .managers import AreaManager
 class Departamento(models.Model):
     """Modelo para guardar los departamentos de una iglesia."""
 
-    nombre = models.CharField(_('nombre'), max_length=100)
+    nombre = models.CharField(_lazy('nombre'), max_length=100)
 
     class Meta:
-        verbose_name = _('departamento')
-        verbose_name_plural = _('departamentos')
+        verbose_name = _lazy('departamento')
+        verbose_name_plural = _lazy('departamentos')
 
     def __str__(self):
         return self.nombre.title()
@@ -25,14 +25,14 @@ class Departamento(models.Model):
 class Area(models.Model):
     """Modelo para guardar las áreas de una iglesia."""
 
-    nombre = models.CharField(_('nombre'), max_length=100)
-    departamento = models.ForeignKey(Departamento, verbose_name=_('departamento'), related_name='areas')
+    nombre = models.CharField(_lazy('nombre'), max_length=100)
+    departamento = models.ForeignKey(Departamento, verbose_name=_lazy('departamento'), related_name='areas')
 
     objects = AreaManager()
 
     class Meta:
-        verbose_name = _('área')
-        verbose_name_plural = _('áreas')
+        verbose_name = _lazy('área')
+        verbose_name_plural = _lazy('áreas')
 
     def __str__(self):
         return self.nombre.title()
@@ -45,19 +45,20 @@ class Area(models.Model):
 class Empleado(models.Model):
     """Modelo que guarda las personas que trabajan actualmente para una iglesia."""
 
-    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name=_('usuario'))
-    areas = models.ManyToManyField(Area, verbose_name=_('áreas'), related_name='empleados')
-    cedula = models.BigIntegerField(verbose_name=_('cédula'), unique=True)
-    primer_nombre = models.CharField(max_length=100, verbose_name=_('primer nombre'))
-    segundo_nombre = models.CharField(max_length=100, blank=True, verbose_name=_('segundo nombre'))
-    primer_apellido = models.CharField(max_length=100, verbose_name=_('primer apellido'))
-    segundo_apellido = models.CharField(max_length=100, blank=True, verbose_name=_('segundo apellido'))
-    jefe_departamento = models.BooleanField(verbose_name=_('jefe de departamento'), default=False)
-    cargo = models.CharField(max_length=150, verbose_name=_('cargo'))
+    iglesia = models.ForeignKey('iglesias.Iglesia', verbose_name=_lazy('iglesia'), related_name='empleados')
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name=_lazy('usuario'))
+    areas = models.ManyToManyField(Area, verbose_name=_lazy('áreas'), related_name='empleados')
+    cedula = models.BigIntegerField(_lazy('cédula'), unique=True)
+    primer_nombre = models.CharField(_lazy('primer nombre'), max_length=100)
+    segundo_nombre = models.CharField(_lazy('segundo nombre'), max_length=100, blank=True)
+    primer_apellido = models.CharField(_lazy('primer apellido'), max_length=100)
+    segundo_apellido = models.CharField(_lazy('segundo apellido'), max_length=100, blank=True)
+    jefe_departamento = models.BooleanField(_lazy('jefe de departamento'), default=False)
+    cargo = models.CharField(_lazy('cargo'), max_length=150)
 
     class Meta:
-        verbose_name = _('empleado')
-        verbose_name_plural = _('empleados')
+        verbose_name = _lazy('empleado')
+        verbose_name_plural = _lazy('empleados')
         permissions = (
             ('es_administrador_sgd', 'Es Administrador de Sistema Gestion Documental'),
             ('buscar_registros', 'Puede Buscar Registros'),
