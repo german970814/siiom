@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse
+from django.http import Http404
 
 
 class IglesiaMiddleware(object):
@@ -8,11 +9,14 @@ class IglesiaMiddleware(object):
 
     def process_request(self, request):
         """
-        Agrega al request la iglesia a la que pertenece el usuario logueado.
+        Agrega al request la iglesia a la que pertenece el usuario logueado. Si el usuario no pertenece a ninguna
+        iglesia se levanta un 404.
         """
 
         if not request.user.is_anonymous() and not request.path.startswith(reverse('admin:index')):
             if hasattr(request, 'miembro'):
                 request.iglesia = request.miembro.iglesia
+            elif hasattr(request, 'empleado'):
+                request.iglesia = request.empleado.iglesia
             else:
-                request.iglesia = None
+                raise Http404

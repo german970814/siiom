@@ -51,6 +51,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'waffle.middleware.WaffleMiddleware',
     'miembros.middleware.MiembroMiddleWare',
+    'organizacional.middleware.EmpleadoMiddleWare',
     'iglesias.middleware.IglesiaMiddleware'
 )
 
