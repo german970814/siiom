@@ -1,10 +1,11 @@
 # Django Package
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 from django.contrib.auth.models import Group, User
 from django.db.models.functions import Lower
 
 # Locale Apps
+from common.forms import CustomModelForm
 from .models import Area, Departamento, Empleado
 
 
@@ -157,3 +158,46 @@ class FormularioEditarEmpleado(EmpleadoForm):
 
         if contrasena_confirmacion != '' and contrasena == '':
             self.add_error('contrasena', _('Este campo es obligatorio'))
+
+
+class NuevoEmpleadoForm(CustomModelForm):
+    """
+    Formulario para la creación de un empleado de una iglesia.
+    """
+
+    # Perfiles que se le pueden asignar a un empleado
+    _accept = ['consulta', 'digitador', 'administrador sgd']
+
+    email = forms.EmailField(label=_lazy('Email'))
+    password1 = forms.CharField(label=_lazy('Contraseña'), widget=forms.PasswordInput(), required=False)
+    password2 = forms.CharField(label=_lazy('Confirmar contraseña'), widget=forms.PasswordInput(), required=False)
+
+    departamento = forms.ModelChoiceField(label=_lazy('Departamento'), queryset=Departamento.objects.all())
+    perfil = forms.ModelChoiceField(
+        label=_lazy('Tipo de usuario'), required=False,
+        queryset=Group.objects.annotate(nombre=Lower('name')).filter(nombre__in=_accept)
+    )
+
+    class Meta:
+        model = Empleado
+        fields = [
+            'areas', 'cedula', 'primer_nombre', 'segundo_nombre', 'primer_apellido',
+            'segundo_apellido', 'cargo', 'jefe_departamento'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cargo'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
+        self.fields['perfil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control'})
+        self.fields['departamento'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['primer_nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
+
+        self.fields['areas'].required = False

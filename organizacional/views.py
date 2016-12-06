@@ -17,7 +17,7 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin
 # Locale Apps
 # from gestion_documental.models import Documento
 from .models import Area, Departamento, Empleado
-from .forms import AreaForm, DepartamentoForm, EmpleadoForm, FormularioEditarEmpleado
+from .forms import AreaForm, DepartamentoForm, EmpleadoForm, FormularioEditarEmpleado, NuevoEmpleadoForm
 
 # Python Package
 import json
@@ -283,3 +283,21 @@ class ListaEmpleadosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
     model = Empleado
     template_name = 'organizacional/listar_empleados.html'
     group_required = ['Administrador SGD']
+
+# --------------------------------------------------------
+
+
+@login_required
+@permission_required('organizacional.es_administrador_sgd', raise_exception=True)
+def crear_empleado2(request):
+    """
+    Permite a un administrador crear empleados para una iglesia.
+    """
+
+    VERBO = _('Crear')
+    if request.method == 'POST':
+        form = NuevoEmpleadoForm(data=request.POST)
+    else:
+        form = NuevoEmpleadoForm()
+
+    return render(request, 'organizacional/empleado_form.html', {'form': form, 'VERBO': VERBO})
