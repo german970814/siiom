@@ -546,7 +546,7 @@ def editar_runion_grupo(request, pk):
                     messages.success(
                         request,
                         _('Se ha editado la reunion exitosamente. \
-                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('reportes_grupo')})
+                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('grupos:reportes_grupo')})
                     )
             else:
                 # se envia que puede ir a la pagina de vista de reportes
@@ -557,7 +557,7 @@ def editar_runion_grupo(request, pk):
                 messages.success(
                     request,
                     _('Se ha editado la reunion exitosamente. \
-                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('reportes_grupo')})
+                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('grupos:reportes_grupo')})
                 )
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario, verifica los campos'))
