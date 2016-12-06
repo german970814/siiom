@@ -6,31 +6,15 @@
 	<div class="card">
 		<div class="card-header">
 			<h1><legend><h3>{{ VERBO }} {% trans "Empleado" %}</h3></legend></h1>
-
-            {% if messages %}
-				{% for message in messages %}
-					<div class="row">
-		                <div class="alert {% if message.tags == "success" %}alert-success {% else %}alert-danger{% endif %} alert-dismissible" role="alert">
-		                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-		                    <p>{{ message }}</p>
-		                </div>
-		            </div>
-				{% endfor %}
-			{% endif %}
-
-            {% if form.non_field_errors %}
-                <div class="row">
-                    <div class="alert alert-danger alert-dismissible" role="alert">
-                        <button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true">x</span></button>
-                        {{ form.non_field_errors }}
-                    </div>
-                </div>
-            {% endif %}
 		</div>
-		<form action="" method="POST" id="formulario-empleado">
-			{% csrf_token %}
+        <div class="card-body card-padding">
+            {% include "_alert_messages.html" %}
 
-            <div class="card-body card-padding">
+    		<form action="" method="POST" id="formulario-empleado">
+    			{% csrf_token %}
+
+                {% include "_alert_non_field_errors.html" %}
+
     			<div class="row">
                     <div class="col-md-4">
                         <div class="input-group {{ form.email.css_classes }}">
@@ -218,9 +202,8 @@
                         <button type="submit" value="Aceptar" name="aceptar" class="btn btn-primary btn-block">{% trans "Aceptar" %}</button>
                     </div>
                 </div>
-			</div>
-
-        </form>
+            </form>
+        </div>
 	</div>
 </div>
 {% endblock contenido %}
