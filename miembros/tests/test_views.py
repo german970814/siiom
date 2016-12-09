@@ -171,16 +171,14 @@ class CrearMiembroViewTest(BaseTest):
 
     def test_post_formulario_invalido_muestra_errores(self):
         """
-        Prueba qie si se hace un POST y el formulario es invalido se muestren los errores.
+        Prueba que si se hace un POST y el formulario es invalido se muestren los errores.
         """
-
-        msj_obligatirio = 'Este campo es obligatorio.'
 
         self.login_usuario(self.admin.usuario)
         response = self.post(self.URL, data={})
 
-        self.assertFormError(response, 'form', 'email', msj_obligatirio)
-        self.assertFormError(response, 'form', 'nombre', msj_obligatirio)
-        self.assertFormError(response, 'form', 'genero', msj_obligatirio)
-        self.assertFormError(response, 'form', 'cedula', msj_obligatirio)
-        self.assertFormError(response, 'form', 'primerApellido', msj_obligatirio)
+        self.assertFormError(response, 'form', 'email', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'genero', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'cedula', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'primerApellido', self.MSJ_OBLIGATORIO)

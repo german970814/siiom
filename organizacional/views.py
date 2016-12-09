@@ -297,6 +297,10 @@ def crear_empleado2(request):
     VERBO = _('Crear')
     if request.method == 'POST':
         form = NuevoEmpleadoForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('El empleado se ha creado correctamente.'))
+            return redirect('organizacional:miembro_nuevo')
     else:
         form = NuevoEmpleadoForm()
 

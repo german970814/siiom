@@ -13,5 +13,5 @@ urlpatterns = [
     url(r'^editar_empleado/(?P<id_empleado>\d+)$', views.editar_empleado, name="editar_empleado"),
     url(r'^listar_empleados/$', views.ListaEmpleadosView.as_view(), name="listar_empleados"),
 
-    url(r'^empleados/nuevo/$', views.crear_empleado2, name="crear_empleado2"),
+    url(r'^empleados/nuevo/$', views.crear_empleado2, name="empleado_nuevo"),
 ]
