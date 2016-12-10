@@ -1,12 +1,16 @@
 # Django Package
-from django import forms
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
-from django.contrib.auth.models import Group, User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.db.models.functions import Lower
+from django.db import transaction
+from django import forms
 
 # Locale Apps
 from common.forms import CustomModelForm
 from .models import Area, Departamento, Empleado
+
+User = get_user_model()
 
 
 class AreaForm(forms.ModelForm):
@@ -165,6 +169,10 @@ class NuevoEmpleadoForm(CustomModelForm):
     Formulario para la creación de un empleado de una iglesia.
     """
 
+    error_messages = {
+        'transaction': _lazy('Ha ocurrido un error al guardar el empleado. Por favor intentelo de nuevo.')
+    }
+
     # Perfiles que se le pueden asignar a un empleado
     _accept = ['consulta', 'digitador', 'administrador sgd']
 
@@ -201,3 +209,44 @@ class NuevoEmpleadoForm(CustomModelForm):
         self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
 
         self.fields['areas'].required = False
+
+        areas_query = Area.objects.none()
+        if self.is_bound:
+            id = self.data.get('departamento', None)
+            try:
+                areas_query = Area.objects.filter(departamento=int(id))
+            except:
+                pass
+
+        self.fields['areas'].queryset = areas_query
+
+    def save(self, iglesia):
+        try:
+            with transaction.atomic:
+                # se intenta buscar o crear el usuario
+                usuario, created = User.objects.get_or_create(
+                    email=self.cleaned_data['email'],
+                    defaults={'password': '123456', 'username': self.cleaned_data['cedula']}
+                )
+
+                if created:  # Si fue creado se le asigna la contraseña del formulario
+                    usuario.set_password(self.cleaned_data['password1'])
+                    usuario.save()
+
+                perfil = self.cleaned_data.get('perfil', None)
+                if perfil:
+                    usuario.groups.add(perfil)
+
+                self.instance.usuario = usuario
+                self.instance.iglesia = iglesia
+
+                empleado = super().save()
+
+                if empleado.jefe_departamento:
+                    areas = list(self.cleaned_data['departamento'].areas.all())
+                    empleado.areas.add(*areas)
+
+                return empleado
+        except:
+            self.add_error(None, forms.ValidationError(self.error_messages['transaction'], code='transaction'))
+            return None
