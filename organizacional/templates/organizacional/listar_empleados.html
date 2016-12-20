@@ -32,7 +32,7 @@
         <div class="card-header">
             <h1 class="f-700 f-20">
             	<legend><h3>Listado de los Empleados</h3></legend>
-				<small><a alt="Agregar Área" href="{% url 'organizacional:crear_empleado' %}">Agregar Empleados</a></small>
+				<small><a alt="Agregar Área" href="{% url 'organizacional:empleado_nuevo' %}">Agregar Empleados</a></small>
 	        </h1>
             {% if messages %}
                 {% for message in messages %}

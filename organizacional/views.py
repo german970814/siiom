@@ -17,7 +17,7 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin
 # Locale Apps
 # from gestion_documental.models import Documento
 from .models import Area, Departamento, Empleado
-from .forms import AreaForm, DepartamentoForm, EmpleadoForm, FormularioEditarEmpleado, NuevoEmpleadoForm
+from .forms import AreaForm, DepartamentoForm, FormularioEditarEmpleado, NuevoEmpleadoForm
 
 # Python Package
 import json
@@ -172,67 +172,6 @@ class ListaDepartamentosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
 @login_required
 @permission_required('organizacional.es_administrador_sgd')
-def crear_empleado(request):
-    """
-    Vista de creacion de empleados y sus usuarios en el sistema de gestion documental
-    """
-
-    VERBO = _('Crear')
-
-    if request.method == 'POST':
-        form = EmpleadoForm(data=request.POST)
-
-        if form.is_valid():
-            empleado = form.save(commit=False)
-            # se intenta buscar o crear el usuario
-            usuario, created = User.objects.get_or_create(
-                email=form.cleaned_data['correo'], defaults={
-                    'password': '123456', 'username': form.cleaned_data['cedula']
-                }
-            )
-            # si fue creado, le asigna la contraseña del formulario
-            if created:
-                usuario.set_password(form.cleaned_data['contrasena'])
-                usuario.save()
-            else:
-                # si no fue creado, quiere decir que algun miembro puede tener ese usuario
-                miembro = usuario.miembro_set.first()  # Si no tiene puede devolver None
-                if miembro:
-                    # de tener un miembro se reemplazan los campos por los del miembro
-                    empleado.primer_nombre = miembro.nombre
-                    empleado.cedula = miembro.cedula
-                    empleado.primer_apellido = miembro.primerApellido
-                    if miembro.segundoApellido:
-                        empleado.segundo_apellido = miembro.segundoApellido
-            # se agrega el tipo de usuario
-            if 'tipo_usuario' in form.cleaned_data and form.cleaned_data['tipo_usuario'] is not None:
-                usuario.groups.add(form.cleaned_data['tipo_usuario'])
-            empleado.usuario = usuario
-            # se crea el empleado
-            empleado.iglesia = request.iglesia
-            empleado.save()
-            form.save_m2m()
-
-            if empleado.jefe_departamento is True:
-                for area in form.cleaned_data['departamento'].areas.all():
-                    if area not in empleado.areas.all():
-                        empleado.areas.add(area)
-
-            messages.success(request, _('Empleado creado exitosamente'))
-            return redirect(reverse('organizacional:crear_empleado'))
-        else:
-            messages.error(request, _('Ha ocurrido un error al enviar el formulario'))
-
-    else:
-        form = EmpleadoForm()
-
-    data = {'form': form, 'VERBO': VERBO}
-
-    return render(request, 'organizacional/crear_empleado.html', data)
-
-
-@login_required
-@permission_required('organizacional.es_administrador_sgd')
 def editar_empleado(request, id_empleado):
     """
     Edita los empleados
@@ -290,7 +229,7 @@ class ListaEmpleadosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 
 @login_required
 @permission_required('organizacional.es_administrador_sgd', raise_exception=True)
-def crear_empleado2(request):
+def crear_empleado(request):
     """
     Permite a un administrador crear empleados para una iglesia.
     """
