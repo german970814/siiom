@@ -137,8 +137,8 @@ class NuevoEmpleadoFormTest(BaseTest):
 
         self.assertEqual(empleado.areas.count(), 2, msg="No se asignaron todas las areas del departamento al empleado")
 
-    @mock.patch('django.db.models.query.QuerySet.all', side_effect=IntegrityError)
-    def test_error_al_guardar_formulario_no_se_guarda_nada_en_db(self, all_mock):
+    @mock.patch('common.forms.CustomModelForm.save', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_no_se_guarda_nada_en_db(self, save_mock):
         """
         Prueba que si ocurre un error al guardar el formulario no se guarde el empleado, ni el usuario.
         """
@@ -149,11 +149,11 @@ class NuevoEmpleadoFormTest(BaseTest):
         form.is_valid()
         form.save()
 
-        self.assertTrue(all_mock.called)
+        self.assertTrue(save_mock.called)
         self.assertEqual(Empleado.objects.count(), 0, msg="Se guardo el empleado.")
 
-    @mock.patch('django.db.models.query.QuerySet.all', side_effect=IntegrityError)
-    def test_error_al_guardar_formulario_agrega_error_form(self, update_mock):
+    @mock.patch('common.forms.CustomModelForm.save', side_effect=IntegrityError)
+    def test_error_al_guardar_formulario_agrega_error_form(self, save_mock):
         """
         Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
         """
@@ -162,5 +162,5 @@ class NuevoEmpleadoFormTest(BaseTest):
         form.is_valid()
         form.save()
 
-        self.assertTrue(update_mock.called)
+        self.assertTrue(save_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)

@@ -209,6 +209,7 @@ def crear_empleado(request):
                 usuario.groups.add(form.cleaned_data['tipo_usuario'])
             empleado.usuario = usuario
             # se crea el empleado
+            empleado.iglesia = request.iglesia
             empleado.save()
             form.save_m2m()
 
@@ -296,12 +297,12 @@ def crear_empleado2(request):
 
     VERBO = _('Crear')
     if request.method == 'POST':
-        form = NuevoEmpleadoForm(data=request.POST)
+        form = NuevoEmpleadoForm(request.iglesia, data=request.POST)
         if form.is_valid():
-            if form.save(request.iglesia):
+            if form.save():
                 messages.success(request, _('El empleado se ha creado correctamente.'))
                 return redirect('organizacional:empleado_nuevo')
     else:
-        form = NuevoEmpleadoForm()
+        form = NuevoEmpleadoForm(request.iglesia)
 
     return render(request, 'organizacional/empleado_form.html', {'form': form, 'VERBO': VERBO})

@@ -1,5 +1,6 @@
 import factory
 from common.tests.base import BaseTest
+from iglesias.tests.factories import IglesiaFactory
 from .factories import EmpleadoFactory, DepartamentoFactory
 
 
@@ -14,14 +15,18 @@ class CrearEmpleadoViewTest(BaseTest):
         self.admin = EmpleadoFactory(admin=True)
         self.login_usuario(self.admin.usuario)
 
-    def datos_formulario(self):
+    def datos_formulario(self, **kwargs):
         """
         Retorna un diccionario con los datos para el formulario NuevoEmpleadoForm.
         """
 
-        departamento = DepartamentoFactory()
+        self.departamento = DepartamentoFactory()
         data = factory.build(dict, FACTORY_CLASS=EmpleadoFactory)
-        data.update({'email': 'a@a.com', 'departamento': departamento.id})
+        data.update({
+            'email': 'a@a.com', 'contrasena1': 'mariana', 'contrasena2': 'mariana',
+            'password2': 'mariana', 'departamento': self.departamento.id, 'jefe_departamento': True
+        })
+        data.update(**kwargs)
         return data
 
     def test_admin_get(self):
@@ -31,6 +36,24 @@ class CrearEmpleadoViewTest(BaseTest):
 
         self.get_check_200(self.URL)
         self.assertResponseContains('id_cedula', html=False)
+
+    def test_post_formulario_valido_crea_empleado_iglesia_correcta(self):
+        """
+        Prueba que cuando se haga un POST y el formulario sea valido el empleado creado pertenezca a la iglesia del
+        usuario logueado.
+        """
+        from ..models import Empleado
+
+        data = self.datos_formulario()
+        iglesia_correcta = self.admin.iglesia
+        iglesia_incorrecta = IglesiaFactory(nombre='nueva iglesia')
+
+        self.login_usuario(self.admin.usuario)
+        self.post(self.URL, data=data)
+
+        empleado = Empleado.objects.get(cedula=data['cedula'])
+        self.assertEqual(iglesia_correcta, empleado.iglesia)
+        self.assertNotEqual(iglesia_incorrecta, empleado.iglesia)
 
     def test_admin_post_formulario_invalido_muestra_errores(self):
         """

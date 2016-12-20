@@ -12,6 +12,16 @@ class DepartamentoFactory(factory.DjangoModelFactory):
     nombre = 'Financiero'
 
 
+class AreaFactory(factory.DjangoModelFactory):
+
+    class Meta:
+        model = 'organizacional.Area'
+        django_get_or_create = ['nombre']
+
+    nombre = 'Contabilidad'
+    departamento = factory.SubFactory(DepartamentoFactory)
+
+
 class EmpleadoFactory(factory.DjangoModelFactory):
 
     class Meta:
@@ -19,6 +29,7 @@ class EmpleadoFactory(factory.DjangoModelFactory):
 
     cargo = 'Ing. de sistemas'
     iglesia = factory.SubFactory(IglesiaFactory)
+    usuario = factory.SubFactory(UsuarioFactory)
     cedula = factory.sequence(lambda n: '112343%02d' % n)
     primer_nombre = factory.Faker('first_name', locale='es')
     segundo_nombre = factory.Faker('first_name', locale='es')
