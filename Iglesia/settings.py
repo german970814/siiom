@@ -30,6 +30,7 @@ INSTALLED_APPS = (
     'iglesias',
     'miembros',
     'academia',
+    'common',
     'grupos',
     'reportes',
     'encuentros',

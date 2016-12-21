@@ -347,12 +347,23 @@ class NuevoGrupoForm(BaseGrupoForm):
             grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
 
         self.fields['parent'].queryset = grupos_query
-        query_lideres = self.fields['lideres'].queryset.red(red)
-        if query_lideres.count() == 0:
-            query_lideres = query_lideres | Grupo.objects.raiz().miembro_set.lideres_disponibles()
 
-        self.fields['lideres'].queryset = query_lideres
+        # query_lideres = self.fields['lideres'].queryset.red(red)
+        # if query_lideres.count() == 0:
+        #     query_lideres = query_lideres | Grupo.objects.raiz().miembro_set.lideres_disponibles()
+
+        # # self.fields['lideres'].queryset = query_lideres
+        # self.fields['lideres'].queryset = Miembro.objects.none()
+
         self.red = red
+
+        if self.is_bound:
+            if hasattr(self.data, 'getlist'):
+                lideres = self.data.getlist('lideres', None) or None
+            else:
+                lideres = self.data.get('lideres', None) or None
+
+            self.fields['lideres'].queryset = Miembro.objects.filter(id__in=lideres)
 
     def save(self):
         try:
@@ -386,13 +397,14 @@ class EditarGrupoForm(NuevoGrupoForm):
         #     root_query = Grupo.objects.prefetch_related('lideres').filter(id=self.instance.parent.id)
         #     self.fields['parent'].queryset = self.fields['parent'].queryset | root_query
 
-        self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
-        self.fields['lideres'].initial = self.instance.lideres.all()
+        # self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
+        self.fields['lideres'].queryset = self.fields['lideres'].initial = self.instance.lideres.all()
+        # self.fields['lideres'].initial = self.instance.lideres.all()
 
     def save(self):
         try:
             with transaction.atomic():
-                grupo = BaseGrupoForm.save(self)
+                grupo = BaseGrupoForm.save(self)# if BaseGrupoForm.is_valid(self) else raise NameError('hola')
 
                 # if 'parent' in self.changed_data:
                 #     padre = self.cleaned_data['parent']

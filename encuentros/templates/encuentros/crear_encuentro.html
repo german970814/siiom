@@ -4,6 +4,7 @@
 
 {% block js %}
 <script src="{% static 'Scripts/funciones.js' %}" type="text/javascript"></script>
+<script src="{% static 'Scripts/IGSearch.js' %}" type="text/javascript"></script>
     <script>
         jQuery(document).ready(function($) {
             $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
@@ -17,7 +18,58 @@
                 // minDate: moment(),
             });
 
-            var $csrftoken = $("input[name='csrfmiddlewaretoken']").val();  // guarda el nombre del token
+            var selected_before = new Array();
+
+            {% if form.errors and not form.red.errors %}
+                {% for value in grupo_errors %}
+                    selected_before.push(['{{ value.0 }}', '{{ value.1 }}']);
+                {% endfor %}
+            {% elif form.instance.id %}
+                {% for value in form.instance.grupos.all %}
+                    selected_before.push(['{{ value.id }}', '{{ value }}']);
+                {% endfor %}
+            {% endif %}
+
+            $('#{{ form.grupos.id_for_label }}').IGSearch({
+                url: "{% url 'encuentros:obtener_grupos' %}",
+                key: 'grupos',
+                items: selected_before,
+                messageError: 'Asegurate de escoger una red',
+                prerequest: function (options) {
+                    options.data.red = $('#{{ form.red.id_for_label }}').val();
+                    return true;
+                }
+            });
+
+            $('#{{ form.coordinador.id_for_label }}').IGSearch({
+                url: "{% url 'encuentros:obtener_coordinadores_tesoreros' %}",
+                key: 'miembros',
+                messageError: 'Asegurate de escoger un grupo primero',
+                prerequest: function (options) {
+                    grupos = $('#{{ form.grupos.id_for_label}}').val();
+                    if (grupos != -1 && grupos != null) {
+                        options.data.grupos = grupos;
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
+            $('#{{ form.tesorero.id_for_label }}').IGSearch({
+                url: "{% url 'encuentros:obtener_coordinadores_tesoreros' %}",
+                key: 'miembros',
+                messageError: 'Asegurate de escoger un grupo primero',
+                prerequest: function (options) {
+                    grupos = $('#{{ form.grupos.id_for_label}}').val();
+                    if (grupos != -1 && grupos != null) {
+                        options.data.grupos = grupos;
+                        return true;
+                    }
+                    return false;
+                }
+            });
+
+            {% comment %}var $csrftoken = $("input[name='csrfmiddlewaretoken']").val();  // guarda el nombre del token
             var selected_before = new Array();
             var _option_tag = '<option value="{0}">{1}</option>';
 
@@ -342,7 +394,7 @@
                         selected_before.splice(0, selected_before.length);
                     }
                 });
-            });
+            });{% endcomment %}
         });
     </script>
 {% endblock js %}
