@@ -231,7 +231,7 @@ class ListaEmpleadosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
 @permission_required('organizacional.es_administrador_sgd', raise_exception=True)
 def crear_empleado(request):
     """
-    Permite a un administrador crear empleados para una iglesia.
+    Permite a un administrador crear empleados para su iglesia.
     """
 
     VERBO = _('Crear')
@@ -245,3 +245,14 @@ def crear_empleado(request):
         form = NuevoEmpleadoForm(request.iglesia)
 
     return render(request, 'organizacional/empleado_form.html', {'form': form, 'VERBO': VERBO})
+
+
+@login_required
+@permission_required('organizacional.es_administrador_sgd', raise_exception=True)
+def listar_empleados(request):
+    """
+    Permite a un administrador listar los empleados de su iglesia.
+    """
+
+    empleados = Empleado.objects.iglesia(request.iglesia)
+    return render(request, 'organizacional/listar_empleados.html', {'empleados': empleados})

@@ -76,3 +76,29 @@ class CrearEmpleadoViewTest(BaseTest):
 
         response = self.post(self.URL, data=self.datos_formulario())
         self.assertRedirects(response, self.reverse(self.URL))
+
+
+class ListarEmpleadoViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista listar empleados de una iglesia.
+    """
+
+    URL = 'organizacional:empleado_listar'
+
+    def setUp(self):
+        self.empleado = EmpleadoFactory(admin=True)
+        self.iglesia = self.empleado.iglesia
+
+    def test_get_muestra_empleado_iglesia_correcta(self):
+        """
+        Prueba que se muestren los empleados de la iglesia correcta.
+        """
+
+        iglesia_incorrecta = IglesiaFactory(nombre='CDR')
+        empleado2 = EmpleadoFactory(iglesia=iglesia_incorrecta)
+
+        self.login_usuario(self.empleado.usuario)
+        self.get_check_200(self.URL)
+
+        self.assertResponseContains(self.empleado.cedula, html=False)
+        self.assertResponseNotContains(empleado2.cedula, html=False)

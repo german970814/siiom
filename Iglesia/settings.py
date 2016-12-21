@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'waffle',
     'treebeard',
+    'common',
     'iglesias',
     'miembros',
     'academia',
