@@ -638,7 +638,10 @@ def crear_grupo(request, pk):
     else:
         form = NuevoGrupoForm(red=red)
 
-    return render(request, 'grupos/grupo_form.html', {'form': form, 'red_id': pk})
+    # se agrega la red
+    data = {'form': form, 'red_id': pk}
+
+    return render(request, 'grupos/grupo_form.html', data)
 
 
 @login_required
@@ -658,7 +661,10 @@ def editar_grupo(request, pk):
     else:
         form = EditarGrupoForm(instance=grupo)
 
-    return render(request, 'grupos/grupo_form.html', {'form': form, 'red_id': grupo.red_id, 'grupo_id': grupo.id})
+    # se agregan los datos como red y grupo
+    data = {'form': form, 'red_id': grupo.red_id, 'grupo_id': grupo.id}
+
+    return render(request, 'grupos/grupo_form.html', data)
 
 
 @login_required

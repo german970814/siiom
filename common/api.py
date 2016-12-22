@@ -1,11 +1,13 @@
-from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Q
 from django.utils.module_loading import import_string
 
 from .forms import BusquedaForm
 from .constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_CODE, RESPONSE_DENIED
+from .decorators import login_required_api
 from miembros.models import Miembro
+from grupos.models import Grupo
 
 import json
 
@@ -13,9 +15,9 @@ import json
 Red = import_string('grupos.models.Red')
 
 
-@login_required
+@login_required_api
 def busqueda_miembro_api(request, pk):
-    """Vista para realizar busquedas de mienbros desde AJAX."""
+    """Vista para realizar busquedas de mienbros desde AJAX a los miembros que son lideres, y no lideran grupo."""
 
     red = Red.objects.get(pk=pk)
 
@@ -48,7 +50,8 @@ def busqueda_miembro_api(request, pk):
 
             response = {
                 'miembros': [{'id': str(x.id), 'nombre': str(x)} for x in miembros],
-                RESPONSE_CODE: RESPONSE_SUCCESS
+                RESPONSE_CODE: RESPONSE_SUCCESS,
+                'value': value
             }
 
         else:
