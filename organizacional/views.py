@@ -217,13 +217,6 @@ def editar_empleado(request, id_empleado):
 
     return render(request, 'organizacional/crear_empleado.html', data)
 
-
-class ListaEmpleadosView(LoginRequiredMixin, GroupRequiredMixin, ListView):
-    """Devuelve una lista de areas ingresadas en el sistema."""
-    model = Empleado
-    template_name = 'organizacional/listar_empleados.html'
-    group_required = ['Administrador SGD']
-
 # --------------------------------------------------------
 
 

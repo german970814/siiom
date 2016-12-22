@@ -83,7 +83,7 @@ class ListarEmpleadoViewTest(BaseTest):
     Pruebas unitarias para la vista listar empleados de una iglesia.
     """
 
-    URL = 'organizacional:empleado_listar'
+    URL = 'organizacional:empleados_listar'
 
     def setUp(self):
         self.empleado = EmpleadoFactory(admin=True)
