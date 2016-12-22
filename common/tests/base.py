@@ -68,6 +68,13 @@ class APIClient(Client):
 
         return response
 
+    def post(self, follow=True, *args, **kwargs):
+        response = super().post(follow=follow, *args, **kwargs)
+
+        assert response._headers['content-type'][1].split(';')[0] == constants.CONTENT_TYPE_API
+
+        return response
+
 
 class BaseTestAPI(BaseTest):
     """Clase de pruebas base para la API."""
