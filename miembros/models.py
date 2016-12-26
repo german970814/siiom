@@ -4,6 +4,8 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _lazy
+
+from common.models import IglesiaMixin
 from .managers import MiembroManager, MiembroQuerySet
 
 
@@ -55,7 +57,7 @@ class Escalafon(models.Model):
         return self.rango
 
 
-class Miembro(models.Model):
+class Miembro(IglesiaMixin, models.Model):
     """
     Modelo para guardar los miembros de una iglesia.
     """
@@ -92,7 +94,6 @@ class Miembro(models.Model):
         (DIVORCIADO, _lazy('Divorciado')),
     )
     #  autenticacion
-    iglesia = models.ForeignKey('iglesias.Iglesia', verbose_name=_lazy('iglesia'), related_name='miembros')
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_lazy('usuario'), unique=True, null=True, blank=True
     )
