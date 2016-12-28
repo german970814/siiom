@@ -32,7 +32,7 @@ def async(function):
 
 
 @async
-def crear_miembros_con_encontristas(encontristas):
+def crear_miembros_con_encontristas(encontristas, iglesia):
     """
     Nota: Importante en esta vista al momento de ejecutar esta funcion, cuando se ejecuta
     la vista en html que reenderiza ve el encuentro como ACTIVO ya que el estado INACTIVO
@@ -62,6 +62,7 @@ def crear_miembros_con_encontristas(encontristas):
                 nuevo_miembro.email = encontrista.email
                 nuevo_miembro.grupo = encontrista.grupo
                 nuevo_miembro.convertido = True
+                nuevo_miembro.iglesia = iglesia
                 nuevo_miembro.save()
                 pasos = CumplimientoPasos()
                 pasos.miembro = nuevo_miembro

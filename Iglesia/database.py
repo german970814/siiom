@@ -7,7 +7,6 @@ NAME = ""
 USER = ""
 
 PASSWORD = ""
-# PASSWORD = 'ecbddac9'
 
 HOST = '127.0.0.1'
 

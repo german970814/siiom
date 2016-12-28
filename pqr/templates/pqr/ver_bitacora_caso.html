@@ -306,11 +306,19 @@
                     </div>
                     {% if caso.documentos.exists %}
                     {% for documento in caso.get_documentos_iniciales %}
-                	<div class="lv-item media ">
+                	{% comment %}<div class="lv-item media ">
                         <div class="lv-avatar bgm-teal pull-left" data-trigger="hover" data-toggle="popover" data-placement="bottom right" data-content="{{ caso.nombre }}" title="" data-original-title="Nombre Solicitante"><span><i class="zmdi {% if documento.is_image %}zmdi-image{% else %}zmdi-file{% endif %}"></i></span></div>
                         <div class="media-body">
                             <div class="ms-item bgm-teal">
                                 <strong><a href="{{ documento.get_absolute_url }}" class="c-white"><u>{{ documento.get_name }}</u></a></strong>
+                            </div>
+                        </div>
+                    </div>{% endcomment %}
+                	<div class="lv-item media ">
+                        <div class="lv-avatar bgm-teal pull-left" data-trigger="hover" data-toggle="popover" data-placement="bottom right" data-content="{{ caso.nombre }}" title="" data-original-title="Nombre Solicitante"><span><i class="zmdi {% if documento.is_image %}zmdi-image{% else %}zmdi-file{% endif %}"></i></span></div>
+                        <div class="media-body">
+                            <div class="ms-item bgm-teal">
+                                <strong><a href="{{ documento.get_absolute_url }}" class="c-white"><img src="{{ documento.get_url }}" alt="{{ documento.get_name }}" width="150px"></a></strong>
                             </div>
                         </div>
                     </div>

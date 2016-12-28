@@ -5,3 +5,4 @@ Iglesia/settings__debug.py
 htmlcov/
 .coverage
 .coveragerc
+tags

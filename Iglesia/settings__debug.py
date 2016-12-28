@@ -2,4 +2,4 @@
 
 from .settings import *
 
-INSTALLED_APPS += ('debug_toolbar', )
+INSTALLED_APPS += ('debug_toolbar', 'django_extensions', )

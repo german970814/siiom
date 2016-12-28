@@ -1,5 +1,5 @@
 from django.test import TestCase
-from grupos.models import Grupo
+from ..models import Grupo
 from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory, ReunionDiscipuladoFactory
 
 

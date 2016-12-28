@@ -24,6 +24,7 @@ from .forms import (
     FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar
 )
 from .utils import get_date_for_report
+from grupos.utils import reunion_reportada
 from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from common.groups_tests import (
@@ -559,233 +560,6 @@ def PasosRangoFecha(request):
         sw = False
 
     return render_to_response('reportes/pasosRangoFecha.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
-# def estadisticoReunionesGar(request):
-#     """Muestra un estadistico de los reportes de reunion GAR segun los grupos,
-#     las opciones y el rango de fecha escogidos."""
-
-#     miembro = Miembro.objects.get(usuario=request.user)
-#     if miembro.usuario.has_perm("miembros.es_administrador"):
-#         grupoP = Grupo.objects.get(red=None)
-#         liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
-#         #  listaGrupo_i = listaGruposDescendientes(liderP)
-#         listaGrupo_i = Grupo.objects.all()  # filter(estado='A')
-#     else:
-#         listaGrupo_i = listaGruposDescendientes(miembro)
-
-#     descendientes = False
-#     ofrenda = False
-#     lid_asis = False
-#     visitas = False
-#     asis_reg = False
-
-#     if request.method == 'POST':
-#         if 'combo' in request.POST:
-#             grupo_i = Grupo.objects.get(id=request.POST['id'])
-#             lider_i = Miembro.objects.get(id=grupo_i.listaLideres()[0])
-
-#             desc = listaGruposDescendientes(lider_i)
-#             descendientes = [{'pk': descendiente.pk, 'nombre': str(descendiente)} for descendiente in desc]
-
-#             return HttpResponse(json.dumps(descendientes), content_type="application/json")
-#         else:
-#             form = FormularioRangoFechas(data=request.POST)
-#             if form.is_valid():
-#                 fechai = form.cleaned_data['fechai']
-#                 fechaf = form.cleaned_data['fechaf']
-#                 grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-
-#                 opciones = {
-#                     'fecha_inicial': fechai,
-#                     'fecha_final': fechaf, 'grupo_inicial': grupo_i.nombre.capitalize()
-#                 }
-
-#                 sw = True
-
-#                 if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
-#                     descendientes = True
-#                     opciones['grupo_final'] = 'Todos los descendientes'
-#                     grupos = Grupo.objects.filter(
-#                         id__in=listaGruposDescendientes_id(grupo_i.lideres.first())
-#                     )
-#                 else:
-#                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-#                     opciones['grupo_final'] = grupo_f.nombre.capitalize()
-#                     listaGrupo_f = listaGruposDescendientes(grupo_i.lideres.first())
-#                     grupos = listaCaminoGrupos(grupo_i, grupo_f)
-
-#                 if isinstance(grupos, QuerySet):
-#                     total_grupos = grupos.count()
-#                     total_grupos_inactivos = grupos.filter(estado='I').count()
-#                 else:
-#                     total_grupos = len(grupos)
-#                     total_grupos_inactivos = len([grupo for grupo in grupos if grupo.estado == 'I'])
-#                 # opciones['total_grupos'] = total_grupos
-#                 opciones['total_grupos_inactivos'] = total_grupos_inactivos
-#                 sw_while = True
-
-#                 if 'reportePDF' in request.POST:
-#                     values = [
-#                         [
-#                             'Rango fecha', 'Visitas', 'Regulares',
-#                             'Lideres', 'Total asistentes', 'Grupos que reportaron',
-#                             'Grupos sin reportar', 'Porcentaje de grupos reportados',
-#                             'Total Grupos Esta semana'
-#                         ]
-#                     ]
-
-#                     values_g = [['Rango fecha', 'Visitas', 'Regulares', 'lideres']]
-
-#                     while sw_while:
-#                         sig = get_date_for_report(fechai, fechaf)  # fechai + datetime.timedelta(days=6)
-#                         if descendientes:
-#                             if not isinstance(grupos, QuerySet):
-#                                 _ids_grupos = listaGruposDescendientes_id(
-#                                     Miembro.objects.get(id=grupo_i.listaLideres()[0])
-#                                 )
-#                                 _grupos_semana = Grupo.objects.filter(id__in=_ids_grupos).exclude(
-#                                     fechaApertura__gt=sig
-#                                 )
-#                                 grupos_semana = _grupos_semana.count()
-#                             else:
-#                                 _grupos_semana = grupos.exclude(fechaApertura__gt=sig)
-#                                 grupos_semana = _grupos_semana.count()
-#                         else:
-#                             # se debe corregir
-#                             _grupos_semana = grupos
-#                             grupos_semana = len(grupos)
-
-#                         numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-#                                                            grupo__in=_grupos_semana,
-#                                                            grupo__estado='A').aggregate(Sum('numeroLideresAsistentes'),
-#                                                                                         Sum('numeroVisitas'),
-#                                                                                         Sum('numeroTotalAsistentes'),
-#                                                                                         Count('id'))
-
-#                         if numPer['numeroLideresAsistentes__sum'] is None:
-#                             sumLid = 0
-#                         else:
-#                             sumLid = numPer['numeroLideresAsistentes__sum']
-
-#                         if numPer['numeroVisitas__sum'] is None:
-#                             sumVis = 0
-#                         else:
-#                             sumVis = numPer['numeroVisitas__sum']
-
-#                         if numPer['numeroTotalAsistentes__sum'] is None:
-#                             sumTot = 0
-#                         else:
-#                             sumTot = numPer['numeroTotalAsistentes__sum']
-
-#                         numReg = sumTot - sumVis - sumLid
-
-#                         if numPer['id__count'] is None:
-#                             numSobres = 0
-#                         else:
-#                             numSobres = numPer['id__count']
-
-#                         # numSobresNo = total_grupos - total_grupos_inactivos - numSobres
-#                         numSobresNo = grupos_semana - total_grupos_inactivos - numSobres
-#                         utillizacion = round(float(numSobres) / (grupos_semana - total_grupos_inactivos) * 100, 2)
-
-#                         l = [
-#                             fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y"),
-#                             sumVis, numReg, sumLid, sumTot,
-#                             numSobres, numSobresNo, utillizacion,
-#                             # numero totales de grupos en esta semana
-#                             grupos_semana - total_grupos_inactivos
-#                         ]
-#                         lg = [fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y"), sumVis, numReg, sumLid]
-
-#                         values.append(l)
-#                         values_g.append(lg)
-
-#                         fechai = sig + datetime.timedelta(days=1)
-#                         if sig >= fechaf:
-#                             sw_while = False
-
-#                     response = HttpResponse(content_type='application/pdf')
-#                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
-#                     PdfReport(response, 'Estadistico de reuniones GAR', opciones, values_g, 3, tabla=values)
-#                     return response
-#                 else:
-#                     values = [['Dates']]
-#                     while sw_while:
-#                         sig = fechai + datetime.timedelta(days=6)
-
-#                         if 'ofrenda' in request.POST and request.POST['ofrenda'] == 'S':
-#                             ofrenda = True
-#                             if 'Ofrenda' not in values[0]:
-#                                 values[0].append('Ofrenda')
-#                             sum_ofrenda = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-#                                                                     grupo__in=grupos).aggregate(Sum('ofrenda'))
-#                             if sum_ofrenda['ofrenda__sum'] is None:
-#                                 sum = 0
-#                             else:
-#                                 sum = sum_ofrenda['ofrenda__sum']
-#                             values.append([fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y"), float(sum)])
-#                         else:
-#                             l = [fechai.strftime("%d/%m/%y") + '-' + sig.strftime("%d/%m/%y")]
-#                             if 'lid_asis' in request.POST and request.POST['lid_asis'] == 'S':
-#                                 lid_asis = True
-#                                 if 'Numero de lideres asistentes' not in values[0]:
-#                                     values[0].append('Numero de lideres asistentes')
-#                                 numlid = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-#                                                                    grupo__in=grupos).aggregate(Sum('numeroLideresAsistentes'))
-#                                 if numlid['numeroLideresAsistentes__sum'] is None:
-#                                     sumLid = 0
-#                                 else:
-#                                     sumLid = numlid['numeroLideresAsistentes__sum']
-#                                 l.append(sumLid)
-#                             if 'visitas' in request.POST and request.POST['visitas'] == 'S':
-#                                 visitas = True
-#                                 if 'Numero de visitas' not in values[0]:
-#                                     values[0].append('Numero de visitas')
-#                                 numVis = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-#                                                                    grupo__in=grupos).aggregate(Sum('numeroVisitas'))
-#                                 if numVis['numeroVisitas__sum'] is None:
-#                                     sumVis = 0
-#                                 else:
-#                                     sumVis = numVis['numeroVisitas__sum']
-#                                 l.append(sumVis)
-#                             if 'asis_reg' in request.POST and request.POST['asis_reg'] == 'S':
-#                                 asis_reg = True
-#                                 if 'Numero de asistentes regulares' not in values[0]:
-#                                     values[0].append('Numero de asistentes regulares')
-#                                 numPer = ReunionGAR.objects.filter(fecha__range=(fechai, sig),
-#                                                                    grupo__in=grupos).aggregate(
-#                                                                        Sum('numeroLideresAsistentes'),
-#                                                                        Sum('numeroVisitas'),
-#                                                                        Sum('numeroTotalAsistentes'))
-
-#                                 if numPer['numeroLideresAsistentes__sum'] is None:
-#                                     sumLid = 0
-#                                 else:
-#                                     sumLid = numPer['numeroLideresAsistentes__sum']
-
-#                                 if numPer['numeroVisitas__sum'] is None:
-#                                     sumVis = 0
-#                                 else:
-#                                     sumVis = numPer['numeroVisitas__sum']
-
-#                                 if numPer['numeroTotalAsistentes__sum'] is None:
-#                                     sumTot = 0
-#                                 else:
-#                                     sumTot = numPer['numeroTotalAsistentes__sum']
-
-#                                 numAsis = sumTot - sumVis - sumLid
-#                                 l.append(numAsis)
-#                             values.append(l)
-#                         fechai = sig + datetime.timedelta(days=1)
-#                         if sig >= fechaf:
-#                             sw_while = False
-#     else:
-#         form = FormularioRangoFechas()
-#         sw = False
-
-#     return render_to_response('reportes/estadistico_gar.html', locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
@@ -1397,6 +1171,10 @@ def estadistico_reuniones_gar(request):
             descendientes = form.cleaned_data.get('descendientes', False)
             ofrenda = form.cleaned_data.get('ofrenda', False)
 
+            # constants
+            format_date = "%d/%m/%y"
+            date_split = ' - '
+
             # helpers
             _helper = []
             labels_fecha = []
@@ -1414,13 +1192,6 @@ def estadistico_reuniones_gar(request):
             # si hay descendientes en el formulario
             if descendientes:
                 # se obtienen los grupos a partir de el lider de el grupo de el formulario
-                # grupos = Grupo.objects.filter(
-                #     id__in=listaGruposDescendientes_id(
-                #         Miembro.objects.get(id=grupo.listaLideres()[0])
-                #     )
-                # ).select_related('lider1', 'lider2').only(
-                #     'lider1', 'lider2', 'fechaApertura', 'id', 'estado'
-                # )
                 grupos = grupo.grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
             else:
                 # Informacion que está por confirmar, cuando no hay descendientes
@@ -1471,8 +1242,8 @@ def estadistico_reuniones_gar(request):
                 )
 
                 # se añaden las fechas
-                fechas_str = fecha_inicial.strftime("%d/%m/%y") + ' - ' + siguiente.strftime("%d/%m/%y")
-                labels_fecha.insert(len(labels_fecha), fechas_str)
+                fechas_str = fecha_inicial.strftime(format_date) + date_split + siguiente.strftime(format_date)
+                labels_fecha.insert(len(labels_fecha), fechas_str)  # se agrega como pila
 
                 # si hay ofrendas
                 if ofrenda:
@@ -1486,15 +1257,6 @@ def estadistico_reuniones_gar(request):
                     ofrendas.append([fechas_str, float(ofrenda_aggregate['ofrendas']) or 0])
 
                 # se sacan los grupos sin reportar, vendria de la resta de los grupos de la semana, menos los sobres
-                # _sin_reportar = _grupos_semana.exclude(
-                #     id__in=_reuniones.values_list('grupo__id', flat=True)
-                # ).select_related(
-                #     'lider1', 'lider2', 'lider1__grupo__lider1',
-                #     'lider1__grupo__lider2', 'lider2__grupo__lider1',
-                #     'lider2__grupo__lider2'
-                # ).only(
-                #     'lider1', 'lider2'
-                # )
                 _sin_reportar = _grupos_semana.exclude(
                     id__in=_reuniones.values_list('grupo__id', flat=True)
                 )
@@ -1566,14 +1328,23 @@ def estadistico_reuniones_gar(request):
                 # se agrega a el array principal
                 values_asistencias.append(_lista)
 
-            morosos = Grupo.objects.filter(
+            morosos = list(Grupo.objects.filter(
                 id__in=[x for x in _morosos]
-            )  # .annotate(
-            #     fechas=Value(', '.join(_morosos[F('id')]))
-            # )
+            ))  # se cambia a que retorne una lista para que queden los datos guardados en memoria
+
+            _exclude = []  # lista para excluir los morosos que no son morosos
+
             for moroso in morosos:
-                moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
-                moroso.no_reportes = len(_morosos[moroso.id.__str__()])
+                for fecha in _morosos[moroso.id.__str__()]:
+                    _fecha = fecha.split(date_split)[0]
+                    _fecha = datetime.datetime.strptime(_fecha, format_date)
+                    if reunion_reportada(_fecha, moroso):
+                        _morosos[moroso.id.__str__()].pop(_morosos[moroso.id.__str__()].index(fecha))
+                if len(_morosos[moroso.id.__str__()]):
+                    moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
+                    moroso.no_reportes = len(_morosos[moroso.id.__str__()])
+                else:
+                    morosos.pop(morosos.index(moroso))
 
             data['sin_reportar'] = morosos
             data['tabla'] = data_table

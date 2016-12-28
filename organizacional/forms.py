@@ -1,11 +1,19 @@
+import logging
+
 # Django Package
-from django import forms
-from django.utils.translation import ugettext as _
-from django.contrib.auth.models import Group, User
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.db.models.functions import Lower
+from django.db import transaction
+from django import forms
 
 # Locale Apps
+from common.forms import CustomModelForm
 from .models import Area, Departamento, Empleado
+
+logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class AreaForm(forms.ModelForm):
@@ -157,3 +165,135 @@ class FormularioEditarEmpleado(EmpleadoForm):
 
         if contrasena_confirmacion != '' and contrasena == '':
             self.add_error('contrasena', _('Este campo es obligatorio'))
+
+
+class NuevoEmpleadoForm(CustomModelForm):
+    """
+    Formulario para la creación de un empleado de una iglesia.
+    """
+
+    error_messages = {
+        'dependencia': _lazy('Debe indicar si el empleado es jefe de departamento o las áreas donde pertenece.'),
+        'transaction': _lazy('Ha ocurrido un error al guardar el empleado. Por favor intentelo de nuevo.'),
+        'email_asignado': _lazy('Ya existe un empleado con este email.'),
+        'contrasenas_diferentes': _lazy('Las contraseñas no coinciden.')
+    }
+
+    # Perfiles que se le pueden asignar a un empleado
+    _accept = ['consulta', 'digitador', 'administrador sgd']
+
+    email = forms.EmailField(label=_lazy('Email'))
+    contrasena1 = forms.CharField(label=_lazy('Contraseña'), widget=forms.PasswordInput(), required=False)
+    contrasena2 = forms.CharField(label=_lazy('Confirmar contraseña'), widget=forms.PasswordInput(), required=False)
+
+    departamento = forms.ModelChoiceField(label=_lazy('Departamento'), queryset=Departamento.objects.all())
+    perfil = forms.ModelChoiceField(
+        label=_lazy('Tipo de usuario'), required=False,
+        queryset=Group.objects.annotate(nombre=Lower('name')).filter(nombre__in=_accept)
+    )
+
+    class Meta:
+        model = Empleado
+        fields = [
+            'areas', 'cedula', 'primer_nombre', 'segundo_nombre', 'primer_apellido',
+            'segundo_apellido', 'cargo', 'jefe_departamento'
+        ]
+
+    def __init__(self, iglesia, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cargo'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
+        self.fields['perfil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['contrasena1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['contrasena2'].widget.attrs.update({'class': 'form-control'})
+        self.fields['departamento'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['primer_nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['areas'].required = False
+        self.iglesia = iglesia
+
+        areas_query = Area.objects.none()
+        if self.is_bound:
+            id = self.data.get('departamento', None)
+            try:
+                areas_query = Area.objects.filter(departamento=int(id))
+            except:
+                pass
+        elif self.instance.pk:
+            departamento = self.instance.areas.first().departamento
+            areas_query = Area.objects.filter(departamento=departamento)
+            self.fields['departamento'].initial = departamento
+
+        self.fields['areas'].queryset = areas_query
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Se verifica que las contraseñas coincidan.
+        contrasena1 = cleaned_data.get('contrasena1', None)
+        contrasena2 = cleaned_data.get('contrasena2', None)
+
+        if contrasena1 or contrasena2:
+            if contrasena1 != contrasena2:
+                codigo = 'contrasenas_diferentes'
+                mensaje = self.error_messages[codigo]
+                self.add_error('contrasena1', forms.ValidationError(mensaje, code=codigo))
+                self.add_error('contrasena2', forms.ValidationError(mensaje, code=codigo))
+
+        # Se verifica que se halla indicado si es jefe de departamento o las áreas.
+        areas = cleaned_data.get('areas', None)
+        jefe_departamento = cleaned_data.get('jefe_departamento', False)
+
+        if not areas and not jefe_departamento:
+            self.add_error(None, forms.ValidationError(self.error_messages['dependencia'], code='dependencia'))
+
+        # Se verifica que el email ingresado no pertenezca a otro empleado.
+        email = cleaned_data.get('email', None)
+        if email:
+            try:
+                usuario = User.objects.get(email=email)
+                try:
+                    if usuario.empleado:
+                        codigo = 'email_asignado'
+                        self.add_error('email', forms.ValidationError(self.error_messages[codigo], code=codigo))
+                except Empleado.DoesNotExist:
+                    pass
+            except Exception as e:
+                pass
+
+    def save(self):
+        try:
+            with transaction.atomic():
+                # se intenta buscar o crear el usuario.
+                usuario, created = User.objects.get_or_create(
+                    email=self.cleaned_data['email'],
+                    defaults={'password': '123456', 'username': self.cleaned_data['cedula']}
+                )
+
+                if created:  # Si fue creado se le asigna la contraseña del formulario.
+                    usuario.set_password(self.cleaned_data['contrasena1'])
+                    usuario.save()
+
+                perfil = self.cleaned_data.get('perfil', None)
+                if perfil:
+                    usuario.groups.add(perfil)
+
+                self.instance.usuario = usuario
+                self.instance.iglesia = self.iglesia
+
+                empleado = super().save()
+
+                # Si el empleado es jefe de departamento se le asignan todas las areas del departamento.
+                if empleado.jefe_departamento:
+                    areas = list(self.cleaned_data['departamento'].areas.all())
+                    empleado.areas.add(*areas)
+
+                return empleado
+        except:
+            logger.exception("Error al intentar crear empleado")
+            self.add_error(None, forms.ValidationError(self.error_messages['transaction'], code='transaction'))
+            return None

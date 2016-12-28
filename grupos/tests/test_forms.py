@@ -2,10 +2,10 @@ from unittest import mock, skip
 from django.test import TestCase
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from grupos.tests.factories import GrupoFactory, GrupoRaizFactory, RedFactory
-from grupos.forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
-from grupos.models import Grupo, Red
 from common.tests.base import BaseTest
+from ..models import Grupo, Red
+from ..forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
+from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
 
 
 class GrupoRaizFormTest(TestCase):
@@ -150,7 +150,7 @@ class NuevoGrupoFormTest(BaseTest):
         self.crear_arbol()
         grupo3 = Grupo.objects.get(id=300)
         self.padre = Grupo.objects.get(id=800)
-        self.lider1 = MiembroFactory(lider=True,  grupo=grupo3)
+        self.lider1 = MiembroFactory(lider=True, grupo=grupo3)
         self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
         self.barrio = BarrioFactory()
         self.red_jovenes = Red.objects.get(nombre='jovenes')

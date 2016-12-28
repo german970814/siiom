@@ -10,6 +10,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0277BD" />  <!--#0288D1-->
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -113,6 +114,14 @@
             margin: 0 0 18px;
             font-size: 16.25;
             border-left: 5px solid #770f0f;
+        }
+
+        .bootstrap-select.btn-group .dropdown-menu.open {
+            width: 50%;
+        }
+
+        .bootstrap-select.btn-group .dropdown-menu {
+            z-index: 10;
         }
 
     </style>
@@ -530,9 +539,11 @@
                         <li>
                             <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">Asignar Visita A Grupo</a>
                         </li>
-                        <li>
-                            <a href="/miembro/agregar_miembro/">Agregar Miembro</a>
-                        </li>
+                        {% if perms.miembros.es_administrador %}
+                            <li>
+                                <a href="{% url 'miembros:nuevo' %}">Agregar Miembro</a>
+                            </li>
+                        {% endif %}
                         <!--<li class="sub-menu">
                             <a href="#">Agregar y Promover Visitas</a>
                             <ul>
@@ -732,7 +743,7 @@
                                           <a href="{% url 'sgd:listar_tipo_documentos' %}">{% trans "Listar Tipo de Documento" %}</a>
                                       </li>
                                       <li>
-                                          <a href="{% url 'organizacional:listar_empleados' %}">{% trans "Listar Empleado" %}</a>
+                                          <a href="{% url 'organizacional:empleados_listar' %}">{% trans "Listar Empleado" %}</a>
                                       </li>
                                 </ul>
                             </li>

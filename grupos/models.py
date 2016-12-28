@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _lazy
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
 from consolidacion.utils import clean_direccion
-from .managers import GrupoManager, GrupoQuerySet
+from .managers import GrupoManager
 
 
 class Red(models.Model):
@@ -48,9 +48,6 @@ class Grupo(AL_Node):
     parent = models.ForeignKey(
         'self', verbose_name=_lazy('grupo origen'), related_name='children_set', null=True, db_index=True
     )
-    # lider1 = models.ForeignKey('miembros.Miembro', related_name='lider_uno', null=True, blank=True)
-    # lider2 = models.ForeignKey('miembros.Miembro', null=True, blank=True, related_name='lider_dos')
-    # poner opcion de asignar la misma del lider por defecto(cual lider?)
     direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
     estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
     fechaApertura = models.DateField(verbose_name=_lazy("fecha de apertura"))
@@ -69,7 +66,7 @@ class Grupo(AL_Node):
     longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     # managers
-    objects = GrupoManager.from_queryset(GrupoQuerySet)()
+    objects = GrupoManager()
     node_order_by = ['id']
 
     class Meta:

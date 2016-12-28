@@ -2,11 +2,14 @@
 # Django
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
+from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 from django.template.context import RequestContext
+from django.utils.translation import ugettext as _
+from django.core.urlresolvers import reverse
 
 # Apps
 from .models import Encuentro, Encontrista
@@ -15,12 +18,11 @@ from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_
 from grupos.models import Red, Grupo
 from miembros.models import Miembro, TipoMiembro
 from common.groups_tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
+from common.constants import URL_SIN_PERMISOS as URL
 
 # Python
 import json
 import time
-
-URL = "/dont_have_permissions/"
 
 
 @user_passes_test(adminTest, login_url=URL)
@@ -28,27 +30,43 @@ def crear_encuentro(request):
     """Vista de Creacion de Encuentros."""
 
     accion = 'Crear'
-    if request.method == 'POST':
-        if 'combo_tesorero' in request.POST:
-            red = Red.objects.get(id=request.POST['id_red'])
-            value = request.POST['value']
-            querys = Q(nombre__icontains=value) | Q(primerApellido__icontains=value) | Q(cedula__icontains=value)
-            tipo = TipoMiembro.objects.get(nombre__iexact='lider')
-            miembros = Miembro.objects.filter(miembro_cambiado__nuevoTipo=tipo, estado='A', grupo__red=red)
-            miembros = miembros.filter(querys)[:10]
-            response = [{'pk': str(a.id), 'nombre': str(a)} for a in miembros]
-            return HttpResponse(json.dumps(response), content_type='application/json')
+    data = {'accion': accion}
 
+    if request.method == 'POST':
         form = CrearEncuentroForm(data=request.POST)
 
         if form.is_valid():
             nuevo_encuentro = form.save()
             avisar_tesorero_coordinador_encuentro(nuevo_encuentro.tesorero, nuevo_encuentro.coordinador)
-            ok = True
+            messages.success(
+                request,
+                _(
+                    '''
+                    Se ha creado el encuentro correctamente.
+                    <a alt="Listar Encuentros" class="alert-link" href="{0}"> Volver a la lista de encuentros</a> o
+                    <a alt="Agregar encontrista" class="alert-link" href="{1}"> agregar encontristas a este encuentro</a>
+                    '''.format(
+                            reverse('encuentros:listar_encuentros'),
+                            reverse('encuentros:agregar_encontrista', args=(nuevo_encuentro.id, ))
+                        )
+                )
+            )
+            return redirect('encuentros:crear_encuetro')
+        else:
+            if 'grupos' in request.POST:
+                grupos = Grupo.objects.filter(id__in=request.POST.getlist('grupos'))
+                grupo_errors = []
+                for grupo in grupos:
+                    grupo_errors.append([grupo.id.__str__(), str(grupo)])
+                data['grupo_errors'] = grupo_errors
+            messages.error(request, 'Aún hay errores en el formulario, verificalo, y envialo nuevamente')
+
     else:
         form = CrearEncuentroForm()
 
-    return render_to_response('encuentros/crear_encuentro.html', locals(), context_instance=RequestContext(request))
+    data['form'] = form
+
+    return render(request, 'encuentros/crear_encuentro.html', data)
 
 
 @user_passes_test(adminTest, login_url=URL)
@@ -57,19 +75,12 @@ def editar_encuentro(request, id_encuentro):
 
     accion = 'Editar'
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
+    data = {'accion': accion, 'encuentro': encuentro}
+
     tesorero = Miembro.objects.get(id=encuentro.tesorero.id)
     coordinador = Miembro.objects.get(id=encuentro.coordinador.id)
-    if request.method == 'POST':
-        if 'combo_tesorero' in request.POST:
-            red = Red.objects.get(id=request.POST['id_red'])
-            value = request.POST['value']
-            querys = Q(nombre__icontains=value) | Q(primerApellido__icontains=value) | Q(cedula__icontains=value)
-            tipo = TipoMiembro.objects.get(nombre__iexact='lider')
-            miembros = Miembro.objects.filter(miembro_cambiado__nuevoTipo=tipo, estado='A', grupo__red=red)
-            miembros = miembros.filter(querys)[:10]
-            response = [{'pk': str(a.id), 'nombre': str(a)} for a in miembros]
-            return HttpResponse(json.dumps(response), content_type='application/json')
 
+    if request.method == 'POST':
         form = EditarEncuentroForm(data=request.POST, instance=encuentro)
 
         if form.is_valid():
@@ -89,28 +100,34 @@ def editar_encuentro(request, id_encuentro):
                     tesorero.usuario.save()
             encuentro_editado = form.save()
             avisar_tesorero_coordinador_encuentro(encuentro_editado.tesorero, encuentro_editado.coordinador)
-            ok = True
+            messages.success(
+                request,
+                _(
+                    '''
+                    Se ha editado el encuentro correctamente.
+                    <a alt="Listar Encuentros" class="alert-link" href="{0}"> Volver a la lista de encuentros</a> o
+                    <a alt="Agregar encontrista" class="alert-link" href="{1}"> agregar encontristas a este encuentro</a>
+                    '''.format(
+                            reverse('encuentros:listar_encuentros'),
+                            reverse('encuentros:agregar_encontrista', args=(encuentro_editado.id, ))
+                        )
+                )
+            )
+            return redirect(reverse('encuentros:editar_encuentro', args=(id_encuentro)))
+        else:
+            if 'grupos' in request.POST:
+                grupos = Grupo.objects.filter(id__in=request.POST.getlist('grupos'))
+                grupo_errors = []
+                for grupo in grupos:
+                    grupo_errors.append([grupo.id.__str__(), str(grupo)])
+                data['grupo_errors'] = grupo_errors
+            messages.error(request, 'Aún hay errores en el formulario, verificalo, y envialo nuevamente')
 
     else:
         form = EditarEncuentroForm(instance=encuentro)
+    data['form'] = form
 
-    return render_to_response('encuentros/crear_encuentro.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(tesorero_administrador_test, login_url=URL)
-def obtener_grupos(request):
-    """Vista que devuelve una lista de grupos en JSON de acuerdo a un valor inicial enviado."""
-
-    if request.method == 'POST':
-        if 'combo_grupo' in request.POST:
-            red = Red.objects.get(id=request.POST['id_red'])
-            value = request.POST.get('value', '')
-            querys = Q(lideres__nombre__icontains=value) |\
-                Q(lideres__primerApellido__icontains=value) | Q(lideres__cedula__icontains=value)
-            grupos = Grupo.objects.filter(red=red)
-            grupos = grupos.filter(querys)[:10]
-            response = [{'pk': str(a.id), 'nombre': str(a)} for a in grupos]
-            return HttpResponse(json.dumps(response), content_type='application/json')
+    return render(request, 'encuentros/crear_encuentro.html', data)
 
 
 @user_passes_test(admin_tesorero_coordinador_test, login_url=URL)
@@ -134,8 +151,9 @@ def agregar_encontrista(request, id_encuentro):
 
     accion = 'Crear'
     encuentro = get_object_or_404(Encuentro, pk=id_encuentro)
+    data = {'accion': accion, 'encuentro': encuentro}
     mismo = solo_encuentros_miembro(request, encuentro)
-    if mismo:
+    if mismo is not None:
         return mismo
 
     if request.method == 'POST':
@@ -145,11 +163,27 @@ def agregar_encontrista(request, id_encuentro):
             encontrista = form.save(commit=False)
             encontrista.encuentro = encuentro
             encontrista.save()
-            ok = True
+            messages.success(
+                request,
+                _(
+                    '''Se ha creado el encontrista exitosamente,
+                    <a href="{}" class="alert-link">Volver a la lista de encuentros</a>'''.format(
+                        reverse('encuentros:listar_encuentros')
+                    )
+                )
+            )
+            return redirect(reverse('encuentros:agregar_encontrista', args=(id_encuentro, )))
+        else:
+            messages.error(
+                request,
+                _('Parece que aun hay errores con el formulario, verificalo y envialo nuevamente')
+            )
     else:
         form = NuevoEncontristaForm(encuentro=encuentro)
+    data['ecuentro'] = encuentro
+    data['form'] = form
 
-    return render_to_response('encuentros/agregar_encontrista.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'encuentros/agregar_encontrista.html', data)
 
 
 @user_passes_test(tesorero_administrador_test, login_url=URL)
@@ -159,6 +193,7 @@ def editar_encontrista(request, id_encontrista):
     accion = 'Editar'
     encontrista = get_object_or_404(Encontrista, pk=id_encontrista)
     encuentro = encontrista.encuentro
+    data = {'accion': accion, 'encuentro': encuentro, 'encontrista': encontrista}
     mismo = solo_encuentros_miembro(request, encuentro)
     if mismo:
         return mismo
@@ -168,11 +203,25 @@ def editar_encontrista(request, id_encontrista):
 
         if form.is_valid():
             form.save()
-            ok = True
+            messages.success(
+                request,
+                _(
+                    '''Se ha editado el encontrista exitosamente,
+                    <a href="{}" class="alert-link">Volver a la lista de encuentros</a>'''.format(
+                        reverse('encuentros:listar_encuentros')
+                    )
+                )
+            )
+        else:
+            messages.error(
+                request,
+                _('Parece que aun hay errores con el formulario, verificalo y envialo nuevamente')
+            )
     else:
         form = NuevoEncontristaForm(instance=encontrista)
+    data['form'] = form
 
-    return render_to_response('encuentros/agregar_encontrista.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'encuentros/agregar_encontrista.html', data)
 
 
 @user_passes_test(tesorero_administrador_test, login_url=URL)
@@ -229,7 +278,7 @@ def asistencia_encuentro(request, id_encuentro):
                     encontrista.save()
                 if request.user.has_perm('miembros.es_administrador'):
                     time.sleep(1)
-                    crear_miembros_con_encontristas(seleccionados)
+                    crear_miembros_con_encontristas(seleccionados, request.iglesia)
                 return HttpResponseRedirect('/encuentro/encuentros/')
             else:
                 pass

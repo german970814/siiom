@@ -109,7 +109,7 @@ def _update_virtualenv(user, site_name, source_folder):
         run('virtualenv --python=python3 %s' % (virtualenv_folder,))
         run('%s/bin/pip install newrelic' % (virtualenv_folder,))
 
-    run('%s/bin/pip install -r %s/requirements.txt' % (
+    run('%s/bin/pip install -r %s/requirements/production.txt' % (
         virtualenv_folder, source_folder
     ))
 

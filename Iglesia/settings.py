@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'waffle',
     'treebeard',
+    'common',
     'iglesias',
     'miembros',
     'academia',
@@ -50,6 +51,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'miembros.middleware.MiembroMiddleWare',
+    'organizacional.middleware.EmpleadoMiddleWare',
+    'iglesias.middleware.IglesiaMiddleware'
 )
 
 ROOT_URLCONF = 'Iglesia.urls'

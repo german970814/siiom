@@ -1,6 +1,6 @@
 from common.tests.base import BaseTest
 from grupos.tests.factories import GrupoFactory, RedFactory
-from miembros.models import Miembro
+from ..models import Miembro
 from .factories import MiembroFactory
 
 
