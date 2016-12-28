@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import Permission
+from common.managers import IglesiaMixinQuerySet
 
 
-class MiembroQuerySet(models.QuerySet):
+class MiembroQuerySet(IglesiaMixinQuerySet, models.QuerySet):
     """
     Queryset personalizado para los miembros.
     """
@@ -25,7 +26,7 @@ class MiembroQuerySet(models.QuerySet):
         return self.filter(grupo__red=red)
 
 
-class MiembroManager(models.Manager):
+class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
     """
     Manager para los miembros.
     """

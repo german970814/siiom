@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _lazy
 
 from common.models import IglesiaMixin
-from .managers import MiembroManager, MiembroQuerySet
+from .managers import MiembroManager
 
 
 class Zona(models.Model):
@@ -165,7 +165,7 @@ class Miembro(IglesiaMixin, models.Model):
     fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers
-    objects = MiembroManager.from_queryset(MiembroQuerySet)()
+    objects = MiembroManager()
 
     def __str__(self):
         return "{0} {1} ({2})".format(self.nombre.upper(), self.primerApellido.upper(), self.cedula)

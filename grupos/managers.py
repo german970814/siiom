@@ -21,7 +21,7 @@ class GrupoQuerySet(models.QuerySet):
         return self.filter(estado=self.model.ACTIVO, **kwargs)
 
 
-class GrupoManager(AL_NodeManager):
+class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     """
     Manager personalizado para los grupos.
     """
