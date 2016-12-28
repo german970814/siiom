@@ -206,14 +206,12 @@
         var selected_before = new Array();
 
         {% if form.errors %}
-            {% for value in grupo_errors %}
-                selected_before.push(['{{ value.0 }}', '{{ value.1 }}']);
-            {% endfor %}
-        {% elif form.instance.id %}
-            {% for value in form.instance.lideres.all %}
+            {% for value in form.fields.lideres.queryset.all %}
                 selected_before.push(['{{ value.id }}', '{{ value }}']);
             {% endfor %}
         {% endif %}
+
+        console.log(selected_before);
 
         $('#{{ form.lideres.id_for_label }}').IGSearch({
             url: "{% url 'common:busqueda_miembro_api' red_id %}",
