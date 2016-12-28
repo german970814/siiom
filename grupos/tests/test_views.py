@@ -50,12 +50,10 @@ class OrganigramaGruposViewTest(BaseTest):
         Prueba que un líder solo pueda ver el arbol desde su grupo hacia abajo.
         """
 
-        self.usuario.user_permissions.add(Permission.objects.get(codename='es_lider'))
         miembro = Grupo.objects.get(id=300).lideres.first()
-        miembro.usuario = self.usuario
-        miembro.save()
+        self.login_usuario(miembro.usuario)
+        response = self.client.get(self.URL)
 
-        response = self.ingresar_pagina()
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.TEMPLATE)
         self.assertListEqual(response.context['arbol'], self.lista_arbol_cb2)

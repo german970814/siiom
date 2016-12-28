@@ -27,10 +27,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'waffle',
     'treebeard',
+    'common',
     'iglesias',
     'miembros',
     'academia',
-    'common',
     'grupos',
     'reportes',
     'encuentros',
@@ -52,6 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'waffle.middleware.WaffleMiddleware',
     'miembros.middleware.MiembroMiddleWare',
+    'organizacional.middleware.EmpleadoMiddleWare',
     'iglesias.middleware.IglesiaMiddleware'
 )
 

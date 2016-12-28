@@ -12,6 +12,7 @@ class BaseTest(TestCase):
     Clase base para las pruebas unitarias.
     """
 
+    MSJ_OBLIGATORIO = 'Este campo es obligatorio.'
     user_factory = UsuarioFactory
 
     def crear_arbol(self):
