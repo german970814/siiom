@@ -205,7 +205,7 @@
 
         var selected_before = new Array();
 
-        {% if form.errors %}
+        {% if form.errors or form.instance.id %}
             {% for value in form.fields.lideres.queryset.all %}
                 selected_before.push(['{{ value.id }}', '{{ value }}']);
             {% endfor %}
