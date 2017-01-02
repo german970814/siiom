@@ -24,7 +24,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm, RedForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -752,3 +752,21 @@ def confirmar_ofrenda_discipulado(request, pk):
         reuniones = grupo.reuniones_discipulado_sin_ofrenda_confirmada
 
     return render(request, 'grupos/confirmar_ofrenda_discipulado.html', {'reuniones': reuniones})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def crear_red(request):
+    """
+    Permite a un administrador crear una red de una iglesia.
+    """
+
+    if request.method == 'POST':
+        form = RedForm(data=request.POST)
+        if form.is_valid():
+            form.save(request.iglesia)
+            return redirect('grupos:red_nueva')
+    else:
+        form = RedForm()
+
+    return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': 'Crear'})

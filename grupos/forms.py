@@ -440,3 +440,23 @@ class TransladarGrupoForm(CustomForm):
 
     def transladar(self):
         self.grupo.transladar(self.cleaned_data['nuevo'])
+
+
+class RedForm(CustomModelForm):
+    """
+    Formulario para la creación y edición de una red de una iglesia.
+    """
+
+    class Meta:
+        model = Red
+        fields = ['nombre']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+
+    def save(self, iglesia=None):
+        if iglesia:
+            self.instance.iglesia = iglesia
+
+        return super().save()

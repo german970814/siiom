@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),  # revisada
 
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
+    url(r'^redes/nueva/$', views.crear_red, name='red_nueva'),
     url(r'^(?P<pk>\d+)$', views.detalle_grupo, name='detalle'),
     url(r'^redes/(?P<pk>\d+)/$', views.listar_grupos, name='listar'),
     url(r'^(?P<pk>\d+)/editar/$', views.editar_grupo, name='editar'),

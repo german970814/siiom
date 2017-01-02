@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
+from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
@@ -602,3 +603,62 @@ class DetalleGrupoViewTest(BaseTest):
         response = self.client.get(reverse(self.URL_NAME, args=[grupo.id]))
 
         self.assertEqual(response.status_code, 403)
+
+
+class CrearRedViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista crear red para una iglesia.
+    """
+
+    URL = 'grupos:red_nueva'
+
+    def setUp(self):
+        self.admin = UsuarioFactory(admin=True)
+
+    def datos_formulario(self):
+        return {'nombre': 'red'}
+
+    def test_admin_get(self):
+        """
+        Prueba que el administrador pueda ver el template.
+        """
+
+        self.login_usuario(self.admin)
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_nombre', html=False)
+
+    def test_formulario_valido_crea_red_iglesia_correcta(self):
+        """
+        Prueba que cuando se haga un POST y el formulario sea valido la red creada pertenezca a la iglesia del usuario
+        logueado.
+        """
+
+        iglesia_correcta = self.admin.miembro_set.first().iglesia
+        otro_iglesia = IglesiaFactory(nombre='nueva iglesia')
+
+        self.login_usuario(self.admin)
+        self.post(self.URL, data=self.datos_formulario())
+
+        red = Red.objects.get(nombre='red')
+        self.assertEqual(iglesia_correcta, red.iglesia)
+        self.assertNotEqual(iglesia_correcta, otro_iglesia)
+
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, data=self.datos_formulario())
+
+        self.assertRedirects(response, self.reverse(self.URL))
+
+    def test_formulario_invalido_muestra_errores(self):
+        """
+        prueba que si se hace POST y el formulario es invalido se muestren los errores correctamente.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, data={})
+
+        self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
