@@ -1,5 +1,6 @@
 import factory
 import datetime
+from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import BarrioFactory
 
 
@@ -10,6 +11,7 @@ class RedFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('nombre',)
 
     nombre = 'jovenes'
+    iglesia = factory.SubFactory(IglesiaFactory)
 
 
 class GrupoFactory(factory.django.DjangoModelFactory):

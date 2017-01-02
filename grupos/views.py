@@ -765,6 +765,7 @@ def crear_red(request):
         form = RedForm(data=request.POST)
         if form.is_valid():
             form.save(request.iglesia)
+            messages.success(request, _('La red se ha creado correctamente.'))
             return redirect('grupos:red_nueva')
     else:
         form = RedForm()
