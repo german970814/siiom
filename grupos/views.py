@@ -21,10 +21,10 @@ from common.decorators import permisos_requeridos
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
-    FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioSetGeoPosicionGrupo,
+    FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm, RedForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -210,57 +210,6 @@ def reportarReunionDiscipulado(request):
         else:
             form = FormularioReportarReunionDiscipulado(miembro=miembro)
     return render_to_response('grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def listarRedes(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-
-        if 'eliminar' in request.POST:
-            okElim = eliminar(request, Red, request.POST.getlist('seleccionados'))
-            if okElim == 1:
-                return HttpResponseRedirect('')
-    redes = list(Red.objects.all())
-
-    return render_to_response('grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def crearRed(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    accion = 'Crear'
-    if request.method == "POST":
-        form = FormularioCrearRed(data=request.POST)
-        if form.is_valid():
-            nuevaRed = form.save()
-            ok = True
-    else:
-        form = FormularioCrearRed()
-    return render_to_response('grupos/crear_red.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def editarRed(request, pk):
-    accion = 'Editar'
-
-    try:
-        red = Red.objects.get(pk=pk)
-    except Red.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
-        form = FormularioCrearRed(request.POST or None, instance=red)
-
-        if form.is_valid():
-            ok = True
-            form.save()
-
-    else:
-        form = FormularioCrearRed(instance=red)
-        return render_to_response("grupos/crear_red.html", locals(), context_instance=RequestContext(request))
-
-    return render_to_response("grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
@@ -752,3 +701,53 @@ def confirmar_ofrenda_discipulado(request, pk):
         reuniones = grupo.reuniones_discipulado_sin_ofrenda_confirmada
 
     return render(request, 'grupos/confirmar_ofrenda_discipulado.html', {'reuniones': reuniones})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def crear_red(request):
+    """
+    Permite a un administrador crear una red de su iglesia.
+    """
+
+    if request.method == 'POST':
+        form = RedForm(data=request.POST)
+        if form.is_valid():
+            form.save(request.iglesia)
+            messages.success(request, _('La red se ha creado correctamente.'))
+            return redirect('grupos:red_nueva')
+    else:
+        form = RedForm()
+
+    return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': _('Crear')})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def editar_red(request, pk):
+    """
+    Permite a un administrador editar una red de su iglesia.
+    """
+
+    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    if request.method == 'POST':
+        form = RedForm(data=request.POST, instance=red)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('La red fue editada correctamente.'))
+            return redirect('grupos:red_editar', pk=pk)
+    else:
+        form = RedForm(instance=red)
+
+    return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': _('Editar')})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def listar_redes(request):
+    """
+    Permite a un administrador listar redes de su iglesia.
+    """
+
+    redes = Red.objects.iglesia(request.iglesia)
+    return render(request, 'grupos/lista_redes.html', {'redes': redes})

@@ -229,7 +229,8 @@ def visitasPorMes(request, por_red):
             meses = request.POST.getlist('meses')
             opciones = {'ano': ano}
             if por_red:
-                red = Red.objects.get(id=form.cleaned_data['red'])
+                # red = Red.objects.get(id=form.cleaned_data['red'])
+                red = form.cleaned_data['red']
                 opciones['red'] = red.nombre.capitalize()
             sw = True
 

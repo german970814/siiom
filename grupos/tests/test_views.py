@@ -1,14 +1,14 @@
 from unittest import mock
-from django.http import Http404
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
+from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
-from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory
+from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
 
 
 class OrganigramaGruposViewTest(BaseTest):
@@ -187,8 +187,8 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:nuevo', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:nuevo', args=(100,)))
+        self.response_404(response)
 
     def test_admin_get_template(self):
         """
@@ -271,8 +271,8 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:editar', args=(1000,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:editar', args=(1000,)))
+        self.response_404(response)
 
     def test_admin_get_template(self):
         """
@@ -337,8 +337,8 @@ class ListarGruposRedViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:listar', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:listar', args=(100,)))
+        self.response_404(response)
 
     def test_get_muestra_grupos_de_red(self):
         """
@@ -372,8 +372,8 @@ class TransladarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:transladar', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:transladar', args=(1000,)))
+        self.response_404(response)
 
     def test_admin_get_template(self):
         """
@@ -452,8 +452,8 @@ class ConfirmarOfrendaGARViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        self.client.get(reverse('grupos:confirmar_ofrenda_GAR', args=(1000,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:confirmar_ofrenda_GAR', args=(1000,)))
+        self.response_404(response)
 
     def test_get_muestra_reuniones_sin_confirmar(self):
         """
@@ -520,8 +520,8 @@ class ConfirmarOfrendaDiscipuladoViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
+        self.response_404(response)
 
     def test_get_muestra_reuniones_sin_confirmar(self):
         """
@@ -563,8 +563,8 @@ class DetalleGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        self.client.get(reverse(self.URL_NAME, args=[1000]))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse(self.URL_NAME, args=[1000]))
+        self.response_404(response)
 
     def test_get_grupo_muestra_info_grupo(self):
         """
@@ -602,3 +602,160 @@ class DetalleGrupoViewTest(BaseTest):
         response = self.client.get(reverse(self.URL_NAME, args=[grupo.id]))
 
         self.assertEqual(response.status_code, 403)
+
+
+class CrearRedViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista crear red para una iglesia.
+    """
+
+    URL = 'grupos:red_nueva'
+
+    def setUp(self):
+        self.admin = UsuarioFactory(admin=True)
+
+    def datos_formulario(self):
+        return {'nombre': 'red'}
+
+    def test_admin_get(self):
+        """
+        Prueba que el administrador pueda ver el template.
+        """
+
+        self.login_usuario(self.admin)
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_nombre', html=False)
+
+    def test_formulario_valido_crea_red_iglesia_correcta(self):
+        """
+        Prueba que cuando se haga un POST y el formulario sea valido la red creada pertenezca a la iglesia del usuario
+        logueado.
+        """
+
+        iglesia_correcta = self.admin.miembro_set.first().iglesia
+        otro_iglesia = IglesiaFactory(nombre='nueva iglesia')
+
+        self.login_usuario(self.admin)
+        self.post(self.URL, data=self.datos_formulario())
+
+        red = Red.objects.get(nombre='red')
+        self.assertEqual(iglesia_correcta, red.iglesia)
+        self.assertNotEqual(iglesia_correcta, otro_iglesia)
+
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, data=self.datos_formulario())
+
+        self.assertRedirects(response, self.reverse(self.URL))
+
+    def test_formulario_invalido_muestra_errores(self):
+        """
+        prueba que si se hace POST y el formulario es invalido se muestren los errores correctamente.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, data={})
+
+        self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
+
+
+class EditarRedViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista editar red de una iglesia.
+    """
+
+    URL = 'grupos:red_editar'
+
+    def setUp(self):
+        self.admin = UsuarioFactory(admin=True)
+        self.red = RedFactory()
+
+    def datos_formulario(self):
+        return {'nombre': 'red editada'}
+
+    def test_get_red_no_existe_devuelve_404(self):
+        """
+        Prueba que si se envia una red que no existe la vista devuelve un status code de 404.
+        """
+
+        self.login_usuario(self.admin)
+        self.get('grupos:editar', pk=4000)
+
+        self.response_404()
+
+    def test_get_red_iglesia_diferente_devuelve_404(self):
+        """
+        Prueba que si el usuario intenta accesar una red que no sea de su iglesia la vista devuelva un status de 404.
+        """
+
+        otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
+        self.login_usuario(self.admin)
+        self.get(self.URL, pk=otra_red.id)
+
+        self.assertNotEqual(otra_red.iglesia_id, self.red.iglesia_id)
+        # self.response_404()
+        self.response_404()
+
+    def test_admin_get_template(self):
+        """
+        Prueba que el administrador vea la página con GET.
+        """
+
+        self.login_usuario(self.admin)
+        self.get_check_200(self.URL, pk=self.red.id)
+
+        self.assertResponseContains('id_nombre', html=False)
+
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
+        """
+
+        data = self.datos_formulario()
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, pk=self.red.id, data=data)
+
+        self.red.refresh_from_db()
+        self.assertEqual(self.red.nombre, data['nombre'])
+        self.assertRedirects(response, self.reverse(self.URL, pk=self.red.id))
+
+    def test_formulario_invalido_muestra_errores(self):
+        """
+        prueba que si se hace POST y el formulario es invalido se muestren los errores correctamente.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, pk=self.red.id, data={})
+
+        self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
+
+
+class ListarRedesViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista listar redes de una iglesia.
+    """
+
+    URL = 'grupos:redes_listar'
+
+    def setUp(self):
+        self.admin = UsuarioFactory(admin=True)
+
+    def test_get_muestra_redes_iglesia_correcta(self):
+        """
+        Prueba que se listen las redes de la iglesia del usuario logueado.
+        """
+
+        red1 = RedFactory()
+        red2 = RedFactory(nombre='adultos jovenes')
+        red_incorrecta = RedFactory(nombre='otra red', iglesia__nombre='otra iglesia')
+
+        self.login_usuario(self.admin)
+        self.get_check_200(self.URL)
+
+        self.assertResponseContains(red1.nombre.capitalize(), html=False)
+        self.assertResponseContains(red2.nombre.capitalize(), html=False)
+        self.assertResponseNotContains(red_incorrecta.nombre.capitalize(), html=False)

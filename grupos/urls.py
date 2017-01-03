@@ -2,9 +2,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^listar_redes/$', views.listarRedes, name="listar_redes"),  # revisada
-    url(r'^crear_red/$', views.crearRed, name="crear_red"),  # revisada
-    url(r'^editar_red/(?P<pk>\d+)$', views.editarRed, name="editar_red"),  # revisada
     url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),  # revisada
     url(r'^crear_predica/$', views.crearPredica, name="crear_predica"),  # revisada
     url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),  # revisada
@@ -13,12 +10,15 @@ urlpatterns = [
     url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),  # revisada
 
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
+    url(r'^redes/$', views.listar_redes, name='redes_listar'),
+    url(r'^redes/nueva/$', views.crear_red, name='red_nueva'),
     url(r'^(?P<pk>\d+)$', views.detalle_grupo, name='detalle'),
-    url(r'^redes/(?P<pk>\d+)/$', views.listar_grupos, name='listar'),
     url(r'^(?P<pk>\d+)/editar/$', views.editar_grupo, name='editar'),
+    url(r'^redes/(?P<pk>\d+)/$', views.editar_red, name='red_editar'),
     url(r'^redes/(?P<pk>\d+)/nuevo/$', views.crear_grupo, name='nuevo'),
     url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),
     url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar'),
+    url(r'^redes/(?P<pk>\d+)/grupos/$', views.listar_grupos, name='listar'),
     url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR'),
     url(r'^(?P<pk>\d+)/confirmar_ofrenda_GAR/$', views.confirmar_ofrenda_GAR, name='confirmar_ofrenda_GAR'),
     url(
