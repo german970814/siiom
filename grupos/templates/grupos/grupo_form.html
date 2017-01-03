@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n staticfiles %}
 
 {% block contenido %}
 <div class="container">
@@ -194,11 +194,34 @@
 {% endblock contenido %}
 
 {% block js %}
+<script src="{% static 'Scripts/funciones.js' %}" type="text/javascript"></script>
+<script src="{% static 'Scripts/IGSearch.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#id_fechaApertura").datetimepicker({
             maxDate : moment(),
             format: 'DD/MM/YYYY'
+        });
+
+        var selected_before = new Array();
+
+        {% if form.errors or form.instance.id %}
+            {% for value in form.fields.lideres.queryset.all %}
+                selected_before.push(['{{ value.id }}', '{{ value }}']);
+            {% endfor %}
+        {% endif %}
+
+        console.log(selected_before);
+
+        $('#{{ form.lideres.id_for_label }}').IGSearch({
+            url: "{% url 'common:busqueda_miembro_api' red_id %}",
+            key: 'miembros',
+            items: selected_before,
+            messageError: 'Ha ocurrido un error y no se pueden mostrar los lideres',
+            prerequest: function (options) {
+                options.data.grupo = '{{ grupo_id|safe }}';
+                return true;
+            }
         });
 	});
 </script>

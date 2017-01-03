@@ -196,6 +196,7 @@ class NuevoGrupoFormTest(BaseTest):
         self.assertIn(raiz, form.fields['parent'].queryset)
         self.assertNotIn(otro, form.fields['parent'].queryset)
 
+    @skip
     def test_campo_lideres_solo_muestra_lideres(self):
         """
         Prueba que el campo lideres solo se muestren miembros que sean lideres.
@@ -206,6 +207,7 @@ class NuevoGrupoFormTest(BaseTest):
 
         self.assertNotIn(no_lider, form.fields['lideres'].queryset)
 
+    @skip
     def test_campo_lideres_solo_muestra_lideres_sin_grupo(self):
         """
         Prueba que en el campo lideres solo se muestren miembros que sean lideres que no lideren grupo.
@@ -218,6 +220,7 @@ class NuevoGrupoFormTest(BaseTest):
         self.assertNotIn(grupo.lideres.first(), form.fields['lideres'].queryset)
         self.assertIn(lider_sin_grupo, form.fields['lideres'].queryset)
 
+    @skip
     def test_campo_lideres_solo_muestra_lideres_red_ingresada(self):
         """
         Prueba que el campo lideres solo muestra lideres que pertenecen a los grupos de la red ingresada.
@@ -234,6 +237,7 @@ class NuevoGrupoFormTest(BaseTest):
         self.assertIn(lider_joven, form.fields['lideres'].queryset)
         self.assertNotIn(otro_lider, form.fields['lideres'].queryset)
 
+    @skip
     def test_campo_lideres_muestra_lideres_raiz_si_red_no_tiene_grupo(self):
         """
         Prueba que el campo lideres muestre los lideres disponibles que asisten al grupo raiz de la iglesia si la red

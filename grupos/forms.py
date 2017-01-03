@@ -340,18 +340,31 @@ class NuevoGrupoForm(BaseGrupoForm):
 
     def __init__(self, red, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.red = red
+
         self.fields['parent'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+
         grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
+
         if grupos_query.count() == 0:
             grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
 
         self.fields['parent'].queryset = grupos_query
-        query_lideres = self.fields['lideres'].queryset.red(red)
-        if query_lideres.count() == 0:
-            query_lideres = query_lideres | Grupo.objects.raiz().miembro_set.lideres_disponibles()
 
-        self.fields['lideres'].queryset = query_lideres
-        self.red = red
+        # se agrega el queryset de lideres como vacio, para busqueda por ajax a la API
+        self.fields['lideres'].queryset = Miembro.objects.none()
+
+        if self.is_bound:
+            # si está lleno
+            if hasattr(self.data, 'getlist'):
+                # busca por getlist
+                lideres = self.data.getlist('lideres', [])
+            else:
+                # este caso solo se da, si se envian datos desde un diccionario (PRUEBAS)
+                lideres = self.data.get('lideres', [])
+
+            # se filtra por los datos que vengan con el formulario
+            self.fields['lideres'].queryset = Miembro.objects.filter(id__in=lideres)
 
     def save(self):
         try:
@@ -379,14 +392,9 @@ class EditarGrupoForm(NuevoGrupoForm):
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
-        # descendientes = [grupo.id for grupo in Grupo.get_tree(self.instance)]
-        # parent_query = self.fields['parent'].queryset.exclude(id__in=descendientes)
-        # if self.instance.parent.is_root():
-        #     root_query = Grupo.objects.prefetch_related('lideres').filter(id=self.instance.parent.id)
-        #     self.fields['parent'].queryset = self.fields['parent'].queryset | root_query
-
-        self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
-        self.fields['lideres'].initial = self.instance.lideres.all()
+        if not self.is_bound:
+            # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
+            self.fields['lideres'].queryset = self.fields['lideres'].initial = self.instance.lideres.all()
 
     def save(self):
         try:

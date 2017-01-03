@@ -55,12 +55,18 @@ class CrearEncuentroForm(CustomModelForm):
 
         if self.is_bound:
             red = self.data.get('red', None) or None
-            grupos = self.data.getlist('grupos', None) or None
+            if hasattr(self.data, 'getlist'):
+                grupos = self.data.getlist('grupos', None) or None
+            else:
+                grupos = self.data.get('grupos', None) or None
 
             if red is not None:
                 try:
                     red = Red.objects.get(id=red)
-                    self.fields['grupos'].queryset = Grupo.objects.filter(red=red).prefetch_related('lideres')
+                    if grupos:
+                        self.fields['grupos'].queryset = Grupo.objects.filter(id__in=grupos).prefetch_related('lideres')
+                    else:
+                        self.fields['grupos'].queryset = Grupo.objects.none()  # .filter(red=red).prefetch_related('lideres')
                 except Red.DoesNotExist:
                     self.fields['grupos'].queryset = Grupo.objects.none()
             else:
