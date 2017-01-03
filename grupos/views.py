@@ -754,3 +754,14 @@ def editar_red(request, pk):
         form = RedForm(instance=red)
 
     return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': _('Editar')})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def listar_redes(request):
+    """
+    Permite a un administrador listar redes de su iglesia.
+    """
+
+    redes = Red.objects.iglesia(request.iglesia)
+    return render(request, 'grupos/lista_redes.html', {'redes': redes})

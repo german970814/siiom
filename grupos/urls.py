@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),  # revisada
 
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
+    url(r'^redes/$', views.listar_redes, name='redes_listar'),
     url(r'^redes/nueva/$', views.crear_red, name='red_nueva'),
     url(r'^(?P<pk>\d+)$', views.detalle_grupo, name='detalle'),
     url(r'^(?P<pk>\d+)/editar/$', views.editar_grupo, name='editar'),

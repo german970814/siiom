@@ -1,5 +1,4 @@
 from unittest import mock
-from django.http import Http404
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission
@@ -733,3 +732,30 @@ class EditarRedViewTest(BaseTest):
         response = self.post(self.URL, pk=self.red.id, data={})
 
         self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
+
+
+class ListarRedesViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista listar redes de una iglesia.
+    """
+
+    URL = 'grupos:redes_listar'
+
+    def setUp(self):
+        self.admin = UsuarioFactory(admin=True)
+
+    def test_get_muestra_redes_iglesia_correcta(self):
+        """
+        Prueba que se listen las redes de la iglesia del usuario logueado.
+        """
+
+        red1 = RedFactory()
+        red2 = RedFactory(nombre='adultos jovenes')
+        red_incorrecta = RedFactory(nombre='otra red', iglesia__nombre='otra iglesia')
+
+        self.login_usuario(self.admin)
+        self.get_check_200(self.URL)
+
+        self.assertResponseContains(red1.nombre.capitalize(), html=False)
+        self.assertResponseContains(red2.nombre.capitalize(), html=False)
+        self.assertResponseNotContains(red_incorrecta.nombre.capitalize(), html=False)
