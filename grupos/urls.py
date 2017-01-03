@@ -2,7 +2,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^listar_redes/$', views.listarRedes, name="listar_redes"),  # revisada
     url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),  # revisada
     url(r'^crear_predica/$', views.crearPredica, name="crear_predica"),  # revisada
     url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),  # revisada

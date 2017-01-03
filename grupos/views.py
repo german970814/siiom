@@ -212,20 +212,6 @@ def reportarReunionDiscipulado(request):
     return render_to_response('grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def listarRedes(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-
-        if 'eliminar' in request.POST:
-            okElim = eliminar(request, Red, request.POST.getlist('seleccionados'))
-            if okElim == 1:
-                return HttpResponseRedirect('')
-    redes = list(Red.objects.all())
-
-    return render_to_response('grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
-
-
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
 def listarPredicas(request):
     miembro = Miembro.objects.get(usuario=request.user)
