@@ -1,8 +1,9 @@
 from django.db import models
 from treebeard.al_tree import AL_NodeManager
+from common.managers import IglesiaMixinQuerySet
 
 
-class GrupoQuerySet(models.QuerySet):
+class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
     """
     Queryset personalizado para los grupos.
     """

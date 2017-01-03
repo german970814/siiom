@@ -16,7 +16,7 @@ class Red(IglesiaMixin, models.Model):
         return self.nombre
 
 
-class Grupo(AL_Node):
+class Grupo(IglesiaMixin, AL_Node):
     """
     Modelo para guardar la información de los grupos de la iglesia.
     """
