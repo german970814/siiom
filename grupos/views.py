@@ -758,7 +758,7 @@ def confirmar_ofrenda_discipulado(request, pk):
 @permission_required('miembros.es_administrador', raise_exception=True)
 def crear_red(request):
     """
-    Permite a un administrador crear una red de una iglesia.
+    Permite a un administrador crear una red de su iglesia.
     """
 
     if request.method == 'POST':
@@ -770,4 +770,24 @@ def crear_red(request):
     else:
         form = RedForm()
 
-    return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': 'Crear'})
+    return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': _('Crear')})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def editar_red(request, pk):
+    """
+    Permite a un administrador editar una red de su iglesia.
+    """
+
+    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    if request.method == 'POST':
+        form = RedForm(data=request.POST, instance=red)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('La red fue editada correctamente.'))
+            return redirect('grupos:red_editar', pk=pk)
+    else:
+        form = RedForm(instance=red)
+
+    return render(request, 'grupos/red_form.html', {'form': form, 'VERBO': _('Editar')})

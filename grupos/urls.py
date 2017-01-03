@@ -15,11 +15,12 @@ urlpatterns = [
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
     url(r'^redes/nueva/$', views.crear_red, name='red_nueva'),
     url(r'^(?P<pk>\d+)$', views.detalle_grupo, name='detalle'),
-    url(r'^redes/(?P<pk>\d+)/$', views.listar_grupos, name='listar'),
     url(r'^(?P<pk>\d+)/editar/$', views.editar_grupo, name='editar'),
+    url(r'^redes/(?P<pk>\d+)/$', views.editar_red, name='red_editar'),
     url(r'^redes/(?P<pk>\d+)/nuevo/$', views.crear_grupo, name='nuevo'),
     url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),
     url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar'),
+    url(r'^redes/(?P<pk>\d+)/grupos/$', views.listar_grupos, name='listar'),
     url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR'),
     url(r'^(?P<pk>\d+)/confirmar_ofrenda_GAR/$', views.confirmar_ofrenda_GAR, name='confirmar_ofrenda_GAR'),
     url(

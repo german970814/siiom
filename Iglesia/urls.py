@@ -8,7 +8,7 @@ from miembros.views import autenticarUsario, salir, administracion, recuperar_co
 
 admin.autodiscover()
 RedirectView.permanent = True
-handler404 = 'views.custom_404'
+# handler404 = 'views.custom_404'
 
 urlpatterns = patterns(
     '',

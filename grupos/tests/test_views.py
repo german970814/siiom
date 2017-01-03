@@ -9,7 +9,7 @@ from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
-from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory
+from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
 
 
 class OrganigramaGruposViewTest(BaseTest):
@@ -660,5 +660,76 @@ class CrearRedViewTest(BaseTest):
 
         self.login_usuario(self.admin)
         response = self.post(self.URL, data={})
+
+        self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
+
+
+class EditarRedViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista editar red de una iglesia.
+    """
+
+    URL = 'grupos:red_editar'
+
+    def setUp(self):
+        self.admin = UsuarioFactory(admin=True)
+        self.red = RedFactory()
+
+    def datos_formulario(self):
+        return {'nombre': 'red editada'}
+
+    def test_get_red_no_existe_devuelve_404(self):
+        """
+        Prueba que si se envia una red que no existe la vista devuelve un status code de 404.
+        """
+
+        self.login_usuario(self.admin)
+        self.get('grupos:editar', pk=4000)
+
+        self.response_404()
+
+    def test_get_red_iglesia_diferente_devuelve_404(self):
+        """
+        Prueba que si el usuario intenta accesar una red que no sea de su iglesia la vista devuelva un status de 404.
+        """
+
+        otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
+        self.login_usuario(self.admin)
+        self.get(self.URL, pk=otra_red.id)
+
+        self.assertNotEqual(otra_red.iglesia_id, self.red.iglesia_id)
+        # self.assertRaises(Http404)
+        self.response_404()
+
+    def test_admin_get_template(self):
+        """
+        Prueba que el administrador vea la página con GET.
+        """
+
+        self.login_usuario(self.admin)
+        self.get_check_200(self.URL, pk=self.red.id)
+
+        self.assertResponseContains('id_nombre', html=False)
+
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
+        """
+
+        data = self.datos_formulario()
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, pk=self.red.id, data=data)
+
+        self.red.refresh_from_db()
+        self.assertEqual(self.red.nombre, data['nombre'])
+        self.assertRedirects(response, self.reverse(self.URL, pk=self.red.id))
+
+    def test_formulario_invalido_muestra_errores(self):
+        """
+        prueba que si se hace POST y el formulario es invalido se muestren los errores correctamente.
+        """
+
+        self.login_usuario(self.admin)
+        response = self.post(self.URL, pk=self.red.id, data={})
 
         self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
