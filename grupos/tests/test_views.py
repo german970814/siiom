@@ -188,8 +188,8 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:nuevo', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:nuevo', args=(100,)))
+        self.response_404(response)
 
     def test_admin_get_template(self):
         """
@@ -272,8 +272,8 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:editar', args=(1000,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:editar', args=(1000,)))
+        self.response_404(response)
 
     def test_admin_get_template(self):
         """
@@ -338,8 +338,8 @@ class ListarGruposRedViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:listar', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:listar', args=(100,)))
+        self.response_404(response)
 
     def test_get_muestra_grupos_de_red(self):
         """
@@ -373,8 +373,8 @@ class TransladarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('grupos:transladar', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:transladar', args=(1000,)))
+        self.response_404(response)
 
     def test_admin_get_template(self):
         """
@@ -453,8 +453,8 @@ class ConfirmarOfrendaGARViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        self.client.get(reverse('grupos:confirmar_ofrenda_GAR', args=(1000,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:confirmar_ofrenda_GAR', args=(1000,)))
+        self.response_404(response)
 
     def test_get_muestra_reuniones_sin_confirmar(self):
         """
@@ -521,8 +521,8 @@ class ConfirmarOfrendaDiscipuladoViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('grupos:confirmar_ofrenda_discipulado', args=(1000,)))
+        self.response_404(response)
 
     def test_get_muestra_reuniones_sin_confirmar(self):
         """
@@ -564,8 +564,8 @@ class DetalleGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.usuario)
-        self.client.get(reverse(self.URL_NAME, args=[1000]))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse(self.URL_NAME, args=[1000]))
+        self.response_404(response)
 
     def test_get_grupo_muestra_info_grupo(self):
         """
@@ -698,7 +698,7 @@ class EditarRedViewTest(BaseTest):
         self.get(self.URL, pk=otra_red.id)
 
         self.assertNotEqual(otra_red.iglesia_id, self.red.iglesia_id)
-        # self.assertRaises(Http404)
+        # self.response_404()
         self.response_404()
 
     def test_admin_get_template(self):
