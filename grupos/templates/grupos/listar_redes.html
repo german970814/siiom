@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load staticfiles i18n %}
 {% block js %}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
@@ -22,8 +22,9 @@
                     formatters: {
                         "commands": function(column, row) {
                             var grupos_url = "{% url 'grupos:listar' 0 %}".replace('0', row.id);
+                            var editar_red_url = "{% url 'grupos:red_editar' 0 %}".replace('0', row.id);
                             var lideres_url = "{% url 'miembros:listar_lideres' 0 %}".replace('0', row.id);
-                            return "<button type=\"button\" title=\"Editar Red\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/grupo/editar_red/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " + "<button type=\"button\" title=\"Listar Grupos\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + grupos_url + "'\"><span class=\"zmdi zmdi-eye\"></span></button>" + "<button type=\"button\" title=\"Listar Líderes\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + lideres_url + "'\"><span class=\"zmdi zmdi-accounts\"></span></button>";
+                            return "<button type=\"button\" title=\"Editar Red\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + editar_red_url + "'\"><span class=\"zmdi zmdi-edit\"></span></button> " + "<button type=\"button\" title=\"Listar Grupos\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + grupos_url + "'\"><span class=\"zmdi zmdi-eye\"></span></button>" + "<button type=\"button\" title=\"Listar Líderes\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + lideres_url + "'\"><span class=\"zmdi zmdi-accounts\"></span></button>";
                         }
                     }
                 });
@@ -43,7 +44,7 @@
         <div class="card-header">
             <h1 class="f-700 f-20">
             	<legend><h3>Listado de las Redes</h3></legend>
-				<small><a alt="Agregar Red" href="/grupo/crear_red/">Agregar Red</a></small>
+				<small><a alt="Agregar Red" href="{% url 'grupos:red_nueva' %}">{% trans "Crear Red" %}</a></small>
 	        </h1>
 				{% if okElim == 2%}
 					<div class="row">

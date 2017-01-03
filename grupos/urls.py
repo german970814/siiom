@@ -3,8 +3,6 @@ from . import views
 
 urlpatterns = [
     url(r'^listar_redes/$', views.listarRedes, name="listar_redes"),  # revisada
-    url(r'^crear_red/$', views.crearRed, name="crear_red"),  # revisada
-    url(r'^editar_red/(?P<pk>\d+)$', views.editarRed, name="editar_red"),  # revisada
     url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),  # revisada
     url(r'^crear_predica/$', views.crearPredica, name="crear_predica"),  # revisada
     url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),  # revisada

@@ -151,18 +151,6 @@ class FormularioReportarReunionDiscipulado(forms.ModelForm):
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in=miembro.pastores())
 
 
-class FormularioCrearRed(forms.ModelForm):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioCrearRed, self).__init__(*args, **kwargs)
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Red
-        fields = '__all__'
-
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
 

@@ -21,7 +21,7 @@ from common.decorators import permisos_requeridos
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
-    FormularioReportarReunionDiscipulado, FormularioCrearRed, FormularioSetGeoPosicionGrupo,
+    FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm, RedForm
@@ -224,43 +224,6 @@ def listarRedes(request):
     redes = list(Red.objects.all())
 
     return render_to_response('grupos/listar_redes.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def crearRed(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    accion = 'Crear'
-    if request.method == "POST":
-        form = FormularioCrearRed(data=request.POST)
-        if form.is_valid():
-            nuevaRed = form.save()
-            ok = True
-    else:
-        form = FormularioCrearRed()
-    return render_to_response('grupos/crear_red.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
-def editarRed(request, pk):
-    accion = 'Editar'
-
-    try:
-        red = Red.objects.get(pk=pk)
-    except Red.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
-        form = FormularioCrearRed(request.POST or None, instance=red)
-
-        if form.is_valid():
-            ok = True
-            form.save()
-
-    else:
-        form = FormularioCrearRed(instance=red)
-        return render_to_response("grupos/crear_red.html", locals(), context_instance=RequestContext(request))
-
-    return render_to_response("grupos/crear_red.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
