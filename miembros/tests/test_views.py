@@ -26,8 +26,8 @@ class ListarLideresRedViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('miembros:listar_lideres', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('miembros:listar_lideres', args=(100,)))
+        self.response_404(response)
 
     def test_get_muestra_lideres_red(self):
         """
@@ -60,8 +60,9 @@ class TransladarMiembroViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        self.client.get(reverse('miembros:transladar', args=(100,)))
-        self.assertRaises(Http404)
+        response = self.client.get(reverse('miembros:transladar', args=(100,)))
+
+        self.response_404(response)
 
     def test_get_miembro_lider_grupo_redirecciona_sin_permisos(self):
         """

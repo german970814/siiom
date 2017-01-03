@@ -151,18 +151,6 @@ class FormularioReportarReunionDiscipulado(forms.ModelForm):
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in=miembro.pastores())
 
 
-class FormularioCrearRed(forms.ModelForm):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioCrearRed, self).__init__(*args, **kwargs)
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Red
-        fields = '__all__'
-
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
 
@@ -268,6 +256,17 @@ class FormularioEditarReunionGAR(FormularioReunionGARBase):
             'numeroLideresAsistentes', 'numeroVisitas',
             'ofrenda'
         )
+
+
+class FormularioSetGeoPosicionGrupo(CustomModelForm):
+    class Meta:
+        model = Grupo
+        fields = ('latitud', 'longitud', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['latitud'].required = True
+        self.fields['longitud'].required = True
 
 
 class BaseGrupoForm(CustomModelForm):
@@ -439,12 +438,21 @@ class TransladarGrupoForm(CustomForm):
         self.grupo.transladar(self.cleaned_data['nuevo'])
 
 
-class FormularioSetGeoPosicionGrupo(CustomModelForm):
+class RedForm(CustomModelForm):
+    """
+    Formulario para la creación y edición de una red de una iglesia.
+    """
+
     class Meta:
-        model = Grupo
-        fields = ('latitud', 'longitud', )
+        model = Red
+        fields = ['nombre']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['latitud'].required = True
-        self.fields['longitud'].required = True
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+
+    def save(self, iglesia=None):
+        if iglesia:
+            self.instance.iglesia = iglesia
+
+        return super().save()

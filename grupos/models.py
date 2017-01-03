@@ -3,11 +3,12 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _lazy
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
+from common.models import IglesiaMixin
 from consolidacion.utils import clean_direccion
-from .managers import GrupoManager, GrupoQuerySet
+from .managers import GrupoManager
 
 
-class Red(models.Model):
+class Red(IglesiaMixin, models.Model):
 
     nombre = models.CharField(max_length=100)
 
@@ -66,7 +67,7 @@ class Grupo(AL_Node):
     longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     # managers
-    objects = GrupoManager.from_queryset(GrupoQuerySet)()
+    objects = GrupoManager()
     node_order_by = ['id']
 
     class Meta:
