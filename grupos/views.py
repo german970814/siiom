@@ -539,11 +539,12 @@ def grupo_raiz(request):
     editar.
     """
 
-    raiz = Grupo.objects.raiz()
+    raiz = Grupo.objects.raiz()  # Si no existe raiz devuelve None
     if request.method == 'POST':
         form = GrupoRaizForm(instance=raiz, data=request.POST)
         if form.is_valid():
-            if form.save():
+            if form.save(request.iglesia):
+                messages.success(request, _('El grupo fue guardado correctamente.'))
                 return redirect('grupos:raiz')
     else:
         form = GrupoRaizForm(instance=raiz)
@@ -581,14 +582,14 @@ def crear_grupo(request, pk):
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
         if form.is_valid():
-            if form.save():
+            if form.save(request.iglesia):
                 messages.success(request, _('El grupo se ha creado correctamente.'))
                 return redirect('grupos:listar', pk)
     else:
         form = NuevoGrupoForm(red=red)
 
     # se agrega la red
-    data = {'form': form, 'red_id': pk}
+    data = {'form': form, 'red_id': pk, 'VERBO': _('Crear')}
 
     return render(request, 'grupos/grupo_form.html', data)
 
@@ -611,7 +612,7 @@ def editar_grupo(request, pk):
         form = EditarGrupoForm(instance=grupo)
 
     # se agregan los datos como red y grupo
-    data = {'form': form, 'red_id': grupo.red_id, 'grupo_id': grupo.id}
+    data = {'form': form, 'red_id': grupo.red_id, 'grupo_id': grupo.id, 'VERBO': _('Editar')}
 
     return render(request, 'grupos/grupo_form.html', data)
 

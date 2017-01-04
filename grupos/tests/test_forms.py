@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
+from iglesias.tests.factories import IglesiaFactory
 from ..models import Grupo, Red
 from ..forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
 from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
@@ -70,7 +71,7 @@ class GrupoRaizFormTest(TestCase):
         """
 
         form = GrupoRaizForm(data=self.datos_formulario())
-        raiz = form.save()
+        raiz = form.save(IglesiaFactory())
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -119,7 +120,7 @@ class GrupoRaizFormTest(TestCase):
         """
 
         form = GrupoRaizForm(data=self.datos_formulario())
-        form.save()
+        form.save(IglesiaFactory())
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -135,7 +136,7 @@ class GrupoRaizFormTest(TestCase):
         """
 
         form = GrupoRaizForm(data=self.datos_formulario())
-        form.save()
+        form.save(IglesiaFactory())
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
@@ -261,7 +262,7 @@ class NuevoGrupoFormTest(BaseTest):
         """
 
         form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
-        grupo = form.save()
+        grupo = form.save(IglesiaFactory())
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -279,7 +280,7 @@ class NuevoGrupoFormTest(BaseTest):
         """
 
         form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
-        form.save()
+        form.save(IglesiaFactory())
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -295,7 +296,7 @@ class NuevoGrupoFormTest(BaseTest):
         """
 
         form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
-        form.save()
+        form.save(IglesiaFactory())
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
@@ -310,7 +311,7 @@ class EditarGrupoFormTest(BaseTest):
         self.crear_arbol()
         grupo3 = Grupo.objects.get(id=300)
         self.grupo = Grupo.objects.get(id=500)
-        self.lider1 = MiembroFactory(lider=True,  grupo=grupo3)
+        self.lider1 = MiembroFactory(lider=True, grupo=grupo3)
         self.lider2 = MiembroFactory(lider=True, grupo=grupo3)
         self.barrio = BarrioFactory()
 

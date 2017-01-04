@@ -3,7 +3,7 @@ Created on Apr 12, 2011
 
 @author: Migue
 '''
-
+import logging
 # Django
 from django import forms
 from django.db.models import Q
@@ -19,6 +19,8 @@ from miembros.models import CambioTipo, Miembro
 from grupos.models import Predica
 from reportes.forms import FormularioRangoFechas
 from common.forms import CustomModelForm, CustomForm
+
+logger = logging.getLogger(__name__)
 
 
 class FormularioReunionGARBase(forms.ModelForm):
@@ -299,6 +301,12 @@ class BaseGrupoForm(CustomModelForm):
 
         self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
 
+    def save(self, iglesia=None, commit=True):
+        if iglesia:
+            self.instance.iglesia = iglesia
+
+        return super().save(commit)
+
 
 class GrupoRaizForm(BaseGrupoForm):
     """
@@ -312,10 +320,10 @@ class GrupoRaizForm(BaseGrupoForm):
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
             self.fields['lideres'].initial = self.instance.lideres.all()
 
-    def save(self):
+    def save(self, iglesia=None):
         try:
             with transaction.atomic():
-                raiz = super().save(commit=False)
+                raiz = super().save(iglesia=iglesia, commit=False)
                 if raiz.pk:
                     raiz.save()
                     raiz.lideres.clear()
@@ -326,6 +334,7 @@ class GrupoRaizForm(BaseGrupoForm):
                 lideres.update(grupo_lidera=raiz)
                 return raiz
         except IntegrityError:
+            logger.exception("Error al intentar guardar el grupo raiz")
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
 
@@ -366,10 +375,10 @@ class NuevoGrupoForm(BaseGrupoForm):
             # se filtra por los datos que vengan con el formulario
             self.fields['lideres'].queryset = Miembro.objects.filter(id__in=lideres)
 
-    def save(self):
+    def save(self, iglesia=None):
         try:
             with transaction.atomic():
-                grupo = super().save(commit=False)
+                grupo = super().save(iglesia=iglesia, commit=False)
                 grupo.red = self.red
 
                 padre = self.cleaned_data['parent']
@@ -379,6 +388,7 @@ class NuevoGrupoForm(BaseGrupoForm):
                 lideres.update(grupo_lidera=grupo, grupo=padre)
                 return grupo
         except IntegrityError:
+            logger.exception("Error al intentar crear el grupo")
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
 
@@ -396,10 +406,10 @@ class EditarGrupoForm(NuevoGrupoForm):
             # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
             self.fields['lideres'].queryset = self.fields['lideres'].initial = self.instance.lideres.all()
 
-    def save(self):
+    def save(self, iglesia=None):
         try:
             with transaction.atomic():
-                grupo = BaseGrupoForm.save(self)
+                grupo = BaseGrupoForm.save(self, iglesia=iglesia)
 
                 # if 'parent' in self.changed_data:
                 #     padre = self.cleaned_data['parent']
@@ -414,6 +424,7 @@ class EditarGrupoForm(NuevoGrupoForm):
 
                 return grupo
         except IntegrityError:
+            logger.exception("Error al intentar editar el grupo")
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
 
