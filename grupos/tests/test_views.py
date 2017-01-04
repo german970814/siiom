@@ -64,10 +64,10 @@ class GrupoRaizViewTest(BaseTest):
     Pruebas unitarias para la vista de creación/edición del grupo raiz.
     """
 
-    URL = reverse('grupos:raiz')
+    URL = 'grupos:raiz'
 
     def setUp(self):
-        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.admin = UsuarioFactory(admin=True)
         self.lider1 = MiembroFactory(lider=True)
         self.lider2 = MiembroFactory(lider=True)
         self.barrio = BarrioFactory()
@@ -91,10 +91,9 @@ class GrupoRaizViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(self.URL)
+        self.get_check_200(self.URL)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id_lideres')
+        self.assertResponseContains('id_lideres', html=False)
 
     def test_get_no_existe_grupo_raiz_muestra_formulario_vacio(self):
         """
@@ -102,10 +101,9 @@ class GrupoRaizViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(self.URL)
+        self.get(self.URL)
 
-        self.assertIsInstance(response.context['form'], GrupoRaizForm)
-        self.assertIsNone(response.context['form'].instance.pk)
+        self.assertIsNone(self.get_context('form').instance.pk)
 
     def test_get_existe_grupo_raiz_muestra_formulario_con_raiz(self):
         """
@@ -114,10 +112,25 @@ class GrupoRaizViewTest(BaseTest):
 
         raiz = GrupoRaizFactory()
         self.login_usuario(self.admin)
-        response = self.client.get(self.URL)
+        self.get(self.URL)
 
-        self.assertIsInstance(response.context['form'], GrupoRaizForm)
-        self.assertEqual(response.context['form'].instance, raiz)
+        self.assertEqual(self.get_context('form').instance, raiz)
+
+    def test_formulario_valido_crea_grupo_raiz_iglesia_correcta(self):
+        """
+        Prueba que cuando se haga un POST y el formulario sea valido el grupo creado pertenezca a la iglesia del usuario
+        logueado.
+        """
+
+        iglesia_correcta = self.admin.miembro_set.first().iglesia
+        otro_iglesia = IglesiaFactory(nombre='nueva iglesia')
+
+        self.login_usuario(self.admin)
+        self.post(self.URL, data=self.datos_formulario())
+
+        grupo = Grupo.objects.raiz()
+        self.assertEqual(iglesia_correcta, grupo.iglesia)
+        self.assertNotEqual(iglesia_correcta, otro_iglesia)
 
     def test_post_formulario_valido_redirecciona_get(self):
         """
@@ -125,9 +138,9 @@ class GrupoRaizViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, self.datos_formulario())
+        response = self.post(self.URL, data=self.datos_formulario())
 
-        self.assertRedirects(response, self.URL)
+        self.assertRedirects(response, self.reverse(self.URL))
 
     def test_formulario_invalido_muestra_errores(self):
         """
@@ -135,7 +148,7 @@ class GrupoRaizViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, {})
+        response = self.post(self.URL, data={})
 
         self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
 
@@ -146,7 +159,7 @@ class GrupoRaizViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, self.datos_formulario())
+        response = self.post(self.URL, data=self.datos_formulario())
 
         self.assertTrue(update_mock.called)
         self.assertFormError(response, 'form', None, GrupoRaizForm.mensaje_error)
@@ -157,16 +170,17 @@ class CrearGrupoViewTest(BaseTest):
     Pruebas unitarias para la vista creación de grupos.
     """
 
+    URL = 'grupos:nuevo'
+
     def setUp(self):
         self.crear_arbol()
-        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.admin = UsuarioFactory(admin=True)
         self.padre = Grupo.objects.get(id=800)
         self.lider1 = MiembroFactory(lider=True, grupo=self.padre)
         self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
         self.barrio = BarrioFactory()
 
         self.red_jovenes = Red.objects.get(nombre='jovenes')
-        self.URL = reverse('grupos:nuevo', args=(self.red_jovenes.id,))
 
     def datos_formulario(self):
         """
@@ -187,8 +201,9 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:nuevo', args=(100,)))
-        self.response_404(response)
+        self.get(self.URL, pk=100)
+
+        self.response_404()
 
     def test_admin_get_template(self):
         """
@@ -196,10 +211,9 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(self.URL)
+        self.get_check_200(self.URL, pk=self.red_jovenes.id)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id_parent')
+        self.assertResponseContains('id_parent', html=False)
 
     def test_post_formulario_valido_redirecciona_get(self):
         """
@@ -207,9 +221,9 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, self.datos_formulario())
+        response = self.post(self.URL, pk=self.red_jovenes.id, data=self.datos_formulario())
 
-        self.assertRedirects(response, reverse('grupos:listar', args=(self.red_jovenes.id,)))
+        self.assertRedirects(response, self.reverse('grupos:listar', pk=self.red_jovenes.id))
 
     def test_formulario_invalido_muestra_errores(self):
         """
@@ -217,7 +231,7 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, {})
+        response = self.post(self.URL, pk=self.red_jovenes.id, data={})
 
         self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
         self.assertFormError(response, 'form', 'parent', 'Este campo es obligatorio.')
@@ -229,7 +243,7 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, self.datos_formulario())
+        response = self.post(self.URL, pk=self.red_jovenes.id, data=self.datos_formulario())
 
         self.assertTrue(update_mock.called)
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
@@ -240,11 +254,11 @@ class EditarGrupoViewTest(BaseTest):
     Pruebas unitarias para la vista edición de grupos.
     """
 
-    URL = reverse('grupos:editar', args=(600,))
+    URL = 'grupos:editar'
 
     def setUp(self):
         self.crear_arbol()
-        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.admin = UsuarioFactory(admin=True)
         self.padre = Grupo.objects.get(id=800)
         self.lider1 = MiembroFactory(lider=True, grupo=self.padre)
         self.lider2 = MiembroFactory(lider=True, grupo=self.padre)
@@ -271,8 +285,9 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:editar', args=(1000,)))
-        self.response_404(response)
+        self.get(self.URL, pk=1000)
+
+        self.response_404()
 
     def test_admin_get_template(self):
         """
@@ -280,10 +295,9 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(self.URL)
+        self.get_check_200(self.URL, pk=600)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id_parent')
+        self.assertResponseContains('id_parent', html=False)
 
     def test_post_formulario_valido_redirecciona_get(self):
         """
@@ -291,10 +305,10 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, self.datos_formulario())
+        response = self.post(self.URL, pk=600, data=self.datos_formulario())
 
         red = Grupo.objects.get(id=600).red
-        self.assertRedirects(response, reverse('grupos:listar', args=(red.id,)))
+        self.assertRedirects(response, self.reverse('grupos:listar', pk=red.id))
 
     def test_formulario_invalido_muestra_errores(self):
         """
@@ -302,10 +316,9 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, {})
+        response = self.post(self.URL, pk=600, data={})
 
-        self.assertFormError(response, 'form', 'lideres', 'Este campo es obligatorio.')
-        # self.assertFormError(response, 'form', 'parent', 'Este campo es obligatorio.')
+        self.assertFormError(response, 'form', 'lideres', self.MSJ_OBLIGATORIO)
 
     @mock.patch('django.db.models.query.QuerySet.update', side_effect=IntegrityError)
     def test_post_save_formulario_devuelve_None_muestra_error(self, update_mock):
@@ -314,7 +327,7 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.post(self.URL, self.datos_formulario())
+        response = self.post(self.URL, pk=600, data=self.datos_formulario())
 
         self.assertTrue(update_mock.called)
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
