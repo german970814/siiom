@@ -14,11 +14,11 @@ from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 from django.core.exceptions import ValidationError
 
 # Apps
-from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
-from grupos.models import Predica
 from reportes.forms import FormularioRangoFechas
 from common.forms import CustomModelForm, CustomForm
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica
+from .utils import convertir_lista_a_queryset
 
 logger = logging.getLogger(__name__)
 
@@ -299,7 +299,7 @@ class BaseGrupoForm(CustomModelForm):
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
+        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles().iglesia(self.iglesia)
 
     def save(self, iglesia=None, commit=True):
         if iglesia:
@@ -313,7 +313,8 @@ class GrupoRaizForm(BaseGrupoForm):
     Formulario para la creación o edición del grupo raiz.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, iglesia, *args, **kwargs):
+        self.iglesia = iglesia
         super().__init__(*args, **kwargs)
 
         if self.instance.pk:
@@ -348,6 +349,7 @@ class NuevoGrupoForm(BaseGrupoForm):
         fields = ['parent'] + BaseGrupoForm.Meta.fields
 
     def __init__(self, red, *args, **kwargs):
+        self.iglesia = red.iglesia_id
         super().__init__(*args, **kwargs)
         self.red = red
 
@@ -356,7 +358,8 @@ class NuevoGrupoForm(BaseGrupoForm):
         grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
 
         if grupos_query.count() == 0:
-            grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
+            # grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
+            grupos_query = grupos_query | convertir_lista_a_queryset([Grupo.objects.raiz(self.iglesia)])
 
         self.fields['parent'].queryset = grupos_query
 
@@ -399,6 +402,7 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
+        self.iglesia = kwargs['instance'].iglesia_id
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 

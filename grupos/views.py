@@ -539,15 +539,16 @@ def grupo_raiz(request):
     editar.
     """
 
-    raiz = Grupo.objects.raiz()  # Si no existe raiz devuelve None
+    iglesia = request.iglesia
+    raiz = Grupo.objects.raiz(iglesia)  # Si no existe raiz devuelve None
     if request.method == 'POST':
-        form = GrupoRaizForm(instance=raiz, data=request.POST)
+        form = GrupoRaizForm(iglesia, instance=raiz, data=request.POST)
         if form.is_valid():
             if form.save(request.iglesia):
                 messages.success(request, _('El grupo fue guardado correctamente.'))
                 return redirect('grupos:raiz')
     else:
-        form = GrupoRaizForm(instance=raiz)
+        form = GrupoRaizForm(iglesia, instance=raiz)
 
     return render(request, 'grupos/grupo_raiz.html', {'form': form})
 
@@ -578,7 +579,7 @@ def crear_grupo(request, pk):
     Permite a un administrador crear un grupo de una iglesia en la red ingresada.
     """
 
-    red = get_object_or_404(Red, pk=pk)
+    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
         if form.is_valid():
@@ -601,7 +602,7 @@ def editar_grupo(request, pk):
     Permite a un administrador editar un grupo de una iglesia.
     """
 
-    grupo = get_object_or_404(Grupo, pk=pk)
+    grupo = get_object_or_404(Grupo.objects.iglesia(request.iglesia), pk=pk)
     if request.method == 'POST':
         form = EditarGrupoForm(instance=grupo, data=request.POST)
         if form.is_valid():

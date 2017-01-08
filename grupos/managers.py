@@ -27,12 +27,12 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     Manager personalizado para los grupos.
     """
 
-    def raiz(self):
+    def raiz(self, iglesia):
         """
-        Devuelve la raiz del arbol de grupos. Si no existe retorna None.
+        Devuelve la raiz del arbol de grupos de la iglesia ingresada. Si no existe retorna None.
         """
 
-        nodos = self.model.get_root_nodes()
+        nodos = self.model.get_root_nodes().iglesia(iglesia)
         if nodos:
             return nodos[0]
 
