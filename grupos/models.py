@@ -216,8 +216,8 @@ class Grupo(IglesiaMixin, AL_Node):
         actual incluyéndose asimismo.
         """
 
-        from .utils import convertir_lista_a_queryset
-        return convertir_lista_a_queryset(self.get_tree(self))
+        from .utils import convertir_lista_grupos_a_queryset
+        return convertir_lista_grupos_a_queryset(self.get_tree(self))
 
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """

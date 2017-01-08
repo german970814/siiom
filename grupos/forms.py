@@ -18,7 +18,7 @@ from miembros.models import CambioTipo, Miembro
 from reportes.forms import FormularioRangoFechas
 from common.forms import CustomModelForm, CustomForm
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica
-from .utils import convertir_lista_a_queryset
+from .utils import convertir_lista_grupos_a_queryset
 
 logger = logging.getLogger(__name__)
 
@@ -359,7 +359,7 @@ class NuevoGrupoForm(BaseGrupoForm):
 
         if grupos_query.count() == 0:
             # grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
-            grupos_query = grupos_query | convertir_lista_a_queryset([Grupo.objects.raiz(self.iglesia)])
+            grupos_query = grupos_query | convertir_lista_grupos_a_queryset([Grupo.objects.raiz(self.iglesia)])
 
         self.fields['parent'].queryset = grupos_query
 
