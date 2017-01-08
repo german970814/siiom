@@ -523,7 +523,7 @@ def organigrama_grupos(request):
 
     usuario = request.user
     if usuario.has_perm('miembros.es_administrador'):
-        arbol = Grupo.obtener_arbol()
+        arbol = Grupo.obtener_arbol(iglesia=request.iglesia)
     else:
         miembro = get_object_or_404(Miembro, usuario=usuario)
         arbol = Grupo.obtener_arbol(miembro.grupo_lidera)

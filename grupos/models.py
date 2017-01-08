@@ -96,7 +96,7 @@ class Grupo(IglesiaMixin, AL_Node):
             resultado.append(lista_hijos)
 
     @classmethod
-    def obtener_arbol(cls, padre=None):
+    def obtener_arbol(cls, padre=None, iglesia=None):
         """
         Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos.
@@ -104,7 +104,10 @@ class Grupo(IglesiaMixin, AL_Node):
 
         arbol = []
         if padre is None:
-            padre = cls.objects.raiz()
+            if iglesia is None:
+                return []
+            else:
+                padre = cls.objects.raiz(iglesia)
 
         if padre is not None:
             cls._obtener_arbol_recursivamente(padre, arbol)

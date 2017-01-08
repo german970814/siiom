@@ -19,7 +19,7 @@ Red = import_string('grupos.models.Red')
 def busqueda_miembro_api(request, pk):
     """Vista para realizar busquedas de mienbros desde AJAX a los miembros que son lideres, y no lideran grupo."""
 
-    red = Red.objects.get(pk=pk)
+    red = Red.objects.iglesia(request.iglesia).get(pk=pk)
 
     if request.method == 'POST':
 
@@ -41,7 +41,7 @@ def busqueda_miembro_api(request, pk):
             )
 
             if not query_lideres.exists():
-                query_lideres = Grupo.objects.raiz().miembro_set.lideres_disponibles()
+                query_lideres = Grupo.objects.raiz(request.iglesia).miembro_set.lideres_disponibles()
 
             if grupo is not None:
                 query_lideres |= grupo.lideres.all()

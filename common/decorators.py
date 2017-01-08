@@ -23,7 +23,6 @@ def permisos_requeridos(*permisos):
                 return True
 
         raise PermissionDenied
-        return False
 
     return user_passes_test(chequear_permisos)
 
