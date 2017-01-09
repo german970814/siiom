@@ -544,7 +544,7 @@ def grupo_raiz(request):
     if request.method == 'POST':
         form = GrupoRaizForm(iglesia, instance=raiz, data=request.POST)
         if form.is_valid():
-            if form.save(request.iglesia):
+            if form.save():
                 messages.success(request, _('El grupo fue guardado correctamente.'))
                 return redirect('grupos:raiz')
     else:
@@ -583,7 +583,7 @@ def crear_grupo(request, pk):
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
         if form.is_valid():
-            if form.save(request.iglesia):
+            if form.save():
                 messages.success(request, _('El grupo se ha creado correctamente.'))
                 return redirect('grupos:listar', pk)
     else:

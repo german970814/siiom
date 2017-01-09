@@ -79,7 +79,7 @@ class GrupoRaizFormTest(TestCase):
         """
 
         form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
-        raiz = form.save(IglesiaFactory())
+        raiz = form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -128,7 +128,7 @@ class GrupoRaizFormTest(TestCase):
         """
 
         form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
-        form.save(IglesiaFactory())
+        form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -144,7 +144,7 @@ class GrupoRaizFormTest(TestCase):
         """
 
         form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
-        form.save(IglesiaFactory())
+        form.save()
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
@@ -270,7 +270,7 @@ class NuevoGrupoFormTest(BaseTest):
         """
 
         form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
-        grupo = form.save(IglesiaFactory())
+        grupo = form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -288,7 +288,7 @@ class NuevoGrupoFormTest(BaseTest):
         """
 
         form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
-        form.save(IglesiaFactory())
+        form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
 
@@ -304,7 +304,7 @@ class NuevoGrupoFormTest(BaseTest):
         """
 
         form = NuevoGrupoForm(red=self.red_jovenes, data=self.datos_formulario())
-        form.save(IglesiaFactory())
+        form.save()
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)

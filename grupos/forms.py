@@ -301,10 +301,8 @@ class BaseGrupoForm(CustomModelForm):
 
         self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles().iglesia(self.iglesia)
 
-    def save(self, iglesia=None, commit=True):
-        if iglesia:
-            self.instance.iglesia = iglesia
-
+    def save(self, commit=True):
+        self.instance.iglesia = self.iglesia
         return super().save(commit)
 
 
@@ -321,10 +319,10 @@ class GrupoRaizForm(BaseGrupoForm):
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
             self.fields['lideres'].initial = self.instance.lideres.all()
 
-    def save(self, iglesia=None):
+    def save(self):
         try:
             with transaction.atomic():
-                raiz = super().save(iglesia=iglesia, commit=False)
+                raiz = super().save(commit=False)
                 if raiz.pk:
                     raiz.save()
                     raiz.lideres.clear()
@@ -349,7 +347,7 @@ class NuevoGrupoForm(BaseGrupoForm):
         fields = ['parent'] + BaseGrupoForm.Meta.fields
 
     def __init__(self, red, *args, **kwargs):
-        self.iglesia = red.iglesia_id
+        self.iglesia = red.iglesia
         super().__init__(*args, **kwargs)
         self.red = red
 
@@ -378,10 +376,10 @@ class NuevoGrupoForm(BaseGrupoForm):
             # se filtra por los datos que vengan con el formulario
             self.fields['lideres'].queryset = Miembro.objects.filter(id__in=lideres)
 
-    def save(self, iglesia=None):
+    def save(self):
         try:
             with transaction.atomic():
-                grupo = super().save(iglesia=iglesia, commit=False)
+                grupo = super().save(commit=False)
                 grupo.red = self.red
 
                 padre = self.cleaned_data['parent']
@@ -402,7 +400,7 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
-        self.iglesia = kwargs['instance'].iglesia_id
+        self.iglesia = kwargs['instance'].iglesia
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
@@ -410,10 +408,10 @@ class EditarGrupoForm(NuevoGrupoForm):
             # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
             self.fields['lideres'].queryset = self.fields['lideres'].initial = self.instance.lideres.all()
 
-    def save(self, iglesia=None):
+    def save(self):
         try:
             with transaction.atomic():
-                grupo = BaseGrupoForm.save(self, iglesia=iglesia)
+                grupo = BaseGrupoForm.save(self)
 
                 # if 'parent' in self.changed_data:
                 #     padre = self.cleaned_data['parent']
