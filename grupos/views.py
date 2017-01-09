@@ -625,7 +625,7 @@ def listar_grupos(request, pk):
     Permite a un administrador listar los grupos de la red escogida.
     """
 
-    red = get_object_or_404(Red, pk=pk)
+    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
     grupos = Grupo.objects.prefetch_related('lideres').red(red)
     return render(request, 'grupos/lista_grupos.html', {'red': red, 'grupos': grupos})
 

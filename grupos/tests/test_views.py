@@ -376,11 +376,13 @@ class ListarGruposRedViewTest(BaseTest):
     Pruebas unitarias para la vista listar grupos de una red especifica.
     """
 
+    URL = 'grupos:listar'
+
     def setUp(self):
         self.crear_arbol()
-        red_jovenes = Red.objects.get(nombre='jovenes')
-        self.URL = reverse('grupos:listar', args=(red_jovenes.id,))
-        self.admin = UsuarioFactory(user_permissions=('es_administrador',))
+        self.red = Red.objects.get(nombre='jovenes')
+        # self.URL = reverse('grupos:listar', args=(red_jovenes.id,))
+        self.admin = UsuarioFactory(admin=True)
 
     def test_get_red_no_existe_devuelve_404(self):
         """
@@ -388,8 +390,21 @@ class ListarGruposRedViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:listar', args=(100,)))
-        self.response_404(response)
+        self.get(self.URL, pk=100)
+        self.response_404()
+
+    def test_get_red_iglesia_diferente_devuelve_404(self):
+        """
+        Prueba que si el usuario intenta listar los grupos de una red que no sea de su iglesia la vista
+        devuelva un status de 404.
+        """
+
+        otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
+        self.login_usuario(self.admin)
+        self.get(self.URL, pk=otra_red.id)
+
+        self.assertNotEqual(otra_red.iglesia_id, self.red.iglesia_id)
+        self.response_404()
 
     def test_get_muestra_grupos_de_red(self):
         """
@@ -397,12 +412,21 @@ class ListarGruposRedViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(self.URL)
+        self.get(self.URL, pk=self.red.pk)
 
         grupo_red = Grupo.objects.get(id=300)
+        self.assertResponseContains(str(grupo_red), html=False)
+
+    def test_get_no_muestra_grupos_red_diferente(self):
+        """
+        Prueba que no se muestren grupos que no pertenecen a la red ingresada.
+        """
+
+        self.login_usuario(self.admin)
+        self.get(self.URL, pk=self.red.pk)
+
         otro_grupo = Grupo.objects.get(id=200)
-        self.assertContains(response, str(grupo_red))
-        self.assertNotContains(response, str(otro_grupo))
+        self.assertResponseNotContains(str(otro_grupo), html=False)
 
 
 class TransladarGrupoViewTest(BaseTest):
@@ -740,7 +764,7 @@ class EditarRedViewTest(BaseTest):
 
     def test_get_red_iglesia_diferente_devuelve_404(self):
         """
-        Prueba que si el usuario intenta accesar una red que no sea de su iglesia la vista devuelva un status de 404.
+        Prueba que si el usuario intenta editar una red que no sea de su iglesia la vista devuelva un status de 404.
         """
 
         otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
