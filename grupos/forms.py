@@ -3,7 +3,7 @@ Created on Apr 12, 2011
 
 @author: Migue
 '''
-
+import logging
 # Django
 from django import forms
 from django.db.models import Q
@@ -14,11 +14,13 @@ from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 from django.core.exceptions import ValidationError
 
 # Apps
-from grupos.models import Grupo, ReunionGAR, ReunionDiscipulado, Red
 from miembros.models import CambioTipo, Miembro
-from grupos.models import Predica
 from reportes.forms import FormularioRangoFechas
 from common.forms import CustomModelForm, CustomForm
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica
+from .utils import convertir_lista_grupos_a_queryset
+
+logger = logging.getLogger(__name__)
 
 
 class FormularioReunionGARBase(forms.ModelForm):
@@ -297,7 +299,11 @@ class BaseGrupoForm(CustomModelForm):
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
+        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles().iglesia(self.iglesia)
+
+    def save(self, commit=True):
+        self.instance.iglesia = self.iglesia
+        return super().save(commit)
 
 
 class GrupoRaizForm(BaseGrupoForm):
@@ -305,7 +311,8 @@ class GrupoRaizForm(BaseGrupoForm):
     Formulario para la creación o edición del grupo raiz.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, iglesia, *args, **kwargs):
+        self.iglesia = iglesia
         super().__init__(*args, **kwargs)
 
         if self.instance.pk:
@@ -326,6 +333,7 @@ class GrupoRaizForm(BaseGrupoForm):
                 lideres.update(grupo_lidera=raiz)
                 return raiz
         except IntegrityError:
+            logger.exception("Error al intentar guardar el grupo raiz")
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
 
@@ -339,6 +347,7 @@ class NuevoGrupoForm(BaseGrupoForm):
         fields = ['parent'] + BaseGrupoForm.Meta.fields
 
     def __init__(self, red, *args, **kwargs):
+        self.iglesia = red.iglesia
         super().__init__(*args, **kwargs)
         self.red = red
 
@@ -347,7 +356,8 @@ class NuevoGrupoForm(BaseGrupoForm):
         grupos_query = Grupo.objects.prefetch_related('lideres').red(red)
 
         if grupos_query.count() == 0:
-            grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
+            # grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
+            grupos_query = grupos_query | convertir_lista_grupos_a_queryset([Grupo.objects.raiz(self.iglesia)])
 
         self.fields['parent'].queryset = grupos_query
 
@@ -379,6 +389,7 @@ class NuevoGrupoForm(BaseGrupoForm):
                 lideres.update(grupo_lidera=grupo, grupo=padre)
                 return grupo
         except IntegrityError:
+            logger.exception("Error al intentar crear el grupo")
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
 
@@ -389,6 +400,7 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
+        self.iglesia = kwargs['instance'].iglesia
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
@@ -414,6 +426,7 @@ class EditarGrupoForm(NuevoGrupoForm):
 
                 return grupo
         except IntegrityError:
+            logger.exception("Error al intentar editar el grupo")
             self.add_error(None, forms.ValidationError(self.mensaje_error))
             return None
 

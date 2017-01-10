@@ -1,4 +1,5 @@
 from django.test import TestCase
+from iglesias.tests.factories import IglesiaFactory
 from ..models import Grupo
 from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory, ReunionDiscipuladoFactory
 
@@ -16,15 +17,17 @@ class GrupoManagerTest(TestCase):
         raiz = GrupoRaizFactory()
         GrupoFactory(parent=raiz)
 
-        raiz_obtenida = Grupo.objects.raiz()
+        raiz_obtenida = Grupo.objects.raiz(raiz.iglesia_id)
         self.assertEqual(raiz_obtenida, raiz)
 
-    def test_no_hay_raiz_arbol_devuelva_none(self):
+    def test_no_hay_raiz_iglesia_ingresada_arbol_devuelva_none(self):
         """
-        Prueba que si no hay grupo raiz en el arbol de grupos devuelva None.
+        Prueba que si no hay grupo raiz en la iglesia ingresada en el arbol de grupos, devuelva None.
         """
 
-        raiz_obtenida = Grupo.objects.raiz()
+        GrupoRaizFactory(iglesia__nombre='otra iglesia')
+
+        raiz_obtenida = Grupo.objects.raiz(IglesiaFactory())
         self.assertIsNone(raiz_obtenida)
 
     def test_red_devuelve_grupos_correctos(self):

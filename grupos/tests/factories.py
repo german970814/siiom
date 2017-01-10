@@ -23,6 +23,7 @@ class GrupoFactory(factory.django.DjangoModelFactory):
     red = factory.SubFactory(RedFactory)
     horaDiscipulado = factory.Faker('time')
     barrio = factory.SubFactory(BarrioFactory)
+    iglesia = factory.SubFactory(IglesiaFactory)
     fechaApertura = factory.LazyFunction(datetime.datetime.now)
     lider = factory.RelatedFactory('miembros.tests.factories.MiembroFactory', 'grupo_lidera', lider=True)
 

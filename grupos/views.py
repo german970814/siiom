@@ -523,7 +523,7 @@ def organigrama_grupos(request):
 
     usuario = request.user
     if usuario.has_perm('miembros.es_administrador'):
-        arbol = Grupo.obtener_arbol()
+        arbol = Grupo.obtener_arbol(iglesia=request.iglesia)
     else:
         miembro = get_object_or_404(Miembro, usuario=usuario)
         arbol = Grupo.obtener_arbol(miembro.grupo_lidera)
@@ -539,14 +539,16 @@ def grupo_raiz(request):
     editar.
     """
 
-    raiz = Grupo.objects.raiz()
+    iglesia = request.iglesia
+    raiz = Grupo.objects.raiz(iglesia)  # Si no existe raiz devuelve None
     if request.method == 'POST':
-        form = GrupoRaizForm(instance=raiz, data=request.POST)
+        form = GrupoRaizForm(iglesia, instance=raiz, data=request.POST)
         if form.is_valid():
             if form.save():
+                messages.success(request, _('El grupo fue guardado correctamente.'))
                 return redirect('grupos:raiz')
     else:
-        form = GrupoRaizForm(instance=raiz)
+        form = GrupoRaizForm(iglesia, instance=raiz)
 
     return render(request, 'grupos/grupo_raiz.html', {'form': form})
 
@@ -577,7 +579,7 @@ def crear_grupo(request, pk):
     Permite a un administrador crear un grupo de una iglesia en la red ingresada.
     """
 
-    red = get_object_or_404(Red, pk=pk)
+    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
         if form.is_valid():
@@ -588,7 +590,7 @@ def crear_grupo(request, pk):
         form = NuevoGrupoForm(red=red)
 
     # se agrega la red
-    data = {'form': form, 'red_id': pk}
+    data = {'form': form, 'red_id': pk, 'VERBO': _('Crear')}
 
     return render(request, 'grupos/grupo_form.html', data)
 
@@ -600,7 +602,7 @@ def editar_grupo(request, pk):
     Permite a un administrador editar un grupo de una iglesia.
     """
 
-    grupo = get_object_or_404(Grupo, pk=pk)
+    grupo = get_object_or_404(Grupo.objects.iglesia(request.iglesia), pk=pk)
     if request.method == 'POST':
         form = EditarGrupoForm(instance=grupo, data=request.POST)
         if form.is_valid():
@@ -611,7 +613,7 @@ def editar_grupo(request, pk):
         form = EditarGrupoForm(instance=grupo)
 
     # se agregan los datos como red y grupo
-    data = {'form': form, 'red_id': grupo.red_id, 'grupo_id': grupo.id}
+    data = {'form': form, 'red_id': grupo.red_id, 'grupo_id': grupo.id, 'VERBO': _('Editar')}
 
     return render(request, 'grupos/grupo_form.html', data)
 
@@ -623,7 +625,7 @@ def listar_grupos(request, pk):
     Permite a un administrador listar los grupos de la red escogida.
     """
 
-    red = get_object_or_404(Red, pk=pk)
+    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
     grupos = Grupo.objects.prefetch_related('lideres').red(red)
     return render(request, 'grupos/lista_grupos.html', {'red': red, 'grupos': grupos})
 

@@ -12,5 +12,5 @@ class UtilsModuleTest(TestCase):
         Prueba cuando se ingresa una lista de grupos, la función devuelva un queryset.
         """
 
-        queryset = utils.convertir_lista_a_queryset([])
+        queryset = utils.convertir_lista_grupos_a_queryset([])
         self.assertIsInstance(queryset, managers.GrupoQuerySet)

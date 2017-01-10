@@ -1,9 +1,8 @@
+import datetime
 from .models import Grupo
 
-import datetime
 
-
-def convertir_lista_a_queryset(lista_grupos):
+def convertir_lista_grupos_a_queryset(lista_grupos):
     """
     Permite convertir una lista de grupos a un queryset según su pk.
     """
