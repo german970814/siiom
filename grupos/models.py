@@ -253,6 +253,14 @@ class Grupo(IglesiaMixin, AL_Node):
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
+    def transladar_visitas(self, nuevo_grupo):
+        """
+        Translada todas las visitas del grupo actual al nuevo grupo.
+        """
+
+        if self != nuevo_grupo:
+            self.visitas.update(grupo=nuevo_grupo)
+
     def get_nombre(self):
         # if self.lider2 is not None:
         #     return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())

@@ -177,3 +177,23 @@ class GrupoModelTest(BaseTest):
 
         self.assertEqual(grupo, red[0])
         self.assertEqual(600, red[1].id)
+
+    def test_transladar_visitas(self):
+        """
+        Prueba que se transladen todas las visitas de un grupo a otro.
+        """
+
+        from consolidacion.tests.factories import VisitaFactory
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        visita1 = VisitaFactory(grupo=grupo)
+        visita2 = VisitaFactory(grupo=grupo)
+
+        grupo.transladar_visitas(nuevo_grupo)
+
+        visitas = nuevo_grupo.visitas.all()
+        self.assertEqual(grupo.visitas.count(), 0, msg="El grupo debio quedar sin visitas")
+        self.assertIn(visita1, visitas)
+        self.assertIn(visita2, visitas)
