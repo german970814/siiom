@@ -261,6 +261,14 @@ class Grupo(IglesiaMixin, AL_Node):
         if self != nuevo_grupo:
             self.visitas.update(grupo=nuevo_grupo)
 
+    def transladar_encontristas(self, nuevo_grupo):
+        """
+        Translada todos los encontristas del grupos actual al nuevo grupo.
+        """
+
+        if self != nuevo_grupo:
+            self.encontristas.update(grupo=nuevo_grupo)
+
     def get_nombre(self):
         # if self.lider2 is not None:
         #     return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())

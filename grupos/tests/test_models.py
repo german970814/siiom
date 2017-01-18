@@ -197,3 +197,23 @@ class GrupoModelTest(BaseTest):
         self.assertEqual(grupo.visitas.count(), 0, msg="El grupo debio quedar sin visitas")
         self.assertIn(visita1, visitas)
         self.assertIn(visita2, visitas)
+
+    def test_transladar_encontristas(self):
+        """
+        Prueba que se transladen todos los encontristas asociados a un grupo a otro grupo.
+        """
+
+        from encuentros.tests.factories import EncontristaFactory
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        encontrista1 = EncontristaFactory(grupo=grupo)
+        encontrista2 = EncontristaFactory(grupo=grupo)
+
+        grupo.transladar_encontristas(nuevo_grupo)
+
+        encontristas = nuevo_grupo.encontristas.all()
+        self.assertEqual(grupo.encontristas.count(), 0, msg="El grupo debio quedar sin encontristas")
+        self.assertIn(encontrista1, encontristas)
+        self.assertIn(encontrista2, encontristas)
