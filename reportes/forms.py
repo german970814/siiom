@@ -21,7 +21,7 @@ MESES_CHOICES = (
     ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
 )
 
-RED_CHOICES = [(red.id, red.nombre)for red in Red.objects.all()]
+# RED_CHOICES = [(red.id, red.nombre)for red in Red.objects.all()]
 
 REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
 
@@ -54,6 +54,7 @@ class FormularioVisitasPorMes(forms.Form):
 
 class FormularioVisitasRedPorMes(forms.Form):
     required_css_class = 'requerido'
+    # RED_CHOICES = [(red.id, red.nombre)for red in Red.objects.all()]
 
     def __init__(self, *args, **kwargs):
         super(FormularioVisitasRedPorMes, self).__init__(*args, **kwargs)
@@ -61,7 +62,8 @@ class FormularioVisitasRedPorMes(forms.Form):
         self.fields['red'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
     ano = forms.CharField(label='año', required=True)
-    red = forms.ChoiceField(choices=RED_CHOICES)
+    # red = forms.ChoiceField(choices=RED_CHOICES)
+    red = forms.ModelChoiceField(queryset=Red.objects.all(), empty_label=None)
     meses = forms.TypedMultipleChoiceField(
         choices=MESES_CHOICES, coerce=int,
         required=True, widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox m-r-20'}))

@@ -1,8 +1,9 @@
 from django.db import models
 from treebeard.al_tree import AL_NodeManager
+from common.managers import IglesiaMixinQuerySet
 
 
-class GrupoQuerySet(models.QuerySet):
+class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
     """
     Queryset personalizado para los grupos.
     """
@@ -26,12 +27,12 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     Manager personalizado para los grupos.
     """
 
-    def raiz(self):
+    def raiz(self, iglesia):
         """
-        Devuelve la raiz del arbol de grupos. Si no existe retorna None.
+        Devuelve la raiz del arbol de grupos de la iglesia ingresada. Si no existe retorna None.
         """
 
-        nodos = self.model.get_root_nodes()
+        nodos = self.model.get_root_nodes().iglesia(iglesia)
         if nodos:
             return nodos[0]
 

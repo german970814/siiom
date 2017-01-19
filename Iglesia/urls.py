@@ -8,7 +8,7 @@ from miembros.views import autenticarUsario, salir, administracion, recuperar_co
 
 admin.autodiscover()
 RedirectView.permanent = True
-handler404 = 'views.custom_404'
+# handler404 = 'views.custom_404'
 
 urlpatterns = patterns(
     '',
@@ -23,6 +23,7 @@ urlpatterns = patterns(
     url(r'^reportes/', include("reportes.urls", namespace='reportes')),  # revisada
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),  # revisada
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),  # revisada
+    url(r'^common/', include("common.urls", namespace="common")),
     url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),  # revisada
     url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),  # revisada
 

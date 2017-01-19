@@ -3,11 +3,12 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _lazy
 from treebeard.al_tree import AL_Node
 from miembros.models import CambioTipo
+from common.models import IglesiaMixin
 from consolidacion.utils import clean_direccion
 from .managers import GrupoManager
 
 
-class Red(models.Model):
+class Red(IglesiaMixin, models.Model):
 
     nombre = models.CharField(max_length=100)
 
@@ -15,7 +16,7 @@ class Red(models.Model):
         return self.nombre
 
 
-class Grupo(AL_Node):
+class Grupo(IglesiaMixin, AL_Node):
     """
     Modelo para guardar la información de los grupos de la iglesia.
     """
@@ -95,7 +96,7 @@ class Grupo(AL_Node):
             resultado.append(lista_hijos)
 
     @classmethod
-    def obtener_arbol(cls, padre=None):
+    def obtener_arbol(cls, padre=None, iglesia=None):
         """
         Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
         grupos.
@@ -103,7 +104,10 @@ class Grupo(AL_Node):
 
         arbol = []
         if padre is None:
-            padre = cls.objects.raiz()
+            if iglesia is None:
+                return []
+            else:
+                padre = cls.objects.raiz(iglesia)
 
         if padre is not None:
             cls._obtener_arbol_recursivamente(padre, arbol)
@@ -215,8 +219,8 @@ class Grupo(AL_Node):
         actual incluyéndose asimismo.
         """
 
-        from .utils import convertir_lista_a_queryset
-        return convertir_lista_a_queryset(self.get_tree(self))
+        from .utils import convertir_lista_grupos_a_queryset
+        return convertir_lista_grupos_a_queryset(self.get_tree(self))
 
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """

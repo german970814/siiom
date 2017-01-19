@@ -1,6 +1,10 @@
+from django.test.client import Client
 from test_plus.test import TestCase
 from grupos.tests.factories import GrupoRaizFactory, GrupoHijoFactory, GrupoFactory
 from .factories import UsuarioFactory
+from .. import constants
+
+import json
 
 
 class BaseTest(TestCase):
@@ -53,3 +57,61 @@ class BaseTest(TestCase):
         """
 
         self.client.login(email=usuario.email, password='123456')
+
+
+class APIClient(Client):
+    """Cliente para API."""
+
+    def get(self, follow=True, *args, **kwargs):
+        response = super().get(follow=follow, *args, **kwargs)
+
+        assert response._headers['content-type'][1].split(';')[0] == constants.CONTENT_TYPE_API
+
+        return response
+
+    def post(self, follow=True, *args, **kwargs):
+        response = super().post(follow=follow, *args, **kwargs)
+
+        assert response._headers['content-type'][1].split(';')[0] == constants.CONTENT_TYPE_API
+
+        return response
+
+
+class BaseTestAPI(BaseTest):
+    """Clase de pruebas base para la API."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client = APIClient()
+
+    def _GET(self, login=True, *args, **kwargs):
+        if login:
+            self.usuario = UsuarioFactory()
+            self.login_usuario(self.usuario)
+        url = kwargs.pop('url', None) or self.get_url()
+        return self.client.get(url, *args, **kwargs)
+
+    def _POST(self, login=True, *args, **kwargs):
+        if login:
+            self.usuario = UsuarioFactory()
+            self.login_usuario(self.usuario)
+        url = kwargs.pop('url', None) or self.get_url()
+        return self.client.post(url, *args, **kwargs)
+
+    def GET(self, *args, **kwargs):
+        encoding = kwargs.pop('encoding', 'utf-8')
+        return self.get_json(self._GET(*args, **kwargs), encoding=encoding)
+
+    def POST(self, *args, **kwargs):
+        encoding = kwargs.pop('encoding', 'utf-8')
+        return self.get_json(self._POST(*args, **kwargs), encoding=encoding)
+
+    def get_url(self):
+        return self.url
+
+    def get_json(self, response, encoding='utf-8'):
+        from django.http import HttpResponse
+
+        self.assertIn(HttpResponse, response.__class__.__mro__)
+
+        return json.loads(response.content.decode(encoding))

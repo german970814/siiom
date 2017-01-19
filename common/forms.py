@@ -3,6 +3,7 @@ from django.forms.utils import ErrorList
 from django.utils.encoding import force_text
 from django.utils.html import format_html_join
 from django.utils.translation import ugettext_lazy as _lazy
+from django.utils.module_loading import import_string
 
 
 class CustomErrorList(ErrorList):
@@ -65,3 +66,11 @@ class FormularioRangoFechas(CustomForm):
             if fechas[0] > fechas[1]:
                 self.add_error('fecha_inicial', _lazy('Fecha inicial no puede ser mayor que Fecha Final'))
                 self.add_error('fecha_final', _lazy('Fecha final no puede ser menor que Fecha Inicial'))
+
+
+class BusquedaForm(forms.Form):
+    """Formulario de busqueda."""
+
+    Grupo = import_string('grupos.models.Grupo')
+    value = forms.CharField(max_length=255)
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.all(), required=False)

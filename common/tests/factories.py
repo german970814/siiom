@@ -11,6 +11,9 @@ class UsuarioFactory(factory.django.DjangoModelFactory):
     password = factory.PostGenerationMethodCall('set_password', '123456')
     miembro = factory.RelatedFactory('miembros.tests.factories.MiembroFactory', 'usuario')
 
+    class Params:
+        admin = factory.Trait(user_permissions=['es_administrador'])
+
     @factory.post_generation
     def user_permissions(self, created, extracted, **kwargs):
         if not created:
