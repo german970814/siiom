@@ -43,7 +43,7 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         Devuelve un queryset con los grupos que tienen pendientes por confirmar la ofrenda de reuniones GAR.
         """
 
-        return self.filter(reuniongar__confirmacionEntregaOfrenda=False).distinct()
+        return self.filter(reuniones_gar__confirmacionEntregaOfrenda=False).distinct()
 
     def sin_confirmar_ofrenda_discipulado(self):
         """

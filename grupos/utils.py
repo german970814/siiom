@@ -19,7 +19,7 @@ def reunion_reportada(fecha, grupo, discipulado=False):
     if discipulado:  # discipulado
         reunion = grupo.reuniondiscipulado_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
     else:  # gar
-        reunion = grupo.reuniongar_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
+        reunion = grupo.reuniones_gar.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
 
     return reunion.exists()
 

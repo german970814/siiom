@@ -993,14 +993,14 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                         gru = gr.filter(
                             estado='A', fechaApertura__lt=sig
                         ).exclude(
-                            reuniongar__fecha__range=(fechai, sig),
-                            reuniongar__confirmacionEntregaOfrenda=True
+                            reuniones_gar__fecha__range=(fechai, sig),
+                            reuniones_gar__confirmacionEntregaOfrenda=True
                         )
                     else:  # Entra si se escoge el reporte de reuniones
                         gru = gr.filter(
                             estado='A', fechaApertura__lt=sig
                         ).exclude(
-                            reuniongar__fecha__range=(fechai, sig)
+                            reuniones_gar__fecha__range=(fechai, sig)
                         )
 
                     for g in gru:

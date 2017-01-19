@@ -416,7 +416,7 @@ def ver_reportes_grupo(request):
             # request.session['valid_post'] = False
             request.session.pop('valid_post', None)
             fecha_final += datetime.timedelta(days=1)
-            reuniones = grupo.reuniongar_set.filter(
+            reuniones = grupo.reuniones_gar.filter(
                 fecha__range=(fecha_inicial, fecha_final)
             ).order_by('-fecha')
             if len(reuniones) == 0:

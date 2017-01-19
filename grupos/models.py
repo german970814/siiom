@@ -202,7 +202,7 @@ class Grupo(IglesiaMixin, AL_Node):
         Devuelve un queryset con las reuniones GAR que no tienen la ofrenda confirmada.
         """
 
-        return self.reuniongar_set.filter(confirmacionEntregaOfrenda=False)
+        return self.reuniones_gar.filter(confirmacionEntregaOfrenda=False)
 
     @property
     def reuniones_discipulado_sin_ofrenda_confirmada(self):
@@ -228,7 +228,7 @@ class Grupo(IglesiaMixin, AL_Node):
         reuniones a confirmar.
         """
 
-        self.reuniongar_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
+        self.reuniones_gar.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
     def confirmar_ofrenda_reuniones_discipulado(self, reuniones):
         """
@@ -263,11 +263,19 @@ class Grupo(IglesiaMixin, AL_Node):
 
     def transladar_encontristas(self, nuevo_grupo):
         """
-        Translada todos los encontristas del grupos actual al nuevo grupo.
+        Translada todos los encontristas del grupo actual al nuevo grupo.
         """
 
         if self != nuevo_grupo:
             self.encontristas.update(grupo=nuevo_grupo)
+
+    def transladar_reuniones_gar(self, nuevo_grupo):
+        """
+        Translada todas las reuniones GAR del grupo actual al nuevo grupo.
+        """
+
+        if self != nuevo_grupo:
+            self.reuniones_gar.update(grupo=nuevo_grupo)
 
     def get_nombre(self):
         # if self.lider2 is not None:
@@ -330,7 +338,7 @@ class Predica(models.Model):
 
 class ReunionGAR(models.Model):
     fecha = models.DateField()
-    grupo = models.ForeignKey(Grupo)
+    grupo = models.ForeignKey(Grupo, related_name='reuniones_gar')
     predica = models.CharField(max_length=100, verbose_name='prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
     numeroTotalAsistentes = models.PositiveIntegerField(verbose_name='Número total de asistentes')
