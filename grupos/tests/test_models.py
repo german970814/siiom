@@ -235,3 +235,21 @@ class GrupoModelTest(BaseTest):
         self.assertEqual(grupo.reuniones_gar.count(), 0, msg="El grupo debio quedar sin reuniones")
         self.assertIn(reunion1, reuniones)
         self.assertIn(reunion2, reuniones)
+
+    def test_transladar_reuniones_discipulado(self):
+        """
+        Prueba que se transladen todas las reuniones de discipulado asociadas a un grupo a otro grupo.
+        """
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        reunion1 = ReunionDiscipuladoFactory(grupo=grupo)
+        reunion2 = ReunionDiscipuladoFactory(grupo=grupo)
+
+        grupo.transladar_reuniones_discipulado(nuevo_grupo)
+
+        reuniones = nuevo_grupo.reuniones_discipulado.all()
+        self.assertEqual(grupo.reuniones_discipulado.count(), 0, msg="El grupo debio quedar sin reuniones")
+        self.assertIn(reunion1, reuniones)
+        self.assertIn(reunion2, reuniones)
