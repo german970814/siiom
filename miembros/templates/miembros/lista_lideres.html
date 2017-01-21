@@ -32,8 +32,8 @@
                     	<td>{{ lider.id }}</td>
                         <td>{{ lider.nombre|upper }} {{ lider.primerApellido|upper }}{% if lider.segundoApellido %} {{ lider.segundoApellido|upper }}{% endif %}</td>
                         <td>{{ lider.cedula }}</td>
-                        <td>{% if lider.email %}{{ lider.email }}{% endif %}</td>
-                        <td>{% if lider.email %}{{ lider.grupo_lidera.cabeza_red }}{% endif %}</td>
+                        <td>{% firstof lider.email "" %}</td>
+                        <td>{% firstof lider.grupo_lidera.cabeza_red "" %}</td>
                         <td>{% if lider.telefono %}{{ lider.telefono }}{% elif lider.celular %}{{ lider.celular }}{% else %}{% trans 'NO HAY DATOS' %}{% endif %}</td>
                         <td>{{ lider.grupo_lidera.get_descendant_count|add:"1" }}</td>
                         <td>{% if lider.usuario and lider.usuario.last_login %}{{ lider.usuario.last_login }}{% else %}{% trans 'NO HAY DATOS' %}{% endif %}</td>
