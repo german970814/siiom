@@ -250,9 +250,9 @@ class Grupo(IglesiaMixin, AL_Node):
 
         self.reuniones_discipulado.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
-    def transladar(self, nuevo_padre):
+    def trasladar(self, nuevo_padre):
         """
-        Translada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
+        Traslada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
         actual, se les modifica el grupo al que pertenecen, al nuevo grupo padre.
         """
 
@@ -265,25 +265,25 @@ class Grupo(IglesiaMixin, AL_Node):
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
-    def transladar_visitas(self, nuevo_grupo):
+    def trasladar_visitas(self, nuevo_grupo):
         """
-        Translada todas las visitas del grupo actual al nuevo grupo.
+        Traslada todas las visitas del grupo actual al nuevo grupo.
         """
 
         if self != nuevo_grupo:
             self.visitas.update(grupo=nuevo_grupo)
 
-    def transladar_encontristas(self, nuevo_grupo):
+    def trasladar_encontristas(self, nuevo_grupo):
         """
-        Translada todos los encontristas del grupo actual al nuevo grupo.
+        Traslada todos los encontristas del grupo actual al nuevo grupo.
         """
 
         if self != nuevo_grupo:
             self.encontristas.update(grupo=nuevo_grupo)
 
-    def transladar_reuniones_gar(self, nuevo_grupo):
+    def trasladar_reuniones_gar(self, nuevo_grupo):
         """
-        Translada todas las reuniones GAR del grupo actual al nuevo grupo.
+        Traslada todas las reuniones GAR del grupo actual al nuevo grupo.
         """
 
         if self != nuevo_grupo:

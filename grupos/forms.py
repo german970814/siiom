@@ -431,7 +431,7 @@ class EditarGrupoForm(NuevoGrupoForm):
             return None
 
 
-class TransladarGrupoForm(CustomForm):
+class TrasladarGrupoForm(CustomForm):
     """
     Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.
     """
@@ -447,8 +447,8 @@ class TransladarGrupoForm(CustomForm):
 
         self.grupo = grupo
 
-    def transladar(self):
-        self.grupo.transladar(self.cleaned_data['nuevo'])
+    def trasladar(self):
+        self.grupo.trasladar(self.cleaned_data['nuevo'])
 
 
 class RedForm(CustomModelForm):

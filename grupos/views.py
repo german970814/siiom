@@ -24,7 +24,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm, RedForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -632,21 +632,21 @@ def listar_grupos(request, pk):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def transladar(request, pk):
+def trasladar(request, pk):
     """
-    Permite a un administrador transladar un grupo a una nueva posición en el organigrama de grupos.
+    Permite a un administrador trasladar un grupo a una nueva posición en el organigrama de grupos.
     """
 
     grupo = get_object_or_404(Grupo, pk=pk)
     if request.method == 'POST':
-        form = TransladarGrupoForm(grupo, data=request.POST)
+        form = TrasladarGrupoForm(grupo, data=request.POST)
         if form.is_valid():
-            form.transladar()
-            return redirect('grupos:transladar', pk)
+            form.trasladar()
+            return redirect('grupos:trasladar', pk)
     else:
-        form = TransladarGrupoForm(grupo)
+        form = TrasladarGrupoForm(grupo)
 
-    return render(request, 'grupos/transladar.html', {'grupo': grupo, 'form': form})
+    return render(request, 'grupos/trasladar.html', {'grupo': grupo, 'form': form})
 
 
 @login_required

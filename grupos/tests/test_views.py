@@ -7,7 +7,7 @@ from common.tests.factories import UsuarioFactory
 from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red
-from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
+from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
 from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
 
 
@@ -429,13 +429,13 @@ class ListarGruposRedViewTest(BaseTest):
         self.assertResponseNotContains(str(otro_grupo), html=False)
 
 
-class TransladarGrupoViewTest(BaseTest):
+class TrasladarGrupoViewTest(BaseTest):
     """
-    Pruebas unitarias para la vista de transladar un grupo a un nuevo padre.
+    Pruebas unitarias para la vista de trasladar un grupo a un nuevo padre.
     """
 
-    TEMPLATE = 'grupos/transladar.html'
-    URL = reverse('grupos:transladar', args=(500,))
+    TEMPLATE = 'grupos/trasladar.html'
+    URL = reverse('grupos:trasladar', args=(500,))
 
     def setUp(self):
         self.crear_arbol()
@@ -447,7 +447,7 @@ class TransladarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:transladar', args=(1000,)))
+        response = self.client.get(reverse('grupos:trasladar', args=(1000,)))
         self.response_404(response)
 
     def test_admin_get_template(self):
@@ -460,11 +460,11 @@ class TransladarGrupoViewTest(BaseTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.TEMPLATE)
-        self.assertIsInstance(response.context['form'], TransladarGrupoForm)
+        self.assertIsInstance(response.context['form'], TrasladarGrupoForm)
 
-    def test_post_formulario_valido_translada_grupo(self):
+    def test_post_formulario_valido_traslada_grupo(self):
         """
-        Prueba que si el formulario es valido translada el  grupo y redirecciona.
+        Prueba que si el formulario es valido traslada el  grupo y redirecciona.
         """
 
         nuevo = Grupo.objects.get(id=800)

@@ -56,39 +56,39 @@ class GrupoModelTest(BaseTest):
 
         self.assertListEqual(ruta_obtenida, list(ruta))
 
-    def test_transladar_grupo_mismo_padre(self):
+    def test_trasladar_grupo_mismo_padre(self):
         """
-        Prueba que cuando se quiere transladar un grupo al mismo padre no se cambie el grupo padre.
+        Prueba que cuando se quiere trasladar un grupo al mismo padre no se cambie el grupo padre.
         """
 
         grupo = Grupo.objects.get(id=500)
         padre = grupo.get_parent()
 
-        grupo.transladar(padre)
+        grupo.trasladar(padre)
         self.assertEqual(grupo.get_parent(), padre)
 
-    def test_transladar_grupo_mueve_lideres_grupo_pertenecen(self):
+    def test_trasladar_grupo_mueve_lideres_grupo_pertenecen(self):
         """
-        Prueba que cuando se translada un grupo a un nuevo padre, tambien se modifica el grupo al que pertenecen los
+        Prueba que cuando se traslada un grupo a un nuevo padre, tambien se modifica el grupo al que pertenecen los
         lideres del grupo que se esta transladando.
         """
 
         grupo = Grupo.objects.get(id=500)
         nuevo_padre = Grupo.objects.get(id=800)
 
-        grupo.transladar(nuevo_padre)
+        grupo.trasladar(nuevo_padre)
         self.assertTrue(all(lider.grupo == nuevo_padre for lider in grupo.lideres.all()))
 
-    def test_transladar_grupo_red(self):
+    def test_trasladar_grupo_red(self):
         """
-        Prueba que cuando se translada un grupo a un nuevo padre que se encuentre en otra red, el grupo y todos
+        Prueba que cuando se traslada un grupo a un nuevo padre que se encuentre en otra red, el grupo y todos
         sus descendientes se mueven a la nueva red.
         """
 
         grupo = Grupo.objects.get(id=500)
         nuevo_padre = Grupo.objects.get(id=200)
 
-        grupo.transladar(nuevo_padre)
+        grupo.trasladar(nuevo_padre)
         grupo.refresh_from_db()
         self.assertEqual(grupo.red, nuevo_padre.red)
         self.assertTrue(all(descendiente.red == nuevo_padre.red for descendiente in grupo.get_descendants()))
@@ -178,9 +178,9 @@ class GrupoModelTest(BaseTest):
         self.assertEqual(grupo, red[0])
         self.assertEqual(600, red[1].id)
 
-    def test_transladar_visitas(self):
+    def test_trasladar_visitas(self):
         """
-        Prueba que se transladen todas las visitas de un grupo a otro.
+        Prueba que se trasladen todas las visitas de un grupo a otro.
         """
 
         from consolidacion.tests.factories import VisitaFactory
@@ -191,16 +191,16 @@ class GrupoModelTest(BaseTest):
         visita1 = VisitaFactory(grupo=grupo)
         visita2 = VisitaFactory(grupo=grupo)
 
-        grupo.transladar_visitas(nuevo_grupo)
+        grupo.trasladar_visitas(nuevo_grupo)
 
         visitas = nuevo_grupo.visitas.all()
         self.assertEqual(grupo.visitas.count(), 0, msg="El grupo debio quedar sin visitas")
         self.assertIn(visita1, visitas)
         self.assertIn(visita2, visitas)
 
-    def test_transladar_encontristas(self):
+    def test_trasladar_encontristas(self):
         """
-        Prueba que se transladen todos los encontristas asociados a un grupo a otro grupo.
+        Prueba que se trasladen todos los encontristas asociados a un grupo a otro grupo.
         """
 
         from encuentros.tests.factories import EncontristaFactory
@@ -211,16 +211,16 @@ class GrupoModelTest(BaseTest):
         encontrista1 = EncontristaFactory(grupo=grupo)
         encontrista2 = EncontristaFactory(grupo=grupo)
 
-        grupo.transladar_encontristas(nuevo_grupo)
+        grupo.trasladar_encontristas(nuevo_grupo)
 
         encontristas = nuevo_grupo.encontristas.all()
         self.assertEqual(grupo.encontristas.count(), 0, msg="El grupo debio quedar sin encontristas")
         self.assertIn(encontrista1, encontristas)
         self.assertIn(encontrista2, encontristas)
 
-    def test_transladar_reuniones_gar(self):
+    def test_trasladar_reuniones_gar(self):
         """
-        Prueba que se transladen todas las reuniones GAR asociadas a un grupo a otro grupo.
+        Prueba que se trasladen todas las reuniones GAR asociadas a un grupo a otro grupo.
         """
 
         grupo = Grupo.objects.get(id=500)
@@ -229,7 +229,7 @@ class GrupoModelTest(BaseTest):
         reunion1 = ReunionGARFactory(grupo=grupo)
         reunion2 = ReunionGARFactory(grupo=grupo)
 
-        grupo.transladar_reuniones_gar(nuevo_grupo)
+        grupo.trasladar_reuniones_gar(nuevo_grupo)
 
         reuniones = nuevo_grupo.reuniones_gar.all()
         self.assertEqual(grupo.reuniones_gar.count(), 0, msg="El grupo debio quedar sin reuniones")
