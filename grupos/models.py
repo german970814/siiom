@@ -210,7 +210,7 @@ class Grupo(IglesiaMixin, AL_Node):
         Devuelve un queryset con las reuniones de discipulado que no tienen la ofrenda confirmada.
         """
 
-        return self.reuniondiscipulado_set.filter(confirmacionEntregaOfrenda=False)
+        return self.reuniones_discipulado.filter(confirmacionEntregaOfrenda=False)
 
     @property
     def grupos_red(self):
@@ -232,7 +232,7 @@ class Grupo(IglesiaMixin, AL_Node):
         if len(ancentros) > 2:
             return ancentros[2]
         else:
-            return None            
+            return None
 
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
@@ -248,7 +248,7 @@ class Grupo(IglesiaMixin, AL_Node):
         de las reuniones a confirmar.
         """
 
-        self.reuniondiscipulado_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
+        self.reuniones_discipulado.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
     def transladar(self, nuevo_padre):
         """
@@ -288,6 +288,14 @@ class Grupo(IglesiaMixin, AL_Node):
 
         if self != nuevo_grupo:
             self.reuniones_gar.update(grupo=nuevo_grupo)
+
+    def trasladar_reuniones_discipulado(self, nuevo_grupo):
+        """
+        Traslada todas las reuniones de discipulado del grupo actual al nuevo grupo.
+        """
+
+        if self != nuevo_grupo:
+            self.reuniones_discipulado.update(grupo=nuevo_grupo)
 
     def get_nombre(self):
         # if self.lider2 is not None:
@@ -393,7 +401,7 @@ class AsistenciaMiembro(models.Model):
 
 class ReunionDiscipulado(models.Model):
     fecha = models.DateField(auto_now_add=True)
-    grupo = models.ForeignKey(Grupo)
+    grupo = models.ForeignKey(Grupo, related_name='reuniones_discipulado')
     predica = models.ForeignKey(Predica, verbose_name='prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')

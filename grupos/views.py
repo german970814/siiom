@@ -85,7 +85,7 @@ def editarHorarioReunionGrupo(request, pk=None):
 
 
 def reunionDiscipuladoReportada(predica, grupo):
-    reunion = grupo.reuniondiscipulado_set.filter(predica=predica)
+    reunion = grupo.reuniones_discipulado.filter(predica=predica)
 
     if reunion:
         return True

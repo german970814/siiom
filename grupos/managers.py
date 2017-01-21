@@ -50,4 +50,4 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         Devuelve un queryset con los grupos que tienen pendientes por confirmar la ofrenda de reuniones de discipulado.
         """
 
-        return self.filter(reuniondiscipulado__confirmacionEntregaOfrenda=False).distinct()
+        return self.filter(reuniones_discipulado__confirmacionEntregaOfrenda=False).distinct()

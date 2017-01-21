@@ -17,7 +17,7 @@ def reunion_reportada(fecha, grupo, discipulado=False):
     fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
 
     if discipulado:  # discipulado
-        reunion = grupo.reuniondiscipulado_set.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
+        reunion = grupo.reuniones_discipulado.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
     else:  # gar
         reunion = grupo.reuniones_gar.filter(fecha__gte=ini_semana, fecha__lte=fin_semana)
 
