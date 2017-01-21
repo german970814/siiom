@@ -28,7 +28,7 @@ from common.groups_tests import (
     miembro_empleado_test
 )
 
-from .forms import TransladarMiembroForm, NuevoMiembroForm
+from .forms import TrasladarMiembroForm, NuevoMiembroForm
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -255,7 +255,7 @@ isOk = False
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderListarMiembrosGrupo(request):
     if request.method == 'POST':
-        if 'transladar' in request.POST:
+        if 'trasladar' in request.POST:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             # return HttpResponseRedirect('/miembro/transladar_miembros/')
         else:
@@ -1636,9 +1636,9 @@ def listar_lideres(request, pk):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def transladar(request, pk):
+def trasladar(request, pk):
     """
-    Permite a un administrador transladar un miembro que no lidere grupo a que asista a otro grupo.
+    Permite a un administrador trasladar un miembro que no lidere grupo a que asista a otro grupo.
     """
 
     miembro = get_object_or_404(Miembro, pk=pk)
@@ -1646,11 +1646,11 @@ def transladar(request, pk):
         return redirect(reverse('sin_permiso'))
 
     if request.method == 'POST':
-        form = TransladarMiembroForm(data=request.POST)
+        form = TrasladarMiembroForm(data=request.POST)
         if form.is_valid():
-            form.transladar(miembro)
-            return redirect('miembros:transladar', pk)
+            form.trasladar(miembro)
+            return redirect('miembros:trasladar', pk)
     else:
-        form = TransladarMiembroForm()
+        form = TrasladarMiembroForm()
 
-    return render(request, 'miembros/transladar.html', {'miembro': miembro, 'form': form})
+    return render(request, 'miembros/trasladar.html', {'miembro': miembro, 'form': form})

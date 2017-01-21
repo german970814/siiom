@@ -183,9 +183,9 @@ class Miembro(IglesiaMixin, models.Model):
 
         return False
 
-    def transladar(self, nuevo_grupo):
+    def trasladar(self, nuevo_grupo):
         """
-        Translada el miembro actual a un nuevo grupo.
+        Traslada el miembro actual a un nuevo grupo.
         """
 
         if nuevo_grupo != self.grupo:

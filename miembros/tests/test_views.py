@@ -41,9 +41,9 @@ class ListarLideresRedViewTest(BaseTest):
         self.assertContains(response, lider.nombre.upper())
 
 
-class TransladarMiembroViewTest(BaseTest):
+class TrasladarMiembroViewTest(BaseTest):
     """
-    Pruebas unitarias para la vista de transladar un miembro que no lidere grupo a otro grupo.
+    Pruebas unitarias para la vista de trasladar un miembro que no lidere grupo a otro grupo.
     """
 
     def setUp(self):
@@ -52,7 +52,7 @@ class TransladarMiembroViewTest(BaseTest):
         self.miembro = MiembroFactory(grupo=grupo1)
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
 
-        self.URL = reverse('miembros:transladar', args=(self.miembro.id,))
+        self.URL = reverse('miembros:trasladar', args=(self.miembro.id,))
 
     def test_get_miembro_no_existe_devuelve_404(self):
         """
@@ -60,18 +60,18 @@ class TransladarMiembroViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('miembros:transladar', args=(100,)))
+        response = self.client.get(reverse('miembros:trasladar', args=(100,)))
 
         self.response_404(response)
 
     def test_get_miembro_lider_grupo_redirecciona_sin_permisos(self):
         """
-        Prueba que si se intenta transladar un miembro que lidera un grupo se redireccione a página sin permisos.
+        Prueba que si se intenta trasladar un miembro que lidera un grupo se redireccione a página sin permisos.
         """
 
         self.login_usuario(self.admin)
         lider = self.grupo2.lideres.first()
-        response = self.client.get(reverse('miembros:transladar', args=(lider.id,)))
+        response = self.client.get(reverse('miembros:trasladar', args=(lider.id,)))
 
         self.assertEqual(response.status_code, 302)
 
@@ -86,9 +86,9 @@ class TransladarMiembroViewTest(BaseTest):
         self.assertContains(response, 'input')
         self.assertContains(response, self.miembro.nombre.upper())
 
-    def test_post_formulario_valido_translada_miembro(self):
+    def test_post_formulario_valido_traslada_miembro(self):
         """
-        Prueba que si el formulario es valido translada el miembro y redirecciona.
+        Prueba que si el formulario es valido traslada el miembro y redirecciona.
         """
 
         self.login_usuario(self.admin)

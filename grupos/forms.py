@@ -433,7 +433,7 @@ class EditarGrupoForm(NuevoGrupoForm):
 
 class TrasladarGrupoForm(CustomForm):
     """
-    Formulario para el translado de un grupo. En nuevo se excluyen los descendientes y el mismo.
+    Formulario para el traslado de un grupo. En nuevo se excluyen los descendientes y el mismo.
     """
 
     nuevo = forms.ModelChoiceField(queryset=None)

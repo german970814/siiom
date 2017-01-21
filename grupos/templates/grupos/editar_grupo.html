@@ -27,7 +27,7 @@
                         </li>
                         {% if not miembro.grupo_lidera %}
                             <li>
-                                <a href="{% url 'miembros:transladar' miembro.id %}">{% trans 'Trasladar Miembro de Grupo' %}</a>
+                                <a href="{% url 'miembros:trasladar' miembro.id %}">{% trans 'Trasladar Miembro de Grupo' %}</a>
                             </li>
                         {% endif %}
                     {% endif %}
