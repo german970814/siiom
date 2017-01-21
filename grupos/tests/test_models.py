@@ -169,7 +169,7 @@ class GrupoModelTest(BaseTest):
 
     def test_grupos_red(self):
         """
-        Prueba que me devuelva los grupos de la red del grupo escogido.
+        Prueba que devuelva los grupos de la red del grupo escogido.
         """
 
         grupo = Grupo.objects.get(id=500)
@@ -253,3 +253,21 @@ class GrupoModelTest(BaseTest):
         self.assertEqual(grupo.reuniones_discipulado.count(), 0, msg="El grupo debio quedar sin reuniones")
         self.assertIn(reunion1, reuniones)
         self.assertIn(reunion2, reuniones)
+
+    def test_obtener_cabeza_de_red(self):
+        """
+        Prueba que devuelva la cabeza de red del grupo indicado.
+        """
+
+        grupo = Grupo.objects.get(id=600)
+
+        cabeza = grupo.cabeza_red
+        self.assertEqual(cabeza.pk, 500, msg="El grupo cabeza de red no esta correcto.")
+
+    def test_obtener_cabeza_de_red_retorna_none(self):
+        """
+        Prueba que devuelva NONE como cabeza de red si el grupo se encuentra por encima de los 72 del inicio del arbol.
+        """
+
+        grupo = Grupo.objects.get(id=200)
+        self.assertIsNone(grupo.cabeza_red)

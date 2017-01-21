@@ -19,6 +19,7 @@
                         <th data-column-id="nombre">{% trans 'Nombre' %}</th>
                         <th data-column-id="dia">{% trans 'Cedula' %}</th>
                         <th data-column-id="hora">{% trans 'Correo' %}</th>
+                        <th data-column-id="hora">{% trans 'Cabez de red' %}</th>
                         <th data-column-id="direccion">{% trans 'Télefono' %}</th>
                         <th data-column-id="celulas" data-type="numeric"># {% trans 'Grupos a su cargo' %}</th>
                         <th data-column-id="red">{% trans 'Ultimo Acceso' %}</th>
@@ -32,6 +33,7 @@
                         <td>{{ lider.nombre|upper }} {{ lider.primerApellido|upper }}{% if lider.segundoApellido %} {{ lider.segundoApellido|upper }}{% endif %}</td>
                         <td>{{ lider.cedula }}</td>
                         <td>{% if lider.email %}{{ lider.email }}{% endif %}</td>
+                        <td>{% if lider.email %}{{ lider.grupo_lidera.cabeza_red }}{% endif %}</td>
                         <td>{% if lider.telefono %}{{ lider.telefono }}{% elif lider.celular %}{{ lider.celular }}{% else %}{% trans 'NO HAY DATOS' %}{% endif %}</td>
                         <td>{{ lider.grupo_lidera.get_descendant_count|add:"1" }}</td>
                         <td>{% if lider.usuario and lider.usuario.last_login %}{{ lider.usuario.last_login }}{% else %}{% trans 'NO HAY DATOS' %}{% endif %}</td>

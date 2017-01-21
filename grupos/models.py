@@ -222,6 +222,18 @@ class Grupo(IglesiaMixin, AL_Node):
         from .utils import convertir_lista_grupos_a_queryset
         return convertir_lista_grupos_a_queryset(self.get_tree(self))
 
+    @property
+    def cabeza_red(self):
+        """
+        Retorna la cabeza de red del grupo actual.
+        """
+
+        ancentros = self.get_ancestors()
+        if len(ancentros) > 2:
+            return ancentros[2]
+        else:
+            return None            
+
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
         Confirma la ofrenda de las reuniones GAR ingresadas en la lista. Reuniones es una lista con los ids de las
