@@ -125,7 +125,10 @@ class Miembro(IglesiaMixin, models.Model):
     estado = models.CharField(_lazy('estado'), max_length=1, choices=ESTADOS)
     pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', verbose_name=_lazy('pasos'), blank=True)
     escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon', verbose_name=_lazy('escalafón'))
-    grupo = models.ForeignKey('grupos.Grupo', verbose_name=_lazy('grupo'), null=True, blank=True)  # grupo al que pertenece
+    grupo = models.ForeignKey(
+        'grupos.Grupo', verbose_name=_lazy('grupo'),
+        related_name='miembros', null=True, blank=True
+    )  # grupo al que pertenece
     grupo_lidera = models.ForeignKey(
         'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
         related_name='lideres', null=True, blank=True
@@ -198,7 +201,7 @@ class Miembro(IglesiaMixin, models.Model):
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         grupo = self.grupo_lidera
         if grupo:
-            return grupo.miembro_set.filter(id__in=lideres)
+            return grupo.miembros.filter(id__in=lideres)
         else:
             return []
 

@@ -194,7 +194,7 @@ class Grupo(IglesiaMixin, AL_Node):
         Devuelve un queryset con los miembros del grupo que son lideres.
         """
 
-        return self.miembro_set.lideres2()
+        return self.miembros.lideres2()
 
     @property
     def reuniones_GAR_sin_ofrenda_confirmada(self):
@@ -265,6 +265,14 @@ class Grupo(IglesiaMixin, AL_Node):
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
+    def trasladar_miembros(self, nuevo_grupo):
+        """
+        Traslada todos los miembros que no lideran grupo del grupo actual al nuevo grupo.
+        """
+
+        if self != nuevo_grupo:
+            self.miembros.filter(grupo_lidera=None).update(grupo=nuevo_grupo)
+
     def trasladar_visitas(self, nuevo_grupo):
         """
         Traslada todas las visitas del grupo actual al nuevo grupo.
@@ -326,7 +334,7 @@ class Grupo(IglesiaMixin, AL_Node):
 
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         miembros = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='miembro').values('miembro')
-        return self.miembro_set.filter(id__in=miembros).exclude(id__in=lideres)
+        return self.miembros.filter(id__in=miembros).exclude(id__in=lideres)
 
     def get_direccion(self):
         """

@@ -44,7 +44,7 @@ def editarHorarioReunionGrupo(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
     draw_mapa = True
-    # grupo.miembro_set.all()
+    # grupo.miembros.all()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)

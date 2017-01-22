@@ -121,7 +121,7 @@ def miembroInicio(request):
     if miembro:
         grupo = miembro.grupo_lidera
         if grupo:
-            miembrosGrupo = grupo.miembro_set.all()
+            miembrosGrupo = grupo.miembros.all()
             tipo = TipoMiembro.objects.get(nombre__iexact='visita')
             visitantes = []
             for mg in miembrosGrupo:
@@ -144,7 +144,7 @@ def miembroInicio(request):
             visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
             grupo = miem.grupo_lidera
             if grupo:
-                return grupo.miembro_set.filter(id__in=visitas)
+                return grupo.miembros.filter(id__in=visitas)
             else:
                 return []
 
@@ -430,7 +430,7 @@ def liderLlamadasPendientesVisitantesGrupo(request):
     grupo = miembro.grupo_lidera
     lideres = []
     if grupo:
-        for lid in grupo.miembro_set.all():
+        for lid in grupo.miembros.all():
             lideres.append(CambioTipo.objects.filter(
                 miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
         lids = []
@@ -438,8 +438,8 @@ def liderLlamadasPendientesVisitantesGrupo(request):
             for k in l:
                 if k.miembro.id not in lids:
                     lids.append(k.miembro.id)
-        visitantes = grupo.miembro_set.filter(fechaLlamadaLider=None).exclude(id__in=lids)
-#        miembrosGrupo = list(grupo.miembro_set.all())
+        visitantes = grupo.miembros.filter(fechaLlamadaLider=None).exclude(id__in=lids)
+#        miembrosGrupo = list(grupo.miembros.all())
 #        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
 #        visitantes = []
 #        for mg in miembrosGrupo:
@@ -593,7 +593,7 @@ def liderPromoverVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupo_lidera
     if grupo:
-        miembrosGrupo = list(grupo.miembro_set.all())
+        miembrosGrupo = list(grupo.miembros.all())
         if request.method == 'POST':
             lista = request.POST.getlist('seleccionados')
             lista.reverse()

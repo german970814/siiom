@@ -271,3 +271,33 @@ class GrupoModelTest(BaseTest):
 
         grupo = Grupo.objects.get(id=200)
         self.assertIsNone(grupo.cabeza_red)
+
+    def test_trasladar_miembros(self):
+        """
+        Prueba que se trasladen todas los miembros asociados a un grupo a otro grupo.
+        """
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        miembro1 = MiembroFactory(grupo=grupo)
+        miembro2 = MiembroFactory(grupo=grupo, admin=True)
+
+        grupo.trasladar_miembros(nuevo_grupo)
+
+        miembros = nuevo_grupo.miembros.all()
+        self.assertIn(miembro1, miembros)
+        self.assertIn(miembro2, miembros)
+
+    def test_trasladar_miembros_no_traslada_lideres_de_grupo(self):
+        """
+        Prueba que no se trasladen los miembros asociados al grupo actual que son lideres de grupo.
+        """
+
+        hijo = Grupo.objects.get(id=600)
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        grupo.trasladar_miembros(nuevo_grupo)
+        miembros = grupo.miembros.all()
+        self.assertIn(hijo.lideres.first(), miembros)
