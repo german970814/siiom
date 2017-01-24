@@ -178,9 +178,9 @@ class GrupoModelTest(BaseTest):
         self.assertEqual(grupo, red[0])
         self.assertEqual(600, red[1].id)
 
-    def test_trasladar_visitas(self):
+    def test_fusionar_traslada_visitas(self):
         """
-        Prueba que se trasladen todas las visitas de un grupo a otro.
+        Prueba que se trasladen todas las visitas del grupo que se esta fusionando con el nuevo grupo.
         """
 
         from consolidacion.tests.factories import VisitaFactory
@@ -191,16 +191,15 @@ class GrupoModelTest(BaseTest):
         visita1 = VisitaFactory(grupo=grupo)
         visita2 = VisitaFactory(grupo=grupo)
 
-        grupo.trasladar_visitas(nuevo_grupo)
+        grupo.fusionar(nuevo_grupo)
 
         visitas = nuevo_grupo.visitas.all()
-        self.assertEqual(grupo.visitas.count(), 0, msg="El grupo debio quedar sin visitas")
         self.assertIn(visita1, visitas)
         self.assertIn(visita2, visitas)
 
-    def test_trasladar_encontristas(self):
+    def test_fusionar_traslada_encontristas(self):
         """
-        Prueba que se trasladen todos los encontristas asociados a un grupo a otro grupo.
+        Prueba que se trasladen todos los encontristas asociados al grupo que se esta fusionando con el nuevo grupo.
         """
 
         from encuentros.tests.factories import EncontristaFactory
@@ -211,16 +210,15 @@ class GrupoModelTest(BaseTest):
         encontrista1 = EncontristaFactory(grupo=grupo)
         encontrista2 = EncontristaFactory(grupo=grupo)
 
-        grupo.trasladar_encontristas(nuevo_grupo)
+        grupo.fusionar(nuevo_grupo)
 
         encontristas = nuevo_grupo.encontristas.all()
-        self.assertEqual(grupo.encontristas.count(), 0, msg="El grupo debio quedar sin encontristas")
         self.assertIn(encontrista1, encontristas)
         self.assertIn(encontrista2, encontristas)
 
-    def test_trasladar_reuniones_gar(self):
+    def test_fusionar_traslada_reuniones_gar(self):
         """
-        Prueba que se trasladen todas las reuniones GAR asociadas a un grupo a otro grupo.
+        Prueba que se trasladen todas las reuniones GAR asociadas al grupo que se esta fusionando con el nuevo grupo.
         """
 
         grupo = Grupo.objects.get(id=500)
@@ -229,16 +227,16 @@ class GrupoModelTest(BaseTest):
         reunion1 = ReunionGARFactory(grupo=grupo)
         reunion2 = ReunionGARFactory(grupo=grupo)
 
-        grupo.trasladar_reuniones_gar(nuevo_grupo)
+        grupo.fusionar(nuevo_grupo)
 
         reuniones = nuevo_grupo.reuniones_gar.all()
-        self.assertEqual(grupo.reuniones_gar.count(), 0, msg="El grupo debio quedar sin reuniones")
         self.assertIn(reunion1, reuniones)
         self.assertIn(reunion2, reuniones)
 
-    def test_trasladar_reuniones_discipulado(self):
+    def test_fusionar_traslada_reuniones_discipulado(self):
         """
-        Prueba que se trasladen todas las reuniones de discipulado asociadas a un grupo a otro grupo.
+        Prueba que se trasladen todas las reuniones de discipulado asociadas al grupo que se esta fusionando con el
+        nuevo grupo.
         """
 
         grupo = Grupo.objects.get(id=500)
@@ -247,12 +245,52 @@ class GrupoModelTest(BaseTest):
         reunion1 = ReunionDiscipuladoFactory(grupo=grupo)
         reunion2 = ReunionDiscipuladoFactory(grupo=grupo)
 
-        grupo.trasladar_reuniones_discipulado(nuevo_grupo)
+        grupo.fusionar(nuevo_grupo)
 
         reuniones = nuevo_grupo.reuniones_discipulado.all()
-        self.assertEqual(grupo.reuniones_discipulado.count(), 0, msg="El grupo debio quedar sin reuniones")
         self.assertIn(reunion1, reuniones)
         self.assertIn(reunion2, reuniones)
+
+    def test_fusionar_traslada_miembros(self):
+        """
+        Prueba que se trasladen todas los miembros asociados al grupo que se esta fusionando con el nuevo grupo.
+        """
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        miembro1 = MiembroFactory(grupo=grupo)
+        miembro2 = MiembroFactory(grupo=grupo, admin=True)
+
+        grupo.fusionar(nuevo_grupo)
+
+        miembros = nuevo_grupo.miembros.all()
+        self.assertIn(miembro1, miembros)
+        self.assertIn(miembro2, miembros)
+
+    def test_fusionar_traslada_grupos_descendientes(self):
+        """
+        Prueba que se trasladen los descendientes del grupo que se esta fusionando con el nuevo grupo.
+        """
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        grupo.fusionar(nuevo_grupo)
+
+        hijo = Grupo.objects.get(id=600)
+        self.assertIn(hijo, nuevo_grupo.get_children())
+
+    def test_fusionar_elimina_grupo_actual(self):
+        """
+        Prueba que se elimine de la bd el grupo que se esta fusionando con el nuevo grupo.
+        """
+
+        grupo = Grupo.objects.get(id=500)
+        nuevo_grupo = Grupo.objects.get(id=800)
+
+        grupo.fusionar(nuevo_grupo)
+        self.assertEqual(Grupo.objects.filter(id=500).count(), 0, msg="El grupo con id 500 se debio eliminar de la bd.")
 
     def test_obtener_cabeza_de_red(self):
         """
@@ -271,33 +309,3 @@ class GrupoModelTest(BaseTest):
 
         grupo = Grupo.objects.get(id=200)
         self.assertIsNone(grupo.cabeza_red)
-
-    def test_trasladar_miembros(self):
-        """
-        Prueba que se trasladen todas los miembros asociados a un grupo a otro grupo.
-        """
-
-        grupo = Grupo.objects.get(id=500)
-        nuevo_grupo = Grupo.objects.get(id=800)
-
-        miembro1 = MiembroFactory(grupo=grupo)
-        miembro2 = MiembroFactory(grupo=grupo, admin=True)
-
-        grupo.trasladar_miembros(nuevo_grupo)
-
-        miembros = nuevo_grupo.miembros.all()
-        self.assertIn(miembro1, miembros)
-        self.assertIn(miembro2, miembros)
-
-    def test_trasladar_miembros_no_traslada_lideres_de_grupo(self):
-        """
-        Prueba que no se trasladen los miembros asociados al grupo actual que son lideres de grupo.
-        """
-
-        hijo = Grupo.objects.get(id=600)
-        grupo = Grupo.objects.get(id=500)
-        nuevo_grupo = Grupo.objects.get(id=800)
-
-        grupo.trasladar_miembros(nuevo_grupo)
-        miembros = grupo.miembros.all()
-        self.assertIn(hijo.lideres.first(), miembros)

@@ -265,45 +265,59 @@ class Grupo(IglesiaMixin, AL_Node):
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
-    def trasladar_miembros(self, nuevo_grupo):
+    def _trasladar_miembros(self, nuevo_grupo):
         """
         Traslada todos los miembros que no lideran grupo del grupo actual al nuevo grupo.
         """
 
-        if self != nuevo_grupo:
-            self.miembros.filter(grupo_lidera=None).update(grupo=nuevo_grupo)
+        self.miembros.filter(grupo_lidera=None).update(grupo=nuevo_grupo)
 
-    def trasladar_visitas(self, nuevo_grupo):
+    def _trasladar_visitas(self, nuevo_grupo):
         """
         Traslada todas las visitas del grupo actual al nuevo grupo.
         """
 
-        if self != nuevo_grupo:
-            self.visitas.update(grupo=nuevo_grupo)
+        self.visitas.update(grupo=nuevo_grupo)
 
-    def trasladar_encontristas(self, nuevo_grupo):
+    def _trasladar_encontristas(self, nuevo_grupo):
         """
         Traslada todos los encontristas del grupo actual al nuevo grupo.
         """
 
-        if self != nuevo_grupo:
-            self.encontristas.update(grupo=nuevo_grupo)
+        self.encontristas.update(grupo=nuevo_grupo)
 
-    def trasladar_reuniones_gar(self, nuevo_grupo):
+    def _trasladar_reuniones_gar(self, nuevo_grupo):
         """
         Traslada todas las reuniones GAR del grupo actual al nuevo grupo.
         """
 
-        if self != nuevo_grupo:
-            self.reuniones_gar.update(grupo=nuevo_grupo)
+        self.reuniones_gar.update(grupo=nuevo_grupo)
 
-    def trasladar_reuniones_discipulado(self, nuevo_grupo):
+    def _trasladar_reuniones_discipulado(self, nuevo_grupo):
         """
         Traslada todas las reuniones de discipulado del grupo actual al nuevo grupo.
         """
 
+        self.reuniones_discipulado.update(grupo=nuevo_grupo)
+
+    def fusionar(self, nuevo_grupo):
+        """
+        Traslada la información asociada al grupo actual (visitas, encontristas, reuniones, miembros, etc) al
+        nuevo grupo y elimina el grupo actual.
+        """
+
         if self != nuevo_grupo:
-            self.reuniones_discipulado.update(grupo=nuevo_grupo)
+            with transaction.atomic():
+                for hijo in self.get_children():
+                    hijo.trasladar(nuevo_grupo)
+
+                self._trasladar_visitas(nuevo_grupo)
+                self._trasladar_miembros(nuevo_grupo)
+                self._trasladar_encontristas(nuevo_grupo)
+                self._trasladar_reuniones_gar(nuevo_grupo)
+                self._trasladar_reuniones_discipulado(nuevo_grupo)
+
+                self.delete()
 
     def get_nombre(self):
         # if self.lider2 is not None:
