@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import Permission
 from common.managers import IglesiaMixinQuerySet
 
@@ -30,6 +30,25 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
     """
     Manager para los miembros.
     """
+
+    def trasladar_lideres(self, lideres, nuevo_grupo):
+        """
+        Traslada los lideres ingresados, del grupo al que lideran actualmente a un nuevo grupo. Si el grupo actual
+        se queda sin lideres, se fusiona el grupo actual con el nuevo grupo.
+        """
+
+        from django.db.models.query import QuerySet
+        from grupos.models import Grupo
+
+        if not isinstance(lideres, QuerySet):
+            raise TypeError("lideres debe ser un QuerySet pero es un {}".format(lideres.__class__.__name__))
+
+        grupo_actual = Grupo.objects.get(lideres__in=lideres)
+        if grupo_actual != nuevo_grupo:
+            with transaction.atomic():
+                lideres.update(grupo_lidera=nuevo_grupo, grupo=nuevo_grupo.get_parent())
+                if not grupo_actual.lideres.exists():
+                    grupo_actual.fusionar(nuevo_grupo)
 
     # TODO eliminar este metodo
     def lideres(self):

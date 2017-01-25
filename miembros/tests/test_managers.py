@@ -1,5 +1,6 @@
+from unittest import mock
 from common.tests.base import BaseTest
-from grupos.tests.factories import GrupoFactory, RedFactory
+from grupos.tests.factories import GrupoFactory, RedFactory, GrupoHijoFactory
 from ..models import Miembro
 from .factories import MiembroFactory
 
@@ -72,3 +73,58 @@ class MiembroManagerTest(BaseTest):
         self.assertNotIn(miembro, lideres)
         self.assertIn(grupo.lideres.first(), lideres)
         self.assertNotIn(otro_grupo.lideres.first(), lideres)
+
+    def test_trasladar_lideres_espera_lideres_sea_queryset(self):
+        """
+        Prueba que se levante una excepción si el parametro lideres no es un queryset.
+        """
+
+        grupo = GrupoFactory()
+        with self.assertRaises(TypeError):
+            Miembro.objects.trasladar_lideres([], grupo)
+            Miembro.objects.trasladar_lideres(MiembroFactory(), grupo)
+
+    def test_trasladar_lideres_mueve_lideres_al_nuevo_grupo(self):
+        """
+        Prueba que se trasladen los lideres al nuevo grupo.
+        """
+
+        padre = GrupoFactory()
+        nuevo_grupo = GrupoFactory()
+        grupo = GrupoHijoFactory(parent=padre)
+        miembro = MiembroFactory(grupo_lidera=grupo, grupo=padre)
+
+        Miembro.objects.trasladar_lideres(Miembro.objects.filter(id=miembro.pk), nuevo_grupo)
+        miembro.refresh_from_db()
+        self.assertEqual(miembro.grupo_lidera, nuevo_grupo)
+        self.assertEqual(miembro.grupo, nuevo_grupo.get_parent())
+
+    def test_trasladar_lideres_no_fusiona_grupos(self):
+        """
+        Prueba que si no se trasladan todos los lideres de un grupo al nuevo grupo, el grupo actual no se fusione con
+        el nuevo grupo.
+        """
+
+        from grupos.models import Grupo
+
+        padre = GrupoFactory()
+        nuevo_grupo = GrupoFactory()
+        grupo = GrupoHijoFactory(parent=padre)
+        miembro = MiembroFactory(grupo_lidera=grupo, grupo=padre)
+
+        Miembro.objects.trasladar_lideres(Miembro.objects.filter(id=miembro.pk), nuevo_grupo)
+        self.assertEqual(grupo.lideres.count(), 1, msg="El grupo debio quedar con un lider.")
+        self.assertIsNotNone(Grupo.objects.filter(pk=grupo.pk).exists())
+
+    @mock.patch('grupos.models.Grupo.fusionar')
+    def test_trasladar_lideres_fusiona_grupos(self, fusionar_mock):
+        """
+        Prueba que si se van a trasladan todos los lideres de un grupo a un nuevo grupo, el grupo actual se fusione con
+        el nuevo grupo.
+        """
+
+        grupo = GrupoFactory()
+        nuevo_grupo = GrupoFactory()
+
+        Miembro.objects.trasladar_lideres(grupo.lideres.all(), nuevo_grupo)
+        fusionar_mock.assert_called_with(nuevo_grupo)
