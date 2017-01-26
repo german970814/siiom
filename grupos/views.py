@@ -24,7 +24,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -759,3 +759,22 @@ def listar_redes(request):
 
     redes = Red.objects.iglesia(request.iglesia)
     return render(request, 'grupos/lista_redes.html', {'redes': redes})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def trasladar_lideres(request):
+    """
+    Permite a un administrador trasladar lideres de un grupo a otro en una iglesia.
+    """
+
+    if request.method == 'POST':
+        form = TrasladarLideresForm(request.iglesia, data=request.POST)
+        if form.is_valid():
+            form.trasladar()
+            messages.success(request, _('Los lideres se han trasladado correctamente.'))
+            return redirect('grupos:organigrama')
+    else:
+        form = TrasladarLideresForm(request.iglesia)
+
+    return render(request, 'grupos/trasladar_lideres.html', {'form': form})

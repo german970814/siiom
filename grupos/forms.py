@@ -5,6 +5,7 @@ Created on Apr 12, 2011
 '''
 import logging
 # Django
+from contextlib import suppress
 from django import forms
 from django.db.models import Q
 from django.forms.models import ModelForm
@@ -469,3 +470,30 @@ class RedForm(CustomModelForm):
             self.instance.iglesia = iglesia
 
         return super().save()
+
+
+class TrasladarLideresForm(CustomForm):
+    """
+    Formulario que permite trasladar lideres de un grupo a otro.
+    """
+
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.none(), label=_lazy('Grupo'))
+    lideres = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none(), label=_lazy('Lideres'))
+    nuevo_grupo = forms.ModelChoiceField(queryset=Grupo.objects.none(), label=_lazy('Nuevo grupo'))
+
+    def __init__(self, iglesia, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['nuevo_grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+
+        self.fields['grupo'].queryset = Grupo.objects.iglesia(iglesia).prefetch_related('lideres')
+        self.fields['nuevo_grupo'].queryset = Grupo.objects.iglesia(iglesia).prefetch_related('lideres')
+
+        if self.is_bound:
+            with suppress(Grupo.DoesNotExist):
+                grupo = Grupo.objects.get(pk=self.data.get('grupo', None))
+                self.fields['lideres'].queryset = grupo.lideres.all()
+
+    def trasladar(self):
+        Miembro.objects.trasladar_lideres(self.cleaned_data['lideres'], self.cleaned_data['nuevo_grupo'])
