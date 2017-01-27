@@ -491,7 +491,7 @@ class TrasladarLideresForm(CustomForm):
         self.fields['nuevo_grupo'].queryset = Grupo.objects.iglesia(iglesia).prefetch_related('lideres')
 
         if self.is_bound:
-            with suppress(Grupo.DoesNotExist):
+            with suppress(Grupo.DoesNotExist, ValueError):
                 grupo = Grupo.objects.get(pk=self.data.get('grupo', None))
                 self.fields['lideres'].queryset = grupo.lideres.all()
 
