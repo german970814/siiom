@@ -478,7 +478,7 @@ class TrasladarLideresForm(CustomForm):
     """
 
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.none(), label=_lazy('Grupo'))
-    lideres = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none(), label=_lazy('Lideres'))
+    lideres = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none(), label=_lazy('Lideres a trasladar'))
     nuevo_grupo = forms.ModelChoiceField(queryset=Grupo.objects.none(), label=_lazy('Nuevo grupo'))
 
     def __init__(self, iglesia, *args, **kwargs):

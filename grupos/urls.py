@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from . import api
 
 urlpatterns = [
     url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),  # revisada
@@ -29,5 +30,7 @@ urlpatterns = [
     url(
         r'^(?P<pk>\d+)/confirmar_ofrenda_discipulado/$', views.confirmar_ofrenda_discipulado,
         name='confirmar_ofrenda_discipulado'
-    )
+    ),
+
+    url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api')
 ]
