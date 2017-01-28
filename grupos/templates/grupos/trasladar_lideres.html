@@ -71,7 +71,7 @@
                     <br class="space-down">
                     <div class="row">
                         <div class="col-md-4 col-md-offset-4">
-                            <button type="button" name="trasladar" class="btn btn-primary btn-block">{% trans 'Trasladar' %}</button>
+                            <button type="submit" name="trasladar" class="btn btn-primary btn-block">{% trans 'Trasladar' %}</button>
                         </div>
                     </div>
                 </form>
@@ -97,7 +97,10 @@
         });
     });
 
-    $('button[name="trasladar"]').click(function() {
+    $('button[name="trasladar"]').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         var total_seleccionados = $('#{{ form.lideres.id_for_label }}' + ' :selected').length;
         var total_opciones = $('#{{ form.lideres.id_for_label }}').children('option').length;
 
@@ -109,20 +112,15 @@
                 showCancelButton: true,
                 confirmButtonText: "Seguir",
                 cancelButtonText: "Cancelar",
-            }).then(function(isConfirm){
+            }, function(isConfirm){
                 if (isConfirm) {
-                    return true;
-                }
-                else {
-                    return false;
+                    $('form').submit();
                 }
             });
         }
         else {
-            return true;
+            $('form').submit();
         }
-
-
     });
 </script>
 {% endblock %}
