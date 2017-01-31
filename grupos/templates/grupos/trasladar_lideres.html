@@ -11,8 +11,6 @@
             </div>
 
             <div class="card-body card-padding">
-                {% include '_alert_messages.html' %}
-
                 <form action="{% url 'grupos:trasladar_lideres' %}" method="POST">
                     {% csrf_token %}
 
@@ -28,6 +26,7 @@
                                     <label for="{{ form.grupo.id_for_label }}">{{ form.grupo.label }}*:</label>
                                     {{ form.grupo }}
                                 </div>
+                                <small class="help-block">{{ form.grupo.help_text }}</small>
                                 {{ form.grupo.errors }}
                             </div>
                         </div>
@@ -105,9 +104,11 @@
         var total_opciones = $('#{{ form.lideres.id_for_label }}').children('option').length;
 
         if (total_opciones != 0 && total_opciones == total_seleccionados) {
+            var grupo_sel = $('#{{ form.grupo.id_for_label }} option:selected').text();
+            var nuevo_grupo_sel = $('#{{ form.nuevo_grupo.id_for_label }} option:selected').text();
             swal({
-                title: "Esta seguro que desea trasladar todos los lideres del grupo?",
-                text: "Recuerde que si selecciona todos los lideres del grupo, la información del grupo seleccionado pasara a ser parte del nuevo grupo y el grupo seleccionado se borrara.",
+                title: "¿Estas seguro que deseas trasladar todos los lideres?",
+                text: "Escogiste todos los lideres del grupo " + grupo_sel + ", por lo tanto su información (miembros, descendientes, sobres, etc) pertenecera al grupo destino " + nuevo_grupo_sel + " y el grupo actual de "+ grupo_sel +" se eliminara.",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Seguir",

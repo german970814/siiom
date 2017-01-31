@@ -477,9 +477,18 @@ class TrasladarLideresForm(CustomForm):
     Formulario que permite trasladar lideres de un grupo a otro.
     """
 
-    grupo = forms.ModelChoiceField(queryset=Grupo.objects.none(), label=_lazy('Grupo'))
+    error_messages = {
+        'es_descendiente': _lazy('El grupo destino escogido no puede ser descendiente del grupo origen.')
+    }
+
+    grupo = forms.ModelChoiceField(
+        queryset=Grupo.objects.none(), label=_lazy('Grupo origen'),
+        help_text=_lazy('Grupo liderado por los lideres que desea trasladar')
+    )
     lideres = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none(), label=_lazy('Lideres a trasladar'))
-    nuevo_grupo = forms.ModelChoiceField(queryset=Grupo.objects.none(), label=_lazy('Nuevo grupo'))
+    nuevo_grupo = forms.ModelChoiceField(
+        queryset=Grupo.objects.none(), label=_lazy('Grupo destino (Nuevo grupo a liderar)')
+    )
 
     def __init__(self, iglesia, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -494,6 +503,16 @@ class TrasladarLideresForm(CustomForm):
             with suppress(Grupo.DoesNotExist, ValueError):
                 grupo = Grupo.objects.get(pk=self.data.get('grupo', None))
                 self.fields['lideres'].queryset = grupo.lideres.all()
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        grupo = cleaned_data.get('grupo', None)
+        nuevo_grupo = cleaned_data.get('nuevo_grupo', None)
+        if nuevo_grupo and grupo:
+            if nuevo_grupo.is_descendant_of(grupo):
+                msj = self.error_messages['es_descendiente']
+                self.add_error('nuevo_grupo', forms.ValidationError(msj, code='es_descendiente'))
 
     def trasladar(self):
         Miembro.objects.trasladar_lideres(self.cleaned_data['lideres'], self.cleaned_data['nuevo_grupo'])
