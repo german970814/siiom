@@ -41,7 +41,7 @@ def busqueda_miembro_api(request, pk):
             )
 
             if not query_lideres.exists():
-                query_lideres = Grupo.objects.raiz(request.iglesia).miembro_set.lideres_disponibles()
+                query_lideres = Grupo.objects.raiz(request.iglesia).miembros.lideres_disponibles()
 
             if grupo is not None:
                 query_lideres |= grupo.lideres.all()

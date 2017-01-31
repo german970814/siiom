@@ -24,7 +24,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioTransladarGrupo, FormularioCrearPredica,
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TransladarGrupoForm, RedForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm
 )
 from miembros.models import Miembro
 from common.groups_tests import (
@@ -44,7 +44,7 @@ def editarHorarioReunionGrupo(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
     draw_mapa = True
-    # grupo.miembro_set.all()
+    # grupo.miembros.all()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -85,7 +85,7 @@ def editarHorarioReunionGrupo(request, pk=None):
 
 
 def reunionDiscipuladoReportada(predica, grupo):
-    reunion = grupo.reuniondiscipulado_set.filter(predica=predica)
+    reunion = grupo.reuniones_discipulado.filter(predica=predica)
 
     if reunion:
         return True
@@ -416,7 +416,7 @@ def ver_reportes_grupo(request):
             # request.session['valid_post'] = False
             request.session.pop('valid_post', None)
             fecha_final += datetime.timedelta(days=1)
-            reuniones = grupo.reuniongar_set.filter(
+            reuniones = grupo.reuniones_gar.filter(
                 fecha__range=(fecha_inicial, fecha_final)
             ).order_by('-fecha')
             if len(reuniones) == 0:
@@ -632,21 +632,21 @@ def listar_grupos(request, pk):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def transladar(request, pk):
+def trasladar(request, pk):
     """
-    Permite a un administrador transladar un grupo a una nueva posición en el organigrama de grupos.
+    Permite a un administrador trasladar un grupo a una nueva posición en el organigrama de grupos.
     """
 
     grupo = get_object_or_404(Grupo, pk=pk)
     if request.method == 'POST':
-        form = TransladarGrupoForm(grupo, data=request.POST)
+        form = TrasladarGrupoForm(grupo, data=request.POST)
         if form.is_valid():
-            form.transladar()
-            return redirect('grupos:transladar', pk)
+            form.trasladar()
+            return redirect('grupos:trasladar', pk)
     else:
-        form = TransladarGrupoForm(grupo)
+        form = TrasladarGrupoForm(grupo)
 
-    return render(request, 'grupos/transladar.html', {'grupo': grupo, 'form': form})
+    return render(request, 'grupos/trasladar.html', {'grupo': grupo, 'form': form})
 
 
 @login_required
@@ -759,3 +759,22 @@ def listar_redes(request):
 
     redes = Red.objects.iglesia(request.iglesia)
     return render(request, 'grupos/lista_redes.html', {'redes': redes})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def trasladar_lideres(request):
+    """
+    Permite a un administrador trasladar lideres de un grupo a otro en una iglesia.
+    """
+
+    if request.method == 'POST':
+        form = TrasladarLideresForm(request.iglesia, data=request.POST)
+        if form.is_valid():
+            form.trasladar()
+            messages.success(request, _('Los lideres se han trasladado correctamente.'))
+            return redirect('grupos:organigrama')
+    else:
+        form = TrasladarLideresForm(request.iglesia)
+
+    return render(request, 'grupos/trasladar_lideres.html', {'form': form})

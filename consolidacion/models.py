@@ -21,7 +21,7 @@ class Visita(models.Model):
     direccion = models.CharField(verbose_name=_('dirección'), max_length=255, blank=True)
     telefono = models.BigIntegerField(verbose_name=_('teléfono'))
     email = models.EmailField(verbose_name=_('email'), blank=True)
-    grupo = models.ForeignKey('grupos.Grupo', verbose_name=_('grupo'), blank=True, null=True)
+    grupo = models.ForeignKey('grupos.Grupo', related_name='visitas', verbose_name=_('grupo'), blank=True, null=True)
     fecha_ingreso = models.DateField(verbose_name=_('fecha ingreso'), auto_now_add=True)
     genero = models.CharField(verbose_name=_('género'), max_length=1, choices=OPCIONES_GENERO)
     retirado = models.BooleanField(verbose_name=_('retirado'), default=False)
