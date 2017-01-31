@@ -84,6 +84,19 @@ class MiembroManagerTest(BaseTest):
             Miembro.objects.trasladar_lideres([], grupo)
             Miembro.objects.trasladar_lideres(MiembroFactory(), grupo)
 
+    def test_trasladar_lideres_espera_lideres_lideren_grupo(self):
+        """
+        Prueba que se levante una excepción si los lideres ingresados no lideran grupo.
+        """
+
+        grupo = GrupoFactory()
+        lider = MiembroFactory(lider=True)
+        miembro = MiembroFactory()
+
+        with self.assertRaises(ValueError):
+            lideres = Miembro.objects.filter(id__in=[lider.pk, miembro.pk])
+            Miembro.objects.trasladar_lideres(lideres, grupo)
+
     def test_trasladar_lideres_mueve_lideres_al_nuevo_grupo(self):
         """
         Prueba que se trasladen los lideres al nuevo grupo.
@@ -125,6 +138,22 @@ class MiembroManagerTest(BaseTest):
 
         grupo = GrupoFactory()
         nuevo_grupo = GrupoFactory()
+        MiembroFactory(grupo_lidera=grupo)
 
         Miembro.objects.trasladar_lideres(grupo.lideres.all(), nuevo_grupo)
-        fusionar_mock.assert_called_with(nuevo_grupo)
+        fusionar_mock.assert_called_once_with(nuevo_grupo)
+
+    @mock.patch('grupos.models.Grupo.fusionar')
+    def test_trasladar_lideres_fusiona_todos_los_grupos_si_mas_de_un_grupo(self, fusionar_mock):
+        """
+        Prueba que si los lideres a trasladar lideran mas de un grupo y los grupos se quedan sin lideres estos se
+        fusionen con el nuevo grupo.
+        """
+
+        grupo1 = GrupoFactory()
+        grupo2 = GrupoFactory()
+        nuevo_grupo = GrupoFactory()
+
+        lideres = Miembro.objects.filter(grupo_lidera__in=[grupo1.id, grupo2.id])
+        Miembro.objects.trasladar_lideres(lideres, nuevo_grupo)
+        self.assertEqual(fusionar_mock.call_count, 2, msg="Fusionar se debio ejecutar 2 veces porque eran 2 grupos.")

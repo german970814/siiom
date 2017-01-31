@@ -43,12 +43,16 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
         if not isinstance(lideres, QuerySet):
             raise TypeError("lideres debe ser un QuerySet pero es un {}".format(lideres.__class__.__name__))
 
-        grupo_actual = Grupo.objects.get(lideres__in=lideres)
-        if grupo_actual != nuevo_grupo:
-            with transaction.atomic():
-                lideres.update(grupo_lidera=nuevo_grupo, grupo=nuevo_grupo.get_parent())
-                if not grupo_actual.lideres.exists():
-                    grupo_actual.fusionar(nuevo_grupo)
+        grupos = list(Grupo.objects.filter(lideres=lideres).distinct())
+        if len(grupos) == 0:
+            raise ValueError("Los lideres ingresados deben liderar grupo")
+
+        with transaction.atomic():
+            lideres.update(grupo_lidera=nuevo_grupo, grupo=nuevo_grupo.get_parent())
+            for grupo_actual in grupos:
+                if grupo_actual != nuevo_grupo:
+                    if not grupo_actual.lideres.exists():
+                        grupo_actual.fusionar(nuevo_grupo)
 
     # TODO eliminar este metodo
     def lideres(self):
