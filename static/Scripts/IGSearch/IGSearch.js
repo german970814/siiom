@@ -120,7 +120,7 @@
                     aux = get_text_by_option($element, id);
                     _list.push(aux);
                 }
-                return _list; 
+                return _list;
             } else {
                 id = $element.val();
                 aux = get_text_by_option($element, id);
