@@ -5,7 +5,7 @@ Created on Apr 12, 2011
 '''
 import logging
 # Django
-from contextlib import suppress
+# from contextlib import suppress
 from django import forms
 from django.db.models import Q
 from django.forms.models import ModelForm
@@ -500,9 +500,12 @@ class TrasladarLideresForm(CustomForm):
         self.fields['nuevo_grupo'].queryset = Grupo.objects.iglesia(iglesia).prefetch_related('lideres')
 
         if self.is_bound:
-            with suppress(Grupo.DoesNotExist, ValueError):
+            # with suppress(Grupo.DoesNotExist, ValueError):
+            try:
                 grupo = Grupo.objects.get(pk=self.data.get('grupo', None))
                 self.fields['lideres'].queryset = grupo.lideres.all()
+            except:
+                pass
 
     def clean(self):
         cleaned_data = super().clean()
