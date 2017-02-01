@@ -6,7 +6,7 @@
  * 2017, Tania Hernandez
  *
  * Test Page
- * See: http://siiom.net/
+ * See: http://siiom.net/grupo/organigrama
  */
 
 // TODO cambiar el click por hover
