@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from . import views
+from . import api
 
 urlpatterns = [
     url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),  # revisada
@@ -17,8 +18,9 @@ urlpatterns = [
     url(r'^redes/(?P<pk>\d+)/$', views.editar_red, name='red_editar'),
     url(r'^redes/(?P<pk>\d+)/nuevo/$', views.crear_grupo, name='nuevo'),
     url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),
-    url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar'),
+    url(r'^(?P<pk>\d+)/trasladar/$', views.trasladar, name='trasladar'),
     url(r'^redes/(?P<pk>\d+)/grupos/$', views.listar_grupos, name='listar'),
+    url(r'^trasladar_lideres/$', views.trasladar_lideres, name='trasladar_lideres'),
     url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR'),
     url(r'^(?P<pk>\d+)/confirmar_ofrenda_GAR/$', views.confirmar_ofrenda_GAR, name='confirmar_ofrenda_GAR'),
     url(
@@ -28,5 +30,7 @@ urlpatterns = [
     url(
         r'^(?P<pk>\d+)/confirmar_ofrenda_discipulado/$', views.confirmar_ofrenda_discipulado,
         name='confirmar_ofrenda_discipulado'
-    )
+    ),
+
+    url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api')
 ]

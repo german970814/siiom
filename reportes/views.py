@@ -993,14 +993,14 @@ def ConsultarReportesSinEnviar(request, sobres=False):
                         gru = gr.filter(
                             estado='A', fechaApertura__lt=sig
                         ).exclude(
-                            reuniongar__fecha__range=(fechai, sig),
-                            reuniongar__confirmacionEntregaOfrenda=True
+                            reuniones_gar__fecha__range=(fechai, sig),
+                            reuniones_gar__confirmacionEntregaOfrenda=True
                         )
                     else:  # Entra si se escoge el reporte de reuniones
                         gru = gr.filter(
                             estado='A', fechaApertura__lt=sig
                         ).exclude(
-                            reuniongar__fecha__range=(fechai, sig)
+                            reuniones_gar__fecha__range=(fechai, sig)
                         )
 
                     for g in gru:
@@ -1087,9 +1087,9 @@ def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
 
                 if sobres:  # Entra si se escoge el reporte de entregas de sobres
                     grupos = gr.filter(estado='A').exclude(
-                        reuniondiscipulado__predica=predica, reuniondiscipulado__confirmacionentregaofrenda=True)
+                        reuniones_discipulado__predica=predica, reuniones_discipulado__confirmacionentregaofrenda=True)
                 else:  # Entra si se escoge el reporte de reuniones
-                    grupos = gr.filter(estado='A').exclude(reuniondiscipulado__predica=predica)
+                    grupos = gr.filter(estado='A').exclude(reuniones_discipulado__predica=predica)
 
                 # for g in grupos:
                 #     g.lideres = Miembro.objects.filter(id__in=g.listaLideres())

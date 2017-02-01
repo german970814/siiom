@@ -54,5 +54,5 @@ urlpatterns = [
 
     url(r'^nuevo/$', views.crear_miembro, name='nuevo'),
     url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
-    url(r'^(?P<pk>\d+)/transladar/$', views.transladar, name='transladar')
+    url(r'^(?P<pk>\d+)/trasladar/$', views.trasladar, name='trasladar')
 ]

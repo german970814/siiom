@@ -5,7 +5,7 @@ from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
 from iglesias.tests.factories import IglesiaFactory
 from ..models import Grupo, Red
-from ..forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm
+from ..forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm
 from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
 
 
@@ -408,3 +408,35 @@ class EditarGrupoFormTest(BaseTest):
 
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
+
+
+class TrasladarLideresFormTest(BaseTest):
+    """
+    Pruebas unitarias para el formulario usado para el traslado de lideres de un grupo a otro.
+    """
+
+    def setUp(self):
+        self.crear_arbol()
+
+    def datos_formulario(self):
+        lideres = map(str, Grupo.objects.get(id=500).lideres.values_list('id', flat=True))
+        return {'grupo': 500, 'lideres': list(lideres), 'nuevo_grupo': 800}
+
+    def test_formulario_invalido_si_nuevo_grupo_es_descendiente_de_grupo(self):
+        """
+        Prueba que el formulario sea invalido si el nuevo grupo es descendiente del grupo escogido.
+        """
+
+        iglesia = Grupo.objects.first().iglesia
+        data = self.datos_formulario()
+        data['nuevo_grupo'] = 600
+        form = TrasladarLideresForm(iglesia, data=data)
+
+        self.assertFalse(form.is_valid(), msg="No se debe dejar trasladar lideres al grupo de un descendiente.")
+        self.assertTrue(
+            form.has_error('nuevo_grupo', code='es_descendiente'),
+            msg="El error {} no es el esperado. Se espera {}".format(
+                form.errors,
+                form.error_messages['es_descendiente']
+            )
+        )

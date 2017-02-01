@@ -7,7 +7,7 @@ from common.tests.factories import UsuarioFactory
 from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red
-from ..forms import GrupoRaizForm, NuevoGrupoForm, TransladarGrupoForm
+from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
 from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
 
 
@@ -429,13 +429,13 @@ class ListarGruposRedViewTest(BaseTest):
         self.assertResponseNotContains(str(otro_grupo), html=False)
 
 
-class TransladarGrupoViewTest(BaseTest):
+class TrasladarGrupoViewTest(BaseTest):
     """
-    Pruebas unitarias para la vista de transladar un grupo a un nuevo padre.
+    Pruebas unitarias para la vista de trasladar un grupo a un nuevo padre.
     """
 
-    TEMPLATE = 'grupos/transladar.html'
-    URL = reverse('grupos:transladar', args=(500,))
+    TEMPLATE = 'grupos/trasladar.html'
+    URL = reverse('grupos:trasladar', args=(500,))
 
     def setUp(self):
         self.crear_arbol()
@@ -447,7 +447,7 @@ class TransladarGrupoViewTest(BaseTest):
         """
 
         self.login_usuario(self.admin)
-        response = self.client.get(reverse('grupos:transladar', args=(1000,)))
+        response = self.client.get(reverse('grupos:trasladar', args=(1000,)))
         self.response_404(response)
 
     def test_admin_get_template(self):
@@ -460,11 +460,11 @@ class TransladarGrupoViewTest(BaseTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, self.TEMPLATE)
-        self.assertIsInstance(response.context['form'], TransladarGrupoForm)
+        self.assertIsInstance(response.context['form'], TrasladarGrupoForm)
 
-    def test_post_formulario_valido_translada_grupo(self):
+    def test_post_formulario_valido_traslada_grupo(self):
         """
-        Prueba que si el formulario es valido translada el  grupo y redirecciona.
+        Prueba que si el formulario es valido traslada el  grupo y redirecciona.
         """
 
         nuevo = Grupo.objects.get(id=800)
@@ -833,3 +833,55 @@ class ListarRedesViewTest(BaseTest):
         self.assertResponseContains(red1.nombre.capitalize(), html=False)
         self.assertResponseContains(red2.nombre.capitalize(), html=False)
         self.assertResponseNotContains(red_incorrecta.nombre.capitalize(), html=False)
+
+
+class TrasladarLideresViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista trasladar lideres de una iglesia.
+    """
+
+    URL = 'grupos:trasladar_lideres'
+
+    def setUp(self):
+        self.crear_arbol()
+        admin = UsuarioFactory(admin=True)
+        self.login_usuario(admin)
+
+    def datos_formulario(self):
+        lider = Grupo.objects.get(id=500).lideres.first()
+        return {'grupo': '500', 'lideres': lider.pk, 'nuevo_grupo': '800'}
+
+    def test_admin_get(self):
+        """
+        Prueba que un administrador pueda ver el formulario.
+        """
+
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_grupo', html=False)
+
+    @mock.patch('miembros.managers.MiembroManager.trasladar_lideres')
+    def test_post_formulario_valido_traslada_lideres_escogidos(self, trasladar_mock):
+        """
+        Prueba que si se hace POST y el formulario es valido se trasladen los lideres o lider escogido.
+        """
+
+        self.post(self.URL, data=self.datos_formulario())
+        self.assertTrue(trasladar_mock.called)
+
+    def test_post_formulario_valido_redirecciona_organigrama(self):
+        """
+        Prueba que si se hace POST y el formulario es valido redirecciona a la vista del organigrama.
+        """
+
+        response = self.post(self.URL, data=self.datos_formulario())
+        self.assertRedirects(response, self.reverse('grupos:organigrama'))
+
+    def test_post_formulario_invalido_muestra_errores(self):
+        """
+        Prueba que si se hace POST y el formulario es invalido se muestren los errores.
+        """
+
+        response = self.post(self.URL, data={})
+        self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'lideres', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'nuevo_grupo', self.MSJ_OBLIGATORIO)

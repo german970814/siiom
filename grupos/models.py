@@ -194,7 +194,7 @@ class Grupo(IglesiaMixin, AL_Node):
         Devuelve un queryset con los miembros del grupo que son lideres.
         """
 
-        return self.miembro_set.lideres2()
+        return self.miembros.lideres2()
 
     @property
     def reuniones_GAR_sin_ofrenda_confirmada(self):
@@ -202,7 +202,7 @@ class Grupo(IglesiaMixin, AL_Node):
         Devuelve un queryset con las reuniones GAR que no tienen la ofrenda confirmada.
         """
 
-        return self.reuniongar_set.filter(confirmacionEntregaOfrenda=False)
+        return self.reuniones_gar.filter(confirmacionEntregaOfrenda=False)
 
     @property
     def reuniones_discipulado_sin_ofrenda_confirmada(self):
@@ -210,7 +210,7 @@ class Grupo(IglesiaMixin, AL_Node):
         Devuelve un queryset con las reuniones de discipulado que no tienen la ofrenda confirmada.
         """
 
-        return self.reuniondiscipulado_set.filter(confirmacionEntregaOfrenda=False)
+        return self.reuniones_discipulado.filter(confirmacionEntregaOfrenda=False)
 
     @property
     def grupos_red(self):
@@ -232,7 +232,7 @@ class Grupo(IglesiaMixin, AL_Node):
         if len(ancentros) > 2:
             return ancentros[2]
         else:
-            return None            
+            return None
 
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
@@ -240,7 +240,7 @@ class Grupo(IglesiaMixin, AL_Node):
         reuniones a confirmar.
         """
 
-        self.reuniongar_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
+        self.reuniones_gar.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
     def confirmar_ofrenda_reuniones_discipulado(self, reuniones):
         """
@@ -248,11 +248,11 @@ class Grupo(IglesiaMixin, AL_Node):
         de las reuniones a confirmar.
         """
 
-        self.reuniondiscipulado_set.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
+        self.reuniones_discipulado.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
-    def transladar(self, nuevo_padre):
+    def trasladar(self, nuevo_padre):
         """
-        Translada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
+        Traslada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
         actual, se les modifica el grupo al que pertenecen, al nuevo grupo padre.
         """
 
@@ -264,6 +264,60 @@ class Grupo(IglesiaMixin, AL_Node):
                 if nuevo_padre.red != self.red:
                     grupos = [grupo.id for grupo in self.get_tree(self)]
                     Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
+
+    def _trasladar_miembros(self, nuevo_grupo):
+        """
+        Traslada todos los miembros que no lideran grupo del grupo actual al nuevo grupo.
+        """
+
+        self.miembros.filter(grupo_lidera=None).update(grupo=nuevo_grupo)
+
+    def _trasladar_visitas(self, nuevo_grupo):
+        """
+        Traslada todas las visitas del grupo actual al nuevo grupo.
+        """
+
+        self.visitas.update(grupo=nuevo_grupo)
+
+    def _trasladar_encontristas(self, nuevo_grupo):
+        """
+        Traslada todos los encontristas del grupo actual al nuevo grupo.
+        """
+
+        self.encontristas.update(grupo=nuevo_grupo)
+
+    def _trasladar_reuniones_gar(self, nuevo_grupo):
+        """
+        Traslada todas las reuniones GAR del grupo actual al nuevo grupo.
+        """
+
+        self.reuniones_gar.update(grupo=nuevo_grupo)
+
+    def _trasladar_reuniones_discipulado(self, nuevo_grupo):
+        """
+        Traslada todas las reuniones de discipulado del grupo actual al nuevo grupo.
+        """
+
+        self.reuniones_discipulado.update(grupo=nuevo_grupo)
+
+    def fusionar(self, nuevo_grupo):
+        """
+        Traslada la información asociada al grupo actual (visitas, encontristas, reuniones, miembros, etc) al
+        nuevo grupo y elimina el grupo actual.
+        """
+
+        if self != nuevo_grupo:
+            with transaction.atomic():
+                for hijo in self.get_children():
+                    hijo.trasladar(nuevo_grupo)
+
+                self._trasladar_visitas(nuevo_grupo)
+                self._trasladar_miembros(nuevo_grupo)
+                self._trasladar_encontristas(nuevo_grupo)
+                self._trasladar_reuniones_gar(nuevo_grupo)
+                self._trasladar_reuniones_discipulado(nuevo_grupo)
+
+                self.delete()
 
     def get_nombre(self):
         # if self.lider2 is not None:
@@ -294,7 +348,7 @@ class Grupo(IglesiaMixin, AL_Node):
 
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         miembros = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='miembro').values('miembro')
-        return self.miembro_set.filter(id__in=miembros).exclude(id__in=lideres)
+        return self.miembros.filter(id__in=miembros).exclude(id__in=lideres)
 
     def get_direccion(self):
         """
@@ -326,7 +380,7 @@ class Predica(models.Model):
 
 class ReunionGAR(models.Model):
     fecha = models.DateField()
-    grupo = models.ForeignKey(Grupo)
+    grupo = models.ForeignKey(Grupo, related_name='reuniones_gar')
     predica = models.CharField(max_length=100, verbose_name='prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
     numeroTotalAsistentes = models.PositiveIntegerField(verbose_name='Número total de asistentes')
@@ -369,7 +423,7 @@ class AsistenciaMiembro(models.Model):
 
 class ReunionDiscipulado(models.Model):
     fecha = models.DateField(auto_now_add=True)
-    grupo = models.ForeignKey(Grupo)
+    grupo = models.ForeignKey(Grupo, related_name='reuniones_discipulado')
     predica = models.ForeignKey(Predica, verbose_name='prédica')
     asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')
