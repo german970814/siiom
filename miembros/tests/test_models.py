@@ -21,27 +21,27 @@ class MiembroModelTest(BaseTest):
         self.assertTrue(director.es_director_red)
         self.assertFalse(no_director.es_director_red)
 
-    def test_transladar_miembro_mismo_grupo(self):
+    def test_trasladar_miembro_mismo_grupo(self):
         """
-        Prueba que cuando se quiere transladar un miembro al mismo grupo no se cambie el grupo actual.
+        Prueba que cuando se quiere trasladar un miembro al mismo grupo no se cambie el grupo actual.
         """
 
         grupo = GrupoFactory()
         miembro = MiembroFactory(grupo=grupo)
 
-        miembro.transladar(grupo)
+        miembro.trasladar(grupo)
         miembro.refresh_from_db()
         self.assertEqual(miembro.grupo, grupo)
 
-    def test_transladar_miembro_mueve(self):
+    def test_trasladar_miembro_mueve(self):
         """
-        Prueba que se translada un miembro a un nuevo grupo.
+        Prueba que se traslada un miembro a un nuevo grupo.
         """
 
         grupo1 = GrupoFactory()
         grupo2 = GrupoFactory()
         miembro = MiembroFactory(grupo=grupo1)
 
-        miembro.transladar(grupo2)
+        miembro.trasladar(grupo2)
         miembro.refresh_from_db()
         self.assertTrue(miembro.grupo, grupo2)

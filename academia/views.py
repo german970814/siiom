@@ -34,15 +34,13 @@ def eliminar(request, modelo, lista):
             try:
                 modelo.objects.get(id=e).delete()
             except ValueError as e:
-                print(e)
+                # print(e)
                 pass
             except:
                 ok = 2  # Hubo un Error
     if ok == 1:
         messages.success(request, "Se ha eliminado correctamente")
     return ok
-
-#  -------------------------AMBOS----------------------------------
 
 
 @user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")

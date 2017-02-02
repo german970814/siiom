@@ -103,7 +103,8 @@ function agregarOpciones(data, idCombo){
 
 // Permite agregar opciones a un select.
 function agregarOpciones2(data, idCombo){
-    var opciones = '<option value="-1" selected="selected">------</option>';
+    // var opciones = '<option value="-1" selected="selected">------</option>';
+    var opciones = '';
     data.forEach(function(item){
         opciones += '<option value="' + item['pk'] + '">' + item['nombre'] + '</option>';
     });
@@ -111,4 +112,3 @@ function agregarOpciones2(data, idCombo){
     $("#"+idCombo).html(opciones);
     $("#"+idCombo).trigger('chosen:updated');
 }
-

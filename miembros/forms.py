@@ -503,18 +503,18 @@ class NuevoMiembroForm(CustomModelForm):
         return super().save()
 
 
-class TransladarMiembroForm(CustomForm):
+class TrasladarMiembroForm(CustomForm):
     """
-    Formulario para el translado de un miembro de un grupo a otro.
+    Formulario para el traslado de un miembro de un grupo a otro.
     """
 
     nuevo = forms.ModelChoiceField(
-        queryset=Grupo.objects.prefetch_related('lideres').all(), label=_lazy('Transladar a')
+        queryset=Grupo.objects.prefetch_related('lideres').all(), label=_lazy('Trasladar a')
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['nuevo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
-    def transladar(self, miembro):
-        miembro.transladar(self.cleaned_data['nuevo'])
+    def trasladar(self, miembro):
+        miembro.trasladar(self.cleaned_data['nuevo'])

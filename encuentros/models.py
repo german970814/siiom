@@ -79,7 +79,7 @@ class Encontrista(models.Model):
     genero = models.CharField(max_length=1, choices=OPCIONES_GENERO, verbose_name='Género')
     identificacion = models.BigIntegerField(verbose_name='Identificación')
     email = models.EmailField(verbose_name='Email')
-    grupo = models.ForeignKey('grupos.Grupo', verbose_name='Grupo')
+    grupo = models.ForeignKey('grupos.Grupo', related_name='encontristas', verbose_name='Grupo')
     encuentro = models.ForeignKey(Encuentro, verbose_name='Encuentro')
     asistio = models.BooleanField(default=False, verbose_name='Asistio')
 

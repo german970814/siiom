@@ -28,7 +28,7 @@ from common.groups_tests import (
     miembro_empleado_test
 )
 
-from .forms import TransladarMiembroForm, NuevoMiembroForm
+from .forms import TrasladarMiembroForm, NuevoMiembroForm
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -121,7 +121,7 @@ def miembroInicio(request):
     if miembro:
         grupo = miembro.grupo_lidera
         if grupo:
-            miembrosGrupo = grupo.miembro_set.all()
+            miembrosGrupo = grupo.miembros.all()
             tipo = TipoMiembro.objects.get(nombre__iexact='visita')
             visitantes = []
             for mg in miembrosGrupo:
@@ -144,7 +144,7 @@ def miembroInicio(request):
             visitas = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
             grupo = miem.grupo_lidera
             if grupo:
-                return grupo.miembro_set.filter(id__in=visitas)
+                return grupo.miembros.filter(id__in=visitas)
             else:
                 return []
 
@@ -255,7 +255,7 @@ isOk = False
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
 def liderListarMiembrosGrupo(request):
     if request.method == 'POST':
-        if 'transladar' in request.POST:
+        if 'trasladar' in request.POST:
             request.session['seleccionados'] = request.POST.getlist('seleccionados')
             # return HttpResponseRedirect('/miembro/transladar_miembros/')
         else:
@@ -430,7 +430,7 @@ def liderLlamadasPendientesVisitantesGrupo(request):
     grupo = miembro.grupo_lidera
     lideres = []
     if grupo:
-        for lid in grupo.miembro_set.all():
+        for lid in grupo.miembros.all():
             lideres.append(CambioTipo.objects.filter(
                 miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
         lids = []
@@ -438,8 +438,8 @@ def liderLlamadasPendientesVisitantesGrupo(request):
             for k in l:
                 if k.miembro.id not in lids:
                     lids.append(k.miembro.id)
-        visitantes = grupo.miembro_set.filter(fechaLlamadaLider=None).exclude(id__in=lids)
-#        miembrosGrupo = list(grupo.miembro_set.all())
+        visitantes = grupo.miembros.filter(fechaLlamadaLider=None).exclude(id__in=lids)
+#        miembrosGrupo = list(grupo.miembros.all())
 #        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
 #        visitantes = []
 #        for mg in miembrosGrupo:
@@ -593,7 +593,7 @@ def liderPromoverVisitantesGrupo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupo_lidera
     if grupo:
-        miembrosGrupo = list(grupo.miembro_set.all())
+        miembrosGrupo = list(grupo.miembros.all())
         if request.method == 'POST':
             lista = request.POST.getlist('seleccionados')
             lista.reverse()
@@ -1636,9 +1636,9 @@ def listar_lideres(request, pk):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def transladar(request, pk):
+def trasladar(request, pk):
     """
-    Permite a un administrador transladar un miembro que no lidere grupo a que asista a otro grupo.
+    Permite a un administrador trasladar un miembro que no lidere grupo a que asista a otro grupo.
     """
 
     miembro = get_object_or_404(Miembro, pk=pk)
@@ -1646,11 +1646,11 @@ def transladar(request, pk):
         return redirect(reverse('sin_permiso'))
 
     if request.method == 'POST':
-        form = TransladarMiembroForm(data=request.POST)
+        form = TrasladarMiembroForm(data=request.POST)
         if form.is_valid():
-            form.transladar(miembro)
-            return redirect('miembros:transladar', pk)
+            form.trasladar(miembro)
+            return redirect('miembros:trasladar', pk)
     else:
-        form = TransladarMiembroForm()
+        form = TrasladarMiembroForm()
 
-    return render(request, 'miembros/transladar.html', {'miembro': miembro, 'form': form})
+    return render(request, 'miembros/trasladar.html', {'miembro': miembro, 'form': form})

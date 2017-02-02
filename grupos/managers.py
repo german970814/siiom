@@ -3,7 +3,6 @@ from treebeard.al_tree import AL_NodeManager
 from common.managers import IglesiaMixinQuerySet
 
 
-
 class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
     """
     Queryset personalizado para los grupos.
@@ -68,11 +67,11 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         Devuelve un queryset con los grupos que tienen pendientes por confirmar la ofrenda de reuniones GAR.
         """
 
-        return self.filter(reuniongar__confirmacionEntregaOfrenda=False).distinct()
+        return self.filter(reuniones_gar__confirmacionEntregaOfrenda=False).distinct()
 
     def sin_confirmar_ofrenda_discipulado(self):
         """
         Devuelve un queryset con los grupos que tienen pendientes por confirmar la ofrenda de reuniones de discipulado.
         """
 
-        return self.filter(reuniondiscipulado__confirmacionEntregaOfrenda=False).distinct()
+        return self.filter(reuniones_discipulado__confirmacionEntregaOfrenda=False).distinct()
