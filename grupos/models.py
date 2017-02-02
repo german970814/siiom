@@ -232,7 +232,16 @@ class Grupo(IglesiaMixin, AL_Node):
         if len(ancentros) > 2:
             return ancentros[2]
         else:
-            return None            
+            return None
+
+    @property
+    def _estado(self):
+        """Retorna el estado del grupo de acuerdo a su historial."""
+        return self.historiales.first().estado
+
+    def _get_estado_display(self):
+        """Retorna el estado display del grupo de acuerdo a su historial."""
+        return self.historiales.first().get_estado_display()
 
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
@@ -270,24 +279,6 @@ class Grupo(IglesiaMixin, AL_Node):
         #     return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())
         # return self.lider1.primerApellido.upper()
         return self.nombre
-
-    # def listaLideres(self):
-    #     """
-    #     Devuelve una lista con los ids de los lideres del grupo.
-    #     Los lideres estan definidos en los campos lider1, lider2 y sus conyugues
-    #     siempre y cuando estos sean lideres.
-    #     """
-    #
-    #     lideres = []
-    #     if self.lider1:
-    #         lideres.append(self.lider1.id)
-    #         if CambioTipo.objects.filter(miembro=self.lider1.conyugue, nuevoTipo__nombre__iexact='lider').exists():
-    #             lideres.append(self.lider1.conyugue.id)
-    #     if self.lider2:
-    #         lideres.append(self.lider2.id)
-    #         if CambioTipo.objects.filter(miembro=self.lider2.conyugue, nuevoTipo__nombre__iexact='lider').exists():
-    #             lideres.append(self.lider2.conyugue.id)
-    #     return lideres
 
     def miembrosGrupo(self):
         """Devuelve los miembros de un grupo (queryset) sino tiene, devuelve el queryset vacio."""
@@ -393,3 +384,31 @@ class AsistenciaDiscipulado(models.Model):
 
     def __str__(self):
         return self.miembro.nombre + " - " + self.reunion.grupo.nombre
+
+
+class HistorialEstado(models.Model):
+    """Modelo para guardar historial de cambio de estado de los grupos."""
+
+    ACTIVO = 'AC'
+    INACTIVO = 'IN'
+    SUSPENDIDO = 'SU'
+    ARCHIVADO = 'AR'
+
+    OPCIONES_ESTADO = (
+        (ACTIVO, 'ACTIVO'),
+        (INACTIVO, 'INACTIVO'),
+        (SUSPENDIDO, 'SUSPENDIDO'),
+        (ARCHIVADO, 'ARCHIVADO'),
+    )
+
+    grupo = models.ForeignKey(Grupo, related_name='historiales', verbose_name=_lazy('grupo'))
+    fecha = models.DateTimeField(verbose_name=_lazy('fecha'), auto_now_add=True)
+    estado = models.CharField(max_length=2, choices=OPCIONES_ESTADO, verbose_name=_lazy('estado'))
+
+    def __str__(self):
+        return 'Historial {estado} para grupo: {self.grupo}'.format(self=self, estado=self.get_estado_display())
+
+    class Meta:
+        verbose_name = _lazy('Historial')
+        verbose_name_plural = _lazy('Historiales')
+        ordering = ['-fecha']
