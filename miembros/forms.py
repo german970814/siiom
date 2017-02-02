@@ -52,12 +52,17 @@ class FormularioLiderAgregarMiembro(ModelForm):
 
     class Meta:
         model = Miembro
-        exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
-                   'asignadoGAR', 'asisteGAR', ''
-                   'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
-                   'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
-                   'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
-                   'noInteresadoGAR', 'convertido', 'estado', 'conyugue', 'foto_perfil')
+        fields = (
+            'nombre', 'primerApellido', 'segundoApellido', 'telefono',
+            'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
+            'profesion', 'barrio', 'genero', 'estadoCivil'  # , 'conyugue'
+        )
+        # exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
+        #            'asignadoGAR', 'asisteGAR', ''
+        #            'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
+        #            'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
+        #            'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
+        #            'noInteresadoGAR', 'convertido', 'estado', 'conyugue', 'foto_perfil', 'iglesia')
 
 
 class FormularioAdminAgregarMiembro(ModelForm):
@@ -96,10 +101,16 @@ class FormularioAdminAgregarMiembro(ModelForm):
 
     class Meta:
         model = Miembro
-        exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
-                   'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
-                   'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
-                   'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada', 'estado')
+        fields = (
+            'nombre', 'primerApellido', 'segundoApellido', 'telefono',
+            'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
+            'profesion', 'barrio', 'genero', 'estadoCivil', 'conyugue'
+        )
+        # exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
+        #            'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
+        #            'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
+        #            'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
+        #            'estado', 'iglesia')
 
 
 class FormularioLlamadaLider(ModelForm):
