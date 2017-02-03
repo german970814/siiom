@@ -84,7 +84,7 @@ class Grupo(IglesiaMixin, AL_Node):
     @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
         """
-        Devuelve el arbol de forma recursiva.
+        Construye el organigrama de forma recursiva.
         """
 
         lista_hijos = []
@@ -98,9 +98,20 @@ class Grupo(IglesiaMixin, AL_Node):
     @classmethod
     def obtener_arbol(cls, padre=None, iglesia=None):
         """
-        Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
-        grupos.
+        :returns:
+            El organigrama en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
+            grupos.
+
+        :param padre:
+            El grupo inicial desde donde sa va mostrar el organigrama. Si no se indica se muestra todo el organigrama
+            de la iglesia.
+
+        :param iglesia:
+            La iglesia a la cual pertenece el organigrama.
         """
+
+        # TODO Mejorar en la doc que retorna con un ejemplo usar como guia el metodo get get_annotated_list de
+        # http://django-treebeard.readthedocs.io/en/latest/api.html#treebeard.models.Node.add_child
 
         arbol = []
         if padre is None:
@@ -118,8 +129,9 @@ class Grupo(IglesiaMixin, AL_Node):
     @classmethod
     def obtener_arbol_viejo(cls, raiz=None):  # pragma: no cover
         """
-        Devuelve el arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
-        grupos.
+        :returns:
+            El arbol en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
+            grupos.
         """
 
         arbol = []
@@ -174,8 +186,15 @@ class Grupo(IglesiaMixin, AL_Node):
     @classmethod
     def obtener_ruta(cls, inicial, final):
         """
-        Devuelve una lista con los grupos que conforman la ruta que hay desde el grupo inicial al grupo final
-        incluyendo estos grupos.
+        :returns:
+            Una lista con los grupos que conforman la ruta que hay desde el grupo inicial al grupo final
+            incluyendo estos grupos.
+
+        :param inicial:
+            Grupo en cual inicia la ruta.
+
+        :param final:
+            Grupo en el cual termina la ruta.
         """
 
         ruta = []
@@ -191,7 +210,12 @@ class Grupo(IglesiaMixin, AL_Node):
     @property
     def discipulos(self):
         """
-        Devuelve un queryset con los miembros del grupo que son lideres.
+        :returns:
+            Un queryset con los miembros del grupo actual que son lideres.
+
+        .. note::
+
+            Es considerado lider todo miembro que tenga permiso de líder.
         """
 
         return self.miembros.lideres2()
@@ -199,7 +223,8 @@ class Grupo(IglesiaMixin, AL_Node):
     @property
     def reuniones_GAR_sin_ofrenda_confirmada(self):
         """
-        Devuelve un queryset con las reuniones GAR que no tienen la ofrenda confirmada.
+        :returns:
+            Un queryset con las reuniones GAR del grupo actual que no tienen la ofrenda confirmada.
         """
 
         return self.reuniones_gar.filter(confirmacionEntregaOfrenda=False)
@@ -207,7 +232,8 @@ class Grupo(IglesiaMixin, AL_Node):
     @property
     def reuniones_discipulado_sin_ofrenda_confirmada(self):
         """
-        Devuelve un queryset con las reuniones de discipulado que no tienen la ofrenda confirmada.
+        :returns:
+            Un queryset con las reuniones de discipulado del grupo actual que no tienen la ofrenda confirmada.
         """
 
         return self.reuniones_discipulado.filter(confirmacionEntregaOfrenda=False)
@@ -215,8 +241,12 @@ class Grupo(IglesiaMixin, AL_Node):
     @property
     def grupos_red(self):
         """
-        Devuelve un queryset con los grupos de la red del grupo actual. Entiéndase por red los descendientes del grupo
-        actual incluyéndose asimismo.
+        :returns:
+            Un queryset con la subred del grupo actual.
+
+        .. note::
+
+            Entiéndase por subred todos los descendientes del grupo actual incluyéndose asimismo.
         """
 
         from .utils import convertir_lista_grupos_a_queryset
@@ -225,7 +255,14 @@ class Grupo(IglesiaMixin, AL_Node):
     @property
     def cabeza_red(self):
         """
-        Retorna la cabeza de red del grupo actual.
+        :returns:
+            El grupo cabeza de red del grupo actual o ``None`` si el grupo actual se encuentra por encima de los
+            cabezas de red.
+
+        .. note::
+
+            Entiéndase por cabeza de red un grupo que se encuentra dentro de los 72 del pastor presidente, es decir,
+            un grupo que se encuentra dos niveles mas abajo que la raiz del arbol.
         """
 
         ancentros = self.get_ancestors()
@@ -236,24 +273,34 @@ class Grupo(IglesiaMixin, AL_Node):
 
     def confirmar_ofrenda_reuniones_GAR(self, reuniones):
         """
-        Confirma la ofrenda de las reuniones GAR ingresadas en la lista. Reuniones es una lista con los ids de las
-        reuniones a confirmar.
+        Confirma la ofrenda de las reuniones GAR ingresadas del grupo actual.
+
+        :param list[int] reuniones:
+            Contiene los ids de las reuniones a confirmar.
         """
 
         self.reuniones_gar.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
     def confirmar_ofrenda_reuniones_discipulado(self, reuniones):
         """
-        Confirma la ofrenda de las reuniones de discipulado ingresadas en la lista. Reuniones es una lista con los ids
-        de las reuniones a confirmar.
+        Confirma la ofrenda de las reuniones de discipulado ingresadas del grupo actual.
+
+        :param list[int] reuniones:
+            Contiene los ids de las reuniones a confirmar.
         """
 
         self.reuniones_discipulado.filter(id__in=reuniones).update(confirmacionEntregaOfrenda=True)
 
     def trasladar(self, nuevo_padre):
         """
-        Traslada el grupo actual y sus descendientes debajo de un nuevo padre en el arbol. A los lideres del grupo
-        actual, se les modifica el grupo al que pertenecen, al nuevo grupo padre.
+        Traslada el grupo actual y sus descendientes debajo de un nuevo grupo en el arbol. A los lideres del grupo
+        actual, se les modifica el grupo al que pertenecen, al nuevo grupo.
+
+        :param nuevo_padre:
+            Grupo que va ser usado como nuevo padre del grupo actual que se esta trasladando.
+
+        :raise InvalidMoveToDescendant:
+            Cuando se intenta trasladar el grupo actual debajo de uno de sus descendientes.
         """
 
         with transaction.atomic():
@@ -268,6 +315,9 @@ class Grupo(IglesiaMixin, AL_Node):
     def _trasladar_miembros(self, nuevo_grupo):
         """
         Traslada todos los miembros que no lideran grupo del grupo actual al nuevo grupo.
+
+        :param nuevo_grupo:
+            Grupo al cual van a pertenecer los miembros que se van a trasladar.
         """
 
         self.miembros.filter(grupo_lidera=None).update(grupo=nuevo_grupo)
@@ -275,6 +325,9 @@ class Grupo(IglesiaMixin, AL_Node):
     def _trasladar_visitas(self, nuevo_grupo):
         """
         Traslada todas las visitas del grupo actual al nuevo grupo.
+
+        :param nuevo_grupo:
+            Grupo al cual van a pertenecer las visitas que se van a trasladar.
         """
 
         self.visitas.update(grupo=nuevo_grupo)
@@ -282,6 +335,9 @@ class Grupo(IglesiaMixin, AL_Node):
     def _trasladar_encontristas(self, nuevo_grupo):
         """
         Traslada todos los encontristas del grupo actual al nuevo grupo.
+
+        :param nuevo_grupo:
+            Grupo al cual van a pertenecer los encontristas que se van a trasladar.
         """
 
         self.encontristas.update(grupo=nuevo_grupo)
@@ -289,6 +345,9 @@ class Grupo(IglesiaMixin, AL_Node):
     def _trasladar_reuniones_gar(self, nuevo_grupo):
         """
         Traslada todas las reuniones GAR del grupo actual al nuevo grupo.
+
+        :param nuevo_grupo:
+            Grupo al cual van a pertenecer las reuniones GAR que se van a trasladar.
         """
 
         self.reuniones_gar.update(grupo=nuevo_grupo)
@@ -296,6 +355,9 @@ class Grupo(IglesiaMixin, AL_Node):
     def _trasladar_reuniones_discipulado(self, nuevo_grupo):
         """
         Traslada todas las reuniones de discipulado del grupo actual al nuevo grupo.
+
+        :param nuevo_grupo:
+            Grupo al cual van a pertenecer las reuniones de discipulado que se van a trasladar.
         """
 
         self.reuniones_discipulado.update(grupo=nuevo_grupo)
@@ -304,6 +366,9 @@ class Grupo(IglesiaMixin, AL_Node):
         """
         Traslada la información asociada al grupo actual (visitas, encontristas, reuniones, miembros, etc) al
         nuevo grupo y elimina el grupo actual.
+
+        :param nuevo_grupo:
+            Grupo al cual va a pertenecer la información que se va a trasladar.
         """
 
         if self != nuevo_grupo:
