@@ -8,7 +8,11 @@ Welcome to Siiom's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Grupos:
+
+   grupos/models
+   grupos/managers
+   grupos/forms
 
 
 

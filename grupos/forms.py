@@ -1,8 +1,3 @@
-'''
-Created on Apr 12, 2011
-
-@author: Migue
-'''
 import logging
 # Django
 # from contextlib import suppress
@@ -31,7 +26,7 @@ class FormularioReunionGARBase(forms.ModelForm):
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
-    no_realizo_grupo = forms.BooleanField(label=_('No se realizo Realizó Grupo'), required=False)
+    no_realizo_grupo = forms.BooleanField(label=_lazy('No se realizo Realizó Grupo'), required=False)
 
     class Meta:
         model = ReunionGAR
