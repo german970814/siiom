@@ -159,7 +159,7 @@ def miembroInicio(request):
         #                 discipulos.append(Miembro.objects.get(id=miem))
         #         else:
         #             pass
-        discipulos = Miembro.objects.lideres2().filter(grupo_lidera__in=k)
+        discipulos = Miembro.objects.lideres().filter(grupo_lidera__in=k)
         totalLideres = len(discipulos)
         totalGrupos = len(k)  # len(grupos)
         lideresGrupo = len(lid_gru(miembro)) - 1
