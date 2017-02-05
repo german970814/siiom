@@ -54,12 +54,6 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
                     if not grupo_actual.lideres.exists():
                         grupo_actual.fusionar(nuevo_grupo)
 
-    # TODO eliminar este metodo
-    def lideres(self):
-        from .models import CambioTipo
-        cambios = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values_list('miembro', flat=True)
-        return self.filter(id__in=cambios)
-
     def lideres_disponibles(self):
         """
         Devuelve un queryset con los lideres que no se encuentran liderando grupo.
