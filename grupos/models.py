@@ -218,7 +218,7 @@ class Grupo(IglesiaMixin, AL_Node):
             Es considerado lider todo miembro que tenga permiso de líder.
         """
 
-        return self.miembros.lideres2()
+        return self.miembros.lideres()
 
     @property
     def reuniones_GAR_sin_ofrenda_confirmada(self):

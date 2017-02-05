@@ -52,7 +52,7 @@ class MiembroManagerTest(BaseTest):
         miembro = MiembroFactory()
         lider = MiembroFactory(lider=True)
 
-        lideres = list(Miembro.objects.lideres2())
+        lideres = list(Miembro.objects.lideres())
         self.assertIn(lider, lideres)
         self.assertNotIn(miembro, lideres)
 
