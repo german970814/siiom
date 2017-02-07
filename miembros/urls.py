@@ -7,17 +7,17 @@ from grupos.views import (
 
 urlpatterns = [
     url(r'^$', views.miembroInicio, name="miembro_inicio"),  # revisada
-    url(r'^listar_miembros/$', views.liderListarMiembrosGrupo, name="listar_miembros"),  # No se usa actualmente revisada
-    url(r'^editar_miembros/$', views.liderEditarMiembros, name="editar_miembros"),  # No se usa actualmente revisada
+    # url(r'^listar_miembros/$', views.liderListarMiembrosGrupo, name="listar_miembros"),  # No se usa actualmente revisada
+    # url(r'^editar_miembros/$', views.liderEditarMiembros, name="editar_miembros"),  # No se usa actualmente revisada
     url(r'^editar_miembro/(\d+)/$', views.editarMiembro, name="editar_miembro"),  # revisada
     url(r'^editar_perfil/$', RedirectView.as_view(url='/miembro/perfil/')),
     url(r'^perfil/(?P<pk>\d*)$', views.liderEditarPerfil, name="editar_perfil"),  # revisada
     url(r'^cambiar_contrasena/$', views.cambiarContrasena, name="cambiar_contrasena"),  # revisada
-    url(r'^llamadas_pendientes/lider/$', views.liderLlamadasPendientesVisitantesGrupo, name="llamadas_pendientes_lider"),  # revisada
-    url(r'^llamadas_pendientes/agente/$', views.llamadasPendientesVisitantes, name="llamadas_pendientes_agente"),  # revisada
-    url(r'^registrar_llamada/lider/$', views.liderLlamarVisitas, name="registrar_llamada_lider"),  # revisada
-    url(r'^registrar_llamada/agente/$', views.llamarVisitas, name="registrar_llamada_agente"),  # revisada
-    url(r'^promover_visitantes/$', views.liderPromoverVisitantesGrupo, name="promover_visitantes"),  # revisada
+    # url(r'^llamadas_pendientes/lider/$', views.liderLlamadasPendientesVisitantesGrupo, name="llamadas_pendientes_lider"),  # no se usa actualmente revisada
+    # url(r'^llamadas_pendientes/agente/$', views.llamadasPendientesVisitantes, name="llamadas_pendientes_agente"),  # no se usa actualmente revisada
+    # url(r'^registrar_llamada/lider/$', views.liderLlamarVisitas, name="registrar_llamada_lider"),  # revisada, no se usa actualmente
+    # url(r'^registrar_llamada/agente/$', views.llamarVisitas, name="registrar_llamada_agente"),  # revisada, no se usa actualmente
+    # url(r'^promover_visitantes/$', views.liderPromoverVisitantesGrupo, name="promover_visitantes"),  # revisada
     url(r'^grupo/(?P<pk>\d*)$', editarHorarioReunionGrupo, name="editar_grupo"),  # revisada
     url(r'^editar_grupo/$', RedirectView.as_view(url="/miembro/grupo/")),
     url(r'^reportar_reunion_grupo/$', reportarReunionGrupo, name="reportar_reunion_grupo"),  # revisada

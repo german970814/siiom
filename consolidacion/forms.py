@@ -38,7 +38,7 @@ class FormularioAsignarGrupoVisita(forms.Form):
     """
 
     visita = forms.ModelChoiceField(queryset=Visita.objects.filter(retirado=False))
-    grupo = forms.ModelChoiceField(queryset=Grupo.objects.filter(estado='A'))
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.activos())
 
     def __init__(self, *args, **kwargs):
         super(FormularioAsignarGrupoVisita, self).__init__(*args, **kwargs)

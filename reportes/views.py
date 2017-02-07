@@ -25,7 +25,10 @@ from .forms import (
 )
 from .utils import get_date_for_report
 from grupos.utils import reunion_reportada
-from grupos.models import Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
+from grupos.models import (
+    Red, ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado,
+    HistorialEstado as Historial
+)
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from common.groups_tests import (
     liderAdminTest, agenteAdminTest,
@@ -38,273 +41,273 @@ import json
 import copy
 
 
-@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
-def visitasAsignadasRedes(request):
-    """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida
-    por el usuario."""
+# @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")  # actualmente en desuso
+# def visitasAsignadasRedes(request):
+#     """Este reporte muestra el total de visitas asignadas a las distintas redes en un rango de fechas escogida
+#     por el usuario."""
 
-    tipo = 1
-    titulo_pag = 'Total de visitas en cada red'
-    vAxis = 'Numero de Visitas'
-    hAxis = 'Redes'
-    if request.method == 'POST':
-        form = FormularioRangoFechas(request.POST)
-        if form.is_valid():
-            fecha_i = form.cleaned_data['fechai']
-            fecha_f = form.cleaned_data['fechaf']
-            opciones = {'fi': fecha_i, 'ff': fecha_f}
-            sw = True
+#     tipo = 1
+#     titulo_pag = 'Total de visitas en cada red'
+#     vAxis = 'Numero de Visitas'
+#     hAxis = 'Redes'
+#     if request.method == 'POST':
+#         form = FormularioRangoFechas(request.POST)
+#         if form.is_valid():
+#             fecha_i = form.cleaned_data['fechai']
+#             fecha_f = form.cleaned_data['fechaf']
+#             opciones = {'fi': fecha_i, 'ff': fecha_f}
+#             sw = True
 
-            redes = Red.objects.all()
-            values = [['Red', 'Visitas']]
-            total = 0
-            for red in redes:
-                num_vis = Miembro.objects.filter(fechaAsignacionGAR__range=(fecha_i, fecha_f), grupo__red=red).count()
-                values.append([str(red.nombre), num_vis])
-                total = total + num_vis
-                titulo = ''
+#             redes = Red.objects.all()
+#             values = [['Red', 'Visitas']]
+#             total = 0
+#             for red in redes:
+#                 num_vis = Miembro.objects.filter(fechaAsignacionGAR__range=(fecha_i, fecha_f), grupo__red=red).count()
+#                 values.append([str(red.nombre), num_vis])
+#                 total = total + num_vis
+#                 titulo = ''
 
-            if 'type' in request.POST:
-                if request.POST['type'] == '1':
-                    tipo = 1
-                else:
-                    tipo = 2
+#             if 'type' in request.POST:
+#                 if request.POST['type'] == '1':
+#                     tipo = 1
+#                 else:
+#                     tipo = 2
 
-            if 'reportePDF' in request.POST:
-                values.append(['Total', total])
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
-                return response
-    else:
-        form = FormularioRangoFechas()
-        sw = False
+#             if 'reportePDF' in request.POST:
+#                 values.append(['Total', total])
+#                 response = HttpResponse(content_type='application/pdf')
+#                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
+#                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
+#                 return response
+#     else:
+#         form = FormularioRangoFechas()
+#         sw = False
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
-
-
-@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
-def asignacionGAR(request):
-    """Este reporte muestra el total de personas que han sido asignadas, que no les interesa,
-    etc a un GAR en un rango de fechas escogidas por el usuario. Para este reporte se toman en
-    cuenta los datos de las llamadas(pertenece, interesado, etc)."""
-
-    tipo = 1
-    titulo_pag = 'Control de asignacion a GAR'
-    if request.method == 'POST':
-        form = FormularioRangoFechas(request.POST)
-        if form.is_valid():
-            fecha_i = form.cleaned_data['fechai']
-            fecha_f = form.cleaned_data['fechaf']
-            opciones = {'fi': fecha_i, 'ff': fecha_f}
-            sw = True
-
-            values = [['Control', 'Miembros']]
-            vAxis = 'Numero de Miembros'
-            hAxis = 'Estado de Miembros'
-
-            num_miembros = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
-                                                     nuevoTipo__nombre__iexact='Visita').count()
-            num_AsignadoGAR = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
-                                                        nuevoTipo__nombre__iexact='Visita',
-                                                        miembro__asignadoGAR=True).count()
-            num_asisteGAR = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
-                                                      nuevoTipo__nombre__iexact='Visita',
-                                                      miembro__asisteGAR=True).count()
-            num_noInteresadoGAR = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
-                                                            nuevoTipo__nombre__iexact='Visita',
-                                                            miembro__noInteresadoGAR=True).count()
-
-            # num_miembros = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f)).count()
-            # num_AsignadoGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
-            #                                          asignadoGAR=True).count()
-            # num_asisteGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
-            #                                        asisteGAR=True).count()
-            # num_noInteresadoGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
-            #                                              noInteresadoGAR=True).count()
-
-            num_noAsignadoGAR = abs(num_miembros - num_AsignadoGAR - num_asisteGAR - num_noInteresadoGAR)
-
-            values.append(['Por asignar GAR', num_noAsignadoGAR])
-            values.append(['Asignado GAR', num_AsignadoGAR])
-            values.append(['Asiste GAR', num_asisteGAR])
-            values.append(['No interesados GAR', num_noInteresadoGAR])
-            total = num_miembros
-            titulo = ''
-
-            if 'type' in request.POST:
-                if request.POST['type'] == '1':
-                    tipo = 1
-                else:
-                    tipo = 2
-
-            if 'reportePDF' in request.POST:
-                values.append(['Total', total])
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
-                return response
-    else:
-        form = FormularioRangoFechas()
-        sw = False
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
-def detalleLlamada(request, llamada):
-    """Este reporte muestra el total de personas que se le hicieron llamadas de consolidacion
-    en una fecha determinada."""
+# @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def asignacionGAR(request):
+#     """Este reporte muestra el total de personas que han sido asignadas, que no les interesa,
+#     etc a un GAR en un rango de fechas escogidas por el usuario. Para este reporte se toman en
+#     cuenta los datos de las llamadas(pertenece, interesado, etc)."""
 
-    tipo = 1
-    if llamada == 1:
-        titulo_pag = 'Primera Llamada realizada en la iglesia'
-    else:
-        titulo_pag = 'Segunda Llamada realizada en la iglesia'
+#     tipo = 1
+#     titulo_pag = 'Control de asignacion a GAR'
+#     if request.method == 'POST':
+#         form = FormularioRangoFechas(request.POST)
+#         if form.is_valid():
+#             fecha_i = form.cleaned_data['fechai']
+#             fecha_f = form.cleaned_data['fechaf']
+#             opciones = {'fi': fecha_i, 'ff': fecha_f}
+#             sw = True
 
-    vAxis = 'Numero de Llamadas'
-    hAxis = 'Detalle de la Llamada'
+#             values = [['Control', 'Miembros']]
+#             vAxis = 'Numero de Miembros'
+#             hAxis = 'Estado de Miembros'
 
-    if request.method == 'POST':
-        form = FormularioRangoFechas(request.POST)
-        if form.is_valid():
-            fecha_i = form.cleaned_data['fechai']
-            fecha_f = form.cleaned_data['fechaf']
-            opciones = {'fi': fecha_i, 'ff': fecha_f}
-            sw = True
+#             num_miembros = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
+#                                                      nuevoTipo__nombre__iexact='Visita').count()
+#             num_AsignadoGAR = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
+#                                                         nuevoTipo__nombre__iexact='Visita',
+#                                                         miembro__asignadoGAR=True).count()
+#             num_asisteGAR = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
+#                                                       nuevoTipo__nombre__iexact='Visita',
+#                                                       miembro__asisteGAR=True).count()
+#             num_noInteresadoGAR = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
+#                                                             nuevoTipo__nombre__iexact='Visita',
+#                                                             miembro__noInteresadoGAR=True).count()
 
-            values = [['Detalles', 'Llamadas']]
-            total = 0
-            detalles = DetalleLlamada.objects.all()
-            for det in detalles:
-                if llamada == 1:
-                    num = Miembro.objects.filter(fechaPrimeraLlamada__range=(fecha_i, fecha_f),
-                                                 detallePrimeraLlamada=det).count()
-                else:
-                    num = Miembro.objects.filter(fechaSegundaLlamada__range=(fecha_i, fecha_f),
-                                                 detalleSegundaLlamada=det).count()
-                total = total + num
-                values.append([str(det.nombre), num])
-                titulo = ''
+#             # num_miembros = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f)).count()
+#             # num_AsignadoGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
+#             #                                          asignadoGAR=True).count()
+#             # num_asisteGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
+#             #                                        asisteGAR=True).count()
+#             # num_noInteresadoGAR = Miembro.objects.filter(fechaRegistro__range=(fecha_i, fecha_f),
+#             #                                              noInteresadoGAR=True).count()
 
-            if 'type' in request.POST:
-                if request.POST['type'] == '1':
-                    tipo = 1
-                else:
-                    tipo = 2
+#             num_noAsignadoGAR = abs(num_miembros - num_AsignadoGAR - num_asisteGAR - num_noInteresadoGAR)
 
-            if 'reportePDF' in request.POST:
-                values.append(['Total', total])
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
-                return response
-    else:
-        form = FormularioRangoFechas()
-        sw = False
+#             values.append(['Por asignar GAR', num_noAsignadoGAR])
+#             values.append(['Asignado GAR', num_AsignadoGAR])
+#             values.append(['Asiste GAR', num_asisteGAR])
+#             values.append(['No interesados GAR', num_noInteresadoGAR])
+#             total = num_miembros
+#             titulo = ''
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
+#             if 'type' in request.POST:
+#                 if request.POST['type'] == '1':
+#                     tipo = 1
+#                 else:
+#                     tipo = 2
+
+#             if 'reportePDF' in request.POST:
+#                 values.append(['Total', total])
+#                 response = HttpResponse(content_type='application/pdf')
+#                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
+#                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
+#                 return response
+#     else:
+#         form = FormularioRangoFechas()
+#         sw = False
+
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
-def visitasPorMes(request, por_red):
-    """Este reporte muestra el total de visitas registradas por mes y el total de visitas de una red registradas por mes.
-        El usuario debe escoger los meses los cuales se mostraran en el reporte."""
+# @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def detalleLlamada(request, llamada):
+#     """Este reporte muestra el total de personas que se le hicieron llamadas de consolidacion
+#     en una fecha determinada."""
 
-    tipo = 1
-    if por_red:
-        titulo_pag = 'Visitas asignadas a una red por mes'
-    else:
-        titulo_pag = 'Visitas registradas por mes'
-    if request.method == 'POST':
-        if por_red:
-            form = FormularioVisitasRedPorMes(request.POST or None)
-        else:
-            form = FormularioVisitasPorMes(request.POST or None)
-        if form.is_valid():
-            ano = int(form.cleaned_data['ano'])
-            meses = request.POST.getlist('meses')
-            opciones = {'ano': ano}
-            if por_red:
-                # red = Red.objects.get(id=form.cleaned_data['red'])
-                red = form.cleaned_data['red']
-                opciones['red'] = red.nombre.capitalize()
-            sw = True
+#     tipo = 1
+#     if llamada == 1:
+#         titulo_pag = 'Primera Llamada realizada en la iglesia'
+#     else:
+#         titulo_pag = 'Segunda Llamada realizada en la iglesia'
 
-            values = [['Meses', 'Visitas registradas']]
-            total = 0
-            for mes in meses:
-                mes = int(mes)
-                ult_dia_mes = calendar.monthrange(ano, mes)[1]
-                fecha_i = datetime.date(ano, mes, 1)
-                fecha_f = datetime.date(ano, mes, ult_dia_mes)
-                if por_red:
-                    num_vis = Miembro.objects.filter(fechaAsignacionGAR__range=(fecha_i, fecha_f),
-                                                     grupo__red=red).count()
-                else:
-                    num_vis = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
-                                                        nuevoTipo__nombre__iexact='Visita').count()
-                mes_nb = calendar.month_name[mes]
-                total = total + num_vis
-                values.append([mes_nb, num_vis])
+#     vAxis = 'Numero de Llamadas'
+#     hAxis = 'Detalle de la Llamada'
 
-            if 'type' in request.POST:
-                if request.POST['type'] == '1':
-                    tipo = 1
-                else:
-                    tipo = 2
+#     if request.method == 'POST':
+#         form = FormularioRangoFechas(request.POST)
+#         if form.is_valid():
+#             fecha_i = form.cleaned_data['fechai']
+#             fecha_f = form.cleaned_data['fechaf']
+#             opciones = {'fi': fecha_i, 'ff': fecha_f}
+#             sw = True
 
-            if 'reportePDF' in request.POST:
-                values.append(['Total', total])
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
-                return response
-    else:
-        if por_red:
-            form = FormularioVisitasRedPorMes()
-        else:
-            form = FormularioVisitasPorMes()
-        sw = False
+#             values = [['Detalles', 'Llamadas']]
+#             total = 0
+#             detalles = DetalleLlamada.objects.all()
+#             for det in detalles:
+#                 if llamada == 1:
+#                     num = Miembro.objects.filter(fechaPrimeraLlamada__range=(fecha_i, fecha_f),
+#                                                  detallePrimeraLlamada=det).count()
+#                 else:
+#                     num = Miembro.objects.filter(fechaSegundaLlamada__range=(fecha_i, fecha_f),
+#                                                  detalleSegundaLlamada=det).count()
+#                 total = total + num
+#                 values.append([str(det.nombre), num])
+#                 titulo = ''
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    return render_to_response('reportes/visitas_por_mes.html', locals(), context_instance=RequestContext(request))
+#             if 'type' in request.POST:
+#                 if request.POST['type'] == '1':
+#                     tipo = 1
+#                 else:
+#                     tipo = 2
+
+#             if 'reportePDF' in request.POST:
+#                 values.append(['Total', total])
+#                 response = HttpResponse(content_type='application/pdf')
+#                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
+#                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
+#                 return response
+#     else:
+#         form = FormularioRangoFechas()
+#         sw = False
+
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     return render_to_response('reportes/visitas_por_red.html', locals(), context_instance=RequestContext(request))
+
+
+# @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")  # en desuso
+# def visitasPorMes(request, por_red):
+#     """Este reporte muestra el total de visitas registradas por mes y el total de visitas de una red registradas por mes.
+#         El usuario debe escoger los meses los cuales se mostraran en el reporte."""
+
+#     tipo = 1
+#     if por_red:
+#         titulo_pag = 'Visitas asignadas a una red por mes'
+#     else:
+#         titulo_pag = 'Visitas registradas por mes'
+#     if request.method == 'POST':
+#         if por_red:
+#             form = FormularioVisitasRedPorMes(request.POST or None)
+#         else:
+#             form = FormularioVisitasPorMes(request.POST or None)
+#         if form.is_valid():
+#             ano = int(form.cleaned_data['ano'])
+#             meses = request.POST.getlist('meses')
+#             opciones = {'ano': ano}
+#             if por_red:
+#                 # red = Red.objects.get(id=form.cleaned_data['red'])
+#                 red = form.cleaned_data['red']
+#                 opciones['red'] = red.nombre.capitalize()
+#             sw = True
+
+#             values = [['Meses', 'Visitas registradas']]
+#             total = 0
+#             for mes in meses:
+#                 mes = int(mes)
+#                 ult_dia_mes = calendar.monthrange(ano, mes)[1]
+#                 fecha_i = datetime.date(ano, mes, 1)
+#                 fecha_f = datetime.date(ano, mes, ult_dia_mes)
+#                 if por_red:
+#                     num_vis = Miembro.objects.filter(fechaAsignacionGAR__range=(fecha_i, fecha_f),
+#                                                      grupo__red=red).count()
+#                 else:
+#                     num_vis = CambioTipo.objects.filter(fecha__range=(fecha_i, fecha_f),
+#                                                         nuevoTipo__nombre__iexact='Visita').count()
+#                 mes_nb = calendar.month_name[mes]
+#                 total = total + num_vis
+#                 values.append([mes_nb, num_vis])
+
+#             if 'type' in request.POST:
+#                 if request.POST['type'] == '1':
+#                     tipo = 1
+#                 else:
+#                     tipo = 2
+
+#             if 'reportePDF' in request.POST:
+#                 values.append(['Total', total])
+#                 response = HttpResponse(content_type='application/pdf')
+#                 response['Content-Disposition'] = 'attachment; filename=report.pdf'
+#                 PdfTemplate(response, titulo_pag, opciones, values, tipo, True)
+#                 return response
+#     else:
+#         if por_red:
+#             form = FormularioVisitasRedPorMes()
+#         else:
+#             form = FormularioVisitasPorMes()
+#         sw = False
+
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     return render_to_response('reportes/visitas_por_mes.html', locals(), context_instance=RequestContext(request))
 
 
 # TODO La asistncia GAR ya no se registra por lo tanto esto no se puede reportar. Preguntar si eliminar
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
-def asistenciaGrupos(request):
-    """Muestra la asistencia de los miembros de un grupo de amistad a las reuniones."""
+# @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def asistenciaGrupos(request):
+#     """Muestra la asistencia de los miembros de un grupo de amistad a las reuniones."""
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == 'POST':
-        form = FormularioRangoFechas(request.POST)
-        if form.is_valid():
-            fechai = form.cleaned_data['fechai']
-            fechaf = form.cleaned_data['fechaf']
-            grupo_lidera = miembro.grupo_lidera
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     if request.method == 'POST':
+#         form = FormularioRangoFechas(request.POST)
+#         if form.is_valid():
+#             fechai = form.cleaned_data['fechai']
+#             fechaf = form.cleaned_data['fechaf']
+#             grupo_lidera = miembro.grupo_lidera
 
-            if grupo_lidera is not None:
-                reuniones = ReunionGAR.objects.filter(grupo=grupo_lidera,
-                                                      fecha__gt=fechai, fecha__lt=fechaf).order_by('fecha')
-                miembros_grupo = grupo_lidera.miembrosGrupo().order_by('nombre', 'primerApellido')
-                for m in miembros_grupo:
-                    f = []
-                    for r in reuniones:
-                        try:
-                            a = AsistenciaMiembro.objects.get(miembro=m, reunion=r)
-                            asistio = a.asistencia
-                        except:
-                            asistio = False
-                        f.append(asistio)
-                    m.asis = f
-    else:
-        form = FormularioRangoFechas()
+#             if grupo_lidera is not None:
+#                 reuniones = ReunionGAR.objects.filter(grupo=grupo_lidera,
+#                                                       fecha__gt=fechai, fecha__lt=fechaf).order_by('fecha')
+#                 miembros_grupo = grupo_lidera.miembrosGrupo().order_by('nombre', 'primerApellido')
+#                 for m in miembros_grupo:
+#                     f = []
+#                     for r in reuniones:
+#                         try:
+#                             a = AsistenciaMiembro.objects.get(miembro=m, reunion=r)
+#                             asistio = a.asistencia
+#                         except:
+#                             asistio = False
+#                         f.append(asistio)
+#                     m.asis = f
+#     else:
+#         form = FormularioRangoFechas()
 
-    return render_to_response('reportes/asistencia_grupos.html', locals(), context_instance=RequestContext(request))
+#     return render_to_response('reportes/asistencia_grupos.html', locals(), context_instance=RequestContext(request))
 
 
 # TODO eliminar
@@ -357,7 +360,7 @@ def pasosPorMiembros(request):
         # grupoP = Grupo.objects.get(red=None)
         # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         #  listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres')  # .activos()
     else:
         # listaGrupo_i = listaGruposDescendientes(miembro)
         listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
@@ -413,7 +416,7 @@ def PasosTotales(request):
         # grupoP = Grupo.objects.get(red=None)
         # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres')  #.activos()
     else:
         # listaGrupo_i = listaGruposDescendientes(miembro)
         listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
@@ -489,7 +492,7 @@ def PasosRangoFecha(request):
         # grupoP = Grupo.objects.get(red=None)
         # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres')  # .activos()
     else:
         # listaGrupo_i = listaGruposDescendientes(miembro)
         listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
@@ -573,10 +576,11 @@ def estadisticoReunionesDiscipulado(request):
         # grupoP = Grupo.objects.get(red=None)
         # liderP = Miembro.objects.get(id=grupoP.listaLideres()[0])
         # listaGrupo_i = listaGruposDescendientes(liderP)
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres').filter(estado='A')
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres').all()  # ._suspendidos()  #.filter(estado='A')
     else:
         # listaGrupo_i = listaGruposDescendientes(miembro)
         listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
+        # listaGrupo_i = miembro.grupo_lidera.grupos_red()._suspendidos()
     descendientes = False
     ofrenda = False
     lid_asis = False
@@ -603,7 +607,8 @@ def estadisticoReunionesDiscipulado(request):
                     descendientes = True
                     opciones['gf'] = 'Descendientes'
                     # grupos = listaGruposDescendientes(Miembro.objects.get(id=grupo_i.listaLideres()[0]))
-                    grupos = Grupo.get_tree(grupo_i)
+                    # grupos = Grupo.get_tree(grupo_i)
+                    grupos = Grupo._get_tree(grupo_i)
                 else:
                     grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
                     opciones['gf'] = grupo_f.nombre.capitalize()
@@ -904,223 +909,210 @@ def listaGruposDescendientes_id(miembro):
 isOk = False
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
-def ConsultarReportesSinEnviar(request, sobres=False):
-    """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de
-    reuniones de grupo en un rango de fecha especificado. El usuario escoge el tipo de reunion, si la reunion es de
-    GAR(1) o discipulado (2). Luego podra enviar un mail a los lideres que no han ingresado los reportes y a sus
-    lideres. Para el lider solo muestra su arbol."""
+# @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def ConsultarReportesSinEnviar(request, sobres=False):
+#     """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de
+#     reuniones de grupo en un rango de fecha especificado. El usuario escoge el tipo de reunion, si la reunion es de
+#     GAR(1) o discipulado (2). Luego podra enviar un mail a los lideres que no han ingresado los reportes y a sus
+#     lideres. Para el lider solo muestra su arbol."""
 
-    global isOk
+#     global isOk
 
-    if isOk:
-        messages.success(request, 'Se han enviado los correros satisfactoriamente')
-        isOk = False
+#     if isOk:
+#         messages.success(request, 'Se han enviado los correros satisfactoriamente')
+#         isOk = False
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == 'POST':
-        if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
-            grupos = request.session['grupos_sin_reporte']
-            sobres = request.session['sobres']
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     if request.method == 'POST':
+#         if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
+#             grupos = request.session['grupos_sin_reporte']
+#             sobres = request.session['sobres']
 
-            from_mail = 'iglesia@mail.webfaction.com'
-            mensaje = "Lideres de la iglesia,\n\n"
-            if sobres:  # Si es GAR y reporte de sobres
-                asunto = 'Recordatorio entrega de ofrendas de reunion GAR'
-                mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones GAR de las siguientes fechas:\n\n"
-            else:  # Si es GAR y reporte reuniones
-                asunto = 'Recordatorio ingreso de reportes de reunion GAR'
-                mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones GAR de las siguientes fechas:\n\n"
+#             from_mail = 'iglesia@mail.webfaction.com'
+#             mensaje = "Lideres de la iglesia,\n\n"
+#             if sobres:  # Si es GAR y reporte de sobres
+#                 asunto = 'Recordatorio entrega de ofrendas de reunion GAR'
+#                 mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones GAR de las siguientes fechas:\n\n"
+#             else:  # Si es GAR y reporte reuniones
+#                 asunto = 'Recordatorio ingreso de reportes de reunion GAR'
+#                 mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones GAR de las siguientes fechas:\n\n"
 
-            correos = []
-            for ids, fechas in grupos.items():
-                receptores = list()
-                g = Grupo.objects.get(id=ids)
-                # mailLideres = Miembro.objects.filter(id__in=g.listaLideres()).values('email')
-                mailLideres = g.lideres.values('email')
-                receptores.extend(["%s" % (k['email']) for k in mailLideres])
-                msj = mensaje + '\n'.join(map(str, fechas)) + "\n\nCordialmente,\n Admin"
-                correos.append((asunto, msj, from_mail, receptores))
-            print(tuple(correos))
-            isOk = True
+#             correos = []
+#             for ids, fechas in grupos.items():
+#                 receptores = list()
+#                 g = Grupo.objects.get(id=ids)
+#                 # mailLideres = Miembro.objects.filter(id__in=g.listaLideres()).values('email')
+#                 mailLideres = g.lideres.values('email')
+#                 receptores.extend(["%s" % (k['email']) for k in mailLideres])
+#                 msj = mensaje + '\n'.join(map(str, fechas)) + "\n\nCordialmente,\n Admin"
+#                 correos.append((asunto, msj, from_mail, receptores))
+#             # print(tuple(correos))
+#             isOk = True
 
-            sendMassMail(tuple(correos))
-            return HttpResponseRedirect('/reportes/reportes_reuniones_sin_enviar/')
+#             sendMassMail(tuple(correos))
+#             return HttpResponseRedirect('/reportes/reportes_reuniones_sin_enviar/')
 
-        # formulario principal
-        form = FormularioReportesSinEnviar(data=request.POST, miembro=miembro)
-        if 'verMorosos' in request.POST:
-            # si se ven los morosos (boton de aceptar)
-            if form.is_valid():
-                # si el formuario es valido
-                fechai = form.cleaned_data['fechai']
-                fechaf = form.cleaned_data['fechaf']
-                grupo_from_form = form.cleaned_data['grupo']
-                descendientes = form.cleaned_data['descendientes']
-                # se crea una lista vacia inicialmente de grupos
-                grupos = []
-                gruposSinReporte = {}
-                sw = True
+#         # formulario principal
+#         form = FormularioReportesSinEnviar(data=request.POST, miembro=miembro)
+#         if 'verMorosos' in request.POST:
+#             # si se ven los morosos (boton de aceptar)
+#             if form.is_valid():
+#                 # si el formuario es valido
+#                 fechai = form.cleaned_data['fechai']
+#                 fechaf = form.cleaned_data['fechaf']
+#                 grupo_from_form = form.cleaned_data['grupo']
+#                 descendientes = form.cleaned_data['descendientes']
+#                 # se crea una lista vacia inicialmente de grupos
+#                 grupos = []
+#                 gruposSinReporte = {}
+#                 sw = True
 
-                # if miembro.usuario.has_perm("miembros.es_administrador"):
-                #     # si es administrador se buscan todos los descenndientes del pastor
-                #     # podria ser mejor cambiarlo a todos los grupos en estado activo
-                #     # -- Example --
-                #     # gr = Grupo.objects.filter(estado='A')
-                #     # -- EndExample
+#                 if descendientes:
+#                     # gr = grupo_from_form.grupos_red
+#                     gr = grupo_from_form._grupos_red
+#                 else:
+#                     gr = Grupo._objects.filter(id=grupo_from_form.id)
 
-                #     # block possible change
-                #     gr = Grupo.objects.filter(
-                #         id__in=listaGruposDescendientes_id(
-                #             Miembro.objects.get(id=Grupo.objects.get(red=None).listaLideres()[0])
-                #         )
-                #     )
-                #     # endchange
-                # else:
-                # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
-                if descendientes:
-                    # gr = Grupo.objects.filter(
-                    #     id__in=listaGruposDescendientes_id(Miembro.objects.get(id=grupo_from_form.listaLideres()[0]))
-                    # )
-                    gr = grupo_from_form.grupos_red
-                else:
-                    gr = Grupo.objects.filter(id=grupo_from_form.id)
+#                 while sw:
+#                     sig = fechai + datetime.timedelta(days=6)
+#                     exclude_kwargs = dict(reuniones_gar__fecha__range=(fechai, sig))
 
-                while sw:
-                    sig = fechai + datetime.timedelta(days=6)
+#                     if sobres:  # Entra si se escoge el reporte de entregas de sobres
+#                         exclude_kwargs['reuniones_gar__confirmacionEntregaOfrenda'] = True
 
-                    if sobres:  # Entra si se escoge el reporte de entregas de sobres
-                        gru = gr.filter(
-                            estado='A', fechaApertura__lt=sig
-                        ).exclude(
-                            reuniones_gar__fecha__range=(fechai, sig),
-                            reuniones_gar__confirmacionEntregaOfrenda=True
-                        )
-                    else:  # Entra si se escoge el reporte de reuniones
-                        gru = gr.filter(
-                            estado='A', fechaApertura__lt=sig
-                        ).exclude(
-                            reuniones_gar__fecha__range=(fechai, sig)
-                        )
+#                         # gru = gr.filter(
+#                         #     estado='A', fechaApertura__lt=sig
+#                         # ).exclude(
+#                         #     reuniones_gar__fecha__range=(fechai, sig),
+#                         #     reuniones_gar__confirmacionEntregaOfrenda=True
+#                         # )
+#                     # else:  # Entra si se escoge el reporte de reuniones
+#                         # gru = gr.filter(
+#                         #     estado='A', fechaApertura__lt=sig
+#                         # ).exclude(
+#                         #     reuniones_gar__fecha__range=(fechai, sig)
+#                         # )
 
-                    for g in gru:
-                        try:
-                            # si existe se guarda la posicion del grupo en la lista
-                            i = grupos.index(g)
-                            fecha = fechai + datetime.timedelta(days=int(g.diaGAR))
-                            # si ya no hay tiempo
-                            if fecha <= datetime.date.today():
-                                # se guardan los datos en la lista y hash
-                                grupos[i].fecha_reunion.append(fecha)
-                                gruposSinReporte[g.id].append(str(fecha))
-                        except:
-                            # la primera vez que entra
-                            fecha = fechai + datetime.timedelta(days=int(g.diaGAR))
-                            # siempre y cuando no sea la fecha superior a hoy porque si no implica que aun hay tiempo
-                            if fecha <= datetime.date.today():
-                                # se crean variables en memoria por objeto
-                                g.fecha_reunion = [fecha]
-                                # g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
-                                # se agrega a la lista de grupos y al hash de fechas
-                                grupos.append(g)
-                                strFecha = str(fecha)
-                                gruposSinReporte[g.id] = [strFecha]
+#                     gru = gr.filter(fechaApertura__lt=sig).exclude(**exclude_kwargs)
 
-                    fechai = sig + datetime.timedelta(days=1)
-                    if sig >= fechaf:
-                        sw = False
+#                     for g in gru:
+#                         try:
+#                             # si existe se guarda la posicion del grupo en la lista
+#                             i = grupos.index(g)
+#                             fecha = fechai + datetime.timedelta(days=int(g.diaGAR))
+#                             # si ya no hay tiempo
+#                             if fecha <= datetime.date.today():
+#                                 # se guardan los datos en la lista y hash
+#                                 grupos[i].fecha_reunion.append(fecha)
+#                                 gruposSinReporte[g.id].append(str(fecha))
+#                         except:
+#                             # la primera vez que entra
+#                             fecha = fechai + datetime.timedelta(days=int(g.diaGAR))
+#                             # siempre y cuando no sea la fecha superior a hoy porque si no implica que aun hay tiempo
+#                             if fecha <= datetime.date.today():
+#                                 # se crean variables en memoria por objeto
+#                                 g.fecha_reunion = [fecha]
+#                                 # g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
+#                                 # se agrega a la lista de grupos y al hash de fechas
+#                                 grupos.append(g)
+#                                 strFecha = str(fecha)
+#                                 gruposSinReporte[g.id] = [strFecha]
 
-                request.session['grupos_sin_reporte'] = gruposSinReporte
-                request.session['sobres'] = sobres
-    else:
-        form = FormularioReportesSinEnviar(miembro=miembro)
+#                     fechai = sig + datetime.timedelta(days=1)
+#                     if sig >= fechaf:
+#                         sw = False
 
-    return render_to_response('reportes/morososGAR.html', locals(), context_instance=RequestContext(request))
+#                 request.session['grupos_sin_reporte'] = gruposSinReporte
+#                 request.session['sobres'] = sobres
+#     else:
+#         form = FormularioReportesSinEnviar(miembro=miembro)
+
+#     return render_to_response('reportes/morososGAR.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
-def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
-    """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de reuniones
-        de discipulado para una predica especificada. El usuario escoge la predica Luego podra enviar un mail
-        a los lideres que no han ingresado los reportes y a sus lideres. Para el lider solo muestra su arbol."""
+# @user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+# def ConsultarReportesDiscipuladoSinEnviar(request, sobres=False):
+#     """Permite a un administrador y a un lider revisar que lideres no han registrado sus reportes de reuniones
+#         de discipulado para una predica especificada. El usuario escoge la predica Luego podra enviar un mail
+#         a los lideres que no han ingresado los reportes y a sus lideres. Para el lider solo muestra su arbol."""
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == 'POST':
-        if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
-            grupos = request.session['grupos_sin_reporte']
-            sobres = request.session['sobres']
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     if request.method == 'POST':
+#         if 'Enviar' in request.POST and 'grupos_sin_reporte' in request.session:
+#             grupos = request.session['grupos_sin_reporte']
+#             sobres = request.session['sobres']
 
-            from_mail = 'iglesia@mail.webfaction.com'
-            mensaje = "Lideres de la iglesia,\n\n"
-            if sobres:  # Si es reporte de sobres
-                asunto = 'Recordatorio entrega de ofrendas de reunion discipulado'
-                mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones de discipulado de las siguientes fechas:\n\n"
-            else:  # Si es reporte reuniones
-                asunto = 'Recordatorio ingreso de reportes de reunion discipulado'
-                mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones de discipulado de las siguientes fechas:\n\n"
+#             from_mail = 'iglesia@mail.webfaction.com'
+#             mensaje = "Lideres de la iglesia,\n\n"
+#             if sobres:  # Si es reporte de sobres
+#                 asunto = 'Recordatorio entrega de ofrendas de reunion discipulado'
+#                 mensaje = mensaje + "Se les recuerda que no han entregado los sobres de las reuniones de discipulado de las siguientes fechas:\n\n"
+#             else:  # Si es reporte reuniones
+#                 asunto = 'Recordatorio ingreso de reportes de reunion discipulado'
+#                 mensaje = mensaje + "Se les recuerda que no han ingresado al sistema los reportes de las reuniones de discipulado de las siguientes fechas:\n\n"
 
-            correos = []
-            for g in grupos:
-                receptores = list()
-                mailLideres = g.lideres.values('email')
-                receptores.extend(["%s" % (k['email']) for k in mailLideres])
-                msj = mensaje + '\n'.join(map(str, g.fecha_reunion)) + "\n\nCordialmente,\n Admin"
-                correos.append((asunto, msj, from_mail, receptores))
-            print(tuple(correos))
+#             correos = []
+#             for g in grupos:
+#                 receptores = list()
+#                 mailLideres = g.lideres.values('email')
+#                 receptores.extend(["%s" % (k['email']) for k in mailLideres])
+#                 msj = mensaje + '\n'.join(map(str, g.fecha_reunion)) + "\n\nCordialmente,\n Admin"
+#                 correos.append((asunto, msj, from_mail, receptores))
+#             print(tuple(correos))
 
-            sendMassMail(tuple(correos))
+#             sendMassMail(tuple(correos))
 
-        form = FormularioPredicas(miembro, request.POST)
-        if 'verMorosos' in request.POST:
-            if form.is_valid():
-                predica = form.cleaned_data['predica']
-                sw = True
+#         form = FormularioPredicas(miembro, request.POST)
+#         if 'verMorosos' in request.POST:
+#             if form.is_valid():
+#                 predica = form.cleaned_data['predica']
+#                 sw = True
 
-                if miembro.usuario.has_perm("miembros.es_administrador"):
-                    # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(
-                    #                           Miembro.objects.get(
-                    #                               id=Grupo.objects.get(red=None).listaLideres()[0])))
-                    gr = Grupo.objects.prefetch_related('lideres').all()
-                else:
-                    # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
-                    gr = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
+#                 if miembro.usuario.has_perm("miembros.es_administrador"):
+#                     # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(
+#                     #                           Miembro.objects.get(
+#                     #                               id=Grupo.objects.get(red=None).listaLideres()[0])))
+#                     gr = Grupo.objects.prefetch_related('lideres').all()
+#                 else:
+#                     # gr = Grupo.objects.filter(id__in=listaGruposDescendientes_id(miembro))
+#                     gr = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
 
-                if sobres:  # Entra si se escoge el reporte de entregas de sobres
-                    grupos = gr.filter(estado='A').exclude(
-                        reuniones_discipulado__predica=predica, reuniones_discipulado__confirmacionentregaofrenda=True)
-                else:  # Entra si se escoge el reporte de reuniones
-                    grupos = gr.filter(estado='A').exclude(reuniones_discipulado__predica=predica)
+#                 if sobres:  # Entra si se escoge el reporte de entregas de sobres
+#                     grupos = gr.filter(estado='A').exclude(
+#                         reuniones_discipulado__predica=predica, reuniones_discipulado__confirmacionentregaofrenda=True)
+#                 else:  # Entra si se escoge el reporte de reuniones
+#                     grupos = gr.filter(estado='A').exclude(reuniones_discipulado__predica=predica)
 
-                # for g in grupos:
-                #     g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
+#                 # for g in grupos:
+#                 #     g.lideres = Miembro.objects.filter(id__in=g.listaLideres())
 
-                # request.session['grupos_sin_reporte'] = grupos
-                request.session['sobres'] = sobres
-    else:
-        form = FormularioPredicas(miembro)
+#                 # request.session['grupos_sin_reporte'] = grupos
+#                 request.session['sobres'] = sobres
+#     else:
+#         form = FormularioPredicas(miembro)
 
-    return render_to_response('reportes/morososDiscipulado.html', locals(), context_instance=RequestContext(request))
+#     return render_to_response('reportes/morososDiscipulado.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")
-def cumplimiento_llamadas_lideres_red(request):
-    """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
-    personas asignadas a su grupo dentro de un rango de fechas especificado."""
+# @user_passes_test(agenteAdminTest, login_url="/dont_have_permissions/")  # en desuso
+# def cumplimiento_llamadas_lideres_red(request):
+#     """Permite a un administrador y a un agente revisar el cumplimiento de las llamadas de los lideres de una red a las
+#     personas asignadas a su grupo dentro de un rango de fechas especificado."""
 
-    grupos = []
-    nadie = False
-    if request.method == 'POST':
-        form = FormularioCumplimientoLlamadasLideres(data=request.POST)
+#     grupos = []
+#     nadie = False
+#     if request.method == 'POST':
+#         form = FormularioCumplimientoLlamadasLideres(data=request.POST)
 
-        if form.is_valid():
-            grupos = form.obtener_grupos()
-            if len(grupos) == 0:
-                nadie = True
-    else:
-        form = FormularioCumplimientoLlamadasLideres()
+#         if form.is_valid():
+#             grupos = form.obtener_grupos()
+#             if len(grupos) == 0:
+#                 nadie = True
+#     else:
+#         form = FormularioCumplimientoLlamadasLideres()
 
-    data = {'form': form, 'grupos': grupos, 'nadie': nadie}
-    return render_to_response('reportes/llamadas_lideres_visitas.html', data, context_instance=RequestContext(request))
+#     data = {'form': form, 'grupos': grupos, 'nadie': nadie}
+#     return render_to_response('reportes/llamadas_lideres_visitas.html', data, context_instance=RequestContext(request))
 
 
 def sendMail(camposMail):
@@ -1142,7 +1134,7 @@ def estadistico_reuniones_gar(request):
     """
 
     # se obtiene el miembro
-    miembro = Miembro.objects.get(usuario=request.user)  # se vuelve el miembro, porque se estaba usando
+    miembro = Miembro.objects.get(usuario=request.user)
 
     # se crean los datos iniciales
     data = {}
@@ -1152,8 +1144,6 @@ def estadistico_reuniones_gar(request):
         queryset_grupo = Grupo.objects.prefetch_related('lideres').all()
     else:
         # si no es administrador, solo puede ver los grupos debajo de el
-        # _ids_grupos = listaGruposDescendientes_id(miembro)
-        # queryset_grupo = Grupo.objects.select_related('lider1', 'lider2').filter(id__in=_ids_grupos)
         queryset_grupo = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
 
     # si el metodo es POST
@@ -1192,32 +1182,26 @@ def estadistico_reuniones_gar(request):
 
             # si hay descendientes en el formulario
             if descendientes:
-                # se obtienen los grupos a partir de el lider de el grupo de el formulario
-                grupos = grupo.grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
+                grupos = grupo._grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
             else:
-                # Informacion que está por confirmar, cuando no hay descendientes
-                grupos = Grupo.objects.filter(
-                    id=grupo.id
-                )
+                grupos = Grupo._objects.filter(id=grupo.id)
 
-            total_grupos = grupos.count()  # se obtiene el numero de grupos
-            # Se sacan los grupos inactivos
-            total_grupos_inactivos = grupos.filter(estado=Grupo.INACTIVO).count()
+            total_grupos_inactivos = grupos.inactivos().count()
 
             # Se sacan los datos semanales, de acuerdo a la funcion get_date_for_report
             while fecha_inicial < fecha_final:
                 # a partir de la fecha inicial y final se obtiene un rango de fechas, y una fecha despues
                 siguiente = get_date_for_report(fecha_inicial, fecha_final)
 
-                # se sacan los grupos que hubieron esa semana
-                _grupos_semana = grupos.exclude(fechaApertura__gt=siguiente).exclude(estado=Grupo.INACTIVO)
+                # esto, trae los que estuvieron activos antes de la fecha filtrada
+                _grupos_semana = grupos.filter(historiales__fecha__lte=siguiente).activos()  # .exclude(id=grupo.id)
+
                 grupos_semana = _grupos_semana.count()
 
                 # se sacan las reuniones que han ocurrido en la semana actual de el ciclo
                 _reuniones = ReunionGAR.objects.filter(
                     fecha__range=(fecha_inicial, siguiente),
-                    grupo__in=_grupos_semana,  # solo busca los reportes de los grupos de la semana
-                    grupo__estado=Grupo.ACTIVO  # importante, grupos Activos
+                    grupo__in=_grupos_semana  # solo busca los reportes de los grupos de la semana
                 ).defer(
                     'confirmacionEntregaOfrenda', 'novedades',
                     'asistentecia', 'predica'
@@ -1329,13 +1313,9 @@ def estadistico_reuniones_gar(request):
                 # se agrega a el array principal
                 values_asistencias.append(_lista)
 
-            morosos = list(Grupo.objects.filter(
-                id__in=[x for x in _morosos]
-            ))  # se cambia a que retorne una lista para que queden los datos guardados en memoria
+            morosos = list(Grupo._objects.filter(id__in=[x for x in _morosos]))
 
-            _exclude = []  # lista para excluir los morosos que no son morosos
-
-            for moroso in morosos:
+            for moroso in reversed(morosos):
                 for fecha in _morosos[moroso.id.__str__()]:
                     _fecha = fecha.split(date_split)[0]
                     _fecha = datetime.datetime.strptime(_fecha, format_date)
@@ -1345,7 +1325,7 @@ def estadistico_reuniones_gar(request):
                     moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
                     moroso.no_reportes = len(_morosos[moroso.id.__str__()])
                 else:
-                    morosos.pop(morosos.index(moroso))
+                    morosos.pop()
 
             data['sin_reportar'] = morosos
             data['tabla'] = data_table
@@ -1402,13 +1382,12 @@ def confirmar_ofrenda_grupos_red(request):
             fecha_final += datetime.timedelta(days=1)
 
             if descendientes:
-                grupos = grupo.grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
+                grupos = grupo._grupos_red.prefetch_related('lideres').only('fechaApertura', 'id', 'estado')
             else:
-                grupos = Grupo.objects.filter(id=grupo.id)
+                grupos = Grupo._objects.filter(id=grupo.id)
 
             reuniones = ReunionGAR.objects.filter(
                 grupo__id__in=grupos.values_list('id', flat=True),
-                grupo__estado=Grupo.ACTIVO,
                 fecha__range=(fecha_inicial, fecha_final),
                 confirmacionEntregaOfrenda=False
             ).order_by('-fecha')

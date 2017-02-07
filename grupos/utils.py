@@ -1,5 +1,8 @@
-import datetime
+# apps
 from .models import Grupo
+
+# Python package
+import datetime
 
 
 def convertir_lista_grupos_a_queryset(lista_grupos):
@@ -8,7 +11,7 @@ def convertir_lista_grupos_a_queryset(lista_grupos):
     """
 
     lista_ids = [grupo.pk for grupo in lista_grupos]
-    return Grupo.objects.filter(pk__in=lista_ids)
+    return Grupo._objects.filter(pk__in=lista_ids)
 
 
 def reunion_reportada(fecha, grupo, discipulado=False):

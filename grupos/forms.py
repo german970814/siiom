@@ -133,7 +133,7 @@ class FormularioReportarReunionGrupoAdmin(FormularioReunionGARBase):
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
-        self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres').filter(estado=Grupo.ACTIVO)
+        self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres').activos()
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
 
@@ -173,18 +173,14 @@ class FormularioCrearPredica(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         miembro = kwargs.pop('miembro', None)
         super(FormularioCrearPredica, self).__init__(*args, **kwargs)
-        print(miembro)
         if miembro is not None:
             if miembro.usuario.has_perm('miembros.es_administrador'):
-                print("entre aca")
                 grupo_pastor = Group.objects.get(name__iexact='pastor')
                 self.fields['miembro'].queryset = Miembro.objects.filter(usuario__groups=grupo_pastor)
             else:
-                print("no me fui por aca")
                 self.fields['miembro'].queryset = Miembro.objects.filter(id=miembro.id)
                 self.fields['miembro'].initial = miembro.id
         else:
-            print("error estoy aca")
             self.fields['miembro'].queryset = Miembro.objects.none()
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
         self.fields['miembro'].widget.attrs.update({'class': 'selectpicker'})
@@ -210,17 +206,17 @@ class FormularioEditarDiscipulado(forms.ModelForm):
         fields = ('diaDiscipulado', 'horaDiscipulado')
 
 
-class FormularioTransladarGrupo(forms.Form):
-    error_css_class = 'has-error'
+# class FormularioTransladarGrupo(forms.Form):  # Actualemente en desuso
+#     error_css_class = 'has-error'
 
-    queryset = Grupo.objects.all()
-    grupo = forms.ModelChoiceField(queryset=queryset, required=True)
+#     queryset = Grupo.objects.all()
+#     grupo = forms.ModelChoiceField(queryset=queryset, required=True)
 
-    def __init__(self, red=None, grupo_id=None, *args, **kwargs):
-        super(FormularioTransladarGrupo, self).__init__(*args, **kwargs)
-        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        if red or grupo_id:
-            self.fields['grupo'].queryset = self.fields['grupo'].queryset.filter(red=red).exclude(id=grupo_id)
+#     def __init__(self, red=None, grupo_id=None, *args, **kwargs):
+#         super(FormularioTransladarGrupo, self).__init__(*args, **kwargs)
+#         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+#         if red or grupo_id:
+#             self.fields['grupo'].queryset = self.fields['grupo'].queryset.filter(red=red).exclude(id=grupo_id)
 
 
 class FormularioReportesEnviados(FormularioRangoFechas):

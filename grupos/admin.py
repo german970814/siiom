@@ -14,9 +14,12 @@ from .models import ReunionDiscipulado
 from .models import Predica
 
 
-class GrupoAdmin(TreeAdmin):
+class GrupoAdmin(admin.ModelAdmin):
     # form = movenodeform_factory(Grupo)
-    search_fields = ['nombre']
+    search_fields = ['nombre', 'direccion', 'lideres__nombre', 'lideres__cedula']
+    list_display = ('__str__', '_get_estado_display', 'red', )
+    list_filter = ('red', 'historiales__estado', )
+    list_select_related = ('red', )
 
 
 class ReunionGARAdmin(admin.ModelAdmin):

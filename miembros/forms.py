@@ -202,7 +202,7 @@ class FormularioAsignarGrupo(ModelForm):
 
     class Meta:
         model = Miembro
-        fields = ('grupo',)
+        fields = ('grupo', )
 
 
 class FormularioCrearZona(ModelForm):

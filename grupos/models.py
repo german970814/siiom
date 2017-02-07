@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+# Django Package
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _lazy
-from treebeard.al_tree import AL_Node
+
+# Locale Apps
 from miembros.models import CambioTipo
 from common.models import IglesiaMixin
 from consolidacion.utils import clean_direccion
-from .managers import GrupoManager
+from .managers import GrupoManager, GrupoManagerStandard, HistorialManager
+from .six import SixALNode
+
+from treebeard.al_tree import AL_Node, get_result_class
 
 
 class Red(IglesiaMixin, models.Model):
@@ -16,7 +21,7 @@ class Red(IglesiaMixin, models.Model):
         return self.nombre
 
 
-class Grupo(IglesiaMixin, AL_Node):
+class Grupo(SixALNode, IglesiaMixin, AL_Node):
     """
     Modelo para guardar la información de los grupos de la iglesia.
     """
@@ -67,7 +72,9 @@ class Grupo(IglesiaMixin, AL_Node):
     longitud = models.FloatField(verbose_name='Longitud', blank=True, null=True)
 
     # managers
+    _objects = GrupoManagerStandard()  # contiene los defaults de django
     objects = GrupoManager()
+
     node_order_by = ['id']
 
     class Meta:
@@ -240,6 +247,11 @@ class Grupo(IglesiaMixin, AL_Node):
 
         return self.historiales.first().estado
 
+    @property
+    def is_activo(self):
+        """Retorna True si el estado del grupo es activo."""
+        return self._estado == self.historiales.model.ACTIVO
+
     def _get_estado_display(self):
         """Retorna el estado display del grupo de acuerdo a su historial."""
 
@@ -331,9 +343,6 @@ class Grupo(IglesiaMixin, AL_Node):
                 self.delete()
 
     def get_nombre(self):
-        # if self.lider2 is not None:
-        #     return '{} - {}'.format(self.lider1.primerApellido.upper(), self.lider2.primerApellido.upper())
-        # return self.lider1.primerApellido.upper()
         return self.nombre
 
     def miembrosGrupo(self):
@@ -359,6 +368,23 @@ class Grupo(IglesiaMixin, AL_Node):
         if self.latitud is not None and self.longitud is not None:
             return [self.latitud, self.longitud]
         return None
+
+    def actualizar_estado(self, **kwargs):
+        """
+        Permite actualizar el estado del grupo
+        """
+
+        actual = self.historiales.first()
+        estado = kwargs.get('estado')
+
+        if estado != actual.estado:
+            from django.db import OperationalError
+            import datetime
+            if estado not in list(map(lambda x: x[0], actual.OPCIONES_ESTADO)):
+                raise OperationalError(_lazy('Estado "{}" no está permitido'.format(estado)))
+            if actual.fecha + datetime.timedelta(weeks=1) > datetime.date.today():
+                raise OperationalError(_lazy('Estado cambiado recientemente, consulte un administrador.'))
+            actual.__class__.objects.create(grupo=self, estado=estado, fecha=fecha)
 
 
 class Predica(models.Model):
@@ -460,6 +486,8 @@ class HistorialEstado(models.Model):
     grupo = models.ForeignKey(Grupo, related_name='historiales', verbose_name=_lazy('grupo'))
     fecha = models.DateTimeField(verbose_name=_lazy('fecha'), auto_now_add=True)
     estado = models.CharField(max_length=2, choices=OPCIONES_ESTADO, verbose_name=_lazy('estado'))
+
+    objects = HistorialManager()
 
     def __str__(self):
         return 'Historial {estado} para grupo: {self.grupo}'.format(self=self, estado=self.get_estado_display())

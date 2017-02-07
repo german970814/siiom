@@ -52,7 +52,8 @@ def eliminar(request, modelo, lista):
                 else:
                     modelo.objects.get(id=e).delete()
             except ValueError as e:
-                print(e)
+                if settings.DEBUG:
+                    print(e)
                 pass
             except:
                 ok = 2  # Hubo un Error
@@ -252,58 +253,58 @@ def miembroInicio(request):
 isOk = False
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderListarMiembrosGrupo(request):
-    if request.method == 'POST':
-        if 'trasladar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            # return HttpResponseRedirect('/miembro/transladar_miembros/')
-        else:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            return HttpResponseRedirect('/miembro/editar_miembros/')
+# @user_passes_test(liderTest, login_url="/dont_have_permissions/")  # esta en desuso
+# def liderListarMiembrosGrupo(request):
+#     if request.method == 'POST':
+#         if 'trasladar' in request.POST:
+#             request.session['seleccionados'] = request.POST.getlist('seleccionados')
+#             # return HttpResponseRedirect('/miembro/transladar_miembros/')
+#         else:
+#             request.session['seleccionados'] = request.POST.getlist('seleccionados')
+#             return HttpResponseRedirect('/miembro/editar_miembros/')
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupo_lidera
-    if grupo:
-        discipulos = grupo.discipulos
-        miembrosGrupo = grupo.miembrosGrupo()
-    return render_to_response("miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     grupo = miembro.grupo_lidera
+#     if grupo:
+#         discipulos = grupo.discipulos
+#         miembrosGrupo = grupo.miembrosGrupo()
+#     return render_to_response("miembros/listar_miembros_grupo.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderEditarMiembros(request):
-    accion = 'Guardar y editar siguiente'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == 'POST':
-        actual = request.session['actual']
-        form = FormularioLiderAgregarMiembro(data=request.POST, instance=actual)
-        if form.is_valid():
-            nuevoMiembro = form.save()
-            nuevoMiembro.usuario.username = nuevoMiembro.nombre + nuevoMiembro.primerApellido
-            nuevoMiembro.usuario.email = nuevoMiembro.email
-            nuevoMiembro.usuario.save()
-            if nuevoMiembro.conyugue is not None and nuevoMiembro.conyugue != "":
-                    conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
-                    conyugue.conyugue = nuevoMiembro
-                    conyugue.estadoCivil = 'C'
-                    conyugue.save()
-                    nuevoMiembro.estadoCivil = 'C'
-                    nuevoMiembro.save()
-        else:
-            return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+# @user_passes_test(liderTest, login_url="/dont_have_permissions/")  # esta en desuso
+# def liderEditarMiembros(request):
+#     accion = 'Guardar y editar siguiente'
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     if request.method == 'POST':
+#         actual = request.session['actual']
+#         form = FormularioLiderAgregarMiembro(data=request.POST, instance=actual)
+#         if form.is_valid():
+#             nuevoMiembro = form.save()
+#             nuevoMiembro.usuario.username = nuevoMiembro.nombre + nuevoMiembro.primerApellido
+#             nuevoMiembro.usuario.email = nuevoMiembro.email
+#             nuevoMiembro.usuario.save()
+#             if nuevoMiembro.conyugue is not None and nuevoMiembro.conyugue != "":
+#                 conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
+#                 conyugue.conyugue = nuevoMiembro
+#                 conyugue.estadoCivil = 'C'
+#                 conyugue.save()
+#                 nuevoMiembro.estadoCivil = 'C'
+#                 nuevoMiembro.save()
+#         else:
+#             return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
 
-    if 'seleccionados' in request.session:
-        faltantes = request.session['seleccionados']
-        if len(faltantes) > 0:
-            miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
-            request.session['actual'] = miembroEditar
-            form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
-            request.session['seleccionados'] = request.session['seleccionados']
-            return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
-        else:
-            return HttpResponseRedirect("/miembro/listar_miembros/")
-    else:
-        return HttpResponseRedirect("/miembro/listar_miembros/")
+#     if 'seleccionados' in request.session:
+#         faltantes = request.session['seleccionados']
+#         if len(faltantes) > 0:
+#             miembroEditar = Miembro.objects.get(id=request.session['seleccionados'].pop())
+#             request.session['actual'] = miembroEditar
+#             form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
+#             request.session['seleccionados'] = request.session['seleccionados']
+#             return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
+#         else:
+#             return HttpResponseRedirect("/miembro/listar_miembros/")
+#     else:
+#         return HttpResponseRedirect("/miembro/listar_miembros/")
 
 
 @user_passes_test(miembroTest, login_url="/dont_have_permissions/")
@@ -338,7 +339,8 @@ def liderEditarPerfil(request, pk=None):
                     if foto:
                         r = settings.MEDIA_ROOT + "/media/profile_pictures/user_%s/" % miembro.id
                         if os.path.exists(rut_perfil) and os.path.isfile(rut_perfil):
-                            print("Se borra el archivo anterior")
+                            if settings.DEBUG:
+                                print("Se borra el archivo anterior")
                             os.remove(rut_perfil)
                 f.save()
                 ok = True
@@ -420,51 +422,51 @@ def cambiarContrasena(request):
     return render_to_response("miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderLlamadasPendientesVisitantesGrupo(request):
-    if request.method == 'POST':
-        request.session['visitantesSeleccionados'] = request.POST.getlist('seleccionados')
-        return HttpResponseRedirect('/miembro/registrar_llamada/lider/')
+# @user_passes_test(liderTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def liderLlamadasPendientesVisitantesGrupo(request):
+#     if request.method == 'POST':
+#         request.session['visitantesSeleccionados'] = request.POST.getlist('seleccionados')
+#         return HttpResponseRedirect('/miembro/registrar_llamada/lider/')
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupo_lidera
-    lideres = []
-    if grupo:
-        for lid in grupo.miembros.all():
-            lideres.append(CambioTipo.objects.filter(
-                miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
-        lids = []
-        for l in lideres:
-            for k in l:
-                if k.miembro.id not in lids:
-                    lids.append(k.miembro.id)
-        visitantes = grupo.miembros.filter(fechaLlamadaLider=None).exclude(id__in=lids)
-#        miembrosGrupo = list(grupo.miembros.all())
-#        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
-#        visitantes = []
-#        for mg in miembrosGrupo:
-#            ct = list(
-#                CambioTipo.objects.filter(miembro = mg).order_by('fecha'))
-#            if len(ct) != 0 and ct != None:
-#                ct = ct.pop()
-#                if(ct.nuevoTipo ==  tipo and ct.anteriorTipo == tipo and
-#                    (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider == None)):
-#                    visitantes.append(ct.miembro)
-    return render_to_response("miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     grupo = miembro.grupo_lidera
+#     lideres = []
+#     if grupo:
+#         for lid in grupo.miembros.all():
+#             lideres.append(CambioTipo.objects.filter(
+#                 miembro=lid, nuevoTipo=TipoMiembro.objects.get(nombre__iexact="lider")))
+#         lids = []
+#         for l in lideres:
+#             for k in l:
+#                 if k.miembro.id not in lids:
+#                     lids.append(k.miembro.id)
+#         visitantes = grupo.miembros.filter(fechaLlamadaLider=None).exclude(id__in=lids)
+# #        miembrosGrupo = list(grupo.miembros.all())
+# #        tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
+# #        visitantes = []
+# #        for mg in miembrosGrupo:
+# #            ct = list(
+# #                CambioTipo.objects.filter(miembro = mg).order_by('fecha'))
+# #            if len(ct) != 0 and ct != None:
+# #                ct = ct.pop()
+# #                if(ct.nuevoTipo ==  tipo and ct.anteriorTipo == tipo and
+# #                    (ct.miembro.observacionLlamadaLider == '' or ct.miembro.observacionLlamadaLider == None)):
+# #                    visitantes.append(ct.miembro)
+#     return render_to_response("miembros/listar_llamadas_pendientes.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
-def llamadasPendientesVisitantes(request):
-    if request.method == 'POST':
-        request.session['miembrosSeleccionados'] = request.POST.getlist('seleccionados')
-        return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
+# @user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def llamadasPendientesVisitantes(request):
+#     if request.method == 'POST':
+#         request.session['miembrosSeleccionados'] = request.POST.getlist('seleccionados')
+#         return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    miembrosPrimera = Miembro.objects.filter(fechaPrimeraLlamada=None)
-    miembrosSegunda = Miembro.objects.filter(fechaSegundaLlamada=None).exclude(fechaPrimeraLlamada=None)
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     miembrosPrimera = Miembro.objects.filter(fechaPrimeraLlamada=None)
+#     miembrosSegunda = Miembro.objects.filter(fechaSegundaLlamada=None).exclude(fechaPrimeraLlamada=None)
 
-    if len(miembrosPrimera) == 0 and len(miembrosSegunda) == 0:
-        ninguna = True
+#     if len(miembrosPrimera) == 0 and len(miembrosSegunda) == 0:
+#         ninguna = True
 #    miembrosIglesia = Miembro.objects.all()
 #    tipo = TipoMiembro.objects.get(nombre__iexact = 'Visita')
 #    miembros = []
@@ -476,149 +478,149 @@ def llamadasPendientesVisitantes(request):
 #               (ct.miembro.observacionPrimeraLlamada == '' or ct.miembro.observacionPrimeraLlamada == None) and\
 #               (ct.miembro.observacionSegundaLlamada == '' or ct.miembro.observacionSegundaLlamada == None):
 #                miembros.append(ct.miembro)
-    return render_to_response("miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
+#    return render_to_response("miembros/llamadas_pendientes_agente.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderLlamarVisitas(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    tipo = 'lider'
-    if request.method == 'POST':
-        aux = request.session['visitaActual']
-        actual = Miembro.objects.get(id=aux['id'])  # request.session['visitaActual']
-        form = FormularioLlamadaLider(data=request.POST, instance=actual)
-        if form.is_valid():
-            nuevoLlamar = form.save(commit=False)
-            nuevoLlamar.fechaLlamadaLider = date.today()
-            nuevoLlamar.save()
-        else:
-            return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+# @user_passes_test(liderTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def liderLlamarVisitas(request):
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     tipo = 'lider'
+#     if request.method == 'POST':
+#         aux = request.session['visitaActual']
+#         actual = Miembro.objects.get(id=aux['id'])  # request.session['visitaActual']
+#         form = FormularioLlamadaLider(data=request.POST, instance=actual)
+#         if form.is_valid():
+#             nuevoLlamar = form.save(commit=False)
+#             nuevoLlamar.fechaLlamadaLider = date.today()
+#             nuevoLlamar.save()
+#         else:
+#             return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
 
-    if 'visitantesSeleccionados' in request.session:
-        faltantes = request.session['visitantesSeleccionados']
-        if len(faltantes) > 0:
-            try:
-                miembroLlamar = Miembro.objects.get(id=request.session['visitantesSeleccionados'].pop())
-                miembrol = {'id': str(miembroLlamar.id),
-                            'nombre': str(miembroLlamar.nombre),
-                            'primerApellido': str(miembroLlamar.primerApellido),
-                            'genero': str(miembroLlamar.genero),
-                            'cedula': str(miembroLlamar.cedula),
-                            'email': str(miembroLlamar.email),
-                            'telefono': str(miembroLlamar.telefono),
-                            'celular': str(miembroLlamar.celular),
-                            'detalleLlamadaLider': str(miembroLlamar.detalleLlamadaLider)
-                            }
-                request.session['visitaActual'] = miembrol  # miembroLlamar #linea que da el error
-                form = FormularioLlamadaLider(instance=miembroLlamar)
-                request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
-                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
-            except IndexError:
-                pass
-            except ValueError:
-                return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
-        else:
-            return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
-    else:
-        return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
-
-
-@user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")
-def llamarVisitas(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == 'POST':
-        actual = Miembro.objects.get(id=request.session['miembroActual'])
-        if actual.fechaPrimeraLlamada is None:  # or actual.detallePrimeraLlamada == '':
-            form = FormularioPrimeraLlamadaAgente(data=request.POST, instance=actual)
-            llamada = 1
-        elif actual.fechaSegundaLlamada == '' or actual.detalleSegundaLlamada is None:
-            form = FormularioSegundaLlamadaAgente(data=request.POST, instance=actual)
-            llamada = 2
-
-        if form.is_valid():
-            if llamada == 1:
-                nuevoLlamar = form.save(commit=False)
-                if nuevoLlamar.grupo is not None:  # or nuevoLlamar.grupo != '':
-                    lideres = nuevoLlamar.grupo.lideres.values('email')
-                    receptores = ["%s" % (k['email']) for k in lideres]
-
-                    camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
-                        Se ha agregado un nuevo miembro a su G.A.R, por favor \
-                        ingrese al sistema para registrar la llamada:\n\
-                        http://iglesia.webfactional.com/iniciar_sesion\n\n\
-                        Cordialmente,\n\
-                        Admin" % Sites.objects.get_current().name, receptores]
-                    # Solo para Panamá
-                    # sendMail(camposMail)
-                nuevoLlamar.fechaPrimeraLlamada = date.today()
-            elif llamada == 2:
-                nuevoLlamar = form.save(commit=False)
-                nuevoLlamar.fechaSegundaLlamada = date.today()
-            nuevoLlamar.save()
-        else:
-            return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
-
-    if 'miembrosSeleccionados' in request.session:
-        faltantes = request.session['miembrosSeleccionados']
-        if len(faltantes) > 0:
-            miembroLlamar = Miembro.objects.get(id=request.session['miembrosSeleccionados'].pop())
-            request.session['miembroActual'] = int(miembroLlamar.id)
-            request.session['miembrosSeleccionados'] = request.session['miembrosSeleccionados']
-            request.session['perfil'] = miembroLlamar.id
-            if miembroLlamar.fechaPrimeraLlamada == '' or miembroLlamar.fechaPrimeraLlamada is None:
-                tipo = "primera"
-                try:
-                    miembroIngreso = CambioTipo.objects.get(
-                        miembro=miembroLlamar, nuevoTipo__nombre__iexact='visita').autorizacion
-                    gMiembroIngreso = miembroIngreso.grupo_lidera
-                except:
-                    pass
-                form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)
-                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
-            elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada is None:
-                tipo = "segunda"
-                form = FormularioSegundaLlamadaAgente(instance=miembroLlamar)
-                return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
-        else:
-            if 'perfil' in request.session:
-                if isinstance(request.session['perfil'], int):
-                    return HttpResponseRedirect("/miembro/informacion_iglesia/" + str(request.session['perfil']))
-            return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
-    else:
-        return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
+#     if 'visitantesSeleccionados' in request.session:
+#         faltantes = request.session['visitantesSeleccionados']
+#         if len(faltantes) > 0:
+#             try:
+#                 miembroLlamar = Miembro.objects.get(id=request.session['visitantesSeleccionados'].pop())
+#                 miembrol = {'id': str(miembroLlamar.id),
+#                             'nombre': str(miembroLlamar.nombre),
+#                             'primerApellido': str(miembroLlamar.primerApellido),
+#                             'genero': str(miembroLlamar.genero),
+#                             'cedula': str(miembroLlamar.cedula),
+#                             'email': str(miembroLlamar.email),
+#                             'telefono': str(miembroLlamar.telefono),
+#                             'celular': str(miembroLlamar.celular),
+#                             'detalleLlamadaLider': str(miembroLlamar.detalleLlamadaLider)
+#                             }
+#                 request.session['visitaActual'] = miembrol  # miembroLlamar #linea que da el error
+#                 form = FormularioLlamadaLider(instance=miembroLlamar)
+#                 request.session['visitantesSeleccionados'] = request.session['visitantesSeleccionados']
+#                 return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+#             except IndexError:
+#                 pass
+#             except ValueError:
+#                 return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
+#         else:
+#             return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
+#     else:
+#         return HttpResponseRedirect("/miembro/llamadas_pendientes/lider/")
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def liderPromoverVisitantesGrupo(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    grupo = miembro.grupo_lidera
-    if grupo:
-        miembrosGrupo = list(grupo.miembros.all())
-        if request.method == 'POST':
-            lista = request.POST.getlist('seleccionados')
-            lista.reverse()
-            for visitante in lista:
-                try:
-                    v = Miembro.objects.get(id=int(visitante))
-                except ValueError:
-                    continue
-                if v in miembrosGrupo:
-                    visita = CambioTipo.objects.create(
-                        miembro=v, autorizacion=miembro,
-                        fecha=date.today(), anteriorTipo=TipoMiembro.objects.get(
-                            nombre__iexact="Visita"), nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Miembro"))
-            return HttpResponseRedirect('')
+# @user_passes_test(llamdaAgenteTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def llamarVisitas(request):
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     if request.method == 'POST':
+#         actual = Miembro.objects.get(id=request.session['miembroActual'])
+#         if actual.fechaPrimeraLlamada is None:  # or actual.detallePrimeraLlamada == '':
+#             form = FormularioPrimeraLlamadaAgente(data=request.POST, instance=actual)
+#             llamada = 1
+#         elif actual.fechaSegundaLlamada == '' or actual.detalleSegundaLlamada is None:
+#             form = FormularioSegundaLlamadaAgente(data=request.POST, instance=actual)
+#             llamada = 2
 
-        tipo = TipoMiembro.objects.get(nombre__iexact='Visita')
-        visitantes = []
-        for mg in miembrosGrupo:
-            ct = list(CambioTipo.objects.filter(
-                miembro=mg).order_by('fecha').order_by('id'))  # .filter(nuevoTipo=tipo, anteriorTipo=tipo)
-            if len(ct) != 0 and ct is not None:
-                ct = ct.pop()
-                if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo):
-                    visitantes.append(ct.miembro)
-    return render_to_response("miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
+#         if form.is_valid():
+#             if llamada == 1:
+#                 nuevoLlamar = form.save(commit=False)
+#                 if nuevoLlamar.grupo is not None:  # or nuevoLlamar.grupo != '':
+#                     lideres = nuevoLlamar.grupo.lideres.values('email')
+#                     receptores = ["%s" % (k['email']) for k in lideres]
+
+#                     camposMail = ['Nuevo Miembro', "Lider de la iglesia %s,\n\n\
+#                         Se ha agregado un nuevo miembro a su G.A.R, por favor \
+#                         ingrese al sistema para registrar la llamada:\n\
+#                         http://iglesia.webfactional.com/iniciar_sesion\n\n\
+#                         Cordialmente,\n\
+#                         Admin" % Sites.objects.get_current().name, receptores]
+#                     # Solo para Panamá
+#                     # sendMail(camposMail)
+#                 nuevoLlamar.fechaPrimeraLlamada = date.today()
+#             elif llamada == 2:
+#                 nuevoLlamar = form.save(commit=False)
+#                 nuevoLlamar.fechaSegundaLlamada = date.today()
+#             nuevoLlamar.save()
+#         else:
+#             return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+
+#     if 'miembrosSeleccionados' in request.session:
+#         faltantes = request.session['miembrosSeleccionados']
+#         if len(faltantes) > 0:
+#             miembroLlamar = Miembro.objects.get(id=request.session['miembrosSeleccionados'].pop())
+#             request.session['miembroActual'] = int(miembroLlamar.id)
+#             request.session['miembrosSeleccionados'] = request.session['miembrosSeleccionados']
+#             request.session['perfil'] = miembroLlamar.id
+#             if miembroLlamar.fechaPrimeraLlamada == '' or miembroLlamar.fechaPrimeraLlamada is None:
+#                 tipo = "primera"
+#                 try:
+#                     miembroIngreso = CambioTipo.objects.get(
+#                         miembro=miembroLlamar, nuevoTipo__nombre__iexact='visita').autorizacion
+#                     gMiembroIngreso = miembroIngreso.grupo_lidera
+#                 except:
+#                     pass
+#                 form = FormularioPrimeraLlamadaAgente(instance=miembroLlamar)
+#                 return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+#             elif miembroLlamar.fechaSegundaLlamada == '' or miembroLlamar.fechaSegundaLlamada is None:
+#                 tipo = "segunda"
+#                 form = FormularioSegundaLlamadaAgente(instance=miembroLlamar)
+#                 return render_to_response("miembros/registrar_llamada.html", locals(), context_instance=RequestContext(request))
+#         else:
+#             if 'perfil' in request.session:
+#                 if isinstance(request.session['perfil'], int):
+#                     return HttpResponseRedirect("/miembro/informacion_iglesia/" + str(request.session['perfil']))
+#             return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
+#     else:
+#         return HttpResponseRedirect("/miembro/llamadas_pendientes/agente/")
+
+
+# @user_passes_test(liderTest, login_url="/dont_have_permissions/")  # vista en desuso
+# def liderPromoverVisitantesGrupo(request):
+#     miembro = Miembro.objects.get(usuario=request.user)
+#     grupo = miembro.grupo_lidera
+#     if grupo:
+#         miembrosGrupo = list(grupo.miembros.all())
+#         if request.method == 'POST':
+#             lista = request.POST.getlist('seleccionados')
+#             lista.reverse()
+#             for visitante in lista:
+#                 try:
+#                     v = Miembro.objects.get(id=int(visitante))
+#                 except ValueError:
+#                     continue
+#                 if v in miembrosGrupo:
+#                     visita = CambioTipo.objects.create(
+#                         miembro=v, autorizacion=miembro,
+#                         fecha=date.today(), anteriorTipo=TipoMiembro.objects.get(
+#                             nombre__iexact="Visita"), nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Miembro"))
+#             return HttpResponseRedirect('')
+
+#         tipo = TipoMiembro.objects.get(nombre__iexact='Visita')
+#         visitantes = []
+#         for mg in miembrosGrupo:
+#             ct = list(CambioTipo.objects.filter(
+#                 miembro=mg).order_by('fecha').order_by('id'))  # .filter(nuevoTipo=tipo, anteriorTipo=tipo)
+#             if len(ct) != 0 and ct is not None:
+#                 ct = ct.pop()
+#                 if(ct.nuevoTipo == tipo and ct.anteriorTipo == tipo):
+#                     visitantes.append(ct.miembro)
+#     return render_to_response("miembros/listar_visitantes.html", locals(), context_instance=RequestContext(request))
 
 
 @user_passes_test(editarMiembroTest, login_url="/dont_have_permissions/")
@@ -669,11 +671,11 @@ def asignarGrupo(request, id):
     except:
         raise Http404
     miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        miembroIngreso = CambioTipo.objects.get(miembro=miembroEditar, nuevoTipo__nombre__iexact='visita').autorizacion
-        gMiembroIngreso = miembroIngreso.grupo_lidera
-    except:
-        pass
+    # try:
+    #     miembroIngreso = CambioTipo.objects.get(miembro=miembroEditar, nuevoTipo__nombre__iexact='visita').autorizacion
+    #     gMiembroIngreso = miembroIngreso.grupo_lidera
+    # except:
+    #     pass
     form = FormularioAsignarGrupo(instance=miembroEditar)
     if request.method == 'POST':
         form = FormularioAsignarGrupo(data=request.POST, instance=miembroEditar)

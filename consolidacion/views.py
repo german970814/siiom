@@ -144,7 +144,7 @@ def asignar_grupo_visitas(request):
                     retirado=False
                 ).exclude(grupo__isnull=False)
 
-                grupos = Grupo.objects.prefetch_related('lideres').filter(estado='A').select_related('red')
+                grupos = Grupo.objects.prefetch_related('lideres').select_related('red').activos()
 
                 if visitas.exists():
                     data['visitas'] = visitas

@@ -1,12 +1,11 @@
 /**
- * jQuery Formset 1.3-pre
+ * IGSearch v.1.0
  * @author German Alzate (Ingeniarte Soft.)
  * @requires jQuery 2.14 or later
  *
  * 2016, German Alzate
  *
- * Test Page
- * See: http://contribuciones.webfaction.com/
+ * See: http://siiom.conial.net/
  */
 
 ;(function ($) {

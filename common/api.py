@@ -17,7 +17,7 @@ Red = import_string('grupos.models.Red')
 
 @login_required_api
 def busqueda_miembro_api(request, pk):
-    """Vista para realizar busquedas de mienbros desde AJAX a los miembros que son lideres, y no lideran grupo."""
+    """Vista para realizar busquedas de miembros desde AJAX a los miembros que son lideres, y no lideran grupo."""
 
     red = Red.objects.iglesia(request.iglesia).get(pk=pk)
 

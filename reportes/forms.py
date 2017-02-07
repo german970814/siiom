@@ -163,19 +163,6 @@ class FormularioEstadisticoReunionesGAR(forms.Form):
     def clean(self, *args, **kwargs):
         cleaned_data = super(FormularioEstadisticoReunionesGAR, self).clean(*args, **kwargs)
 
-        # boolean_fields = [
-        #     cleaned_data.get('ofrenda', False),
-        #     cleaned_data.get('lideres_asistentes', False),
-        #     cleaned_data.get('visitas', False),
-        #     cleaned_data.get('asistentes_regulares', False)
-        # ]
-
-        # if all(not x for x in boolean_fields):
-        #     self.add_error('ofrenda', _('Escoge una opción'))
-        #     self.add_error('lideres_asistentes', _('Escoge una opción'))
-        #     self.add_error('visitas', _('Escoge una opción'))
-        #     self.add_error('asistentes_regulares', _('Escoge una opción'))
-
 
 class FormularioReportesSinConfirmar(CommonFormFechas):
     grupo = forms.ModelChoiceField(

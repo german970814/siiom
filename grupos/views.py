@@ -22,7 +22,7 @@ from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscip
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
-    FormularioTransladarGrupo, FormularioCrearPredica,
+    FormularioCrearPredica,  # FormularioTransladarGrupo
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm
 )
@@ -103,7 +103,7 @@ def reportarReunionGrupo(request):
     grupo = miembro.grupo_lidera
 
     # se verifica que exista el grupo de el miembro en la sesion y que este, esté activo
-    if grupo is not None and grupo.estado == Grupo.ACTIVO:
+    if grupo is not None and grupo.is_activo:
 
         # Se comentan estas lineas de código, porque no están siendo usadas en la actualidad
 
@@ -311,21 +311,21 @@ def sendMail(camposMail):
     send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
 
 
-def reporteVisitasPorRed(request):
-    redes = Red.objects.all()
-    data = []
-    for red in redes:
-        grupos = Grupo.objects.filter(red=red.id)
-        visRed = 0
-        l = [red.nombre]
-        for grupo in grupos:
-            visReuniones = ReunionGAR.objects.filter(grupo=grupo.id).values('numeroVisitas')
-            if len(visReuniones.values()) > 0:
-                visitas = sum([int(dict['numeroVisitas']) for dict in visReuniones.values('numeroVisitas')])
-                visRed = visRed + visitas
-        l.append(visRed)
-        data.append(l)
-    return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
+# def reporteVisitasPorRed(request):  # vista en desuso
+#     redes = Red.objects.all()
+#     data = []
+#     for red in redes:
+#         grupos = Grupo.objects.filter(red=red.id)
+#         visRed = 0
+#         l = [red.nombre]
+#         for grupo in grupos:
+#             visReuniones = ReunionGAR.objects.filter(grupo=grupo.id).values('numeroVisitas')
+#             if len(visReuniones.values()) > 0:
+#                 visitas = sum([int(dict['numeroVisitas']) for dict in visReuniones.values('numeroVisitas')])
+#                 visRed = visRed + visitas
+#         l.append(visRed)
+#         data.append(l)
+#     return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
 
 
 @user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
@@ -509,8 +509,6 @@ def set_position_grupo(request, id_grupo):
         data['code_response'] = 400
 
     return HttpResponse(json.dumps(data), content_type='application/json')
-
-# -----------------------------------
 
 
 @login_required
