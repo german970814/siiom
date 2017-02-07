@@ -3,40 +3,13 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'jsTree3.3.3/dist/themes/default/style.css' %}">
-<style>
-.fab-div {
-    overflow: auto;
-}
-
-.backdrop{
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: #FFF;
-	opacity: 0.9;
-    z-index: 11;
-	display: none;
-}
-
-.m-btn {
-    z-index: 12;
-}
-
-.m-btn.child {
-    width: 40px;
-    height: 40px;
-    right: 45px;
-    line-height: 35px !important;
-}
-</style>
+<link rel="stylesheet" href="{% static 'Scripts/IGFABSpeedDial/IGFABSpeedDial.css' %}">
 {% endblock css %}
 
 {% block contenido %}
 <div class="container">
     {% if perms.miembros.es_administrador %}
-        <div class="fab-div">
+        <div id="fab-div">
             <a href="{% url 'grupos:trasladar_lideres' %}" class="btn btn-float btn-danger m-btn child" data-subfab="1" data-toggle="tooltip" data-placement="left" data-original-title="{% trans 'Trasladar lideres' %}">
                 <i class="zmdi zmdi-account"></i>
             </a>
@@ -76,6 +49,7 @@
 
 {% block js %}
 <script type="text/javascript" src="{% static 'jsTree3.3.3/dist/jstree.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'Scripts/IGFABSpeedDial/IGFABSpeedDial.js' %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
         $("#arbol").jstree({
@@ -96,21 +70,8 @@
             }, 250);
         });
 
-        $("#fab-principal").click(function() {
-            if($(".backdrop").length) {
-                $(".backdrop").fadeOut(125);
-                $(".backdrop").remove();
-                $(".m-btn.child").css("bottom", $("#fab-principal").css("bottom"));
-            }
-            else {
-                $("body").append("<div class='backdrop'></div>");
-                $(".backdrop").fadeIn(125);
-                $(".m-btn.child").each(function(){
-                    var pos = parseInt($("#fab-principal").css("bottom")) + $("#fab-principal").outerHeight() + 55 * $(this).data("subfab") - $(".m-btn.child").outerHeight();
-                    $(this).css("bottom", pos);
-                });
-            }
-        });
+
+        $("#fab-div").IGFABSpeedDial();
     });
 </script>
 {% endblock %}

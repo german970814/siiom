@@ -6,3 +6,4 @@ htmlcov/
 .coverage
 .coveragerc
 tags
+docs/_build
