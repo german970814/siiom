@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils.module_loading import import_string
+
 from treebeard.al_tree import AL_NodeManager
 from common.managers import IglesiaMixinQuerySet
 
@@ -7,6 +9,15 @@ class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
     """
     Queryset personalizado para los grupos.
     """
+
+    @classmethod
+    def get_historial_model(cls):
+        """
+        :returns:
+            Modelo de HistorialEstado.
+        """
+
+        return import_string('grupos.models.HistorialEstado')
 
     def red(self, red):
         """
@@ -18,16 +29,6 @@ class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
         """
 
         return self.filter(red=red)
-
-    def get_historial_model(self):
-        """
-        :returns:
-            Modelo de HistorialEstado.
-        """
-
-        if not hasattr(self, 'historial_model'):
-            self.historial_model = self.model._meta.get_field('historiales').related_model
-        return self.historial_model
 
     def _filter_queryset_by_estado(self, estado):
         """Retorna un queryset de acuerdo al estado en el historial del grupo."""

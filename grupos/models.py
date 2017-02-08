@@ -82,7 +82,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         verbose_name_plural = _lazy('grupos')
 
     def __str__(self):
-        if self.estado == self._meta.get_field('historiales').related_model.ARCHIVADO:
+        if self.estado == self.__class__.objects.get_queryset().get_historial_model().ARCHIVADO:
             return self.get_nombre()
 
         lideres = ["{0} {1}({2})".format(
@@ -94,7 +94,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if not self.historiales.exists():
-            self.actualizar_estado(estado=self._meta.get_field('historiales').related_model.ACTIVO)
+            self.actualizar_estado(estado=self.__class__.objects.get_queryset().get_historial_model().ACTIVO)
 
     @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
@@ -288,17 +288,28 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
     @property
     def estado(self):
-        """Retorna el estado del grupo de acuerdo a su historial."""
+        """
+        Retorna el estado del grupo de acuerdo a su historial.
+
+        :rtype: str
+        """
 
         return self.historiales.first().estado
 
     @property
     def is_activo(self):
-        """Retorna True si el estado del grupo es activo."""
+        """
+        Retorna ``True`` si el estado del grupo es activo.
+
+        :rtype: bool
+        """
         return self.estado == self.historiales.model.ACTIVO
 
     def get_estado_display(self):
-        """Retorna el estado display del grupo de acuerdo a su historial."""
+        """
+        :returns:
+            Estado display del grupo de acuerdo a su historial.
+        """
 
         return self.historiales.first().get_estado_display()
 
@@ -416,6 +427,11 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
                 self.delete()
 
     def get_nombre(self):
+        """
+        Retorna el nombre del grupo.
+
+        :rtype: str
+        """
         return self.nombre
 
     def miembrosGrupo(self):
@@ -427,7 +443,8 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
     def get_direccion(self):
         """
-        Retorna la direccion de manera legible para los buscadores de mapas
+        :returns: 
+            La direccion de manera legible para los buscadores de mapas
         """
         if self.get_position() is None:
             return clean_direccion(self.direccion)
@@ -436,7 +453,8 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
     def get_position(self):
         """
-        Retorna las coordenadas de un grupo o None
+        :returns:
+            Las coordenadas de un grupo o `None` en caso de no tener last coordenadas.
         """
         if self.latitud is not None and self.longitud is not None:
             return [self.latitud, self.longitud]
@@ -445,6 +463,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
     def actualizar_estado(self, **kwargs):
         """
         Actualiza el estado de el grupo en su historial.
+
         :param estado:
             El estado que se asignara.
 
@@ -456,7 +475,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         estado = kwargs.get('estado')
 
         if actual is None:
-            self._meta.get_field('historiales').related_model.objects.create(grupo=self, estado=estado)
+            self.__class__.objects.get_queryset().get_historial_model().objects.create(grupo=self, estado=estado)
         elif estado != actual.estado:
             from django.db import OperationalError
             # import datetime
@@ -549,7 +568,32 @@ class AsistenciaDiscipulado(models.Model):
 
 
 class HistorialEstado(models.Model):
-    """Modelo para guardar historial de cambio de estado de los grupos."""
+    """
+    Modelo para guardar historial de cambio de estado de los grupos.
+
+        **Significado de cada estado**
+
+           * ``ACTIVO`` Este estado es aplicado a grupos que realicen todas las funciones
+             que un grupo hace, es decir: reunion de G.A.R, reunion de discipulado, etc.
+
+           * ``INACTIVO`` Este estado es aplicado a grupos que en la actualidad no se
+             encuentran realizando reuniones de G.A.R, pero realizan encuentros, reuniones
+             de dicipulado, etc.
+
+           * ``SUSPENDIDO`` Este estado es aplicado a grupos que en la actualidad no realizan
+             ninguna acción de grupos, pero no quiere ser archivado.
+
+           * ``ARCHIVADO`` Este estado es aplicado a grupos que serán eliminados.
+
+
+        **Usabilidad**
+
+            Solo se podrá tener un ``estado`` diferente de seguido para cada grupo, es decir,
+            no se podrán tener dos estados de ``ACTIVO`` de seguido para el mismo grupo.
+
+            Ante el caso de una posible repetición de ``estado``, la creación de el historial del
+            estado será abortada.
+    """
 
     ACTIVO = 'AC'
     INACTIVO = 'IN'
@@ -578,6 +622,13 @@ class HistorialEstado(models.Model):
         ordering = ['-fecha']
 
     def save(self, *args, **kwargs):
+        """
+        Guarda una instancia de EstadoHistorial
+
+        .. warning::
+            Si el grupo tiene en su último historial, el mismo estado del historial actual
+            a guardar, entonces, este será omitido.
+        """
         if self.grupo.pk:
             with transaction.atomic():
                 last = self.grupo.historiales.first()
