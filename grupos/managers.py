@@ -20,13 +20,12 @@ class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
         return self.filter(red=red)
 
     def get_historial_model(self):
-        """Retorna el modelo de Historialestado."""
+        """
+        :returns:
+            Modelo de HistorialEstado.
+        """
 
         if not hasattr(self, 'historial_model'):
-            # self.historial_model = [x for x in filter(
-            #     lambda relation: relation.related_model._meta.model_name == 'historialestado',
-            #     self.model._meta.related_objects
-            # )][0].related_model
             self.historial_model = self.model._meta.get_field('historiales').related_model
         return self.historial_model
 
@@ -56,37 +55,58 @@ class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
         return self._filter_queryset_by_estado(self.get_historial_model().ACTIVO)
 
     def inactivos(self):
-        """Devuelve un queryset con los grupos en estado inactivo."""
+        """
+        :returns:
+            Un queryset con los grupos con estado inactivo.
+        """
 
         return self._filter_queryset_by_estado(self.get_historial_model().INACTIVO)
 
     def suspendidos(self):
-        """Devuelve un queryset con los grupos en estado suspendido."""
+        """
+        :returns:
+            Un queryset con los grupos con estado suspendido.
+        """
 
         return self._filter_queryset_by_estado(self.get_historial_model().SUSPENDIDO)
 
     def archivados(self):
-        """Devuelve un queryset con los grupos en estado archivado."""
+        """
+        :returns:
+            Un queryset con los grupos con estado archivado.
+        """
 
         return self._filter_queryset_by_estado(self.get_historial_model().ARCHIVADO)
 
     def _archivados(self):
-        """Retorna un queryset con todos los grupos a excepcion de los que se encuentran archivados."""
+        """
+        :returns:
+            Un queryset con los grupos que no tengan estado archivado.
+        """
 
         return self._exclude_queryset_by_estado(self.get_historial_model().ARCHIVADO)
 
     def _activos(self):
-        """Retorna un queryset con todos los grupos a excepcion de los que se encuentran activos."""
+        """
+        :returns:
+            Un queryset con los grupos que no tengan estado activo.
+        """
 
         return self._exclude_queryset_by_estado(self.get_historial_model().ACTIVO)
 
     def _inactivos(self):
-        """Retorna un queryset con todos los grupos a excepcion de los que se encuentran inactivos."""
+        """
+        :returns:
+            Un queryset con los grupos que no tengan estado inactivo.
+        """
 
         return self._exclude_queryset_by_estado(self.get_historial_model().INACTIVO)
 
     def _suspendidos(self):
-        """Retorna un queryset con todos los grupos a excepcion de los que se encuentran suspendidos."""
+        """
+        :returns:
+            Un queryset con los grupos que no tengan estado suspendido.
+        """
 
         return self._exclude_queryset_by_estado(self.get_historial_model().SUSPENDIDO)
 
@@ -97,7 +117,10 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     """
 
     def get_super_queryset(self):
-        """Retorna el get_queryset original de la clase."""
+        """
+        :returns:
+            Retorna el get_queryset() del padre.
+        """
         return super().get_queryset()
 
     def get_queryset(self):
@@ -107,7 +130,10 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         return self.model._objects.get(*args, **kwargs)
 
     def archivados(self):
-        # raise NotImplementedError('Debes asegugarte de usar "Grupo._objects.archivados()"')
+        """
+        :returns:
+            Un queryset con los grupos que se encuentran en estado archivado.
+        """
         return self.model._objects.archivados()
 
     def raiz(self, iglesia):
@@ -151,4 +177,10 @@ class HistorialManager(models.Manager):
     """Manager para el modelo de historialestado."""
 
     def estado(self, estado):
+        """
+        :returns:
+            Un queryset con los historiales filtrados por el estado.
+        :param estado:
+            El estado a partir del cual se filtraran los historiales.
+        """
         return self.filter(estado=estado)

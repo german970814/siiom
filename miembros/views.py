@@ -1198,8 +1198,8 @@ def calcularCelulas(miembro):
 def administracion(request):
     miembro = Miembro.objects.get(usuario=request.user)
     totalGrupos = Grupo.objects.all().count()
-    totalGruposA = Grupo.objects.filter(estado='A').count()
-    totalGruposI = Grupo.objects.filter(estado='I').count()
+    totalGruposA = Grupo.objects.activos().count()
+    totalGruposI = Grupo.objects.inactivos().count()
     totalMiembros = Miembro.objects.all().count()
     totalMiembrosA = Miembro.objects.filter(estado='A').count()
     totalMiembrosR = Miembro.objects.filter(estado='R').count()

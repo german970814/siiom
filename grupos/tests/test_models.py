@@ -1,6 +1,6 @@
 from miembros.tests.factories import MiembroFactory
 from common.tests.base import BaseTest
-from ..models import Grupo
+from ..models import Grupo, HistorialEstado
 from .factories import ReunionGARFactory, ReunionDiscipuladoFactory
 
 
@@ -309,3 +309,143 @@ class GrupoModelTest(BaseTest):
 
         grupo = Grupo.objects.get(id=200)
         self.assertIsNone(grupo.cabeza_red)
+
+    def test_grupos_archivados_not_in_queryset_objects(self):
+        """
+        Prueba que los grupos en estado archivado no esten saliendo en queryset de objects
+        """
+        import datetime
+        grupo = Grupo.objects.get(id=500)
+
+        self.assertIn(grupo, Grupo.objects.all())
+
+        grupo.actualizar_estado(
+            estado=HistorialEstado.ARCHIVADO, fecha=grupo.fechaApertura + datetime.timedelta(weeks=5)
+        )
+
+        self.assertNotIn(grupo, Grupo.objects.all())
+        self.assertIn(grupo, Grupo._objects.all())
+
+    def test_grupo_tiene_estado_activo(self):
+        """
+        Prueba que los grupos esten viniendo con estado activo.
+        """
+
+        padre = Grupo.objects.get(id=100)
+
+        for grupo in padre.grupos_red:
+            self.assertTrue(grupo.historiales.filter(estado=HistorialEstado.ACTIVO).exists())
+
+    def test_queryset_activos_solo_traiga_grupos_activos(self):
+        """
+        Prueba que los querysets de grupos activos solo traiga grupos activos
+        """
+
+        padre = Grupo.objects.get(id=100)
+
+        ids_grupos = Grupo.objects.activos().values_list('id', flat=1)
+
+        for grupo in padre.grupos_red:
+            self.assertIn(grupo.id, ids_grupos)
+
+        grupo_a = Grupo.objects.get(id=600)
+        grupo_a.actualizar_estado(estado=HistorialEstado.INACTIVO)
+
+        self.assertNotIn(grupo_a, Grupo.objects.activos())
+
+        grupo_b = Grupo.objects.get(id=500)
+        grupo_b.actualizar_estado(estado=HistorialEstado.SUSPENDIDO)
+
+        self.assertNotIn(grupo_b, Grupo.objects.activos())
+
+        grupo_c = Grupo.objects.get(id=800)
+        grupo_c.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        self.assertNotIn(grupo_c, Grupo.objects.activos())
+
+    def test_grupos_red_retorne_todos_los_grupos_sin_excepcion_de_archivados(self):
+        """
+        Prueba que con el metodo de _grupos_red se retornen todos los grupos, aun los que estan en
+        estado archivado
+        """
+
+        padre = Grupo.objects.get(id=100)
+
+        ids_grupos = Grupo.objects.activos().values_list('id', flat=1)
+
+        for grupo in padre.grupos_red:
+            self.assertIn(grupo.id, ids_grupos)
+
+        grupo_a = Grupo.objects.get(id=600)
+        grupo_a.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        self.assertIn(grupo_a, padre._grupos_red)
+        self.assertNotIn(grupo_a, padre.grupos_red)
+
+    def test_estado_grupo(self):
+        """
+        Prueba los estados del grupo.
+        """
+
+        grupo = Grupo.objects.get(id=300)
+        self.assertEqual(grupo.estado, HistorialEstado.ACTIVO)
+
+        grupo.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+        self.assertEqual(grupo.estado, HistorialEstado.ARCHIVADO)
+
+        grupo.actualizar_estado(estado=HistorialEstado.SUSPENDIDO)
+        self.assertEqual(grupo.estado, HistorialEstado.SUSPENDIDO)
+
+        grupo.actualizar_estado(estado=HistorialEstado.INACTIVO)
+        self.assertEqual(grupo.estado, HistorialEstado.INACTIVO)
+
+    def test_queryset_inactivos(self):
+        """
+        Prueba el queryset de inactivos.
+        """
+
+        self.assertEqual(
+            [],
+            list(Grupo.objects.inactivos().values_list('id', flat=1))
+        )
+
+        grupo = Grupo.objects.last()
+        grupo.actualizar_estado(estado=HistorialEstado.INACTIVO)
+
+        self.assertIn(grupo, Grupo.objects.inactivos())
+
+        self.assertNotIn(grupo, Grupo.objects.get_queryset()._inactivos())
+
+    def test_queryset_suspendidos(self):
+        """
+        Prueba el queryset de suspendidos.
+        """
+
+        self.assertEqual(
+            [],
+            list(Grupo.objects.suspendidos().values_list('id', flat=1))
+        )
+
+        grupo = Grupo.objects.last()
+        grupo.actualizar_estado(estado=HistorialEstado.SUSPENDIDO)
+
+        self.assertIn(grupo, Grupo.objects.suspendidos())
+
+        self.assertNotIn(grupo, Grupo.objects.get_queryset()._suspendidos())
+
+    def test_queryset_archivados(self):
+        """
+        Prueba el queryset de archivados.
+        """
+
+        self.assertEqual(
+            [],
+            list(Grupo.objects.archivados().values_list('id', flat=1))
+        )
+
+        grupo = Grupo.objects.last()
+        grupo.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        self.assertIn(grupo, Grupo.objects.archivados())
+
+        self.assertNotIn(grupo, Grupo.objects.get_queryset()._archivados())

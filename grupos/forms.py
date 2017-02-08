@@ -274,7 +274,7 @@ class BaseGrupoForm(CustomModelForm):
     class Meta:
         model = Grupo
         fields = [
-            'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
+            'lideres', 'direccion', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
             'horaDiscipulado', 'nombre', 'barrio'
         ]
 
@@ -287,7 +287,7 @@ class BaseGrupoForm(CustomModelForm):
         self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+        # self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 

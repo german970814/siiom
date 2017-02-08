@@ -52,19 +52,6 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group {{ form.estado.css_classes }}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-refresh"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="{{ form.estado.id_for_label }}" class="fg-label control-label">{{ form.estado.label }}*:</label>
-                                {{ form.estado }}
-                            </div>
-                            {{ form.estado.errors }}
-                        </div>
-                    </div>
-                    <br class="space">
-                    <div class="col-md-4">
                         <div class="input-group {{ form.fechaApertura.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
@@ -89,10 +76,7 @@
                             {{ form.diaGAR.errors }}
                         </div>
                     </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group {{ form.horaGAR.css_classes }}">
                             <span class="input-group-addon">
@@ -105,7 +89,10 @@
                             {{ form.horaGAR.errors }}
                         </div>
                     </div>
-                    <br class="space">
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
                     <div class="col-md-4">
                         <div class="input-group {{ form.diaDiscipulado.css_classes }}">
                             <span class="input-group-addon">
@@ -131,10 +118,7 @@
                             {{ form.horaDiscipulado.errors }}
                         </div>
                     </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group {{ form.direccion.css_classes }}">
                             <span class="input-group-addon">
@@ -147,6 +131,10 @@
                             {{ form.direccion.errors }}
                         </div>
                     </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
                     <div class="col-md-4">
                         <div class="input-group {{ form.nombre.css_classes }}">
                             <span class="input-group-addon">
@@ -204,7 +192,7 @@
             {% endfor %}
         {% endif %}
 
-        console.log(selected_before);
+        {% comment %}console.log(selected_before);{% endcomment %}
 
         $('#{{ form.lideres.id_for_label }}').IGSearch({
             url: "{% url 'common:busqueda_miembro_api' red_id %}",

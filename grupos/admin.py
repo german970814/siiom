@@ -17,7 +17,7 @@ from .models import Predica
 class GrupoAdmin(admin.ModelAdmin):
     # form = movenodeform_factory(Grupo)
     search_fields = ['nombre', 'direccion', 'lideres__nombre', 'lideres__cedula']
-    list_display = ('__str__', '_get_estado_display', 'red', )
+    list_display = ('__str__', 'get_estado_display', 'red', )
     list_filter = ('red', 'historiales__estado', )
     list_select_related = ('red', )
 

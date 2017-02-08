@@ -10,7 +10,7 @@ from consolidacion.utils import clean_direccion
 from .managers import GrupoManager, GrupoManagerStandard, HistorialManager
 from .six import SixALNode
 
-from treebeard.al_tree import AL_Node, get_result_class
+from treebeard.al_tree import AL_Node
 
 
 class Red(IglesiaMixin, models.Model):
@@ -55,7 +55,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         'self', verbose_name=_lazy('grupo origen'), related_name='children_set', null=True, db_index=True
     )
     direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
-    estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
+    # estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
     fechaApertura = models.DateField(verbose_name=_lazy("fecha de apertura"))
     diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=DIAS_SEMANA)
     horaGAR = models.TimeField(verbose_name=_lazy('hora G.A.R'))
@@ -63,7 +63,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         verbose_name=_lazy('dia discipulado'), max_length=1, choices=DIAS_SEMANA, blank=True, null=True
     )
     horaDiscipulado = models.TimeField(verbose_name=_lazy('hora discipulado'), blank=True, null=True)
-    nombre = models.CharField(verbose_name=_lazy('nombre'), max_length=30)
+    nombre = models.CharField(verbose_name=_lazy('nombre'), max_length=255)
     red = models.ForeignKey(Red, verbose_name=('red'), null=True, blank=True)
     barrio = models.ForeignKey('miembros.Barrio', verbose_name=_lazy('barrio'))
 
@@ -82,11 +82,19 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         verbose_name_plural = _lazy('grupos')
 
     def __str__(self):
+        if self.estado == self._meta.get_field('historiales').related_model.ARCHIVADO:
+            return self.get_nombre()
+
         lideres = ["{0} {1}({2})".format(
             lider.nombre.upper(), lider.primerApellido.upper(), lider.cedula
         ) for lider in self.lideres.all()]
 
         return " - ".join(lideres)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.historiales.exists():
+            self.actualizar_estado(estado=self._meta.get_field('historiales').related_model.ACTIVO)
 
     @classmethod
     def _obtener_arbol_recursivamente(cls, padre, resultado):
@@ -279,7 +287,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             return None
 
     @property
-    def _estado(self):
+    def estado(self):
         """Retorna el estado del grupo de acuerdo a su historial."""
 
         return self.historiales.first().estado
@@ -287,9 +295,9 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
     @property
     def is_activo(self):
         """Retorna True si el estado del grupo es activo."""
-        return self._estado == self.historiales.model.ACTIVO
+        return self.estado == self.historiales.model.ACTIVO
 
-    def _get_estado_display(self):
+    def get_estado_display(self):
         """Retorna el estado display del grupo de acuerdo a su historial."""
 
         return self.historiales.first().get_estado_display()
@@ -332,8 +340,8 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
                 self.lideres.all().update(grupo=nuevo_padre)
 
                 if nuevo_padre.red != self.red:
-                    grupos = [grupo.id for grupo in self.get_tree(self)]
-                    Grupo.objects.filter(id__in=grupos).update(red=nuevo_padre.red)
+                    grupos = [grupo.id for grupo in self._get_tree(self)]
+                    Grupo._objects.filter(id__in=grupos).update(red=nuevo_padre.red)
 
     def _trasladar_miembros(self, nuevo_grupo):
         """
@@ -436,20 +444,27 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
     def actualizar_estado(self, **kwargs):
         """
-        Permite actualizar el estado del grupo
+        Actualiza el estado de el grupo en su historial.
+        :param estado:
+            El estado que se asignara.
+
+        :param fecha:
+            La fecha en la cual se asignará el estado.
         """
 
         actual = self.historiales.first()
         estado = kwargs.get('estado')
 
-        if estado != actual.estado:
+        if actual is None:
+            self._meta.get_field('historiales').related_model.objects.create(grupo=self, estado=estado)
+        elif estado != actual.estado:
             from django.db import OperationalError
-            import datetime
+            # import datetime
             if estado not in list(map(lambda x: x[0], actual.OPCIONES_ESTADO)):
                 raise OperationalError(_lazy('Estado "{}" no está permitido'.format(estado)))
-            if actual.fecha + datetime.timedelta(weeks=1) > datetime.date.today():
-                raise OperationalError(_lazy('Estado cambiado recientemente, consulte un administrador.'))
-            actual.__class__.objects.create(grupo=self, estado=estado, fecha=fecha)
+            # if actual.fecha + datetime.timedelta(weeks=1) > datetime.datetime.now():
+            #     raise OperationalError(_lazy('Estado cambiado recientemente, consulte un administrador.'))
+            actual.__class__.objects.create(grupo=self, **kwargs)
 
 
 class Predica(models.Model):
@@ -561,3 +576,17 @@ class HistorialEstado(models.Model):
         verbose_name = _lazy('Historial')
         verbose_name_plural = _lazy('Historiales')
         ordering = ['-fecha']
+
+    def save(self, *args, **kwargs):
+        if self.grupo.pk:
+            with transaction.atomic():
+                last = self.grupo.historiales.first()
+                if last is None:
+                    return super().save(*args, **kwargs)
+                if last.estado != self.estado:
+                    if self.estado == self.ARCHIVADO:
+                        self.grupo.nombre = self.grupo.__str__()
+                        self.grupo.save()
+                    return super().save(*args, **kwargs)
+        else:
+            return super().save(*args, **kwargs)

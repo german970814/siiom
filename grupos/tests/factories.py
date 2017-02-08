@@ -14,6 +14,16 @@ class RedFactory(factory.django.DjangoModelFactory):
     iglesia = factory.SubFactory(IglesiaFactory)
 
 
+class HistorialEstadoFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = 'grupos.HistorialEstado'
+
+    estado = 'AC'
+    fecha = factory.LazyFunction(datetime.datetime.now)
+    grupo = None
+
+
 class GrupoFactory(factory.django.DjangoModelFactory):
 
     class Meta:
@@ -26,6 +36,7 @@ class GrupoFactory(factory.django.DjangoModelFactory):
     iglesia = factory.SubFactory(IglesiaFactory)
     fechaApertura = factory.LazyFunction(datetime.datetime.now)
     lider = factory.RelatedFactory('miembros.tests.factories.MiembroFactory', 'grupo_lidera', lider=True)
+    historial = factory.RelatedFactory('grupos.tests.factories.HistorialEstadoFactory', 'grupo')
 
 
 class GrupoRaizFactory(GrupoFactory):
