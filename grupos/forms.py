@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from miembros.models import CambioTipo, Miembro
 from reportes.forms import FormularioRangoFechas
 from common.forms import CustomModelForm, CustomForm
-from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado
 from .utils import convertir_lista_grupos_a_queryset
 
 logger = logging.getLogger(__name__)
@@ -311,6 +311,12 @@ class GrupoRaizForm(BaseGrupoForm):
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
             self.fields['lideres'].initial = self.instance.lideres.all()
 
+            choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
+            self.fields['estado'] = forms.ChoiceField(
+                choices=choices, initial=self.instance.estado, required=False, label=_lazy('Estado')
+            )
+            self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+
     def save(self):
         try:
             with transaction.atomic():
@@ -323,6 +329,10 @@ class GrupoRaizForm(BaseGrupoForm):
 
                 lideres = self.cleaned_data['lideres']
                 lideres.update(grupo_lidera=raiz)
+
+                if self.instance.pk:
+                    if 'estado' in self.cleaned_data and self.cleaned_data['estado'] != self.instance.estado:
+                        self.instance.actualizar_estado(estado=self.cleaned_data.get('estado'))
                 return raiz
         except IntegrityError:
             logger.exception("Error al intentar guardar el grupo raiz")
@@ -396,6 +406,15 @@ class EditarGrupoForm(NuevoGrupoForm):
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
+        if self.instance:
+            choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
+            self.fields['estado'] = forms.ChoiceField(
+                choices=choices, initial=self.instance.estado, label=_lazy('Estado')
+            )
+            self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+        else:
+            raise NotImplementedError('No se implementó la instancia para el formulario')
+
         if not self.is_bound:
             # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
             self.fields['lideres'].queryset = self.fields['lideres'].initial = self.instance.lideres.all()
@@ -415,6 +434,9 @@ class EditarGrupoForm(NuevoGrupoForm):
                     # padre = self.cleaned_data['parent']
                     lideres = self.cleaned_data['lideres']
                     lideres.update(grupo_lidera=grupo, grupo=self.instance.parent)
+
+                if 'estado' in self.cleaned_data and self.cleaned_data['estado'] != self.instance.estado:
+                    self.instance.actualizar_estado(estado=self.cleaned_data.get('estado'))
 
                 return grupo
         except IntegrityError:

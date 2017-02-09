@@ -636,7 +636,7 @@ class HistorialEstado(models.Model):
                     return super().save(*args, **kwargs)
                 if last.estado != self.estado:
                     if self.estado == self.ARCHIVADO:
-                        self.grupo.nombre = self.grupo.__str__()
+                        self.grupo.nombre = '{} (ARCHIVADO)'.format(self.grupo.__str__())
                         self.grupo.save()
                     return super().save(*args, **kwargs)
         else:

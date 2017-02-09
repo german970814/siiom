@@ -143,6 +143,21 @@
                             {{ form.barrio.errors }}
                         </div>
                     </div>
+                    {% if form.estado %}
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{ form.estado.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-refresh"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="{{ form.estado.id_for_label }}" class="fg-label control-label">{{ form.estado.label }}*:</label>
+                                {{ form.estado }}
+                            </div>
+                            {{ form.estado.errors }}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 <br>
                 <br>
