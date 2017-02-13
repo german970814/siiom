@@ -449,3 +449,25 @@ class GrupoModelTest(BaseTest):
         self.assertIn(grupo, Grupo.objects.archivados())
 
         self.assertNotIn(grupo, Grupo.objects.get_queryset()._archivados())
+
+    def test_manager_hojas(self):
+        """
+        Verifica que el manager de hojas solo tenga grupos que esten disponibles para eliminar.
+        """
+
+        iglesia = Grupo.objects.get(id=100).iglesia
+        queryset = Grupo.objects.hojas(iglesia)
+
+        self.assertNotIn(Grupo.objects.get(id=100), queryset)
+        self.assertIn(Grupo.objects.get(id=200), queryset)
+        self.assertNotIn(Grupo.objects.get(id=300), queryset)
+        self.assertNotIn(Grupo.objects.get(id=400), queryset)
+        self.assertNotIn(Grupo.objects.get(id=500), queryset)
+        self.assertIn(Grupo.objects.get(id=600), queryset)
+        self.assertIn(Grupo.objects.get(id=700), queryset)
+        self.assertIn(Grupo.objects.get(id=800), queryset)
+
+        g = Grupo.objects.get(id=700)
+        g.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        self.assertIn(Grupo.objects.get(id=400), Grupo.objects.hojas(iglesia))

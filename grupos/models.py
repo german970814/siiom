@@ -294,12 +294,13 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         :rtype: str
         """
 
-        return self.historiales.first().estado
+        return getattr(self.historiales.first(), 'estado', 'NONE')
 
     @property
     def is_activo(self):
         """
-        Retorna ``True`` si el estado del grupo es activo.
+        :returns:
+            ``True`` si el estado del grupo es activo.
 
         :rtype: bool
         """

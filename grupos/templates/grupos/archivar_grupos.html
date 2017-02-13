@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load i18n staticfiles %}
+
+{% block contenido %}
+<div class="modal fade" id="modal-eliminar-grupo" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title replacement-grupo"></h4>
+                <small class="help-block hidde-if-not-miembros">{% trans "Los miembros seleccionados, serán miembros del grupo de destino que especifique."%}</small>
+            </div>
+            <div class="modal-body">
+                <div class="row hidde-if-not-miembros">
+                    <div class="col-md-12">
+                        <div class="input-group {{ form.grupo_destino.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-map"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="{{ form.grupo_destino.id_for_label }}">{{ form.grupo_destino.label }}*:</label>
+                                {{ form.grupo_destino }}
+                            </div>
+                            <small class="help-block">{{ form.grupo_destino.help_text }}</small>
+                            {{ form.grupo_destino.errors }}
+                        </div>
+                    </div>
+                    <br class="space">
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="input-group {{ form.mantener_lideres.css_classes }}">
+                            <label for="{{ form.mantener_lideres.id_for_label }}" class="checkbox control-label">
+                                {{ form.mantener_lideres }}
+                                <i class="input-helper m-r-20"></i>
+                                {{ form.mantener_lideres.label }}
+                            </label>
+                            <small class="help-block">{{ form.mantener_lideres.help_text }}</small>
+                            {{ form.mantener_lideres.errors }}
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <table id="table-miembros-eliminar" class="table table-striped hidde-if-not-miembros">
+                    <thead>
+                        <tr>
+                            <th data-column-id="id" data-visible="false" data-identifier="true"></th>
+                            <th data-column-id="nombre" data-identifier="true">{% trans 'Miembro' %}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="insert-miembros">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" name="confirmar-eliminar" class="btn btn-link">{% trans "Aceptar" %}</button>
+                <button type="button" class="btn btn-link" data-dismiss="modal">{% trans "Cerrar" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+<a data-toggle="modal" id="toggleModalEliminarGrupo" href="#modal-eliminar-grupo"></a>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="f-700">
+                    <legend><h3>{% trans 'Eliminar Grupo' %}</h3></legend>
+                </h1>
+            </div>
+
+            <div class="card-body card-padding">
+                <form id="formulario-archivar" action="{% url 'grupos:archivar' %}" method="POST">
+                    {% csrf_token %}
+
+                    {% include '_alert_non_field_errors.html' %}
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group {{ form.grupo.css_classes }}">
+                                <span class="input-group-addon">
+                                    <i class="zmdi zmdi-map"></i>
+                                </span>
+                                <div class="fg-line">
+                                    <label for="{{ form.grupo.id_for_label }}">{{ form.grupo.label }}*:</label>
+                                    {{ form.grupo }}
+                                </div>
+                                <small class="help-block">{{ form.grupo.help_text }}</small>
+                                {{ form.grupo.errors }}
+                            </div>
+                        </div>
+                        <br class="space">
+                    </div>
+                    <br>
+                    <br>
+                    <br class="space-down">
+                    <div class="row">
+                        <div class="col-md-4 col-md-offset-4">
+                            <button type="submit" name="archivar" class="btn btn-primary btn-block">{% trans 'Eliminar' %}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock contenido %}
+
+{% block js %}
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones.js' %}" type="text/javascript"></script>
+<script src="{% static 'Scripts/IGSearch/IGSearch.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    var last_grupo = 0;
+    var $grupo = $('#{{ form.grupo.id_for_label }}'),
+        $form = $('#formulario-archivar');
+
+    function tabla_miembros ($grupo_nombre) {
+        last_grupo = $grupo.val();
+        $.ajax({
+            url: '{% url "grupos:discipulos_miembros_api" 0 %}'.replace('0', $grupo.val().toString()),
+            method: 'get',
+            data: {csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val()},
+            success: function (data) {
+                $('.replacement-grupo').html('Escoja que desea hacer con los mimbros del grupo ' + $grupo_nombre);
+                var to_append = '';
+                for (let object of data) {
+                    let tr = '<tr>0</tr>';
+                    let td = '<td>0</td><td>!</td>';
+                    td = td.replace('0', object.pk.toString()).replace('!', (object.fields.nombre + ' ' + object.fields.primerApellido).toUpperCase());
+                    to_append += tr.replace('0', td);
+                }
+
+                if (to_append.replace(/\s+/g, '')) {
+                    $('.hidde-if-not-miembros').css('display', 'inline-table');
+
+                    $("#table-miembros-eliminar").bootgrid('destroy');
+                    $("#table-miembros-eliminar").find('.insert-miembros').html('').append(to_append);
+
+                    $("#table-miembros-eliminar").bootgrid({
+                        css: {
+                            icon: 'zmdi icon',
+                            iconColumns: 'zmdi-view-module',
+                            iconDown: 'zmdi-expand-more',
+                            iconRefresh: 'zmdi-refresh',
+                            iconUp: 'zmdi-expand-less'
+                        },
+                        rowCount: -1,
+                        selection: true,
+                        multiSelect: true,
+                        rowSelect: true,
+                        keepSelection: true
+                    });
+                } else {
+                    $("#table-miembros-eliminar").bootgrid('destroy');
+                    $("#table-miembros-eliminar").find('.insert-miembros').html('')
+                    $('.hidde-if-not-miembros').css('display', 'none');
+                }
+
+                //$("#table-miembros-eliminar").bootgrid('destroy');
+                //$("#table-miembros-eliminar").find('.insert-miembros').html('').append(to_append);
+
+
+                // TODO...
+                // QUITAR LA ALERTA CUANDO SE ABRE EL MODAL,
+                // QUE SALGAN BIEN LOS MIEMBROS AL MOSTRAR EL MODAL
+
+                $('#modal-eliminar-grupo').modal('show');
+                $('div[data-growl="container"]').remove();
+
+                $('#{{ form.grupo_destino.id_for_label }}').IGSearch({
+                    url: "{% url 'common:busqueda_grupo_api' 0 %}".replace('0', $grupo.val()),
+                    key: 'grupos',
+                    items: [],
+                    type: 'GET',
+                    messageError: 'Ha ocurrido un error y no se pueden mostrar los grupos',
+                });
+
+            },
+            error: function (error) {
+                danger(error);
+            }
+        })
+    }
+
+    $('button[name="archivar"]').click(function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var $grupo_nombre = $grupo.find(':selected').html();
+
+        if (parseInt($grupo.val()) > 0) {
+            swal({
+                title: "¿Estás seguro que deseas eliminar el grupo de 0?".replace('0', $grupo_nombre),
+                text: "Ten en cuenta que no podrás volver a recuperar la información de este grupo de amistad.",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Confirmar",
+                cancelButtonText: "Cancelar",
+                closeOnConfirm: true,
+            }, function (isConfirm){
+                if (isConfirm) {
+                    if (last_grupo != $grupo.val()) {
+                        tabla_miembros($grupo_nombre);
+                    } else {
+                        $('#modal-eliminar-grupo').modal('show');
+                    }
+                }
+            });
+        }
+    });
+
+    $('button[name="confirmar-eliminar"]').click(function (event) {
+        var seleccionados = new Array();
+        $("#table-miembros-eliminar").find('.insert-miembros').find('input[name="seleccionados"]:checked').each(function (indx, obj) {
+            //seleccionados.push($(this).val());
+            $form.append(obj);
+        });
+        $form.append('<input type="hidden" value="' + $('#{{ form.grupo_destino.id_for_label }}').val().toString() + '" name="grupo_destino">');
+        $form.append('<input type="hidden" value="' + $('#{{ form.mantener_lideres.id_for_label }}').val().toString() + '" name="mantener_lideres">');
+        $form.submit();
+    });
+
+
+    {% if form.grupo_destino.errors %}
+        // $('#modal-eliminar-grupo').modal('show');
+        tabla_miembros('{{ form.nombre_grupo }}');
+        $("#table-miembros-eliminar").on("loaded.rs.jquery.bootgrid", function(e) {
+            var seleccionados = [];
+            {% for miembro in form.seleccionados.value %}
+            // $('tr[data-row-id={{ miembro }}]').addClass('active').find('input').prop('checked', true);
+            seleccionados.push('{{miembro}}');
+            {% endfor %}
+            $(this).bootgrid('select', seleccionados);
+        });
+    {% else %}
+    _notify(
+        "{% trans 'Recuerde que solo puede eliminar los grupos que no tienen descendientes' %}",
+        undefined, undefined, undefined,
+        'info', 'animated bounceIn', '', 150000
+    )
+    {% endif %}
+});
+
+</script>
+{% endblock %}

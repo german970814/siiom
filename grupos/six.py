@@ -26,7 +26,7 @@ class SixALNode(object):
         todos los grupos de la red incluyendo los archivados.
 
         :returns: Un QuerySet con la lista de los grupos del arbol dado el padre,
-        incluye a los grupos en estado inactivo.
+                  incluye a los grupos en estado inactivo.
         """
         from .utils import convertir_lista_grupos_a_queryset
         return convertir_lista_grupos_a_queryset(self._get_tree(self))
@@ -43,7 +43,7 @@ class SixALNode(object):
     def _get_ancestors(self):
         """
         :returns: A *list* containing the current node object's ancestors,
-            starting by the root node and descending to the parent.
+                  starting by the root node and descending to the parent.
         """
         ancestors = []
         if self._meta.proxy_for_model:
@@ -135,7 +135,7 @@ class SixALNode(object):
     def _get_siblings(self):
         """
         :returns: A queryset of all the node's siblings, including the node
-            itself.
+                  itself.
         """
         if self.parent:
             return get_result_class(self.__class__)._default_manager.filter(
