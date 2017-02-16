@@ -74,3 +74,4 @@ class BusquedaForm(forms.Form):
     Grupo = import_string('grupos.models.Grupo')
     value = forms.CharField(max_length=255)
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.all(), required=False)
+    grupo_by = forms.ModelChoiceField(queryset=Grupo.objects.all(), required=False)

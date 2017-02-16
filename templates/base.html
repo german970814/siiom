@@ -312,7 +312,7 @@
                 <li class="active">
                     <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
                 </li>
-                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                {% if perms.miembros.es_administrador or request.miembro.es_director_red or request.miembro.es_cabeza_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-accounts-list-alt"></i> Administración</a>
                     <ul>
@@ -386,7 +386,7 @@
                             </ul>
                         </li>
                     {% endif %}
-                    {% if perms.miembros.es_administrador or mi.es_director_red %}
+                    {% if perms.miembros.es_administrador or request.miembro.es_director_red or request.miembro.es_cabeza_red %}
                         <li class="sub-menu">
                             <a href="#">Grupo</a>
                             <ul>
@@ -395,13 +395,15 @@
                                         <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'grupos:redes_listar' %}">{% trans "Listar Redes" %}</a>
-                                    </li>
-                                    <li>
                                         <a href="/grupo/listar_predicas/">Listar Prédicas</a>
                                     </li>
                                 {% endif %}
-                                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                                {% if request.miembro.es_cabeza_red or perms.miembros.es_administrador %}
+                                    <li>
+                                        <a href="{% url 'grupos:redes_listar' %}">{% trans "Listar Redes" %}</a>
+                                    </li>
+                                {% endif %}
+                                {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                                     <li>
                                         <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                     </li>
@@ -414,7 +416,7 @@
                                         <a href="{% url 'grupos:sin_confirmar_ofrenda_discipulado' %}">{% trans 'Discipulados Faltantes Confirmar Ofrenda' %}</a>
                                     </li>{% endcomment %}
                                 {% endif %}
-                                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                                {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                                     <li>
                                         <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
                                     </li>
