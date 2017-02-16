@@ -444,7 +444,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
     def get_direccion(self):
         """
-        :returns: 
+        :returns:
             La direccion de manera legible para los buscadores de mapas
         """
         if self.get_position() is None:

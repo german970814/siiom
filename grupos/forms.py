@@ -577,9 +577,6 @@ class ArchivarGrupoForm(CustomForm):
             if grupo is not None:
                 self.fields['seleccionados'].queryset = Miembro.objects.filter(grupo_id=grupo)
 
-        if self.initial:
-            self.fields['grupo'].initial = self.initial['grupo']
-
     def clean(self):
         cleaned_data = super().clean()
 

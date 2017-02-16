@@ -11,7 +11,7 @@
     {% if perms.miembros.es_administrador %}
         <div id="fab-div">
             <a href="{% url 'grupos:archivar' %}" class="btn btn-float btn-danger m-btn child" data-subfab="2" data-toggle="tooltip" data-placement="left" data-original-title="{% trans 'Eliminar grupo' %}" id="archivar_grupo">
-                <i class="zmdi zmdi-eye-off"></i>
+                <i class="zmdi zmdi-delete"></i>
             </a>
             <a href="{% url 'grupos:trasladar_lideres' %}" class="btn btn-float btn-warning m-btn child" data-subfab="1" data-toggle="tooltip" data-placement="left" data-original-title="{% trans 'Trasladar lideres' %}">
                 <i class="zmdi zmdi-account"></i>

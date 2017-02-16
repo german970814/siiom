@@ -74,7 +74,18 @@ def busqueda_miembro_api(request, pk):
 @login_required_api
 def busqueda_grupo_api(request, pk):
     """
-    Vista para realizar las busquedas de tipo AJAX a grupos, por caracteres
+    Vista para realizar las busquedas a grupos por caracteres, de acuerdo a una red.
+
+    :param pk:
+        Es el pk de un grupo, dicho grupo nos dará la red a partir de la cual se efectuará la busqueda
+
+    :returns:
+        Un JSON que contiene los grupos filtrados por Nombre de lideres, Primer Apellido de lideres,
+        Cedula de lideres o el nombre del grupo.
+
+    .. note::
+
+        Se debe enviar por GET una variable llamada 'value', a partir de la cual iniciaría la busqueda.
     """
 
     grupo = get_object_or_404(Grupo, pk=pk, iglesia=request.iglesia)
