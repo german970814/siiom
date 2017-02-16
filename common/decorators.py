@@ -35,7 +35,10 @@ def login_required_api(view_func):
         if request.user.is_authenticated():
             return view_func(request, *args, **kwargs)
         return HttpResponse(
-            json.dumps({constants.RESPONSE_CODE: constants.RESPONSE_DENIED, 'message': 'User not authenticated'}),
+            json.dumps({
+                constants.RESPONSE_CODE: constants.RESPONSE_DENIED,
+                'message': 'User not authenticated'
+            }),
             content_type=constants.CONTENT_TYPE_API
         )
     return wrapped_view

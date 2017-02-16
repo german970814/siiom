@@ -186,6 +186,15 @@ class Miembro(IglesiaMixin, models.Model):
 
         return False
 
+    @property
+    def es_cabeza_red(self):
+        """
+        Indica si el miembro es cabeza de red. Un cabeza de red es un miembro que lidera grupo y que es discipulo
+        de un director de red.
+        """
+
+        return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', None) == 3
+
     def trasladar(self, nuevo_grupo):
         """
         Traslada el miembro actual a un nuevo grupo.
