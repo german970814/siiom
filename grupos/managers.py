@@ -171,11 +171,11 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     def hojas(self, iglesia):
         """
         :returns:
-            Un QuerySet con los grupos los cuales no tienen hijos, si un grupo tiene un hijo, y este se encuentra
-            en estado archivado, entonces este grupo tambien entra a hacer parte del queryset.
+            Un QuerySet con los grupos de la iglesia especificada, que no tienen descendientes (Incluye los grupos que
+            solo tienen descendientes archivados).
 
         :param iglesia:
-            La iglesia de la cual se van a retornar los grupos hoja.
+            La iglesia de la cual se van a retornar los grupos.
         """
         return self.iglesia(iglesia).exclude(children_set__in=self.model.objects.all())
 
