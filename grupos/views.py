@@ -27,10 +27,10 @@ from .forms import (
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm
 )
 from common.decorators import permisos_requeridos
-from miembros.decorators import user_is_cabeza_red
+from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.models import Miembro
 from common.groups_tests import (
-    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest, admin_or_director_red
+    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
 )
 
 # Python Packages
@@ -149,7 +149,8 @@ def reportarReunionGrupo(request):
     return render_to_response('grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
+@login_required
+@user_is_director_red
 def reportarReunionGrupoAdmin(request):
 
     if request.method == 'POST':
@@ -182,7 +183,9 @@ def reportarReunionGrupoAdmin(request):
         init = request.GET.get('grupo', None)
         initial = {'grupo': init}
         form = FormularioReportarReunionGrupoAdmin(initial=initial)
-    return render_to_response('grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request))
+    return render_to_response(
+        'grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request)
+    )
 
 
 @user_passes_test(liderTest, login_url="/dont_have_permissions/")
@@ -326,10 +329,12 @@ def sendMail(camposMail):
 #                 visRed = visRed + visitas
 #         l.append(visRed)
 #         data.append(l)
-#     return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
+#     return render_to_response(
+#          'reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
 
 
-@user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
+@login_required
+@user_is_director_red
 def ver_reportes_grupo(request):
     if request.method == 'POST' or (
         'post' in request.session and len(request.session['post']) > 1 and request.session.get('valid_post', False)
