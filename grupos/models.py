@@ -467,9 +467,6 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
         :param estado:
             El estado que se asignara.
-
-        :param fecha:
-            La fecha en la cual se asignará el estado.
         """
 
         actual = self.historiales.first()
