@@ -532,3 +532,88 @@ class TrasladarLideresForm(CustomForm):
 
     def trasladar(self):
         Miembro.objects.trasladar_lideres(self.cleaned_data['lideres'], self.cleaned_data['nuevo_grupo'])
+
+
+class ArchivarGrupoForm(CustomForm):
+    """Formulario para archivar grupos."""
+
+    error_messages = {
+        'sin_destino': _lazy('Debe escoger un grupo de destino para los discipulos y/o miembros escogidos.'),
+        'mismo_grupo': _lazy('El grupo de destino, no puede ser igual al grupo que se va a eliminar.'),
+    }
+
+    grupo = forms.ModelChoiceField(
+        queryset=Grupo.objects.none(), label=_lazy('Grupo a eliminar'),
+        help_text=_lazy('El grupo escogido, será aquel grupo el cual se eliminará.')
+    )
+    grupo_destino = forms.ModelChoiceField(
+        queryset=Grupo.objects.none(), label=_lazy('Grupo destino'),
+        help_text=_lazy('El grupo escogido, será aquel grupo el cual se enviaran los miembros seleccionados.'),
+        required=False
+    )
+    mantener_lideres = forms.BooleanField(
+        required=False, label=_lazy('Mantener líderes en grupo origen'), initial=True,
+        help_text=_lazy(
+            'Al marcar esta casilla, se asegurará de que los líderes del grupo a eliminar, sigan siendo miembros \
+            del grupo origen'
+        )
+    )
+    seleccionados = forms.ModelMultipleChoiceField(queryset=Miembro.objects.all(), required=False)
+
+    def __init__(self, iglesia, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo_destino'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo'].queryset = Grupo.objects.hojas(iglesia).prefetch_related('lideres')
+
+        if self.is_bound:
+            grupo_destino = self.data.get('grupo_destino', None) or None
+            grupo = self.data.get('grupo', None) or None
+
+            if grupo_destino is not None:
+                self.fields['grupo_destino'].queryset = Grupo.objects.filter(
+                    id=grupo_destino).prefetch_related('lideres')
+
+            if grupo is not None:
+                self.fields['seleccionados'].queryset = Miembro.objects.filter(grupo_id=grupo)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        grupo = cleaned_data.get('grupo', None)
+        grupo_destino = cleaned_data.get('grupo_destino', None)
+        seleccionados = cleaned_data.get('seleccionados', Miembro.objects.none())
+
+        if seleccionados.exists() and not grupo_destino:
+            self.add_error(
+                'grupo_destino', forms.ValidationError(self.error_messages['sin_destino'], code='sin_destino')
+            )
+
+        if grupo is not None and grupo_destino is not None and grupo == grupo_destino:
+            self.add_error(
+                'grupo_destino', forms.ValidationError(self.error_messages['mismo_grupo'], code='mismo_grupo')
+            )
+
+    def archiva_grupo(self):
+        """
+        Metodo para archivar los grupos, de acuerdo al grupo de destino y los seleccionados.
+        """
+
+        grupo = self.cleaned_data['grupo']
+        seleccionados = self.cleaned_data.get('seleccionados', Miembro.objects.none())
+        mantenter_lideres_en_grupo_padre = self.cleaned_data.get('mantener_lideres', False)
+
+        with transaction.atomic():
+            if seleccionados:
+                grupo_destino = self.cleaned_data['grupo_destino']
+                seleccionados.update(grupo=grupo_destino)
+
+            query_miembros = grupo.miembros.all()
+
+            grupo.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+            if mantenter_lideres_en_grupo_padre:
+                grupo.lideres.all().update(grupo_lidera=None)
+            else:
+                query_miembros |= grupo.lideres.all()
+            query_miembros.update(grupo=None, grupo_lidera=None)

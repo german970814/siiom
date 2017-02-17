@@ -10,7 +10,10 @@
 <div class="container">
     {% if perms.miembros.es_administrador %}
         <div id="fab-div">
-            <a href="{% url 'grupos:trasladar_lideres' %}" class="btn btn-float btn-danger m-btn child" data-subfab="1" data-toggle="tooltip" data-placement="left" data-original-title="{% trans 'Trasladar lideres' %}">
+            <a href="{% url 'grupos:archivar' %}" class="btn btn-float btn-danger m-btn child" data-subfab="2" data-toggle="tooltip" data-placement="left" data-original-title="{% trans 'Eliminar grupo' %}" id="archivar_grupo">
+                <i class="zmdi zmdi-delete"></i>
+            </a>
+            <a href="{% url 'grupos:trasladar_lideres' %}" class="btn btn-float btn-warning m-btn child" data-subfab="1" data-toggle="tooltip" data-placement="left" data-original-title="{% trans 'Trasladar lideres' %}">
                 <i class="zmdi zmdi-account"></i>
             </a>
             <button class="btn btn-float btn-danger m-btn" id="fab-principal">
@@ -68,6 +71,12 @@
                 var v = $('#arbol_q').val();
                 $('#arbol').jstree(true).search(v);
             }, 250);
+        });
+
+        $('#arbol').on('select_node.jstree', function (event, data) {
+            //console.log(data.node.li_attr['data-id']);
+            $('#archivar_grupo').prop('href', '{% url "grupos:archivar" %}?grupo=0'.replace('0', data.node.li_attr['data-id']));
+
         });
 
 

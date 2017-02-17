@@ -6,7 +6,7 @@ from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
 from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from ..models import Grupo, Red
+from ..models import Grupo, Red, HistorialEstado
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
 from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
 
@@ -885,3 +885,60 @@ class TrasladarLideresViewTest(BaseTest):
         self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'lideres', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'nuevo_grupo', self.MSJ_OBLIGATORIO)
+
+
+class ArchivarGrupoViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista trasladar lideres de una iglesia.
+    """
+
+    URL = 'grupos:archivar'
+
+    def setUp(self):
+        self.crear_arbol()
+        admin = UsuarioFactory(admin=True)
+        self.login_usuario(admin)
+
+    @property
+    def datos_formulario(self):
+        for children in Grupo.objects.get(id=300).children_set.all():
+            children.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        return {
+            'grupo': 300, 'grupo_destino': 200,
+            'mantener_lideres': True, 'seleccionados': list(map(str, Grupo.objects.get(
+                id=300).miembros.all().values_list('id', flat=1)))
+        }
+
+    def test_admin_get(self):
+        """
+        Prueba que un administrador pueda ver el formulario.
+        """
+
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_grupo', html=False)
+
+    @mock.patch('grupos.forms.ArchivarGrupoForm.archiva_grupo')
+    def test_post_formulario_valido_archiva_grupo(self, archivar_mock):
+        """
+        Prueba que si se hace POST y el formulario es valido se archive el grupo escogido.
+        """
+
+        self.post(self.URL, data=self.datos_formulario)
+        self.assertTrue(archivar_mock.called)
+
+    def test_post_formulario_valido_redirecciona_organigrama(self):
+        """
+        Prueba que si se hace POST y el formulario es valido redirecciona a la vista del organigrama.
+        """
+
+        response = self.post(self.URL, data=self.datos_formulario)
+        self.assertRedirects(response, self.reverse('grupos:organigrama'))
+
+    def test_post_formulario_invalido_muestra_errores(self):
+        """
+        Prueba que si se hace POST y el formulario es invalido se muestren los errores.
+        """
+
+        response = self.post(self.URL, data={})
+        self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)

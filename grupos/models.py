@@ -294,12 +294,13 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         :rtype: str
         """
 
-        return self.historiales.first().estado
+        return getattr(self.historiales.first(), 'estado', 'NONE')
 
     @property
     def is_activo(self):
         """
-        Retorna ``True`` si el estado del grupo es activo.
+        :returns:
+            ``True`` si el estado del grupo es activo.
 
         :rtype: bool
         """
@@ -443,7 +444,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
     def get_direccion(self):
         """
-        :returns: 
+        :returns:
             La direccion de manera legible para los buscadores de mapas
         """
         if self.get_position() is None:
@@ -460,30 +461,23 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             return [self.latitud, self.longitud]
         return None
 
-    def actualizar_estado(self, **kwargs):
+    def actualizar_estado(self, estado, **kwargs):
         """
         Actualiza el estado de el grupo en su historial.
 
         :param estado:
             El estado que se asignara.
-
-        :param fecha:
-            La fecha en la cual se asignará el estado.
         """
 
         actual = self.historiales.first()
-        estado = kwargs.get('estado')
 
         if actual is None:
-            self.__class__.objects.get_queryset().get_historial_model().objects.create(grupo=self, estado=estado)
+            self.__class__.objects.get_queryset().get_historial_model().objects.create(grupo=self, estado=estado, **kwargs)
         elif estado != actual.estado:
             from django.db import OperationalError
-            # import datetime
             if estado not in list(map(lambda x: x[0], actual.OPCIONES_ESTADO)):
                 raise OperationalError(_lazy('Estado "{}" no está permitido'.format(estado)))
-            # if actual.fecha + datetime.timedelta(weeks=1) > datetime.datetime.now():
-            #     raise OperationalError(_lazy('Estado cambiado recientemente, consulte un administrador.'))
-            actual.__class__.objects.create(grupo=self, **kwargs)
+            actual.__class__.objects.create(grupo=self, estado=estado, **kwargs)
 
 
 class Predica(models.Model):
@@ -629,15 +623,11 @@ class HistorialEstado(models.Model):
             Si el grupo tiene en su último historial, el mismo estado del historial actual
             a guardar, entonces, este será omitido.
         """
-        if self.grupo.pk:
-            with transaction.atomic():
-                last = self.grupo.historiales.first()
-                if last is None:
-                    return super().save(*args, **kwargs)
-                if last.estado != self.estado:
-                    if self.estado == self.ARCHIVADO:
-                        self.grupo.nombre = '{} (ARCHIVADO)'.format(self.grupo.__str__())
-                        self.grupo.save()
-                    return super().save(*args, **kwargs)
-        else:
-            return super().save(*args, **kwargs)
+
+        with transaction.atomic():
+            last = self.grupo.historiales.first()
+            if last is None or last.estado != self.estado:
+                if self.estado == self.ARCHIVADO:
+                    self.grupo.nombre = '{} (ARCHIVADO)'.format(self.grupo.__str__())
+                    self.grupo.save()
+                return super().save(*args, **kwargs)

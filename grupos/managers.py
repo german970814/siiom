@@ -168,6 +168,17 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
 
         return self.filter(reuniones_discipulado__confirmacionEntregaOfrenda=False).distinct()
 
+    def hojas(self, iglesia):
+        """
+        :returns:
+            Un QuerySet con los grupos de la iglesia especificada, que no tienen descendientes (Incluye los grupos que
+            solo tienen descendientes archivados).
+
+        :param iglesia:
+            La iglesia de la cual se van a retornar los grupos.
+        """
+        return self.iglesia(iglesia).exclude(children_set__in=self.model.objects.all())
+
 
 class GrupoManagerStandard(AL_NodeManager.from_queryset(GrupoQuerySet)):
     """Clase de manager para mantener el get_queryset original proveido por django."""
@@ -181,6 +192,7 @@ class HistorialManager(models.Manager):
         """
         :returns:
             Un queryset con los historiales filtrados por el estado.
+
         :param estado:
             El estado a partir del cual se filtraran los historiales.
         """

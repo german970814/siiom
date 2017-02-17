@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^redes/(?P<pk>\d+)/nuevo/$', views.crear_grupo, name='nuevo'),
     url(r'^organigrama/$', views.organigrama_grupos, name='organigrama'),
     url(r'^(?P<pk>\d+)/trasladar/$', views.trasladar, name='trasladar'),
+    url(r'^archivar/$', views.archivar_grupo, name='archivar'),
     url(r'^redes/(?P<pk>\d+)/grupos/$', views.listar_grupos, name='listar'),
     url(r'^trasladar_lideres/$', views.trasladar_lideres, name='trasladar_lideres'),
     url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR'),
@@ -32,5 +33,6 @@ urlpatterns = [
         name='confirmar_ofrenda_discipulado'
     ),
 
-    url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api')
+    url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api'),
+    url(r'^api/(?P<pk>\d+)/miembros/$', api.discipulos_miembros_grupo, name='discipulos_miembros_api'),
 ]
