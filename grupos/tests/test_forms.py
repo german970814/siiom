@@ -485,13 +485,6 @@ class ArchivarGrupoFormTest(BaseTest):
         escogido.
         """
 
-        form = self.form(self.iglesia, data=self.datos_formulario)
-
-        self.assertTrue(form.is_valid())
-
-        for miembro in form.cleaned_data['grupo'].miembros.all():
-            self.assertIn(miembro, form.cleaned_data['seleccionados'])
-
         data = self.datos_formulario
         data.update({'seleccionados': list(map(str, Grupo.objects.get(id=100).miembros.all().values_list('id', flat=1)))})
 

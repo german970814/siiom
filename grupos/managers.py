@@ -192,6 +192,7 @@ class HistorialManager(models.Manager):
         """
         :returns:
             Un queryset con los historiales filtrados por el estado.
+
         :param estado:
             El estado a partir del cual se filtraran los historiales.
         """
