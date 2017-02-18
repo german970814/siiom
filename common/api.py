@@ -1,7 +1,8 @@
 # from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.db.models import Q
 from django.utils.module_loading import import_string
+from django.shortcuts import get_object_or_404
 
 from .forms import BusquedaForm
 from .constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_CODE, RESPONSE_DENIED
@@ -91,3 +92,47 @@ def busqueda_miembro_api(request, pk):
         }
 
     return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+@login_required_api
+def busqueda_grupo_api(request, pk):
+    """
+    Vista para realizar las busquedas a grupos por caracteres, de acuerdo a una red.
+
+    :param pk:
+        Es el pk de un grupo, dicho grupo nos dará la red a partir de la cual se efectuará la busqueda
+
+    :returns:
+        Un JSON que contiene los grupos filtrados por Nombre de lideres, Primer Apellido de lideres,
+        Cedula de lideres o el nombre del grupo.
+
+    .. note::
+
+        Se debe enviar por GET una variable llamada 'value', a partir de la cual iniciaría la busqueda.
+    """
+
+    grupo = get_object_or_404(Grupo, pk=pk, iglesia=request.iglesia)
+
+    if request.method == 'GET' and request.is_ajax():
+        form = BusquedaForm(data=request.GET)
+
+        if form.is_valid():
+            q = form.cleaned_data.get('value')
+            querys = (
+                Q(lideres__nombre__icontains=q) |
+                Q(lideres__primerApellido__icontains=q) |
+                Q(nombre__icontains=q) |
+                Q(lideres__cedula__icontains=q)
+            )
+
+            queryset = Grupo.objects.red(grupo.red).filter(querys).distinct()[:10]
+
+            response = {
+                'grupos': [{'id': grupo.pk, 'nombre': grupo.__str__()} for grupo in queryset.iterator()],
+                RESPONSE_CODE: RESPONSE_SUCCESS,
+                'value': q
+            }
+
+            return HttpResponse(json.dumps(response), content_type='application/json')
+
+    return HttpResponseBadRequest('Bad Request')

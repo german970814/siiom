@@ -4,8 +4,11 @@ from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
 from iglesias.tests.factories import IglesiaFactory
-from ..models import Grupo, Red
-from ..forms import GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm
+from ..models import Grupo, Red, HistorialEstado
+from ..forms import (
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm,
+    ArchivarGrupoForm
+)
 from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
 
 
@@ -440,3 +443,150 @@ class TrasladarLideresFormTest(BaseTest):
                 form.error_messages['es_descendiente']
             )
         )
+
+
+class ArchivarGrupoFormTest(BaseTest):
+    """
+    Pruebas para el formulario de archivar o eliminar un grupo.
+    """
+
+    def setUp(self):
+        self.crear_arbol()
+        self.iglesia = Grupo.objects.first().iglesia
+        self.form = ArchivarGrupoForm
+
+    @property
+    def datos_formulario(self):
+        for children in Grupo.objects.get(id=300).children_set.all():
+            children.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        return {
+            'grupo': 300, 'grupo_destino': 200,
+            'mantener_lideres': True, 'seleccionados': list(map(str, Grupo.objects.get(
+                id=300).miembros.all().values_list('id', flat=1)))
+        }
+
+    def test_formulario_invalido_si_seleccionados_y_no_grupo_destino(self):
+        """
+        Verifica que el formulario retorne error si no se envia un grupo de destino,
+        pero sí se escogen seleccionados.
+        """
+
+        datos = self.datos_formulario
+        datos.update({'grupo_destino': None})
+        form = self.form(self.iglesia, data=datos)
+
+        self.assertFalse(form.is_valid())
+        self.assertTrue(form.has_error('grupo_destino', code='sin_destino'))
+
+    def test_miembros_seleccionados_son_miembros_de_grupo(self):
+        """
+        Verifica que los miembros seleccionados, siempre sean discipulos o miembros del Grupo
+        escogido.
+        """
+
+        data = self.datos_formulario
+        data.update({'seleccionados': list(map(str, Grupo.objects.get(id=100).miembros.all().values_list('id', flat=1)))})
+
+        form = self.form(self.iglesia, data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertTrue(form.has_error('seleccionados'))
+
+    def test_grupo_es_archivado_existosamente(self):
+        """
+        Verifica que el grupo escogido, sea archivado.
+        """
+
+        form = self.form(self.iglesia, data=self.datos_formulario)
+
+        self.assertTrue(form.is_valid())
+        self.assertTrue(form.cleaned_data['grupo'].estado, HistorialEstado.ACTIVO)
+
+        form.archiva_grupo()
+
+        self.assertTrue(form.cleaned_data['grupo'].estado, HistorialEstado.ARCHIVADO)
+
+    def test_lideres_grupo_pasan_a_grupo_padre_si_mantenter_lideres(self):
+        """
+        Verifica que al escoger la opcion de mantener lideres, los lideres sigan siendo miembros
+        del grupo padre.
+        """
+
+        form = self.form(self.iglesia, data=self.datos_formulario)
+
+        self.assertTrue(form.is_valid())
+
+        grupo_padre = form.cleaned_data['grupo'].get_parent()
+        lideres = form.cleaned_data['grupo'].lideres.all()
+
+        form.archiva_grupo()
+
+        for lider in lideres:
+            self.assertEqual(lider.grupo, grupo_padre)
+
+    def test_lideres_grupo_quedan_sin_grupo_si_no_mantener_lideres(self):
+        """
+        Verifica que los lideres de grupo queden sin grupo si no se escoge la opcion de mantener lideres.
+        """
+
+        data = self.datos_formulario
+        data.pop('mantener_lideres')
+        form = self.form(self.iglesia, data=data)
+
+        self.assertTrue(form.is_valid())
+
+        lideres = form.cleaned_data['grupo'].lideres.all()
+        form.archiva_grupo()
+
+        for lider in lideres:
+            lider.refresh_from_db()
+            self.assertIsNone(lider.grupo)
+
+    def test_miembros_grupo_grupo_destino(self):
+        """
+        Verifica que los miembros del grupo, vayan al grupo de destino
+        """
+
+        datos = self.datos_formulario
+        form = self.form(self.iglesia, data=datos)
+
+        self.assertTrue(form.is_valid())
+
+        form.archiva_grupo()
+
+        for miembro in datos['seleccionados']:
+            self.assertIn(
+                int(miembro),
+                form.cleaned_data['grupo_destino'].miembros.all().values_list('id', flat=1)
+            )
+
+    def test_miembros_grupo_grupo_destino_es_none(self):
+        """
+        Verifica que si no hay seleccionados, los miembros queden sin grupo
+        """
+
+        datos = self.datos_formulario
+        datos.pop('seleccionados')
+        datos.pop('grupo_destino')
+        form = self.form(self.iglesia, data=datos)
+
+        self.assertTrue(form.is_valid())
+
+        miembros = list(form.cleaned_data['grupo'].miembros.all())
+        form.archiva_grupo()
+
+        for miembro in miembros:
+            miembro.refresh_from_db()
+            self.assertIsNone(miembro.grupo)
+
+    def test_error_si_grupo_destino_igual_a_grupo_a_eliminar(self):
+        """
+        Verifica que se lance un error cuando el grupo de destino es igual al grupo a eliminar.
+        """
+        data = self.datos_formulario
+        data.update({'grupo_destino': self.datos_formulario['grupo']})
+        form = self.form(self.iglesia, data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertTrue(form.has_error('grupo_destino', code='mismo_grupo'))

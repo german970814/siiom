@@ -22,9 +22,9 @@ from .utils import reunion_reportada, obtener_fechas_semana
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
-    FormularioCrearPredica,  # FormularioTransladarGrupo
+    FormularioCrearPredica, ArchivarGrupoForm,  # FormularioTransladarGrupo
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm
+    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
 )
 from common.decorators import permisos_requeridos
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
@@ -213,7 +213,9 @@ def reportarReunionDiscipulado(request):
                     ya_reportada = True
         else:
             form = FormularioReportarReunionDiscipulado(miembro=miembro)
-    return render_to_response('grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request))
+    return render_to_response(
+        'grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request)
+    )
 
 
 @user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
@@ -799,3 +801,33 @@ def trasladar_lideres(request):
         form = TrasladarLideresForm(request.iglesia)
 
     return render(request, 'grupos/trasladar_lideres.html', {'form': form})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def archivar_grupo(request):
+    """
+    Permite archivar un grupo.
+    """
+
+    grupo = request.GET.get('grupo', None) or None
+
+    if request.method == 'POST':
+        form = ArchivarGrupoForm(data=request.POST, iglesia=request.iglesia)
+
+        if form.is_valid():
+            form.archiva_grupo()
+            messages.success(request, _('Grupo eliminado correctamente.'))
+            return redirect('grupos:organigrama')
+        else:
+            try:
+                form.nombre_grupo = str(form.cleaned_data['grupo'])
+            except:
+                form.nombre_grupo = _('escogido')
+            if settings.DEBUG:
+                print(form.errors)
+
+    else:
+        form = ArchivarGrupoForm(iglesia=request.iglesia, initial={'grupo': grupo})
+
+    return render(request, 'grupos/archivar_grupos.html', {'form': form})

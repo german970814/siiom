@@ -7,6 +7,7 @@ __author__ = 'Tania'
 
 register = template.Library()
 
+
 def unordered_list_grupos(value, autoescape=None):
     """
     Recursively takes a self-nested list and returns an HTML unordered list --
@@ -33,6 +34,7 @@ def unordered_list_grupos(value, autoescape=None):
         escaper = conditional_escape
     else:
         escaper = lambda x: x
+
     def convert_old_style_list(list_):
         """
         Converts old style lists to the new easier to understand format.
@@ -43,17 +45,22 @@ def unordered_list_grupos(value, autoescape=None):
         And it is converted to:
             ['Item 1', ['Item 1.1', 'Item 1.2]]
         """
+
         if not isinstance(list_, (tuple, list)) or len(list_) != 2:
             return list_, False
+
         first_item, second_item = list_
+
         if second_item == []:
             return [first_item], True
         try:
             it = iter(second_item)  # see if second item is iterable
         except TypeError:
             return list_, False
+
         old_style_list = True
         new_second_item = []
+
         for sublist in second_item:
             item, old_style_list = convert_old_style_list(sublist)
             if not old_style_list:
@@ -61,7 +68,9 @@ def unordered_list_grupos(value, autoescape=None):
             new_second_item.extend(item)
         if old_style_list:
             second_item = new_second_item
+
         return [first_item, second_item], old_style_list
+
     def _helper(list_, tabs=1):
         indent = '\t' * tabs
         output = []
@@ -76,7 +85,7 @@ def unordered_list_grupos(value, autoescape=None):
                 sublist_item = title
                 title = ''
             elif i < list_length - 1:
-                next_item = list_[i+1]
+                next_item = list_[i + 1]
                 if next_item and isinstance(next_item, (list, tuple)):
                     # The next item is a sub-list.
                     sublist_item = next_item
@@ -86,11 +95,12 @@ def unordered_list_grupos(value, autoescape=None):
                 sublist = _helper(sublist_item, tabs+1)
                 sublist = '\n%s<ul>\n%s\n%s</ul>\n%s' % (indent, sublist,
                                                          indent, indent)
-            output.append('%s<li><a>%s</a>%s</li>' % (indent,
-                    escaper(force_text(title)), sublist))
+            output.append('%s<li data-id="%s"><a>%s</a>%s</li>' % (indent, title.id, escaper(force_text(title)), sublist))
             i += 1
         return '\n'.join(output)
+
     value, converted = convert_old_style_list(value)
+
     return mark_safe(_helper(value))
 unordered_list_grupos.is_safe = True
 unordered_list_grupos.needs_autoescape = True
