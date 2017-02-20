@@ -536,9 +536,33 @@ class DesvincularLiderGrupoForm(CustomForm):
     Formulario para desvincular a los lideres de grupos de amistad.
     """
 
-    nuevo_lider = forms.ModelChoiceField(
-        queryset=Miembro.objects.lideres_disponibles(), label=_lazy('Nuevo Lider')
-    )
     lider = forms.ModelChoiceField(
-        queryset=Miembro.objects.all()
+        queryset=Miembro.objects.all(), label=_lazy('Lider')
     )
+    nuevo_lider = forms.ModelChoiceField(
+        queryset=Miembro.objects.lideres_disponibles(), label=_lazy('Nuevo Lider'),
+        required=False
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        lider = cleaned_data.get('lider', None)
+
+        if lider is not None:
+            if lider.grupo_lidera and not cleaned_data['nuevo_lider']:
+                self.add_error('nuevo_lider', forms.ValidationError(
+                    forms.Field.default_error_messages['required'], code='required'))
+
+    def desvincular_lider(self):
+        """Metodo para desvincular a un lider de un grupo de amistad."""
+
+        lider = self.cleaned_data['lider']
+        nuevo_lider = self.cleaned_data.get('nuevo_lider', None)
+
+        if nuevo_lider is not None:
+            lider.grupo_lidera.lideres.add(nuevo_lider)
+
+        lider.grupo = None
+        lider.grupo_lidera = None
+        lider.save()
