@@ -1643,7 +1643,7 @@ def trasladar(request, pk):
     Permite a un administrador trasladar un miembro que no lidere grupo a que asista a otro grupo.
     """
 
-    miembro = get_object_or_404(Miembro, pk=pk)
+    miembro = get_object_or_404(Miembro.objects.iglesia(request.iglesia), pk=pk)
     if miembro.grupo_lidera:
         return redirect(reverse('sin_permiso'))
 
@@ -1656,3 +1656,17 @@ def trasladar(request, pk):
         form = TrasladarMiembroForm()
 
     return render(request, 'miembros/trasladar.html', {'miembro': miembro, 'form': form})
+
+
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
+def desvincular_lider_grupo(request, pk):
+    """
+    Desvincula a un lider de un grupo de amistad
+    """
+
+    miembro = get_object_or_404(Miembro.objects.iglesia(request.iglesia), pk=pk)
+
+    if miembro.grupo:
+        pass
+    return render(request, 'miembros/desvincular_lider_grupo.html', {'form': None})

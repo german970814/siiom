@@ -529,3 +529,16 @@ class TrasladarMiembroForm(CustomForm):
 
     def trasladar(self, miembro):
         miembro.trasladar(self.cleaned_data['nuevo'])
+
+
+class DesvincularLiderGrupoForm(CustomForm):
+    """
+    Formulario para desvincular a los lideres de grupos de amistad.
+    """
+
+    nuevo_lider = forms.ModelChoiceField(
+        queryset=Miembro.objects.lideres_disponibles(), label=_lazy('Nuevo Lider')
+    )
+    lider = forms.ModelChoiceField(
+        queryset=Miembro.objects.all()
+    )
