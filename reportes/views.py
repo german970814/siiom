@@ -1228,7 +1228,7 @@ def estadistico_reuniones_gar(request):
                     lideres_asistentes=Sum('numeroLideresAsistentes'),
                     visitas_=Sum('numeroVisitas'),
                     total_asistentes=Sum('numeroTotalAsistentes'),
-                    grupos_reportaron=Count('id')
+                    grupos_reportaron=Count('grupo', distinct=True)
                 )
 
                 # Si las agregaciones estan vacias, se pasan a 0 para evitar errores en las operaciones
