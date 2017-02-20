@@ -22,9 +22,9 @@ def busqueda_miembro_api(request, pk):
     Vista obtener los miembros lideres de una red especifica.
 
     :returns:
-        Un array de 10 Miembros(max.) lideres que se encuentren disponibles a partir de la red.
+        Un diccionario de 10 Miembros(max.) lideres que se encuentren disponibles a partir de la red.
 
-    :rtype: list
+    :rtype: dict
 
     :param pk:
         El pk de la red a partir de la cual se buscarán los líderes.

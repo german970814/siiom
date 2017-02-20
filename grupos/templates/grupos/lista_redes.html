@@ -66,7 +66,7 @@
                             "<button type=\"button\" title=\"Listar Líderes\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='" + lideres_url +
                             "'\"><span class=\"zmdi zmdi-accounts\"></span></button>";
                     {% else %}
-                        if (row.id.toString() == '{{ mi.grupo.red.id }}') {
+                        if (row.id.toString() == '{{ mi.grupo.red_id }}') {
                             return "<button type=\"button\" title=\"Listar Grupos\" class=\"btn btn-icon command-delete waves-effect waves-circle\" data-row-id=\"" + row.id +
                             "\" onClick=\"window.location.href='" + grupos_url + "'\"><span class=\"zmdi zmdi-eye\"></span></button>";
                         }

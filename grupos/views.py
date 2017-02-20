@@ -644,10 +644,7 @@ def listar_grupos(request, pk):
         return redirect('grupos:listar', request.miembro.grupo.red_id)
 
     if not request.user.has_perm('miembros.es_administrador'):
-        if request.miembro.grupo_lidera:
-            grupos = request.miembro.grupo_lidera.grupos_red
-        else:
-            grupos = Grupo.objects.none()
+        grupos = request.miembro.grupo_lidera.grupos_red
     else:
         grupos = Grupo.objects.prefetch_related('lideres').red(red)
     return render(request, 'grupos/lista_grupos.html', {'red': red, 'grupos': grupos})
