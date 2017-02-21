@@ -590,7 +590,7 @@ def crear_grupo(request, pk):
     if not request.user.has_perm('miembros.es_administrador') and \
        request.miembro.es_cabeza_red and str(request.miembro.grupo.red_id) != str(pk):
         # cuando no está visitando la red correspondiente al miembro, se redirecciona hasta la red
-        return redirect('grupos:crear_grupo', request.miembro.grupo.red_id)
+        return redirect('grupos:nuevo', request.miembro.grupo.red_id)
 
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
