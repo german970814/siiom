@@ -19,7 +19,7 @@ Red = import_string('grupos.models.Red')
 @login_required_api
 def busqueda_miembro_api(request, pk):
     """
-    Vista obtener los miembros lideres de una red especifica.
+    Vista obtener los miembros lideres disponibles de una red especifica.
 
     :returns:
         Un diccionario de 10 Miembros(max.) lideres que se encuentren disponibles a partir de la red.
