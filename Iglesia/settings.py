@@ -17,29 +17,49 @@ LOGIN_URL = '/iniciar_sesion/'
 
 # Application definition
 
-INSTALLED_APPS = (
-    'django.contrib.admin',
+SHARED_APPS = [
+    'tenant_schemas',
+
     'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.admin',
     'django.contrib.sites',
+    'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.contenttypes',
+
     'waffle',
+
+    'clientes',  # Maneja las iglesias
+]
+
+TENANT_APPS = [
+    'django.contrib.auth',
+    'django.contrib.admin',
+    'django.contrib.sites',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.contenttypes',
+
     'treebeard',
+
+    'pqr',
     'common',
+    'grupos',
+    'compras',
     'iglesias',
     'miembros',
     'academia',
-    'grupos',
     'reportes',
     'encuentros',
     'consolidacion',
     'organizacional',
     'gestion_documental',
-    'compras',
-    'pqr'
-)
+]
+
+INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
+
+TENANT_MODEL = 'clientes.Iglesia'
 
 MIDDLEWARE_CLASSES = (
     'tenant_schemas.middleware.TenantMiddleware',
