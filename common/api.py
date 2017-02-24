@@ -16,6 +16,43 @@ import json
 Red = import_string('grupos.models.Red')
 
 
+def get_error_forms_to_json(form, response_code=RESPONSE_DENIED, response_label=RESPONSE_CODE, traceback_label='trace'):
+    """
+    :returns: ``json`` los errores de los formularios en formato JSON, con la siguiente estructura
+
+    {
+        response_code: 403,
+        errors: {
+            field_error_1: {
+                trace: [Errores para este campo, Error dos para el campo],
+                class: 'has-error'
+            },
+            field_error_2: {
+                trace: [Error para este campo],
+                class: 'has-error'
+            }
+        }
+    }
+
+    :param form:  El formulario de cual se sacaran los errores.
+
+    :param response_code:  El código de respuesta que retornará el formulario.
+
+    :param response_label:  El label del codigo de la respuesta.
+
+    :param traceback_label:  El label del traceback o error.
+    """
+
+    errors = {'errors': {}}
+    for error in form.errors:
+        errors['errors'][error] = {traceback_label: form.errors[error], 'class': form.error_css_class}
+
+    if response_code is not None and response_label:
+        errors.update({response_label: response_code})
+
+    return errors
+
+
 @login_required_api
 def busqueda_miembro_api(request, pk):
     """Vista para realizar busquedas de miembros desde AJAX a los miembros que son lideres, y no lideran grupo."""

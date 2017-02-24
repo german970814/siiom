@@ -28,7 +28,7 @@ from common.groups_tests import (
     miembro_empleado_test
 )
 
-from .forms import TrasladarMiembroForm, NuevoMiembroForm
+from .forms import TrasladarMiembroForm, NuevoMiembroForm, DesvincularLiderGrupoForm
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -313,6 +313,7 @@ def liderEditarPerfil(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     casado = False
     mismo = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -1186,6 +1187,7 @@ def eliminarCambioTipoMiembro(request, id):
     cambio.delete()
     # return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
+
 # TODO eliminar
 def calcularCelulas(miembro):
     celulas = 0
@@ -1380,6 +1382,7 @@ def ver_discipulos(request, pk=None):
     d = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -1433,6 +1436,7 @@ def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -1602,8 +1606,6 @@ def eliminar_foto_perfil(request, pk):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-# -----------------------------------
-
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
 def crear_miembro(request):
@@ -1656,17 +1658,3 @@ def trasladar(request, pk):
         form = TrasladarMiembroForm()
 
     return render(request, 'miembros/trasladar.html', {'miembro': miembro, 'form': form})
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def desvincular_lider_grupo(request, pk):
-    """
-    Desvincula a un lider de un grupo de amistad
-    """
-
-    miembro = get_object_or_404(Miembro.objects.iglesia(request.iglesia), pk=pk)
-
-    if miembro.grupo:
-        pass
-    return render(request, 'miembros/desvincular_lider_grupo.html', {'form': None})

@@ -15,6 +15,7 @@ from grupos.models import Grupo
 from PIL import Image
 from io import BytesIO
 from common.forms import CustomForm, CustomModelForm
+from grupos.forms import ArchivarGrupoForm
 
 
 class FormularioLiderAgregarMiembro(ModelForm):
@@ -531,7 +532,7 @@ class TrasladarMiembroForm(CustomForm):
         miembro.trasladar(self.cleaned_data['nuevo'])
 
 
-class DesvincularLiderGrupoForm(CustomForm):
+class DesvincularLiderGrupoForm(ArchivarGrupoForm):
     """
     Formulario para desvincular a los lideres de grupos de amistad.
     """
@@ -540,29 +541,58 @@ class DesvincularLiderGrupoForm(CustomForm):
         queryset=Miembro.objects.all(), label=_lazy('Lider')
     )
     nuevo_lider = forms.ModelChoiceField(
-        queryset=Miembro.objects.lideres_disponibles(), label=_lazy('Nuevo Lider'),
+        queryset=Miembro.objects.none(), label=_lazy('Nuevo Lider'),
         required=False
     )
+
+    def __init__(self, iglesia, *args, **kwargs):
+        super().__init__(iglesia=iglesia, *args, **kwargs)
+        self.fields['lider'].widget.attrs.update({'class': 'form-control'})
+        self.fields['nuevo_lider'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo'].required = False
+
+        if self.is_bound:
+            lider = self.data.get('lider', None)
+
+            if lider is not None:
+                lider = Miembro.objects.get(pk=lider)
+                self.fields['nuevo_lider'].queryset = Miembro.objects.lideres_disponibles().filter(
+                    grupo__red_id=lider.grupo.red_id)
 
     def clean(self):
         cleaned_data = super().clean()
 
         lider = cleaned_data.get('lider', None)
+        nuevo_lider = cleaned_data.get('nuevo_lider', None)
+        miembros = cleaned_data.get('seleccionados', Miembro.objects.none())
+        grupo_destino = cleaned_data.get('grupo_destino', None)
 
         if lider is not None:
-            if lider.grupo_lidera and not cleaned_data['nuevo_lider']:
-                self.add_error('nuevo_lider', forms.ValidationError(
-                    forms.Field.default_error_messages['required'], code='required'))
+            if lider.grupo_lidera is not None:
+                if lider.grupo_lidera.grupos_red.exclude(id=lider.grupo_lidera_id).exists():
+                    if nuevo_lider is None:
+                        self.add_error('nuevo_lider', forms.ValidationError(
+                            forms.Field.default_error_messages['required'], code='required'))
+                else:
+                    # se va a archivar
+                    cleaned_data['grupo'] = lider.grupo_lidera
+                    if miembros.exists() and not grupo_destino:
+                        self.add_error('grupo_destino', forms.ValidationError(
+                            self.error_messages['sin_destino'], code='sin_destino'))
 
     def desvincular_lider(self):
         """Metodo para desvincular a un lider de un grupo de amistad."""
 
         lider = self.cleaned_data['lider']
         nuevo_lider = self.cleaned_data.get('nuevo_lider', None)
+        grupo = lider.grupo_lidera
 
-        if nuevo_lider is not None:
-            lider.grupo_lidera.lideres.add(nuevo_lider)
+        if grupo and not grupo.lideres.count() > 1:
+            if not grupo.grupos_red.exclude(id=grupo.id).exists():
+                # self.cleaned_data['grupo'] = grupo
+                self.cleaned_data['mantener_lideres'] = False
+                return self.archiva_grupo()
+        elif nuevo_lider is not None and grupo:
+            grupo.lideres.add(nuevo_lider)
 
-        lider.grupo = None
-        lider.grupo_lidera = None
-        lider.save()
+        lider.update(grupo=None, grupo_lidera=None, estado=Miembro.INACTIVO)

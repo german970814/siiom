@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import Group
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView
+from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, render, redirect
 from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
