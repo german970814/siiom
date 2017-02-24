@@ -1,5 +1,4 @@
 from unittest import mock, skip
-from django.test import TestCase
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
@@ -12,7 +11,7 @@ from ..forms import (
 from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
 
 
-class GrupoRaizFormTest(TestCase):
+class GrupoRaizFormTest(BaseTest):
     """
     Pruebas unitarias para el formulario de creación y/o edición del grupo raiz.
     """

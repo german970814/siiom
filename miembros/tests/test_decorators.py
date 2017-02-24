@@ -1,22 +1,20 @@
-from django.test import TestCase, RequestFactory
+import inspect
+from unittest import mock, skip, skipIf
+from django.test import RequestFactory
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from django.http import HttpResponse
 
-# from common.tests.base import BaseTest
+from common.tests.base import BaseTest
 from ..decorators import miembro_property_test_decorator
 from .factories import MiembroFactory
-
-from unittest import mock, skip, skipIf
-
-import inspect
 
 
 MENSAJE_SKIP = 'No hay miembros en el request sin el middleware de miembros'
 
 
-class MiembroPropertyDecoratorTest(TestCase):
+class MiembroPropertyDecoratorTest(BaseTest):
     """
     Pruebas al decorador de vistas de miembro_property_test_decorator
     """

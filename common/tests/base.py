@@ -1,5 +1,7 @@
 from django.test.client import Client
 from test_plus.test import TestCase
+from tenant_schemas.test.cases import TenantTestCase, FastTenantTestCase
+from tenant_schemas.test.client import TenantClient
 from grupos.tests.factories import GrupoRaizFactory, GrupoHijoFactory, GrupoFactory
 from .factories import UsuarioFactory
 from .. import constants
@@ -7,13 +9,17 @@ from .. import constants
 import json
 
 
-class BaseTest(TestCase):
+class BaseTest(FastTenantTestCase, TestCase):
     """
     Clase base para las pruebas unitarias.
     """
 
     MSJ_OBLIGATORIO = 'Este campo es obligatorio.'
     user_factory = UsuarioFactory
+
+    def _pre_setup(self):
+        super()._pre_setup()
+        self.client = TenantClient(self.tenant)
 
     def crear_arbol(self):
         """
