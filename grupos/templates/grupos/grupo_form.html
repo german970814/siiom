@@ -216,6 +216,9 @@
             messageError: 'Ha ocurrido un error y no se pueden mostrar los lideres',
             prerequest: function(options) {
                 options.data.grupo = '{{ grupo_id|safe }}';
+                {% if not perms.miembros.es_administrador %}
+                    options.data.grupo_by = '{{ request.miembro.grupo_lidera_id }}';
+                {% endif %}
                 return true;
             }
         });

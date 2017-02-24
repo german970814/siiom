@@ -17,11 +17,8 @@ from django.core.urlresolvers import reverse
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin, PermissionRequiredMixin
 
 # Apps Imports
-from common.decorators import permisos_requeridos
-from .models import (
-    Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica,
-    HistorialEstado
-)
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
+from .utils import reunion_reportada, obtener_fechas_semana
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
@@ -29,11 +26,12 @@ from .forms import (
     FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
 )
+from common.decorators import permisos_requeridos
+from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.models import Miembro
 from common.groups_tests import (
-    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest, admin_or_director_red
+    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
 )
-from .utils import reunion_reportada, obtener_fechas_semana
 
 # Python Packages
 import datetime
@@ -151,7 +149,8 @@ def reportarReunionGrupo(request):
     return render_to_response('grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
+@login_required
+@user_is_director_red
 def reportarReunionGrupoAdmin(request):
 
     if request.method == 'POST':
@@ -332,10 +331,12 @@ def sendMail(camposMail):
 #                 visRed = visRed + visitas
 #         l.append(visRed)
 #         data.append(l)
-# return render_to_response('reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
+#     return render_to_response(
+#          'reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
 
 
-@user_passes_test(admin_or_director_red, login_url="/dont_have_permissions/")
+@login_required
+@user_is_director_red
 def ver_reportes_grupo(request):
     if request.method == 'POST' or (
         'post' in request.session and len(request.session['post']) > 1 and request.session.get('valid_post', False)
@@ -578,13 +579,19 @@ def detalle_grupo(request, pk):
 
 
 @login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
+@user_is_cabeza_red
 def crear_grupo(request, pk):
     """
-    Permite a un administrador crear un grupo de una iglesia en la red ingresada.
+    Permite a un administrador o un cabeza de red crear un grupo de una iglesia en la red ingresada.
     """
 
     red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+
+    if not request.user.has_perm('miembros.es_administrador') and \
+       request.miembro.es_cabeza_red and str(request.miembro.grupo.red_id) != str(pk):
+        # cuando no está visitando la red correspondiente al miembro, se redirecciona hasta la red
+        return redirect('grupos:nuevo', request.miembro.grupo.red_id)
+
     if request.method == 'POST':
         form = NuevoGrupoForm(red=red, data=request.POST)
         if form.is_valid():
@@ -601,10 +608,10 @@ def crear_grupo(request, pk):
 
 
 @login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
+@user_is_cabeza_red
 def editar_grupo(request, pk):
     """
-    Permite a un administrador editar un grupo de una iglesia.
+    Permite a un administrador o cabeza de red editar un grupo de una iglesia.
     """
 
     grupo = get_object_or_404(Grupo.objects.iglesia(request.iglesia), pk=pk)
@@ -624,14 +631,22 @@ def editar_grupo(request, pk):
 
 
 @login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
+@user_is_cabeza_red
 def listar_grupos(request, pk):
     """
-    Permite a un administrador listar los grupos de la red escogida.
+    Permite a un administrador o cabeza de red listar los grupos de la red escogida.
     """
 
     red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
-    grupos = Grupo.objects.prefetch_related('lideres').red(red)
+
+    if not request.user.has_perm('miembros.es_administrador') and \
+       str(request.miembro.grupo.red_id) != str(pk):
+        return redirect('grupos:listar', request.miembro.grupo.red_id)
+
+    if not request.user.has_perm('miembros.es_administrador'):
+        grupos = request.miembro.grupo_lidera.grupos_red
+    else:
+        grupos = Grupo.objects.prefetch_related('lideres').red(red)
     return render(request, 'grupos/lista_grupos.html', {'red': red, 'grupos': grupos})
 
 
@@ -756,7 +771,7 @@ def editar_red(request, pk):
 
 
 @login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
+@user_is_cabeza_red
 def listar_redes(request):
     """
     Permite a un administrador listar redes de su iglesia.

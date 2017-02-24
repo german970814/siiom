@@ -61,7 +61,8 @@ class TestAPIBusquedaMiembro(BaseTestAPI):
         response = self.POST(data={'value': lider.nombre[0:5]})
 
         self.assertIn('id', response['miembros'][0])
-        self.assertEqual(str(response['miembros'][0]['id']), str(lider.id))
+        # self.assertEqual(str(response['miembros'][0]['id']), str(lider.id))
+        self.assertIn(str(lider.id), [x['id'] for x in response['miembros']])
 
     def test_campo_lideres_solo_muestra_lideres_red_ingresada(self):
         """
@@ -96,3 +97,22 @@ class TestAPIBusquedaMiembro(BaseTestAPI):
 
         for m in response['miembros']:
             self.assertNotEqual(str(otro.lideres.first().id), str(m['id']))
+
+    def test_grupo_by_solo_muestra_lideres_disponibles_debajo_de_grupo(self):
+        """
+        Prueba que a partir de el campo de grupo_by, solo sean mostrados los lideres disponibles que se encuentran
+        por debajo de ese grupo.
+        """
+        grupo = Grupo.objects.get(id=300)
+        grupo_lider_disponible = Grupo.objects.get(id=700)
+
+        lider_disponible_1 = MiembroFactory(lider=True, grupo=grupo_lider_disponible)
+        lider_disponible_2 = MiembroFactory(lider=True, grupo=grupo)
+
+        response = self.POST(data={'value': lider_disponible_1.nombre[0:5], 'grupo_by': grupo.id})
+
+        self.assertNotIn(str(lider_disponible_1), [x['id'] for x in response['miembros']])
+
+        response = self.POST(data={'value': lider_disponible_2.nombre[0:5], 'grupo_by': grupo.id})
+
+        self.assertIn(str(lider_disponible_2.id), [x['id'] for x in response['miembros']])

@@ -193,7 +193,7 @@ class Miembro(IglesiaMixin, models.Model):
         de un director de red.
         """
 
-        return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', None) == 3
+        return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 3
 
     def trasladar(self, nuevo_grupo):
         """

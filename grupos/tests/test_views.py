@@ -273,6 +273,25 @@ class CrearGrupoViewTest(BaseTest):
         self.assertTrue(update_mock.called)
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
 
+    def test_redireccion_si_cabeza_red_no_entra_a_su_red(self):
+        """
+        Verifica que el usuario, si es cabeza de red y no entra a crear un grupo de su red, sea redireccionado.
+        """
+        grupo = Grupo.objects.get(id=300)
+
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=self.padre, iglesia=self.red_jovenes.iglesia)
+        otra_red = RedFactory(nombre='nueva red', iglesia=self.red_jovenes.iglesia)
+        red = self.padre.red
+
+        self.assertTrue(cabeza_red.es_cabeza_red)
+
+        self.assertEqual(otra_red.iglesia.id, red.iglesia.id)
+
+        self.login_usuario(cabeza_red.usuario)
+        response = self.get(self.URL, pk=otra_red.id)
+
+        self.assertRedirects(response, self.reverse(self.URL, pk=red.id))
+
 
 class EditarGrupoViewTest(BaseTest):
     """
@@ -427,6 +446,47 @@ class ListarGruposRedViewTest(BaseTest):
 
         otro_grupo = Grupo.objects.get(id=200)
         self.assertResponseNotContains(str(otro_grupo), html=False)
+
+    def test_redireccion_si_cabeza_red_no_entra_a_su_red(self):
+        """
+        Verifica que el usuario, si es cabeza de red y no entra a crear un grupo de su red, sea redireccionado.
+        """
+        grupo = Grupo.objects.get(id=300)
+        padre = Grupo.objects.get(id=800)
+        red_jovenes = Red.objects.get(nombre='jovenes')
+
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre, iglesia=red_jovenes.iglesia)
+        otra_red = RedFactory(nombre='nueva red', iglesia=red_jovenes.iglesia)
+        red = padre.red
+
+        self.assertTrue(cabeza_red.es_cabeza_red)
+
+        self.assertEqual(otra_red.iglesia.id, red.iglesia.id)
+
+        self.login_usuario(cabeza_red.usuario)
+        response = self.get(self.URL, pk=otra_red.id)
+
+        self.assertRedirects(response, self.reverse(self.URL, pk=red.id))
+
+    def test_grupos_listados_sean_red_de_cabeza_red(self):
+        """
+        Verifica que los grupos que sean listados sean de la red del cabeza de red, y no de otra red.
+        """
+
+        grupo = Grupo.objects.get(id=300)
+        padre = Grupo.objects.get(id=800)
+        otro_grupo = Grupo.objects.get(id=500)
+        red_jovenes = Red.objects.get(nombre='jovenes')
+
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre, iglesia=red_jovenes.iglesia)
+
+        self.assertTrue(cabeza_red.es_cabeza_red)
+
+        self.login_usuario(cabeza_red.usuario)
+        self.get(self.URL, pk=red_jovenes.id)
+
+        self.assertResponseNotContains(str(otro_grupo), html=False)
+        self.assertResponseContains(str(padre), html=False)
 
 
 class TrasladarGrupoViewTest(BaseTest):
