@@ -1,6 +1,6 @@
 from django.test.client import Client
 from test_plus.test import TestCase
-from tenant_schemas.test.cases import TenantTestCase, FastTenantTestCase
+from tenant_schemas.test.cases import FastTenantTestCase
 from tenant_schemas.test.client import TenantClient
 from grupos.tests.factories import GrupoRaizFactory, GrupoHijoFactory, GrupoFactory
 from .factories import UsuarioFactory
@@ -20,6 +20,13 @@ class BaseTest(FastTenantTestCase, TestCase):
     def _pre_setup(self):
         super()._pre_setup()
         self.client = TenantClient(self.tenant)
+
+    def assertRedirects(self, response, expected_url, *args, **kwargs):
+        """
+        Se sobreescribe metodo para setear el host del tenant por defecto.
+        """
+
+        super().assertRedirects(response, expected_url, host=self.tenant.domain_url)
 
     def crear_arbol(self):
         """
