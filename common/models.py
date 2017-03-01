@@ -9,15 +9,17 @@ class UtilsModelMixin:
     Mixin de utilidades para los modelos.
     """
 
-    def update(**options):
+    def update(self, **options):
         """
         Actualiza los datos de el modelo.
         """
 
+        keys = []
         with transaction.atomic():
             for key, value in options.items():
                 setattr(self, key, value)
-            self.save()
+                keys.append(key)
+            self.save(update_fields=keys)
 
 
 # TODO: Al eliminar el mixin de Iglesia, se debe seguir manteniendo el modelo de UtilsModelMixin a todos los modelos

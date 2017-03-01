@@ -472,7 +472,8 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         actual = self.historiales.first()
 
         if actual is None:
-            self.__class__.objects.get_queryset().get_historial_model().objects.create(grupo=self, estado=estado, **kwargs)
+            self.__class__.objects.get_queryset().get_historial_model().objects.create(
+                grupo=self, estado=estado, **kwargs)
         elif estado != actual.estado:
             from django.db import OperationalError
             if estado not in list(map(lambda x: x[0], actual.OPCIONES_ESTADO)):

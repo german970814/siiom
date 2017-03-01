@@ -573,12 +573,12 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
                     if nuevo_lider is None:
                         self.add_error('nuevo_lider', forms.ValidationError(
                             forms.Field.default_error_messages['required'], code='required'))
-                else:
-                    # se va a archivar
+                elif lider.grupo_lidera.lideres.count() == 1:  # se va a archivar
                     cleaned_data['grupo'] = lider.grupo_lidera
                     if miembros.exists() and not grupo_destino:
                         self.add_error('grupo_destino', forms.ValidationError(
                             self.error_messages['sin_destino'], code='sin_destino'))
+        return cleaned_data
 
     def desvincular_lider(self):
         """Metodo para desvincular a un lider de un grupo de amistad."""
@@ -591,8 +591,9 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
             if not grupo.grupos_red.exclude(id=grupo.id).exists():
                 # self.cleaned_data['grupo'] = grupo
                 self.cleaned_data['mantener_lideres'] = False
-                return self.archiva_grupo()
-        elif nuevo_lider is not None and grupo:
+                self.archiva_grupo()
+
+        if nuevo_lider is not None and grupo:
             grupo.lideres.add(nuevo_lider)
 
         lider.update(grupo=None, grupo_lidera=None, estado=Miembro.INACTIVO)

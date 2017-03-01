@@ -55,5 +55,6 @@ urlpatterns = [
     url(r'^nuevo/$', views.crear_miembro, name='nuevo'),
     url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
     url(r'^(?P<pk>\d+)/trasladar/$', views.trasladar, name='trasladar'),
+
     url(r'^api/desvincular_lider/(?P<pk>\d+)/$', api.desvincular_lider_grupo_api, name='desvincular_grupo_api'),
 ]

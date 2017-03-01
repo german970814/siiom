@@ -1,17 +1,18 @@
-from django.contrib.auth.decorators import permission_required, PermissionDenied
+from django.contrib.auth.decorators import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
 from .forms import DesvincularLiderGrupoForm
 from .models import Miembro
+from .decorators import user_is_cabeza_red
 from common.decorators import login_required_api
 from common import constants
 from common.api import get_error_forms_to_json
 
 
 @login_required_api
-@permission_required('miembros.es_administrador', raise_exception=True)
+@user_is_cabeza_red  # No hay soporte con JSON
 def desvincular_lider_grupo_api(request, pk):
     """
     Desvincula a un lider de un grupo de amistad
@@ -29,4 +30,4 @@ def desvincular_lider_grupo_api(request, pk):
             errors = get_error_forms_to_json(form)
             return JsonResponse(errors, safe=False)
 
-    raise PermissionDenied
+    return JsonResponse({constants.RESPONSE_CODE: constants.RESPONSE_DENIED})
