@@ -542,7 +542,8 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
     )
     nuevo_lider = forms.ModelChoiceField(
         queryset=Miembro.objects.none(), label=_lazy('Nuevo Lider'),
-        required=False
+        required=False, help_text=_lazy('Si escoge esta opcion, el líder escogido, reemplazará al líder el cual quiere desvincular.'),
+        empty_label=_lazy('NO REEMPLAZAR LIDER')
     )
 
     def __init__(self, iglesia, *args, **kwargs):
@@ -570,9 +571,16 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
         if lider is not None:
             if lider.grupo_lidera is not None:
                 if lider.grupo_lidera.grupos_red.exclude(id=lider.grupo_lidera_id).exists():
-                    if nuevo_lider is None:
-                        self.add_error('nuevo_lider', forms.ValidationError(
-                            forms.Field.default_error_messages['required'], code='required'))
+                    if lider.grupo_lidera.lideres.count() == 1 and nuevo_lider is None:
+                        self.add_error(
+                            'nuevo_lider',
+                            forms.ValidationError(
+                                _lazy("""
+                                    Debes escoger un nuevo lider que reemplaze al anterior, \
+                                    ya que el grupo actual tiene grupos descendientes"""),
+                                code='required'
+                            )
+                        )
                 elif lider.grupo_lidera.lideres.count() == 1:  # se va a archivar
                     cleaned_data['grupo'] = lider.grupo_lidera
                     if miembros.exists() and not grupo_destino:

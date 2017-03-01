@@ -29,6 +29,7 @@ from .forms import (
 from common.decorators import permisos_requeridos
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.models import Miembro
+from miembros.forms import DesvincularLiderGrupoForm
 from common.groups_tests import (
     liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
 )
@@ -45,6 +46,7 @@ def editarHorarioReunionGrupo(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
     draw_mapa = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     # grupo.miembros.all()
     if pk:
         try:

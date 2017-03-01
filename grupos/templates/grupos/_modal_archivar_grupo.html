@@ -4,8 +4,8 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title replacement-grupo">{% if change_titulo %}{% trans "Escoja el líder que va a reemplazar al lider que quiere desvincular" %}{% endif %}</h4>
-                    <small class="help-block {% if not miembro %}hidde-if-not-miembros{% endif %}">{% if change_titulo %}{% trans "Los miembros seleccionados, serán miembros del grupo de destino que especifique."%}{% else %}{% trans "El líder seleccionado, reemplazará al líder que quiere desvincular." %}{% endif %}</small>
+                    <h4 class="modal-title replacement-grupo">{% if not not_show_members %}{% trans "Escoja que desea hacer con los miembros del grupo" %}{% else %}{% if change_titulo %}{% trans "¿Desea escoger un lider para reemplazar a " %}{{ miembro }}?{% endif %}{% endif %}</h4>
+                    <small class="help-block {% if not miembro %}hidde-if-not-miembros{% endif %}"></small>
                 </div>
                 <form action="" enctype="multipart/form-data" method="POST" id="form-modal-archivar">
                     {% csrf_token %}
@@ -78,7 +78,7 @@
                 </form>
                 <div class="modal-footer">
                     <button type="button" name="confirmar-eliminar" class="btn btn-link">{% trans "Aceptar" %}</button>
-                    <button type="button" class="btn btn-link" data-dismiss="modal">{% trans "Cerrar" %}</button>
+                    <button type="button" class="btn btn-link" data-dismiss="modal">{% trans "Cancelar" %}</button>
                 </div>
             </div>
         </div>
