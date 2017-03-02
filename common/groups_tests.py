@@ -1,10 +1,12 @@
 from django.contrib.auth.models import Group
+from contextlib import suppress
 
 
-ADMINISTRADOR = Group.objects.get(name__iexact='Administrador')
-TESORERO = Group.objects.get(name__iexact='Tesorero')
-COORDINADOR = Group.objects.get(name__iexact='Coordinador')
-LIDER = Group.objects.get(name__iexact='Lider')
+with suppress(Exception):
+    ADMINISTRADOR = Group.objects.get(name__iexact='Administrador')
+    TESORERO = Group.objects.get(name__iexact='Tesorero')
+    COORDINADOR = Group.objects.get(name__iexact='Coordinador')
+    LIDER = Group.objects.get(name__iexact='Lider')
 
 
 def liderTest(user):

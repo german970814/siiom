@@ -15,6 +15,7 @@ from grupos.models import Grupo
 from PIL import Image
 from io import BytesIO
 from common.forms import CustomForm, CustomModelForm
+from grupos.forms import ArchivarGrupoForm
 
 
 class FormularioLiderAgregarMiembro(ModelForm):
@@ -529,3 +530,76 @@ class TrasladarMiembroForm(CustomForm):
 
     def trasladar(self, miembro):
         miembro.trasladar(self.cleaned_data['nuevo'])
+
+
+class DesvincularLiderGrupoForm(ArchivarGrupoForm):
+    """
+    Formulario para desvincular a los lideres de grupos de amistad.
+    """
+
+    lider = forms.ModelChoiceField(
+        queryset=Miembro.objects.all(), label=_lazy('Lider')
+    )
+    nuevo_lider = forms.ModelChoiceField(
+        queryset=Miembro.objects.none(), label=_lazy('Nuevo Lider'),
+        required=False, help_text=_lazy('Si escoge esta opcion, el líder escogido, reemplazará al líder el cual quiere desvincular.'),
+        empty_label=_lazy('NO REEMPLAZAR LIDER')
+    )
+
+    def __init__(self, iglesia, *args, **kwargs):
+        super().__init__(iglesia=iglesia, *args, **kwargs)
+        self.fields['lider'].widget.attrs.update({'class': 'form-control'})
+        self.fields['nuevo_lider'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo'].required = False
+
+        if self.is_bound:
+            lider = self.data.get('lider', None)
+
+            if lider is not None:
+                lider = Miembro.objects.get(pk=lider)
+                self.fields['nuevo_lider'].queryset = Miembro.objects.lideres_disponibles().filter(
+                    grupo__red_id=lider.grupo.red_id)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        lider = cleaned_data.get('lider', None)
+        nuevo_lider = cleaned_data.get('nuevo_lider', None)
+        miembros = cleaned_data.get('seleccionados', Miembro.objects.none())
+        grupo_destino = cleaned_data.get('grupo_destino', None)
+
+        if lider is not None and lider.grupo_lidera is not None:
+            if not lider.grupo_lidera.is_leaf():
+                if lider.grupo_lidera.lideres.count() == 1 and nuevo_lider is None:
+                    self.add_error(
+                        'nuevo_lider',
+                        forms.ValidationError(
+                            _lazy("""
+                                Debes escoger un nuevo lider que reemplaze al anterior, \
+                                ya que el grupo actual tiene grupos descendientes"""),
+                            code='required'
+                        )
+                    )
+            elif lider.grupo_lidera.lideres.count() == 1:  # se va a archivar
+                cleaned_data['grupo'] = lider.grupo_lidera
+                if miembros.exists() and not grupo_destino:
+                    self.add_error('grupo_destino', forms.ValidationError(
+                        self.error_messages['sin_destino'], code='sin_destino'))
+        return cleaned_data
+
+    def desvincular_lider(self):
+        """Metodo para desvincular a un lider de un grupo de amistad."""
+
+        lider = self.cleaned_data['lider']
+        nuevo_lider = self.cleaned_data.get('nuevo_lider', None)
+        grupo = lider.grupo_lidera
+
+        if grupo is not None and grupo.lideres.count() <= 1:
+            if grupo.is_leaf():
+                self.cleaned_data['mantener_lideres'] = False
+                self.archiva_grupo()
+
+        if nuevo_lider is not None and grupo:
+            grupo.lideres.add(nuevo_lider)
+
+        lider.update(grupo=None, grupo_lidera=None, estado=Miembro.INACTIVO)
