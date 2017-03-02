@@ -568,24 +568,23 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
         miembros = cleaned_data.get('seleccionados', Miembro.objects.none())
         grupo_destino = cleaned_data.get('grupo_destino', None)
 
-        if lider is not None:
-            if lider.grupo_lidera is not None:
-                if lider.grupo_lidera.grupos_red.exclude(id=lider.grupo_lidera_id).exists():
-                    if lider.grupo_lidera.lideres.count() == 1 and nuevo_lider is None:
-                        self.add_error(
-                            'nuevo_lider',
-                            forms.ValidationError(
-                                _lazy("""
-                                    Debes escoger un nuevo lider que reemplaze al anterior, \
-                                    ya que el grupo actual tiene grupos descendientes"""),
-                                code='required'
-                            )
+        if lider is not None and lider.grupo_lidera is not None:
+            if not lider.grupo_lidera.is_leaf():
+                if lider.grupo_lidera.lideres.count() == 1 and nuevo_lider is None:
+                    self.add_error(
+                        'nuevo_lider',
+                        forms.ValidationError(
+                            _lazy("""
+                                Debes escoger un nuevo lider que reemplaze al anterior, \
+                                ya que el grupo actual tiene grupos descendientes"""),
+                            code='required'
                         )
-                elif lider.grupo_lidera.lideres.count() == 1:  # se va a archivar
-                    cleaned_data['grupo'] = lider.grupo_lidera
-                    if miembros.exists() and not grupo_destino:
-                        self.add_error('grupo_destino', forms.ValidationError(
-                            self.error_messages['sin_destino'], code='sin_destino'))
+                    )
+            elif lider.grupo_lidera.lideres.count() == 1:  # se va a archivar
+                cleaned_data['grupo'] = lider.grupo_lidera
+                if miembros.exists() and not grupo_destino:
+                    self.add_error('grupo_destino', forms.ValidationError(
+                        self.error_messages['sin_destino'], code='sin_destino'))
         return cleaned_data
 
     def desvincular_lider(self):
@@ -595,9 +594,8 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
         nuevo_lider = self.cleaned_data.get('nuevo_lider', None)
         grupo = lider.grupo_lidera
 
-        if grupo and not grupo.lideres.count() > 1:
-            if not grupo.grupos_red.exclude(id=grupo.id).exists():
-                # self.cleaned_data['grupo'] = grupo
+        if grupo is not None and grupo.lideres.count() <= 1:
+            if grupo.is_leaf():
                 self.cleaned_data['mantener_lideres'] = False
                 self.archiva_grupo()
 

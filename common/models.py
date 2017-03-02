@@ -12,6 +12,9 @@ class UtilsModelMixin:
     def update(self, **options):
         """
         Actualiza los datos de el modelo.
+
+        :param *options:
+            Las opciones en clave:valor que van a ser cambiadas de los atributos del modelo.
         """
 
         keys = []

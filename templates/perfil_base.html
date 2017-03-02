@@ -332,7 +332,7 @@
                             </li>
                             {% endif %}
                             {% if miembro.grupo %}
-                                {% if request.miembro.grupo.red_id == miembro.grupo.red_id or perms.miembro.es_administrador %}
+                                {% if request.miembro.grupo_lidera == miembro.grupo.cabeza_red or perms.miembro.es_administrador %}
                                 <li>
                                     <a href="javascript:void(0);" id="desvincular-lider">{% trans "Desvincular Lider de grupo de amistad" %}</a>
                                 </li>

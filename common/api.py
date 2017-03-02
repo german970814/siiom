@@ -18,7 +18,9 @@ Red = import_string('grupos.models.Red')
 
 def get_error_forms_to_json(form, response_code=RESPONSE_DENIED, response_label=RESPONSE_CODE, traceback_label='trace'):
     """
-    :returns: ``json`` los errores de los formularios en formato JSON, con la siguiente estructura
+    :returns:
+        ``json`` los errores de el formulario pasado como parametro en formato JSON,
+        con la siguiente estructura:
 
     {
         response_code: 403,

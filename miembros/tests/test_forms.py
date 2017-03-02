@@ -36,11 +36,10 @@ class DesvincularLiderGrupoFormTest(BaseTest):
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('lider', code='required'))
 
-    @skip
     def test_formulario_invalido_si_grupos_red_y_no_nuevo_lider(self):
         """
         Verifica que el formulario retorne un error en el caso que el grupo tenga discipulos y no se haya escogido
-        un lider de reemplazo.
+        un lider de reemplazo cuando solo hay un lider.
         """
 
         lider = self.grupo.lideres.first()
