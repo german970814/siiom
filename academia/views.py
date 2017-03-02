@@ -2,8 +2,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core import serializers
-from django.db.models.aggregates import Sum
 from django.db.models import Q
+from django.db.models.aggregates import Sum
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
@@ -177,7 +177,6 @@ def verDetalleEstudiante(request, est):
     return render_to_response("academia/estudiante_detalle.html", locals(), context_instance=RequestContext(request))
 
 
-#  ----------------------------------MAESTRO--------------------------------------
 @user_passes_test(maestroTest, login_url="/dont_have_permissions/")
 def maestroAsistencia(request):
     """ Permite a un maestro llenar la asistencia de una sesion. Se muestran los estudiantes que esten en dicho modulo
@@ -392,8 +391,6 @@ def promoverModulo(request):
     miembro = Miembro.objects.get(usuario=request.user)
     return render_to_response('academia/promover_estudiante.html', locals(), context_instance=RequestContext(request))
 
-#  --------------------------------------------ADMINISTRADOR--------------------------------------------
-
 
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def crearCurso(request):
@@ -531,7 +528,6 @@ def crearSesion(request, id):
 @user_passes_test(adminTest, login_url="/dont_have_permissions/")
 def editarSesion(request, id, pk):
     """Permite a un administrador editar una sesion de un modulo de la academia."""
-    # miembro = Miembro.objects.get(usuario = request.user)
 
     accion = 'Editar'
     modulo = Modulo.objects.get(id=int(id))
@@ -549,14 +545,6 @@ def editarSesion(request, id, pk):
             ok = True
         else:
             return render_to_response("academia/crear_sesion.html", locals(), context_instance=RequestContext(request))
-
-    # if 'seleccionados' in request.session:
-    #     faltantes = request.session['seleccionados']
-    #     if len(faltantes) > 0:
-    #         sesionEditar = Sesion.objects.get(id = request.session['seleccionados'].pop())
-    #         request.session['actual'] = sesionEditar
-    #         request.session['seleccionados'] = request.session['seleccionados']
-    #         form = FormularioCrearSesion(instance = sesionEditar)
 
     else:
         form = FormularioCrearSesion(instance=sesion)

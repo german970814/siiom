@@ -95,7 +95,8 @@ def unordered_list_grupos(value, autoescape=None):
                 sublist = _helper(sublist_item, tabs+1)
                 sublist = '\n%s<ul>\n%s\n%s</ul>\n%s' % (indent, sublist,
                                                          indent, indent)
-            output.append('%s<li data-id="%s"><a>%s</a>%s</li>' % (indent, title.id, escaper(force_text(title)), sublist))
+            output.append('%s<li data-id="%s"><a>%s</a>%s</li>' % (
+                indent, title.id, escaper(force_text(title)), sublist))
             i += 1
         return '\n'.join(output)
 

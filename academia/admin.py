@@ -1,9 +1,6 @@
 from django.contrib import admin
-from .models import Modulo
-from .models import Sesion
-from .models import Curso
-from .models import Matricula
-from .models import AsistenciaSesiones, Reporte
+
+from .models import Modulo, Sesion, Curso, Matricula, AsistenciaSesiones, Reporte
 
 
 admin.site.register(Modulo)

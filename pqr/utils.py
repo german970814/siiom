@@ -41,31 +41,6 @@ def crear_llave():
 
 
 @concurrente
-def enviar_email_verificacion(request, caso):
-    global SENDER
-    llave = crear_llave()
-    caso.llave = llave
-    caso.save()
-
-    link = reverse_lazy('pqr:validar_caso', args=(llave, ))
-    # SENDER = 'iglesia@mail.webfaction.com'
-    mensaje = """
-        En hora buena!!!! \n
-        Hemos recibido su petición satisfactoriamente, por favor para confirmar tu
-        correo y solicitud, haz click en el siguiente enlace:\n
-        http://%(domain)s%(link)s
-    """
-
-    send_mail(
-        'Verificación de E-mail para PQR',
-        mensaje % {'link': link, 'domain': request.META['HTTP_HOST']},
-        SENDER,
-        ('{}'.format(caso.email), ),
-        fail_silently=False
-    )
-
-
-@concurrente
 def enviar_email_success(request, caso):
     global SENDER
     """

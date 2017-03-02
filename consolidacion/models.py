@@ -10,8 +10,8 @@ class Visita(models.Model):
     MASCULINO = 'M'
     FEMENINO = 'F'
     OPCIONES_GENERO = (
-        (MASCULINO, 'MASCULINO'),
-        (FEMENINO, 'FEMENINO'),
+        (MASCULINO, _('MASCULINO')),
+        (FEMENINO, _('FEMENINO')),
     )
 
     primer_nombre = models.CharField(verbose_name=_('primer nombre'), max_length=255)
@@ -27,7 +27,7 @@ class Visita(models.Model):
     retirado = models.BooleanField(verbose_name=_('retirado'), default=False)
 
     def __str__(self):
-        return self.primer_nombre.upper() + ' ' + self.primer_apellido.upper()
+        return self.get_nombre()
 
     def get_nombre(self):
         nombre = '%(primer_nombre)s %(segundo_nombre)s %(primer_apellido)s %(segundo_apellido)s' % {

@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.db.models import Q
 
 from .forms import FormularioObtenerGrupoAPI, FormularioObtenerTesoreroCoordinadorAPI
-from grupos.models import Red, Grupo
+from grupos.models import Grupo
 from miembros.models import Miembro
 from common.constants import RESPONSE_SUCCESS, RESPONSE_CODE, RESPONSE_ERROR, RESPONSE_DENIED, URL_SIN_PERMISOS as URL
 from common.groups_tests import tesorero_administrador_test

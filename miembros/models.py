@@ -1,45 +1,59 @@
 # -*- coding:utf-8 -*-
-import datetime
+# Django imports
 from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _lazy
 
+# Locale imports
 from common.models import IglesiaMixin
 from .managers import MiembroManager
 
+# Python imports
+import datetime
+
 
 class Zona(models.Model):
+    """Modelo para guardar las zonas."""
+
     nombre = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre.upper()
 
 
 class Barrio(models.Model):
+    """Modelo para guardar los barrios."""
+
     nombre = models.CharField(max_length=50)
     zona = models.ForeignKey(Zona, null=False)
 
     def __str__(self):
-        return self.nombre + " - " + self.zona.nombre
+        return '{} - {}'.format(self.nombre.upper(), self.zona)
 
 
 class Pasos(models.Model):
+    """Modelo para guardar los pasos que puede dar un miembro."""
+
     nombre = models.CharField(max_length=20)
     prioridad = models.PositiveIntegerField()
 
     def __str__(self):
-        return self.nombre
+        return self.nombre.upper()
 
 
 class TipoMiembro(models.Model):
+    """Modelo para guardar los tipos de miembros que puede tener un miembro."""
+
     nombre = models.CharField(max_length=20)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre.upper()
 
 
 class DetalleLlamada(models.Model):
+    """Modelo para guardar los detalles de las llamadas."""
+
     nombre = models.CharField(max_length=20)
     descripcion = models.TextField(max_length=200)
 
@@ -48,6 +62,7 @@ class DetalleLlamada(models.Model):
 
 
 class Escalafon(models.Model):
+    """Modelo para guardar los posibles escalafones que tendrán los miembros."""
     celulas = models.PositiveIntegerField()
     descripcion = models.TextField(max_length=200)
     logro = models.TextField(max_length=200)
@@ -66,9 +81,9 @@ class Miembro(IglesiaMixin, models.Model):
         ruta = 'media/profile_pictures/user_%s/%s' % (self.id, filename)
         return ruta
 
-    # opciones
     FEMENINO = 'F'
     MASCULINO = 'M'
+
     GENEROS = (
         (FEMENINO, _lazy('Femenino')),
         (MASCULINO, _lazy('Masculino')),
@@ -77,6 +92,7 @@ class Miembro(IglesiaMixin, models.Model):
     ACTIVO = 'A'
     INACTIVO = 'I'
     RESTAURACION = 'R'
+
     ESTADOS = (
         (ACTIVO, _lazy('Activo')),
         (INACTIVO, _lazy('Inactivo')),
@@ -87,12 +103,14 @@ class Miembro(IglesiaMixin, models.Model):
     CASADO = 'C'
     SOLTERO = 'S'
     DIVORCIADO = 'D'
+
     ESTADOS_CIVILES = (
         (VIUDO, _lazy('Viudo')),
         (CASADO, _lazy('Casado')),
         (SOLTERO, _lazy('Soltero')),
         (DIVORCIADO, _lazy('Divorciado')),
     )
+
     #  autenticacion
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_lazy('usuario'), unique=True, null=True, blank=True
@@ -180,11 +198,7 @@ class Miembro(IglesiaMixin, models.Model):
         del pastor presidente.
         """
 
-        if self.grupo_lidera:
-            if self.grupo_lidera.get_depth() == 2:
-                return True
-
-        return False
+        return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 2
 
     @property
     def es_cabeza_red(self):
@@ -205,7 +219,7 @@ class Miembro(IglesiaMixin, models.Model):
             self.save()
 
     def discipulos(self):
-        """Devuelve los discipulos del miembro (queryset) sino tiene, devuelve una lista vacia."""
+        """Devuelve los discipulos del miembro (queryset) si no tiene, devuelve una lista vacia."""
 
         lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         grupo = self.grupo_lidera
@@ -267,24 +281,36 @@ class Miembro(IglesiaMixin, models.Model):
 
 
 class CumplimientoPasos(models.Model):
+    """
+    Modelo para guardar los cumplimientos de pasos que ha alcanzado cada miembros.
+    """
+
     miembro = models.ForeignKey(Miembro)
     paso = models.ForeignKey(Pasos)
     fecha = models.DateField()
 
     def __str__(self):
-        return self.miembro.nombre + " - " + self.paso.nombre
+        return '{} - {}'.format(self.miembro, self.paso)
 
 
 class CambioEscalafon(models.Model):
+    """
+    Modelo para guardar el cambio de escalafon que ha alcanzado cada miembro.
+    """
+
     miembro = models.ForeignKey(Miembro)
     escalafon = models.ForeignKey(Escalafon)
     fecha = models.DateField(default=datetime.datetime.now)
 
     def __str__(self):
-        return self.miembro.nombre + " - " + self.escalafon.rango
+        return '{} - {}'.format(self.miembro, self.escalafon)
 
 
 class CambioTipo(models.Model):
+    """
+    Modelo para guardar el tipo de cambio que ha tenido cada miembro.
+    """
+
     miembro = models.ForeignKey(Miembro, related_name='miembro_cambiado')
     autorizacion = models.ForeignKey(Miembro, related_name='miembro_autoriza')
     nuevoTipo = models.ForeignKey(TipoMiembro, related_name='tipo_nuevo', verbose_name="tipo nuevo")
@@ -292,4 +318,4 @@ class CambioTipo(models.Model):
     fecha = models.DateField()
 
     def __str__(self):
-        return self.miembro.nombre + " - " + self.nuevoTipo.nombre
+        return '{} - {}'.format(self.miembro, self.nuevoTipo)

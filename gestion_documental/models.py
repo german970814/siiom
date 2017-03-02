@@ -7,7 +7,6 @@ from .managers import SolicitudRegistroManager
 from .utils import pdf_to_png, get_media_url, get_filenames
 
 # Python Packages
-# import os
 import re
 
 

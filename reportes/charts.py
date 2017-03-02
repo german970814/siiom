@@ -10,12 +10,16 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
 
+
 __author__ = 'Tania'
 
-color_list = [colors.red, colors.yellow, colors.green, colors.blue, colors.cyan, colors.magenta,
-              colors.orange, colors.lime, colors.turquoise, colors.azure, colors.violet, colors.crimson,
-              colors.orangered, colors.chartreuse, colors.aquamarine, colors.skyblue, colors.indigo, colors.lavender,
-              colors.gold, colors.greenyellow, colors.powderblue, colors.purple]
+
+color_list = [
+    colors.red, colors.yellow, colors.green, colors.blue, colors.cyan, colors.magenta,
+    colors.orange, colors.lime, colors.turquoise, colors.azure, colors.violet, colors.crimson,
+    colors.orangered, colors.chartreuse, colors.aquamarine, colors.skyblue, colors.indigo, colors.lavender,
+    colors.gold, colors.greenyellow, colors.powderblue, colors.purple
+]
 
 
 class BarChart(Drawing):
@@ -34,6 +38,7 @@ class BarChart(Drawing):
         self.chart.categoryAxis.categoryNames = labels
         self.chart.categoryAxis.labels.boxAnchor = 'ne'
         self.chart.categoryAxis.labels.angle = 30
+
         for i in range(len(data)):
             self.chart.bars[i].fillColor = color_list[i]
 
@@ -60,7 +65,7 @@ class PieChart(Drawing):
         self.chart.width = self.width - 150
         self.chart.height = self.height - 40
         self.chart.data = data
-        # self.chart.labels = labels
+
         for i in range(len(data)):
             self.chart.slices[i].fillColor = color_list[i]
 
@@ -90,6 +95,7 @@ class LineChart(Drawing):
 
         self.chart.categoryAxis.categoryNames = labels
         self.chart.categoryAxis.labels.angle = 45
+
         for i in range(len(data)):
             self.chart.lines[i].strokeColor = color_list[i]
 
@@ -164,9 +170,11 @@ class PdfTemplate(SimpleDocTemplate):
         table.setStyle(TableStyle(table_style))
 
         # Graficos
+
         sw = True
         if total:
             datos.pop()
+
         other_labels = datos.pop(0)
         other_labels.pop(0)
         chart_datos = list(zip(*datos))
@@ -214,44 +222,13 @@ class PdfReport(SimpleDocTemplate):
         _opciones = ''
         xml_b = '<b>%(title)s:</b> %(value)s<br />'
 
-        # opciones from __init__ would be:
-        # opciones = {
-        #    'fecha_inicial', 'fecha_final', 'nombre_grupo',
-        #    'grupo_final', 'total_grupos', total_grupos_inactivos
-        # }
-
         for title, value in opciones.items():
             _opciones += xml_b % {
                 'title': self.__class__.get_string_options(title),
                 'value': value
             }
 
-        # if 'fi' in opciones:
-        #     _opciones = _opciones + '<b>Fecha Inicial:</b> %s<br />' % opciones['fi']
-        # if 'ff' in opciones:
-        #     _opciones = _opciones + '<b>Fecha Final:</b> %s<br />' % opciones['ff']
-        # if 'g' in opciones:
-        #     _opciones = _opciones + '<b>Grupo:</b> %s<br />' % opciones['g']
-        # if 'gi' in opciones:
-        #     _opciones = _opciones + '<b>Grupo Inicial:</b> %s<br />' % opciones['gi']
-        # if 'gf' in opciones:
-        #     _opciones = _opciones + '<b>Grupo Final:</b> %s<br />' % opciones['gf']
-        # if 'opt' in opciones:
-        #     _opciones = _opciones + '<b>Opcion:</b> %s<br />' % opciones['opt']
-        # if 'ano' in opciones:
-        #     _opciones = _opciones + '<b>Año:</b> %s<br />' % opciones['ano']
-        # if 'red' in opciones:
-        #     _opciones = _opciones + '<b>Red:</b> %s<br />' % opciones['red']
-        # if 'predica' in opciones:
-        #     _opciones = _opciones + '<b>Predica:</b> %s<br />' % opciones['predica']
-        # if 'total_grupos' in opciones:
-        #     _opciones = _opciones + '<b>Total de grupos:</b> %s<br />' % opciones['total_grupos']
-        # if 'total_grupos_inactivos' in opciones:
-        #     _opciones = _opciones + '<b>Total de grupos inactivos:</b> %s<br />' % opciones['total_grupos_inactivos']
-
         opciones_paragraph = Paragraph(_opciones, style['Normal'])
-
-        # Tabla
 
         if tabla is not None:
             f = 7
@@ -260,6 +237,7 @@ class PdfReport(SimpleDocTemplate):
             f = 10
 
         table = Table(tabla)
+
         table_style = [
             ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
             ('ALIGN', (1, 1), (-1, -1), 'CENTER'),

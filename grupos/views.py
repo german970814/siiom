@@ -1,20 +1,16 @@
 # Django Imports
-from django.db.models import Q
+from django.conf import settings
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.contrib.auth.models import Group
-from django.template.context import RequestContext
-from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView, CreateView
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
+from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, render, redirect
-from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.conf import settings
-from django.core.urlresolvers import reverse
-
-# Third-Party App Imports
-from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin, PermissionRequiredMixin
+from django.template.context import RequestContext
+from django.utils.translation import ugettext as _
 
 # Apps Imports
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
@@ -22,13 +18,13 @@ from .utils import reunion_reportada, obtener_fechas_semana
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
-    FormularioCrearPredica, ArchivarGrupoForm,  # FormularioTransladarGrupo
-    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
+    FormularioCrearPredica, ArchivarGrupoForm, FormularioReportarReunionGrupoAdmin,
+    FormularioReportesEnviados, FormularioEditarReunionGAR, GrupoRaizForm, NuevoGrupoForm,
+    EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
 )
-from common.decorators import permisos_requeridos
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.models import Miembro
+from common.decorators import permisos_requeridos
 from common.groups_tests import (
     liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
 )
@@ -105,13 +101,6 @@ def reportarReunionGrupo(request):
 
     # se verifica que exista el grupo de el miembro en la sesion y que este, esté activo
     if grupo is not None and grupo.is_activo:
-
-        # Se comentan estas lineas de código, porque no están siendo usadas en la actualidad
-
-        # discipulos = miembro.discipulos()
-        # miembrosGrupo = grupo.miembrosGrupo()
-        # asistentesId = request.POST.getlist('seleccionados')
-
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
@@ -138,7 +127,8 @@ def reportarReunionGrupo(request):
                     # envia mensaje de warning si ya fue reportada
                     messages.warning(
                         request,
-                        _('Parece que ya se ha reportado una reunion esta semana, Preguntale a tu Co-Líder o Administrador')
+                        _('''Parece que ya se ha reportado una reunion esta semana,\
+                        Preguntale a tu Co-Líder o Administrador''')
                     )
             else:
                 # si han ocurrido errores en el formulario, los envia
@@ -152,7 +142,6 @@ def reportarReunionGrupo(request):
 @login_required
 @user_is_director_red
 def reportarReunionGrupoAdmin(request):
-
     if request.method == 'POST':
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
@@ -317,24 +306,6 @@ def sendMail(camposMail):
     send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
 
 
-# def reporteVisitasPorRed(request):  # vista en desuso
-#     redes = Red.objects.all()
-#     data = []
-#     for red in redes:
-#         grupos = Grupo.objects.filter(red=red.id)
-#         visRed = 0
-#         l = [red.nombre]
-#         for grupo in grupos:
-#             visReuniones = ReunionGAR.objects.filter(grupo=grupo.id).values('numeroVisitas')
-#             if len(visReuniones.values()) > 0:
-#                 visitas = sum([int(dict['numeroVisitas']) for dict in visReuniones.values('numeroVisitas')])
-#                 visRed = visRed + visitas
-#         l.append(visRed)
-#         data.append(l)
-#     return render_to_response(
-#          'reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
-
-
 @login_required
 @user_is_director_red
 def ver_reportes_grupo(request):
@@ -473,7 +444,9 @@ def editar_runion_grupo(request, pk):
                     messages.success(
                         request,
                         _('Se ha editado la reunion exitosamente. \
-                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('grupos:reportes_grupo')})
+                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {
+                            'link': reverse('grupos:reportes_grupo')
+                        })
                     )
             else:
                 # se envia que puede ir a la pagina de vista de reportes
@@ -484,7 +457,9 @@ def editar_runion_grupo(request, pk):
                 messages.success(
                     request,
                     _('Se ha editado la reunion exitosamente. \
-                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('grupos:reportes_grupo')})
+                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {
+                        'link': reverse('grupos:reportes_grupo')
+                    })
                 )
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario, verifica los campos'))

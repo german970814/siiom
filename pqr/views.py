@@ -15,7 +15,7 @@ from .forms import (
     FormularioCaso, FormularioAgregarMensaje, FormularioAgregarIntegrante, FormularioEliminarInvitacion,
     FormularioCerrarCaso, FormularioEditarCaso, FormularioAgregarArchivoCaso
 )
-from .utils import enviar_email_verificacion, enviar_email_success, enviar_email_invitacion, format_string_to_ascii
+from .utils import enviar_email_success, enviar_email_invitacion, format_string_to_ascii
 
 # Apps
 from common.constants import CONTENT_TYPES
@@ -101,9 +101,7 @@ def nuevo_caso(request):
                         ).date()
                 else:
                     caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
-                # caso.save()
 
-                #  enviar_email_verificacion(request, caso)  # Si se quiere verificar email
                 if request.FILES:
                     errors = 0
                     _errors = []
@@ -121,7 +119,8 @@ def nuevo_caso(request):
                         if settings.DEBUG:
                             print(_errors)
                         message = ugettext(
-                            'Ha Ocurrido errores con los archivos, vuelve a intentarlo. Puede que el formato de tus archivos no sea soportado'
+                            '''Ha Ocurrido errores con los archivos, vuelve a intentarlo.\
+                            Puede que el formato de tus archivos no sea soportado'''
                         )
                         data = {
                             'message': message,
@@ -155,7 +154,6 @@ def nuevo_caso(request):
                     raise(e)
                     return HttpResponse(e, content_type='text/plain')
                 pass
-            # enviar_email_verificacion(request, caso)  # Comment this line when DEBUG is True
 
             return redirect(reverse_lazy('pqr:nuevo_caso'))
         else:
@@ -178,26 +176,6 @@ def nuevo_caso(request):
     data = {'form': form}
 
     return render(request, 'pqr/nuevo_caso.html', data)
-
-
-@waffle_switch('pqr')
-def validar_caso(request, llave):
-    """
-    Vista que a partir de una llave o slug valida un modelo de Caso, solo asi puede este
-    ser visto por usuarios de servicio al cliente
-    ¡¡¡ VISTA SIN USO ACTUAL !!!
-    """
-
-    caso = get_object_or_404(Caso, llave=llave)
-
-    if not caso.valido and not caso._validacion_expirada():
-        caso.valido = True
-        caso.fecha_registro = timezone.now()
-        caso.fecha_ingreso_habil = caso.get_fecha_expiracion().date()
-        caso.save()
-        data = {'caso': caso}
-        return render(request, 'pqr/validar_caso.html', data)
-    raise Http404
 
 
 @waffle_switch('pqr')
@@ -431,7 +409,6 @@ def nuevo_caso_servicio_cliente(request):
             #  se pone una fecha de ingreso habil
             caso.fecha_ingreso_habil = caso.fecha_registro.date()  # caso.get_fecha_expiracion()
             caso.save()
-            # enviar_email_verificacion(request, caso)  # Comment this line when DEBUG is True
             messages.success(
                 request,
                 _("""Se ha regitrado el caso exitosamente""")

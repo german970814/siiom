@@ -1,7 +1,11 @@
+# Django
 from django.db import models
 from django.utils.module_loading import import_string
 
+# Third apps
 from treebeard.al_tree import AL_NodeManager
+
+# Locale
 from common.managers import IglesiaMixinQuerySet
 
 

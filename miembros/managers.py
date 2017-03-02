@@ -1,5 +1,7 @@
 from django.db import models, transaction
+from django.db.models.query import QuerySet
 from django.contrib.auth.models import Permission
+
 from common.managers import IglesiaMixinQuerySet
 
 
@@ -36,7 +38,6 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
         se queda sin lideres, se fusiona el grupo actual con el nuevo grupo.
         """
 
-        from django.db.models.query import QuerySet
         from grupos.models import Grupo
 
         if not isinstance(lideres, QuerySet):
@@ -58,9 +59,7 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
         Devuelve un queryset con los lideres que no se encuentran liderando grupo.
         """
 
-        disponibles = self.filter(grupo_lidera__isnull=True).lideres()
-
-        return disponibles
+        return self.filter(grupo_lidera__isnull=True).lideres()
 
     def lideres_red(self, red):
         """
@@ -70,6 +69,9 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
         return self.filter(grupo_lidera__red=red).lideres()
 
     def visitas(self, *args, **kwargs):
+        """
+        :returns:  Un QuerySet con los miembros que son visitas.
+        """
         from .models import CambioTipo, TipoMiembro
         visita = TipoMiembro.objects.filter(nombre__iexact='visita')
         return self.annotate(

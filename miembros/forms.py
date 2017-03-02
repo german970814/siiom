@@ -4,20 +4,35 @@ Created on Apr 4, 2011
 
 @author: Migue
 '''
-from django.forms import ModelForm
-from django.utils.translation import ugettext_lazy as _lazy
-from miembros.models import Miembro, Zona, Barrio, CumplimientoPasos,\
-    Pasos, Escalafon, CambioEscalafon, TipoMiembro, CambioTipo, DetalleLlamada
-from django.db.models import Q
+
 from django import forms
+from django.db.models import Q
+from django.utils.translation import ugettext_lazy as _lazy
+
 from academia.models import Matricula
+from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
+from .models import (
+    Miembro, Zona, Barrio, CumplimientoPasos, DetalleLlamada,
+    Pasos, Escalafon, CambioEscalafon, TipoMiembro, CambioTipo
+)
+
 from PIL import Image
 from io import BytesIO
-from common.forms import CustomForm, CustomModelForm
 
 
-class FormularioLiderAgregarMiembro(ModelForm):
+__all__ = (
+    'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro', 'FormularioCambiarContrasena',
+    'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
+    'FormularioCumplimientoPasosMiembro', 'FormularioPasos', 'FormularioCrearEscalafon',
+    'FormularioPromoverEscalafon', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
+    'FormularioAsignarUsuario', 'FormularioDetalleLlamada', 'FormularioRecuperarContrasenia',
+    'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'FormularioTipoMiembros',
+    'TrasladarMiembroForm'
+)
+
+
+class FormularioLiderAgregarMiembro(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -42,13 +57,6 @@ class FormularioLiderAgregarMiembro(ModelForm):
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
-        # self.fields['estado'].widget.attrs.update({'class':'form-control'})
-        # if c:
-        #     self.fields['conyugue'].queryset = Miembro.objects.filter(
-        #         Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
-        # else:
-        #     self.fields['conyugue'].queryset = Miembro.objects.filter(
-        #         Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
 
     class Meta:
         model = Miembro
@@ -57,15 +65,9 @@ class FormularioLiderAgregarMiembro(ModelForm):
             'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
             'profesion', 'barrio', 'genero', 'estadoCivil'  # , 'conyugue'
         )
-        # exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
-        #            'asignadoGAR', 'asisteGAR', ''
-        #            'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
-        #            'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
-        #            'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
-        #            'noInteresadoGAR', 'convertido', 'estado', 'conyugue', 'foto_perfil', 'iglesia')
 
 
-class FormularioAdminAgregarMiembro(ModelForm):
+class FormularioAdminAgregarMiembro(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -106,60 +108,6 @@ class FormularioAdminAgregarMiembro(ModelForm):
             'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
             'profesion', 'barrio', 'genero', 'estadoCivil', 'conyugue'
         )
-        # exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
-        #            'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
-        #            'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
-        #            'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
-        #            'estado', 'iglesia')
-
-
-class FormularioLlamadaLider(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioLlamadaLider, self).__init__(*args, **kwargs)
-
-        self.fields['detalleLlamadaLider'].widget.attrs.update({'class': 'form-control'})
-        self.fields['observacionLlamadaLider'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Miembro
-        fields = ('detalleLlamadaLider', 'observacionLlamadaLider')
-
-
-class FormularioPrimeraLlamadaAgente(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioPrimeraLlamadaAgente, self).__init__(*args, **kwargs)
-        self.fields['detallePrimeraLlamada'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['observacionPrimeraLlamada'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Miembro
-        fields = ('detallePrimeraLlamada',
-                  'observacionPrimeraLlamada',
-                  'noInteresadoGAR',
-                  'asisteGAR',
-                  'asignadoGAR',
-                  'fechaAsignacionGAR',
-                  'grupo')
-
-
-class FormularioSegundaLlamadaAgente(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioSegundaLlamadaAgente, self).__init__(*args, **kwargs)
-        self.fields['detalleSegundaLlamada'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['observacionSegundaLlamada'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Miembro
-        fields = ('detalleSegundaLlamada', 'observacionSegundaLlamada', 'asisteGAR', 'noInteresadoGAR')
 
 
 class FormularioCambiarContrasena(forms.Form):
@@ -192,7 +140,7 @@ class FormularioCambiarContrasena(forms.Form):
         return super(FormularioCambiarContrasena, self).clean()
 
 
-class FormularioAsignarGrupo(ModelForm):
+class FormularioAsignarGrupo(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -205,7 +153,7 @@ class FormularioAsignarGrupo(ModelForm):
         fields = ('grupo', )
 
 
-class FormularioCrearZona(ModelForm):
+class FormularioCrearZona(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -227,7 +175,7 @@ class FormularioCrearZona(ModelForm):
         fields = ('nombre', )
 
 
-class FormularioCrearBarrio(ModelForm):
+class FormularioCrearBarrio(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -241,21 +189,12 @@ class FormularioCrearBarrio(ModelForm):
         fields = ('nombre', )
 
 
-class FormularioPasosMiembro(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    class Meta:
-        model = CumplimientoPasos
-        fields = ('paso',)
-
-
-class FormularioCumplimientoPasosMiembro(ModelForm):
+class FormularioCumplimientoPasosMiembro(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
-        super(FormularioCumplimientoPasosMiembro, self).__init__(*args, **kwargs)  # populates the post
+        super(FormularioCumplimientoPasosMiembro, self).__init__(*args, **kwargs)
         estudiantes = Matricula.objects.all().exclude(
             estudiante__pasos__nombre__iexact='lanzamiento').values('estudiante')
         self.fields['miembro'].queryset = Miembro.objects.filter(id__in=estudiantes)
@@ -266,7 +205,7 @@ class FormularioCumplimientoPasosMiembro(ModelForm):
         fields = ('miembro',)
 
 
-class FormularioPasos(ModelForm):
+class FormularioPasos(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -281,7 +220,7 @@ class FormularioPasos(ModelForm):
         fields = '__all__'
 
 
-class FormularioCrearEscalafon(ModelForm):
+class FormularioCrearEscalafon(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -298,7 +237,7 @@ class FormularioCrearEscalafon(ModelForm):
         fields = '__all__'
 
 
-class FormularioPromoverEscalafon(ModelForm):
+class FormularioPromoverEscalafon(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -312,7 +251,7 @@ class FormularioPromoverEscalafon(ModelForm):
         fields = ('miembro', 'escalafon')
 
 
-class FormularioCrearTipoMiembro(ModelForm):
+class FormularioCrearTipoMiembro(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -325,7 +264,7 @@ class FormularioCrearTipoMiembro(ModelForm):
         fields = ('nombre', )
 
 
-class FormularioCambioTipoMiembro(ModelForm):
+class FormularioCambioTipoMiembro(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -337,12 +276,6 @@ class FormularioCambioTipoMiembro(ModelForm):
             m = Miembro.objects.get(id=idm)
             tipos = CambioTipo.objects.filter(miembro=m).values('nuevoTipo')
             self.fields['nuevoTipo'].queryset = TipoMiembro.objects.all().exclude(id__in=tipos)
-#            try:
-#                mLanzado = CumplimientoPasos.objects.get(miembro = m, paso__nombre__iexact = 'lanzamiento')
-#            except:
-#                mLanzado = None
-#            if mLanzado is None:
-#                self.fields['nuevoTipo'].queryset = self.fields['nuevoTipo'].queryset.exclude(nombre__iexact = 'lider')
 
     class Meta:
         model = CambioTipo
@@ -365,7 +298,7 @@ class FormularioAsignarUsuario(forms.Form):
         self.fields['contrasenaVerificacion'].widget.attrs.update({'class': 'form-control'})
 
 
-class FormularioDetalleLlamada(ModelForm):
+class FormularioDetalleLlamada(forms.ModelForm):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 

@@ -1,13 +1,12 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import user_passes_test
-from django.views.generic.edit import CreateView, UpdateView
+from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import ugettext as _
+from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
-from django.conf import settings
+from django.shortcuts import render
+from django.utils.translation import ugettext as _
+from django.views.generic.edit import CreateView, UpdateView
 
-from .utils import clean_direccion
 from .models import Visita
 from .forms import FormularioVisita, FormularioAsignarGrupoVisita
 from common.forms import FormularioRangoFechas
@@ -134,10 +133,6 @@ def asignar_grupo_visitas(request):
             if form.is_valid():
                 fecha_inicial = form.cleaned_data['fecha_inicial']
                 fecha_final = form.cleaned_data['fecha_final']
-
-                # visitas = Miembro.objects.visitas(
-                #     fechaRegistro__range=(fecha_inicial, fecha_final)
-                # )
 
                 visitas = Visita.objects.filter(
                     fecha_ingreso__range=(fecha_inicial, fecha_final),

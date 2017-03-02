@@ -52,7 +52,7 @@ class Caso(models.Model):
     nombre = models.CharField(verbose_name=_('nombre'), max_length=255)
     identificacion = models.BigIntegerField(verbose_name=_('identificación'))
     direccion = models.CharField(verbose_name=_('dirección'), max_length=255, blank=True)
-    telefono = models.BigIntegerField(verbose_name=_('teléfono'))  # se quita blank=True, null=True, 30 septiembre 2016
+    telefono = models.BigIntegerField(verbose_name=_('teléfono'))
     email = models.EmailField(verbose_name=_('email'))
     descripcion = models.TextField(verbose_name=_('descripción'))
     asunto = models.CharField(verbose_name=_('asunto'), max_length=255)
@@ -275,7 +275,10 @@ class Documento(models.Model):
 
         if empleado in self.caso.integrantes.all() or empleado == self.caso.empleado_cargo:
             mensaje = """
-                <strong><a href="{get_absolute_url}" class="c-white"><img src="{get_url}" alt="{get_name}" width="150px"/></a></strong>
+                <strong>
+                    <a href="{get_absolute_url}" class="c-white">
+                    <img src="{get_url}" alt="{get_name}" width="150px"/></a>
+                </strong>
             """.format(get_absolute_url=self.get_absolute_url(), get_name=self.get_name(), get_url=self.get_url())
             return Comentario.objects.create(
                 empleado=empleado,

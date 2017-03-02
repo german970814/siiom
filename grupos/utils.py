@@ -7,7 +7,11 @@ import datetime
 
 def convertir_lista_grupos_a_queryset(lista_grupos):
     """
-    Permite convertir una lista de grupos a un queryset según su pk.
+    :returns:
+        Un queryset de grupos.
+
+    :param list[int] lista_grupos:
+        Una lista de pks de los grupos los cuales quieren ser pasados a queryset.
     """
 
     lista_ids = [grupo.pk for grupo in lista_grupos]
@@ -15,7 +19,23 @@ def convertir_lista_grupos_a_queryset(lista_grupos):
 
 
 def reunion_reportada(fecha, grupo, discipulado=False):
-    """Retorna verdadero si la existe una reunion en la fecha dada"""
+    """
+    :returns:
+        *True* si existe una reunion reportada en el rango de una semana.
+
+    :rtype: bool
+
+    :param fecha:
+        Objeto del tipo ``datetime.date`` o ``datetime.datetime``, a partir del cual
+        se crearán los rangos para buscar las reuniones.
+
+    :param grupo:
+        Grupo a partir del cual se buscarán las reuniones.
+
+    :param bool discipulado:
+        Especifica si la busqueda se realizará sobre reuniones de grupo o discipulado.
+    """
+
     ini_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
     fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
 
@@ -29,7 +49,9 @@ def reunion_reportada(fecha, grupo, discipulado=False):
 
 def obtener_fechas_semana(fecha):
     """
-    Retorna las fechas de la semana de lunes a domingo a partir de una fecha
+    :returns:
+        Las fechas posibles en la semana de lunes a domingo, a partir de la fecha
+        dada.
     """
     inicio_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
     fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())

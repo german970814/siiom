@@ -1,10 +1,8 @@
-
 # Django
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect, render
 from django.template.context import RequestContext
@@ -16,12 +14,11 @@ from .models import Encuentro, Encontrista
 from .forms import CrearEncuentroForm, NuevoEncontristaForm, EditarEncuentroForm
 from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro, solo_encuentros_miembro
 from grupos.models import Red, Grupo
-from miembros.models import Miembro, TipoMiembro
+from miembros.models import Miembro
 from common.groups_tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
 from common.constants import URL_SIN_PERMISOS as URL
 
 # Python
-import json
 import time
 
 
@@ -43,11 +40,12 @@ def crear_encuentro(request):
                 _(
                     '''
                     Se ha creado el encuentro correctamente.
-                    <a alt="Listar Encuentros" class="alert-link" href="{0}"> Volver a la lista de encuentros</a> o
-                    <a alt="Agregar encontrista" class="alert-link" href="{1}"> agregar encontristas a este encuentro</a>
+                    <a alt="Listar Encuentros" class="{2}" href="{0}"> Volver a la lista de encuentros</a> o
+                    <a alt="Agregar encontrista" class="{2}" href="{1}"> agregar encontristas a este encuentro</a>
                     '''.format(
                             reverse('encuentros:listar_encuentros'),
-                            reverse('encuentros:agregar_encontrista', args=(nuevo_encuentro.id, ))
+                            reverse('encuentros:agregar_encontrista', args=(nuevo_encuentro.id, )),
+                            "alert-link"
                         )
                 )
             )
@@ -105,11 +103,12 @@ def editar_encuentro(request, id_encuentro):
                 _(
                     '''
                     Se ha editado el encuentro correctamente.
-                    <a alt="Listar Encuentros" class="alert-link" href="{0}"> Volver a la lista de encuentros</a> o
-                    <a alt="Agregar encontrista" class="alert-link" href="{1}"> agregar encontristas a este encuentro</a>
+                    <a alt="Listar Encuentros" class="{2}" href="{0}"> Volver a la lista de encuentros</a> o
+                    <a alt="Agregar encontrista" class="{2}" href="{1}"> agregar encontristas a este encuentro</a>
                     '''.format(
                             reverse('encuentros:listar_encuentros'),
-                            reverse('encuentros:agregar_encontrista', args=(encuentro_editado.id, ))
+                            reverse('encuentros:agregar_encontrista', args=(encuentro_editado.id, )),
+                            'alert-link'
                         )
                 )
             )
@@ -289,4 +288,6 @@ def asistencia_encuentro(request, id_encuentro):
                     encontrista.asistio = False
                 encontrista.save()
 
-    return render_to_response('encuentros/asistencia_encuentro.html', locals(), context_instance=RequestContext(request))
+    return render_to_response(
+        'encuentros/asistencia_encuentro.html', locals(), context_instance=RequestContext(request)
+    )

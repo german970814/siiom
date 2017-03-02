@@ -1,6 +1,6 @@
-from miembros.models import Miembro
 import calendar
 import datetime
+
 
 # TODO eliminar
 def listaGruposDescendientes_id(miembro):

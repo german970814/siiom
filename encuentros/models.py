@@ -1,30 +1,34 @@
-import datetime
 from django.db import models
+from django.utils.translation import ugettext_lazy as _lazy
+
 from .managers import EncuentroManager
+
+import datetime
 
 
 class Encuentro(models.Model):
     """
     Modelo para la creacion de encuentros
     """
+
     ACTIVO = 'A'
     INACTIVO = 'I'
     OPCIONES_ESTADO = (
-        (ACTIVO, 'ACTIVO'),
-        (INACTIVO, 'INACTIVO'),
+        (ACTIVO, _lazy('ACTIVO')),
+        (INACTIVO, _lazy('INACTIVO')),
     )
 
-    fecha_inicial = models.DateTimeField(verbose_name='Fecha Inicial')
-    fecha_final = models.DateField(verbose_name='Fecha Final')
-    hotel = models.CharField(max_length=100, verbose_name='Hotel')
-    grupos = models.ManyToManyField('grupos.Grupo', verbose_name='Grupos')
+    fecha_inicial = models.DateTimeField(verbose_name=_lazy('Fecha Inicial'))
+    fecha_final = models.DateField(verbose_name=_lazy('Fecha Final'))
+    hotel = models.CharField(max_length=100, verbose_name=_lazy('Hotel'))
+    grupos = models.ManyToManyField('grupos.Grupo', verbose_name=_lazy('Grupos'))
     coordinador = models.ForeignKey('miembros.Miembro',
-                                    verbose_name='Coordinador', related_name='encuentros_coordinador')
-    tesorero = models.ForeignKey('miembros.Miembro', verbose_name='Tesorero', related_name='encuentros_tesorero')
-    direccion = models.CharField(max_length=100, verbose_name='Direccion', blank=True)
-    observaciones = models.TextField(verbose_name='Observaciones', blank=True)
-    dificultades = models.TextField(verbose_name='Dificultades', blank=True)
-    estado = models.CharField(max_length=1, choices=OPCIONES_ESTADO, default=ACTIVO, verbose_name='Estado')
+                                    verbose_name=_lazy('Coordinador'), related_name='encuentros_coordinador')
+    tesorero = models.ForeignKey('miembros.Miembro', verbose_name=_lazy('Tesorero'), related_name='encuentros_tesorero')
+    direccion = models.CharField(max_length=100, verbose_name=_lazy('Direccion'), blank=True)
+    observaciones = models.TextField(verbose_name=_lazy('Observaciones'), blank=True)
+    dificultades = models.TextField(verbose_name=_lazy('Dificultades'), blank=True)
+    estado = models.CharField(max_length=1, choices=OPCIONES_ESTADO, default=ACTIVO, verbose_name=_lazy('Estado'))
 
     objects = EncuentroManager()
 
@@ -37,51 +41,68 @@ class Encuentro(models.Model):
 
     @property
     def en_curso(self):
+        """
+        :returns: ``True`` si el encuentro actual está en curso o no ha finalizado.
+
+        :rtype: bool
+        """
         if datetime.date.today() >= self.fecha_inicial.date() and datetime.date.today() <= self.fecha_final:
             return True
         return False
 
     @property
     def acabado(self):
-        if datetime.date.today() > self.fecha_final:
-            return True
-        return False
+        """
+        :returns: ``True`` si el encuentro actual ha finalizado.
+
+        :rtype: bool
+        """
+        return datetime.date.today() > self.fecha_final
 
     @property
     def tiene_asistencia(self):
-        if self.encontrista_set.filter(asistio=True):
-            return True
-        return False
+        """
+        :returns: ``True`` si el encuentro actual le fue marcada la asistencia de miembros.
+
+        :rtype: bool
+        """
+
+        return self.encontrista_set.filter(asistio=True).exists()
 
     @property
     def no_empieza(self):
-        if datetime.date.today() < self.fecha_inicial.date():
-            return True
-        return False
+        """
+        :returns: ``True`` si el encuentro actual no ha empezado aún.
+
+        :rtype: bool
+        """
+
+        return datetime.date.today() < self.fecha_inicial.date()
 
 
 class Encontrista(models.Model):
     """
     Modelo de creacion de encontristas
     """
+
     MASCULINO = 'M'
     FEMENINO = 'F'
     OPCIONES_GENERO = (
-        (MASCULINO, 'MASCULINO'),
-        (FEMENINO, 'FEMENINO'),
+        (MASCULINO, _lazy('MASCULINO')),
+        (FEMENINO, _lazy('FEMENINO')),
     )
 
-    primer_nombre = models.CharField(max_length=60, verbose_name='Primer Nombre')
-    segundo_nombre = models.CharField(max_length=60, blank=True, verbose_name='Segundo Nombre')
-    primer_apellido = models.CharField(max_length=60, verbose_name='Primer Apellido')
-    segundo_apellido = models.CharField(max_length=60, blank=True, verbose_name='Segundo Apellido')
-    talla = models.CharField(max_length=3, verbose_name='Talla', blank=True)
-    genero = models.CharField(max_length=1, choices=OPCIONES_GENERO, verbose_name='Género')
-    identificacion = models.BigIntegerField(verbose_name='Identificación')
-    email = models.EmailField(verbose_name='Email')
-    grupo = models.ForeignKey('grupos.Grupo', related_name='encontristas', verbose_name='Grupo')
-    encuentro = models.ForeignKey(Encuentro, verbose_name='Encuentro')
-    asistio = models.BooleanField(default=False, verbose_name='Asistio')
+    primer_nombre = models.CharField(max_length=60, verbose_name=_lazy('Primer Nombre'))
+    segundo_nombre = models.CharField(max_length=60, blank=True, verbose_name=_lazy('Segundo Nombre'))
+    primer_apellido = models.CharField(max_length=60, verbose_name=_lazy('Primer Apellido'))
+    segundo_apellido = models.CharField(max_length=60, blank=True, verbose_name=_lazy('Segundo Apellido'))
+    talla = models.CharField(max_length=3, verbose_name=_lazy('Talla'), blank=True)
+    genero = models.CharField(max_length=1, choices=OPCIONES_GENERO, verbose_name=_lazy('Género'))
+    identificacion = models.BigIntegerField(verbose_name=_lazy('Identificación'))
+    email = models.EmailField(verbose_name=_lazy('Email'))
+    grupo = models.ForeignKey('grupos.Grupo', related_name='encontristas', verbose_name=_lazy('Grupo'))
+    encuentro = models.ForeignKey(Encuentro, verbose_name=_lazy('Encuentro'))
+    asistio = models.BooleanField(default=False, verbose_name=_lazy('Asistio'))
 
     def __str__(self):
         return '{0} {1} ({2})'.format(self.primer_nombre, self.primer_apellido, self.identificacion)

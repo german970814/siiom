@@ -12,7 +12,6 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils import timezone
-# from django.forms.models import modelformset_factory
 
 # Third Apps
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
@@ -111,7 +110,6 @@ def editar_registro(request, id_registro):
     )
 
     if request.method == 'POST':
-        # print(request.POST)
         # se instancian los dos formularios
         form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
         form_documentos = DocumentosFormSet(request.POST, request.FILES)
