@@ -280,9 +280,11 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             un grupo que se encuentra dos niveles mas abajo que la raiz del arbol.
         """
 
-        ancentros = self.get_ancestors()
-        if len(ancentros) > 2:
-            return ancentros[2]
+        ancestros = self.get_ancestors()
+        if self.get_depth() == 3:
+            return self
+        elif len(ancestros) > 2:
+            return ancestros[2]
         else:
             return None
 
@@ -472,7 +474,8 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         actual = self.historiales.first()
 
         if actual is None:
-            self.__class__.objects.get_queryset().get_historial_model().objects.create(grupo=self, estado=estado, **kwargs)
+            self.__class__.objects.get_queryset().get_historial_model().objects.create(
+                grupo=self, estado=estado, **kwargs)
         elif estado != actual.estado:
             from django.db import OperationalError
             if estado not in list(map(lambda x: x[0], actual.OPCIONES_ESTADO)):

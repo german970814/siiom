@@ -64,16 +64,3 @@
         display: none !important;
     }
 }
-
-
-/*if 'imprimir' in request.POST:
-    ruta = "static/css/%s.css"
-    to_html = render_to_string('trazabilidad/reporte.html', data, RequestContext(request))
-    http_response = HttpResponse(content_type='application/pdf')
-    http_response['Content-Disposition'] = 'attachment; filename=report-by-%s-%s.pdf' % (request.user.username, fecha_impresion)
-    HTML(string=to_html).write_pdf(http_response, stylesheets=[ruta % 'estilos', ruta % 'bootstrap.min', ruta % 'informes'])
-    return http_response
-
-    pip install -U setuptools
-    html5lib==0.999999999
-    WeasyPrint==0.31*/

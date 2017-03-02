@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load staticfiles i18n %}
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/estilos_foto_perfil.css' %}">
 <link href="{% static 'Template/jquery/vendors/bower_components/lightgallery/light-gallery/css/lightGallery.css' %}" rel="stylesheet">
@@ -7,6 +7,13 @@
 {% endblock css %}
 
 {% block js %}
+{% if miembro.grupo %}
+    {% if not miembro.grupo_lidera.grupos_red|length > 1 and miembro.grupo_lidera.lideres.all|length == 1 %}
+        {% include "grupos/_modal_archivar_grupo.html" with form=form_desvincular miembro=miembro change_titulo=1 %}
+    {% else%}
+        {% include "grupos/_modal_archivar_grupo.html" with form=form_desvincular not_show_members=1 miembro=miembro change_titulo=1 %}
+    {% endif %}
+{% endif %}
 <script src="{% static 'Template/jquery/vendors/bower_components/lightgallery/light-gallery/js/lightGallery.min.js' %}"></script>
 <script src="{% static 'Template/jquery/vendors/bower_components/mediaelement/build/mediaelement-and-player.min.js' %}"></script>
 <script type="text/javascript">
@@ -99,7 +106,7 @@
         }
 
         // Funcion al momento de subir las fotos evitar error 413(Http status)
-        window.uploadPhotos = function(url){
+        window.uploadPhotos = function(url) {
             var file = event.target.files[0];
 
             if(file.type.match(/image.*/)) {
@@ -230,6 +237,70 @@
                 }
             })
         });
+
+        $('#desvincular-lider').click(function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            swal({
+                title: "¿Estás seguro que deseas desvincular a {{ miembro.nombre|upper }} {{ miembro.primerApellido|upper}} del grupo de amistad?",
+                text: "Al momento de desvincular un miembro del grupo, este miembro será inactivado",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Confirmar",
+                cancelButtonText: "Cancelar",
+                closeOnConfirm: true,
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    {% if miembro.grupo_lidera.lideres.all|length > 1 or miembro.grupo_lidera.grupos_red|length > 1 or miembro.grupo_lidera.miembros.all|length %}
+                        $('.loaded_into').carga_miembros('update', {grupo_selector: '{{ miembro.grupo_lidera_id }}'})
+                        $('.loaded_into').carga_miembros('reload');
+                    {% else %}
+                        $('#form-modal-archivar').submit();
+                    {% endif %}
+                }
+            });
+        });
+
+        $('#form-modal-archivar').on('submit', function (event) {
+            $('input[value="all"]').prop('name', 'not-sended');
+            event.stopImmediatePropagation();
+            event.preventDefault();
+
+            var form = new FormData(this);
+            form.append('lider', '{{ miembro.id }}');
+
+            data = {};
+            for (var x of form.keys()) {
+                data[x] = form.get(x);
+            }
+
+            $('.page-loader').fadeIn();
+
+            $.ajax({
+                url: '{% url "miembros:desvincular_grupo_api" miembro.id %}',
+                type: 'POST',
+                data: data,
+                success: function (data) {
+                    if (data.response_code == 403) {
+                        for (let error in data.errors) {
+                            let trace = '\n '.join(data.errors[error].trace);
+                            if ($('.added-in-form')[0]) {
+                                $('.added-in-form').remove();
+                            }
+                            let small = $('<small></small>').text(trace).addClass('help-block added-in-form');
+                            $('#id_' + '{0}'.format(error)).parent().parent().addClass(data.errors[error].class).append(small);
+                        }
+                    } else {
+                        window.location.href = data.url;
+                    }
+                },
+                error: function (error) {
+                    danger(error);
+                }
+            })
+            $('.page-loader').fadeOut();
+        });
     });
 </script>
 {% block js2 %}
@@ -237,31 +308,36 @@
 {% endblock %}
 
 {% block contenido %}
+<div class="load_modal_archivar_grupo"></div>
 <section>
     <section>
         <div class="container">
             <div class="block-header">
                 <h2>{{miembro.nombre|upper}} {{miembro.primerApellido|upper}}<small>{% if miembro.grupo_lidera %}Lider del grupo '{{miembro.grupo_lidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
-                {% if perms.miembros.es_administrador %}
+                {% if perms.miembros.es_administrador or request.miembro.es_cabeza_red %}
                 <ul class="actions m-t-20 hidden-xs">
                     <li class="dropdown">
                         <a href="" data-toggle="dropdown">
                             <i class="zmdi zmdi-more-vert"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right">
-                            {% if not miembro.asisteGAR and not miembro.grupo %}
+                            {% if not miembro.asisteGAR and not miembro.grupo and perms.miembros.es_administrador %}
                             <li>
                                 <a href="/miembro/asignar_grupo/{{miembro.id}}/">Asignar a Grupo</a>
                             </li>
                             {% endif %}
-                            {% if not miembro.usuario %}
+                            {% if not miembro.usuario and perms.miembros.es_administrador %}
                             <li>
                                 <a href="/miembro/asignar_usuario/{{miembro.id}}/">Asignar Usuario</a>
                             </li>
                             {% endif %}
-                            <!-- <li>
-                                <a href="/miembro/cambiar_tipo_miembro/{{miembro.id}}/">Agregar Tipo de Miembro</a>
-                            </li> -->
+                            {% if miembro.grupo %}
+                                {% if request.miembro.grupo_lidera == miembro.grupo.cabeza_red or perms.miembro.es_administrador %}
+                                <li>
+                                    <a href="javascript:void(0);" id="desvincular-lider">{% trans "Desvincular Lider de grupo de amistad" %}</a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
                             <li>
                                 <a href="">Refrescar</a>
                             </li>
@@ -279,18 +355,6 @@
                             <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="uploadPhotos('/miembro/perfil/')">
                             {% endif %}
                             <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
-
-                            <!-- <div class="dropdown pmop-message">
-                                <a data-toggle="dropdown" href="" class="btn bgm-white btn-float z-depth-1">
-                                    <i class="zmdi zmdi-comment-text-alt"></i>
-                                </a>
-
-                                <div class="dropdown-menu">
-                                    <textarea placeholder="Write something..."></textarea>
-
-                                    <button class="btn bgm-green btn-float"><i class="zmdi zmdi-mail-send"></i></button>
-                                </div>
-                            </div> -->
 
                             {% if mismo %}
                             <a class="pmop-edit" id="change-photo" style="width:50%; cursor:pointer;">
@@ -335,7 +399,9 @@
                 <div class="pm-body clearfix">
                     <ul class="tab-nav tn-justified">
                         <li class="{% if p %}active{% endif %} waves-effect"><a href="{% if pk %}/miembro/perfil/{{pk}}{% else %}/miembro/perfil/{% endif %}">Información de Miembro</a></li>
+                        {% if miembro.grupo %}
                         <li class="{% if g %}active{% endif %} waves-effect"><a href="{% if pk %}/miembro/grupo/{{pk}}{% else %}/miembro/grupo/{% endif %}">Grupo</a></li>
+                        {% endif %}
                         {% if miembro.discipulos %}
                         <li class="{% if d %}active{% endif %} waves-effect"><a href="{% if pk %}/miembro/discipulos/{{pk}}{% else %}/miembro/discipulos/{% endif %}">Discípulos</a></li>
                         {% endif %}

@@ -73,7 +73,7 @@ class BaseTest(FastTenantTestCase, TestCase):
 
 
 class APIClient(Client):
-    """Cliente para API."""
+    """Custom Cliente para pruebas de API."""
 
     def get(self, follow=True, *args, **kwargs):
         response = super().get(follow=follow, *args, **kwargs)
@@ -99,14 +99,14 @@ class BaseTestAPI(BaseTest):
 
     def _GET(self, login=True, *args, **kwargs):
         if login:
-            self.usuario = UsuarioFactory()
+            self.usuario = UsuarioFactory(**kwargs.get('kwargs_user', {}))
             self.login_usuario(self.usuario)
         url = kwargs.pop('url', None) or self.get_url()
         return self.client.get(url, *args, **kwargs)
 
     def _POST(self, login=True, *args, **kwargs):
         if login:
-            self.usuario = UsuarioFactory()
+            self.usuario = UsuarioFactory(**kwargs.get('kwargs_user', {}))
             self.login_usuario(self.usuario)
         url = kwargs.pop('url', None) or self.get_url()
         return self.client.post(url, *args, **kwargs)

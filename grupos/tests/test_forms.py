@@ -485,7 +485,9 @@ class ArchivarGrupoFormTest(BaseTest):
         """
 
         data = self.datos_formulario
-        data.update({'seleccionados': list(map(str, Grupo.objects.get(id=100).miembros.all().values_list('id', flat=1)))})
+        data.update(
+            {'seleccionados': list(map(str, Grupo.objects.get(id=100).miembros.all().values_list('id', flat=1)))}
+        )
 
         form = self.form(self.iglesia, data=data)
 

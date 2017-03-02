@@ -1,5 +1,6 @@
 from contextlib import suppress
 from django.contrib.auth.models import Group
+from contextlib import suppress
 
 
 with suppress(Exception):
