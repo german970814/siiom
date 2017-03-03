@@ -1190,7 +1190,8 @@ def ver_informacion_miembro(request, pk=None):
                 data = {'id': miembro.id}
                 request.session['perfil'] = True
                 request.session['miembrosSeleccionados'] = [miembro.id]
-                return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
+                # return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
+                return HttpResponseRedirect('')
 
             form = FormularioInformacionIglesiaMiembro(request.POST, instance=miembro)
             form_cambio_tipo = FormularioTipoMiembros(request.POST, instance=miembro)

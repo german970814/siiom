@@ -29,10 +29,6 @@ def without_perms(request):
     return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))
 
 
-def mapa(request):
-    return render_to_response("mapas.html", locals(), context_instance=RequestContext(request))
-
-
 @login_required
 @permisos_requeridos('miembros.es_lider', 'miembros.buscar_todos')
 def buscar(request, tipo):

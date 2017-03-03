@@ -16,13 +16,6 @@
 
     <title>{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ nombreIglesia }}</title>
 
-    <!-- Bootstrap Core CSS -->
-
-    <!-- Custom Fonts -->
-
-
-    <!-- Template CSS -->
-
     <link href="{% static 'Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/animate.css/animate.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/bootstrap-sweetalert/lib/sweet-alert.css' %}" rel="stylesheet">
@@ -50,20 +43,6 @@
     <script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
     <srcipt src="{% static 'leaflet/icons/js/leaflet-color-markers.js' %}"></srcipt>
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-
-        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. --><!--
-        <style type="text/css">
-            .toggle-switch .ts-label {
-                min-width: 130px;
-            }
-        </style> -->
     <style>
         @media screen and (min-width: 991px) {
             br.space {
@@ -323,15 +302,9 @@
                                 <li>
                                     <a href="/academia/listar_cursos/">Listar Cursos</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="/academia/crear_curso/">Crear Curso</a>
-                                </li> -->
                                 <li>
                                     <a href="/academia/listar_modulos/">Listar Módulos</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="/academia/crear_modulo/">Crear Módulo</a>
-                                </li> -->
                                 <li>
                                     <a href="/miembro/graduar_alumno/">Graduar Alumno</a>
                                 </li>
@@ -348,36 +321,18 @@
                                 <li>
                                     <a href="/miembro/listar_zonas/">Listar Zonas</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="/miembro/crear_zona/">Crear Zona</a>
-                                </li> -->
                                 <li>
                                     <a href="/miembro/listar_escalafones/">Listar Escalafones</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="/miembro/crear_escalafon/">Crear Escalafón</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/crear_tipo_miembro/">Agregar Tipos de Miembro</a>
-                                </li> -->
                                 <li>
                                     <a href="/miembro/listar_pasos/">Listar Pasos</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="/miembro/agregar_paso/">Agregar Pasos</a>
-                                </li> -->
                                 <li>
                                     <a href="/miembro/detalles_llamada/">Listar Detalles de Llamada</a>
                                 </li>
                                 <li>
                                     <a href="/miembro/promover_escalafon/">Promover Miembro de Escalafón</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada</a>
-                                </li> -->
                                 {% if perms.miembros.cumplimiento_pasos %}
                                 <li>
                                     <a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a>
@@ -412,9 +367,6 @@
                                     <li>
                                         <a href="{% url 'grupos:sin_confirmar_ofrenda_GAR' %}">{% trans 'Grupos Faltantes Confirmar Ofrenda' %}</a>
                                     </li>
-                                    {% comment %}<li>
-                                        <a href="{% url 'grupos:sin_confirmar_ofrenda_discipulado' %}">{% trans 'Discipulados Faltantes Confirmar Ofrenda' %}</a>
-                                    </li>{% endcomment %}
                                 {% endif %}
                                 {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                                     <li>
@@ -442,9 +394,6 @@
                         <li>
                             <a href="/miembro/editar_grupo/">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
-                        {% comment %}<li>
-                            <a href="/miembro/llamadas_pendientes/lider/">Llamadas Pendientes</a>
-                        </li>{% endcomment %}
                     </ul>
                 </li>
                 {% endif %}
@@ -455,9 +404,6 @@
                         <li>
                             <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
-                        {% comment %}<li>
-                            <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                        </li>{% endcomment %}
                     </ul>
                 </li>
                 {% endif %}
@@ -514,9 +460,6 @@
                         <li class="sub-menu">
                             <a href="#">Asistencia Reuniones</a>
                             <ul>
-                                <!-- <li>
-                                    <a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a>
-                                </li> -->
                                 <li>
                                     <a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discupulado</a>
                                 </li>
@@ -543,48 +486,6 @@
                                 <a href="{% url 'miembros:nuevo' %}">Agregar Miembro</a>
                             </li>
                         {% endif %}
-                        <!--<li class="sub-menu">
-                            <a href="#">Agregar y Promover Visitas</a>
-                            <ul>
-                                <li>
-                                    <a href="/miembro/promover_visitantes/">Promover Visitas</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/llamadas_pendientes/agente/">Llamadas Pendientes</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="sub-menu">
-                            <a href="#">Asignación y Llamadas</a>
-                            <ul>
-                                <li>
-                                    <a href="/reportes/asignacion_gar/">Control de Asignacion a {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/primera_llamada/">Primera Llamada</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/segunda_llamada/">Segunda Llamada</a>
-                                </li>
-                                <li>
-                                    {% comment %}<a href="{% url 'reportes:cumplimiento_llamadas_lideres' %}">Cumplimiento llamadas lideres</a>{% endcomment %}
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="sub-menu">
-                            <a href="#">Visitas Asignadas</a>
-                            <ul>
-                                <li>
-                                    <a href="/reportes/visitas_por_red/">Visitas asignadas por redes</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/visitas_por_mes/">Visitas registradas por mes</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a>
-                                </li>
-                            </ul>
-                        </li>-->
                     </ul>
                     {% endif %}
                 </li>
