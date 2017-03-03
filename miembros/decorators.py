@@ -40,7 +40,7 @@ def miembro_property_test_decorator(view_func, property, *permissions, function=
                         permisos_requeridos(*permissions)(view_func)(request, *args, **kwargs)
                 return view_func(request, *args, **kwargs)
         else:
-            raise PermissionDenied
+            raise PermissionDenied('No se encontró el miembro')
 
     return wrapped_view
 
@@ -65,3 +65,28 @@ def user_is_cabeza_red(view_func):
     """
 
     return miembro_property_test_decorator(view_func, 'es_cabeza_red', 'miembros.es_administrador')
+
+
+def user_is_miembro_or_empleado(view_func):
+    """
+    Decorador para ver si el usuario que entra, tiene permisos de miembro o permisos de empleado
+
+    :returns: view_func, la funcion de a vista que le fue asiganada el decorador
+    """
+
+    @wraps(view_func)
+    def wrapped_view(request, *args, **kwargs):
+        if hasattr(request.user, 'empleado'):
+            return view_func(request, *args, **kwargs)
+        else:
+            permissions = (
+                'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
+                'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
+            )
+            for permission in permissions:
+                if request.user.has_perm(permission):
+                    return view_func(request, *args, **kwargs)
+
+        raise PermissionDenied('No se encontro el miembro o empleado.')
+
+    return wrapped_view

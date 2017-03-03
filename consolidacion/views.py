@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import permission_required, login_required
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -10,7 +10,6 @@ from django.views.generic.edit import CreateView, UpdateView
 from .models import Visita
 from .forms import FormularioVisita, FormularioAsignarGrupoVisita
 from common.forms import FormularioRangoFechas
-from common.groups_tests import adminTest
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
 
@@ -88,7 +87,8 @@ def asignar_grupo_visitas_ajax(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-@user_passes_test(adminTest)
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def asignar_grupo_visitas(request):
     """
     Vista para asignar a las visitas a un grupo
@@ -145,7 +145,10 @@ def asignar_grupo_visitas(request):
                     data['visitas'] = visitas
                     data['redes'] = Red.objects.all()
                     data['grupos'] = grupos
-                    messages.success(request, _('Se muestran %d visitas para el rango de fechas escogido' % visitas.count()))
+                    messages.success(
+                        request,
+                        _('Se muestran %d visitas para el rango de fechas escogido' % visitas.count())
+                    )
                 else:
                     messages.warning(request, _('No se encontraron resultados para el rango de fecha escogido'))
             else:

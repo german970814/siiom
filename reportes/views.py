@@ -1,6 +1,6 @@
 # Django imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail, send_mass_mail
 from django.db.models import Sum, Count
 from django.http import HttpResponse
@@ -18,7 +18,7 @@ from .utils import get_date_for_report
 from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
 from grupos.utils import reunion_reportada
 from grupos.models import ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
-from common.groups_tests import liderAdminTest
+from common.decorators import permisos_requeridos
 
 # Python Package
 import datetime
@@ -67,7 +67,8 @@ def listaCaminoGrupos(grupoi, grupof):
     return listaG
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def pasosPorMiembros(request):
     """Muestra los miembros de los grupos seleccionados y los pasos hechos por cada miembro."""
 
@@ -115,7 +116,8 @@ def pasosPorMiembros(request):
     )
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def PasosTotales(request):
     """Muestra un reporte de pasos por totales."""
 
@@ -182,7 +184,8 @@ def PasosTotales(request):
     return render_to_response('reportes/pasosTotales.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def PasosRangoFecha(request):
     """Muestra un reporte de pasos por un rango de fecha."""
 
@@ -255,7 +258,8 @@ def PasosRangoFecha(request):
     return render_to_response('reportes/pasosRangoFecha.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def estadisticoReunionesDiscipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado segun los grupos,
     las opciones y el rango de fecha escogidos."""
@@ -348,7 +352,8 @@ def estadisticoReunionesDiscipulado(request):
     )
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def estadisticoTotalizadoReunionesGar(request):
     """Muestra un estadistico de los reportes de reunion GAR totalizado
     por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
@@ -445,7 +450,8 @@ def estadisticoTotalizadoReunionesGar(request):
     return render_to_response('reportes/estadistico_total_gar.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def estadisticoTotalizadoReunionesDiscipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado
     totalizado por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
@@ -568,7 +574,8 @@ def sendMassMail(correos):
     send_mass_mail(correos, fail_silently=False)
 
 
-@user_passes_test(liderAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def estadistico_reuniones_gar(request):
     """
     Muestra un estadistico de los reportes de reunion GAR segun los grupos,
@@ -787,7 +794,8 @@ def estadistico_reuniones_gar(request):
     return render(request, 'reportes/estadistico_gar.html', data)
 
 
-@user_passes_test(liderAdminTest)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
 def confirmar_ofrenda_grupos_red(request):
     """Vista para confirmar la ofrenda de los grupos de acuerdo a un grupo inicial"""
 

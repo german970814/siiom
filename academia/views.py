@@ -1,6 +1,6 @@
 # Django Imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core import serializers
 from django.db.models import Q
 from django.db.models.aggregates import Sum
@@ -18,9 +18,7 @@ from .forms import (
     FormularioCrearSesion, FormularioRecibirPago
 )
 from miembros.models import Miembro, CumplimientoPasos
-from common.groups_tests import (
-    maestroTest, receptorTest, adminTest, adminMaestroTest
-)
+from common.decorators import permisos_requeridos
 
 # Python Packages
 import datetime
@@ -43,7 +41,8 @@ def eliminar(request, modelo, lista):
     return ok
 
 
-@user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_maestro', 'miembros.es_administrador')
 def verCursos(request, admin):
     """Permite a un maestro o a un administrador listar cursos."""
     miembro = Miembro.objects.get(usuario=request.user)
@@ -69,7 +68,8 @@ def verCursos(request, admin):
     return render_to_response("academia/listar_cursos.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_maestro', 'miembros.es_administrador')
 def verDetalleCurso(request, curso):
     """Permite a un maestro o administrador ver los modulos y sesiones que se dan en un curso."""
 
@@ -82,7 +82,8 @@ def verDetalleCurso(request, curso):
     return render_to_response("academia/curso_detalle.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_maestro', 'miembros.es_administrador')
 def editarCurso(request, admin, url, pk, template_name="academia/crear_curso.html"):
     """Permite a un maestro o administrador editar un cursos."""
     accion = 'Editar'
@@ -109,7 +110,8 @@ def editarCurso(request, admin, url, pk, template_name="academia/crear_curso.htm
     return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_maestro', 'miembros.es_administrador')
 def listarEstudiantes(request, curso):
     """Permite listar los modulos dados en un curso y los estudiantes que asisten a dicho curso."""
 
@@ -150,7 +152,8 @@ def listarEstudiantes(request, curso):
     return render_to_response("academia/listar_estudiantes.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminMaestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('miembros.es_maestro', 'miembros.es_administrador')
 def verDetalleEstudiante(request, est):
     """Permite ver la informacion del estudiante. Las sesiones dadas, su nota definitiva, etc."""
 
@@ -177,7 +180,8 @@ def verDetalleEstudiante(request, est):
     return render_to_response("academia/estudiante_detalle.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(maestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_maestro', raise_exception=True)
 def maestroAsistencia(request):
     """ Permite a un maestro llenar la asistencia de una sesion. Se muestran los estudiantes que esten en dicho modulo
         o que el moduloActual sea None."""
@@ -256,7 +260,8 @@ def maestroAsistencia(request):
     return render_to_response("academia/asistencia.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(maestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_maestro', raise_exception=True)
 def maestroRegistrarEntregaTareas(request):
     """Permite a un maestro registrar si un estudiante entrego la tarea de una sesion. Se muestran solo
     los estudiantes que han dado dicha sesion."""
@@ -314,7 +319,8 @@ def maestroRegistrarEntregaTareas(request):
     return render_to_response("academia/tareas.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(maestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_maestro', raise_exception=True)
 def evaluarModulo(request):
     """Permite a un profesor registrar la calificacion del examen final del modulo actual en el que se
     encuentra el estudiante, siempre y cuando este halla asistido a todas las sesiones de dicho modulo."""
@@ -362,7 +368,8 @@ def evaluarModulo(request):
     return render_to_response('academia/evaluar_modulo.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(maestroTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_maestro', raise_exception=True)
 def promoverModulo(request):
     """Permite a un maestro promover a un estudiante de modulo, siempre y cuando este haya realizado el examen final
        de el modulo actual en el que se encuentra."""
@@ -392,7 +399,8 @@ def promoverModulo(request):
     return render_to_response('academia/promover_estudiante.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def crearCurso(request):
     """Permite a un administrador crear cursos en la academia."""
 
@@ -412,7 +420,8 @@ def crearCurso(request):
     return render_to_response('academia/crear_curso.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def matricularEstudiante(request, id):
     """ Permite a un administrador matricular a un miembro de la iglesia en un curso de la academia siempre y cuando este
         haya realizado encuentro."""
@@ -431,7 +440,8 @@ def matricularEstudiante(request, id):
     return render_to_response('academia/matricula.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def listarModulos(request):
     """Permite a un administrador listar los modulos de la academia."""
 
@@ -446,7 +456,8 @@ def listarModulos(request):
     return render_to_response('academia/listar_modulos.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def crearModulo(request):
     """Permite a un administrador crear modulos en la academia."""
 
@@ -463,7 +474,8 @@ def crearModulo(request):
     return render_to_response('academia/crear_modulo.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def editarModulo(request, pk):
     """Permite a un administrador editar los modulos existentes en la academia."""
 
@@ -489,7 +501,8 @@ def editarModulo(request, pk):
     return HttpResponseRedirect("/academia/listar_modulos")
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def listarSesiones(request, id):
     """Permite a un administrador listar las sesiones de un modulo."""
 
@@ -505,7 +518,8 @@ def listarSesiones(request, id):
     return render_to_response('academia/listar_sesiones.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def crearSesion(request, id):
     """Permite a un administrador crear una sesion en un modulo."""
 
@@ -525,7 +539,8 @@ def crearSesion(request, id):
     return render_to_response('academia/crear_sesion.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def editarSesion(request, id, pk):
     """Permite a un administrador editar una sesion de un modulo de la academia."""
 
@@ -553,7 +568,8 @@ def editarSesion(request, id, pk):
     return HttpResponseRedirect("/academia/sesiones/" + id + "/")
 
 
-@user_passes_test(receptorTest, login_url="/dont_have_permissions/")
+@login_required
+@permisos_requeridos('grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR')
 def recibirPago(request, id):
     miembro = Miembro.objects.get(usuario=request.user)
     try:
@@ -578,7 +594,8 @@ def recibirPago(request, id):
     return render_to_response('academia/recibir_pago.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def listarPagosAcademia(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupos = request.user.groups.all()

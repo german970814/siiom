@@ -1,5 +1,5 @@
 # Django
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.db import transaction
@@ -15,14 +15,15 @@ from .forms import CrearEncuentroForm, NuevoEncontristaForm, EditarEncuentroForm
 from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro, solo_encuentros_miembro
 from grupos.models import Red, Grupo
 from miembros.models import Miembro
-from common.groups_tests import tesorero_administrador_test, adminTest, admin_tesorero_coordinador_test
 from common.constants import URL_SIN_PERMISOS as URL
+from common.decorators import permisos_requeridos
 
 # Python
 import time
 
 
-@user_passes_test(adminTest, login_url=URL)
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def crear_encuentro(request):
     """Vista de Creacion de Encuentros."""
 
@@ -67,7 +68,8 @@ def crear_encuentro(request):
     return render(request, 'encuentros/crear_encuentro.html', data)
 
 
-@user_passes_test(adminTest, login_url=URL)
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def editar_encuentro(request, id_encuentro):
     """Vista de edicion de encuentros."""
 
@@ -129,7 +131,8 @@ def editar_encuentro(request, id_encuentro):
     return render(request, 'encuentros/crear_encuentro.html', data)
 
 
-@user_passes_test(admin_tesorero_coordinador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero', 'miembros.es_coordinador')
 def listar_encuentros(request):
     """Lista de los Encuentros en estado activo y no completados."""
 
@@ -144,7 +147,8 @@ def listar_encuentros(request):
     return render_to_response('encuentros/listar_encuentros.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(tesorero_administrador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero')
 def agregar_encontrista(request, id_encuentro):
     """Vista que permite agregar un encontrista a un encuentro especifico."""
 
@@ -185,7 +189,8 @@ def agregar_encontrista(request, id_encuentro):
     return render(request, 'encuentros/agregar_encontrista.html', data)
 
 
-@user_passes_test(tesorero_administrador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero')
 def editar_encontrista(request, id_encontrista):
     """Vista para editar los encontristas agregados."""
 
@@ -223,7 +228,8 @@ def editar_encontrista(request, id_encontrista):
     return render(request, 'encuentros/agregar_encontrista.html', data)
 
 
-@user_passes_test(tesorero_administrador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero')
 def borrar_encontrista(request, id_encontrista):
     """
     Vista sencilla que toma el id de un encontrista y lo elimina luego
@@ -235,7 +241,8 @@ def borrar_encontrista(request, id_encontrista):
     return HttpResponseRedirect('/encuentro/listar_encontristas/%s/' % str(encuentro.id))
 
 
-@user_passes_test(admin_tesorero_coordinador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero', 'miembros.es_coordinador')
 def listar_encontristas(request, id_encuentro):
     """Vista que lista los encontristas actuales que tiene cada encuentro."""
 
@@ -249,7 +256,8 @@ def listar_encontristas(request, id_encuentro):
 
 
 @transaction.atomic
-@user_passes_test(tesorero_administrador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero')
 def asistencia_encuentro(request, id_encuentro):
     """
     Lista de asistencia final en la cual se marca cuales de los encontristas asistieron

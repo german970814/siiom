@@ -3,16 +3,14 @@ Created on 4/04/2011
 
 @author: Conial
 '''
-from datetime import date
-from django.shortcuts import render_to_response, render
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import Group, User
-from django.contrib.auth.decorators import user_passes_test, login_required
-from miembros.models import Miembro, TipoMiembro
-from django.template.context import RequestContext
-from grupos.models import Grupo
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from miembros.models import CambioTipo, CumplimientoPasos, Pasos
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render_to_response, render
+from django.template.context import RequestContext
+
+from grupos.models import Grupo
+from miembros.models import Miembro
 from common.decorators import permisos_requeridos
 
 
@@ -34,8 +32,6 @@ def without_perms(request):
 def mapa(request):
     return render_to_response("mapas.html", locals(), context_instance=RequestContext(request))
 
-
-# ---------------------------------------
 
 @login_required
 @permisos_requeridos('miembros.es_lider', 'miembros.buscar_todos')

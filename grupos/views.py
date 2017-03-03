@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -25,9 +25,6 @@ from .forms import (
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.models import Miembro
 from common.decorators import permisos_requeridos
-from common.groups_tests import (
-    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
-)
 
 # Python Packages
 import datetime
@@ -35,7 +32,8 @@ import json
 import copy
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_lider', raise_exception=True)
 def editarHorarioReunionGrupo(request, pk=None):
     g = True
     miembro = Miembro.objects.get(usuario=request.user)
@@ -90,7 +88,8 @@ def reunionDiscipuladoReportada(predica, grupo):
         return False
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_lider', raise_exception=True)
 def reportarReunionGrupo(request):
     """
     Vista para crear el reporte de grupos en el sistema
@@ -177,7 +176,8 @@ def reportarReunionGrupoAdmin(request):
     )
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_lider', raise_exception=True)
 def reportarReunionDiscipulado(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupo_lidera
@@ -207,7 +207,8 @@ def reportarReunionDiscipulado(request):
     )
 
 
-@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_pastor', raise_exception=True)
 def listarPredicas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
@@ -222,7 +223,8 @@ def listarPredicas(request):
     return render_to_response('grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_pastor', raise_exception=True)
 def crearPredica(request):
     miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
@@ -236,7 +238,8 @@ def crearPredica(request):
     return render_to_response('grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_pastor', raise_exception=True)
 def editarPredica(request, pk):
     accion = 'Editar'
 
@@ -409,7 +412,8 @@ def ver_reportes_grupo(request):
     return render_to_response("grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def editar_runion_grupo(request, pk):
     """
     Funcion para editar una reunion de Grupo GAR
