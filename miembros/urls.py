@@ -38,7 +38,6 @@ urlpatterns = [
     url(r'^detalles_llamada/$', views.listarDetallesLlamada, name="detalles_llamada"),
     url(r'^agregar_detalle_llamada/$', views.AgregarDetalleLlamada, name="agregar_detalle_llamada"),
     url(r'^editar_detalle_llamada/(?P<pk>\d+)$', views.editarDetalleLlamada, name="editar_detalle_llamada"),
-    url(r'^graduar_alumno/$', views.graduarAlumno, name="graduar_alumno"),
     url(r'^asignar_usuario/(\d+)/$', views.crearUsuarioMimembro, name="asignar_usuario"),
     url(r'^eliminar_cambio_tipo/(\d+)/$', views.eliminarCambioTipoMiembro, name="eliminar_cambio_tipo"),
     url(r'^cumplimiento_pasos/$', views.cumplimientoPasos, name="cumplimiento_pasos"),

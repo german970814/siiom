@@ -297,25 +297,6 @@
                     <ul>
                     {% if perms.miembros.es_administrador %}
                         <li class="sub-menu">
-                            <a href="#">Academia</a>
-                            <ul>
-                                <li>
-                                    <a href="/academia/listar_cursos/">Listar Cursos</a>
-                                </li>
-                                <li>
-                                    <a href="/academia/listar_modulos/">Listar Módulos</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/graduar_alumno/">Graduar Alumno</a>
-                                </li>
-                                <li>
-                                    <a href="/academia/listar_pagos/">Listar Pagos de Academia</a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% endif %}
-                    {% if perms.miembros.es_administrador %}
-                        <li class="sub-menu">
                             <a href="#">Miembro</a>
                             <ul>
                                 <li>
@@ -419,22 +400,6 @@
                         </li>
                         <li>
                             <a href="{% url 'grupos:organigrama' %}">Organigrama de mi Red</a>
-                        </li>
-                    </ul>
-                </li>
-                {% endif %}
-                {% if perms.miembros.es_maestro %}
-                <li class="sub-menu">
-                    <a href="#"><i class="zmdi zmdi-graduation-cap"></i> Academias</a>
-                    <ul>
-                        <li>
-                            <a href="/academia/cursos/">Curso</a>
-                        </li>
-                        <li>
-                            <a href="/academia/asistencia/">Asistencia</a>
-                        </li>
-                        <li>
-                            <a href="/academia/registrar_entrega_tarea/">Entrega de Tarea</a>
                         </li>
                     </ul>
                 </li>

@@ -9,7 +9,6 @@ from django import forms
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _lazy
 
-from academia.models import Matricula
 from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
 from .models import (
@@ -24,11 +23,10 @@ from io import BytesIO
 __all__ = (
     'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro', 'FormularioCambiarContrasena',
     'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
-    'FormularioCumplimientoPasosMiembro', 'FormularioPasos', 'FormularioCrearEscalafon',
+    'FormularioPasos', 'FormularioCrearEscalafon', 'TrasladarMiembroForm',
     'FormularioPromoverEscalafon', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
     'FormularioAsignarUsuario', 'FormularioDetalleLlamada', 'FormularioRecuperarContrasenia',
     'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'FormularioTipoMiembros',
-    'TrasladarMiembroForm'
 )
 
 
@@ -187,22 +185,6 @@ class FormularioCrearBarrio(forms.ModelForm):
     class Meta:
         model = Barrio
         fields = ('nombre', )
-
-
-class FormularioCumplimientoPasosMiembro(forms.ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioCumplimientoPasosMiembro, self).__init__(*args, **kwargs)
-        estudiantes = Matricula.objects.all().exclude(
-            estudiante__pasos__nombre__iexact='lanzamiento').values('estudiante')
-        self.fields['miembro'].queryset = Miembro.objects.filter(id__in=estudiantes)
-        self.fields['miembro'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-
-    class Meta:
-        model = CumplimientoPasos
-        fields = ('miembro',)
 
 
 class FormularioPasos(forms.ModelForm):

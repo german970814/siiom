@@ -19,7 +19,6 @@ urlpatterns = patterns(
     url(r'^administracion/$', administracion, name="administracion"),
     url(r'^miembro/', include("miembros.urls", namespace='miembros')),
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),
-    url(r'^academia/', include("academia.urls", namespace='academia')),
     url(r'^reportes/', include("reportes.urls", namespace='reportes')),
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),

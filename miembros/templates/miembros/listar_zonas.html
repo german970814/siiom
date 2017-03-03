@@ -87,8 +87,8 @@
             <tbody>
                 {% for zona in zonas %}
                     <tr>
-                        <td class="hidden">{{zona.id}}</td>
-                        <td><a alt="Ver Sesiones" href="/academia/sesiones/{{zona.id}}/">{{zona.nombre|capfirst}}</a></td>
+                        <td class="hidden">{{ zona.id }}</td>
+                        <td>{{ zona.nombre|capfirst }}</td>
                     </tr>
                 {% empty %}
                     <tr>

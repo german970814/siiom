@@ -17,13 +17,12 @@ from django.utils.translation import ugettext as _
 # Apps Imports
 from .forms import *
 from .forms import TrasladarMiembroForm, NuevoMiembroForm
-from .models import Miembro, CambioTipo, TipoMiembro
 from .decorators import user_is_miembro_or_empleado
-from academia.models import Curso
-from compras.models import Requisicion, Parametros, DetalleRequisicion
-from common.decorators import permisos_requeridos
-from grupos.models import Grupo, Red
+from .models import Miembro, CambioTipo, TipoMiembro, Zona
 from grupos.forms import FormularioEditarDiscipulado
+from grupos.models import Grupo, Red
+from common.decorators import permisos_requeridos
+from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
 import waffle
@@ -858,36 +857,6 @@ def crearUsuarioMimembro(request, id):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def graduarAlumno(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-
-    if request.method == 'POST':
-        form = FormularioCumplimientoPasosMiembro(data=request.POST)
-        if form.is_valid():
-            estudianteGraduado = form.save(commit=False)
-            estudianteGraduado.paso = Pasos.objects.get(nombre__iexact="lanzamiento")
-            try:
-                estudiante = Matricula.objects.get(estudiante=estudianteGraduado.miembro)
-            except:
-                raise Http404
-            modulos = list(estudiante.modulos.all())
-            modulosCurso = estudiante.curso.modulos.all()
-            if len(modulos) == len(modulosCurso) and estudiante.notaDefinitiva >= 3:
-                estudianteGraduado.fecha = datetime.datetime.now()
-                estudianteGraduado.save()
-                ok = True
-                puedeVer = True
-            else:
-                ok = False
-                puedeVer = False
-    else:
-        puedeVer = True
-        form = FormularioCumplimientoPasosMiembro()
-    return render_to_response('miembros/graduar_estudiante.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
 def eliminarCambioTipoMiembro(request, id):
     """
     El cambio que se va a eliminar se guarda en la var cambio y si esta es un
@@ -951,9 +920,6 @@ def administracion(request):
     totalMiembrosI = Miembro.objects.filter(estado='I').count()
     totalLideres = CambioTipo.objects.filter(nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Lider")).count()
     totalMaestros = CambioTipo.objects.filter(nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Maestro")).count()
-    totalCursos = Curso.objects.all().count()
-    totalCursosA = Curso.objects.filter(estado='A').count()
-    totalCursosC = Curso.objects.filter(estado='C').count()
     # visitantes = request.session['visitantes']
     return render_to_response('miembros/administracion.html', locals(), context_instance=RequestContext(request))
 
