@@ -35,7 +35,6 @@ urlpatterns = [
     url(r'^listar_tipo_miembro/$', views.listarTipoMiembro, name="listar_tipo_miembro"),
     url(r'^editar_tipo_miembro/(?P<pk>\d+)$', views.editarTipoMiembro, name="editar_tipo_miembro"),
     url(r'^cambiar_tipo_miembro/(\d+)/$', views.cambiarMiembroDeTipoMiembro, name="cambiar_tipo_miembro"),
-    url(r'^detalles_llamada/$', views.listarDetallesLlamada, name="detalles_llamada"),
     url(r'^asignar_usuario/(\d+)/$', views.crearUsuarioMimembro, name="asignar_usuario"),
     url(r'^eliminar_cambio_tipo/(\d+)/$', views.eliminarCambioTipoMiembro, name="eliminar_cambio_tipo"),
     url(r'^cumplimiento_pasos/$', views.cumplimientoPasos, name="cumplimiento_pasos"),

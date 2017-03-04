@@ -334,26 +334,7 @@
         </div>
     </div>
 	{% endif %}
-	{% if visitantes %}
-	<div class="card">
-		<div class="card-header">
-			<h1>
-				<legend><h3>Notificaciones</h3></legend>
-			</h1>
-		</div>
-		<div class="card-body card-padding">
-			<div class="row">
-			{% comment %}
-            {% for visita in visitantes %}
-	            <div class="alert bgm-cyan" role="alert">
-	                <p  class="f-15" style="color:#fff;">Llamada pendiente al visitante {{visita.nombre|capfirst}} {{visita.primerApellido|capfirst}} para informarle de las reuniones de G.A.R <a style="color: #fff;" alt="Listar Redes" class="alert-link f-700" href="/miembro/registrar_llamada/lider/">Registrar Llamada</a></p>
-	            </div>
-	        {% endfor %}
-            {% endcomment %}
-	    	</div>
-		</div>
-	</div>
-	{% endif %}
+
 </div>
 {% endblock %}
 
@@ -361,11 +342,11 @@
 {% block js %}
 <script>
     {% if miembro %}
-    {% if not grupo.get_position %}
-    $(document).ready(function() {
-        $('#toggleModal').click();
-    })
-    {% endif %}
+        {% if not grupo.get_position %}
+        $(document).ready(function() {
+            $('#toggleModal').click();
+        })
+        {% endif %}
     {% endif %}
 </script>
 </script>

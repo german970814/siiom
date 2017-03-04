@@ -18,7 +18,7 @@ from django.utils.translation import ugettext as _
 from .forms import *
 from .forms import TrasladarMiembroForm, NuevoMiembroForm
 from .decorators import user_is_miembro_or_empleado
-from .models import Miembro, CambioTipo, TipoMiembro, Zona
+from .models import Miembro, CambioTipo, TipoMiembro, Zona, CambioEscalafon, CumplimientoPasos
 from .utils import divorciar, calcular_grupos_miembro
 from grupos.forms import FormularioEditarDiscipulado
 from grupos.models import Grupo, Red
@@ -1044,13 +1044,6 @@ def ver_informacion_miembro(request, pk=None):
 
     if request.user.has_perm('miembros.es_administrador'):
         if request.method == 'POST':
-            if 'rllamada' in request.POST:
-                data = {'id': miembro.id}
-                request.session['perfil'] = True
-                request.session['miembrosSeleccionados'] = [miembro.id]
-                # return HttpResponseRedirect('/miembro/registrar_llamada/agente/')
-                return HttpResponseRedirect('')
-
             form = FormularioInformacionIglesiaMiembro(request.POST, instance=miembro)
             form_cambio_tipo = FormularioTipoMiembros(request.POST, instance=miembro)
 

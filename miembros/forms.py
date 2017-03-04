@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _lazy
 from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
 from .models import (
-    Miembro, Zona, Barrio, CumplimientoPasos, CambioTipo
+    Miembro, Zona, Barrio, CumplimientoPasos, CambioTipo,
     Pasos, Escalafon, CambioEscalafon, TipoMiembro,
 )
 
