@@ -14,8 +14,8 @@ import datetime
 
 
 __all__ = (
-    'Zona', 'Barrio', 'Pasos', 'TipoMiembro', 'DetalleLlamada',
-    'Escalafon', 'Miembro', 'CumplimientoPasos', 'CambioEscalafon', 'CambioTipo',
+    'Zona', 'Barrio', 'Pasos', 'TipoMiembro', 'CambioEscalafon', 'CambioTipo',
+    'Escalafon', 'Miembro', 'CumplimientoPasos',
 )
 
 
@@ -55,16 +55,6 @@ class TipoMiembro(models.Model):
 
     def __str__(self):
         return self.nombre.upper()
-
-
-class DetalleLlamada(models.Model):
-    """Modelo para guardar los detalles de las llamadas."""
-
-    nombre = models.CharField(max_length=20)
-    descripcion = models.TextField(max_length=200)
-
-    def __str__(self):
-        return self.nombre
 
 
 class Escalafon(models.Model):
@@ -144,8 +134,7 @@ class Miembro(IglesiaMixin, models.Model):
     )
     foto_perfil = models.ImageField(_lazy('foto perfil'), upload_to=ruta_imagen, null=True, blank=True)
     portada = models.ImageField(_lazy('portada'), upload_to=ruta_imagen, null=True, blank=True)
-    #  info iglesia
-    convertido = models.BooleanField(_lazy('convertido'), default=False)  # eliminar
+
     estado = models.CharField(_lazy('estado'), max_length=1, choices=ESTADOS)
     pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', verbose_name=_lazy('pasos'), blank=True)
     escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon', verbose_name=_lazy('escalafón'))
@@ -157,7 +146,6 @@ class Miembro(IglesiaMixin, models.Model):
         'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
         related_name='lideres', null=True, blank=True
     )
-    #  info GAR
     fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers

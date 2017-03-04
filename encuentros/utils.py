@@ -49,7 +49,6 @@ def crear_miembros_con_encontristas(encontristas, iglesia):
                 nuevo_miembro.genero = encontrista.genero
                 nuevo_miembro.email = encontrista.email
                 nuevo_miembro.grupo = encontrista.grupo
-                nuevo_miembro.convertido = True
                 nuevo_miembro.iglesia = iglesia
                 nuevo_miembro.save()
                 pasos = CumplimientoPasos()

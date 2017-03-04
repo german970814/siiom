@@ -885,64 +885,6 @@ def administracion(request):
 
 
 @login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def AgregarDetalleLlamada(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-    accion = 'Crear'
-    if request.method == 'POST':
-        form = FormularioDetalleLlamada(data=request.POST)
-        if form.is_valid():
-            NuevoDetalleLlamada = form.save()
-            ok = True
-    else:
-        form = FormularioDetalleLlamada()
-    return render_to_response(
-        'miembros/agregar_detalle_llamada.html', locals(), context_instance=RequestContext(request)
-    )
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def listarDetallesLlamada(request):
-    miembro = Miembro.objects.get(usuario=request.user)
-
-    if request.method == "POST":
-
-        if 'eliminar' in request.POST:
-            okElim = eliminar(request, DetalleLlamada, request.POST.getlist('seleccionados'))
-
-    detallesLlamada = list(DetalleLlamada.objects.all())
-
-    return render_to_response(
-        'miembros/listar_detalles_llamada.html', locals(), context_instance=RequestContext(request)
-    )
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def editarDetalleLlamada(request, pk):
-    accion = 'Editar'
-
-    try:
-        detalle = DetalleLlamada.objects.get(pk=pk)
-    except DetalleLlamada.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
-        form = FormularioDetalleLlamada(request.POST or None, instance=detalle)
-
-        if form.is_valid():
-            ok = True
-            form.save()
-    else:
-        form = FormularioDetalleLlamada(instance=detalle)
-
-    return render_to_response(
-        "miembros/agregar_detalle_llamada.html", locals(), context_instance=RequestContext(request)
-    )
-
-
-@login_required
 @permission_required('miembros.cumplimiento_pasos', raise_exception=True)
 def cumplimientoPasos(request):
     """

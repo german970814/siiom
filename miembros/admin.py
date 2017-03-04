@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (
-    Zona, Barrio, Pasos, TipoMiembro, DetalleLlamada, Escalafon,
+    Zona, Barrio, Pasos, TipoMiembro, Escalafon,
     Miembro, CambioTipo, CambioEscalafon, CumplimientoPasos
 )
 
@@ -107,7 +107,6 @@ admin.site.register(Zona)
 admin.site.register(Barrio)
 admin.site.register(Pasos)
 admin.site.register(TipoMiembro)
-admin.site.register(DetalleLlamada)
 admin.site.register(Escalafon)
 admin.site.register(Miembro, MiembroAdmin)
 admin.site.register(CambioTipo, CambioTipoAdmin)

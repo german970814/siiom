@@ -28,10 +28,6 @@
                 <dd>{% if miembro.estado %}{{miembro.get_estado_display}}{% else %}SIN DATOS{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
-                <dt>Convertido</dt>
-                <dd>{% if miembro.convertido %}SI{% else %}NO{% endif %}</dd>
-            </dl>
-            <dl class="dl-horizontal">
                 <dt>Grupo que Lidera</dt>
                 <dd>{% if miembro.grupo_lidera %}{{miembro.grupo_lidera.nombre|upper}}{% else %}NINGUNO{% endif %}</dd>
             </dl>
@@ -61,24 +57,6 @@
                         {{form.estado}}
                     </div>
                     {% for error in form.estado.errors %}
-                    <small class="help-block">{{error}}</small>
-                    {% endfor %}
-                </dd>
-            </dl>
-            </div>
-            <div class="input-group {{form.convertido.css_classes}} col-xs-12">
-            <dl class="dl-horizontal">
-                <dt class="p-t-10">
-                	<label for="id_convertido" class="requerido control-label">Convertido:</label>
-                </dt>
-                <dd>
-                    <div class="fg-line">
-                    	<label for="id_convertido" class="control-label checkbox">
-                        {{form.convertido}}
-                        <i class="input-helper m-r-20"></i>
-                        </label>
-                    </div>
-                    {% for error in form.convertido.errors %}
                     <small class="help-block">{{error}}</small>
                     {% endfor %}
                 </dd>

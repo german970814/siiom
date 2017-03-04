@@ -12,8 +12,8 @@ from django.utils.translation import ugettext_lazy as _lazy
 from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
 from .models import (
-    Miembro, Zona, Barrio, CumplimientoPasos, DetalleLlamada,
-    Pasos, Escalafon, CambioEscalafon, TipoMiembro, CambioTipo
+    Miembro, Zona, Barrio, CumplimientoPasos, CambioTipo
+    Pasos, Escalafon, CambioEscalafon, TipoMiembro,
 )
 
 from PIL import Image
@@ -25,8 +25,8 @@ __all__ = (
     'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
     'FormularioPasos', 'FormularioCrearEscalafon', 'TrasladarMiembroForm',
     'FormularioPromoverEscalafon', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
-    'FormularioAsignarUsuario', 'FormularioDetalleLlamada', 'FormularioRecuperarContrasenia',
-    'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'FormularioTipoMiembros',
+    'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
+    'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro',
 )
 
 
@@ -280,20 +280,6 @@ class FormularioAsignarUsuario(forms.Form):
         self.fields['contrasenaVerificacion'].widget.attrs.update({'class': 'form-control'})
 
 
-class FormularioDetalleLlamada(forms.ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioDetalleLlamada, self).__init__(*args, **kwargs)
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['descripcion'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = DetalleLlamada
-        fields = '__all__'
-
-
 class FormularioRecuperarContrasenia(forms.Form):
     required_css_class = 'requerido'
     error_css_class = 'has-error'
@@ -376,7 +362,7 @@ class FormularioInformacionIglesiaMiembro(forms.ModelForm):
 
     class Meta:
         model = Miembro
-        fields = ('estado', 'convertido', )
+        fields = ('estado', )
 
 
 class FormularioTipoMiembros(forms.ModelForm):
