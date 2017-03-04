@@ -279,9 +279,11 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             un grupo que se encuentra dos niveles mas abajo que la raiz del arbol.
         """
 
-        ancentros = self.get_ancestors()
-        if len(ancentros) > 2:
-            return ancentros[2]
+        ancestros = self.get_ancestors()
+        if self.get_depth() == 3:
+            return self
+        elif len(ancestros) > 2:
+            return ancestros[2]
         else:
             return None
 

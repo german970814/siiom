@@ -580,6 +580,8 @@ class ArchivarGrupoForm(CustomForm):
                 'grupo_destino', forms.ValidationError(self.error_messages['mismo_grupo'], code='mismo_grupo')
             )
 
+        return cleaned_data
+
     def archiva_grupo(self):
         """
         Metodo para archivar los grupos, de acuerdo al grupo de destino y los seleccionados.

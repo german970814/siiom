@@ -16,7 +16,7 @@ from django.utils.translation import ugettext as _
 
 # Apps Imports
 from .forms import *
-from .forms import TrasladarMiembroForm, NuevoMiembroForm
+from .forms import TrasladarMiembroForm, NuevoMiembroForm, DesvincularLiderGrupoForm
 from .decorators import user_is_miembro_or_empleado
 from .models import Miembro, CambioTipo, TipoMiembro, Zona, CambioEscalafon, CumplimientoPasos
 from .utils import divorciar, calcular_grupos_miembro
@@ -211,6 +211,7 @@ def liderEditarPerfil(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     casado = False
     mismo = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -988,6 +989,7 @@ def ver_discipulos(request, pk=None):
     d = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -1033,6 +1035,7 @@ def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
+    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -1233,7 +1236,7 @@ def trasladar(request, pk):
     Permite a un administrador trasladar un miembro que no lidere grupo a que asista a otro grupo.
     """
 
-    miembro = get_object_or_404(Miembro, pk=pk)
+    miembro = get_object_or_404(Miembro.objects.iglesia(request.iglesia), pk=pk)
     if miembro.grupo_lidera:
         return redirect(reverse('sin_permiso'))
 
