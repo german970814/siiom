@@ -315,13 +315,6 @@ class FormularioFotoPerfil(forms.ModelForm):
                 self.add_error('foto_perfil', 'Tamaño maximo aceptado de %sx%s y has puesto una de \
                     %sx%s' % (max_width, max_height, w, h))
 
-            # main, sub = foto.content_type.split('/')
-            # if not(main == 'image' and sub in ['jpeg', 'pjpeg', 'gif', 'png']):
-            #     self.add_error('foto_perfil', 'Error con el tipo de imagen')
-
-            # if len(foto) > (20 * 1024):
-            #     print("Error exceso de tamaño")
-
         except AttributeError as e:
             print(e)
             pass
@@ -336,11 +329,6 @@ class FormularioFotoPerfil(forms.ModelForm):
         image_file = BytesIO(image_field.read())
         image = Image.open(image_file)
         w, h = image.size
-
-        # if w > 1000 or h > 1000:
-        #     image = image.resize((1000, 1000), Image.ANTIALIAS)
-        # if w < 400 or h < 400:
-        #     image = image.resize((400, 400), Image.ANTIALIAS)
 
         image_file = BytesIO()
         image.save(image_file, 'png', quality=90)

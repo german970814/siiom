@@ -53,6 +53,7 @@ def obtener_fechas_semana(fecha):
         Las fechas posibles en la semana de lunes a domingo, a partir de la fecha
         dada.
     """
+
     inicio_semana = fecha - datetime.timedelta(days=fecha.isoweekday() - 1)
     fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
 
