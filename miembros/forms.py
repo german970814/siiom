@@ -24,7 +24,7 @@ from io import BytesIO
 __all__ = (
     'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro', 'FormularioCambiarContrasena',
     'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
-    'FormularioPasos', 'FormularioCrearEscalafon', 'TrasladarMiembroForm', 'DesvincularLiderGrupoForm'
+    'FormularioPasos', 'FormularioCrearEscalafon', 'TrasladarMiembroForm', 'DesvincularLiderGrupoForm',
     'FormularioPromoverEscalafon', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
     'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
     'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro',
@@ -443,7 +443,7 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
     )
     nuevo_lider = forms.ModelChoiceField(
         queryset=Miembro.objects.none(), label=_lazy('Nuevo Lider'),
-        required=False, empty_label=_lazy('NO REEMPLAZAR LIDER')
+        required=False, empty_label=_lazy('NO REEMPLAZAR LIDER'),
         help_text=_lazy('Si escoge esta opcion, el líder escogido, reemplazará al líder el cual quiere desvincular.')
     )
 
