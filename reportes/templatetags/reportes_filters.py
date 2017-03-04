@@ -8,6 +8,13 @@ __author__ = 'Tania'
 register = template.Library()
 
 
+def _scaper(x):
+    """
+    Funcion para solucionar PEP8 E731 (do not assign name to lambda expression, use a def).
+    """
+    return x
+
+
 def unordered_list_grupos(value, autoescape=None):
     """
     Recursively takes a self-nested list and returns an HTML unordered list --
@@ -33,7 +40,7 @@ def unordered_list_grupos(value, autoescape=None):
         from django.utils.html import conditional_escape
         escaper = conditional_escape
     else:
-        escaper = lambda x: x
+        escaper = _scaper
 
     def convert_old_style_list(list_):
         """

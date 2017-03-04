@@ -13,6 +13,12 @@ from .six import SixALNode
 from treebeard.al_tree import AL_Node
 
 
+__all__ = (
+    'Red', 'Grupo', 'Predica', 'ReunionGAR', 'AsistenciaMiembro',
+    'ReunionDiscipulado', 'AsistenciaDiscipulado', 'HistorialEstado',
+)
+
+
 class Red(IglesiaMixin, models.Model):
     """Modelo para guardar las redes que tiene una iglesia."""
 
@@ -161,17 +167,13 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
             discipulos = list(raiz.get_children().select_related('parent').prefetch_related('lideres'))
             while len(discipulos) > 0:
-                # print 'dis:', discipulos
                 hijo = discipulos.pop()
-                # print 'd:', d, 'hijo:', hijo
                 if hijo:
                     if act is not None:
                         pila.append(act)
                     sw = True
                     while len(pila) > 0 and sw:
                         act = pila.pop()
-                        # print 'pila:', pila
-                        # print 'act:', act
                         if act[len(act) - 1] == hijo.parent:
                             act.append([hijo])
                             bajada = True
@@ -185,13 +187,9 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
                             pila.append(act[len(act) - 1])
                         elif not isinstance(act[-1], (tuple, list)):
                             bajada = False
-                        # print '------------while pila------------'
                 hijos = hijo.get_children().select_related('parent').prefetch_related('lideres')
                 if len(hijos) > 0:
                     discipulos.extend(list(hijos))
-                #  print '----------while disci-----------'
-            #  print 'act final:', act
-            #  print 'pila final:', pila
             if pila:
                 arbol = pila[0]
             else:

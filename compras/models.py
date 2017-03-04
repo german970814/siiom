@@ -61,6 +61,9 @@ from .managers import RequisicionManager, ParametrosManager, DetalleRequisicionM
 import re
 
 
+__all__ = ('Proveedor', 'Requisicion', 'DetalleRequisicion', 'Adjunto', 'Historial', 'Parametros', )
+
+
 class Proveedor(models.Model):
     """
     Modelo de creación de proveedores en el sistema

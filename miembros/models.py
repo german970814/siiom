@@ -13,6 +13,12 @@ from .managers import MiembroManager
 import datetime
 
 
+__all__ = (
+    'Zona', 'Barrio', 'Pasos', 'TipoMiembro', 'DetalleLlamada',
+    'Escalafon', 'Miembro', 'CumplimientoPasos', 'CambioEscalafon', 'CambioTipo',
+)
+
+
 class Zona(models.Model):
     """Modelo para guardar las zonas."""
 

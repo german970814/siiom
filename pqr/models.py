@@ -14,6 +14,9 @@ import calendar
 import re
 
 
+__all__ = ('Caso', 'Comentario', 'Invitacion', 'Documento', )
+
+
 class Caso(models.Model):
     """
     Modelo de casos para Preguntas, Quejas y Reclamos, el cual tendrá la razón de la

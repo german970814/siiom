@@ -6,6 +6,9 @@ from common.models import IglesiaMixin
 from .managers import AreaManager
 
 
+__all__ = ('Departamento', 'Area', 'Empleado', )
+
+
 class Departamento(models.Model):
     """Modelo para guardar los departamentos de una iglesia."""
 

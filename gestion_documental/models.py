@@ -10,6 +10,12 @@ from .utils import pdf_to_png, get_media_url, get_filenames
 import re
 
 
+__all__ = (
+    'TipoDocumento', 'PalabraClave', 'Registro', 'Documento',
+    'SolicitudRegistro', 'SolicitudCustodiaDocumento',
+)
+
+
 class TipoDocumento(models.Model):
     """Modelo para guardar los tipos de documentos que manejan las distintas áreas de una iglesia."""
 

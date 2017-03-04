@@ -2,6 +2,9 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
+__all__ = ('Visita', )
+
+
 class Visita(models.Model):
     """
     Modelo para las visitas que ingresan en el sistema

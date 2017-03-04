@@ -6,6 +6,9 @@ from .managers import EncuentroManager
 import datetime
 
 
+__all__ = ('Encuentro', 'Encontrista', )
+
+
 class Encuentro(models.Model):
     """
     Modelo para la creacion de encuentros
