@@ -94,10 +94,7 @@ def miembroInicio(request):
                 ct = CambioTipo.objects.filter(miembro=mg).order_by('id')
                 if ct.exists():
                     ct = list(ct).pop()
-                    if (ct.nuevoTipo == tipo and ct.anteriorTipo == tipo and (
-                       ct.miembro.observacionLlamadaLider == '' or
-                       ct.miembro.observacionLlamadaLider is None)
-                    ):
+                    if ct.nuevoTipo == tipo and ct.anteriorTipo == tipo:
                         visitantes.append(ct.miembro)
         else:
             visitantes = []
@@ -395,7 +392,6 @@ def asignarGrupo(request, id):
                         http://iglesia.webfactional.com/iniciar_sesion\n\n\
                         Cordialmente,\n\
                         Admin" % Site.objects.get_current().name, receptores]
-                nuevoMiembro.fechaAsignacionGAR = datetime.date.today()
             nuevoMiembro.save()
             ok = True
     return render_to_response("miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))

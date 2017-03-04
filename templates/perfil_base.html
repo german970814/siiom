@@ -249,9 +249,9 @@
                             <i class="zmdi zmdi-more-vert"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right">
-                            {% if not miembro.asisteGAR and not miembro.grupo %}
+                            {% if not miembro.grupo %}
                             <li>
-                                <a href="/miembro/asignar_grupo/{{miembro.id}}/">Asignar a Grupo</a>
+                                <a href="/miembro/asignar_grupo/{{ miembro.id }}/">Asignar a Grupo</a>
                             </li>
                             {% endif %}
                             {% if not miembro.usuario %}

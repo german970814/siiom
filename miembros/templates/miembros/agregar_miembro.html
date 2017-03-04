@@ -351,34 +351,6 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="col-md-2 col-md-ofsset-2">
-                        <div class="input-group {{form.asisteGAR.css_classes}}">
-                            <div class="fg-line">
-                                <label for="id_asisteGAR" class="control-label checkbox">
-                                {{form.asisteGAR}}
-                                <i class="input-helper m-r-20"></i>
-                                Asiste a G.A.R
-                                </label>
-                            </div>
-                            {% for err in form.asisteGAR.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="col-md-2 col-md-ofsset-2">
-                        <div class="input-group {{form.asignadoGAR.css_classes}}">
-                            <div class="fg-line">
-                                <label for="id_asignadoGAR" class="control-label checkbox">
-                                {{form.asignadoGAR}}
-                                <i class="input-helper m-r-20"></i>
-                                Asignado a G.A.R
-                                </label>
-                            </div>
-                            {% for err in form.asignadoGAR.errors %}
-                                <small class="help-block">{{err}}</small>
-                            {% endfor %}
-                        </div>
-                    </div>
                     {% endif %}
                     {% endif %}
                 </div>

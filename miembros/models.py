@@ -145,7 +145,7 @@ class Miembro(IglesiaMixin, models.Model):
     foto_perfil = models.ImageField(_lazy('foto perfil'), upload_to=ruta_imagen, null=True, blank=True)
     portada = models.ImageField(_lazy('portada'), upload_to=ruta_imagen, null=True, blank=True)
     #  info iglesia
-    convertido = models.BooleanField(_lazy('convertido'), default=False)
+    convertido = models.BooleanField(_lazy('convertido'), default=False)  # eliminar
     estado = models.CharField(_lazy('estado'), max_length=1, choices=ESTADOS)
     pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', verbose_name=_lazy('pasos'), blank=True)
     escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon', verbose_name=_lazy('escalafón'))
@@ -158,37 +158,37 @@ class Miembro(IglesiaMixin, models.Model):
         related_name='lideres', null=True, blank=True
     )
     #  info GAR
-    asignadoGAR = models.BooleanField(_lazy('asignado a GAR'), default=False)
-    asisteGAR = models.BooleanField(_lazy('asiste a GAR'), default=False)
-    noInteresadoGAR = models.BooleanField(_lazy('no interesado en GAR'), default=False)
-    fechaAsignacionGAR = models.DateField(_lazy('fecha de asignación a GAR'), null=True, blank=True)
-    #  Llamada Lider
-    fechaLlamadaLider = models.DateField(_lazy('fecha de llamada del líder'), null=True, blank=True)
-    detalleLlamadaLider = models.ForeignKey(
-        DetalleLlamada, verbose_name=_lazy('detalle de llamada del líder'), null=True,
-        blank=True, related_name='llamada_lider'
-    )
-    observacionLlamadaLider = models.TextField(
-        _lazy('observación de llamada del líder'), max_length=300, null=True, blank=True
-    )
-    #  Primera llamada
-    fechaPrimeraLlamada = models.DateField(_lazy('fecha de primera llamada'), null=True, blank=True)
-    detallePrimeraLlamada = models.ForeignKey(
-        DetalleLlamada, verbose_name=_lazy('detalle de primera llamada'), null=True,
-        blank=True, related_name='primera_llamada'
-    )
-    observacionPrimeraLlamada = models.TextField(
-        _lazy('observación de primera llamada'), max_length=300, null=True, blank=True
-    )
-    #  Segunda Llamada
-    fechaSegundaLlamada = models.DateField(_lazy('fecha de segunda llamada'), null=True, blank=True)
-    detalleSegundaLlamada = models.ForeignKey(
-        DetalleLlamada, verbose_name=_lazy('detalle de segunda llamada'), null=True,
-        blank=True, related_name='segunda_llamada'
-    )
-    observacionSegundaLlamada = models.TextField(
-        _lazy('observación de segunda llamada'), max_length=300, null=True, blank=True
-    )
+    # asignadoGAR = models.BooleanField(_lazy('asignado a GAR'), default=False)  # LISTO
+    # asisteGAR = models.BooleanField(_lazy('asiste a GAR'), default=False)  # LISTO
+    # noInteresadoGAR = models.BooleanField(_lazy('no interesado en GAR'), default=False)  # LISTO
+    # fechaAsignacionGAR = models.DateField(_lazy('fecha de asignación a GAR'), null=True, blank=True)  # LISTO
+    # #  Llamada Lider
+    # fechaLlamadaLider = models.DateField(_lazy('fecha de llamada del líder'), null=True, blank=True)  # LISTO
+    # detalleLlamadaLider = models.ForeignKey(
+    #     DetalleLlamada, verbose_name=_lazy('detalle de llamada del líder'), null=True,
+    #     blank=True, related_name='llamada_lider'
+    # )  # LISTO
+    # observacionLlamadaLider = models.TextField(
+    #     _lazy('observación de llamada del líder'), max_length=300, null=True, blank=True
+    # )  # LISTO
+    # #  Primera llamada
+    # fechaPrimeraLlamada = models.DateField(_lazy('fecha de primera llamada'), null=True, blank=True)  # LISTO
+    # detallePrimeraLlamada = models.ForeignKey(
+    #     DetalleLlamada, verbose_name=_lazy('detalle de primera llamada'), null=True,
+    #     blank=True, related_name='primera_llamada'
+    # )  # LISTO
+    # observacionPrimeraLlamada = models.TextField(
+    #     _lazy('observación de primera llamada'), max_length=300, null=True, blank=True
+    # )  # LISTO
+    # #  Segunda Llamada
+    # fechaSegundaLlamada = models.DateField(_lazy('fecha de segunda llamada'), null=True, blank=True)  # LISTO
+    # detalleSegundaLlamada = models.ForeignKey(
+    #     DetalleLlamada, verbose_name=_lazy('detalle de segunda llamada'), null=True,
+    #     blank=True, related_name='segunda_llamada'
+    # )  # LISTO
+    # observacionSegundaLlamada = models.TextField(
+    #     _lazy('observación de segunda llamada'), max_length=300, null=True, blank=True
+    # )  # LISTO
     fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers

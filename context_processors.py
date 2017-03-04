@@ -3,6 +3,9 @@ from miembros.models import Miembro
 
 
 def siiom_context_processor(request):
+    """
+    Procesador de contextos para siiom.
+    """
 
     site = Site.objects.get_current()
 

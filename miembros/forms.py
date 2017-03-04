@@ -376,7 +376,7 @@ class FormularioInformacionIglesiaMiembro(forms.ModelForm):
 
     class Meta:
         model = Miembro
-        fields = ('estado', 'convertido', 'asisteGAR', 'asignadoGAR')
+        fields = ('estado', 'convertido', )
 
 
 class FormularioTipoMiembros(forms.ModelForm):
