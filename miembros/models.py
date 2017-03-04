@@ -158,37 +158,6 @@ class Miembro(IglesiaMixin, models.Model):
         related_name='lideres', null=True, blank=True
     )
     #  info GAR
-    # asignadoGAR = models.BooleanField(_lazy('asignado a GAR'), default=False)  # LISTO
-    # asisteGAR = models.BooleanField(_lazy('asiste a GAR'), default=False)  # LISTO
-    # noInteresadoGAR = models.BooleanField(_lazy('no interesado en GAR'), default=False)  # LISTO
-    # fechaAsignacionGAR = models.DateField(_lazy('fecha de asignación a GAR'), null=True, blank=True)  # LISTO
-    # #  Llamada Lider
-    # fechaLlamadaLider = models.DateField(_lazy('fecha de llamada del líder'), null=True, blank=True)  # LISTO
-    # detalleLlamadaLider = models.ForeignKey(
-    #     DetalleLlamada, verbose_name=_lazy('detalle de llamada del líder'), null=True,
-    #     blank=True, related_name='llamada_lider'
-    # )  # LISTO
-    # observacionLlamadaLider = models.TextField(
-    #     _lazy('observación de llamada del líder'), max_length=300, null=True, blank=True
-    # )  # LISTO
-    # #  Primera llamada
-    # fechaPrimeraLlamada = models.DateField(_lazy('fecha de primera llamada'), null=True, blank=True)  # LISTO
-    # detallePrimeraLlamada = models.ForeignKey(
-    #     DetalleLlamada, verbose_name=_lazy('detalle de primera llamada'), null=True,
-    #     blank=True, related_name='primera_llamada'
-    # )  # LISTO
-    # observacionPrimeraLlamada = models.TextField(
-    #     _lazy('observación de primera llamada'), max_length=300, null=True, blank=True
-    # )  # LISTO
-    # #  Segunda Llamada
-    # fechaSegundaLlamada = models.DateField(_lazy('fecha de segunda llamada'), null=True, blank=True)  # LISTO
-    # detalleSegundaLlamada = models.ForeignKey(
-    #     DetalleLlamada, verbose_name=_lazy('detalle de segunda llamada'), null=True,
-    #     blank=True, related_name='segunda_llamada'
-    # )  # LISTO
-    # observacionSegundaLlamada = models.TextField(
-    #     _lazy('observación de segunda llamada'), max_length=300, null=True, blank=True
-    # )  # LISTO
     fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers
