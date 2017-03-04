@@ -15,56 +15,15 @@ from .forms import (
     FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar
 )
 from .utils import get_date_for_report
-from miembros.models import Miembro, DetalleLlamada, Pasos, CumplimientoPasos, CambioTipo
+from common.decorators import permisos_requeridos
 from grupos.utils import reunion_reportada
 from grupos.models import ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
-from common.decorators import permisos_requeridos
+from miembros.models import Miembro, Pasos, CumplimientoPasos
 
 # Python Package
 import datetime
 import json
 import copy
-
-
-# TODO eliminar
-def listaGruposDescendientes(miembro):
-    """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
-        usada en un choice field."""
-
-    grupo = miembro.grupo_lidera
-    listaG = [grupo]
-    discipulos = list(miembro.discipulos())
-    while len(discipulos) > 0:
-        d = discipulos.pop(0)
-        g = d.grupo_lidera
-        if g:
-            if g not in listaG:
-                listaG.append(g)
-            lid = g.lideres.all()
-            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
-                if l in discipulos:
-                    discipulos.remove(l)
-        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
-            discipulos.extend(list(d.discipulos()))
-    return listaG
-
-
-# TODO eliminar
-def listaCaminoGrupos(grupoi, grupof):
-    """Devuelve los grupos que se encuentran en la camino del grupo inicial, al grupo final."""
-
-    listaG = [grupof]
-    if grupof != grupoi:
-        m = grupof.lideres.first()
-        padre = m.grupo
-        while padre != grupoi:
-            if padre not in listaG:
-                listaG.insert(0, padre)
-            m = padre.lideres.first()
-            padre = m.grupo
-        if padre not in listaG:
-            listaG.insert(0, padre)
-    return listaG
 
 
 @login_required
@@ -538,40 +497,6 @@ def estadisticoTotalizadoReunionesDiscipulado(request):
     return render_to_response(
         'reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request)
     )
-
-
-# TODO eliminar
-def listaGruposDescendientes_id(miembro):
-    """Devuelve una lista con todos los ids de los grupos descendientes del grupo del miembro usado como parametro para ser
-        usada en un choice field."""
-
-    grupo = miembro.grupo_lidera
-    listaG = [grupo.id]
-    discipulos = list(miembro.discipulos())
-    while len(discipulos) > 0:
-        d = discipulos.pop(0)
-        g = d.grupo_lidera
-        if g:
-            if g not in listaG:
-                listaG.append(g.id)
-            lid = g.lideres.all()
-            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
-                if l in discipulos:
-                    discipulos.remove(l)
-        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
-            discipulos.extend(list(d.discipulos()))
-    return listaG
-
-
-def sendMail(camposMail):
-    subject = camposMail[0]
-    mensaje = camposMail[1]
-    receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
-
-
-def sendMassMail(correos):
-    send_mass_mail(correos, fail_silently=False)
 
 
 @login_required

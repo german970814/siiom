@@ -1,5 +1,6 @@
 # apps
 from .models import Grupo
+from common.utils import convertir_a_queryset
 
 # Python package
 import datetime
@@ -14,8 +15,7 @@ def convertir_lista_grupos_a_queryset(lista_grupos):
         Una lista de pks de los grupos los cuales quieren ser pasados a queryset.
     """
 
-    lista_ids = [grupo.pk for grupo in lista_grupos]
-    return Grupo._objects.filter(pk__in=lista_ids)
+    return convertir_a_queryset(Grupo, [grupo.pk for grupo in lista_grupos])
 
 
 def reunion_reportada(fecha, grupo, discipulado=False):

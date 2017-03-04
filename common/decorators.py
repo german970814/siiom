@@ -8,6 +8,7 @@ from . import constants
 
 # Python imports
 from functools import wraps
+from threading import Thread
 import json
 
 
@@ -42,3 +43,20 @@ def login_required_api(view_func):
             content_type=constants.CONTENT_TYPE_API
         )
     return wrapped_view
+
+
+def concurrente(function):
+    """
+    Funcion para manejar concurrencia.
+
+    :returns:
+        Un hilo con la ejecución de la funcion asignada.
+    """
+
+    @wraps(function)
+    def decorator(*args, **kwargs):
+        hilo = Thread(target=function, args=args, kwargs=kwargs)
+        hilo.daemon = True
+        hilo.start()
+        return hilo
+    return decorator

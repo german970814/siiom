@@ -19,9 +19,11 @@ from .forms import *
 from .forms import TrasladarMiembroForm, NuevoMiembroForm
 from .decorators import user_is_miembro_or_empleado
 from .models import Miembro, CambioTipo, TipoMiembro, Zona
+from .utils import divorciar, calcular_grupos_miembro
 from grupos.forms import FormularioEditarDiscipulado
 from grupos.models import Grupo, Red
 from common.decorators import permisos_requeridos
+from common.utils import eliminar, generar_random_string
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -31,36 +33,6 @@ import waffle
 import datetime
 import json
 import os
-
-
-def eliminar(request, modelo, lista):
-    ok = 0  # No hay nada en la lista
-    if lista:
-        ok = 1  # Los borro todos
-        for e in lista:
-            try:
-                if isinstance(e, str):
-                    modelo.objects.get(id=int(e)).delete()
-                else:
-                    modelo.objects.get(id=e).delete()
-            except ValueError as e:
-                if settings.DEBUG:
-                    print(e)
-                pass
-            except:
-                ok = 2  # Hubo un Error
-    if ok == 1:
-        messages.success(request, "Se ha eliminado correctamente")
-    return ok
-
-
-def divorciar(miembro, conyugue, estado_civil):
-    miembro.estadoCivil = estado_civil
-    miembro.conyugue = None
-    miembro.save()
-    conyugue.estadoCivil = estado_civil
-    conyugue.conyugue = None
-    conyugue.save()
 
 
 def autenticarUsario(request):
@@ -695,7 +667,7 @@ def promoverMiembroEscalafon(request):
         if form.is_valid():
             nuevoCambioEscalafon = form.save(commit=False)
             miembroEditar = nuevoCambioEscalafon.miembro
-            if calcularCelulas(miembroEditar) >= nuevoCambioEscalafon.escalafon.celulas:
+            if calcular_grupos_miembro(miembroEditar) >= nuevoCambioEscalafon.escalafon.celulas:
                 nuevoCambioEscalafon.save()
                 ok = True
             else:
@@ -899,14 +871,6 @@ def eliminarCambioTipoMiembro(request, id):
     # return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
 
-# TODO eliminar
-def calcularCelulas(miembro):
-    celulas = 0
-    if miembro.grupo_lidera:
-        celulas = miembro.grupo_lidera.get_descendant_count() + 1
-    return celulas
-
-
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
 def administracion(request):
@@ -1033,16 +997,6 @@ def recuperar_contrasena(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/iniciar_sesion')
 
-    def _generate_password(pswd, length):
-        import random
-        pswd = ''
-        _abc = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZabcdefghijklmnñopqrstuvwxyz1234567890'
-
-        if isinstance(pswd, str):
-            for x in range(length):
-                pswd += random.choice(_abc)
-            return pswd
-
     SUBJECT = "Recuperar Contraseña de %s" % Site.objects.get_current().name
     MESSAGE = """Ingresa al siguiente link para cambiar tu contraseña:\n
         http://%s/iniciar_sesion/?next=/miembro/cambiar_contrasena/\n\n\n
@@ -1062,7 +1016,7 @@ def recuperar_contrasena(request):
                 email = form.cleaned_data['email']
                 try:
                     usuario = User.objects.get(username__exact=email)
-                    new_password = _generate_password(new_password, 12)
+                    new_password = generar_random_string(12)
 
                     usuario.set_password(new_password)
                     usuario.save()

@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -25,6 +24,7 @@ from .forms import (
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.models import Miembro
 from common.decorators import permisos_requeridos
+from common.utils import eliminar
 
 # Python Packages
 import datetime
@@ -260,53 +260,6 @@ def editarPredica(request, pk):
         return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 
     return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
-
-
-def eliminar(request, modelo, lista):
-    ok = 0  # No hay nada en la lista
-    if lista:
-        ok = 1  # Los borro todos
-        for m in lista:
-            try:
-                modelo.objects.get(id=m).delete()
-            except ValueError as e:
-                print(e)
-                pass
-            except:
-                ok = 2  # Hubo un error
-    if ok == 1:
-        messages.success(request, "Se ha eliminado correctamente")
-    return ok
-
-
-# TODO eliminar
-def listaGruposDescendientes(grupo):
-    """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
-        usada en un choice field."""
-
-    miembro = grupo.lideres.first()
-    listaG = [grupo]
-    discipulos = list(miembro.discipulos())
-    while len(discipulos) > 0:
-        d = discipulos.pop(0)
-        g = d.grupo_lidera()
-        if g:
-            if g not in listaG:
-                listaG.append(g)
-            lid = g.lideres.all()
-            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
-                if l in discipulos:
-                    discipulos.remove(l)
-        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
-            discipulos.extend(list(d.discipulos()))
-    return listaG
-
-
-def sendMail(camposMail):
-    subject = camposMail[0]
-    mensaje = camposMail[1]
-    receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
 
 
 @login_required

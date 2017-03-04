@@ -15,7 +15,6 @@ from .forms import CrearEncuentroForm, NuevoEncontristaForm, EditarEncuentroForm
 from .utils import crear_miembros_con_encontristas, avisar_tesorero_coordinador_encuentro, solo_encuentros_miembro
 from grupos.models import Red, Grupo
 from miembros.models import Miembro
-from common.constants import URL_SIN_PERMISOS as URL
 from common.decorators import permisos_requeridos
 
 # Python

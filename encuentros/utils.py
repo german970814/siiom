@@ -4,9 +4,9 @@ from django.http import HttpResponseRedirect
 
 # Apps
 from miembros.models import TipoMiembro, Pasos, CumplimientoPasos, CambioTipo, Miembro
+from common.decorators import concurrente
 
 # Python
-from threading import Thread
 import datetime
 
 
@@ -19,19 +19,7 @@ Miembro.algun_encuentro_como_tesorero = property(
 )
 
 
-def async(function):
-    from functools import wraps
-
-    @wraps(function)
-    def decorator(*args, **kwargs):
-        t = Thread(target=function, args=args, kwargs=kwargs)
-        t.daemon = True
-        t.start()
-        return t
-    return decorator
-
-
-@async
+@concurrente
 def crear_miembros_con_encontristas(encontristas, iglesia):
     """
     Nota: Importante en esta vista al momento de ejecutar esta funcion, cuando se ejecuta
@@ -94,8 +82,12 @@ def crear_miembros_con_encontristas(encontristas, iglesia):
             encuentro.coordinador.usuario.save()
 
 
-@async
+@concurrente
 def avisar_tesorero_coordinador_encuentro(tesorero, coordinador):
+    """
+    Funcion para agregar los permisos de tesorero y coordinador de un encuentro
+    a un miembro.
+    """
     tesorero_group = Group.objects.get(name__iexact='tesorero')
     coordinador_group = Group.objects.get(name__iexact='coordinador')
     if tesorero_group not in tesorero.usuario.groups.all():
@@ -107,6 +99,14 @@ def avisar_tesorero_coordinador_encuentro(tesorero, coordinador):
 
 
 def solo_encuentros_miembro(request, encuentro):
+    """
+    Funcion para verificar que los encuentros que pueda ver el miembro de la sesion,
+    sean solo los encuentros en los cuales participa.
+
+    :returns:
+        HttpResponseRedirect si no puede ver el encuentro, de lo contrario retorna ``None``.
+    """
+
     if not request.user.has_perm('miembros.es_administrador'):
         if request.user.has_perm('miembros.es_coordinador'):
             if encuentro not in Miembro.objects.get(usuario=request.user).encuentros_coordinador.all():
