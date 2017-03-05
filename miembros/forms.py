@@ -6,8 +6,11 @@ Created on Apr 4, 2011
 '''
 
 from django import forms
+from django.contrib import auth
+from django.core.urlresolvers import reverse_lazy
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _lazy
+from django.utils.http import is_safe_url
 
 from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
@@ -27,8 +30,65 @@ __all__ = (
     'FormularioPasos', 'FormularioCrearEscalafon', 'TrasladarMiembroForm', 'DesvincularLiderGrupoForm',
     'FormularioPromoverEscalafon', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
     'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
-    'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro',
+    'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'LoginForm'
 )
+
+
+class LoginForm(CustomForm):
+    """
+    Formulario para el logeo de usuarios en el sistema.
+    """
+
+    error_messages = {
+        'invalid_login': _lazy('Email y contraseña no coinciden.')
+    }
+
+    next = forms.CharField(max_length=255, required=False, widget=forms.HiddenInput)
+    email = forms.EmailField(label=_lazy('Email'))
+    password = forms.CharField(
+        max_length=255, label=_lazy('Contraseña'), widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'class': self.input_css_class, 'placeholder': _lazy('Email (usuario)')})
+        self.fields['password'].widget.attrs.update(
+            {'class': self.input_css_class, 'placeholder': _lazy('Contraseña')})
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        email = self.cleaned_data.get('email', '')
+        password = self.cleaned_data.get('password', '')
+
+        if password and email:
+            self.usuario = auth.authenticate(email=email, password=password)
+
+            if self.usuario is None:
+                raise forms.ValidationError(
+                    self.error_messages['invalid_login'], code='invalid_login'
+                )
+
+        return cleaned_data
+
+    def get_user(self):
+        return getattr(self, 'usuario', None)
+
+    def is_safe_url(self, *args, **kwargs):
+        return is_safe_url(host=self.request.get_host(), *args, **kwargs)
+
+    def get_next(self):
+        if self.get_user() is not None and self.usuario.has_perm('miembros.es_administrador'):
+            next = reverse_lazy('administracion')
+        else:
+            next = reverse_lazy('miembros:miembro_inicio')
+
+        url = self.cleaned_data.get('next', next)
+
+        if self.is_safe_url(url=url):
+            return url
+        return next
 
 
 class FormularioLiderAgregarMiembro(forms.ModelForm):

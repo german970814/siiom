@@ -2,6 +2,7 @@
 from django.contrib.auth.decorators import user_passes_test  # , login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
 
 # Locale imports
 from . import constants
@@ -60,3 +61,17 @@ def concurrente(function):
         hilo.start()
         return hilo
     return decorator
+
+
+def POST(view_func):
+    """
+    Decorador para que solo pueda ser ingresada a la pagina con POST.
+    """
+    return require_http_methods(view_func, ['POST'])
+
+
+def GET(view_func):
+    """
+    Decorador para que solo pueda ser ingresada a la pagina con GET.
+    """
+    return require_http_methods(view_func, ['GET'])

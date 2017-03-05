@@ -13,6 +13,9 @@ from django.shortcuts import render_to_response, render, get_object_or_404, redi
 from django.template import RequestContext
 from django.utils import timezone
 from django.utils.translation import ugettext as _
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.csrf import csrf_protect
 
 # Apps Imports
 from .forms import *
@@ -35,40 +38,45 @@ import json
 import os
 
 
-def autenticarUsario(request):
+@sensitive_post_parameters()
+@csrf_protect
+@never_cache
+def login(request):
+    """
+    Vista para el logeo de usuarios al sistema, permite el login de usuarios
+    miembros, y de usuarios empleados, luego de autenticarlos, retorna a una
+    vista de acuerdo a los permisos que el usuario tenga.
+    """
+
     siguiente = request.session.get('next', '')
+
     if request.user.is_authenticated():
         if request.user.has_perm("miembros.es_administrador"):
-            return HttpResponseRedirect("/administracion/")
-        else:
-            return HttpResponseRedirect("/miembro/")
-    else:
-        valido = True
-        if request.method == 'POST':
-            nombreUsuario = request.POST.get('email', '')
-            contrasena = request.POST.get('password', '')
-            sig = request.POST.get('next', '')
-            if siguiente:
-                sig = siguiente
-            usuario = auth.authenticate(email=nombreUsuario, password=contrasena)
-            if usuario is not None:
-                auth.login(request, usuario)
-                if Group.objects.get(name__iexact='Administrador') in usuario.groups.all():
-                    if sig is not None or sig != '':
-                        return HttpResponseRedirect(sig)
-                    return HttpResponseRedirect("/administracion/")
-                else:
-                    if sig is not None or sig != '':
-                        return HttpResponseRedirect(sig)
-                    return HttpResponseRedirect('/miembro/')
+            return redirect('administracion')
+        return redirect('miembros:miembro_inicio')
+
+    if request.method == 'POST':
+        form = LoginForm(request=request, data=request.POST)
+
+        if form.is_valid():
+            auth.login(request, form.get_user())
+            if form.is_safe_url(siguiente):
+                next = siguiente
             else:
-                valido = False
-    return render_to_response('miembros/login.html', locals(), context_instance=RequestContext(request))
+                next = form.get_next()
+            return HttpResponseRedirect(next)  # No usar redirect
+    else:
+        form = LoginForm()
+
+    return render(request, 'miembros/login.html', {'form': form})
 
 
-def salir(request):
+@csrf_protect
+@never_cache
+def logout(request):
+    """Vista para hacer el logout del usuario que se encuentra actualmente logeado."""
     auth.logout(request)
-    return HttpResponseRedirect('/iniciar_sesion')
+    return redirect('inicio')
 
 
 @login_required

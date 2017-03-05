@@ -4,7 +4,7 @@ from django.conf.urls import include, patterns, url
 from django.views.generic import RedirectView
 from django.contrib import admin
 from django.conf import settings
-from miembros.views import autenticarUsario, salir, administracion, recuperar_contrasena
+from miembros.views import login, logout, administracion, recuperar_contrasena
 
 admin.autodiscover()
 RedirectView.permanent = True
@@ -14,8 +14,8 @@ urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
-    url(r'^iniciar_sesion/$', autenticarUsario, name="inicio"),
-    url(r'^salir/$', salir),
+    url(r'^iniciar_sesion/$', login, name="inicio"),
+    url(r'^salir/$', logout, name='logout'),
     url(r'^administracion/$', administracion, name="administracion"),
     url(r'^miembro/', include("miembros.urls", namespace='miembros')),
     url(r'^grupo/', include("grupos.urls", namespace='grupos')),

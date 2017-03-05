@@ -14,10 +14,6 @@ from miembros.models import Miembro
 from common.decorators import permisos_requeridos
 
 
-def inicio(request):
-    return HttpResponseRedirect('/iniciar_sesion/')
-
-
 def custom_404(request):
     return render_to_response('404.html')
 

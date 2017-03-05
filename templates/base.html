@@ -230,7 +230,7 @@
                             </li>
                             <li class="divider hidden-xs"></li>
                             <li>
-                                <a href="/salir/"><i class="zmdi zmdi-power"></i> Salir</a>
+                                <a href="{% url 'logout' %}"><i class="zmdi zmdi-power"></i> Salir</a>
                             </li>
                         {% else %}
                             <li class="hidden-xs">
@@ -283,7 +283,7 @@
                         <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
                     </li>
                     <li>
-                        <a href="/salir/"><i class="zmdi zmdi-time-restore"></i> Salir</a>
+                        <a href="{% url 'logout' %}"><i class="zmdi zmdi-time-restore"></i> Salir</a>
                     </li>
                 </ul>
             </div>
