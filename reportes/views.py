@@ -28,7 +28,7 @@ import copy
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def pasosPorMiembros(request):
+def reporte_pasos_por_miembro(request):
     """Muestra los miembros de los grupos seleccionados y los pasos hechos por cada miembro."""
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -77,7 +77,7 @@ def pasosPorMiembros(request):
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def PasosTotales(request):
+def reporte_pasos_totales(request):
     """Muestra un reporte de pasos por totales."""
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -145,7 +145,7 @@ def PasosTotales(request):
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def PasosRangoFecha(request):
+def reporte_pasos_por_fecha(request):
     """Muestra un reporte de pasos por un rango de fecha."""
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -219,7 +219,7 @@ def PasosRangoFecha(request):
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def estadisticoReunionesDiscipulado(request):
+def estadistico_reuniones_discipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado segun los grupos,
     las opciones y el rango de fecha escogidos."""
 
@@ -313,7 +313,7 @@ def estadisticoReunionesDiscipulado(request):
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def estadisticoTotalizadoReunionesGar(request):
+def estadistico_totalizado_reuniones_gar(request):
     """Muestra un estadistico de los reportes de reunion GAR totalizado
     por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
 
@@ -411,7 +411,7 @@ def estadisticoTotalizadoReunionesGar(request):
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def estadisticoTotalizadoReunionesDiscipulado(request):
+def estadistico_totalizado_reuniones_discipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado
     totalizado por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
 

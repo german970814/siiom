@@ -380,7 +380,7 @@
                     <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
                         <li>
-                            <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'reportes:estadistico_reuniones_grupo' %}">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
@@ -393,7 +393,7 @@
                             <a href="{% url 'miembros:reportar_reunion_discipulado' %}">Ingresar D12</a>
                         </li>
                         <li>
-                            <a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Reporte D12</a>
+                            <a href="{% url 'reportes:estadistico_totalizado_reuniones_discipulado' %}">Reporte D12</a>
                         </li>
                         <li>
                             <a href="{% url 'grupos:organigrama' %}">Organigrama de mi Red</a>
@@ -409,13 +409,13 @@
                             <a href="#">Miembros y sus Pasos</a>
                             <ul>
                                 <li>
-                                    <a href="/reportes/miembros_y_pasos/">Miembros y sus pasos</a>
+                                    <a href="{% url 'reportes:pasos_por_miembro' %}">Miembros y sus pasos</a>
                                 </li>
                                 <li>
-                                    <a href="/reportes/pasos_totales/">Estadistico de pasos por totales</a>
+                                    <a href="{% url 'reportes:pasos_totales' %}">Estadistico de pasos por totales</a>
                                 </li>
                                 <li>
-                                    <a href="/reportes/pasos_rango_fechas/">Estadistico de pasos por un rango de fechas</a>
+                                    <a href="{% url 'reportes:pasos_rango_fechas' %}">Estadistico de pasos por un rango de fechas</a>
                                 </li>
                             </ul>
                         </li>
@@ -423,10 +423,10 @@
                             <a href="#">Asistencia Reuniones</a>
                             <ul>
                                 <li>
-                                    <a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discupulado</a>
+                                    <a href="{% url 'reportes:estadistico_reuniones_discipulado' %}">Estadistico de reuniones Discupulado</a>
                                 </li>
                                 <li>
-                                    <a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                                    <a href="{% url 'reportes:estadistico_totalizado_reuniones_grupo' %}">Estadistico totalizado de reuniones {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
                             </ul>
                         </li>
