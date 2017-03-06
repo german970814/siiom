@@ -56,7 +56,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Lideres</dt>
-                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% else %},  <a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% endif %}{% endfor %}</dd>
+                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% else %},  <a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% endif %}{% endfor %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Nombre Grupo</dt>
@@ -145,7 +145,7 @@
         {% for miem in miembros %}
         <div class="col-md-3 col-sm-4 col-xs-6">
             <div class="c-item">
-                <a href="/miembro/perfil/{{miem.id}}" class="ci-avatar">
+                <a href="{% url 'miembros:editar_perfil' miem.id %}" class="ci-avatar">
                     <img src="{% if miem.foto_perfil %}{{ miem.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                 </a>
 
@@ -169,7 +169,7 @@
 <div class="container">
     <div class="p-25 p-t-25">El Miembro No Pertenece a Grupo.
     {% if perms.miembros.es_administrador %}
-        <a href="/miembro/asignar_grupo/{{miembro.id}}/" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>
+        <a href="{% url 'miembros:asignar_grupo' miembro.id %}" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>
     {% endif %}
     </div>
 </div>

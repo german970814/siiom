@@ -55,7 +55,7 @@
             <h1 class="f-700 f-20">
             	<legend><h3>Zonas</h3></legend>
 				<small>Haga click en "Ver" para ver los barrios de esa zona.
-				<a alt="Agregar Zona" href="/miembro/crear_zona/">Agregar Zona</a></small>
+				<a alt="Agregar Zona" href="{% url 'miembros:crear_zona' %}">Agregar Zona</a></small>
 	        </h1>
 			{% if okElim == 2 %}
             <div class="row">

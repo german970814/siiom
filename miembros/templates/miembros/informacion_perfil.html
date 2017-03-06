@@ -41,7 +41,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Lideres</dt>
-                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}{% if not lid.grupo_lidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, {% if not lid.grupo_lidera.red == None or perms.miembro.es_administrador %}<a href="/miembro/perfil/{{lid.id}}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}NO TIENE LÍDERES{% endif %}</dd>
+                <dd>{% if lideres_miembro %}{% for lid in lideres_miembro %}{% if forloop.first %}{% if not lid.grupo_lidera.red == None or perms.miembro.es_administrador %}<a href="{% url 'miembros:editar_perfil' lid.id %}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% else %}, {% if not lid.grupo_lidera.red == None or perms.miembro.es_administrador %}<a href="{% url 'miembros:editar_perfil' lid.id %}">{% endif %}{{lid.nombre|upper}} {{lid.primerApellido|upper}} ({{lid.cedula}})</a>{% endif %}{% endfor %}{% else %}NO TIENE LÍDERES{% endif %}</dd>
             </dl>
         </div>
         <form action="" method="POST" enctype="multipart/form-data" id="form_informacion">

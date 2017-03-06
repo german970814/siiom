@@ -81,7 +81,7 @@ def logout(request):
 
 @login_required
 @user_is_miembro_or_empleado
-def miembroInicio(request):
+def miembro_inicio(request):
     miembro = None
     empleado = None
     try:
@@ -214,7 +214,7 @@ def miembroInicio(request):
     'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
     'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
 )
-def liderEditarPerfil(request, pk=None):
+def editar_perfil_miembro(request, pk=None):
     p = True
     miembro = Miembro.objects.get(usuario=request.user)
     casado = False
@@ -265,7 +265,7 @@ def liderEditarPerfil(request, pk=None):
                 return HttpResponse(json.dumps(dat), content_type="application/json")
 
         if 'contrasena' in request.POST:
-            return HttpResponseRedirect("/miembro/cambiar_contrasena/")
+            return redirect('miembros:cambiar_contrasena')
 
         elif 'aceptar' in request.POST:
             if request.user.has_perm('miembros.es_administrador'):
@@ -295,11 +295,10 @@ def liderEditarPerfil(request, pk=None):
                 ms = "Miembro Editado Correctamente"
                 if mismo:
                     ms = "Te has Editado Correctamente"
-                # return HttpResponseRedirect("/miembro/perfil/" + str(miembro.id))
             else:
                 ms = "Ha Ocurrido un Error, Verifica el Formulario"
         else:
-            return HttpResponseRedirect("/miembro/")
+            return redirect('miembros:miembro_inicio')
     else:
         if request.user.has_perm('miembros.es_administrador'):
             form = FormularioAdminAgregarMiembro(instance=miembro, g=miembro.genero)
@@ -314,7 +313,7 @@ def liderEditarPerfil(request, pk=None):
     'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
     'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
 )
-def cambiarContrasena(request):
+def cambiar_contrasena_miembro(request):
     miembroUsuario = request.user
     if request.method == 'POST':
         form = FormularioCambiarContrasena(data=request.POST, request=request)
@@ -324,8 +323,8 @@ def cambiarContrasena(request):
                 miembroUsuario.set_password(form.cleaned_data['contrasenaNueva'])
                 miembroUsuario.save()
                 if hasattr(miembroUsuario, 'empleado') and not Miembro.objects.filter(usuario=miembroUsuario):
-                    return HttpResponseRedirect("/miembro/")
-                return HttpResponseRedirect("/miembro/editar_perfil/")
+                    return redirect('miembros:miembro_inicio')
+                return redirect("miembros:editar_perfil")
             else:
                 validacionContrasena = """
                 Error al tratar de cambiar la contraseña, verifique que la contraseña\
@@ -337,50 +336,8 @@ def cambiarContrasena(request):
 
 
 @login_required
-@permission_required('miembros.puede_editar_miembro', raise_exception=True)
-def editarMiembro(request, id):
-    try:
-        miembroEditar = Miembro.objects.get(id=id)
-    except:
-        raise Http404
-    miembro = Miembro.objects.get(usuario=request.user)
-    accion = "Editar"
-    if request.method == 'POST':
-        if miembro.usuario.has_perm('miembros.es_administrador'):
-            form = FormularioAdminAgregarMiembro(data=request.POST, instance=miembroEditar)
-            admin = True
-        else:
-            form = FormularioLiderAgregarMiembro(data=request.POST, instance=miembroEditar)
-            lider = True
-        if form.is_valid():
-            nuevoMiembro = form.save(commit=False)
-            nuevoMiembro.estado = 'A'
-            nuevoMiembro.save()
-            if nuevoMiembro.usuario is not None:
-                nuevoMiembro.usuario.username = nuevoMiembro.nombre + nuevoMiembro.primerApellido
-                nuevoMiembro.usuario.email = nuevoMiembro.email
-                nuevoMiembro.usuario.save()
-            if nuevoMiembro.conyugue is not None and nuevoMiembro.conyugue != '':
-                    conyugue = Miembro.objects.get(id=nuevoMiembro.conyugue.id)
-                    conyugue.conyugue = nuevoMiembro
-                    conyugue.estadoCivil = 'C'
-                    conyugue.save()
-                    nuevoMiembro.estadoCivil = 'C'
-                    nuevoMiembro.save()
-            return HttpResponseRedirect("/miembro/perfil/" + str(nuevoMiembro.id) + "/")
-    else:
-        if miembro.usuario.has_perm('miembros.es_administrador'):
-            form = FormularioAdminAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
-            admin = True
-        else:
-            form = FormularioLiderAgregarMiembro(g=miembroEditar.genero, instance=miembroEditar)
-            lider = True
-    return render_to_response("miembros/agregar_miembro.html", locals(), context_instance=RequestContext(request))
-
-
-@login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_agente')
-def asignarGrupo(request, id):
+def asignar_grupo(request, id):
     try:
         miembroEditar = Miembro.objects.get(id=id)
     except:
@@ -408,7 +365,7 @@ def asignarGrupo(request, id):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def crearZona(request):
+def crear_zona(request):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
@@ -423,7 +380,7 @@ def crearZona(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def editarZona(request, pk):
+def editar_zona(request, pk):
     accion = 'Editar'
     miembro = Miembro.objects.get(usuario=request.user)
 
@@ -441,14 +398,13 @@ def editarZona(request, pk):
 
     else:
         form = FormularioCrearZona(instance=zona)
-        return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
     return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def listarZonas(request):
+def listar_zonas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
 
@@ -463,7 +419,7 @@ def listarZonas(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def barriosDeZona(request, id):
+def barrios_zona(request, id):
     """
         Esta función permite listar los barrios que están registrados en determinada/
         zona
@@ -486,7 +442,7 @@ def barriosDeZona(request, id):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def crearBarrio(request, id):
+def crear_barrio(request, id):
     """
         Esta función permite crear barrios de una zona en la base de datos
     """
@@ -511,7 +467,7 @@ def crearBarrio(request, id):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def editarBarrio(request, id, pk):
+def editar_barrio(request, id, pk):
     accion = 'Editar'
     # miembro = Miembro.objects.get(usuario=request.user)
     try:
@@ -524,24 +480,20 @@ def editarBarrio(request, id, pk):
         raise Http404
 
     if request.method == "POST":
-        # barrio = request.session['actual']
         form = FormularioCrearBarrio(request.POST or None, instance=barrio)
         if form.is_valid():
             nuevoBarrio = form.save()
             ok = True
-        else:
-            return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
 
     else:
         form = FormularioCrearBarrio(instance=barrio)
-        return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
 
-    return HttpResponseRedirect('/miembro/barrios/' + str(zona.id))
+    return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def agregarPasoMiembro(request):
+def agregar_paso_miembro(request):
     """
     Esta función sirve para agregar un paso a la lista de pasos que puede cumplir
     un miembro
@@ -560,7 +512,7 @@ def agregarPasoMiembro(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def listarPasos(request):
+def listar_pasos(request):
     """
     Esta función sirve para listar los pasos con que cuenta la iglesia
     """
@@ -577,7 +529,7 @@ def listarPasos(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def editarPaso(request, pk):
+def editar_paso(request, pk):
     accion = 'Editar'
 
     try:
@@ -594,15 +546,13 @@ def editarPaso(request, pk):
 
     else:
         form = FormularioPasos(instance=paso)
-        return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
 
-    # return HttpResponseRedirect("/miembro/listar_pasos/")
     return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def listarEscalafones(request):
+def listar_escalafones(request):
     """
     Muestra la lista de escalafones ya creados ordenado por el número de
     células
@@ -620,7 +570,7 @@ def listarEscalafones(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def crearEscalafon(request):
+def crear_escalafon(request):
     """
     Crea Escalafones con sus respectivos campos
     """
@@ -638,7 +588,7 @@ def crearEscalafon(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def editarEscalafon(request, pk):
+def editar_escalafon(request, pk):
     accion = 'Editar'
 
     try:
@@ -651,19 +601,17 @@ def editarEscalafon(request, pk):
 
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/miembro/listar_escalafones/")
+            return redirect('miembros:listar_escalafones')
 
     else:
         form = FormularioCrearEscalafon(instance=escalafon)
-        return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
 
-    # return HttpResponseRedirect("/miembro/listar_escalafones/")
     return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def promoverMiembroEscalafon(request):
+def promover_miembro_escalafon(request):
     """Promueve un miembro de escalafon siempre y cuando este cumpla con los requesitos para el cambio."""
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -685,7 +633,7 @@ def promoverMiembroEscalafon(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def crearTipoMiembro(request):
+def crear_tipo_miembro(request):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
@@ -700,7 +648,7 @@ def crearTipoMiembro(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def listarTipoMiembro(request):
+def listar_tipos_miembro(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
         if 'editar' in request.POST:
@@ -714,7 +662,7 @@ def listarTipoMiembro(request):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def editarTipoMiembro(request, pk):
+def editar_tipo_miembro(request, pk):
     accion = 'Editar'
 
     try:
@@ -731,64 +679,13 @@ def editarTipoMiembro(request, pk):
 
     else:
         form = FormularioCrearTipoMiembro(instance=tipo)
-        return render_to_response(
-            "miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request)
-        )
 
-    # return HttpResponseRedirect("/miembro/listar_tipo_miembro/")
     return render_to_response("miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
 
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def cambiarMiembroDeTipoMiembro(request, id):
-    miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        miembroCambio = Miembro.objects.get(id=id)
-    except:
-        raise Http404
-    try:
-        anterior = CambioTipo.objects.filter(miembro=miembroCambio).order_by('-fecha')[0].nuevoTipo
-    except:
-        anterior = TipoMiembro.objects.get(nombre__iexact="visita")
-
-    if request.method == "POST":
-        form = FormularioCambioTipoMiembro(data=request.POST)
-        if form.is_valid():
-            nuevoCambioTipo = form.save(commit=False)
-            nuevoCambioTipo.fecha = datetime.date.today()
-            nuevoCambioTipo.autorizacion = miembro
-            nuevoCambioTipo.miembro = miembroCambio
-            nuevoCambioTipo.anteriorTipo = anterior
-            nuevoCambioTipo.save()
-            ok = True
-
-            _possible = ['lider', 'agente', 'maestro', 'receptor', 'administrador', 'pastor']
-            if nuevoCambioTipo.nuevoTipo.nombre.lower() in _possible:
-                if miembroCambio.usuario is None or miembroCambio.usuario == '':
-                    request.session['tipo'] = nuevoCambioTipo.nuevoTipo.nombre
-                    return HttpResponseRedirect('/miembro/asignar_usuario/' + str(miembroCambio.id) + '/')
-                else:
-                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "lider":
-                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Lider'))
-                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "agente":
-                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Agente'))
-                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "maestro":
-                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Maestro'))
-                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "receptor":
-                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Receptor'))
-                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "administrador":
-                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Administrador'))
-                    if nuevoCambioTipo.nuevoTipo.nombre.lower() == "pastor":
-                        miembroCambio.usuario.groups.add(Group.objects.get(name__iexact='Pastor'))
-    else:
-        form = FormularioCambioTipoMiembro(idm=int(id))
-    return render_to_response('miembros/asignar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def crearUsuarioMimembro(request, id):
+def crear_usuario_miembro(request, id):
     try:
         miembroCambio = Miembro.objects.get(id=id)
     except:
@@ -834,7 +731,7 @@ def crearUsuarioMimembro(request, id):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def eliminarCambioTipoMiembro(request, id):
+def eliminar_cambio_tipo_miembro(request, id):
     """
     El cambio que se va a eliminar se guarda en la var cambio y si esta es un
     tipo de cambio aceptable, es eliminado. En caso de que el usuario no cuente
@@ -873,7 +770,6 @@ def eliminarCambioTipoMiembro(request, id):
     except:
         pass
     cambio.delete()
-    # return HttpResponseRedirect('/miembro/perfil/' + str(cambio.miembro.id))
 
 
 @login_required
@@ -895,7 +791,7 @@ def administracion(request):
 
 @login_required
 @permission_required('miembros.cumplimiento_pasos', raise_exception=True)
-def cumplimientoPasos(request):
+def cumplimiento_pasos(request):
     """
     Permite a un Administrador o a un Agente registrar los cumplimientos de los pasos de los miembros.
     Una vez seleccionado un paso, se muestran los miembros que pueden realizar dicho paso y los que lo
@@ -1075,7 +971,7 @@ def ver_informacion_miembro(request, pk=None):
                             c = CambioTipo.objects.get(miembro=miembro, nuevoTipo=e)
                         except:
                             c = CambioTipo.objects.get(miembro=miembro, anteriorTipo=e)
-                        eliminarCambioTipoMiembro(request, c.id)
+                        eliminar_cambio_tipo_miembro(request, c.id)
                     cambio = CambioTipo.objects.filter(miembro=miembro)
                     tipos_cambio = [c_iter.nuevoTipo for c_iter in cambio]
 

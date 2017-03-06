@@ -164,7 +164,7 @@
             </li>
             {% endif %}
             <li class="logo hidden-xs">
-                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
+                <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -222,11 +222,11 @@
                         {% if request.user.is_authenticated %}
                             {% if mi %}
                             <li class="hidden-xs">
-                                <a  href="/miembro/perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
+                                <a  href="{% url 'miembros:editar_perfil' request.miembro.id %}"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
                             {% endif %}
                             <li>
-                                <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
+                                <a  href="{% url 'miembros:cambiar_contrasena' %}"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
                             </li>
                             <li class="divider hidden-xs"></li>
                             <li>
@@ -276,11 +276,11 @@
                 <ul class="main-menu">
                     {% if mi %}
                     <li>
-                        <a href="/miembro/perfil/"><i class="zmdi zmdi-account"></i> Perfil</a>
+                        <a href="{% url 'miembros:editar_perfil' request.miembro.id %}"><i class="zmdi zmdi-account"></i> Perfil</a>
                     </li>
                     {% endif %}
                     <li>
-                        <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
+                        <a href="{% url 'miembros:cambiar_contrasena' %}"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
                     </li>
                     <li>
                         <a href="{% url 'logout' %}"><i class="zmdi zmdi-time-restore"></i> Salir</a>
@@ -289,7 +289,7 @@
             </div>
             <ul class="main-menu">
                 <li class="active">
-                    <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
+                    <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
                 </li>
                 {% if perms.miembros.es_administrador or request.miembro.es_director_red or request.miembro.es_cabeza_red %}
                 <li class="sub-menu">
@@ -300,20 +300,20 @@
                             <a href="#">Miembro</a>
                             <ul>
                                 <li>
-                                    <a href="/miembro/listar_zonas/">Listar Zonas</a>
+                                    <a href="{% url 'miembros:listar_zonas' %}">Listar Zonas</a>
                                 </li>
                                 <li>
-                                    <a href="/miembro/listar_escalafones/">Listar Escalafones</a>
+                                    <a href="{% url 'miembros:listar_escalafones' %}">Listar Escalafones</a>
                                 </li>
                                 <li>
-                                    <a href="/miembro/listar_pasos/">Listar Pasos</a>
+                                    <a href="{% url 'miembros:listar_pasos' %}">Listar Pasos</a>
                                 </li>
                                 <li>
-                                    <a href="/miembro/promover_escalafon/">Promover Miembro de Escalafón</a>
+                                    <a href="{% url 'miembros:promover_escalafon' %}">Promover Miembro de Escalafón</a>
                                 </li>
                                 {% if perms.miembros.cumplimiento_pasos %}
                                 <li>
-                                    <a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a>
+                                    <a href="{% url 'miembros:cumplimiento_pasos' %}">Cumplimiento de Pasos</a>
                                 </li>
                                 {% endif %}
                             </ul>
@@ -338,7 +338,7 @@
                                 {% endif %}
                                 {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                                     <li>
-                                        <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                                        <a href="{% url 'miembros:reportar_reunion_grupo_admin' %}">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                     </li>
                                 {% endif %}
                                 {% if perms.miembros.es_administrador %}
@@ -366,11 +366,11 @@
                     <ul>
                         {% if mi.grupo_lidera.estado == 'A' %}
                         <li>
-                            <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'miembros:reportar_reunion_grupo' %}">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                         {% endif %}
                         <li>
-                            <a href="/miembro/editar_grupo/">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'miembros:editar_grupo' request.miembro.id %}">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
@@ -390,7 +390,7 @@
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
                         <li>
-                            <a href="/miembro/reportar_reunion_discipulado/">Ingresar D12</a>
+                            <a href="{% url 'miembros:reportar_reunion_discipulado' %}">Ingresar D12</a>
                         </li>
                         <li>
                             <a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Reporte D12</a>

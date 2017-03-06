@@ -25,7 +25,7 @@
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha asignado correctamente. <a class="alert-link" href="/miembro/grupo/{{miembroEditar.id}}">Volver al perfil.</a></p>
+                    <p>Se ha asignado correctamente. <a class="alert-link" href="{% url 'miembros:editar_grupo' miembroEditar.id %}">Volver al perfil.</a></p>
                 </div>
             </div>
             {% endif %}

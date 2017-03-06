@@ -87,7 +87,7 @@
             {% if miembro.estadoCivil == 'C' %}
             <dl class="dl-horizontal">
                 <dt>Casado con</dt>
-                <dd><a href="/miembro/perfil/{{miembro.conyugue.id}}" alt="Ver perfil de '{{miembro.conyugue.nombre}}'">{{ miembro.conyugue.nombre|upper }} {{ miembro.conyugue.primerApellido|upper }}</a></dd>
+                <dd><a href="{% url 'miembros:editar_perfil' miembro.conyugue.id %}" alt="Ver perfil de '{{miembro.conyugue.nombre}}'">{{ miembro.conyugue.nombre|upper }} {{ miembro.conyugue.primerApellido|upper }}</a></dd>
             </dl>
             {% endif %}
         </div>
