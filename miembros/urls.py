@@ -1,19 +1,14 @@
 from django.conf.urls import url
-from django.views.generic import RedirectView
 
 from . import views, api
-from grupos.views import (
-    editar_horario_reunion_grupo, reportar_reunion_grupo, reportar_reunion_grupo_admin, reportar_reunion_discipulado
-)
+from grupos.views import editar_horario_reunion_grupo
+
 
 urlpatterns = [
     url(r'^$', views.miembro_inicio, name="miembro_inicio"),
     url(r'^perfil/(?P<pk>\d*)$', views.editar_perfil_miembro, name="editar_perfil"),
     url(r'^cambiar_contrasena/$', views.cambiar_contrasena_miembro, name="cambiar_contrasena"),
     url(r'^grupo/(?P<pk>\d*)$', editar_horario_reunion_grupo, name="editar_grupo"),
-    url(r'^reportar_reunion_grupo/$', reportar_reunion_grupo, name="reportar_reunion_grupo"),
-    url(r'^reportar_reunion_grupo_admin/$', reportar_reunion_grupo_admin, name="reportar_reunion_grupo_admin"),
-    url(r'^reportar_reunion_discipulado/$', reportar_reunion_discipulado, name="reportar_reunion_discipulado"),
     url(r'^asignar_grupo/(\d+)/$', views.asignar_grupo, name="asignar_grupo"),
     url(r'^crear_zona/$', views.crear_zona, name="crear_zona"),
     url(r'^editar_zona/(?P<pk>\d+)$', views.editar_zona, name="editar_zona"),

@@ -114,7 +114,7 @@ def reportar_reunion_grupo(request):
                     messages.success(
                         request, _('Se ha Registrado el Reporte Existosamente, No olvides Llenar tu reporte Físico')
                     )
-                    return redirect('miembros:reportar_reunion_grupo')
+                    return redirect('grupos:reportar_reunion_grupo')
                 else:
                     # envia mensaje de warning si ya fue reportada
                     messages.warning(
@@ -149,7 +149,7 @@ def reportar_reunion_grupo_admin(request):
                     request,
                     _('Has reportado exitosamente la reunión de el grupo %s' % reunion.grupo.__str__())
                 )
-                return redirect('miembros:reportar_reunion_grupo_admin')
+                return redirect('grupos:reportar_reunion_grupo_admin')
             else:
                 messages.warning(
                     request,

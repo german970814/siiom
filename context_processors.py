@@ -1,5 +1,6 @@
 from django.contrib.sites.models import Site
 from miembros.models import Miembro
+from grupos.models import HistorialEstado
 
 
 def siiom_context_processor(request):
@@ -11,16 +12,16 @@ def siiom_context_processor(request):
 
     data = {
         'sitio': site,
-        'dominioIglesia': site.domain,
-        'nombreIglesia': site.name,
+        'DOMINIO': site.domain,
+        'NOMBRE_IGLESIA': site.name,
+        'GRUPO_ACTIVO': HistorialEstado.ACTIVO,
+        'GRUPO_INACTIVO': HistorialEstado.INACTIVO,
+        'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO
     }
 
     if request.user.is_authenticated():
         try:
             miembro = Miembro.objects.get(usuario=request.user)
-            data['id_miembro'] = miembro.id
-            data['mi'] = miembro
-
             draw_mapa = False
 
             if miembro.grupo_lidera is not None:

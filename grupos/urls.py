@@ -22,6 +22,9 @@ urlpatterns = [
     url(r'^redes/(?P<pk>\d+)/grupos/$', views.listar_grupos, name='listar'),
     url(r'^trasladar_lideres/$', views.trasladar_lideres, name='trasladar_lideres'),
     url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR'),
+    url(r'^reportar_reunion_discipulado/$', views.reportar_reunion_discipulado, name="reportar_reunion_discipulado"),
+    url(r'^reportar_reunion_grupo_admin/$', views.reportar_reunion_grupo_admin, name="reportar_reunion_grupo_admin"),
+    url(r'^reportar_reunion_grupo/$', views.reportar_reunion_grupo, name="reportar_reunion_grupo"),
     url(r'^(?P<pk>\d+)/confirmar_ofrenda_GAR/$', views.confirmar_ofrenda_GAR, name='confirmar_ofrenda_GAR'),
     url(
         r'^sin_confirmar_ofrenda_discipulado/$', views.sin_confirmar_ofrenda_discipulado,

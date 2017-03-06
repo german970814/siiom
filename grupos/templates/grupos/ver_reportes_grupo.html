@@ -164,7 +164,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Reportar Reunion {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</h4>
+                <h4 class="modal-title">Reportar Reunion {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</h4>
             </div>
 	        <form action="" method="POST" id="form-reporte" enctype="multipart/form-data">
 	        	{% csrf_token %}

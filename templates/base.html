@@ -14,7 +14,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ nombreIglesia }}</title>
+    <title>{% if DOMINIO == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ NOMBRE_IGLESIA }}</title>
 
     <link href="{% static 'Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/animate.css/animate.min.css' %}" rel="stylesheet">
@@ -164,7 +164,7 @@
             </li>
             {% endif %}
             <li class="logo hidden-xs">
-                <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
+                <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}">{% if DOMINIO == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -176,13 +176,13 @@
                         </div>
                     </li>
                     {% endif %}
-                    {% if mi %}
+                    {% if request.miembro %}
                     <li id="top-search">
                         <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
                     </li>
                     {% endif %}
                     <!-- opciones -->
-                    {% if mi.grupo_lidera and not mi.grupo_lidera.get_position %}
+                    {% if request.miembro.grupo_lidera and not request.miembro.grupo_lidera.get_position %}
                     <li class="dropdown">
                             <a data-toggle="dropdown" href="">
                                 <i class="tm-icon zmdi zmdi-notifications"></i>
@@ -220,7 +220,7 @@
                         <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
                         <ul class="dropdown-menu dm-icon pull-right">
                         {% if request.user.is_authenticated %}
-                            {% if mi %}
+                            {% if request.miembro %}
                             <li class="hidden-xs">
                                 <a  href="{% url 'miembros:editar_perfil' request.miembro.id %}"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
                             </li>
@@ -234,7 +234,7 @@
                             </li>
                         {% else %}
                             <li class="hidden-xs">
-                                <a  href="/iniciar_sesion/"><i class="zmdi zmdi-assignment-account"></i> Iniciar Sesión</a>
+                                <a  href="{% url 'inicio' %}"><i class="zmdi zmdi-assignment-account"></i> Iniciar Sesión</a>
                             </li>
                         {% endif %}
                         </ul>
@@ -243,7 +243,7 @@
             </li>
         </ul>
         <!-- Top Search Content -->
-        {% if mi %}
+        {% if request.miembro %}
         <div id="top-search-wrap">
             <div class="tsw-inner">
             <form action="{% url 'buscar' 'miembro' %}" method="GET">
@@ -259,22 +259,22 @@
         {% if request.user.is_authenticated %}
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
-                <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{dominioIglesia}}.png') !important;">
+                <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{DOMINIO}}.png') !important;">
                     <div class="profile-pic">
-                        <img src="{% if mi.foto_perfil %}{{ mi.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
+                        <img src="{% if request.miembro.foto_perfil %}{{ request.miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                     </div>
                     <div class="profile-info">
                     {% if request.user.is_authenticated %}
                         {{ request.user.email }}
                     {% else %}
-                        {{ nombreIglesia }}
+                        {{ NOMBRE_IGLESIA }}
                     {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
                 </a>
                 {% if request.user.is_authenticated %}
                 <ul class="main-menu">
-                    {% if mi %}
+                    {% if request.miembro %}
                     <li>
                         <a href="{% url 'miembros:editar_perfil' request.miembro.id %}"><i class="zmdi zmdi-account"></i> Perfil</a>
                     </li>
@@ -338,7 +338,7 @@
                                 {% endif %}
                                 {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                                     <li>
-                                        <a href="{% url 'miembros:reportar_reunion_grupo_admin' %}">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                                        <a href="{% url 'grupos:reportar_reunion_grupo_admin' %}">Reportar Reunión {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                     </li>
                                 {% endif %}
                                 {% if perms.miembros.es_administrador %}
@@ -360,37 +360,37 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupo_lidera %}
+                {% if request.miembro.grupo_lidera %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
-                        {% if mi.grupo_lidera.estado == 'A' %}
+                        {% if request.miembro.grupo_lidera.estado == GRUPO_ACTIVO %}
                         <li>
-                            <a href="{% url 'miembros:reportar_reunion_grupo' %}">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'grupos:reportar_reunion_grupo' %}">Ingresar Sobre {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                         {% endif %}
                         <li>
-                            <a href="{% url 'miembros:editar_grupo' request.miembro.id %}">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'miembros:editar_grupo' request.miembro.id %}">Editar mi {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupo_lidera or perms.miembro.es_administrador %}
+                {% if request.miembro.grupo_lidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
                         <li>
-                            <a href="{% url 'reportes:estadistico_reuniones_grupo' %}">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'reportes:estadistico_reuniones_grupo' %}">Informe General de mi {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupo_lidera or perms.miembros.es_administrador %}
+                {% if request.miembro.grupo_lidera or perms.miembros.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
                     <ul>
                         <li>
-                            <a href="{% url 'miembros:reportar_reunion_discipulado' %}">Ingresar D12</a>
+                            <a href="{% url 'grupos:reportar_reunion_discipulado' %}">Ingresar D12</a>
                         </li>
                         <li>
                             <a href="{% url 'reportes:estadistico_totalizado_reuniones_discipulado' %}">Reporte D12</a>
@@ -401,7 +401,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
                     <ul>
@@ -426,7 +426,7 @@
                                     <a href="{% url 'reportes:estadistico_reuniones_discipulado' %}">Estadistico de reuniones Discupulado</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'reportes:estadistico_totalizado_reuniones_grupo' %}">Estadistico totalizado de reuniones {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                                    <a href="{% url 'reportes:estadistico_totalizado_reuniones_grupo' %}">Estadistico totalizado de reuniones {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                                 </li>
                             </ul>
                         </li>
@@ -780,8 +780,8 @@
             $('#toggleModal').click();
         });
         {% if draw_mapa %}
-            {% if mi.grupo_lidera or perms.miembros.es_administrador %}
-            {% if dominioIglesia == 'gng.com' %}
+            {% if request.miembro.grupo_lidera or perms.miembros.es_administrador %}
+            {% if DOMINIO == 'gng.com' %}
                 var mymap = L.map('mapa').setView([11.2009692, -74.227405], 18);
             {%  else %}
                 var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
@@ -819,8 +819,8 @@
                     console.log(err);
                 }
             })
-            {% elif mi.grupo_lidera %}
-            geocoder.geocode('{{ mi.grupo_lidera.get_direccion }}', function(results){
+            {% elif request.miembro.grupo_lidera %}
+            geocoder.geocode('{{ request.miembro.grupo_lidera.get_direccion }}', function(results){
                 try {
                     latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
                     _marker = new L.Marker(latLng);
@@ -865,7 +865,7 @@
                 $('#toggleModal2').click();
             });
 
-                {% if mi.grupo_lidera %}
+                {% if request.miembro.grupo_lidera %}
                 $('#send_position').click(function(event) {
                     if (!marker) {
                         event.preventDefault();
@@ -873,7 +873,7 @@
                         return false;
                     } else {
                         $.ajax({
-                            url: {% if g and miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" miembro.grupo_lidera.id %}'{% elif mi.grupo_lidera %}'{% url "grupos:posicion_grupo" mi.grupo_lidera.id %}'{% endif %},
+                            url: {% if g and miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" miembro.grupo_lidera.id %}'{% elif request.miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" request.miembro.grupo_lidera.id %}'{% endif %},
                             type: 'GET',
                             data: {
                                 csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
