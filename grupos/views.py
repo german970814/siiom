@@ -13,7 +13,7 @@ from django.utils.translation import ugettext as _
 
 # Apps Imports
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
-from .utils import reunion_reportada, obtener_fechas_semana
+from .utils import reunion_reportada, obtener_fechas_semana, reunion_reportada_discipulado_predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
@@ -35,7 +35,7 @@ import copy
 
 @login_required
 @permission_required('miembros.es_lider', raise_exception=True)
-def editarHorarioReunionGrupo(request, pk=None):
+def editar_horario_reunion_grupo(request, pk=None):
     g = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
@@ -81,18 +81,9 @@ def editarHorarioReunionGrupo(request, pk=None):
     return render_to_response('grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
 
 
-def reunionDiscipuladoReportada(predica, grupo):
-    reunion = grupo.reuniones_discipulado.filter(predica=predica)
-
-    if reunion:
-        return True
-    else:
-        return False
-
-
 @login_required
 @permission_required('miembros.es_lider', raise_exception=True)
-def reportarReunionGrupo(request):
+def reportar_reunion_grupo(request):
     """
     Vista para crear el reporte de grupos en el sistema
     """
@@ -142,7 +133,7 @@ def reportarReunionGrupo(request):
 
 @login_required
 @user_is_director_red
-def reportarReunionGrupoAdmin(request):
+def reportar_reunion_grupo_admin(request):
     if request.method == 'POST':
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
@@ -180,7 +171,7 @@ def reportarReunionGrupoAdmin(request):
 
 @login_required
 @permission_required('miembros.es_lider', raise_exception=True)
-def reportarReunionDiscipulado(request):
+def reportar_reunion_discipulado(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupo_lidera
     if grupo:
@@ -190,7 +181,7 @@ def reportarReunionDiscipulado(request):
             form = FormularioReportarReunionDiscipulado(miembro=miembro, data=request.POST)
             if form.is_valid():
                 r = form.save(commit=False)
-                if not reunionDiscipuladoReportada(r.predica, grupo):
+                if not reunion_reportada_discipulado_predica(grupo, r.predica):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
@@ -211,7 +202,7 @@ def reportarReunionDiscipulado(request):
 
 @login_required
 @permission_required('miembros.es_pastor', raise_exception=True)
-def listarPredicas(request):
+def listar_predicas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
         if 'eliminar' in request.POST:
@@ -227,7 +218,7 @@ def listarPredicas(request):
 
 @login_required
 @permission_required('miembros.es_pastor', raise_exception=True)
-def crearPredica(request):
+def crear_predica(request):
     miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
     if request.method == "POST":
@@ -242,7 +233,7 @@ def crearPredica(request):
 
 @login_required
 @permission_required('miembros.es_pastor', raise_exception=True)
-def editarPredica(request, pk):
+def editar_predica(request, pk):
     accion = 'Editar'
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -259,7 +250,6 @@ def editarPredica(request, pk):
             form.save()
     else:
         form = FormularioCrearPredica(instance=predica, miembro=miembro)
-        return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 
     return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 

@@ -64,3 +64,22 @@ def obtener_fechas_semana(fecha):
         inicio_semana += datetime.timedelta(days=1)
 
     return _fechas
+
+
+def reunion_reportada_discipulado_predica(grupo, predica):
+    """
+    :returns:
+        *True* si se encuentra que el grupo ya hizo un reporte de reunion discipulado
+        con la predica dada.
+
+    :rtype bool:
+
+    :param grupo:
+        El grupo del el cual se quiere hacer la consulta si se reportó la reunion,
+        discipulado.
+
+    :param predica:
+        La predica sobre la cual se hará la consulta.
+    """
+
+    return grupo.reuniones_discipulado.filter(predica=predica).exists()

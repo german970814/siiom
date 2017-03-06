@@ -328,7 +328,7 @@
                                         <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
                                     </li>
                                     <li>
-                                        <a href="/grupo/listar_predicas/">Listar Prédicas</a>
+                                        <a href="{% url 'grupos:listar_predicas' %}">Listar Prédicas</a>
                                     </li>
                                 {% endif %}
                                 {% if request.miembro.es_cabeza_red or perms.miembros.es_administrador %}

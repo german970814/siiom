@@ -3,9 +3,9 @@ from django.conf.urls import url
 from . import views, api
 
 urlpatterns = [
-    url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),
-    url(r'^crear_predica/$', views.crearPredica, name="crear_predica"),
-    url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),
+    url(r'^listar_predicas/$', views.listar_predicas, name="listar_predicas"),
+    url(r'^crear_predica/$', views.crear_predica, name="crear_predica"),
+    url(r'^editar_predica/(?P<pk>\d+)$', views.editar_predica, name="editar_predica"),
     url(r'^ver_reportes/$', views.ver_reportes_grupo, name="reportes_grupo"),
     url(r'^editar_reporte/(?P<pk>\d+)$', views.editar_runion_grupo, name="editar_reporte"),
 

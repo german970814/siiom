@@ -96,7 +96,7 @@
             $(".grupo .bs-searchbox input").on('keydown change keyup', function(event){
                 if($(this).val() != ''){
                     $.ajax({
-                        url: "/grupo/ver_reportes/",
+                        url: "{% url 'grupos:reportes_grupo' %}",
                         data: {
                             combo: $(this).val(),
                             value: $(this).val(),
