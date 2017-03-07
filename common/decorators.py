@@ -67,11 +67,11 @@ def POST(view_func):
     """
     Decorador para que solo pueda ser ingresada a la pagina con POST.
     """
-    return require_http_methods(view_func, ['POST'])
+    return require_http_methods(['POST'])(view_func)
 
 
 def GET(view_func):
     """
     Decorador para que solo pueda ser ingresada a la pagina con GET.
     """
-    return require_http_methods(view_func, ['GET'])
+    return require_http_methods(['GET'])(view_func)

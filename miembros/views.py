@@ -21,12 +21,15 @@ from django.views.decorators.csrf import csrf_protect
 from .forms import *
 from .forms import TrasladarMiembroForm, NuevoMiembroForm, DesvincularLiderGrupoForm
 from .decorators import user_is_miembro_or_empleado
-from .models import Miembro, CambioTipo, TipoMiembro, Zona, CambioEscalafon, CumplimientoPasos
+from .models import (
+    Miembro, CambioTipo, TipoMiembro, Zona, CambioEscalafon,
+    CumplimientoPasos, Barrio, Escalafon, Pasos
+)
 from .utils import divorciar, calcular_grupos_miembro
 from grupos.forms import FormularioEditarDiscipulado
 from grupos.models import Grupo, Red
 from common.decorators import permisos_requeridos
-from common.utils import eliminar, generar_random_string
+from common.utils import eliminar, generar_random_string, eliminar_registros
 from compras.models import Requisicion, Parametros, DetalleRequisicion
 
 # Third Apps
@@ -313,16 +316,25 @@ def editar_perfil_miembro(request, pk=None):
     'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
     'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
 )
+@sensitive_post_parameters()
+@csrf_protect
+@never_cache
 def cambiar_contrasena_miembro(request):
-    miembroUsuario = request.user
+    """
+    Vista para cambiar la contraseña de el usuario de un miembro.
+    """
+
+    usuario = request.user
+
     if request.method == 'POST':
         form = FormularioCambiarContrasena(data=request.POST, request=request)
+
         if form.is_valid():
-            if (miembroUsuario.check_password(form.cleaned_data['contrasenaAnterior']) and
+            if (usuario.check_password(form.cleaned_data['contrasenaAnterior']) and
                form.cleaned_data['contrasenaNueva'] == form.cleaned_data['contrasenaNuevaVerificacion']):
-                miembroUsuario.set_password(form.cleaned_data['contrasenaNueva'])
-                miembroUsuario.save()
-                if hasattr(miembroUsuario, 'empleado') and not Miembro.objects.filter(usuario=miembroUsuario):
+                usuario.set_password(form.cleaned_data['contrasenaNueva'])
+                usuario.save()
+                if hasattr(usuario, 'empleado') and not Miembro.objects.filter(usuario=usuario):
                     return redirect('miembros:miembro_inicio')
                 return redirect("miembros:editar_perfil")
             else:
@@ -421,23 +433,18 @@ def listar_zonas(request):
 @permission_required('miembros.es_administrador', raise_exception=True)
 def barrios_zona(request, id):
     """
-        Esta función permite listar los barrios que están registrados en determinada/
-        zona
+    Esta función permite listar los barrios que están registrados en determinada
+    zona.
     """
-    miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        zona = Zona.objects.get(id=id)
-    except:
-        raise Http404
+
+    zona = get_object_or_404(Zona, id=id)
+
     if request.method == "POST":
-        if 'editar' in request.POST:
-            request.session['seleccionados'] = request.POST.getlist('seleccionados')
-            request.session['zona'] = zona
-            return HttpResponseRedirect('/miembro/editar_barrio/')
         if 'eliminar' in request.POST:
             okElim = eliminar(request, Barrio, request.POST.getlist('seleccionados'))
-    barrios = list(Barrio.objects.filter(zona=zona))
-    return render_to_response('miembros/barrios.html', locals(), context_instance=RequestContext(request))
+
+    barrios = zona.barrio_set.all()
+    return render(request, 'miembros/barrios.html', {'barrios': barrios, 'zona': zona})
 
 
 @login_required
@@ -1148,7 +1155,7 @@ def trasladar(request, pk):
         form = TrasladarMiembroForm(data=request.POST)
         if form.is_valid():
             form.trasladar(miembro)
-            return redirect('miembros:trasladar', pk)
+            return redirect('miembros:editar_perfil', pk)
     else:
         form = TrasladarMiembroForm()
 

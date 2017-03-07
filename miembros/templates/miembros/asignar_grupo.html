@@ -19,7 +19,7 @@
     <div class="card">
         <div class="card-header">
             <h1 class="f-20">
-                <legend><h3>Asignar Grupo a {{miembroEditar.nombre|upper}} {{miembroEditar.primerApellido|upper}} ({{miembroEditar.cedula}})</h3></legend>
+                <legend><h3>Asignar Grupo a {{ miembroEditar }}</h3></legend>
             </h1> 
             {% if ok %}
             <div class="row">
@@ -33,11 +33,6 @@
         <form action="" method="POST" enctype="multipart/form-data" id="form">
             {% csrf_token %}
             <div class="card-body card-padding">
-                <div class="row">
-                	<div class="col-md-6">
-                    	<p class="t-20 form-control-static"><label>Miembro ingreso:</label> {{ miembroIngreso.nombre|upper }} {{miembroIngreso.primerApellido|upper}} {{miembroIngreso.segundoApellido|upper}} ({{ gMiembroIngreso.nombre|upper }})</p>
-                    </div>
-                </div>
                 <br>
                 <br>
                 <div class="row">

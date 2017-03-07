@@ -85,7 +85,7 @@ def editar_horario_reunion_grupo(request, pk=None):
 @permission_required('miembros.es_lider', raise_exception=True)
 def reportar_reunion_grupo(request):
     """
-    Vista para crear el reporte de grupos en el sistema
+    Vista para crear el reporte de grupos en el sistema.
     """
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -128,6 +128,8 @@ def reportar_reunion_grupo(request):
         else:
             # carga el formulario en get
             form = FormularioReportarReunionGrupo()
+    else:
+        raise PermissionDenied('Grupo no se encuentra o está inactivo.')
     return render_to_response('grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
 
