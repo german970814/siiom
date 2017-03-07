@@ -21,10 +21,7 @@ from django.views.decorators.csrf import csrf_protect
 from .forms import *
 from .forms import TrasladarMiembroForm, NuevoMiembroForm, DesvincularLiderGrupoForm
 from .decorators import user_is_miembro_or_empleado
-from .models import (
-    Miembro, CambioTipo, TipoMiembro, Zona, CambioEscalafon,
-    CumplimientoPasos, Barrio, Escalafon, Pasos
-)
+from .models import Miembro, CambioTipo, TipoMiembro, Zona, Barrio
 from .utils import divorciar, calcular_grupos_miembro
 from grupos.forms import FormularioEditarDiscipulado
 from grupos.models import Grupo, Red
@@ -214,7 +211,7 @@ def miembro_inicio(request):
 
 @login_required
 @permisos_requeridos(
-    'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
+    'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente',
     'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
 )
 def editar_perfil_miembro(request, pk=None):
@@ -313,7 +310,7 @@ def editar_perfil_miembro(request, pk=None):
 
 @login_required
 @permisos_requeridos(
-    'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
+    'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente',
     'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
 )
 @sensitive_post_parameters()
@@ -500,146 +497,6 @@ def editar_barrio(request, id, pk):
 
 @login_required
 @permission_required('miembros.es_administrador', raise_exception=True)
-def agregar_paso_miembro(request):
-    """
-    Esta función sirve para agregar un paso a la lista de pasos que puede cumplir
-    un miembro
-    """
-    accion = 'Crear'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        form = FormularioPasos(data=request.POST)
-        if form.is_valid():
-            nuevoPaso = form.save()
-            ok = True
-    else:
-        form = FormularioPasos()
-    return render_to_response('miembros/agregar_paso.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def listar_pasos(request):
-    """
-    Esta función sirve para listar los pasos con que cuenta la iglesia
-    """
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-
-        if 'eliminar' in request.POST:
-            okElim = eliminar(request, Pasos, request.POST.getlist('seleccionados'))
-            if okElim == 1:
-                return HttpResponseRedirect('')
-    pasos = Pasos.objects.all().order_by("prioridad")
-    return render_to_response('miembros/listar_pasos.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def editar_paso(request, pk):
-    accion = 'Editar'
-
-    try:
-        paso = Pasos.objects.get(pk=pk)
-    except Pasos.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
-        form = FormularioPasos(request.POST or None, instance=paso)
-
-        if form.is_valid():
-            ok = True
-            form.save()
-
-    else:
-        form = FormularioPasos(instance=paso)
-
-    return render_to_response("miembros/agregar_paso.html", locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def listar_escalafones(request):
-    """
-    Muestra la lista de escalafones ya creados ordenado por el número de
-    células
-    """
-
-    if request.method == 'POST':
-        if 'eliminar' in request.POST:
-            okElim = eliminar(request, Escalafon, request.POST.getlist('seleccionados'))
-            if okElim == 1:
-                return HttpResponseRedirect('')
-
-    escalafones = list(Escalafon.objects.all().order_by('celulas'))
-    return render_to_response('miembros/listar_escalafones.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def crear_escalafon(request):
-    """
-    Crea Escalafones con sus respectivos campos
-    """
-    accion = 'Crear'
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        form = FormularioCrearEscalafon(data=request.POST)
-        if form.is_valid():
-            nuevoEscalafon = form.save()
-            ok = True
-    else:
-        form = FormularioCrearEscalafon()
-    return render_to_response('miembros/crear_escalafon.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def editar_escalafon(request, pk):
-    accion = 'Editar'
-
-    try:
-        escalafon = Escalafon.objects.get(pk=pk)
-    except Escalafon.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
-        form = FormularioCrearEscalafon(request.POST or None, instance=escalafon)
-
-        if form.is_valid():
-            form.save()
-            return redirect('miembros:listar_escalafones')
-
-    else:
-        form = FormularioCrearEscalafon(instance=escalafon)
-
-    return render_to_response("miembros/crear_escalafon.html", locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
-def promover_miembro_escalafon(request):
-    """Promueve un miembro de escalafon siempre y cuando este cumpla con los requesitos para el cambio."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if request.method == "POST":
-        form = FormularioPromoverEscalafon(data=request.POST)
-        if form.is_valid():
-            nuevoCambioEscalafon = form.save(commit=False)
-            miembroEditar = nuevoCambioEscalafon.miembro
-            if calcular_grupos_miembro(miembroEditar) >= nuevoCambioEscalafon.escalafon.celulas:
-                nuevoCambioEscalafon.save()
-                ok = True
-            else:
-                messages.error(request,
-                               "El miembro %s no cumple con los requisitos para el cambio." % (str(miembroEditar)))
-    else:
-        form = FormularioPromoverEscalafon()
-    return render_to_response('miembros/promover_escalafon.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.es_administrador', raise_exception=True)
 def crear_tipo_miembro(request):
     accion = 'Crear'
     miembro = Miembro.objects.get(usuario=request.user)
@@ -794,53 +651,6 @@ def administracion(request):
     totalMaestros = CambioTipo.objects.filter(nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Maestro")).count()
     # visitantes = request.session['visitantes']
     return render_to_response('miembros/administracion.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permission_required('miembros.cumplimiento_pasos', raise_exception=True)
-def cumplimiento_pasos(request):
-    """
-    Permite a un Administrador o a un Agente registrar los cumplimientos de los pasos de los miembros.
-    Una vez seleccionado un paso, se muestran los miembros que pueden realizar dicho paso y los que lo
-    hayan realizado. La condición para que un miembro pueda realizar un paso es que haya realizado todos
-    los pasos con una prioridad menor al escogido.
-    """
-
-    if request.method == 'POST':
-        if 'verMiembros' in request.POST or 'promoverPaso' in request.POST:
-            try:
-                pasoE = Pasos.objects.get(id=request.POST.getlist('menuPasos')[0])
-                numPasos = Pasos.objects.filter(prioridad__lt=pasoE.prioridad).count()
-
-                if 'promoverPaso' in request.POST:
-                    miembros = Miembro.objects.exclude(
-                        pasos__prioridad__gt=pasoE.prioridad).annotate(
-                            nPasos=Count('pasos')).filter(nPasos__gte=numPasos).order_by('nombre')
-                    seleccionados = request.POST.getlist('seleccionados')
-                    for m in miembros:
-                        if str(m.id) in seleccionados:
-                            if not m.pasos.filter(id=pasoE.id).exists():
-                                c = CumplimientoPasos.objects.create(
-                                    miembro=m, paso=pasoE, fecha=datetime.datetime.now())
-                                ok = True
-                        else:
-                            if m.pasos.filter(id=pasoE.id).exists():
-                                CumplimientoPasos.objects.get(miembro=m, paso=pasoE).delete()
-                                ok = True
-
-                miembros = Miembro.objects.exclude(
-                    pasos__prioridad__gt=pasoE.prioridad).annotate(
-                        nPasos=Count('pasos')).filter(nPasos__gte=numPasos).order_by('nombre')
-                for m in miembros:
-                    if m.pasos.filter(id=pasoE.id).exists():
-                        m.cumplio = True
-                    else:
-                        m.cumplio = False
-            except:
-                raise Http404
-    miembro = Miembro.objects.get(usuario=request.user)
-    pasos = Pasos.objects.all().exclude(nombre__iexact='lanzamiento').order_by('prioridad', 'nombre')
-    return render_to_response("miembros/cumplimiento_pasos.html", locals(), context_instance=RequestContext(request))
 
 
 def recuperar_contrasena(request):
@@ -1046,11 +856,6 @@ def ver_informacion_miembro(request, pk=None):
 
     if miembro.grupo:
         lideres_miembro = miembro.grupo.lideres.all()
-    escalafones = list(CambioEscalafon.objects.filter(miembro=miembro).order_by('fecha'))
-    tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
-    if len(escalafones) > 0:
-        escalafon = escalafones.pop()
-    pasos = list(CumplimientoPasos.objects.filter(miembro=miembro).order_by('fecha'))
 
     return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 

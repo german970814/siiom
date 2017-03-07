@@ -94,14 +94,6 @@
     <div class="pmbb-body p-l-30">
         <div class="pmbb-view">
             <dl class="dl-horizontal">
-                <dt>Pasos que ha completado</dt>
-                <dd>{% for paso in pasos %}{% if forloop.first %}{{paso.paso}}{% else %}, {{paso.paso}}{% endif %}{% empty %}Ningún Paso Aún{% endfor %}</dd>
-            </dl>
-            <dl class="dl-horizontal">
-                <dt>Escalafon</dt>
-                <dd>{% if escalafon %}{{escalafon.escalafon.rango|upper}}{% else %}SIN DATOS{% endif %}</dd>
-            </dl>
-            <dl class="dl-horizontal">
                 <dt>Tipo de Miembro</dt>
                 {% for cambio in tipos %}
                 <dd>{{cambio.nuevoTipo|upper}}</dd>

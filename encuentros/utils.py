@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
 
 # Apps
-from miembros.models import TipoMiembro, Pasos, CumplimientoPasos, CambioTipo, Miembro
+from miembros.models import TipoMiembro, CambioTipo, Miembro
 from common.decorators import concurrente
 
 # Python
@@ -30,7 +30,6 @@ def crear_miembros_con_encontristas(encontristas, iglesia):
     tesorero_group = Group.objects.get(name__iexact='tesorero')
     coordinador_group = Group.objects.get(name__iexact='coordinador')
     tipo_miembro = TipoMiembro.objects.get(nombre__iexact='miembro')
-    paso = Pasos.objects.get(nombre__iexact='encuentro')
     for encontrista in encontristas:
         if encontrista.asistio:
             try:
@@ -51,11 +50,6 @@ def crear_miembros_con_encontristas(encontristas, iglesia):
                 nuevo_miembro.grupo = encontrista.grupo
                 nuevo_miembro.iglesia = iglesia
                 nuevo_miembro.save()
-                pasos = CumplimientoPasos()
-                pasos.miembro = nuevo_miembro
-                pasos.paso = paso
-                pasos.fecha = datetime.date.today()
-                pasos.save()
                 cambio = CambioTipo()
                 cambio.miembro = nuevo_miembro
                 cambio.fecha = datetime.date.today()

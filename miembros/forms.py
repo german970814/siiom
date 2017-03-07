@@ -15,10 +15,7 @@ from django.utils.http import is_safe_url
 from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
 from grupos.forms import ArchivarGrupoForm
-from .models import (
-    Miembro, Zona, Barrio, CumplimientoPasos, CambioTipo,
-    Pasos, Escalafon, CambioEscalafon, TipoMiembro,
-)
+from .models import Miembro, Zona, Barrio, CambioTipo, TipoMiembro
 
 from PIL import Image
 from io import BytesIO
@@ -27,8 +24,7 @@ from io import BytesIO
 __all__ = (
     'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro', 'FormularioCambiarContrasena',
     'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
-    'FormularioPasos', 'FormularioCrearEscalafon', 'TrasladarMiembroForm', 'DesvincularLiderGrupoForm',
-    'FormularioPromoverEscalafon', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
+    'TrasladarMiembroForm', 'DesvincularLiderGrupoForm', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
     'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
     'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'LoginForm'
 )
@@ -284,59 +280,6 @@ class FormularioCrearBarrio(forms.ModelForm):
     class Meta:
         model = Barrio
         fields = ('nombre', )
-
-
-class FormularioPasos(forms.ModelForm):
-    """
-    Formulario para crear y editar pasos.
-    """
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioPasos, self).__init__(*args, **kwargs)
-
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['prioridad'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Pasos
-        fields = '__all__'
-
-
-class FormularioCrearEscalafon(forms.ModelForm):
-    """Formulario para crear y editar el escalafon."""
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioCrearEscalafon, self).__init__(*args, **kwargs)
-
-        self.fields['celulas'].widget.attrs.update({'class': 'form-control'})
-        self.fields['descripcion'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Descripción...'})
-        self.fields['logro'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Logros...'})
-        self.fields['rango'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Escalafon
-        fields = '__all__'
-
-
-class FormularioPromoverEscalafon(forms.ModelForm):
-    """
-    Formulario para promover a los miebros de el escalafon.
-    """
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioPromoverEscalafon, self).__init__(*args, **kwargs)
-        self.fields['miembro'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['escalafon'].widget.attrs.update({'class': 'selectpicker'})
-
-    class Meta:
-        model = CambioEscalafon
-        fields = ('miembro', 'escalafon')
 
 
 class FormularioCrearTipoMiembro(forms.ModelForm):

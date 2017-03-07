@@ -14,8 +14,7 @@ import datetime
 
 
 __all__ = (
-    'Zona', 'Barrio', 'Pasos', 'TipoMiembro', 'CambioEscalafon', 'CambioTipo',
-    'Escalafon', 'Miembro', 'CumplimientoPasos',
+    'Zona', 'Barrio', 'TipoMiembro', 'CambioTipo', 'Miembro',
 )
 
 
@@ -38,16 +37,6 @@ class Barrio(models.Model):
         return '{} - {}'.format(self.nombre.upper(), self.zona)
 
 
-class Pasos(models.Model):
-    """Modelo para guardar los pasos que puede dar un miembro."""
-
-    nombre = models.CharField(max_length=20)
-    prioridad = models.PositiveIntegerField()
-
-    def __str__(self):
-        return self.nombre.upper()
-
-
 class TipoMiembro(models.Model):
     """Modelo para guardar los tipos de miembros que puede tener un miembro."""
 
@@ -55,17 +44,6 @@ class TipoMiembro(models.Model):
 
     def __str__(self):
         return self.nombre.upper()
-
-
-class Escalafon(models.Model):
-    """Modelo para guardar los posibles escalafones que tendrán los miembros."""
-    celulas = models.PositiveIntegerField()
-    descripcion = models.TextField(max_length=200)
-    logro = models.TextField(max_length=200)
-    rango = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.rango
 
 
 class Miembro(IglesiaMixin, models.Model):
@@ -136,8 +114,6 @@ class Miembro(IglesiaMixin, models.Model):
     portada = models.ImageField(_lazy('portada'), upload_to=ruta_imagen, null=True, blank=True)
 
     estado = models.CharField(_lazy('estado'), max_length=1, choices=ESTADOS)
-    pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', verbose_name=_lazy('pasos'), blank=True)
-    escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon', verbose_name=_lazy('escalafón'))
     grupo = models.ForeignKey(
         'grupos.Grupo', verbose_name=_lazy('grupo'),
         related_name='miembros', null=True, blank=True
@@ -245,44 +221,12 @@ class Miembro(IglesiaMixin, models.Model):
         permissions = (
             ("es_agente", "define si un miembro es agente"),
             ("es_lider", "indica si el usuario es lider de un GAR"),
-            ("es_maestro", "indica si un usuario es maestro de un curso"),
             ("es_administrador", "es adminisitrador"),
-            ("buscar_todos", "indica si un usuario puede buscar miembros"),
-            ("puede_editar_miembro", "indica si un usuario puede editar miembros"),
-            ("puede_agregar_visitante", "puede agregar miembros visitantes"),
-            ("llamada_lider", "puede modificar llamada lider"),
-            ("llamada_agente", "puede modificar llamada agente"),
-            ("cumplimiento_pasos", "puede registrar el cumplimiento de pasos"),
             ("es_pastor", "indica si un miembro es pastor"),
             ("es_tesorero", "indica si un miembro es tesorero"),
             ("es_coordinador", "indica si un miembro es coordinador"),
+            ("buscar_todos", "indica si un usuario puede buscar miembros"),
         )
-
-
-class CumplimientoPasos(models.Model):
-    """
-    Modelo para guardar los cumplimientos de pasos que ha alcanzado cada miembros.
-    """
-
-    miembro = models.ForeignKey(Miembro)
-    paso = models.ForeignKey(Pasos)
-    fecha = models.DateField()
-
-    def __str__(self):
-        return '{} - {}'.format(self.miembro, self.paso)
-
-
-class CambioEscalafon(models.Model):
-    """
-    Modelo para guardar el cambio de escalafon que ha alcanzado cada miembro.
-    """
-
-    miembro = models.ForeignKey(Miembro)
-    escalafon = models.ForeignKey(Escalafon)
-    fecha = models.DateField(default=datetime.datetime.now)
-
-    def __str__(self):
-        return '{} - {}'.format(self.miembro, self.escalafon)
 
 
 class CambioTipo(models.Model):

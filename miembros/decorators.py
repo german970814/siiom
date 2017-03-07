@@ -80,7 +80,7 @@ def user_is_miembro_or_empleado(view_func):
             return view_func(request, *args, **kwargs)
         else:
             permissions = (
-                'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente', 'miembros.es_maestro',
+                'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente',
                 'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
             )
             for permission in permissions:

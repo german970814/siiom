@@ -302,20 +302,6 @@
                                 <li>
                                     <a href="{% url 'miembros:listar_zonas' %}">Listar Zonas</a>
                                 </li>
-                                <li>
-                                    <a href="{% url 'miembros:listar_escalafones' %}">Listar Escalafones</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'miembros:listar_pasos' %}">Listar Pasos</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'miembros:promover_escalafon' %}">Promover Miembro de Escalafón</a>
-                                </li>
-                                {% if perms.miembros.cumplimiento_pasos %}
-                                <li>
-                                    <a href="{% url 'miembros:cumplimiento_pasos' %}">Cumplimiento de Pasos</a>
-                                </li>
-                                {% endif %}
                             </ul>
                         </li>
                     {% endif %}
@@ -405,20 +391,6 @@
                 <li class="sub-menu">
                     <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
                     <ul>
-                        <li class="sub-menu">
-                            <a href="#">Miembros y sus Pasos</a>
-                            <ul>
-                                <li>
-                                    <a href="{% url 'reportes:pasos_por_miembro' %}">Miembros y sus pasos</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'reportes:pasos_totales' %}">Estadistico de pasos por totales</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'reportes:pasos_rango_fechas' %}">Estadistico de pasos por un rango de fechas</a>
-                                </li>
-                            </ul>
-                        </li>
                         <li class="sub-menu">
                             <a href="#">Asistencia Reuniones</a>
                             <ul>

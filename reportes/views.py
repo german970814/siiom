@@ -17,204 +17,13 @@ from .forms import (
 from .utils import get_date_for_report
 from common.decorators import permisos_requeridos
 from grupos.utils import reunion_reportada
-from grupos.models import ReunionGAR, AsistenciaMiembro, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
-from miembros.models import Miembro, Pasos, CumplimientoPasos
+from grupos.models import ReunionGAR, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
+from miembros.models import Miembro
 
 # Python Package
 import datetime
 import json
 import copy
-
-
-@login_required
-@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def reporte_pasos_por_miembro(request):
-    """Muestra los miembros de los grupos seleccionados y los pasos hechos por cada miembro."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres')  # .activos()
-    else:
-        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
-    pasos = Pasos.objects.all().order_by('prioridad')
-    descendientes = False
-
-    if request.method == 'POST':
-        if 'combo' in request.POST:
-            grupo_i = Grupo.objects.get(id=request.POST['id'])
-            grupos = Grupo.get_tree(grupo_i)
-            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
-            return HttpResponse(json.dumps(data), content_type="application/json")
-
-        if 'verReporte' in request.POST:
-            grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-            if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
-                descendientes = True
-                grupos = Grupo.get_tree(grupo_i)
-            else:
-                grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-                listaGrupo_f = Grupo.get_tree(grupo_i)
-                grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
-
-            for g in grupos:
-                miembros_grupo = g.miembrosGrupo().order_by('nombre', 'primerApellido')
-                for m in miembros_grupo:
-                    f = []
-                    for p in pasos:
-                        try:
-                            c = CumplimientoPasos.objects.get(miembro=m, paso=p)
-                            cumplio = True
-                        except:
-                            cumplio = False
-                        f.append(cumplio)
-                    m.cumple = f
-                g.m_grupo = miembros_grupo
-
-    return render_to_response(
-        'reportes/pasosPorMiembro.html', locals(), context_instance=RequestContext(request)
-    )
-
-
-@login_required
-@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def reporte_pasos_totales(request):
-    """Muestra un reporte de pasos por totales."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres')
-    else:
-        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
-
-    pasos = Pasos.objects.all().order_by('prioridad')
-    descendientes = False
-    sw = False
-
-    tipo = 1
-    if request.method == 'POST':
-        if 'combo' in request.POST:
-            grupo_i = Grupo.objects.get(id=request.POST['id'])
-            grupos = Grupo.get_tree(grupo_i)
-            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
-            return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-            opciones = {'gi': grupo_i.nombre.capitalize()}
-            sw = True
-
-            if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
-                descendientes = True
-                opciones['gf'] = 'Descendientes'
-                grupos = Grupo.get_tree(grupo_i)
-            else:
-                grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-                opciones['gf'] = grupo_f.nombre.capitalize()
-                listaGrupo_f = Grupo.get_tree(grupo_i)
-                grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
-
-            miembros = []
-            for g in grupos:
-                miembros.extend(g.miembrosGrupo())
-
-            values = [['Pasos', 'Miembros']]
-            total = len(miembros)
-            for p in pasos:
-                num_m = CumplimientoPasos.objects.filter(paso=p, miembro__in=miembros).count()
-                values.append([str(p.nombre), num_m])
-
-            m_cumplen = CumplimientoPasos.objects.filter(paso__in=pasos,
-                                                         miembro__in=miembros).values_list('miembro', flat=True)
-            total_m = Miembro.objects.filter(id__in=m_cumplen).count()
-            values.append(['No han realizado ningun paso', len(miembros) - total_m])
-
-            if 'type' in request.POST:
-                if request.POST['type'] == '1':
-                    tipo = 1
-                else:
-                    tipo = 2
-
-            if 'reportePDF' in request.POST:
-                values.append(['Total', total])
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                PdfTemplate(response, 'Numero de miembros por pasos', opciones, values, tipo, True)
-                return response
-
-    return render_to_response('reportes/pasosTotales.html', locals(), context_instance=RequestContext(request))
-
-
-@login_required
-@permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
-def reporte_pasos_por_fecha(request):
-    """Muestra un reporte de pasos por un rango de fecha."""
-
-    miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres')  # .activos()
-    else:
-        listaGrupo_i = Grupo.get_tree(miembro.grupo_lidera)
-    pasos = Pasos.objects.all().order_by('prioridad')
-    descendientes = False
-
-    tipo = 1
-    if request.method == 'POST':
-        if 'combo' in request.POST:
-            grupo_i = Grupo.objects.get(id=request.POST['id'])
-            grupos = Grupo.get_tree(grupo_i)
-            data = [{'pk': grupo.id, 'nombre': str(grupo)} for grupo in grupos]
-            return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            form = FormularioRangoFechas(request.POST)
-            if form.is_valid():
-                fechai = form.cleaned_data['fechai']
-                fechaf = form.cleaned_data['fechaf']
-                grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-                opciones = {'fi': fechai, 'ff': fechaf, 'gi': grupo_i.nombre.capitalize()}
-                sw = True
-
-                if 'descendientes' in request.POST and request.POST['descendientes'] == 'S':
-                    descendientes = True
-                    opciones['gf'] = 'Descendientes'
-                    grupos = Grupo.get_tree(grupo_i)
-                else:
-                    grupo_f = Grupo.objects.get(id=request.POST['menuGrupo_f'])
-                    opciones['gf'] = grupo_f.nombre.capitalize()
-                    listaGrupo_f = Grupo.get_tree(grupo_i)
-                    grupos = Grupo.obtener_ruta(grupo_i, grupo_f)
-
-                miembros = []
-                for g in grupos:
-                    miembros.extend(g.miembrosGrupo())
-
-                values = [['Pasos', 'Miembros']]
-                total = 0
-                for p in pasos:
-                    num_m = CumplimientoPasos.objects.filter(paso=p, miembro__in=miembros,
-                                                             fecha__range=(fechai, fechaf)).count()
-                    total = total + num_m
-                    values.append([str(p.nombre), num_m])
-
-                if 'type' in request.POST:
-                    if request.POST['type'] == '1':
-                        tipo = 1
-                    else:
-                        tipo = 2
-
-                if 'reportePDF' in request.POST:
-                    values.append(['Total', total])
-                    response = HttpResponse(content_type='application/pdf')
-                    response['Content-Disposition'] = 'attachment; filename=report.pdf'
-                    PdfTemplate(response,
-                                'Numero de miembros por pasos en un rango de fecha',
-                                opciones,
-                                values,
-                                tipo, True)
-                    return response
-    else:
-        form = FormularioRangoFechas()
-        sw = False
-
-    return render_to_response('reportes/pasosRangoFecha.html', locals(), context_instance=RequestContext(request))
 
 
 @login_required
@@ -390,7 +199,7 @@ def estadistico_totalizado_reuniones_gar(request):
                                     opciones['opt'] = 'Asistentes Regulares'
                                     titulo = "'Asistentes Regulares'"
                                     reg = ReunionGAR.objects.filter(fecha__range=(fechai, sig), grupo__in=grupos)
-                                    numAsis = AsistenciaMiembro.objects.filter(reunion__in=reg, asistencia=True).count()
+                                    numAsis = 0
                                     l.append(numAsis)
                 values.append(l)
                 fechai = sig + datetime.timedelta(days=1)
@@ -577,8 +386,7 @@ def estadistico_reuniones_gar(request):
                     fecha__range=(fecha_inicial, siguiente),
                     grupo__in=_grupos_semana  # solo busca los reportes de los grupos de la semana
                 ).defer(
-                    'confirmacionEntregaOfrenda', 'novedades',
-                    'asistentecia', 'predica'
+                    'confirmacionEntregaOfrenda', 'novedades', 'predica'
                 ).distinct()
 
                 # se hacen las agregaciones, con los datos de los estadisticos por semana

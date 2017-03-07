@@ -14,8 +14,8 @@ from treebeard.al_tree import AL_Node
 
 
 __all__ = (
-    'Red', 'Grupo', 'Predica', 'ReunionGAR', 'AsistenciaMiembro',
-    'ReunionDiscipulado', 'AsistenciaDiscipulado', 'HistorialEstado',
+    'Red', 'Grupo', 'Predica', 'ReunionGAR', 'HistorialEstado',
+    'ReunionDiscipulado', 'AsistenciaDiscipulado',
 )
 
 
@@ -499,7 +499,6 @@ class ReunionGAR(models.Model):
     fecha = models.DateField()
     grupo = models.ForeignKey(Grupo, related_name='reuniones_gar')
     predica = models.CharField(max_length=100, verbose_name='prédica')
-    asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
     numeroTotalAsistentes = models.PositiveIntegerField(verbose_name='Número total de asistentes')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')
     numeroVisitas = models.PositiveIntegerField(verbose_name='Número de visitas:')
@@ -529,24 +528,12 @@ class ReunionGAR(models.Model):
         return False
 
 
-class AsistenciaMiembro(models.Model):
-    """Modelo para registrar la asistencia de miembros a las reuniones de grupo de amistad."""
-
-    miembro = models.ForeignKey('miembros.Miembro')
-    reunion = models.ForeignKey(ReunionGAR)
-    asistencia = models.BooleanField()
-
-    def __str__(self):
-        return '{} - {}'.format(self.miembro, self.reunion)
-
-
 class ReunionDiscipulado(models.Model):
     """Modelo para guardar las reuniones de discpulados por grupo."""
 
     fecha = models.DateField(auto_now_add=True)
     grupo = models.ForeignKey(Grupo, related_name='reuniones_discipulado')
     predica = models.ForeignKey(Predica, verbose_name='prédica')
-    asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')
     novedades = models.TextField(max_length=500)
     ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
