@@ -41,9 +41,9 @@ def crear_miembros_con_encontristas(encontristas, iglesia):
                 else:
                     nombre = encontrista.primer_nombre
                 nuevo_miembro.nombre = nombre
-                nuevo_miembro.primerApellido = encontrista.primer_apellido
+                nuevo_miembro.primer_apellido = encontrista.primer_apellido
                 if encontrista.segundo_apellido:
-                    nuevo_miembro.segundoApellido = encontrista.segundo_apellido
+                    nuevo_miembro.segundo_apellido = encontrista.segundo_apellido
                 nuevo_miembro.cedula = encontrista.identificacion
                 nuevo_miembro.genero = encontrista.genero
                 nuevo_miembro.email = encontrista.email

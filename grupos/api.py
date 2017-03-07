@@ -41,7 +41,7 @@ def discipulos_miembros_grupo(request, pk):
 
     string = serializers.serialize(
         queryset=grupo.miembros.all().order_by('nombre'),
-        format='json', fields=['nombre', 'primerApellido']
+        format='json', fields=['nombre', 'primer_apellido']
     )
 
     serialized = json.loads(string)

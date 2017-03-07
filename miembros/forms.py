@@ -122,25 +122,25 @@ class FormularioLiderAgregarMiembro(forms.ModelForm):
                 g = 'M'
 
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['celular'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
+        self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['estado_civil'].widget.attrs.update({'class': 'selectpicker'})
 
     class Meta:
         model = Miembro
         fields = (
-            'nombre', 'primerApellido', 'segundoApellido', 'telefono',
-            'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
-            'profesion', 'barrio', 'genero', 'estadoCivil'  # , 'conyugue'
+            'nombre', 'primer_apellido', 'segundo_apellido', 'telefono',
+            'celular', 'direccion', 'fecha_nacimiento', 'cedula', 'email',
+            'profesion', 'barrio', 'genero', 'estado_civil'
         )
 
 
@@ -158,7 +158,7 @@ class FormularioAdminAgregarMiembro(forms.ModelForm):
                 g = 'F'
             else:
                 g = 'M'
-            queryset = Miembro.objects.filter(Q(estadoCivil='S') | Q(estadoCivil='V') | Q(estadoCivil='D'), genero=g)
+            queryset = Miembro.objects.filter(Q(estado_civil='S') | Q(estado_civil='V') | Q(estado_civil='D'), genero=g)
             self.fields['conyugue'].queryset = queryset
 
             if self.instance.conyugue:
@@ -166,27 +166,27 @@ class FormularioAdminAgregarMiembro(forms.ModelForm):
                 self.fields['conyugue'].queryset = queryset | conyugue
 
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['celular'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
+        self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'form-control'})
         self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['estado_civil'].widget.attrs.update({'class': 'selectpicker'})
         # self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['conyugue'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
     class Meta:
         model = Miembro
         fields = (
-            'nombre', 'primerApellido', 'segundoApellido', 'telefono',
-            'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
-            'profesion', 'barrio', 'genero', 'estadoCivil', 'conyugue'
+            'nombre', 'primer_apellido', 'segundo_apellido', 'telefono',
+            'celular', 'direccion', 'fecha_nacimiento', 'cedula', 'email',
+            'profesion', 'barrio', 'genero', 'estado_civil', 'conyugue'
         )
 
 
@@ -449,8 +449,8 @@ class NuevoMiembroForm(CustomModelForm):
     class Meta:
         model = Miembro
         fields = [
-            'nombre', 'primerApellido', 'segundoApellido', 'genero', 'telefono', 'celular', 'fechaNacimiento',
-            'cedula', 'direccion', 'barrio', 'email', 'profesion', 'estadoCivil'
+            'nombre', 'primer_apellido', 'segundo_apellido', 'genero', 'telefono', 'celular', 'fecha_nacimiento',
+            'cedula', 'direccion', 'barrio', 'email', 'profesion', 'estado_civil'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -463,10 +463,10 @@ class NuevoMiembroForm(CustomModelForm):
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control'})
+        self.fields['estado_civil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
     def save(self, iglesia):

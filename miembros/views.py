@@ -229,7 +229,7 @@ def editar_perfil_miembro(request, pk=None):
         except Miembro.DoesNotExist:
             raise Http404
 
-    if miembro.estadoCivil == 'C' and miembro.conyugue is not None:
+    if miembro.estado_civil == 'C' and miembro.conyugue is not None:
         casado = True
 
     foto = False
@@ -283,13 +283,13 @@ def editar_perfil_miembro(request, pk=None):
                 if miembroEditado.conyugue is not None:
                     conyugue = Miembro.objects.get(id=miembroEditado.conyugue.id)
                     conyugue.conyugue = miembroEditado
-                    conyugue.estadoCivil = 'C'
+                    conyugue.estado_civil = 'C'
                     conyugue.save()
-                    miembroEditado.estadoCivil = 'C'
+                    miembroEditado.estado_civil = 'C'
                     miembroEditado.save()
-                if casado and miembroEditado.estadoCivil != 'C':
+                if casado and miembroEditado.estado_civil != 'C':
                     conyugue = Miembro.objects.get(conyugue=miembroEditado)
-                    divorciar(miembroEditado, conyugue, miembroEditado.estadoCivil)
+                    divorciar(miembroEditado, conyugue, miembroEditado.estado_civil)
 
                 ok = True
                 ms = "Miembro Editado Correctamente"
@@ -842,7 +842,7 @@ def ver_informacion_miembro(request, pk=None):
                         continue
 
                 ok = True
-                ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primerApellido.upper())
+                ms = "Miembro %s %s Editado Correctamente" % (miembro.nombre.upper(), miembro.primer_apellido.upper())
                 if mismo:
                     ms = "Te has Editado Correctamente"
                 # return redirect(reverse('miembros:ver_informacion', args=(miembro.id, )))

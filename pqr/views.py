@@ -44,7 +44,7 @@ def nuevo_caso(request):
         try:
             miembro = Miembro.objects.get(usuario=request.user)
             initial = {
-                'nombre': '{} {}'.format(miembro.nombre, miembro.primerApellido),
+                'nombre': '{} {}'.format(miembro.nombre, miembro.primer_apellido),
                 'identificacion': miembro.cedula, 'email': miembro.email,
                 'telefono': miembro.telefono or miembro.celular or '',
                 'direccion': miembro.direccion or ''

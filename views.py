@@ -39,15 +39,15 @@ def buscar(request, tipo):
     if termino_busqueda:
         terminos = termino_busqueda.split()
         q = (
-            Q(nombre__icontains=terminos[0]) | Q(primerApellido__icontains=terminos[0]) |
-            Q(segundoApellido__icontains=terminos[0]) | Q(cedula=terminos[0])
+            Q(nombre__icontains=terminos[0]) | Q(primer_apellido__icontains=terminos[0]) |
+            Q(segundo_apellido__icontains=terminos[0]) | Q(cedula=terminos[0])
         )
 
         for termino in terminos[1:]:
             q.add(
                 (
-                    Q(nombre__icontains=termino) | Q(primerApellido__icontains=termino) |
-                    Q(segundoApellido__icontains=termino) | Q(cedula=termino)
+                    Q(nombre__icontains=termino) | Q(primer_apellido__icontains=termino) |
+                    Q(segundo_apellido__icontains=termino) | Q(cedula=termino)
                 ), Q.OR
             )
 

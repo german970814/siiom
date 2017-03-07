@@ -25,7 +25,7 @@ def obtener_grupos(request):
 
             querys = (
                 Q(lideres__nombre__icontains=value) |
-                Q(lideres__primerApellido__icontains=value) |
+                Q(lideres__primer_apellido__icontains=value) |
                 Q(lideres__cedula__icontains=value)
             )
 
@@ -71,7 +71,7 @@ def obtener_coordinadores_tesoreros(request):
 
                 querys = (
                     Q(nombre__icontains=value) |
-                    Q(primerApellido__icontains=value) |
+                    Q(primer_apellido__icontains=value) |
                     Q(cedula__icontains=value)
                 )
 

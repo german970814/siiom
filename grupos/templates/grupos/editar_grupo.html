@@ -56,7 +56,7 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Lideres</dt>
-                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% else %},  <a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% endif %}{% endfor %}</dd>
+                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primer_apellido|upper}}</a>{% else %},  <a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primer_apellido|upper}}</a>{% endif %}{% endfor %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Nombre Grupo</dt>
@@ -150,7 +150,7 @@
                 </a>
 
                 <div class="c-info">
-                    <strong>{{miem.nombre|upper}} {{miem.primerApellido|upper}}</strong>
+                    <strong>{{miem.nombre|upper}} {{miem.primer_apellido|upper}}</strong>
                     <small>{{miem.cedula}}</small>
                 </div>
             </div>

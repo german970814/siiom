@@ -27,8 +27,8 @@ class UtilsModuleTest(base.BaseTest):
 
         self.assertIsNone(miembro.conyugue)
         self.assertIsNone(conyugue.conyugue)
-        self.assertEqual(miembro.estadoCivil, miembro.DIVORCIADO)
-        self.assertEqual(conyugue.estadoCivil, miembro.DIVORCIADO)
+        self.assertEqual(miembro.estado_civil, miembro.DIVORCIADO)
+        self.assertEqual(conyugue.estado_civil, miembro.DIVORCIADO)
 
     def test_calcular_grupos_miembro(self):
         """

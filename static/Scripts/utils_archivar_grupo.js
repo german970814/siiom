@@ -33,7 +33,7 @@
                     for (let object of data) {
                         let tr = '<tr>0</tr>';
                         let td = '<td>0</td><td>!</td>';
-                        td = td.replace('0', object.pk.toString()).replace('!', (object.fields.nombre + ' ' + object.fields.primerApellido).toUpperCase());
+                        td = td.replace('0', object.pk.toString()).replace('!', (object.fields.nombre + ' ' + object.fields.primer_apellido).toUpperCase());
                         to_append += tr.replace('0', td);
                     }
 

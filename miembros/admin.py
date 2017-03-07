@@ -91,8 +91,8 @@ class FiltroSinEntrar(admin.SimpleListFilter):
 
 
 class MiembroAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cedula', 'nombre', 'primerApellido', 'segundoApellido', 'usuario')
-    search_fields = ('cedula', 'nombre', 'primerApellido', 'segundoApellido', 'email', 'usuario__username')
+    list_display = ('id', 'cedula', 'nombre', 'primer_apellido', 'segundo_apellido', 'usuario')
+    search_fields = ('cedula', 'nombre', 'primer_apellido', 'segundo_apellido', 'email', 'usuario__username')
     list_filter = (DecadeBornListFilter, FiltroSinEntrar)
 
 

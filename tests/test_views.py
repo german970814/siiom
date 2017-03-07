@@ -26,8 +26,8 @@ class BuscarViewTest(BaseTest):
         Prueba el buscador de miembros cuando el usuario tiene permiso de buscar todos.
         """
 
-        MiembroFactory(nombre='adriana', primerApellido='mendoza')
-        MiembroFactory(nombre='maria', primerApellido='fernandez')
+        MiembroFactory(nombre='adriana', primer_apellido='mendoza')
+        MiembroFactory(nombre='maria', primer_apellido='fernandez')
 
         self.login_usuario(self.usuario)
         response = self.client.get(self.URL_MIEMBROS, self.termino_busqueda())
@@ -40,8 +40,8 @@ class BuscarViewTest(BaseTest):
         Prueba el buscador de grupos cuando el usuario tiene permiso de buscar todos.
         """
 
-        grupo1 = GrupoFactory(lider__nombre='adriana', lider__primerApellido='mendoza', nombre='mendoza')
-        grupo2 = GrupoFactory(lider__nombre='maria', lider__primerApellido='fernandez', nombre='fernandez')
+        grupo1 = GrupoFactory(lider__nombre='adriana', lider__primer_apellido='mendoza', nombre='mendoza')
+        grupo2 = GrupoFactory(lider__nombre='maria', lider__primer_apellido='fernandez', nombre='fernandez')
 
         self.login_usuario(self.usuario)
         response = self.client.get(self.URL_GRUPOS, self.termino_busqueda())
@@ -91,7 +91,7 @@ class BuscarViewTest(BaseTest):
 
         self.datos_pruebas()
         termino = 'maria {0} {1} {2}'.format(
-            self.lider_red.primerApellido, self.miembro_red.nombre, self.lider_no_red.nombre
+            self.lider_red.primer_apellido, self.miembro_red.nombre, self.lider_no_red.nombre
         )
 
         self.login_usuario(self.lider.usuario)
@@ -111,7 +111,7 @@ class BuscarViewTest(BaseTest):
 
         self.datos_pruebas()
         termino = 'maria {0} {1} {2}'.format(
-            self.lider_red.primerApellido, self.miembro_red.nombre, self.lider_no_red.nombre
+            self.lider_red.primer_apellido, self.miembro_red.nombre, self.lider_no_red.nombre
         )
 
         self.login_usuario(self.lider.usuario)

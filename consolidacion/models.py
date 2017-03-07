@@ -49,12 +49,12 @@ class Visita(models.Model):
             from miembros.models import Miembro
             miembro = Miembro()
             miembro.nombre = self.primer_nombre + ' ' + self.segundo_nombre
-            miembro.primerApellido = self.primer_apellido
+            miembro.primer_apellido = self.primer_apellido
             miembro.grupo = self.grupo
-            miembro.fechaRegistro = self.fecha_ingreso
+            miembro.fecha_registro = self.fecha_ingreso
             miembro.telefono = self.telefono
             if self.segundo_apellido != '':
-                miembro.segundoApellido = self.segundo_apellido
+                miembro.segundo_apellido = self.segundo_apellido
             if self.direccion != '':
                 miembro.direccion = self.direccion
             if self.email != '':

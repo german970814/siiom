@@ -25,11 +25,11 @@
             format: 'HH:mm'
         });
 
-        {% if miembro.estadoCivil != 'C' %}
+        {% if miembro.estado_civil != 'C' %}
         $("#cpm1").addClass('hidden');
         {% endif %}
 
-        $("#id_estadoCivil").change(function(event) {
+        $("#id_estado_civil").change(function(event) {
             if ($(this).val() == 'C') {
                 if ($("#cpm1").hasClass('hidden')) {
                     $("#cpm1").removeClass('hidden')
@@ -71,17 +71,17 @@
         {% endif %}
 
         var $nombre = $('#id_nombre').val();
-        var $papellido = $('#id_primerApellido').val();
-        var $sapellido = $('#id_segundoApellido').val();
+        var $papellido = $('#id_primer_apellido').val();
+        var $sapellido = $('#id_segundo_apellido').val();
         var $genero = $('#id_genero').val();
-        var $fecha = $('#id_fechaNacimiento').val();
-        var $estadoCivil = $('#id_estadoCivil').val();
+        var $fecha = $('#id_fecha_nacimiento').val();
+        var $estado_civil = $('#id_estado_civil').val();
         var $telefono = $('#id_telefono').val();
         var $celular = $('#id_celular').val();
         var $direccion = $('#id_direccion').val();
         var $email = $('#id_email').val();
 
-		$("#id_fechaNacimiento").datetimepicker({
+		$("#id_fecha_nacimiento").datetimepicker({
 			format: 'DD/MM/YYYY',
             maxDate: moment(),
 		});
@@ -243,7 +243,7 @@
             event.stopPropagation();
 
             swal({
-                title: "¿Estás seguro que deseas desvincular a {{ miembro.nombre|upper }} {{ miembro.primerApellido|upper}} del grupo de amistad?",
+                title: "¿Estás seguro que deseas desvincular a {{ miembro.nombre|upper }} {{ miembro.primer_apellido|upper}} del grupo de amistad?",
                 text: "Al momento de desvincular un miembro del grupo, este miembro será inactivado",
                 type: "warning",
                 showCancelButton: true,
@@ -313,7 +313,7 @@
     <section>
         <div class="container">
             <div class="block-header">
-                <h2>{{miembro.nombre|upper}} {{miembro.primerApellido|upper}}<small>{% if miembro.grupo_lidera %}Lider del grupo '{{miembro.grupo_lidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
+                <h2>{{miembro.nombre|upper}} {{miembro.primer_apellido|upper}}<small>{% if miembro.grupo_lidera %}Lider del grupo '{{miembro.grupo_lidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
                 {% if perms.miembros.es_administrador or request.miembro.es_cabeza_red %}
                 <ul class="actions m-t-20 hidden-xs">
                     <li class="dropdown">

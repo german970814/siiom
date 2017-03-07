@@ -264,7 +264,7 @@ def ver_reportes_grupo(request):
        ):
         if 'combo' in request.POST:
             value = request.POST['value']
-            querys = Q(lideres__nombre__icontains=value) | Q(lideres__primerApellido__icontains=value) | \
+            querys = Q(lideres__nombre__icontains=value) | Q(lideres__primer_apellido__icontains=value) | \
                 Q(lideres__cedula__icontains=value)
             # Importante que se puedan escoger todos los grupos y no solo los 'Activos'
             busqueda = Grupo.objects.filter(querys)[:5]

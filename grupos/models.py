@@ -93,7 +93,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             return self.get_nombre()
 
         lideres = ["{0} {1}({2})".format(
-            lider.nombre.upper(), lider.primerApellido.upper(), lider.cedula
+            lider.nombre.upper(), lider.primer_apellido.upper(), lider.cedula
         ) for lider in self.lideres.all()]
 
         return " - ".join(lideres)

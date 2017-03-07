@@ -91,12 +91,12 @@ class Miembro(IglesiaMixin, models.Model):
     )
     #  info personal
     nombre = models.CharField(_lazy('nombre'), max_length=30)
-    primerApellido = models.CharField(_lazy('primer apellido'), max_length=20)
-    segundoApellido = models.CharField(_lazy('segundo apellido'), max_length=20, null=True, blank=True)
+    primer_apellido = models.CharField(_lazy('primer apellido'), max_length=20)
+    segundo_apellido = models.CharField(_lazy('segundo apellido'), max_length=20, null=True, blank=True)
     genero = models.CharField(_lazy('género'), max_length=1, choices=GENEROS)
     telefono = models.CharField(_lazy('teléfono'), max_length=50, null=True, blank=True)
     celular = models.CharField(_lazy('celular'), max_length=50, null=True, blank=True)
-    fechaNacimiento = models.DateField(_lazy('fecha de nacimiento'), null=True, blank=True)
+    fecha_nacimiento = models.DateField(_lazy('fecha de nacimiento'), null=True, blank=True)
     cedula = models.CharField(
         _lazy('cédula'), max_length=25, unique=True, validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")]
     )
@@ -104,7 +104,7 @@ class Miembro(IglesiaMixin, models.Model):
     barrio = models.ForeignKey(Barrio, verbose_name=_lazy('barrio'), null=True, blank=True)
     email = models.EmailField(_lazy('email'), unique=True)
     profesion = models.CharField(_lazy('profesion'), max_length=20, null=True, blank=True)
-    estadoCivil = models.CharField(
+    estado_civil = models.CharField(
         _lazy('estado civil'), max_length=1, choices=ESTADOS_CIVILES, null=True, blank=True
     )
     conyugue = models.ForeignKey(
@@ -122,13 +122,13 @@ class Miembro(IglesiaMixin, models.Model):
         'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
         related_name='lideres', null=True, blank=True
     )
-    fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
+    fecha_registro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers
     objects = MiembroManager()
 
     def __str__(self):
-        return "{0} {1} ({2})".format(self.nombre.upper(), self.primerApellido.upper(), self.cedula)
+        return "{0} {1} ({2})".format(self.nombre.upper(), self.primer_apellido.upper(), self.cedula)
 
     @property
     def es_director_red(self):
