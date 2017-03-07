@@ -85,6 +85,8 @@ def eliminar(request, modelo, lista):  # deprecated
 
 def generar_random_string(length=12):
     """
+    Puede ser reemplazado por django.utils.crypto.get_random_string
+
     :returns:
         Un string con letras aleatoreas.
 

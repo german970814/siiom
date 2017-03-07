@@ -21,9 +21,9 @@ def divorciar_miembro(miembro, estado_civil=None):
         estado_civil = miembro.DIVORCIADO
 
     if conyugue:
-        conyugue.update(conyugue=None, estado_civil=estado_civil)
+        conyugue.update(conyugue=None, estadoCivil=estado_civil)
 
-    miembro.update(conyugue=None, estado_civil=estado_civil)
+    miembro.update(conyugue=None, estadoCivil=estado_civil)
 
 
 def divorciar(miembro, conyugue, estado_civil):  # deprecated
