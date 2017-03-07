@@ -10,6 +10,7 @@ class Iglesia(TenantMixin):
 
     nombre = models.CharField(_lazy('nombre'), max_length=200)
     creada_el = models.DateTimeField(_lazy('creada el'), auto_now_add=True)
+    logo = models.ImageField(_lazy('logo'), null=True, blank=True)
 
     class Meta:
         verbose_name = _lazy('iglesia')

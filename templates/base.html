@@ -14,7 +14,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ nombreIglesia }}</title>
+    <title>{% if request.tenant.schema_name == 'gng' %}SARA{% else %}SIIOM{% endif %}: {{ request.tenant.nombre|upper }}</title>
 
     <!-- Bootstrap Core CSS -->
 
@@ -185,7 +185,9 @@
             </li>
             {% endif %}
             <li class="logo hidden-xs">
-                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
+                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">
+                    {% if request.tenant.schema_name == 'gng' %}SARA{% else %}SIIOM{% endif %}
+                </a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -280,7 +282,7 @@
         {% if request.user.is_authenticated %}
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
-                <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{dominioIglesia}}.png') !important;">
+                <a href="" style="background: url('{% if request.tenant.logo %}{{ request.tenant.logo.url }}{% endif %}') !important;">
                     <div class="profile-pic">
                         <img src="{% if mi.foto_perfil %}{{ mi.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                     </div>
