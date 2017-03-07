@@ -159,6 +159,11 @@ class Miembro(IglesiaMixin, models.Model):
         """
         Indica si el miembro es director de red. Un director de red es un miembro que lidere grupo y sea discipulo
         del pastor presidente.
+
+        :returns:
+            ``True`` si el miembro es director de red, de lo contrario retorna ``False``
+
+        :rtype: ``bool``
         """
 
         return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 2
@@ -168,6 +173,11 @@ class Miembro(IglesiaMixin, models.Model):
         """
         Indica si el miembro es cabeza de red. Un cabeza de red es un miembro que lidera grupo y que es discipulo
         de un director de red.
+
+        :returns:
+            ``True`` si el miembro es cabeza de red, de lo contrario retorna ``False``
+
+        :rtype: ``bool``
         """
 
         return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 3
@@ -182,17 +192,23 @@ class Miembro(IglesiaMixin, models.Model):
             self.save()
 
     def discipulos(self):
-        """Devuelve los discipulos del miembro (queryset) si no tiene, devuelve una lista vacia."""
+        """
+        :returns:
+            Un QuerySet con los discipulos del miembro, si no tiene, devuelve un QuerySet vacio.
+        """
 
-        lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         grupo = self.grupo_lidera
         if grupo:
-            return grupo.miembros.filter(id__in=lideres)
-        else:
-            return []
+            return grupo.miembros.lideres()
+        return self.__class__.objects.none()
 
     def pastores(self):
-        """Devuelve los indices de los pastores que se encuentran por encima del miembro."""
+        """
+        :returns:
+            Los indices de los pastores que se encuentran por encima del miembro.
+
+        :rtype: ``list(int)``
+        """
 
         grupo_actual = self.grupo
         tipo_pastor = TipoMiembro.objects.get(nombre__iexact='pastor')

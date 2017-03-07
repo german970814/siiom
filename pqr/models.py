@@ -62,7 +62,7 @@ class Caso(models.Model):
     fecha_registro = models.DateTimeField(verbose_name=_('fecha registro'), auto_now_add=True)
     integrantes = models.ManyToManyField(
         'organizacional.Empleado', verbose_name=_('integrantes'), related_name='casos_implicado',
-        blank=True, null=True
+        blank=True
     )
     empleado_cargo = models.ForeignKey(
         'organizacional.Empleado', verbose_name=_('empleado a cargo'), related_name='casos_cargo',

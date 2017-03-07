@@ -12,7 +12,9 @@ class MiembroQuerySet(IglesiaMixinQuerySet, models.QuerySet):
 
     def lideres(self):
         """
-        Devuelve un queryset con los lideres de una iglesia. Los lideres son los miembros que tengan permiso de lider.
+        :returns:
+            Un queryset con los lideres de una iglesia.
+            Los lideres son los miembros que tengan permiso de lider.
         """
 
         permiso = Permission.objects.get(codename='es_lider')
@@ -20,8 +22,12 @@ class MiembroQuerySet(IglesiaMixinQuerySet, models.QuerySet):
 
     def red(self, red):
         """
-        Devuelve un queryset con los miembros filtrados por la red a la cual pertenece el grupo al que asisten como
-        miembros.
+        :returns:
+            Un queryset con los miembros filtrados por la red a la cual pertenece el grupo al que asisten como
+            miembros.
+
+        :param red:
+            La red a partir la cual se hara el filtro.
         """
 
         return self.filter(grupo__red=red)
@@ -29,13 +35,19 @@ class MiembroQuerySet(IglesiaMixinQuerySet, models.QuerySet):
 
 class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
     """
-    Manager para los miembros.
+    Manager para los el modelo de Miembros.
     """
 
     def trasladar_lideres(self, lideres, nuevo_grupo):
         """
         Traslada los lideres ingresados, del grupo al que lideran actualmente a un nuevo grupo. Si el grupo actual
         se queda sin lideres, se fusiona el grupo actual con el nuevo grupo.
+
+        :param lideres:
+            Un Queryset de lideres a los cuales se les va a trasladar.
+
+        :param nuevo_grupo:
+            El nuevo grupo a donde se quiere trasladar.
         """
 
         from grupos.models import Grupo
@@ -56,27 +68,35 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
 
     def lideres_disponibles(self):
         """
-        Devuelve un queryset con los lideres que no se encuentran liderando grupo.
+        :returns:
+            Un queryset con los lideres que no se encuentran liderando grupo.
         """
 
         return self.filter(grupo_lidera__isnull=True).lideres()
 
     def lideres_red(self, red):
         """
-        Devuelve un queryset con los lideres que lideran grupos de la red ingresada.
+        :returns:
+            Un queryset con los lideres que lideran grupos de la red ingresada.
+
+        :param red:
+            La red a partir de la cual se quiere filtrar.
         """
 
         return self.filter(grupo_lidera__red=red).lideres()
 
-    def visitas(self, *args, **kwargs):
+    def visitas(self, **kwargs):
         """
-        :returns:  Un QuerySet con los miembros que son visitas.
+        :returns:
+            Un QuerySet con los miembros que son visitas.
+
+        :param \*\*kwargs:
+            Diccionario de argumentos que serán pasados al momento de filtrar.
         """
+
         from .models import CambioTipo, TipoMiembro
+
         visita = TipoMiembro.objects.filter(nombre__iexact='visita')
-        return self.annotate(
-            tipos=models.Count('miembro_cambiado')
-        ).filter(
-            tipos=1, miembro_cambiado__nuevoTipo=visita,
-            **kwargs
-        )
+
+        return self.annotate(tipos=models.Count('miembro_cambiado')).filter(
+            tipos=1, miembro_cambiado__nuevoTipo=visita, **kwargs)

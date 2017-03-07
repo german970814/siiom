@@ -76,9 +76,27 @@ class LoginForm(CustomForm):
         return getattr(self, 'usuario', None)
 
     def is_safe_url(self, *args, **kwargs):
+        """
+        Verifica que la url a la cual se va a redirigir sea segura.
+
+        :rtype bool:
+
+        :param *args:
+            Argumentos de la funcion ``is_safe_url``.
+
+        :param **kwargs:
+            Diccionario de argumentos de la funcion ``is_safe_url``.
+        """
         return is_safe_url(host=self.request.get_host(), *args, **kwargs)
 
     def get_next(self):
+        """
+        :returns:
+            El string de la url a la cual hará la redireccion una vez el formulario
+            este válido.
+
+        :rtype str:
+        """
         if self.get_user() is not None and self.usuario.has_perm('miembros.es_administrador'):
             next = reverse_lazy('administracion')
         else:
@@ -92,11 +110,15 @@ class LoginForm(CustomForm):
 
 
 class FormularioLiderAgregarMiembro(forms.ModelForm):
+    """
+    Formulario para crear miembros.
+    """
+
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
     def __init__(self, g='', c=None, *args, **kwargs):
-        super(FormularioLiderAgregarMiembro, self).__init__(*args, **kwargs)  # populates the post
+        super(FormularioLiderAgregarMiembro, self).__init__(*args, **kwargs)
         if g != '':
             if g == 'M':
                 g = 'F'
@@ -127,11 +149,14 @@ class FormularioLiderAgregarMiembro(forms.ModelForm):
 
 
 class FormularioAdminAgregarMiembro(forms.ModelForm):
+    """
+    Formulario para agregar miembros un administrador
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
     def __init__(self, g='', *args, **kwargs):
-        super(FormularioAdminAgregarMiembro, self).__init__(*args, **kwargs)  # populates the post
+        super(FormularioAdminAgregarMiembro, self).__init__(*args, **kwargs)
         if g != '':
             if g == 'M':
                 g = 'F'
@@ -170,6 +195,9 @@ class FormularioAdminAgregarMiembro(forms.ModelForm):
 
 
 class FormularioCambiarContrasena(forms.Form):
+    """
+    Formulario usado para el cambio de las contraseñas de los usuarios miembros.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -200,6 +228,9 @@ class FormularioCambiarContrasena(forms.Form):
 
 
 class FormularioAsignarGrupo(forms.ModelForm):
+    """
+    Formulario para asignar grupos de amistad a miembros que no asistan a grupos.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -213,6 +244,10 @@ class FormularioAsignarGrupo(forms.ModelForm):
 
 
 class FormularioCrearZona(forms.ModelForm):
+    """
+    Formulario para crear y editar zonas.
+    """
+
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -235,6 +270,9 @@ class FormularioCrearZona(forms.ModelForm):
 
 
 class FormularioCrearBarrio(forms.ModelForm):
+    """
+    Formulario para crear y editar barrios.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -249,6 +287,9 @@ class FormularioCrearBarrio(forms.ModelForm):
 
 
 class FormularioPasos(forms.ModelForm):
+    """
+    Formulario para crear y editar pasos.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -264,6 +305,7 @@ class FormularioPasos(forms.ModelForm):
 
 
 class FormularioCrearEscalafon(forms.ModelForm):
+    """Formulario para crear y editar el escalafon."""
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -281,6 +323,9 @@ class FormularioCrearEscalafon(forms.ModelForm):
 
 
 class FormularioPromoverEscalafon(forms.ModelForm):
+    """
+    Formulario para promover a los miebros de el escalafon.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -295,6 +340,9 @@ class FormularioPromoverEscalafon(forms.ModelForm):
 
 
 class FormularioCrearTipoMiembro(forms.ModelForm):
+    """
+    Formulario para crear y editar los tipos de miembros.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -308,6 +356,9 @@ class FormularioCrearTipoMiembro(forms.ModelForm):
 
 
 class FormularioCambioTipoMiembro(forms.ModelForm):
+    """
+    Formulario para crear los cambios de tipos de miembro.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -326,6 +377,9 @@ class FormularioCambioTipoMiembro(forms.ModelForm):
 
 
 class FormularioAsignarUsuario(forms.Form):
+    """
+    Formulario para crear y asignar usuarios a los miembros.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -342,6 +396,9 @@ class FormularioAsignarUsuario(forms.Form):
 
 
 class FormularioRecuperarContrasenia(forms.Form):
+    """
+    Formulario usado para recuperar contraseñas
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -353,6 +410,10 @@ class FormularioRecuperarContrasenia(forms.Form):
 
 
 class FormularioFotoPerfil(forms.ModelForm):
+    """
+    Formulario para manejar las validaciones de la imagen de perfil de el miembro,
+    y manejar el tamaño de la misma.
+    """
     error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
@@ -403,6 +464,9 @@ class FormularioFotoPerfil(forms.ModelForm):
 
 
 class FormularioInformacionIglesiaMiembro(forms.ModelForm):
+    """
+    Formulario para cambiar el estado de un miembro.
+    """
     error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
@@ -415,6 +479,9 @@ class FormularioInformacionIglesiaMiembro(forms.ModelForm):
 
 
 class FormularioTipoMiembros(forms.ModelForm):
+    """
+    Formulario para cambiar el tipo de miembro de un usuario.
+    """
     error_css_class = 'has-error'
 
     tipos = forms.ModelMultipleChoiceField(queryset=TipoMiembro.objects.all(), widget=forms.CheckboxSelectMultiple)
