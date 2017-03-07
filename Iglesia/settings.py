@@ -168,6 +168,8 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../media'))
 
+DEFAULT_FILE_STORAGE = 'Iglesia.storage.TenantFileSystemStorage'
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
