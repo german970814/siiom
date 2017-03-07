@@ -379,8 +379,7 @@ class FormularioFotoPerfil(forms.ModelForm):
                 self.add_error('foto_perfil', 'Tamaño maximo aceptado de %sx%s y has puesto una de \
                     %sx%s' % (max_width, max_height, w, h))
 
-        except AttributeError as e:
-            print(e)
+        except AttributeError:
             pass
 
         return foto

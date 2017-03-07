@@ -271,7 +271,6 @@ def ver_bitacora_caso(request, id_caso):
                     enviar_email_invitacion(request, caso, empleado, invitacion.mensaje)
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
-                # print(form_integrante.errors)
                 data['click'] = True
         elif 'eliminar_integrante' in request.POST:
             if form_eliminar_integrante.is_valid():
@@ -295,15 +294,11 @@ def ver_bitacora_caso(request, id_caso):
                     form_cerrar_caso.enviar_email()
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
-                # print(form_cerrar_caso.errors)
                 data['click4'] = True
         else:
             if form.is_valid():
                 form.save()
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
-            else:
-                # print(form.errors)
-                pass
     else:
         form = FormularioAgregarMensaje(initial=initial, caso=caso)
         if mismo:

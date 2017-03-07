@@ -884,10 +884,7 @@ def eliminar_foto_perfil(request, pk):
         if 'delete_file' in request.POST:
             if miembro.foto_perfil != '' or miembro.foto_perfil is not None:
                 if foto:
-                    if os.path.exists(rut_perfil):
-                        print("si existe")
                     if os.path.isfile(rut_perfil):
-                        print("Es archivo")
                         os.remove(rut_perfil)
                     try:
                         miembro.foto_perfil.delete(save=True)

@@ -178,7 +178,6 @@ class PdfTemplate(SimpleDocTemplate):
         other_labels = datos.pop(0)
         other_labels.pop(0)
         chart_datos = list(zip(*datos))
-        # print(chart_datos)
         labels = list(chart_datos.pop(0))
         if tipo == 1:  # Pie chart
             data = list(chart_datos.pop())
@@ -257,7 +256,6 @@ class PdfReport(SimpleDocTemplate):
         other_labels = datos.pop(0)
         other_labels.pop(0)
         chart_datos = list(zip(*datos))
-        # print(chart_datos)
         labels = list(chart_datos.pop(0))
         if tipo == 1:  # Pie chart
             data = list(chart_datos.pop())

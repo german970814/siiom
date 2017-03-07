@@ -97,12 +97,10 @@ def asignar_grupo_visitas(request):
     data = {}
 
     if request.method == 'POST':
-        # print(request.POST)
         if 'visita[]' in request.POST:
             response = {}
             _removed_ids = []
             try:
-                # print(request.POST)
                 visitas = request.POST.getlist('visita[]')
                 for visita in visitas:
                     try:
@@ -111,8 +109,6 @@ def asignar_grupo_visitas(request):
                         _visita.save()
                         _removed_ids.append(_visita.id)
                     except Exception as exception:
-                        # if settings.DEBUG:
-                            # print(exception)
                         response['error'] = exception.__str__()
                         response['response_code'] = 401
                 if 'error' not in response:
