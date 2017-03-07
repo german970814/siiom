@@ -960,7 +960,7 @@ def trasladar(request, pk):
         form = TrasladarMiembroForm(data=request.POST)
         if form.is_valid():
             form.trasladar(miembro)
-            return redirect('miembros:editar_perfil', pk)
+            return redirect('miembros:trasladar', pk)
     else:
         form = TrasladarMiembroForm()
 
