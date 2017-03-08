@@ -1,5 +1,8 @@
+from django.contrib import messages
+
 import random
 import string
+import warnings
 
 
 __doc__ = '''
@@ -69,6 +72,9 @@ def eliminar(request, modelo, lista):  # deprecated
         La lista de ids con la cual se harán las consultas a la base de datos.
     """
 
+    warnings.warn(
+        'Funcion `common.utils.eliminar` está obsoleta, mejor use `common.utils.eliminar_registros`'
+    )
     code = 0
     if lista:
         code = 1
@@ -85,7 +91,7 @@ def eliminar(request, modelo, lista):  # deprecated
 
 def generar_random_string(length=12):
     """
-    Puede ser reemplazado por django.utils.crypto.get_random_string
+    Puede ser reemplazado por ``django.utils.crypto.get_random_string``
 
     :returns:
         Un string con letras aleatoreas.
