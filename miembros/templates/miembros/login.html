@@ -46,7 +46,7 @@
 <body class="login-content">
     <!-- Login -->
     {% if next %}
-    <form action="{% url 'inicio' %}?next={{next}}" method="POST"></form>
+    <form action="{% url 'inicio' %}?next={{ next|escape }}" method="POST"></form>
     {% else %}
     <form action="{% url 'inicio' %}" method="POST">
     {% endif %}
@@ -83,7 +83,7 @@
             </ul>
             
             <button type="submit" class="btn btn-login btn-danger btn-float"><i class="zmdi zmdi-arrow-forward"></i></button>
-            <input type="hidden" name="next" value="{{ request.GET.next }}" />
+            <input type="hidden" name="next" value="{{ request.GET.next|escape }}" />
             
             <!--<ul class="login-navigation">
                 <li style="padidng:10px !important;" data-block="#" class="bgm-red">Registrarse</li>
