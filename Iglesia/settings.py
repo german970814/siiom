@@ -53,7 +53,7 @@ MIDDLEWARE_CLASSES = (
     'waffle.middleware.WaffleMiddleware',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
-    'iglesias.middleware.IglesiaMiddleware'
+    'iglesias.middleware.IglesiaMiddleware',
 )
 
 ROOT_URLCONF = 'Iglesia.urls'
