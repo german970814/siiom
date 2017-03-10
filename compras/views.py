@@ -69,7 +69,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import permission_required, login_required
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db import transaction, models
-from django.db.models import Sum
 from django.forms import inlineformset_factory, modelformset_factory
 from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -88,7 +87,7 @@ from .forms import (
     FormularioInformeTotalesAreaDerpartamento, FormularioProveedor
 )
 from .models import DetalleRequisicion, Requisicion, Adjunto, Historial, Proveedor
-from organizacional.models import Empleado, Departamento
+from organizacional.models import Empleado
 from organizacional.decorators import login_empleado
 
 __author__ = 'German Alzate'
@@ -400,11 +399,7 @@ def ver_requisiciones_jefe_departamento(request):
     de departamento
     """
     try:
-        # se busca el empleado a partir de la sesion
         empleado = request.user.empleado
-        # se verifica que tenga los permisos para ser jefe de departamento
-        # if not empleado.jefe_departamento:
-        #     return redirect('sin_permiso')
     except:
         raise Http404
 

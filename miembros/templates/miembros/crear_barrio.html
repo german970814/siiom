@@ -25,7 +25,7 @@
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" class="alert-link" href="/miembro/barrios/{{zona.id}}"> Volver a la lista de barrios.</p>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el barrio correctamente. <a alt="Lista de Barrios" class="alert-link" href="{% url 'miembros:barrios' zona.id %}"> Volver a la lista de barrios.</p>
                 </div>
             </div>
 			{% endif %}	

@@ -1,25 +1,20 @@
-'''
-Created on Apr 12, 2011
-
-@author: Migue
-'''
-import logging
 # Django
-# from contextlib import suppress
 from django import forms
-from django.db.models import Q
-from django.forms.models import ModelForm
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
-from django.core.exceptions import ValidationError
 
 # Apps
-from miembros.models import CambioTipo, Miembro
-from reportes.forms import FormularioRangoFechas
-from common.forms import CustomModelForm, CustomForm
-from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado
 from .utils import convertir_lista_grupos_a_queryset
+from common.forms import CustomModelForm, CustomForm
+from miembros.models import Miembro
+from reportes.forms import FormularioRangoFechas
+
+# Python
+import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,16 +23,17 @@ class FormularioReunionGARBase(forms.ModelForm):
     """
     Formulario base de validaciones para las reuniones GAR
     """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
-    no_realizo_grupo = forms.BooleanField(label=_('No se realizo Realizó Grupo'), required=False)
+    no_realizo_grupo = forms.BooleanField(label=_lazy('No se realizo Realizó Grupo'), required=False)
 
     class Meta:
         model = ReunionGAR
         fields = (
-            'fecha', 'predica', 'ofrenda',
-            'numeroTotalAsistentes', 'numeroVisitas', 'numeroLideresAsistentes'
+            'fecha', 'predica', 'ofrenda', 'numeroTotalAsistentes',
+            'numeroVisitas', 'numeroLideresAsistentes'
         )
 
     def __init__(self, *args, **kwargs):
@@ -73,7 +69,8 @@ class FormularioReunionGARBase(forms.ModelForm):
             if numero_lideres > 0:
                 if numero_lideres > numero_asistentes:
                     self.add_error(
-                        'numeroLideresAsistentes', _('Número de Líderes NO puede ser mayor a Número Total de Asistentes')
+                        'numeroLideresAsistentes',
+                        _('Número de Líderes NO puede ser mayor a Número Total de Asistentes')
                     )
             if numero_visitas > 0:
                 if numero_visitas >= numero_asistentes:
@@ -96,6 +93,10 @@ class FormularioReunionGARBase(forms.ModelForm):
 
 
 class FormularioEditarGrupo(forms.ModelForm):
+    """
+    Formulario para editar la direccion, el dia y la hora de el grupo.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -111,6 +112,10 @@ class FormularioEditarGrupo(forms.ModelForm):
 
 
 class FormularioReportarReunionGrupo(FormularioReunionGARBase):
+    """
+    Formulario para reportar las reuniones de grupo.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -121,10 +126,14 @@ class FormularioReportarReunionGrupo(FormularioReunionGARBase):
         super(FormularioReportarReunionGrupo, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        super(FormularioReportarReunionGrupo, self).clean(*args, **kwargs)
+        return super(FormularioReportarReunionGrupo, self).clean(*args, **kwargs)
 
 
 class FormularioReportarReunionGrupoAdmin(FormularioReunionGARBase):
+    """
+    Formulario para reportar las reuniones de grupo de amistad, desde un administrador.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -133,11 +142,13 @@ class FormularioReportarReunionGrupoAdmin(FormularioReunionGARBase):
 
     def __init__(self, *args, **kwargs):
         super(FormularioReportarReunionGrupoAdmin, self).__init__(*args, **kwargs)
-        self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres').filter(estado=Grupo.ACTIVO)
+        self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres').activos()
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
 
 class FormularioReportarReunionDiscipulado(forms.ModelForm):
+    """Formulario para reportar las reuniones de discipulado."""
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -154,37 +165,29 @@ class FormularioReportarReunionDiscipulado(forms.ModelForm):
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in=miembro.pastores())
 
 
-REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
-
-
-class FormularioReportesSinEnviar(forms.Form):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    reunion = forms.TypedChoiceField(choices=REUNION_CHOICES, coerce=int, required=True, widget=forms.RadioSelect)
-    fechai = forms.DateField(label='Fecha inicial', required=True, widget=forms.DateInput(attrs={'size': 10}))
-    fechaf = forms.DateField(label='Fecha final', required=True, widget=forms.DateInput(attrs={'size': 10}))
-
-
 class FormularioCrearPredica(forms.ModelForm):
+    """
+    Formulario para crear predicas.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
+
+    class Meta:
+        model = Predica
+        fields = ('miembro', 'descripcion', 'nombre')
 
     def __init__(self, *args, **kwargs):
         miembro = kwargs.pop('miembro', None)
         super(FormularioCrearPredica, self).__init__(*args, **kwargs)
-        print(miembro)
         if miembro is not None:
             if miembro.usuario.has_perm('miembros.es_administrador'):
-                print("entre aca")
                 grupo_pastor = Group.objects.get(name__iexact='pastor')
                 self.fields['miembro'].queryset = Miembro.objects.filter(usuario__groups=grupo_pastor)
             else:
-                print("no me fui por aca")
                 self.fields['miembro'].queryset = Miembro.objects.filter(id=miembro.id)
                 self.fields['miembro'].initial = miembro.id
         else:
-            print("error estoy aca")
             self.fields['miembro'].queryset = Miembro.objects.none()
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
         self.fields['miembro'].widget.attrs.update({'class': 'selectpicker'})
@@ -192,38 +195,25 @@ class FormularioCrearPredica(forms.ModelForm):
                                                         'placeholder': 'Descripción...',
                                                         'rows': '3'})
 
-    class Meta:
-        model = Predica
-        fields = ('miembro', 'descripcion', 'nombre')
-
 
 class FormularioEditarDiscipulado(forms.ModelForm):
+    """Formulario para editar el discipulado."""
+
     error_css_class = 'has-error'
+
+    class Meta:
+        model = Grupo
+        fields = ('diaDiscipulado', 'horaDiscipulado')
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarDiscipulado, self).__init__(*args, **kwargs)
         self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00'})
         self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
 
-    class Meta:
-        model = Grupo
-        fields = ('diaDiscipulado', 'horaDiscipulado')
-
-
-class FormularioTransladarGrupo(forms.Form):
-    error_css_class = 'has-error'
-
-    queryset = Grupo.objects.all()
-    grupo = forms.ModelChoiceField(queryset=queryset, required=True)
-
-    def __init__(self, red=None, grupo_id=None, *args, **kwargs):
-        super(FormularioTransladarGrupo, self).__init__(*args, **kwargs)
-        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        if red or grupo_id:
-            self.fields['grupo'].queryset = self.fields['grupo'].queryset.filter(red=red).exclude(id=grupo_id)
-
 
 class FormularioReportesEnviados(FormularioRangoFechas):
+    """Formulario para ver los reportes enviados por un grupo."""
+
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.none())  # .filter(estado='A'))
 
     def __init__(self, *args, **kwargs):
@@ -242,26 +232,18 @@ class FormularioReportesEnviados(FormularioRangoFechas):
 
 
 class FormularioEditarReunionGAR(FormularioReunionGARBase):
+    """Formulario para editar las reuniones de grupos de amistad."""
+
+    class Meta(FormularioReunionGARBase.Meta):
+        pass
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarReunionGAR, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
-        # se comenta la linea que hacia que la fecha no fuera editable
-        # self.fields['fecha'].widget.attrs.update({'readonly': ''})
-
-    class Meta:
-        model = ReunionGAR
-        # exclude = ('grupo', 'asistentecia')
-        # se cambia el exclude por fields
-        fields = (
-            'fecha', 'predica', 'numeroTotalAsistentes',
-            'numeroLideresAsistentes', 'numeroVisitas',
-            'ofrenda'
-        )
 
 
 class FormularioSetGeoPosicionGrupo(CustomModelForm):
+    """Formulario para setear la geoposicion de los grupos."""
+
     class Meta:
         model = Grupo
         fields = ('latitud', 'longitud', )
@@ -283,7 +265,7 @@ class BaseGrupoForm(CustomModelForm):
     class Meta:
         model = Grupo
         fields = [
-            'lideres', 'direccion', 'estado', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
+            'lideres', 'direccion', 'fechaApertura', 'diaGAR', 'horaGAR', 'diaDiscipulado',
             'horaDiscipulado', 'nombre', 'barrio'
         ]
 
@@ -296,7 +278,7 @@ class BaseGrupoForm(CustomModelForm):
         self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['fechaApertura'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+        # self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
@@ -320,6 +302,12 @@ class GrupoRaizForm(BaseGrupoForm):
             self.fields['lideres'].queryset = (self.fields['lideres'].queryset | self.instance.lideres.all()).distinct()
             self.fields['lideres'].initial = self.instance.lideres.all()
 
+            choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
+            self.fields['estado'] = forms.ChoiceField(
+                choices=choices, initial=self.instance.estado, required=False, label=_lazy('Estado')
+            )
+            self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+
     def save(self):
         try:
             with transaction.atomic():
@@ -332,6 +320,10 @@ class GrupoRaizForm(BaseGrupoForm):
 
                 lideres = self.cleaned_data['lideres']
                 lideres.update(grupo_lidera=raiz)
+
+                if self.instance.pk:
+                    if 'estado' in self.cleaned_data and self.cleaned_data['estado'] != self.instance.estado:
+                        self.instance.actualizar_estado(estado=self.cleaned_data.get('estado'))
                 return raiz
         except IntegrityError:
             logger.exception("Error al intentar guardar el grupo raiz")
@@ -405,6 +397,15 @@ class EditarGrupoForm(NuevoGrupoForm):
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
+        if self.instance:
+            choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
+            self.fields['estado'] = forms.ChoiceField(
+                choices=choices, initial=self.instance.estado, label=_lazy('Estado')
+            )
+            self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
+        else:
+            raise NotImplementedError('No se implementó la instancia para el formulario')
+
         if not self.is_bound:
             # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
             self.fields['lideres'].queryset = self.fields['lideres'].initial = self.instance.lideres.all()
@@ -414,16 +415,14 @@ class EditarGrupoForm(NuevoGrupoForm):
             with transaction.atomic():
                 grupo = BaseGrupoForm.save(self)
 
-                # if 'parent' in self.changed_data:
-                #     padre = self.cleaned_data['parent']
-                #     grupo.move(padre, pos='sorted-child')
-                #     self.lideres.all().update(grupo=nuevo_padre)
-
                 if 'lideres' in self.changed_data:
                     grupo.lideres.clear()
                     # padre = self.cleaned_data['parent']
                     lideres = self.cleaned_data['lideres']
                     lideres.update(grupo_lidera=grupo, grupo=self.instance.parent)
+
+                if 'estado' in self.cleaned_data and self.cleaned_data['estado'] != self.instance.estado:
+                    self.instance.actualizar_estado(estado=self.cleaned_data.get('estado'))
 
                 return grupo
         except IntegrityError:
@@ -519,3 +518,90 @@ class TrasladarLideresForm(CustomForm):
 
     def trasladar(self):
         Miembro.objects.trasladar_lideres(self.cleaned_data['lideres'], self.cleaned_data['nuevo_grupo'])
+
+
+class ArchivarGrupoForm(CustomForm):
+    """Formulario para archivar grupos."""
+
+    error_messages = {
+        'sin_destino': _lazy('Debe escoger un grupo de destino para los discipulos y/o miembros escogidos.'),
+        'mismo_grupo': _lazy('El grupo de destino, no puede ser igual al grupo que se va a eliminar.'),
+    }
+
+    grupo = forms.ModelChoiceField(
+        queryset=Grupo.objects.none(), label=_lazy('Grupo a eliminar'),
+        help_text=_lazy('El grupo escogido, será aquel grupo el cual se eliminará.')
+    )
+    grupo_destino = forms.ModelChoiceField(
+        queryset=Grupo.objects.none(), label=_lazy('Grupo destino'),
+        help_text=_lazy('El grupo escogido, será aquel grupo el cual se enviaran los miembros seleccionados.'),
+        required=False
+    )
+    mantener_lideres = forms.BooleanField(
+        required=False, label=_lazy('Mantener líderes en grupo origen'), initial=True,
+        help_text=_lazy(
+            'Al marcar esta casilla, se asegurará de que los líderes del grupo a eliminar, sigan siendo miembros \
+            del grupo origen'
+        )
+    )
+    seleccionados = forms.ModelMultipleChoiceField(queryset=Miembro.objects.all(), required=False)
+
+    def __init__(self, iglesia, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo_destino'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo'].queryset = Grupo.objects.hojas(iglesia).prefetch_related('lideres')
+
+        if self.is_bound:
+            grupo_destino = self.data.get('grupo_destino', None) or None
+            grupo = self.data.get('grupo', None) or None
+
+            if grupo_destino is not None:
+                self.fields['grupo_destino'].queryset = Grupo.objects.filter(
+                    id=grupo_destino).prefetch_related('lideres')
+
+            if grupo is not None:
+                self.fields['seleccionados'].queryset = Miembro.objects.filter(grupo_id=grupo)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        grupo = cleaned_data.get('grupo', None)
+        grupo_destino = cleaned_data.get('grupo_destino', None)
+        seleccionados = cleaned_data.get('seleccionados', Miembro.objects.none())
+
+        if seleccionados.exists() and not grupo_destino:
+            self.add_error(
+                'grupo_destino', forms.ValidationError(self.error_messages['sin_destino'], code='sin_destino')
+            )
+
+        if grupo is not None and grupo_destino is not None and grupo == grupo_destino:
+            self.add_error(
+                'grupo_destino', forms.ValidationError(self.error_messages['mismo_grupo'], code='mismo_grupo')
+            )
+
+        return cleaned_data
+
+    def archiva_grupo(self):
+        """
+        Metodo para archivar los grupos, de acuerdo al grupo de destino y los seleccionados.
+        """
+
+        grupo = self.cleaned_data['grupo']
+        seleccionados = self.cleaned_data.get('seleccionados', Miembro.objects.none())
+        mantenter_lideres_en_grupo_padre = self.cleaned_data.get('mantener_lideres', False)
+
+        with transaction.atomic():
+            if seleccionados:
+                grupo_destino = self.cleaned_data['grupo_destino']
+                seleccionados.update(grupo=grupo_destino)
+
+            query_miembros = grupo.miembros.all()
+
+            grupo.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+            if mantenter_lideres_en_grupo_padre:
+                grupo.lideres.all().update(grupo_lidera=None)
+            else:
+                query_miembros |= grupo.lideres.all()
+            query_miembros.update(grupo=None, grupo_lidera=None)

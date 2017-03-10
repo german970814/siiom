@@ -1,5 +1,16 @@
 from django.core.urlresolvers import reverse
+from django.utils.functional import SimpleLazyObject
+
 from .models import Miembro
+
+
+def get_miembro(request):
+    if not hasattr(request, '_cache_miembro'):
+        try:
+            request._cache_miembro = Miembro.objects.get(usuario=request.user)
+        except Miembro.DoesNotExist:
+            return None
+    return request._cache_miembro
 
 
 class MiembroMiddleWare(object):
@@ -13,7 +24,4 @@ class MiembroMiddleWare(object):
         """
 
         if not request.user.is_anonymous() and not request.path.startswith(reverse('admin:index')):
-            try:
-                request.miembro = Miembro.objects.get(usuario=request.user)
-            except Miembro.DoesNotExist:
-                pass
+            request.miembro = SimpleLazyObject(lambda: get_miembro(request))

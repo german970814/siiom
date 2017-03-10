@@ -4,7 +4,6 @@ from django import forms
 
 # Locale Apps
 from .models import Requisicion, DetalleRequisicion, Adjunto, Historial, Proveedor
-from organizacional.models import Area, Departamento
 
 
 class FormularioSolicitudRequisicion(forms.ModelForm):
@@ -36,7 +35,7 @@ class FormularioDetalleRequisicion(forms.ModelForm):
         fields = (
             'cantidad', 'descripcion', 'referencia',
             'marca', 'valor_aprobado', 'forma_pago'
-        )  # lista para ser modificada por objetos hijos
+        )
 
     def __init__(self, *args, **kwargs):
         super(FormularioDetalleRequisicion, self).__init__(*args, **kwargs)
@@ -115,10 +114,6 @@ class FormularioObservacionHistorial(forms.ModelForm):
         super(FormularioObservacionHistorial, self).__init__(*args, **kwargs)
         self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
 
-        if self.initial and 'observacion' in self.initial:
-            # self.fields['observacion'].widget.attrs.update({'readonly': ''})
-            pass
-
 
 class FormularioFechaPagoRequisicion(forms.ModelForm):
     """
@@ -135,7 +130,6 @@ class FormularioFechaPagoRequisicion(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FormularioFechaPagoRequisicion, self).__init__(*args, **kwargs)
-        # self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
         self.fields['observacion'].widget.attrs.update({'class': 'form-control'})
         self.fields['presupuesto_aprobado'].required = True
         self.fields['presupuesto_aprobado'].widget.attrs.update({'class': 'selectpicker'})
@@ -165,13 +159,10 @@ class FormularioEstadoPago(forms.ModelForm):
 
     class Meta:
         model = Requisicion
-        fields = ('estado_pago', )  # 'fecha_pago')
+        fields = ('estado_pago', )
 
     def __init__(self, *args, **kwargs):
         super(FormularioEstadoPago, self).__init__(*args, **kwargs)
-        # self.fields['fecha_pago'].required = True
-        # self.fields['fecha_pago'].widget.attrs.update({'class': 'form-control'})
-        # self.fields['fecha_pago'].label = _('Fecha aprobada de entrega de recurso')
         if self.instance:
             if self.instance.fecha_pago is None or self.instance.fecha_pago == '':
                 self.fields['estado_pago'].widget.attrs.update(

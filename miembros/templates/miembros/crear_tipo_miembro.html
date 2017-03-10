@@ -11,7 +11,7 @@
             <div class="row">
                 <div class="alert alert-success alert-dismissible" role="alert">
                     <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el tipo de miembro correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el tipo de miembro o{% endif %} <a alt="Listar Redes" class="alert-link" href="/miembro/listar_tipo_miembro/"> {% if accion == 'Crear' %}Volver{% else %}volver{% endif %} a la lista de tipos de miembro. </a></p>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el tipo de miembro correctamente. {% if accion == 'Editar' %}Haga click en aceptar para editar el tipo de miembro o{% endif %} <a alt="Listar Redes" class="alert-link" href="{% url 'miembros:listar_tipo_miembro' %}"> {% if accion == 'Crear' %}Volver{% else %}volver{% endif %} a la lista de tipos de miembro. </a></p>
                 </div>
             </div>
             {% endif %}

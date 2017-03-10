@@ -1,5 +1,6 @@
-import re
 from django.conf import settings
+
+import re
 
 
 def clean_direccion(string):
@@ -19,9 +20,6 @@ def clean_direccion(string):
 
     database = settings.DATABASES['default']['NAME']
 
-    # digit = re.compile(r'(\d{1,3})([a-zA-Z]{1})?(\d{1})?')
-    # digit = re.compile(r'(\d{1,3})(([ ]{1})?([a-zA-Z]{1})([ ]|\d{1})([ ]{1})?(\d{1})?)?')
-    # digit = re.compile(r'(\d{1,3})((([ ]{1})?([a-zA-Z]{1})([ ]|\d{1})|([a-zA-Z]))?([ ]{1})?(\d{1})?)?')
     digit = re.compile(r'(\d{1,3})((([ ]{1})?[a-lA-L]{1}([ ]|\d{1})|([a-lA-L]))?([ ]{1})?(\d{0})?)?')
 
     if database in CIUDADES:
@@ -61,17 +59,3 @@ def clean_direccion(string):
         else:
             pass
     return ''
-
-
-# if any(not x for x in [regex_calle.match(string), regex_carrera.match(string)]):
-#     if regex_carrera.match(string) is not None:
-#         try:
-#             return 'Carrera %s # %s Barranquilla' % (numbers[0], numbers[1])
-#         except IndexError:
-#             pass
-#     elif regex_calle.match(string) is not None:
-#         try:
-#             return 'Calle %s # %s Barranquilla' % (numbers[0], numbers[1])
-#         except IndexError:
-#             pass
-# else:

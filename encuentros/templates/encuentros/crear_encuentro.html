@@ -4,7 +4,7 @@
 
 {% block js %}
 <script src="{% static 'Scripts/funciones.js' %}" type="text/javascript"></script>
-<script src="{% static 'Scripts/IGSearch.js' %}" type="text/javascript"></script>
+<script src="{% static 'Scripts/IGSearch/IGSearch.js' %}" type="text/javascript"></script>
     <script>
         jQuery(document).ready(function($) {
             $('#{{ form.fecha_inicial.id_for_label }}').datetimepicker({
@@ -165,7 +165,7 @@
                         aux = get_text_by_option($element, id);
                         _list.push(aux);
                     }
-                    return _list; 
+                    return _list;
                 } else {
                     id = $element.val();
                     aux = get_text_by_option($element, id);

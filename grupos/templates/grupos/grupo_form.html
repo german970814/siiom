@@ -52,19 +52,6 @@
                 <br class="space-down">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="input-group {{ form.estado.css_classes }}">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-refresh"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="{{ form.estado.id_for_label }}" class="fg-label control-label">{{ form.estado.label }}*:</label>
-                                {{ form.estado }}
-                            </div>
-                            {{ form.estado.errors }}
-                        </div>
-                    </div>
-                    <br class="space">
-                    <div class="col-md-4">
                         <div class="input-group {{ form.fechaApertura.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-calendar"></i>
@@ -83,29 +70,29 @@
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="{{ form.diaGAR.id_for_label }}" class="fg-label control-label">Dia del {% if dominioIglesia == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
+                                <label for="{{ form.diaGAR.id_for_label }}" class="fg-label control-label">Dia del {% if DOMINIO == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
                                 {{ form.diaGAR }}
                             </div>
                             {{ form.diaGAR.errors }}
                         </div>
                     </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group {{ form.horaGAR.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="{{ form.horaGAR.id_for_label }}" class="fg-label control-label">Hora del {% if dominioIglesia == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
+                                <label for="{{ form.horaGAR.id_for_label }}" class="fg-label control-label">Hora del {% if DOMINIO == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
                                 {{ form.horaGAR }}
                             </div>
                             {{ form.horaGAR.errors }}
                         </div>
                     </div>
-                    <br class="space">
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
                     <div class="col-md-4">
                         <div class="input-group {{ form.diaDiscipulado.css_classes }}">
                             <span class="input-group-addon">
@@ -131,10 +118,7 @@
                             {{ form.horaDiscipulado.errors }}
                         </div>
                     </div>
-                </div>
-                <br>
-                <br class="space-down">
-                <div class="row">
+                    <br class="space">
                     <div class="col-md-4">
                         <div class="input-group {{ form.direccion.css_classes }}">
                             <span class="input-group-addon">
@@ -147,6 +131,10 @@
                             {{ form.direccion.errors }}
                         </div>
                     </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
                     <div class="col-md-4">
                         <div class="input-group {{ form.nombre.css_classes }}">
                             <span class="input-group-addon">
@@ -172,6 +160,21 @@
                             {{ form.barrio.errors }}
                         </div>
                     </div>
+                    {% if form.estado %}
+                    <br class="space">
+                    <div class="col-md-4">
+                        <div class="input-group {{ form.estado.css_classes }}">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-refresh"></i>
+                            </span>
+                            <div class="fg-line">
+                                <label for="{{ form.estado.id_for_label }}" class="fg-label control-label">{{ form.estado.label }}*:</label>
+                                {{ form.estado }}
+                            </div>
+                            {{ form.estado.errors }}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 <br>
                 <br>
@@ -188,7 +191,7 @@
 
 {% block js %}
 <script src="{% static 'Scripts/funciones.js' %}" type="text/javascript"></script>
-<script src="{% static 'Scripts/IGSearch.js' %}" type="text/javascript"></script>
+<script src="{% static 'Scripts/IGSearch/IGSearch.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         $("#id_fechaApertura").datetimepicker({
@@ -204,7 +207,7 @@
             {% endfor %}
         {% endif %}
 
-        console.log(selected_before);
+        {% comment %}console.log(selected_before);{% endcomment %}
 
         $('#{{ form.lideres.id_for_label }}').IGSearch({
             url: "{% url 'common:busqueda_miembro_api' red_id %}",
@@ -213,6 +216,9 @@
             messageError: 'Ha ocurrido un error y no se pueden mostrar los lideres',
             prerequest: function(options) {
                 options.data.grupo = '{{ grupo_id|safe }}';
+                {% if not perms.miembros.es_administrador %}
+                    options.data.grupo_by = '{{ request.miembro.grupo_lidera_id }}';
+                {% endif %}
                 return true;
             }
         });

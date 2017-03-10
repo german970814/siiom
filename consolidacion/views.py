@@ -1,17 +1,15 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import user_passes_test
-from django.views.generic.edit import CreateView, UpdateView
+from django.conf import settings
 from django.contrib import messages
-from django.utils.translation import ugettext as _
+from django.contrib.auth.decorators import permission_required, login_required
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
-from django.conf import settings
+from django.shortcuts import render
+from django.utils.translation import ugettext as _
+from django.views.generic.edit import CreateView, UpdateView
 
-from .utils import clean_direccion
 from .models import Visita
 from .forms import FormularioVisita, FormularioAsignarGrupoVisita
 from common.forms import FormularioRangoFechas
-from common.groups_tests import adminTest
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
 
@@ -89,7 +87,8 @@ def asignar_grupo_visitas_ajax(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-@user_passes_test(adminTest)
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def asignar_grupo_visitas(request):
     """
     Vista para asignar a las visitas a un grupo
@@ -98,12 +97,10 @@ def asignar_grupo_visitas(request):
     data = {}
 
     if request.method == 'POST':
-        # print(request.POST)
         if 'visita[]' in request.POST:
             response = {}
             _removed_ids = []
             try:
-                # print(request.POST)
                 visitas = request.POST.getlist('visita[]')
                 for visita in visitas:
                     try:
@@ -112,8 +109,6 @@ def asignar_grupo_visitas(request):
                         _visita.save()
                         _removed_ids.append(_visita.id)
                     except Exception as exception:
-                        # if settings.DEBUG:
-                            # print(exception)
                         response['error'] = exception.__str__()
                         response['response_code'] = 401
                 if 'error' not in response:
@@ -135,22 +130,21 @@ def asignar_grupo_visitas(request):
                 fecha_inicial = form.cleaned_data['fecha_inicial']
                 fecha_final = form.cleaned_data['fecha_final']
 
-                # visitas = Miembro.objects.visitas(
-                #     fechaRegistro__range=(fecha_inicial, fecha_final)
-                # )
-
                 visitas = Visita.objects.filter(
                     fecha_ingreso__range=(fecha_inicial, fecha_final),
                     retirado=False
                 ).exclude(grupo__isnull=False)
 
-                grupos = Grupo.objects.prefetch_related('lideres').filter(estado='A').select_related('red')
+                grupos = Grupo.objects.prefetch_related('lideres').select_related('red').activos()
 
                 if visitas.exists():
                     data['visitas'] = visitas
                     data['redes'] = Red.objects.all()
                     data['grupos'] = grupos
-                    messages.success(request, _('Se muestran %d visitas para el rango de fechas escogido' % visitas.count()))
+                    messages.success(
+                        request,
+                        _('Se muestran %d visitas para el rango de fechas escogido' % visitas.count())
+                    )
                 else:
                     messages.warning(request, _('No se encontraron resultados para el rango de fecha escogido'))
             else:

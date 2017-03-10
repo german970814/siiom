@@ -125,10 +125,10 @@ class CrearMiembroViewTest(BaseTest):
 
         from miembros.models import Miembro
         data = {
-            'nombre': 'Maria', 'primerApellido': 'Torres', 'genero': Miembro.FEMENINO, 'cedula': '122342312',
-            'email': 'test@siiom.com', 'segundoApellido': 'Mejia', 'telefono': '3423454', 'celular': '3003224543',
-            'fechaNacimiento': '1990-03-12', 'direccion': 'Cra 45 N 93 - 34', 'profesion': 'Ing. Civil',
-            'estadoCivil': Miembro.SOLTERO
+            'nombre': 'Maria', 'primer_apellido': 'Torres', 'genero': Miembro.FEMENINO, 'cedula': '122342312',
+            'email': 'test@siiom.com', 'segundo_apellido': 'Mejia', 'telefono': '3423454', 'celular': '3003224543',
+            'fecha_nacimiento': '1990-03-12', 'direccion': 'Cra 45 N 93 - 34', 'profesion': 'Ing. Civil',
+            'estado_civil': Miembro.SOLTERO
         }
 
         return data
@@ -182,4 +182,4 @@ class CrearMiembroViewTest(BaseTest):
         self.assertFormError(response, 'form', 'nombre', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'genero', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'cedula', self.MSJ_OBLIGATORIO)
-        self.assertFormError(response, 'form', 'primerApellido', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'primer_apellido', self.MSJ_OBLIGATORIO)

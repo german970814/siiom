@@ -1,25 +1,27 @@
 from django.contrib.sites.models import Site
 from miembros.models import Miembro
+from grupos.models import HistorialEstado
 
 
-def site(request):
+def siiom_context_processor(request):
+    """
+    Procesador de contextos para siiom.
+    """
 
     site = Site.objects.get_current()
-    # miembro = Miembro.objects.get(usuario=request.user)
 
     data = {
         'sitio': site,
-        'dominioIglesia': site.domain,
-        'nombreIglesia': site.name,
-        # 'id_miembro': miembro.id
+        'DOMINIO': site.domain,
+        'NOMBRE_IGLESIA': site.name,
+        'GRUPO_ACTIVO': HistorialEstado.ACTIVO,
+        'GRUPO_INACTIVO': HistorialEstado.INACTIVO,
+        'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO
     }
 
     if request.user.is_authenticated():
         try:
             miembro = Miembro.objects.get(usuario=request.user)
-            data['id_miembro'] = miembro.id
-            data['mi'] = miembro
-
             draw_mapa = False
 
             if miembro.grupo_lidera is not None:

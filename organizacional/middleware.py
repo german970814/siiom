@@ -1,5 +1,16 @@
 from django.core.urlresolvers import reverse
+from django.utils.functional import SimpleLazyObject
+
 from .models import Empleado
+
+
+def get_empleado(request):
+    if not hasattr(request, '_cache_empleado'):
+        try:
+            request._cache_empleado = request.user.empleado
+        except Empleado.DoesNotExist:
+            return None
+    return request._cache_empleado
 
 
 class EmpleadoMiddleWare(object):
@@ -13,7 +24,4 @@ class EmpleadoMiddleWare(object):
         """
 
         if not request.user.is_anonymous() and not request.path.startswith(reverse('admin:index')):
-            try:
-                request.empleado = request.user.empleado
-            except Empleado.DoesNotExist:
-                pass
+            request.empleado = SimpleLazyObject(lambda: get_empleado(request))

@@ -175,7 +175,6 @@ class FormularioCerrarCaso(FormularioAgregarMensaje):
             raise ValidationError(_('mensaje or caso not in self.cleaned_data'))
 
 
-# Agregado 30 Septiembre de 2016
 class FormularioEditarCaso(ModelFormBase):
     """
     Formulario para editar los datos de la persona que ingresa un caso

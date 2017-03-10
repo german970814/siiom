@@ -1,12 +1,13 @@
-from django.db.models import Manager
+from django.db import models
 
 
-class EncuentroManager(Manager):
+class EncuentroManager(models.Manager):
     """
     Manager para los encuentros
     """
+
     def activos(self):
-        return self.filter(estado='A')
+        return self.filter(estado=self.model.ACTIVO)
 
     def inactivos(self):
-        return self.filter(estado='I')
+        return self.filter(estado=self.model.INACTIVO)

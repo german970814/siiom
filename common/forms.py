@@ -24,6 +24,8 @@ class CustomModelForm(forms.ModelForm):
     """
 
     error_css_class = 'has-error'
+    input_css_class = 'form-control'
+    select_css_class = 'selectpicker'
 
     def __init__(self, *args, **kwargs):
         super().__init__(error_class=CustomErrorList, *args, **kwargs)
@@ -35,6 +37,8 @@ class CustomForm(forms.Form):
     """
 
     error_css_class = 'has-error'
+    input_css_class = 'form-control'
+    select_css_class = 'selectpicker'
 
     def __init__(self, *args, **kwargs):
         super().__init__(error_class=CustomErrorList, *args, **kwargs)
@@ -74,3 +78,4 @@ class BusquedaForm(forms.Form):
     Grupo = import_string('grupos.models.Grupo')
     value = forms.CharField(max_length=255)
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.all(), required=False)
+    grupo_by = forms.ModelChoiceField(queryset=Grupo.objects.all(), required=False)

@@ -14,14 +14,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ nombreIglesia }}</title>
-
-    <!-- Bootstrap Core CSS -->
-
-    <!-- Custom Fonts -->
-
-
-    <!-- Template CSS -->
+    <title>{% if DOMINIO == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ NOMBRE_IGLESIA }}</title>
 
     <link href="{% static 'Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/animate.css/animate.min.css' %}" rel="stylesheet">
@@ -50,20 +43,6 @@
     <script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
     <srcipt src="{% static 'leaflet/icons/js/leaflet-color-markers.js' %}"></srcipt>
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-
-        <!-- Following CSS are used only for the Demp purposes thus you can remove this anytime. --><!--
-        <style type="text/css">
-            .toggle-switch .ts-label {
-                min-width: 130px;
-            }
-        </style> -->
     <style>
         @media screen and (min-width: 991px) {
             br.space {
@@ -121,7 +100,7 @@
         }
 
         .bootstrap-select.btn-group .dropdown-menu {
-            z-index: 10;
+            z-index: 11;
         }
 
     </style>
@@ -136,8 +115,8 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Ubica A Tú Grupo</h4>
-                <small>Marca la posicion de donde haces tu grupo Actualmente</small>
+                <h4 class="modal-title">{% trans 'Ubica A Tú Grupo' %}</h4>
+                <small>{% trans 'Marca la posicion de donde haces tu grupo Actualmente' %}</small>
             </div>
 	        <form action="" method="POST" id="" enctype="multipart/form-data">
 	        	{% csrf_token %}
@@ -145,8 +124,8 @@
                     <div id="mapa"></div>
 	            </div>
 	            <div class="modal-footer">
-	                <button type="button" name="aceptar" id="accept_position" class="btn btn-link">Aceptar</button>
-	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	                <button type="button" name="aceptar" id="accept_position" class="btn btn-link">{% trans 'Aceptar' %}</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">{% trans 'Cerrar' %}</button>
 	            </div>
             </form>
         </div>
@@ -157,22 +136,22 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Ubica A Grupo</h4>
-                <small>Marca la posicion de donde haces tu grupo Actualmente</small>
+                <h4 class="modal-title">{% trans 'Ubica A Grupo' %}</h4>
+                <small>{% trans 'Marca la posicion de donde haces tu grupo Actualmente' %}</small>
             </div>
 	        <form action="" method="POST" id="" enctype="multipart/form-data">
 	        	{% csrf_token %}
 	            <div class="modal-body">
 	            </div>
 	            <div class="modal-footer">
-	                <button type="button" name="aceptar" id="send_position" class="btn btn-link">Aceptar</button>
-	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
+	                <button type="button" name="aceptar" id="send_position" class="btn btn-link">{% trans 'Aceptar' %}</button>
+	                <button type="button" class="btn btn-link" data-dismiss="modal">{% trans 'Cerrar' %}</button>
 	            </div>
             </form>
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
+    <a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
     <header id="header" class="clearfix" data-current-skin="blue">
         <ul class="header-inner">
             {% if request.user.is_authenticated %}
@@ -185,7 +164,7 @@
             </li>
             {% endif %}
             <li class="logo hidden-xs">
-                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">{% if dominioIglesia == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
+                <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}">{% if DOMINIO == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -197,65 +176,57 @@
                         </div>
                     </li>
                     {% endif %}
-                    {% if mi %}
+                    {% if request.miembro %}
                     <li id="top-search">
                         <a href=""><i class="tm-icon zmdi zmdi-search"></i></a>
                     </li>
                     {% endif %}
-                    <!-- opciones -->
-                    {% if mi.grupo_lidera and not mi.grupo_lidera.get_position %}
+                    {% if request.miembro.grupo_lidera and not request.miembro.grupo_lidera.get_position %}
                     <li class="dropdown">
-                            <a data-toggle="dropdown" href="">
-                                <i class="tm-icon zmdi zmdi-notifications"></i>
-                                <i class="tmn-counts">1</i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-lg pull-right">
-                                <div class="listview" id="notifications">
-                                    <div class="lv-header">
-                                        Notificaciones
-                                        <!--<ul class="actions">
-                                            <li class="dropdown">
-                                                <a href="" data-clear="notification">
-                                                    <i class="zmdi zmdi-check-all"></i>
-                                                </a>
-                                            </li>
-                                        </ul>-->
-                                    </div>
-                                    <div class="lv-body">
-                                        <a class="lv-item">
-                                            <div class="media" id="tomodalmap">
-                                                <div class="media-body">
-                                                    <div class="lv-title">Actualiza Datos</div>
-                                                    <small class="lv-small">Ubica a tu grupo en el mapa</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
+                        <a data-toggle="dropdown" href="">
+                            <i class="tm-icon zmdi zmdi-notifications"></i>
+                            <i class="tmn-counts">1</i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg pull-right">
+                            <div class="listview" id="notifications">
+                                <div class="lv-header">
+                                    {% trans 'Notificaciones' %}
                                 </div>
-
+                                <div class="lv-body">
+                                    <a class="lv-item">
+                                        <div class="media" id="tomodalmap">
+                                            <div class="media-body">
+                                                <div class="lv-title">{% trans 'Actualiza Datos' %}</div>
+                                                <small class="lv-small">{% trans 'Ubica a tu grupo en el mapa' %}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
-                        </li>
+
+                        </div>
+                    </li>
                     {% endif %}
 
                     <li class="dropdown">
                         <a data-toggle="dropdown" href=""><i class="tm-icon zmdi zmdi-more-vert"></i></a>
                         <ul class="dropdown-menu dm-icon pull-right">
                         {% if request.user.is_authenticated %}
-                            {% if mi %}
+                            {% if request.miembro %}
                             <li class="hidden-xs">
-                                <a  href="/miembro/perfil/"><i class="zmdi zmdi-account-o"></i> Perfil Usuario</a>
+                                <a  href="{% url 'miembros:editar_perfil' request.miembro.id %}"><i class="zmdi zmdi-account-o"></i> {% trans 'Perfil Usuario' %}</a>
                             </li>
                             {% endif %}
                             <li>
-                                <a  href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-wrench"></i> Cambiar Clave</a>
+                                <a  href="{% url 'miembros:cambiar_contrasena' %}"><i class="zmdi zmdi-wrench"></i> {% trans 'Cambiar Clave' %}</a>
                             </li>
                             <li class="divider hidden-xs"></li>
                             <li>
-                                <a href="/salir/"><i class="zmdi zmdi-power"></i> Salir</a>
+                                <a href="{% url 'logout' %}"><i class="zmdi zmdi-power"></i> {% trans 'Salir' %}</a>
                             </li>
                         {% else %}
                             <li class="hidden-xs">
-                                <a  href="/iniciar_sesion/"><i class="zmdi zmdi-assignment-account"></i> Iniciar Sesión</a>
+                                <a  href="{% url 'inicio' %}"><i class="zmdi zmdi-assignment-account"></i> {% trans 'Iniciar Sesión' %}</a>
                             </li>
                         {% endif %}
                         </ul>
@@ -264,7 +235,7 @@
             </li>
         </ul>
         <!-- Top Search Content -->
-        {% if mi %}
+        {% if request.miembro %}
         <div id="top-search-wrap">
             <div class="tsw-inner">
             <form action="{% url 'buscar' 'miembro' %}" method="GET">
@@ -280,323 +251,156 @@
         {% if request.user.is_authenticated %}
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
-                <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{dominioIglesia}}.png') !important;">
+                <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{DOMINIO}}.png') !important;">
                     <div class="profile-pic">
-                        <img src="{% if mi.foto_perfil %}{{ mi.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
+                        <img src="{% if request.miembro.foto_perfil %}{{ request.miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                     </div>
                     <div class="profile-info">
                     {% if request.user.is_authenticated %}
                         {{ request.user.email }}
                     {% else %}
-                        {{ nombreIglesia }}
+                        {{ NOMBRE_IGLESIA }}
                     {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
                 </a>
                 {% if request.user.is_authenticated %}
                 <ul class="main-menu">
-                    {% if mi %}
+                    {% if request.miembro %}
                     <li>
-                        <a href="/miembro/perfil/"><i class="zmdi zmdi-account"></i> Perfil</a>
+                        <a href="{% url 'miembros:editar_perfil' request.miembro.id %}"><i class="zmdi zmdi-account"></i> {% trans 'Perfil' %}</a>
                     </li>
                     {% endif %}
                     <li>
-                        <a href="/miembro/cambiar_contrasena/"><i class="zmdi zmdi-input-antenna"></i> Cambiar Clave</a>
+                        <a href="{% url 'miembros:cambiar_contrasena' %}"><i class="zmdi zmdi-input-antenna"></i> {% trans 'Cambiar Clave' %}</a>
                     </li>
                     <li>
-                        <a href="/salir/"><i class="zmdi zmdi-time-restore"></i> Salir</a>
+                        <a href="{% url 'logout' %}"><i class="zmdi zmdi-time-restore"></i> {% trans 'Salir' %}</a>
                     </li>
                 </ul>
             </div>
             <ul class="main-menu">
                 <li class="active">
-                    <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
+                    <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}"><i class="zmdi zmdi-home"></i> Dashboard</a>
                 </li>
-                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                {% if perms.miembros.es_administrador or request.miembro.es_director_red or request.miembro.es_cabeza_red %}
                 <li class="sub-menu">
-                    <a href="#"><i class="zmdi zmdi-accounts-list-alt"></i> Administración</a>
+                    <a href="#"><i class="zmdi zmdi-accounts-list-alt"></i>{% trans 'Administración' %}</a>
                     <ul>
                     {% if perms.miembros.es_administrador %}
-                        <li class="sub-menu">
-                            <a href="#">Academia</a>
-                            <ul>
-                                <li>
-                                    <a href="/academia/listar_cursos/">Listar Cursos</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/academia/crear_curso/">Crear Curso</a>
-                                </li> -->
-                                <li>
-                                    <a href="/academia/listar_modulos/">Listar Módulos</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/academia/crear_modulo/">Crear Módulo</a>
-                                </li> -->
-                                <li>
-                                    <a href="/miembro/graduar_alumno/">Graduar Alumno</a>
-                                </li>
-                                <li>
-                                    <a href="/academia/listar_pagos/">Listar Pagos de Academia</a>
-                                </li>
-                            </ul>
+                        <li>
+                            <a href="{% url 'grupos:raiz' %}">{% trans 'Grupo Padre' %}</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'grupos:listar_predicas' %}">{% trans 'Listar Prédicas' %}</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'miembros:listar_zonas' %}">{% trans 'Listar Zonas' %}</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'grupos:sin_confirmar_ofrenda_GAR' %}">{% trans 'Grupos Faltantes Confirmar Ofrenda' %}</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'miembros:nuevo' %}">{% trans 'Agregar Líder' %}</a>
                         </li>
                     {% endif %}
-                    {% if perms.miembros.es_administrador %}
-                        <li class="sub-menu">
-                            <a href="#">Miembro</a>
-                            <ul>
-                                <li>
-                                    <a href="/miembro/listar_zonas/">Listar Zonas</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/miembro/crear_zona/">Crear Zona</a>
-                                </li> -->
-                                <li>
-                                    <a href="/miembro/listar_escalafones/">Listar Escalafones</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/miembro/crear_escalafon/">Crear Escalafón</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/listar_tipo_miembro/">Listar Tipos de Miembro</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/crear_tipo_miembro/">Agregar Tipos de Miembro</a>
-                                </li> -->
-                                <li>
-                                    <a href="/miembro/listar_pasos/">Listar Pasos</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/miembro/agregar_paso/">Agregar Pasos</a>
-                                </li> -->
-                                <li>
-                                    <a href="/miembro/detalles_llamada/">Listar Detalles de Llamada</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/promover_escalafon/">Promover Miembro de Escalafón</a>
-                                </li>
-                                <!-- <li>
-                                    <a href="/miembro/agregar_detalle_llamada/">Agregar Detalle de Llamada</a>
-                                </li> -->
-                                {% if perms.miembros.cumplimiento_pasos %}
-                                <li>
-                                    <a href="/miembro/cumplimiento_pasos/">Cumplimiento de Pasos</a>
-                                </li>
-                                {% endif %}
-                            </ul>
+                    {% if perms.miembros.es_administrador or request.miembro.es_cabeza_red %}
+                        <li>
+                            <a href="{% url 'grupos:redes_listar' %}">{% trans "Listar Redes" %}</a>
                         </li>
                     {% endif %}
-                    {% if perms.miembros.es_administrador or mi.es_director_red %}
-                        <li class="sub-menu">
-                            <a href="#">Grupo</a>
-                            <ul>
-                                {% if perms.miembros.es_administrador %}
-                                    <li>
-                                        <a href="{% url 'grupos:raiz' %}">Grupo Padre</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'grupos:redes_listar' %}">{% trans "Listar Redes" %}</a>
-                                    </li>
-                                    <li>
-                                        <a href="/grupo/listar_predicas/">Listar Prédicas</a>
-                                    </li>
-                                {% endif %}
-                                {% if perms.miembros.es_administrador or mi.es_director_red %}
-                                    <li>
-                                        <a href="/miembro/reportar_reunion_grupo_admin/">Reportar Reunión {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                                    </li>
-                                {% endif %}
-                                {% if perms.miembros.es_administrador %}
-                                    <li>
-                                        <a href="{% url 'grupos:sin_confirmar_ofrenda_GAR' %}">{% trans 'Grupos Faltantes Confirmar Ofrenda' %}</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'grupos:sin_confirmar_ofrenda_discipulado' %}">{% trans 'Discipulados Faltantes Confirmar Ofrenda' %}</a>
-                                    </li>
-                                {% endif %}
-                                {% if perms.miembros.es_administrador or mi.es_director_red %}
-                                    <li>
-                                        <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'reportes:confirmar_ofrenda_grupos_red' %}">{% trans 'Confirmar Ofrenda Grupo Por Red' %}</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
+                    {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
+                        <li>
+                            <a href="{% url 'grupos:reportar_reunion_grupo_admin' %}">{% trans 'Reportar Reunión' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'reportes:confirmar_ofrenda_grupos_red' %}">{% trans 'Confirmar Ofrenda Grupo Por Red' %}</a>
                         </li>
                     {% endif %}
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupo_lidera %}
+                {% if request.miembro.grupo_lidera %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> Mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> {% trans 'Mi' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
-                        {% if mi.grupo_lidera.estado == 'A' %}
+                        {% if request.miembro.grupo_lidera.estado == GRUPO_ACTIVO %}
                         <li>
-                            <a href="/miembro/reportar_reunion_grupo/">Ingresar Sobre {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'grupos:reportar_reunion_grupo' %}">{% trans 'Ingresar Sobre' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                         {% endif %}
                         <li>
-                            <a href="/miembro/editar_grupo/">Editar mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                        </li>
-                        <li>
-                            <a href="/miembro/llamadas_pendientes/lider/">Llamadas Pendientes</a>
+                            <a href="{% url 'miembros:editar_grupo' request.miembro.id %}">{% trans 'Editar mi' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
-                {% if mi.grupo_lidera or perms.miembro.es_administrador %}
+                {% if request.miembro.grupo_lidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                     <ul>
                         <li>
-                            <a href="/reportes/estadistico_reunionesGAR/">Informe General de mi {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                        </li>
-                        {% comment %}<li>
-                            <a href="/reportes/reportes_reuniones_sin_enviar/">Faltante por Reportar {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                        </li>{% endcomment %}
-                    </ul>
-                </li>
-                {% endif %}
-                {% if mi.grupo_lidera or perms.miembros.es_administrador %}
-                <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-accounts"></i> Discipulado</a>
-                    <ul>
-                        <li>
-                            <a href="/miembro/reportar_reunion_discipulado/">Ingresar D12</a>
-                        </li>
-                        <li>
-                            <a href="/reportes/estadistico__totalizado_reunionesDiscipulado/">Reporte D12</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'grupos:organigrama' %}">Organigrama de mi Red</a>
+                            <a href="{% url 'reportes:estadistico_reuniones_grupo' %}">Informe General de mi {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_maestro %}
+                {% if request.miembro.grupo_lidera or perms.miembros.es_administrador %}
                 <li class="sub-menu">
-                    <a href="#"><i class="zmdi zmdi-graduation-cap"></i> Academias</a>
+                    <a href=""><i class="zmdi zmdi-accounts"></i> {% trans 'Discipulado' %}</a>
                     <ul>
                         <li>
-                            <a href="/academia/cursos/">Curso</a>
+                            <a href="{% url 'grupos:reportar_reunion_discipulado' %}">{% trans 'Ingresar D12' %}</a>
                         </li>
                         <li>
-                            <a href="/academia/asistencia/">Asistencia</a>
+                            <a href="{% url 'reportes:estadistico_totalizado_reuniones_discipulado' %}">{% trans 'Reporte D12' %}</a>
                         </li>
                         <li>
-                            <a href="/academia/registrar_entrega_tarea/">Entrega de Tarea</a>
+                            <a href="{% url 'grupos:organigrama' %}">{% trans 'Organigrama de mi Red' %}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
-                {% if perms.miembros.es_administrador or mi.es_director_red %}
+                {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                 <li class="sub-menu">
-                    <a href="#"><i class="zmdi zmdi-trending-up"></i>Informes Generales</a>
+                    <a href="#"><i class="zmdi zmdi-trending-up"></i>{% trans 'Informes Generales' %}</a>
                     <ul>
-                        <li class="sub-menu">
-                            <a href="#">Miembros y sus Pasos</a>
-                            <ul>
-                                <li>
-                                    <a href="/reportes/miembros_y_pasos/">Miembros y sus pasos</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/pasos_totales/">Estadistico de pasos por totales</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/pasos_rango_fechas/">Estadistico de pasos por un rango de fechas</a>
-                                </li>
-                            </ul>
+                        <li>
+                            <a href="{% url 'reportes:estadistico_reuniones_discipulado' %}">{% trans 'Estadistico de reuniones Discupulado' %}</a>
                         </li>
-                        <li class="sub-menu">
-                            <a href="#">Asistencia Reuniones</a>
-                            <ul>
-                                <!--- <li>
-                                    <a href="/reportes/asistencia_reuniones/">Asistencia a reuniones</a>
-                                </li> --->
-                                <li>
-                                    <a href="/reportes/estadistico_reunionesDiscipulado/">Estadistico de reuniones Discupulado</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/estadistico__totalizado_reunionesGAR/">Estadistico totalizado de reuniones {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                                </li>
-                            </ul>
+                        <li>
+                            <a href="{% url 'reportes:estadistico_totalizado_reuniones_grupo' %}">{% trans 'Estadistico totalizado de reuniones' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
                 {% if perms.miembros.es_agente or perms.miembros.es_administrador %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-account-box-mail"></i>Consolidación</a>
+                    <a href=""><i class="zmdi zmdi-account-box-mail"></i>{% trans 'Consolidación' %}</a>
                     <ul>
                         <li>
-                            <a href="{% url 'consolidacion:crear_visita' %}">Agregar Visita</a>
+                            <a href="{% url 'consolidacion:crear_visita' %}">{% trans 'Agregar Visita' %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">Asignar Visita A Grupo</a>
+                            <a href="{% url 'consolidacion:asignar_grupo_visitas' %}">{% trans 'Asignar Visita A Grupo' %}</a>
                         </li>
-                        {% if perms.miembros.es_administrador %}
-                            <li>
-                                <a href="{% url 'miembros:nuevo' %}">Agregar Miembro</a>
-                            </li>
-                        {% endif %}
-                        <!--<li class="sub-menu">
-                            <a href="#">Agregar y Promover Visitas</a>
-                            <ul>
-                                <li>
-                                    <a href="/miembro/promover_visitantes/">Promover Visitas</a>
-                                </li>
-                                <li>
-                                    <a href="/miembro/llamadas_pendientes/agente/">Llamadas Pendientes</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="sub-menu">
-                            <a href="#">Asignación y Llamadas</a>
-                            <ul>
-                                <li>
-                                    <a href="/reportes/asignacion_gar/">Control de Asignacion a {% if dominioIglesia == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/primera_llamada/">Primera Llamada</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/segunda_llamada/">Segunda Llamada</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'reportes:cumplimiento_llamadas_lideres' %}">Cumplimiento llamadas lideres</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="sub-menu">
-                            <a href="#">Visitas Asignadas</a>
-                            <ul>
-                                <li>
-                                    <a href="/reportes/visitas_por_red/">Visitas asignadas por redes</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/visitas_por_mes/">Visitas registradas por mes</a>
-                                </li>
-                                <li>
-                                    <a href="/reportes/visitas_red_por_mes/">Visitas asignadas a una red por mes</a>
-                                </li>
-                            </ul>
-                        </li>-->
                     </ul>
                     {% endif %}
                 </li>
                     {% if perms.miembros.es_tesorero or perms.miembros.es_administrador or perms.miembros.es_coordinador %}
                     <li class="sub-menu">
-                        <a href=""><i class="zmdi zmdi-globe"></i>Encuentros</a>
+                        <a href=""><i class="zmdi zmdi-globe"></i>{% trans 'Encuentros' %}</a>
                         <ul>
                             {% if perms.miembros.es_administrador %}
                             <li>
-                                <a href="{% url 'encuentros:crear_encuetro' %}">Crear Encuentro</a>
+                                <a href="{% url 'encuentros:crear_encuetro' %}">{% trans 'Crear Encuentro' %}</a>
                             </li>
                             {% endif %}
                             <li>
-                                <a href="{% url 'encuentros:listar_encuentros' %}">Listar Encuentros</a>
+                                <a href="{% url 'encuentros:listar_encuentros' %}">{% trans 'Listar Encuentros' %}</a>
                             </li>
                         </ul>
                     </li>
@@ -915,8 +719,8 @@
             $('#toggleModal').click();
         });
         {% if draw_mapa %}
-            {% if mi.grupo_lidera or perms.miembros.es_administrador %}
-            {% if dominioIglesia == 'gng.com' %}
+            {% if request.miembro.grupo_lidera or perms.miembros.es_administrador %}
+            {% if DOMINIO == 'gng.com' %}
                 var mymap = L.map('mapa').setView([11.2009692, -74.227405], 18);
             {%  else %}
                 var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);
@@ -954,8 +758,8 @@
                     console.log(err);
                 }
             })
-            {% elif mi.grupo_lidera %}
-            geocoder.geocode('{{ mi.grupo_lidera.get_direccion }}', function(results){
+            {% elif request.miembro.grupo_lidera %}
+            geocoder.geocode('{{ request.miembro.grupo_lidera.get_direccion }}', function(results){
                 try {
                     latLng = new L.LatLng(results[0].center.lat, results[0].center.lng);
                     _marker = new L.Marker(latLng);
@@ -1000,7 +804,7 @@
                 $('#toggleModal2').click();
             });
 
-                {% if mi.grupo_lidera %}
+                {% if request.miembro.grupo_lidera %}
                 $('#send_position').click(function(event) {
                     if (!marker) {
                         event.preventDefault();
@@ -1008,7 +812,7 @@
                         return false;
                     } else {
                         $.ajax({
-                            url: {% if g and miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" miembro.grupo_lidera.id %}'{% elif mi.grupo_lidera %}'{% url "grupos:posicion_grupo" mi.grupo_lidera.id %}'{% endif %},
+                            url: {% if g and miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" miembro.grupo_lidera.id %}'{% elif request.miembro.grupo_lidera %}'{% url "grupos:posicion_grupo" request.miembro.grupo_lidera.id %}'{% endif %},
                             type: 'GET',
                             data: {
                                 csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),

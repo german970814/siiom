@@ -11,7 +11,7 @@
                 <div class="row">
                     <div class="alert alert-success alert-dismissible" role="alert">
                         <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
-                        <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la predica correctamente. Haga click en aceptar para editar la predica siguiente o <a alt="Listar Predicas" class="alert-link" href="/grupo/listar_predicas"> Volver a la lista de prédicas.</a></p>
+                        <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} la predica correctamente. Haga click en aceptar para editar la predica siguiente o <a alt="Listar Predicas" class="alert-link" href="{% url 'grupos:listar_predicas' %}"> Volver a la lista de prédicas.</a></p>
                     </div>
                 </div>
             {% endif %} 

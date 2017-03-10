@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 
 # Locale Apps
 from .models import Requisicion, Adjunto, Parametros
+from common import constants
 from organizacional.models import Departamento
 
 # Python Package
@@ -74,7 +75,7 @@ def detalles_requisicion_api(request, id_requisicion):
 
         data.insert(2, to_data_3)
 
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        return HttpResponse(json.dumps(data), content_type=constants.CONTENT_TYPE_API)
     except Exception as e:
         return HttpResponse(e, content_type='text/plain')
 
@@ -131,7 +132,7 @@ def observaciones_requisicion(request, id_requisicion):
         data.insert(1, data2)
         if data3:
             data.insert(2, data3)
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        return HttpResponse(json.dumps(data), content_type=constants.CONTENT_TYPE_API)
     except Exception as e:
         return HttpResponse(e, content_type='text/plain')
 
@@ -239,29 +240,11 @@ def descargar_archivos_api(request, id_archivo):
     try:
         adjunto = get_object_or_404(Adjunto, pk=id_archivo)
 
-        CONTENT_TYPES = {
-            'png': 'image/png', 'JPEG': 'application/JPEG', 'bmp': 'image/bmp',
-            'gif': 'image/gif', 'pdf': 'application/pdf', 'css': 'text/css', 'jpg': 'image/jpeg',
-            'doc': 'application/msword', 'gz': 'application/x-gzip', 'html': 'text/html',
-            'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'dotx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
-            'jar': 'application/java-archive', 'js': 'application/x-javascript',
-            'potx': 'application/vnd.openxmlformats-officedocument.presentationml.template',
-            'ppsx': 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
-            'ppt': 'application/vnd.ms-powerpointtd>', 'tiff': 'image/tiff',
-            'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'svg': 'image/svg+xml', 'txt': 'text-plain', 'xls': 'application/vnd.ms-excel',
-            'xlsb': 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
-            'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'xltx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
-            'xml': 'application/xml'
-        }
-
         try:
             ext = adjunto.get_name.split('.')
             if ext:
                 ext = ext[len(ext) - 1]
-            response = HttpResponse(adjunto.archivo, content_type=CONTENT_TYPES[ext])
+            response = HttpResponse(adjunto.archivo, content_type=constants.CONTENT_TYPES[ext])
         except:
             response = HttpResponse(adjunto.archivo)
         response['Content-Disposition'] = "attachment; filename='%s'" % adjunto.get_name()
@@ -281,10 +264,10 @@ def get_areas_by_departamento_json(request, id_departamento):
         departamento = Departamento.objects.get(id=id_departamento)
     except:
         data = []
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        return HttpResponse(json.dumps(data), content_type=constants.CONTENT_TYPE_API)
 
     data = [
         {'area': area.nombre.upper(), 'id': area.id} for area in departamento.areas.all()
     ]
 
-    return HttpResponse(json.dumps(data), content_type='application/json')
+    return HttpResponse(json.dumps(data), content_type=constants.CONTENT_TYPE_API)

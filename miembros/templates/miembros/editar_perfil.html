@@ -62,11 +62,11 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Primer Apellido</dt>
-                <dd>{{ miembro.primerApellido|upper }}</dd>
+                <dd>{{ miembro.primer_apellido|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Segundo Apellido</dt>
-                <dd>{% if miembro.segundoApellido %}{{ miembro.segundoApellido|upper }}{% else %}SIN DATOS{% endif %}</dd>
+                <dd>{% if miembro.segundo_apellido %}{{ miembro.segundo_apellido|upper }}{% else %}SIN DATOS{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Cedula</dt>
@@ -78,16 +78,16 @@
             </dl>
             <dl class="dl-horizontal">
                 <dt>Fecha de Nacimiento</dt>
-                <dd>{% if miembro.fechaNacimiento %}{{ miembro.fechaNacimiento }}{% else %}SIN DATOS{% endif %}</dd>
+                <dd>{% if miembro.fecha_nacimiento %}{{ miembro.fecha_nacimiento }}{% else %}SIN DATOS{% endif %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Estado Civil</dt>
-                <dd>{% if miembro.estadoCivil %}{{ miembro.get_estadoCivil_display|upper }}{% else %}SIN DATOS{% endif %}</dd>
+                <dd>{% if miembro.estado_civil %}{{ miembro.get_estado_civil_display|upper }}{% else %}SIN DATOS{% endif %}</dd>
             </dl>
-            {% if miembro.estadoCivil == 'C' %}
+            {% if miembro.estado_civil == 'C' %}
             <dl class="dl-horizontal">
                 <dt>Casado con</dt>
-                <dd><a href="/miembro/perfil/{{miembro.conyugue.id}}" alt="Ver perfil de '{{miembro.conyugue.nombre}}'">{{ miembro.conyugue.nombre|upper }} {{ miembro.conyugue.primerApellido|upper }}</a></dd>
+                <dd><a href="{% url 'miembros:editar_perfil' miembro.conyugue.id %}" alt="Ver perfil de '{{miembro.conyugue.nombre}}'">{{ miembro.conyugue.nombre|upper }} {{ miembro.conyugue.primer_apellido|upper }}</a></dd>
             </dl>
             {% endif %}
         </div>
@@ -110,31 +110,31 @@
                     </dd>
                 </dl>
             </div>
-            <div class="input-group {{form.primerApellido.css_classes}} col-xs-12">
+            <div class="input-group {{form.primer_apellido.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_primerApellido" class="requerido control-label">Primer Apellido*:</label>
+                        <label for="id_primer_apellido" class="requerido control-label">Primer Apellido*:</label>
                     </dt>
                     <dd>
                         <div class="fg-line">
-                           {{form.primerApellido}}
+                           {{form.primer_apellido}}
                         </div>
-                        {% for error in form.primerApellido.errors %}
+                        {% for error in form.primer_apellido.errors %}
                         <small class="help-block">{{error}}</small>
                         {% endfor %}
                     </dd>
                 </dl>
             </div>
-            <div class="input-group {{form.segundoApellido.css_classes}} col-xs-12">
+            <div class="input-group {{form.segundo_apellido.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_segundoApellido" class="control-label">Segundo Apellido:</label>
+                        <label for="id_segundo_apellido" class="control-label">Segundo Apellido:</label>
                     </dt>
                     <dd>
                         <div class="dtp-container dropdown fg-line">
-                            {{form.segundoApellido}}
+                            {{form.segundo_apellido}}
                         </div>
-                        {% for error in form.segundoApellido.errors %}
+                        {% for error in form.segundo_apellido.errors %}
                         <small class="help-block">{{error}}</small>
                         {% endfor %}
                     </dd>
@@ -170,29 +170,29 @@
                     </dd>
                 </dl>
             </div>
-            <div class="input-group {{form.fechaNacimiento.css_classes}} col-xs-12">
+            <div class="input-group {{form.fecha_nacimiento.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_fechaNacimiento" class="control-label">Fecha de Nacimiento:</label>
+                        <label for="id_fecha_nacimiento" class="control-label">Fecha de Nacimiento:</label>
                     </dt>
                     <dd>
-                        {{form.fechaNacimiento}}
-                        {% for error in form.fechaNacimiento.errors %}
+                        {{form.fecha_nacimiento}}
+                        {% for error in form.fecha_nacimiento.errors %}
                         <small class="help-block">{{error}}</small>
                         {% endfor %}
                     </dd>
                 </dl>
             </div>
-            <div class="input-group {{form.estadoCivil.css_classes}} col-xs-12">
+            <div class="input-group {{form.estado_civil.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_estadoCivil" class="control-label">Estado Civil:</label>
+                        <label for="id_estado_civil" class="control-label">Estado Civil:</label>
                     </dt>
                     <dd>
                         <div class="fg-line">
-                            {{form.estadoCivil}}
+                            {{form.estado_civil}}
                         </div>
-                        {% for error in form.estadoCivil.errors %}
+                        {% for error in form.estado_civil.errors %}
                         <small class="help-block">{{error}}</small>
                         {% endfor %}
                     </dd>

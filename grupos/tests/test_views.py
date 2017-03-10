@@ -6,7 +6,7 @@ from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
 from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from ..models import Grupo, Red
+from ..models import Grupo, Red, HistorialEstado
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
 from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
 
@@ -78,7 +78,7 @@ class GrupoRaizViewTest(BaseTest):
         """
 
         data = {
-            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'AC', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
             'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
             'barrio': self.barrio.id, 'lideres': [self.lider1.id]
         }
@@ -200,7 +200,7 @@ class CrearGrupoViewTest(BaseTest):
         """
 
         data = {
-            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'AC', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
             'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
             'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': self.padre.id
         }
@@ -273,6 +273,25 @@ class CrearGrupoViewTest(BaseTest):
         self.assertTrue(update_mock.called)
         self.assertFormError(response, 'form', None, NuevoGrupoForm.mensaje_error)
 
+    def test_redireccion_si_cabeza_red_no_entra_a_su_red(self):
+        """
+        Verifica que el usuario, si es cabeza de red y no entra a crear un grupo de su red, sea redireccionado.
+        """
+        grupo = Grupo.objects.get(id=300)
+
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=self.padre, iglesia=self.red_jovenes.iglesia)
+        otra_red = RedFactory(nombre='nueva red', iglesia=self.red_jovenes.iglesia)
+        red = self.padre.red
+
+        self.assertTrue(cabeza_red.es_cabeza_red)
+
+        self.assertEqual(otra_red.iglesia.id, red.iglesia.id)
+
+        self.login_usuario(cabeza_red.usuario)
+        response = self.get(self.URL, pk=otra_red.id)
+
+        self.assertRedirects(response, self.reverse(self.URL, pk=red.id))
+
 
 class EditarGrupoViewTest(BaseTest):
     """
@@ -297,7 +316,7 @@ class EditarGrupoViewTest(BaseTest):
         """
 
         data = {
-            'direccion': 'Calle 34 N 74 - 23', 'estado': 'A', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'AC', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
             'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
             'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': self.padre.id
         }
@@ -427,6 +446,47 @@ class ListarGruposRedViewTest(BaseTest):
 
         otro_grupo = Grupo.objects.get(id=200)
         self.assertResponseNotContains(str(otro_grupo), html=False)
+
+    def test_redireccion_si_cabeza_red_no_entra_a_su_red(self):
+        """
+        Verifica que el usuario, si es cabeza de red y no entra a crear un grupo de su red, sea redireccionado.
+        """
+        grupo = Grupo.objects.get(id=300)
+        padre = Grupo.objects.get(id=800)
+        red_jovenes = Red.objects.get(nombre='jovenes')
+
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre, iglesia=red_jovenes.iglesia)
+        otra_red = RedFactory(nombre='nueva red', iglesia=red_jovenes.iglesia)
+        red = padre.red
+
+        self.assertTrue(cabeza_red.es_cabeza_red)
+
+        self.assertEqual(otra_red.iglesia.id, red.iglesia.id)
+
+        self.login_usuario(cabeza_red.usuario)
+        response = self.get(self.URL, pk=otra_red.id)
+
+        self.assertRedirects(response, self.reverse(self.URL, pk=red.id))
+
+    def test_grupos_listados_sean_red_de_cabeza_red(self):
+        """
+        Verifica que los grupos que sean listados sean de la red del cabeza de red, y no de otra red.
+        """
+
+        grupo = Grupo.objects.get(id=300)
+        padre = Grupo.objects.get(id=800)
+        otro_grupo = Grupo.objects.get(id=500)
+        red_jovenes = Red.objects.get(nombre='jovenes')
+
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre, iglesia=red_jovenes.iglesia)
+
+        self.assertTrue(cabeza_red.es_cabeza_red)
+
+        self.login_usuario(cabeza_red.usuario)
+        self.get(self.URL, pk=red_jovenes.id)
+
+        self.assertResponseNotContains(str(otro_grupo), html=False)
+        self.assertResponseContains(str(padre), html=False)
 
 
 class TrasladarGrupoViewTest(BaseTest):
@@ -885,3 +945,60 @@ class TrasladarLideresViewTest(BaseTest):
         self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'lideres', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'nuevo_grupo', self.MSJ_OBLIGATORIO)
+
+
+class ArchivarGrupoViewTest(BaseTest):
+    """
+    Pruebas unitarias para la vista trasladar lideres de una iglesia.
+    """
+
+    URL = 'grupos:archivar'
+
+    def setUp(self):
+        self.crear_arbol()
+        admin = UsuarioFactory(admin=True)
+        self.login_usuario(admin)
+
+    @property
+    def datos_formulario(self):
+        for children in Grupo.objects.get(id=300).children_set.all():
+            children.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        return {
+            'grupo': 300, 'grupo_destino': 200,
+            'mantener_lideres': True, 'seleccionados': list(map(str, Grupo.objects.get(
+                id=300).miembros.all().values_list('id', flat=1)))
+        }
+
+    def test_admin_get(self):
+        """
+        Prueba que un administrador pueda ver el formulario.
+        """
+
+        self.get_check_200(self.URL)
+        self.assertResponseContains('id_grupo', html=False)
+
+    @mock.patch('grupos.forms.ArchivarGrupoForm.archiva_grupo')
+    def test_post_formulario_valido_archiva_grupo(self, archivar_mock):
+        """
+        Prueba que si se hace POST y el formulario es valido se archive el grupo escogido.
+        """
+
+        self.post(self.URL, data=self.datos_formulario)
+        self.assertTrue(archivar_mock.called)
+
+    def test_post_formulario_valido_redirecciona_organigrama(self):
+        """
+        Prueba que si se hace POST y el formulario es valido redirecciona a la vista del organigrama.
+        """
+
+        response = self.post(self.URL, data=self.datos_formulario)
+        self.assertRedirects(response, self.reverse('grupos:organigrama'))
+
+    def test_post_formulario_invalido_muestra_errores(self):
+        """
+        Prueba que si se hace POST y el formulario es invalido se muestren los errores.
+        """
+
+        response = self.post(self.URL, data={})
+        self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)

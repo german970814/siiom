@@ -6,13 +6,17 @@ from grupos.models import Grupo
 
 class BaseModelForm(forms.ModelForm):
     """
-    Formulario base para los formularios
+    Formulario base para los formularios.
     """
 
     error_css_class = 'has-error'
 
 
 class FormularioVisita(BaseModelForm):
+    """
+    Formulario para crear visitas en el modulo de consolidacion.
+    """
+
     class Meta:
         model = Visita
         fields = (
@@ -34,11 +38,11 @@ class FormularioVisita(BaseModelForm):
 
 class FormularioAsignarGrupoVisita(forms.Form):
     """
-    Formulario de Asignacion de visita a grupo
+    Formulario de Asignacion de visita a grupo.
     """
 
     visita = forms.ModelChoiceField(queryset=Visita.objects.filter(retirado=False))
-    grupo = forms.ModelChoiceField(queryset=Grupo.objects.filter(estado='A'))
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.activos())
 
     def __init__(self, *args, **kwargs):
         super(FormularioAsignarGrupoVisita, self).__init__(*args, **kwargs)
