@@ -2,6 +2,9 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
+__all__ = ('Visita', )
+
+
 class Visita(models.Model):
     """
     Modelo para las visitas que ingresan en el sistema
@@ -10,8 +13,8 @@ class Visita(models.Model):
     MASCULINO = 'M'
     FEMENINO = 'F'
     OPCIONES_GENERO = (
-        (MASCULINO, 'MASCULINO'),
-        (FEMENINO, 'FEMENINO'),
+        (MASCULINO, _('MASCULINO')),
+        (FEMENINO, _('FEMENINO')),
     )
 
     primer_nombre = models.CharField(verbose_name=_('primer nombre'), max_length=255)
@@ -27,7 +30,7 @@ class Visita(models.Model):
     retirado = models.BooleanField(verbose_name=_('retirado'), default=False)
 
     def __str__(self):
-        return self.primer_nombre.upper() + ' ' + self.primer_apellido.upper()
+        return self.get_nombre()
 
     def get_nombre(self):
         nombre = '%(primer_nombre)s %(segundo_nombre)s %(primer_apellido)s %(segundo_apellido)s' % {
@@ -46,12 +49,12 @@ class Visita(models.Model):
             from miembros.models import Miembro
             miembro = Miembro()
             miembro.nombre = self.primer_nombre + ' ' + self.segundo_nombre
-            miembro.primerApellido = self.primer_apellido
+            miembro.primer_apellido = self.primer_apellido
             miembro.grupo = self.grupo
-            miembro.fechaRegistro = self.fecha_ingreso
+            miembro.fecha_registro = self.fecha_ingreso
             miembro.telefono = self.telefono
             if self.segundo_apellido != '':
-                miembro.segundoApellido = self.segundo_apellido
+                miembro.segundo_apellido = self.segundo_apellido
             if self.direccion != '':
                 miembro.direccion = self.direccion
             if self.email != '':

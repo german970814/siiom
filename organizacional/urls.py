@@ -10,7 +10,6 @@ urlpatterns = [
     url(r'^editar_departamento/(?P<pk>\d+)$', views.DepartamentoUpdateView.as_view(), name="editar_departamento"),
     url(r'^listar_departamentos/$', views.ListaDepartamentosView.as_view(), name="listar_departamentos"),
     url(r'^editar_empleado/(?P<id_empleado>\d+)$', views.editar_empleado, name="editar_empleado"),
-
     url(r'^empleados/$', views.listar_empleados, name="empleados_listar"),
     url(r'^empleados/nuevo/$', views.crear_empleado, name="empleado_nuevo"),
 ]

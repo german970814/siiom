@@ -19,7 +19,7 @@ def get_pascua_day(year):
     """
     Algoritmo que devuelve la fecha en la que se celebran las pascuas
     esta fecha es la base de muchos festivos, sacado de:
-    'https://es.wikipedia.org/wiki/Anexo:Implementaciones_del_algoritmo_de_c%C3%A1lculo_de_la_fecha_de_Pascua#Algoritmo_en_Python'
+    https://es.wikipedia.org/wiki/Anexo:Implementaciones_del_algoritmo_de_c%C3%A1lculo_de_la_fecha_de_Pascua#Algoritmo_en_Python
     """
     # Constantes mágicas
     M = 24

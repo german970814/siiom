@@ -47,16 +47,16 @@
                 <dd>{{ grupo.direccion|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
-                <dt>Dia del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dt>Dia del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
                 <dd>{{ grupo.get_diaGAR_display|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
-                <dt>Hora del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dt>Hora del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
                 <dd>{{ grupo.horaGAR|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Lideres</dt>
-                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% else %},  <a href="/miembro/perfil/{{lid.id}}">{{lid.nombre|upper}} {{lid.primerApellido|upper}}</a>{% endif %}{% endfor %}</dd>
+                <dd>{% for lid in lideres %} {% if forloop.first %}<a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primer_apellido|upper}}</a>{% else %},  <a href="{% url 'miembros:editar_perfil' lid.id %}">{{lid.nombre|upper}} {{lid.primer_apellido|upper}}</a>{% endif %}{% endfor %}</dd>
             </dl>
             <dl class="dl-horizontal">
                 <dt>Nombre Grupo</dt>
@@ -101,7 +101,7 @@
             <div class="input-group {{form.diaGAR.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_diaGAR" class="requerido control-label">Dia del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
+                        <label for="id_diaGAR" class="requerido control-label">Dia del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
                     </dt>
                     <dd>
                         <div class="fg-line">
@@ -116,7 +116,7 @@
             <div class="input-group {{form.horaGAR.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_horaGAR" class="control-label">Hora del {% if dominioIglesia == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
+                        <label for="id_horaGAR" class="control-label">Hora del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
                     </dt>
                     <dd>
                         <div class="dtp-container dropdown fg-line">
@@ -145,12 +145,12 @@
         {% for miem in miembros %}
         <div class="col-md-3 col-sm-4 col-xs-6">
             <div class="c-item">
-                <a href="/miembro/perfil/{{miem.id}}" class="ci-avatar">
+                <a href="{% url 'miembros:editar_perfil' miem.id %}" class="ci-avatar">
                     <img src="{% if miem.foto_perfil %}{{ miem.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                 </a>
 
                 <div class="c-info">
-                    <strong>{{miem.nombre|upper}} {{miem.primerApellido|upper}}</strong>
+                    <strong>{{miem.nombre|upper}} {{miem.primer_apellido|upper}}</strong>
                     <small>{{miem.cedula}}</small>
                 </div>
             </div>
@@ -169,7 +169,7 @@
 <div class="container">
     <div class="p-25 p-t-25">El Miembro No Pertenece a Grupo.
     {% if perms.miembros.es_administrador %}
-        <a href="/miembro/asignar_grupo/{{miembro.id}}/" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>
+        <a href="{% url 'miembros:asignar_grupo' miembro.id %}" title="Asignar Grupo a {{miembro.nombre|upper}}">Asignale Uno Aquí</a>
     {% endif %}
     </div>
 </div>

@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+
 import datetime
 
 
@@ -113,25 +114,10 @@ class RequisicionManager(models.Manager):
         """
         Retorna un QuerySet con las requisiciones aprobadas por usuario de compras
         """
-        # from .models import Historial
-        # query1 = models.Q(historial__empleado__usuario__is_superuser=True)
-        # query2 = models.Q(
-        #     historial__empleado__usuario__groups__permissions__codename='organizacional.es_compras'
-        # )
-        # query3 = models.Q(
-        #     historial__empleado__usuario__user_permissions__codename='organizacional.es_compras'
-        # )
-        # query = query1 | query2 | query3
 
-        pre_query = self.annotate(
+        return self.annotate(
             num_historial=models.Count('historial')
         ).exclude(num_historial__lt=2, estado=self.model.ANULADA)
-
-        # return self.filter(query, historial__estado=Historial.APROBADA).exclude(
-        #     estado=self.model.ANULADA
-        # ).distinct()
-
-        return pre_query
 
     def aprobadas_jefe_administrativo(self):
         """
@@ -165,16 +151,6 @@ class RequisicionManager(models.Manager):
         administrativo
         """
         from .models import Parametros
-        # return self.aprobadas_jefe_administrativo().annotate(
-        #     total_valores=models.Sum(models.F('detallerequisicion__total_aprobado'))
-        # ).filter(total_valores__gte=Parametros.objects.tope()).exclude(estado=self.model.ANULADA)
-
-        # antes de new feature dia 11 agosto
-        # return self.annotate(
-        #     total_valores=models.Sum('detallerequisicion__total_aprobado')
-        # ).filter(
-        #     total_valores__gte=Parametros.objects.tope()
-        # ).exclude(estado__in=[self.model.ANULADA, self.model.TERMINADA])
 
         # se sacan las requisiciones que vallan a presidencia por superar cierto monto
         query_for_total = self.annotate(

@@ -75,12 +75,6 @@
                                         <li>
                                             <a href="">Actualizar</a>
                                         </li>
-                                        <!-- <li>
-                                            <a href="">Detalles</a>
-                                        </li>
-                                        <li>
-                                            <a href="">Configuración</a>
-                                        </li> -->
                                     </ul>
                                 </li>
                             </ul>
@@ -118,42 +112,12 @@
                                         <td class="f-500 c-cyan">Maestros</td>
                                         <td class="f-500 c-cyan">{{totalMaestros}}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="f-500 c-cyan">Academia</td>
-                                        <td class="f-500 c-cyan">{{totalCursos}}</td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div id="recent-items-chart" class="flot-chart"></div>
                     </div>
                 </div>
-                <!-- <div class="col-md-6 col-sm-6">
-                    <div id="pie-charts" class="dash-widget-item">
-                        <div class="bgm-pink">
-                            <div class="dash-widget-header">
-                                <div class="dash-widget-title">Estadísticas y Porcentajes</div>
-                            </div>
-                            <div class="clearfix"></div>
-                            <div class="text-center p-20 m-t-25">
-                                <div class="easy-pie main-pie" data-percent="26">
-                                    <div class="percent">26</div>
-                                    <div class="pie-title">Porcentaje Uso Aplicación</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-t-20 p-b-20 text-center">
-                            <div class="easy-pie sub-pie-1" data-percent="56">
-                                <div class="percent">56</div>
-                                <div class="pie-title">Porcentaje Ingresos</div>
-                            </div>
-                            <div class="easy-pie sub-pie-2" data-percent="84">
-                                <div class="percent">84</div>
-                                <div class="pie-title">Porcentaje Consolidación</div>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
     </div> 
@@ -162,23 +126,5 @@
 
 {% block js %}
 
-<!-- Page-Level Plugin Scripts - Morris -->
-<!--<script src="{% static 'Scripts/js/plugins/morris/raphael-2.1.0.min.js' %}"></script>
-<script src="{% static 'Scripts/js/plugins/morris/morris.js' %}"></script>   
-<script type="text/javascript">
-  $(document).ready(function(){
-      var numero1 = 6;
-      var numero2 = 1;
-      var numero3 = 9;
-      Morris.Donut({
-        element: 'donut-example',
-        data: [
-          {label: "Confirmado", value: numero1},
-          {label: "Cumplido", value: numero2},
-          {label: "Ausentismo", value: numero3}
-        ]
-      });
-  });
-</script> -->
 
 {% endblock %}

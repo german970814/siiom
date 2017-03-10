@@ -91,43 +91,27 @@
             </li>-->
         </ul>
 
-        <!--<ul class="actions m-t-20 hidden-xs">
-            <li class="dropdown">
-                <a href="" data-toggle="dropdown">
-                    <i class="zmdi zmdi-more-vert"></i>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li>
-                        <a href="">Refresh</a>
-                    </li>
-                    <li>
-                        <a href="">Settings</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>-->
     </div>
 
     <div class="contacts c-profile clearfix row">
     	{% for discipulo in discipulos %}
         <div class="col-md-3 col-sm-4 col-xs-6">
             <div class="c-item">
-                <a href="/miembro/perfil/{{discipulo.id}}" class="ci-avatar">
+                <a href="{% url 'miembros:editar_perfil' discipulo.id %}" class="ci-avatar">
                     <img src="{% if discipulo.foto_perfil %}{{ discipulo.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                 </a>
 
                 <div class="c-info">
-                    <strong>{{discipulo.nombre|upper}} {{discipulo.primerApellido|upper}}</strong>
+                    <strong>{{discipulo.nombre|upper}} {{discipulo.primer_apellido|upper}}</strong>
                     <small>{{discipulo.cedula}}</small>
                 </div>
 
                 <div class="c-footer">
-                    <button class="waves-effect" style="width: 20%; display:inline; padding: 3px 10px 3px" title="información" onclick="window.location='/miembro/informacion_iglesia/{{discipulo.id}}'"><i class="zmdi zmdi-balance"></i></button>
+                    <button class="waves-effect" style="width: 20%; display:inline; padding: 3px 10px 3px" title="información" onclick="window.location='{% url "miembros:ver_informacion" discipulo.id %}'"><i class="zmdi zmdi-balance"></i></button>
                     {% if discipulo.discipulos %}
-                    <button class="waves-effect" style="width: 20%; display:inline; padding: 3px 10px 3px" title="discípulos" onclick="window.location='/miembro/discipulos/{{discipulo.id}}'"><i class="zmdi zmdi-accounts-alt"></i></button>
+                    <button class="waves-effect" style="width: 20%; display:inline; padding: 3px 10px 3px" title="discípulos" onclick="window.location='{% url "miembros:ver_discipulos" discipulo.id %}'"><i class="zmdi zmdi-accounts-alt"></i></button>
                     {% endif %}
-                    <button class="waves-effect" style="width: 20%; display:inline; padding: 3px 10px 3px" title="grupo" onclick="window.location='/miembro/grupo/{{discipulo.id}}'"><i class="zmdi zmdi-view-comfy"></i></button>
+                    <button class="waves-effect" style="width: 20%; display:inline; padding: 3px 10px 3px" title="grupo" onclick="window.location='{% url "miembros:editar_grupo" discipulo.id %}'"><i class="zmdi zmdi-view-comfy"></i></button>
                 </div>
             </div>
         </div>

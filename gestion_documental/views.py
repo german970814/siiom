@@ -12,12 +12,12 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic import ListView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils import timezone
-# from django.forms.models import modelformset_factory
 
 # Third Apps
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
 # Locale Apps
+from common.decorators import POST, GET
 from .models import (
     Registro, Documento, PalabraClave, TipoDocumento,
     SolicitudRegistro, SolicitudCustodiaDocumento
@@ -111,7 +111,6 @@ def editar_registro(request, id_registro):
     )
 
     if request.method == 'POST':
-        # print(request.POST)
         # se instancian los dos formularios
         form = FormularioEditarRegistroDocumento(data=request.POST, instance=registro)
         form_documentos = DocumentosFormSet(request.POST, request.FILES)
@@ -177,6 +176,7 @@ def editar_registro(request, id_registro):
 
 @login_required
 @csrf_exempt
+@GET
 def palabras_claves_json(request):
     """
     Vista que devuelve una lista con los nombres de las palabras claves para typeahead.js
@@ -190,6 +190,7 @@ def palabras_claves_json(request):
 
 @login_required
 @csrf_exempt
+@POST
 def area_tipo_documento_json(request):
     """
     Retorna los tipos de documentos pertenecientes a cada area
@@ -204,6 +205,7 @@ def area_tipo_documento_json(request):
 
 @login_required
 @csrf_exempt
+@POST
 def empleado_area_json(request):
     """
     Retorna las areas en la que pertenece cada empleado

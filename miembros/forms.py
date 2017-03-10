@@ -4,26 +4,117 @@ Created on Apr 4, 2011
 
 @author: Migue
 '''
-from django.forms import ModelForm
-from django.utils.translation import ugettext_lazy as _lazy
-from miembros.models import Miembro, Zona, Barrio, CumplimientoPasos,\
-    Pasos, Escalafon, CambioEscalafon, TipoMiembro, CambioTipo, DetalleLlamada
-from django.db.models import Q
+
 from django import forms
-from academia.models import Matricula
+from django.contrib import auth
+from django.core.urlresolvers import reverse_lazy
+from django.db.models import Q
+from django.utils.translation import ugettext_lazy as _lazy
+from django.utils.http import is_safe_url
+
+from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
+from grupos.forms import ArchivarGrupoForm
+from .models import Miembro, Zona, Barrio, CambioTipo, TipoMiembro
+
 from PIL import Image
 from io import BytesIO
-from common.forms import CustomForm, CustomModelForm
-from grupos.forms import ArchivarGrupoForm
 
 
-class FormularioLiderAgregarMiembro(ModelForm):
+__all__ = (
+    'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro', 'FormularioCambiarContrasena',
+    'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
+    'TrasladarMiembroForm', 'DesvincularLiderGrupoForm', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
+    'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
+    'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'LoginForm'
+)
+
+
+class LoginForm(CustomForm):
+    """
+    Formulario para el logeo de usuarios en el sistema.
+    """
+
+    error_messages = {
+        'invalid_login': _lazy('Email y contraseña no coinciden.')
+    }
+
+    next = forms.CharField(max_length=255, required=False, widget=forms.HiddenInput)
+    email = forms.EmailField(label=_lazy('Email'))
+    password = forms.CharField(
+        max_length=255, label=_lazy('Contraseña'), widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'class': self.input_css_class, 'placeholder': _lazy('Email (usuario)')})
+        self.fields['password'].widget.attrs.update(
+            {'class': self.input_css_class, 'placeholder': _lazy('Contraseña')})
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        email = self.cleaned_data.get('email', '')
+        password = self.cleaned_data.get('password', '')
+
+        if password and email:
+            self.usuario = auth.authenticate(email=email, password=password)
+
+            if self.usuario is None:
+                raise forms.ValidationError(
+                    self.error_messages['invalid_login'], code='invalid_login'
+                )
+
+        return cleaned_data
+
+    def get_user(self):
+        return getattr(self, 'usuario', None)
+
+    def is_safe_url(self, *args, **kwargs):
+        """
+        Verifica que la url a la cual se va a redirigir sea segura.
+
+        :rtype bool:
+
+        :param *args:
+            Argumentos de la funcion ``is_safe_url``.
+
+        :param **kwargs:
+            Diccionario de argumentos de la funcion ``is_safe_url``.
+        """
+        return is_safe_url(host=self.request.get_host(), *args, **kwargs)
+
+    def get_next(self):
+        """
+        :returns:
+            El string de la url a la cual hará la redireccion una vez el formulario
+            este válido.
+
+        :rtype str:
+        """
+        if self.get_user() is not None and self.usuario.has_perm('miembros.es_administrador'):
+            next = reverse_lazy('administracion')
+        else:
+            next = reverse_lazy('miembros:miembro_inicio')
+
+        url = self.cleaned_data.get('next', next)
+
+        if self.is_safe_url(url=url):
+            return url
+        return next
+
+
+class FormularioLiderAgregarMiembro(forms.ModelForm):
+    """
+    Formulario para crear miembros.
+    """
+
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
     def __init__(self, g='', c=None, *args, **kwargs):
-        super(FormularioLiderAgregarMiembro, self).__init__(*args, **kwargs)  # populates the post
+        super(FormularioLiderAgregarMiembro, self).__init__(*args, **kwargs)
         if g != '':
             if g == 'M':
                 g = 'F'
@@ -31,53 +122,43 @@ class FormularioLiderAgregarMiembro(ModelForm):
                 g = 'M'
 
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['celular'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
+        self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
-        # self.fields['estado'].widget.attrs.update({'class':'form-control'})
-        # if c:
-        #     self.fields['conyugue'].queryset = Miembro.objects.filter(
-        #         Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D')| Q(id=c.id), genero=g)
-        # else:
-        #     self.fields['conyugue'].queryset = Miembro.objects.filter(
-        #         Q(estadoCivil='S')|Q(estadoCivil='V')| Q(estadoCivil='D'), genero=g)
+        self.fields['estado_civil'].widget.attrs.update({'class': 'selectpicker'})
 
     class Meta:
         model = Miembro
         fields = (
-            'nombre', 'primerApellido', 'segundoApellido', 'telefono',
-            'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
-            'profesion', 'barrio', 'genero', 'estadoCivil'  # , 'conyugue'
+            'nombre', 'primer_apellido', 'segundo_apellido', 'telefono',
+            'celular', 'direccion', 'fecha_nacimiento', 'cedula', 'email',
+            'profesion', 'barrio', 'genero', 'estado_civil'
         )
-        # exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
-        #            'asignadoGAR', 'asisteGAR', ''
-        #            'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
-        #            'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
-        #            'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
-        #            'noInteresadoGAR', 'convertido', 'estado', 'conyugue', 'foto_perfil', 'iglesia')
 
 
-class FormularioAdminAgregarMiembro(ModelForm):
+class FormularioAdminAgregarMiembro(forms.ModelForm):
+    """
+    Formulario para agregar miembros un administrador
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
     def __init__(self, g='', *args, **kwargs):
-        super(FormularioAdminAgregarMiembro, self).__init__(*args, **kwargs)  # populates the post
+        super(FormularioAdminAgregarMiembro, self).__init__(*args, **kwargs)
         if g != '':
             if g == 'M':
                 g = 'F'
             else:
                 g = 'M'
-            queryset = Miembro.objects.filter(Q(estadoCivil='S') | Q(estadoCivil='V') | Q(estadoCivil='D'), genero=g)
+            queryset = Miembro.objects.filter(Q(estado_civil='S') | Q(estado_civil='V') | Q(estado_civil='D'), genero=g)
             self.fields['conyugue'].queryset = queryset
 
             if self.instance.conyugue:
@@ -85,85 +166,34 @@ class FormularioAdminAgregarMiembro(ModelForm):
                 self.fields['conyugue'].queryset = queryset | conyugue
 
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['celular'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
+        self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control', 'data-mask': '00/00/0000'})
         self.fields['cedula'].widget.attrs.update({'class': 'form-control'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'form-control'})
         self.fields['genero'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['estado_civil'].widget.attrs.update({'class': 'selectpicker'})
         # self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['conyugue'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
     class Meta:
         model = Miembro
         fields = (
-            'nombre', 'primerApellido', 'segundoApellido', 'telefono',
-            'celular', 'direccion', 'fechaNacimiento', 'cedula', 'email',
-            'profesion', 'barrio', 'genero', 'estadoCivil', 'conyugue'
+            'nombre', 'primer_apellido', 'segundo_apellido', 'telefono',
+            'celular', 'direccion', 'fecha_nacimiento', 'cedula', 'email',
+            'profesion', 'barrio', 'genero', 'estado_civil', 'conyugue'
         )
-        # exclude = ('usuario', 'grupo', 'lider', 'pasos', 'escalafon', 'fechaAsignacionGAR',
-        #            'fechaLlamadaLider', 'detalleLlamadaLider', 'observacionLlamadaLider',
-        #            'fechaPrimeraLlamada', 'detallePrimeraLlamada', 'observacionPrimeraLlamada',
-        #            'fechaSegundaLlamada', 'detalleSegundaLlamada', 'observacionSegundaLlamada',
-        #            'estado', 'iglesia')
-
-
-class FormularioLlamadaLider(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioLlamadaLider, self).__init__(*args, **kwargs)
-
-        self.fields['detalleLlamadaLider'].widget.attrs.update({'class': 'form-control'})
-        self.fields['observacionLlamadaLider'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Miembro
-        fields = ('detalleLlamadaLider', 'observacionLlamadaLider')
-
-
-class FormularioPrimeraLlamadaAgente(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioPrimeraLlamadaAgente, self).__init__(*args, **kwargs)
-        self.fields['detallePrimeraLlamada'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['observacionPrimeraLlamada'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Miembro
-        fields = ('detallePrimeraLlamada',
-                  'observacionPrimeraLlamada',
-                  'noInteresadoGAR',
-                  'asisteGAR',
-                  'asignadoGAR',
-                  'fechaAsignacionGAR',
-                  'grupo')
-
-
-class FormularioSegundaLlamadaAgente(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioSegundaLlamadaAgente, self).__init__(*args, **kwargs)
-        self.fields['detalleSegundaLlamada'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['observacionSegundaLlamada'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Miembro
-        fields = ('detalleSegundaLlamada', 'observacionSegundaLlamada', 'asisteGAR', 'noInteresadoGAR')
 
 
 class FormularioCambiarContrasena(forms.Form):
+    """
+    Formulario usado para el cambio de las contraseñas de los usuarios miembros.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -193,7 +223,10 @@ class FormularioCambiarContrasena(forms.Form):
         return super(FormularioCambiarContrasena, self).clean()
 
 
-class FormularioAsignarGrupo(ModelForm):
+class FormularioAsignarGrupo(forms.ModelForm):
+    """
+    Formulario para asignar grupos de amistad a miembros que no asistan a grupos.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -206,7 +239,11 @@ class FormularioAsignarGrupo(ModelForm):
         fields = ('grupo', )
 
 
-class FormularioCrearZona(ModelForm):
+class FormularioCrearZona(forms.ModelForm):
+    """
+    Formulario para crear y editar zonas.
+    """
+
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -228,7 +265,10 @@ class FormularioCrearZona(ModelForm):
         fields = ('nombre', )
 
 
-class FormularioCrearBarrio(ModelForm):
+class FormularioCrearBarrio(forms.ModelForm):
+    """
+    Formulario para crear y editar barrios.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -242,78 +282,10 @@ class FormularioCrearBarrio(ModelForm):
         fields = ('nombre', )
 
 
-class FormularioPasosMiembro(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    class Meta:
-        model = CumplimientoPasos
-        fields = ('paso',)
-
-
-class FormularioCumplimientoPasosMiembro(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioCumplimientoPasosMiembro, self).__init__(*args, **kwargs)  # populates the post
-        estudiantes = Matricula.objects.all().exclude(
-            estudiante__pasos__nombre__iexact='lanzamiento').values('estudiante')
-        self.fields['miembro'].queryset = Miembro.objects.filter(id__in=estudiantes)
-        self.fields['miembro'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-
-    class Meta:
-        model = CumplimientoPasos
-        fields = ('miembro',)
-
-
-class FormularioPasos(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioPasos, self).__init__(*args, **kwargs)
-
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['prioridad'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Pasos
-        fields = '__all__'
-
-
-class FormularioCrearEscalafon(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioCrearEscalafon, self).__init__(*args, **kwargs)
-
-        self.fields['celulas'].widget.attrs.update({'class': 'form-control'})
-        self.fields['descripcion'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Descripción...'})
-        self.fields['logro'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Logros...'})
-        self.fields['rango'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = Escalafon
-        fields = '__all__'
-
-
-class FormularioPromoverEscalafon(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioPromoverEscalafon, self).__init__(*args, **kwargs)
-        self.fields['miembro'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['escalafon'].widget.attrs.update({'class': 'selectpicker'})
-
-    class Meta:
-        model = CambioEscalafon
-        fields = ('miembro', 'escalafon')
-
-
-class FormularioCrearTipoMiembro(ModelForm):
+class FormularioCrearTipoMiembro(forms.ModelForm):
+    """
+    Formulario para crear y editar los tipos de miembros.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -326,7 +298,10 @@ class FormularioCrearTipoMiembro(ModelForm):
         fields = ('nombre', )
 
 
-class FormularioCambioTipoMiembro(ModelForm):
+class FormularioCambioTipoMiembro(forms.ModelForm):
+    """
+    Formulario para crear los cambios de tipos de miembro.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -338,12 +313,6 @@ class FormularioCambioTipoMiembro(ModelForm):
             m = Miembro.objects.get(id=idm)
             tipos = CambioTipo.objects.filter(miembro=m).values('nuevoTipo')
             self.fields['nuevoTipo'].queryset = TipoMiembro.objects.all().exclude(id__in=tipos)
-#            try:
-#                mLanzado = CumplimientoPasos.objects.get(miembro = m, paso__nombre__iexact = 'lanzamiento')
-#            except:
-#                mLanzado = None
-#            if mLanzado is None:
-#                self.fields['nuevoTipo'].queryset = self.fields['nuevoTipo'].queryset.exclude(nombre__iexact = 'lider')
 
     class Meta:
         model = CambioTipo
@@ -351,6 +320,9 @@ class FormularioCambioTipoMiembro(ModelForm):
 
 
 class FormularioAsignarUsuario(forms.Form):
+    """
+    Formulario para crear y asignar usuarios a los miembros.
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -366,21 +338,10 @@ class FormularioAsignarUsuario(forms.Form):
         self.fields['contrasenaVerificacion'].widget.attrs.update({'class': 'form-control'})
 
 
-class FormularioDetalleLlamada(ModelForm):
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioDetalleLlamada, self).__init__(*args, **kwargs)
-        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
-        self.fields['descripcion'].widget.attrs.update({'class': 'form-control'})
-
-    class Meta:
-        model = DetalleLlamada
-        fields = '__all__'
-
-
 class FormularioRecuperarContrasenia(forms.Form):
+    """
+    Formulario usado para recuperar contraseñas
+    """
     required_css_class = 'requerido'
     error_css_class = 'has-error'
 
@@ -392,6 +353,10 @@ class FormularioRecuperarContrasenia(forms.Form):
 
 
 class FormularioFotoPerfil(forms.ModelForm):
+    """
+    Formulario para manejar las validaciones de la imagen de perfil de el miembro,
+    y manejar el tamaño de la misma.
+    """
     error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
@@ -414,15 +379,7 @@ class FormularioFotoPerfil(forms.ModelForm):
                 self.add_error('foto_perfil', 'Tamaño maximo aceptado de %sx%s y has puesto una de \
                     %sx%s' % (max_width, max_height, w, h))
 
-            # main, sub = foto.content_type.split('/')
-            # if not(main == 'image' and sub in ['jpeg', 'pjpeg', 'gif', 'png']):
-            #     self.add_error('foto_perfil', 'Error con el tipo de imagen')
-
-            # if len(foto) > (20 * 1024):
-            #     print("Error exceso de tamaño")
-
-        except AttributeError as e:
-            print(e)
+        except AttributeError:
             pass
 
         return foto
@@ -435,11 +392,6 @@ class FormularioFotoPerfil(forms.ModelForm):
         image_file = BytesIO(image_field.read())
         image = Image.open(image_file)
         w, h = image.size
-
-        # if w > 1000 or h > 1000:
-        #     image = image.resize((1000, 1000), Image.ANTIALIAS)
-        # if w < 400 or h < 400:
-        #     image = image.resize((400, 400), Image.ANTIALIAS)
 
         image_file = BytesIO()
         image.save(image_file, 'png', quality=90)
@@ -454,6 +406,9 @@ class FormularioFotoPerfil(forms.ModelForm):
 
 
 class FormularioInformacionIglesiaMiembro(forms.ModelForm):
+    """
+    Formulario para cambiar el estado de un miembro.
+    """
     error_css_class = 'has-error'
 
     def __init__(self, *args, **kwargs):
@@ -462,10 +417,13 @@ class FormularioInformacionIglesiaMiembro(forms.ModelForm):
 
     class Meta:
         model = Miembro
-        fields = ('estado', 'convertido', 'asisteGAR', 'asignadoGAR')
+        fields = ('estado', )
 
 
 class FormularioTipoMiembros(forms.ModelForm):
+    """
+    Formulario para cambiar el tipo de miembro de un usuario.
+    """
     error_css_class = 'has-error'
 
     tipos = forms.ModelMultipleChoiceField(queryset=TipoMiembro.objects.all(), widget=forms.CheckboxSelectMultiple)
@@ -490,8 +448,8 @@ class NuevoMiembroForm(CustomModelForm):
     class Meta:
         model = Miembro
         fields = [
-            'nombre', 'primerApellido', 'segundoApellido', 'genero', 'telefono', 'celular', 'fechaNacimiento',
-            'cedula', 'direccion', 'barrio', 'email', 'profesion', 'estadoCivil'
+            'nombre', 'primer_apellido', 'segundo_apellido', 'genero', 'telefono', 'celular', 'fecha_nacimiento',
+            'cedula', 'direccion', 'barrio', 'email', 'profesion', 'estado_civil'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -504,10 +462,10 @@ class NuevoMiembroForm(CustomModelForm):
         self.fields['telefono'].widget.attrs.update({'class': 'form-control'})
         self.fields['profesion'].widget.attrs.update({'class': 'form-control'})
         self.fields['direccion'].widget.attrs.update({'class': 'form-control'})
-        self.fields['estadoCivil'].widget.attrs.update({'class': 'selectpicker'})
-        self.fields['primerApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['segundoApellido'].widget.attrs.update({'class': 'form-control'})
-        self.fields['fechaNacimiento'].widget.attrs.update({'class': 'form-control'})
+        self.fields['estado_civil'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
+        self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
     def save(self, iglesia):
@@ -542,8 +500,8 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
     )
     nuevo_lider = forms.ModelChoiceField(
         queryset=Miembro.objects.none(), label=_lazy('Nuevo Lider'),
-        required=False, help_text=_lazy('Si escoge esta opcion, el líder escogido, reemplazará al líder el cual quiere desvincular.'),
-        empty_label=_lazy('NO REEMPLAZAR LIDER')
+        required=False, empty_label=_lazy('NO REEMPLAZAR LIDER'),
+        help_text=_lazy('Si escoge esta opcion, el líder escogido, reemplazará al líder el cual quiere desvincular.')
     )
 
     def __init__(self, iglesia, *args, **kwargs):

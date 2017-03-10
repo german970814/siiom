@@ -1,60 +1,49 @@
 # -*- coding:utf-8 -*-
-import datetime
+# Django imports
 from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _lazy
 
+# Locale imports
 from common.models import IglesiaMixin
 from .managers import MiembroManager
 
+# Python imports
+import datetime
+
+
+__all__ = (
+    'Zona', 'Barrio', 'TipoMiembro', 'CambioTipo', 'Miembro',
+)
+
 
 class Zona(models.Model):
+    """Modelo para guardar las zonas."""
+
     nombre = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre.upper()
 
 
 class Barrio(models.Model):
+    """Modelo para guardar los barrios."""
+
     nombre = models.CharField(max_length=50)
     zona = models.ForeignKey(Zona, null=False)
 
     def __str__(self):
-        return self.nombre + " - " + self.zona.nombre
-
-
-class Pasos(models.Model):
-    nombre = models.CharField(max_length=20)
-    prioridad = models.PositiveIntegerField()
-
-    def __str__(self):
-        return self.nombre
+        return '{} - {}'.format(self.nombre.upper(), self.zona)
 
 
 class TipoMiembro(models.Model):
+    """Modelo para guardar los tipos de miembros que puede tener un miembro."""
+
     nombre = models.CharField(max_length=20)
 
     def __str__(self):
-        return self.nombre
-
-
-class DetalleLlamada(models.Model):
-    nombre = models.CharField(max_length=20)
-    descripcion = models.TextField(max_length=200)
-
-    def __str__(self):
-        return self.nombre
-
-
-class Escalafon(models.Model):
-    celulas = models.PositiveIntegerField()
-    descripcion = models.TextField(max_length=200)
-    logro = models.TextField(max_length=200)
-    rango = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.rango
+        return self.nombre.upper()
 
 
 class Miembro(IglesiaMixin, models.Model):
@@ -66,9 +55,9 @@ class Miembro(IglesiaMixin, models.Model):
         ruta = 'media/profile_pictures/user_%s/%s' % (self.id, filename)
         return ruta
 
-    # opciones
     FEMENINO = 'F'
     MASCULINO = 'M'
+
     GENEROS = (
         (FEMENINO, _lazy('Femenino')),
         (MASCULINO, _lazy('Masculino')),
@@ -77,6 +66,7 @@ class Miembro(IglesiaMixin, models.Model):
     ACTIVO = 'A'
     INACTIVO = 'I'
     RESTAURACION = 'R'
+
     ESTADOS = (
         (ACTIVO, _lazy('Activo')),
         (INACTIVO, _lazy('Inactivo')),
@@ -87,24 +77,26 @@ class Miembro(IglesiaMixin, models.Model):
     CASADO = 'C'
     SOLTERO = 'S'
     DIVORCIADO = 'D'
+
     ESTADOS_CIVILES = (
         (VIUDO, _lazy('Viudo')),
         (CASADO, _lazy('Casado')),
         (SOLTERO, _lazy('Soltero')),
         (DIVORCIADO, _lazy('Divorciado')),
     )
+
     #  autenticacion
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_lazy('usuario'), unique=True, null=True, blank=True
     )
     #  info personal
     nombre = models.CharField(_lazy('nombre'), max_length=30)
-    primerApellido = models.CharField(_lazy('primer apellido'), max_length=20)
-    segundoApellido = models.CharField(_lazy('segundo apellido'), max_length=20, null=True, blank=True)
+    primer_apellido = models.CharField(_lazy('primer apellido'), max_length=20)
+    segundo_apellido = models.CharField(_lazy('segundo apellido'), max_length=20, null=True, blank=True)
     genero = models.CharField(_lazy('género'), max_length=1, choices=GENEROS)
     telefono = models.CharField(_lazy('teléfono'), max_length=50, null=True, blank=True)
     celular = models.CharField(_lazy('celular'), max_length=50, null=True, blank=True)
-    fechaNacimiento = models.DateField(_lazy('fecha de nacimiento'), null=True, blank=True)
+    fecha_nacimiento = models.DateField(_lazy('fecha de nacimiento'), null=True, blank=True)
     cedula = models.CharField(
         _lazy('cédula'), max_length=25, unique=True, validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")]
     )
@@ -112,7 +104,7 @@ class Miembro(IglesiaMixin, models.Model):
     barrio = models.ForeignKey(Barrio, verbose_name=_lazy('barrio'), null=True, blank=True)
     email = models.EmailField(_lazy('email'), unique=True)
     profesion = models.CharField(_lazy('profesion'), max_length=20, null=True, blank=True)
-    estadoCivil = models.CharField(
+    estado_civil = models.CharField(
         _lazy('estado civil'), max_length=1, choices=ESTADOS_CIVILES, null=True, blank=True
     )
     conyugue = models.ForeignKey(
@@ -120,11 +112,8 @@ class Miembro(IglesiaMixin, models.Model):
     )
     foto_perfil = models.ImageField(_lazy('foto perfil'), upload_to=ruta_imagen, null=True, blank=True)
     portada = models.ImageField(_lazy('portada'), upload_to=ruta_imagen, null=True, blank=True)
-    #  info iglesia
-    convertido = models.BooleanField(_lazy('convertido'), default=False)
+
     estado = models.CharField(_lazy('estado'), max_length=1, choices=ESTADOS)
-    pasos = models.ManyToManyField(Pasos, through='CumplimientoPasos', verbose_name=_lazy('pasos'), blank=True)
-    escalafon = models.ManyToManyField(Escalafon, through='CambioEscalafon', verbose_name=_lazy('escalafón'))
     grupo = models.ForeignKey(
         'grupos.Grupo', verbose_name=_lazy('grupo'),
         related_name='miembros', null=True, blank=True
@@ -133,64 +122,38 @@ class Miembro(IglesiaMixin, models.Model):
         'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
         related_name='lideres', null=True, blank=True
     )
-    #  info GAR
-    asignadoGAR = models.BooleanField(_lazy('asignado a GAR'), default=False)
-    asisteGAR = models.BooleanField(_lazy('asiste a GAR'), default=False)
-    noInteresadoGAR = models.BooleanField(_lazy('no interesado en GAR'), default=False)
-    fechaAsignacionGAR = models.DateField(_lazy('fecha de asignación a GAR'), null=True, blank=True)
-    #  Llamada Lider
-    fechaLlamadaLider = models.DateField(_lazy('fecha de llamada del líder'), null=True, blank=True)
-    detalleLlamadaLider = models.ForeignKey(
-        DetalleLlamada, verbose_name=_lazy('detalle de llamada del líder'), null=True,
-        blank=True, related_name='llamada_lider'
-    )
-    observacionLlamadaLider = models.TextField(
-        _lazy('observación de llamada del líder'), max_length=300, null=True, blank=True
-    )
-    #  Primera llamada
-    fechaPrimeraLlamada = models.DateField(_lazy('fecha de primera llamada'), null=True, blank=True)
-    detallePrimeraLlamada = models.ForeignKey(
-        DetalleLlamada, verbose_name=_lazy('detalle de primera llamada'), null=True,
-        blank=True, related_name='primera_llamada'
-    )
-    observacionPrimeraLlamada = models.TextField(
-        _lazy('observación de primera llamada'), max_length=300, null=True, blank=True
-    )
-    #  Segunda Llamada
-    fechaSegundaLlamada = models.DateField(_lazy('fecha de segunda llamada'), null=True, blank=True)
-    detalleSegundaLlamada = models.ForeignKey(
-        DetalleLlamada, verbose_name=_lazy('detalle de segunda llamada'), null=True,
-        blank=True, related_name='segunda_llamada'
-    )
-    observacionSegundaLlamada = models.TextField(
-        _lazy('observación de segunda llamada'), max_length=300, null=True, blank=True
-    )
-    fechaRegistro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
+    fecha_registro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
 
     # managers
     objects = MiembroManager()
 
     def __str__(self):
-        return "{0} {1} ({2})".format(self.nombre.upper(), self.primerApellido.upper(), self.cedula)
+        return "{0} {1} ({2})".format(self.nombre.upper(), self.primer_apellido.upper(), self.cedula)
 
     @property
     def es_director_red(self):
         """
         Indica si el miembro es director de red. Un director de red es un miembro que lidere grupo y sea discipulo
         del pastor presidente.
+
+        :returns:
+            ``True`` si el miembro es director de red, de lo contrario retorna ``False``
+
+        :rtype: ``bool``
         """
 
-        if self.grupo_lidera:
-            if self.grupo_lidera.get_depth() == 2:
-                return True
-
-        return False
+        return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 2
 
     @property
     def es_cabeza_red(self):
         """
         Indica si el miembro es cabeza de red. Un cabeza de red es un miembro que lidera grupo y que es discipulo
         de un director de red.
+
+        :returns:
+            ``True`` si el miembro es cabeza de red, de lo contrario retorna ``False``
+
+        :rtype: ``bool``
         """
 
         return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 3
@@ -205,17 +168,23 @@ class Miembro(IglesiaMixin, models.Model):
             self.save()
 
     def discipulos(self):
-        """Devuelve los discipulos del miembro (queryset) sino tiene, devuelve una lista vacia."""
+        """
+        :returns:
+            Un QuerySet con los discipulos del miembro, si no tiene, devuelve un QuerySet vacio.
+        """
 
-        lideres = CambioTipo.objects.filter(nuevoTipo__nombre__iexact='lider').values('miembro')
         grupo = self.grupo_lidera
         if grupo:
-            return grupo.miembros.filter(id__in=lideres)
-        else:
-            return []
+            return grupo.miembros.lideres()
+        return self.__class__.objects.none()
 
     def pastores(self):
-        """Devuelve los indices de los pastores que se encuentran por encima del miembro."""
+        """
+        :returns:
+            Los indices de los pastores que se encuentran por encima del miembro.
+
+        :rtype: ``list(int)``
+        """
 
         grupo_actual = self.grupo
         tipo_pastor = TipoMiembro.objects.get(nombre__iexact='pastor')
@@ -252,39 +221,19 @@ class Miembro(IglesiaMixin, models.Model):
         permissions = (
             ("es_agente", "define si un miembro es agente"),
             ("es_lider", "indica si el usuario es lider de un GAR"),
-            ("es_maestro", "indica si un usuario es maestro de un curso"),
             ("es_administrador", "es adminisitrador"),
-            ("buscar_todos", "indica si un usuario puede buscar miembros"),
-            ("puede_editar_miembro", "indica si un usuario puede editar miembros"),
-            ("puede_agregar_visitante", "puede agregar miembros visitantes"),
-            ("llamada_lider", "puede modificar llamada lider"),
-            ("llamada_agente", "puede modificar llamada agente"),
-            ("cumplimiento_pasos", "puede registrar el cumplimiento de pasos"),
             ("es_pastor", "indica si un miembro es pastor"),
             ("es_tesorero", "indica si un miembro es tesorero"),
             ("es_coordinador", "indica si un miembro es coordinador"),
+            ("buscar_todos", "indica si un usuario puede buscar miembros"),
         )
 
 
-class CumplimientoPasos(models.Model):
-    miembro = models.ForeignKey(Miembro)
-    paso = models.ForeignKey(Pasos)
-    fecha = models.DateField()
-
-    def __str__(self):
-        return self.miembro.nombre + " - " + self.paso.nombre
-
-
-class CambioEscalafon(models.Model):
-    miembro = models.ForeignKey(Miembro)
-    escalafon = models.ForeignKey(Escalafon)
-    fecha = models.DateField(default=datetime.datetime.now)
-
-    def __str__(self):
-        return self.miembro.nombre + " - " + self.escalafon.rango
-
-
 class CambioTipo(models.Model):
+    """
+    Modelo para guardar el tipo de cambio que ha tenido cada miembro.
+    """
+
     miembro = models.ForeignKey(Miembro, related_name='miembro_cambiado')
     autorizacion = models.ForeignKey(Miembro, related_name='miembro_autoriza')
     nuevoTipo = models.ForeignKey(TipoMiembro, related_name='tipo_nuevo', verbose_name="tipo nuevo")
@@ -292,4 +241,4 @@ class CambioTipo(models.Model):
     fecha = models.DateField()
 
     def __str__(self):
-        return self.miembro.nombre + " - " + self.nuevoTipo.nombre
+        return '{} - {}'.format(self.miembro, self.nuevoTipo)

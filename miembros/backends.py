@@ -1,17 +1,23 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 
 class EmailAuthenticationBackend(object):
+    """
+    Backend de autentificación por medio de email.
+    """
+
+    UserModel = get_user_model()
+
     def authenticate(self, email=None, password=None):
         try:
-            user = User.objects.get(email=email)
+            user = self.UserModel.objects.get(email=email)
             if user.check_password(password):
                 return user
-        except User.DoesNotExist:
+        except self.UserModel.DoesNotExist:
             return None
 
     def get_user(self, user_id):
         try:
-            return User.objects.get(id=user_id)
-        except User.DoesNotExist:
+            return self.UserModel.objects.get(id=user_id)
+        except self.UserModel.DoesNotExist:
             return None

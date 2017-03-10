@@ -32,7 +32,7 @@ class MiembroFactory(factory.django.DjangoModelFactory):
     iglesia = factory.SubFactory(IglesiaFactory)
     nombre = factory.Faker('first_name', locale='es')
     cedula = factory.sequence(lambda n: '112343%02d' % n)
-    primerApellido = factory.Faker('last_name', locale='es')
+    primer_apellido = factory.Faker('last_name', locale='es')
     grupo = factory.LazyAttribute(lambda o: o.grupo_lidera.parent if o.grupo_lidera else None)
 
     class Params:

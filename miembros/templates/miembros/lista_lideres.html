@@ -31,7 +31,7 @@
                     {% for lider in lideres %}
                     <tr>
                     	<td>{{ lider.id }}</td>
-                        <td>{{ lider.nombre|upper }} {{ lider.primerApellido|upper }}{% if lider.segundoApellido %} {{ lider.segundoApellido|upper }}{% endif %}</td>
+                        <td>{{ lider.nombre|upper }} {{ lider.primer_apellido|upper }}{% if lider.segundo_apellido %} {{ lider.segundo_apellido|upper }}{% endif %}</td>
                         <td>{{ lider.cedula }}</td>
                         <td>{% firstof lider.email "" %}</td>
                         <td>{{ lider.grupo }}</td>

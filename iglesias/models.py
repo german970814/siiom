@@ -2,6 +2,9 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _lazy
 
 
+__all__ = ('Iglesia', )
+
+
 class Iglesia(models.Model):
     """
     Modelo para guardar la información de las iglesias gestionadas por la aplicación.

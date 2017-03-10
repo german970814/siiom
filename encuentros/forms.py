@@ -22,8 +22,7 @@ class CrearEncuentroForm(CustomModelForm):
             'fecha_inicial', 'fecha_final', 'hotel',
             'grupos', 'coordinador', 'tesorero',
             'direccion', 'observaciones',
-        )  # se agrega fields
-        # exclude = ('dificultades', 'estado')  # se comenta el exclude
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,7 +44,6 @@ class CrearEncuentroForm(CustomModelForm):
                 'class': 'selectpicker',
                 'data-live-search': 'true',
                 'data-actions-box': 'true',
-                # 'multiple data-selected-text-format': 'count',
                 'liveSearchPlaceholder': 'Busca por nombre de líder',
                 'noneSelectedText': 'SIN ESCOGER'
             }
@@ -66,7 +64,7 @@ class CrearEncuentroForm(CustomModelForm):
                     if grupos:
                         self.fields['grupos'].queryset = Grupo.objects.filter(id__in=grupos).prefetch_related('lideres')
                     else:
-                        self.fields['grupos'].queryset = Grupo.objects.none()  # .filter(red=red).prefetch_related('lideres')
+                        self.fields['grupos'].queryset = Grupo.objects.none()
                 except Red.DoesNotExist:
                     self.fields['grupos'].queryset = Grupo.objects.none()
             else:
@@ -103,7 +101,6 @@ class NuevoEncontristaForm(forms.ModelForm):
             'segundo_apellido', 'talla', 'genero', 'identificacion',
             'email', 'grupo',
         )
-        # exclude = ('encuentro', )
 
     def __init__(self, encuentro=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -130,6 +127,10 @@ class NuevoEncontristaForm(forms.ModelForm):
 
 
 class EditarEncuentroForm(CrearEncuentroForm):
+    """
+    Formulario para la edicion de encuentros.
+    """
+
     def __init__(self, *args, **kwargs):
         super(EditarEncuentroForm, self).__init__(*args, **kwargs)
         self.fields['coordinador'].widget.attrs.update({'readonly': ''})
@@ -157,7 +158,3 @@ class FormularioObtenerTesoreroCoordinadorAPI(CustomForm):
     """Formulario para el uso desde la api, para obtener miembros tesoreros y coordinadores."""
     grupos = forms.ModelMultipleChoiceField(queryset=Grupo.objects.all())
     value = forms.CharField(max_length=255)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # print(self.data)

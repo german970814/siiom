@@ -1,14 +1,7 @@
 from django.contrib import admin
-from .models import Zona
-from .models import Barrio
-from .models import Pasos
-from .models import TipoMiembro
-from .models import DetalleLlamada
-from .models import Escalafon
-from .models import Miembro
-from .models import CambioTipo
-from .models import CambioEscalafon
-from .models import CumplimientoPasos
+
+from .models import Zona, Barrio, TipoMiembro, Miembro, CambioTipo
+
 import datetime
 
 
@@ -45,9 +38,19 @@ class DecadeBornListFilter(admin.SimpleListFilter):
         if self.value() == 'hoy':
             return queryset.filter(usuario__last_login__icontains=datetime.date.today())
         if self.value() == 'ultima_semana':
-            return queryset.filter(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=7), datetime.date.today() + datetime.timedelta(days=1)))
+            return queryset.filter(
+                usuario__last_login__range=(
+                    datetime.date.today() - datetime.timedelta(days=7),
+                    datetime.date.today() + datetime.timedelta(days=1)
+                )
+            )
         if self.value() == 'ultimo_mes':
-            return queryset.filter(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=30), datetime.date.today() + datetime.timedelta(days=1)))
+            return queryset.filter(
+                usuario__last_login__range=(
+                    datetime.date.today() - datetime.timedelta(days=30),
+                    datetime.date.today() + datetime.timedelta(days=1)
+                )
+            )
 
 
 class FiltroSinEntrar(admin.SimpleListFilter):
@@ -72,27 +75,33 @@ class FiltroSinEntrar(admin.SimpleListFilter):
         if self.value() == 'hoy':
             return queryset.exclude(usuario__last_login__icontains=datetime.date.today())
         if self.value() == 'ultima_semana':
-            return queryset.exclude(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=7), datetime.date.today() + datetime.timedelta(days=1)))
+            return queryset.exclude(
+                usuario__last_login__range=(
+                    datetime.date.today() - datetime.timedelta(days=7),
+                    datetime.date.today() + datetime.timedelta(days=1)
+                )
+            )
         if self.value() == 'ultimo_mes':
-            return queryset.exclude(usuario__last_login__range=(datetime.date.today() - datetime.timedelta(days=30), datetime.date.today() + datetime.timedelta(days=1)))
+            return queryset.exclude(
+                usuario__last_login__range=(
+                    datetime.date.today() - datetime.timedelta(days=30),
+                    datetime.date.today() + datetime.timedelta(days=1)
+                )
+            )
 
 
-class miembroAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cedula', 'nombre', 'primerApellido', 'segundoApellido', 'usuario')
-    search_fields = ('cedula', 'nombre', 'primerApellido', 'segundoApellido', 'email', 'usuario__username')
+class MiembroAdmin(admin.ModelAdmin):
+    list_display = ('id', 'cedula', 'nombre', 'primer_apellido', 'segundo_apellido', 'usuario')
+    search_fields = ('cedula', 'nombre', 'primer_apellido', 'segundo_apellido', 'email', 'usuario__username')
     list_filter = (DecadeBornListFilter, FiltroSinEntrar)
 
 
-class cambioTipoAdmin(admin.ModelAdmin):
-    search_fields = ('miembro__nombre',)
+class CambioTipoAdmin(admin.ModelAdmin):
+    search_fields = ('miembro__nombre', )
+
 
 admin.site.register(Zona)
 admin.site.register(Barrio)
-admin.site.register(Pasos)
 admin.site.register(TipoMiembro)
-admin.site.register(DetalleLlamada)
-admin.site.register(Escalafon)
-admin.site.register(Miembro, miembroAdmin)
-admin.site.register(CambioTipo, cambioTipoAdmin)
-admin.site.register(CambioEscalafon)
-admin.site.register(CumplimientoPasos)
+admin.site.register(Miembro, MiembroAdmin)
+admin.site.register(CambioTipo, CambioTipoAdmin)

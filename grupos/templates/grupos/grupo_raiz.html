@@ -66,7 +66,7 @@
                                 <i class="zmdi zmdi-calendar"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="{{ form.diaGAR.id_for_label }}" class="fg-label control-label">Dia del {% if dominioIglesia == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
+                                <label for="{{ form.diaGAR.id_for_label }}" class="fg-label control-label">Dia del {% if DOMINIO == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
                                 {{ form.diaGAR }}
                             </div>
                             {{ form.diaGAR.errors }}
@@ -79,7 +79,7 @@
                                 <i class="zmdi zmdi-time"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="{{ form.horaGAR.id_for_label }}" class="fg-label control-label">Hora del {% if dominioIglesia == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
+                                <label for="{{ form.horaGAR.id_for_label }}" class="fg-label control-label">Hora del {% if DOMINIO == "gng.com" %}G.A.A*{% else %}G.A.R*{% endif %}:</label>
                                 {{ form.horaGAR }}
                             </div>
                             {{ form.horaGAR.errors }}

@@ -14,6 +14,9 @@ import calendar
 import re
 
 
+__all__ = ('Caso', 'Comentario', 'Invitacion', 'Documento', )
+
+
 class Caso(models.Model):
     """
     Modelo de casos para Preguntas, Quejas y Reclamos, el cual tendrá la razón de la
@@ -52,14 +55,14 @@ class Caso(models.Model):
     nombre = models.CharField(verbose_name=_('nombre'), max_length=255)
     identificacion = models.BigIntegerField(verbose_name=_('identificación'))
     direccion = models.CharField(verbose_name=_('dirección'), max_length=255, blank=True)
-    telefono = models.BigIntegerField(verbose_name=_('teléfono'))  # se quita blank=True, null=True, 30 septiembre 2016
+    telefono = models.BigIntegerField(verbose_name=_('teléfono'))
     email = models.EmailField(verbose_name=_('email'))
     descripcion = models.TextField(verbose_name=_('descripción'))
     asunto = models.CharField(verbose_name=_('asunto'), max_length=255)
     fecha_registro = models.DateTimeField(verbose_name=_('fecha registro'), auto_now_add=True)
     integrantes = models.ManyToManyField(
         'organizacional.Empleado', verbose_name=_('integrantes'), related_name='casos_implicado',
-        blank=True, null=True
+        blank=True
     )
     empleado_cargo = models.ForeignKey(
         'organizacional.Empleado', verbose_name=_('empleado a cargo'), related_name='casos_cargo',
@@ -275,7 +278,10 @@ class Documento(models.Model):
 
         if empleado in self.caso.integrantes.all() or empleado == self.caso.empleado_cargo:
             mensaje = """
-                <strong><a href="{get_absolute_url}" class="c-white"><img src="{get_url}" alt="{get_name}" width="150px"/></a></strong>
+                <strong>
+                    <a href="{get_absolute_url}" class="c-white">
+                    <img src="{get_url}" alt="{get_name}" width="150px"/></a>
+                </strong>
             """.format(get_absolute_url=self.get_absolute_url(), get_name=self.get_name(), get_url=self.get_url())
             return Comentario.objects.create(
                 empleado=empleado,

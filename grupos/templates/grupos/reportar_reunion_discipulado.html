@@ -181,7 +181,7 @@
                         {% for mg in discipulos %}
                             <tr>
                                 <td>{{mg.id}}</td>
-                                <td>{{mg.nombre|capfirst}} {{mg.primerApellido|capfirst}} {% if mg.segundoApellido %} {{mg.segundoApellido|capfirst}} {% endif %}</td>
+                                <td>{{mg.nombre|capfirst}} {{mg.primer_apellido|capfirst}} {% if mg.segundo_apellido %} {{mg.segundo_apellido|capfirst}} {% endif %}</td>
                             </tr>
                         {% empty %}
                             <tr>

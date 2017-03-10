@@ -1,14 +1,13 @@
 from django.conf.urls import url
-from . import views
-from . import api
+
+from . import views, api
 
 urlpatterns = [
-    url(r'^listar_predicas/$', views.listarPredicas, name="listar_predicas"),  # revisada
-    url(r'^crear_predica/$', views.crearPredica, name="crear_predica"),  # revisada
-    url(r'^editar_predica/(?P<pk>\d+)$', views.editarPredica, name="editar_predica"),  # revisada
-    url(r'^ver_reportes/$', views.ver_reportes_grupo, name="reportes_grupo"),  # revisada
-    url(r'^editar_reporte/(?P<pk>\d+)$', views.editar_runion_grupo, name="editar_reporte"),  # revisada
-    url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),  # revisada
+    url(r'^listar_predicas/$', views.listar_predicas, name="listar_predicas"),
+    url(r'^crear_predica/$', views.crear_predica, name="crear_predica"),
+    url(r'^editar_predica/(?P<pk>\d+)$', views.editar_predica, name="editar_predica"),
+    url(r'^ver_reportes/$', views.ver_reportes_grupo, name="reportes_grupo"),
+    url(r'^editar_reporte/(?P<pk>\d+)$', views.editar_runion_grupo, name="editar_reporte"),
 
     url(r'^raiz/$', views.grupo_raiz, name='raiz'),
     url(r'^redes/$', views.listar_redes, name='redes_listar'),
@@ -23,6 +22,9 @@ urlpatterns = [
     url(r'^redes/(?P<pk>\d+)/grupos/$', views.listar_grupos, name='listar'),
     url(r'^trasladar_lideres/$', views.trasladar_lideres, name='trasladar_lideres'),
     url(r'^sin_confirmar_ofrenda_GAR/$', views.sin_confirmar_ofrenda_GAR, name='sin_confirmar_ofrenda_GAR'),
+    url(r'^reportar_reunion_discipulado/$', views.reportar_reunion_discipulado, name="reportar_reunion_discipulado"),
+    url(r'^reportar_reunion_grupo_admin/$', views.reportar_reunion_grupo_admin, name="reportar_reunion_grupo_admin"),
+    url(r'^reportar_reunion_grupo/$', views.reportar_reunion_grupo, name="reportar_reunion_grupo"),
     url(r'^(?P<pk>\d+)/confirmar_ofrenda_GAR/$', views.confirmar_ofrenda_GAR, name='confirmar_ofrenda_GAR'),
     url(
         r'^sin_confirmar_ofrenda_discipulado/$', views.sin_confirmar_ofrenda_discipulado,
@@ -33,6 +35,7 @@ urlpatterns = [
         name='confirmar_ofrenda_discipulado'
     ),
 
+    url(r'^api/set_position_grupo/(?P<id_grupo>\d+)$', views.set_position_grupo, name="posicion_grupo"),
     url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api'),
     url(r'^api/(?P<pk>\d+)/miembros/$', api.discipulos_miembros_grupo, name='discipulos_miembros_api'),
 ]
