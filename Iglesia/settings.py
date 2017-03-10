@@ -53,7 +53,7 @@ MIDDLEWARE_CLASSES = (
     'waffle.middleware.WaffleMiddleware',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
-    'iglesias.middleware.IglesiaMiddleware'
+    'iglesias.middleware.IglesiaMiddleware',
 )
 
 ROOT_URLCONF = 'Iglesia.urls'
@@ -70,7 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'context_processors.site',
+                'context_processors.siiom_context_processor',
             ],
         },
     },

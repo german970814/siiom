@@ -1,38 +1,31 @@
 # Django Imports
-from django.db.models import Q
+from django.conf import settings
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.contrib.auth.models import Group
-from django.template.context import RequestContext
-from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required, permission_required
+from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, render, redirect
-from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.conf import settings
-from django.core.urlresolvers import reverse
-
-# Third-Party App Imports
-from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin, PermissionRequiredMixin
+from django.template.context import RequestContext
+from django.utils.translation import ugettext as _
 
 # Apps Imports
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, AsistenciaDiscipulado, Predica
-from .utils import reunion_reportada, obtener_fechas_semana
+from .utils import reunion_reportada, obtener_fechas_semana, reunion_reportada_discipulado_predica
 from .forms import (
     FormularioEditarGrupo, FormularioReportarReunionGrupo,
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
-    FormularioCrearPredica, ArchivarGrupoForm,  # FormularioTransladarGrupo
-    FormularioReportarReunionGrupoAdmin, FormularioReportesEnviados, FormularioEditarReunionGAR,
-    GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
+    FormularioCrearPredica, ArchivarGrupoForm, FormularioReportarReunionGrupoAdmin,
+    FormularioReportesEnviados, FormularioEditarReunionGAR, GrupoRaizForm, NuevoGrupoForm,
+    EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
 )
-from common.decorators import permisos_requeridos
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
-from miembros.models import Miembro
 from miembros.forms import DesvincularLiderGrupoForm
-from common.groups_tests import (
-    liderTest, adminTest, verGrupoTest, receptorAdminTest, PastorAdminTest
-)
+from miembros.models import Miembro
+from common.decorators import permisos_requeridos
+from common.utils import eliminar
 
 # Python Packages
 import datetime
@@ -40,8 +33,9 @@ import json
 import copy
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def editarHorarioReunionGrupo(request, pk=None):
+@login_required
+@permission_required('miembros.es_lider', raise_exception=True)
+def editar_horario_reunion_grupo(request, pk=None):
     g = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
@@ -87,19 +81,11 @@ def editarHorarioReunionGrupo(request, pk=None):
     return render_to_response('grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
 
 
-def reunionDiscipuladoReportada(predica, grupo):
-    reunion = grupo.reuniones_discipulado.filter(predica=predica)
-
-    if reunion:
-        return True
-    else:
-        return False
-
-
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def reportarReunionGrupo(request):
+@login_required
+@permission_required('miembros.es_lider', raise_exception=True)
+def reportar_reunion_grupo(request):
     """
-    Vista para crear el reporte de grupos en el sistema
+    Vista para crear el reporte de grupos en el sistema.
     """
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -107,13 +93,6 @@ def reportarReunionGrupo(request):
 
     # se verifica que exista el grupo de el miembro en la sesion y que este, esté activo
     if grupo is not None and grupo.is_activo:
-
-        # Se comentan estas lineas de código, porque no están siendo usadas en la actualidad
-
-        # discipulos = miembro.discipulos()
-        # miembrosGrupo = grupo.miembrosGrupo()
-        # asistentesId = request.POST.getlist('seleccionados')
-
         if request.method == 'POST':
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
@@ -135,12 +114,13 @@ def reportarReunionGrupo(request):
                     messages.success(
                         request, _('Se ha Registrado el Reporte Existosamente, No olvides Llenar tu reporte Físico')
                     )
-                    return redirect('miembros:reportar_reunion_grupo')
+                    return redirect('grupos:reportar_reunion_grupo')
                 else:
                     # envia mensaje de warning si ya fue reportada
                     messages.warning(
                         request,
-                        _('Parece que ya se ha reportado una reunion esta semana, Preguntale a tu Co-Líder o Administrador')
+                        _('''Parece que ya se ha reportado una reunion esta semana,\
+                        Preguntale a tu Co-Líder o Administrador''')
                     )
             else:
                 # si han ocurrido errores en el formulario, los envia
@@ -148,13 +128,14 @@ def reportarReunionGrupo(request):
         else:
             # carga el formulario en get
             form = FormularioReportarReunionGrupo()
+    else:
+        raise PermissionDenied('Grupo no se encuentra o está inactivo.')
     return render_to_response('grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
 
 
 @login_required
 @user_is_director_red
-def reportarReunionGrupoAdmin(request):
-
+def reportar_reunion_grupo_admin(request):
     if request.method == 'POST':
         form = FormularioReportarReunionGrupoAdmin(data=request.POST)
         if form.is_valid():
@@ -170,7 +151,7 @@ def reportarReunionGrupoAdmin(request):
                     request,
                     _('Has reportado exitosamente la reunión de el grupo %s' % reunion.grupo.__str__())
                 )
-                return redirect('miembros:reportar_reunion_grupo_admin')
+                return redirect('grupos:reportar_reunion_grupo_admin')
             else:
                 messages.warning(
                     request,
@@ -190,8 +171,9 @@ def reportarReunionGrupoAdmin(request):
     )
 
 
-@user_passes_test(liderTest, login_url="/dont_have_permissions/")
-def reportarReunionDiscipulado(request):
+@login_required
+@permission_required('miembros.es_lider', raise_exception=True)
+def reportar_reunion_discipulado(request):
     miembro = Miembro.objects.get(usuario=request.user)
     grupo = miembro.grupo_lidera
     if grupo:
@@ -201,7 +183,7 @@ def reportarReunionDiscipulado(request):
             form = FormularioReportarReunionDiscipulado(miembro=miembro, data=request.POST)
             if form.is_valid():
                 r = form.save(commit=False)
-                if not reunionDiscipuladoReportada(r.predica, grupo):
+                if not reunion_reportada_discipulado_predica(grupo, r.predica):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
@@ -220,8 +202,9 @@ def reportarReunionDiscipulado(request):
     )
 
 
-@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
-def listarPredicas(request):
+@login_required
+@permission_required('miembros.es_pastor', raise_exception=True)
+def listar_predicas(request):
     miembro = Miembro.objects.get(usuario=request.user)
     if request.method == "POST":
         if 'eliminar' in request.POST:
@@ -235,8 +218,9 @@ def listarPredicas(request):
     return render_to_response('grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
-def crearPredica(request):
+@login_required
+@permission_required('miembros.es_pastor', raise_exception=True)
+def crear_predica(request):
     miembro = Miembro.objects.get(usuario=request.user)
     accion = 'Crear'
     if request.method == "POST":
@@ -249,8 +233,9 @@ def crearPredica(request):
     return render_to_response('grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(PastorAdminTest, login_url="/dont_have_permissions/")
-def editarPredica(request, pk):
+@login_required
+@permission_required('miembros.es_pastor', raise_exception=True)
+def editar_predica(request, pk):
     accion = 'Editar'
 
     miembro = Miembro.objects.get(usuario=request.user)
@@ -267,74 +252,8 @@ def editarPredica(request, pk):
             form.save()
     else:
         form = FormularioCrearPredica(instance=predica, miembro=miembro)
-        return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
 
     return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
-
-
-def eliminar(request, modelo, lista):
-    ok = 0  # No hay nada en la lista
-    if lista:
-        ok = 1  # Los borro todos
-        for m in lista:
-            try:
-                modelo.objects.get(id=m).delete()
-            except ValueError as e:
-                print(e)
-                pass
-            except:
-                ok = 2  # Hubo un error
-    if ok == 1:
-        messages.success(request, "Se ha eliminado correctamente")
-    return ok
-
-
-# TODO eliminar
-def listaGruposDescendientes(grupo):
-    """Devuelve una lista con todos los grupos descendientes del grupo del miembro usado como parametro para ser
-        usada en un choice field."""
-
-    miembro = grupo.lideres.first()
-    listaG = [grupo]
-    discipulos = list(miembro.discipulos())
-    while len(discipulos) > 0:
-        d = discipulos.pop(0)
-        g = d.grupo_lidera()
-        if g:
-            if g not in listaG:
-                listaG.append(g)
-            lid = g.lideres.all()
-            for l in lid:  # Se elimina los otros lideres de la lista de discipulos para que no se repita el grupo.
-                if l in discipulos:
-                    discipulos.remove(l)
-        if d.discipulos():  # Se agregan los discipulos del miembro en la lista de discipulos.
-            discipulos.extend(list(d.discipulos()))
-    return listaG
-
-
-def sendMail(camposMail):
-    subject = camposMail[0]
-    mensaje = camposMail[1]
-    receptor = camposMail[2]
-    send_mail(subject, mensaje, 'iglesia@mail.webfaction.com', receptor, fail_silently=False)
-
-
-# def reporteVisitasPorRed(request):  # vista en desuso
-#     redes = Red.objects.all()
-#     data = []
-#     for red in redes:
-#         grupos = Grupo.objects.filter(red=red.id)
-#         visRed = 0
-#         l = [red.nombre]
-#         for grupo in grupos:
-#             visReuniones = ReunionGAR.objects.filter(grupo=grupo.id).values('numeroVisitas')
-#             if len(visReuniones.values()) > 0:
-#                 visitas = sum([int(dict['numeroVisitas']) for dict in visReuniones.values('numeroVisitas')])
-#                 visRed = visRed + visitas
-#         l.append(visRed)
-#         data.append(l)
-#     return render_to_response(
-#          'reportes/visitas_por_red.html', {'values': data}, context_instance=RequestContext(request))
 
 
 @login_required
@@ -345,7 +264,7 @@ def ver_reportes_grupo(request):
        ):
         if 'combo' in request.POST:
             value = request.POST['value']
-            querys = Q(lideres__nombre__icontains=value) | Q(lideres__primerApellido__icontains=value) | \
+            querys = Q(lideres__nombre__icontains=value) | Q(lideres__primer_apellido__icontains=value) | \
                 Q(lideres__cedula__icontains=value)
             # Importante que se puedan escoger todos los grupos y no solo los 'Activos'
             busqueda = Grupo.objects.filter(querys)[:5]
@@ -440,7 +359,8 @@ def ver_reportes_grupo(request):
     return render_to_response("grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
 
 
-@user_passes_test(adminTest, login_url="/dont_have_permissions/")
+@login_required
+@permission_required('miembros.es_administrador', raise_exception=True)
 def editar_runion_grupo(request, pk):
     """
     Funcion para editar una reunion de Grupo GAR
@@ -475,7 +395,9 @@ def editar_runion_grupo(request, pk):
                     messages.success(
                         request,
                         _('Se ha editado la reunion exitosamente. \
-                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('grupos:reportes_grupo')})
+                        <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {
+                            'link': reverse('grupos:reportes_grupo')
+                        })
                     )
             else:
                 # se envia que puede ir a la pagina de vista de reportes
@@ -486,7 +408,9 @@ def editar_runion_grupo(request, pk):
                 messages.success(
                     request,
                     _('Se ha editado la reunion exitosamente. \
-                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {'link': reverse('grupos:reportes_grupo')})
+                    <a href="%(link)s" class="alert-link">Volver a reuniones.</a>' % {
+                        'link': reverse('grupos:reportes_grupo')
+                    })
                 )
         else:
             messages.error(request, _('Ha ocurrido un error al enviar el formulario, verifica los campos'))

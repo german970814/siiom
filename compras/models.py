@@ -61,6 +61,9 @@ from .managers import RequisicionManager, ParametrosManager, DetalleRequisicionM
 import re
 
 
+__all__ = ('Proveedor', 'Requisicion', 'DetalleRequisicion', 'Adjunto', 'Historial', 'Parametros', )
+
+
 class Proveedor(models.Model):
     """
     Modelo de creación de proveedores en el sistema
@@ -608,8 +611,10 @@ class Parametros(models.Model):
     Modelo para parametrizar ciertos valores de los que dependen los procesos de
     trazabilidad de la aplicacion
     """
-    dias_habiles = models.PositiveSmallIntegerField(verbose_name=_('dias hábiles'))  # cuantos dias habiles tiene una requisicion para ser atentida
-    tope_monto = models.PositiveIntegerField(verbose_name=_('monto tope para presidencia'))  # a partir de que valor, pasa a presidencia
+    # cuantos dias habiles tiene una requisicion para ser atentida
+    dias_habiles = models.PositiveSmallIntegerField(verbose_name=_('dias hábiles'))
+    # a partir de que valor, pasa a presidencia
+    tope_monto = models.PositiveIntegerField(verbose_name=_('monto tope para presidencia'))
 
     objects = ParametrosManager()
 

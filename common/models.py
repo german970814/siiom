@@ -4,6 +4,9 @@ from django.utils.translation import ugettext_lazy as _lazy
 from .managers import IglesiaMixinQuerySet
 
 
+__all__ = ('IglesiaMixin', 'UtilsModelMixin', )
+
+
 class UtilsModelMixin:
     """
     Mixin de utilidades para los modelos.

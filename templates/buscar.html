@@ -32,7 +32,7 @@
 
 						<div class="media-body">
 							<div class="lv-title">
-								<a href="{% url 'miembros:editar_perfil' resultado.pk %}">{% filter upper %}{{ resultado.nombre }} {{ resultado.primerApellido }}{% endfilter %} ({{ resultado.cedula }})</a>
+								<a href="{% url 'miembros:editar_perfil' resultado.pk %}">{% filter upper %}{{ resultado.nombre }} {{ resultado.primer_apellido }}{% endfilter %} ({{ resultado.cedula }})</a>
 								<small class="lv-small">
 									{% if resultado.grupo_lidera %}
 										{% trans "Lider de grupo" %} {{ resultado.grupo_lidera.nombre|upper }}

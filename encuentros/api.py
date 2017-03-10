@@ -1,17 +1,18 @@
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Q
 
 from .forms import FormularioObtenerGrupoAPI, FormularioObtenerTesoreroCoordinadorAPI
-from grupos.models import Red, Grupo
+from grupos.models import Grupo
 from miembros.models import Miembro
 from common.constants import RESPONSE_SUCCESS, RESPONSE_CODE, RESPONSE_ERROR, RESPONSE_DENIED, URL_SIN_PERMISOS as URL
-from common.groups_tests import tesorero_administrador_test
+from common.decorators import permisos_requeridos
 
 import json
 
 
-@user_passes_test(tesorero_administrador_test, login_url=URL)
+@login_required
+@permisos_requeridos('miembros.es_administrador', 'miembros.es_tesorero')
 def obtener_grupos(request):
     """Vista que devuelve una lista de grupos en JSON de acuerdo a un valor inicial enviado."""
 
@@ -24,7 +25,7 @@ def obtener_grupos(request):
 
             querys = (
                 Q(lideres__nombre__icontains=value) |
-                Q(lideres__primerApellido__icontains=value) |
+                Q(lideres__primer_apellido__icontains=value) |
                 Q(lideres__cedula__icontains=value)
             )
 
@@ -70,11 +71,10 @@ def obtener_coordinadores_tesoreros(request):
 
                 querys = (
                     Q(nombre__icontains=value) |
-                    Q(primerApellido__icontains=value) |
+                    Q(primer_apellido__icontains=value) |
                     Q(cedula__icontains=value)
                 )
 
-                # ids_lideres = (x.grupos_red.prefetch_related('lideres').values_list('id', flat=True) for x in grupos)
                 ids_lideres = []
                 for grupo in grupos:
                     for _id in grupo.grupos_red.prefetch_related('lideres').values_list('lideres__id', flat=True):

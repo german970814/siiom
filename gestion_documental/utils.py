@@ -1,4 +1,5 @@
 from wand.image import Image
+
 import os
 import glob
 

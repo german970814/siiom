@@ -1,18 +1,19 @@
 import logging
 
 # Django Package
-from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
+from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.functions import Lower
 from django.db import transaction
-from django import forms
+from django.db.models.functions import Lower
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 # Locale Apps
-from common.forms import CustomModelForm
 from .models import Area, Departamento, Empleado
+from common.forms import CustomModelForm
 
 logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 

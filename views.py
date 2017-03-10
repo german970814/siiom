@@ -3,21 +3,15 @@ Created on 4/04/2011
 
 @author: Conial
 '''
-from datetime import date
-from django.shortcuts import render_to_response, render
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import Group, User
-from django.contrib.auth.decorators import user_passes_test, login_required
-from miembros.models import Miembro, TipoMiembro
-from django.template.context import RequestContext
-from grupos.models import Grupo
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from miembros.models import CambioTipo, CumplimientoPasos, Pasos
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render_to_response, render
+from django.template.context import RequestContext
+
+from grupos.models import Grupo
+from miembros.models import Miembro
 from common.decorators import permisos_requeridos
-
-
-def inicio(request):
-    return HttpResponseRedirect('/iniciar_sesion/')
 
 
 def custom_404(request):
@@ -30,12 +24,6 @@ def without_perms(request):
         return HttpResponseRedirect('/iniciar_sesion/')
     return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))
 
-
-def mapa(request):
-    return render_to_response("mapas.html", locals(), context_instance=RequestContext(request))
-
-
-# ---------------------------------------
 
 @login_required
 @permisos_requeridos('miembros.es_lider', 'miembros.buscar_todos')
@@ -51,15 +39,15 @@ def buscar(request, tipo):
     if termino_busqueda:
         terminos = termino_busqueda.split()
         q = (
-            Q(nombre__icontains=terminos[0]) | Q(primerApellido__icontains=terminos[0]) |
-            Q(segundoApellido__icontains=terminos[0]) | Q(cedula=terminos[0])
+            Q(nombre__icontains=terminos[0]) | Q(primer_apellido__icontains=terminos[0]) |
+            Q(segundo_apellido__icontains=terminos[0]) | Q(cedula=terminos[0])
         )
 
         for termino in terminos[1:]:
             q.add(
                 (
-                    Q(nombre__icontains=termino) | Q(primerApellido__icontains=termino) |
-                    Q(segundoApellido__icontains=termino) | Q(cedula=termino)
+                    Q(nombre__icontains=termino) | Q(primer_apellido__icontains=termino) |
+                    Q(segundo_apellido__icontains=termino) | Q(cedula=termino)
                 ), Q.OR
             )
 

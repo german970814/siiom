@@ -2,12 +2,14 @@
 from django.contrib.auth.decorators import user_passes_test  # , login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
 
 # Locale imports
 from . import constants
 
 # Python imports
 from functools import wraps
+from threading import Thread
 import json
 
 
@@ -42,3 +44,34 @@ def login_required_api(view_func):
             content_type=constants.CONTENT_TYPE_API
         )
     return wrapped_view
+
+
+def concurrente(function):
+    """
+    Funcion para manejar concurrencia.
+
+    :returns:
+        Un hilo con la ejecución de la funcion asignada.
+    """
+
+    @wraps(function)
+    def decorator(*args, **kwargs):
+        hilo = Thread(target=function, args=args, kwargs=kwargs)
+        hilo.daemon = True
+        hilo.start()
+        return hilo
+    return decorator
+
+
+def POST(view_func):
+    """
+    Decorador para que solo pueda ser ingresada a la pagina con POST.
+    """
+    return require_http_methods(['POST'])(view_func)
+
+
+def GET(view_func):
+    """
+    Decorador para que solo pueda ser ingresada a la pagina con GET.
+    """
+    return require_http_methods(['GET'])(view_func)

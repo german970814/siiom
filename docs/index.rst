@@ -13,7 +13,18 @@ Welcome to Siiom's documentation!
    grupos/models
    grupos/managers
    grupos/forms
+   grupos/utils
+   grupos/api
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Miembros:
+
+   miembros/models
+   miembros/managers
+   miembros/forms
+   miembros/decorators
+   miembros/utils
 
 
 Indices and tables

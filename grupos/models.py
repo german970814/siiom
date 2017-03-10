@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Django Package
-from django.db import models, transaction
+from django.db import models, transaction, OperationalError
 from django.utils.translation import ugettext_lazy as _lazy
 
 # Locale Apps
@@ -13,7 +13,14 @@ from .six import SixALNode
 from treebeard.al_tree import AL_Node
 
 
+__all__ = (
+    'Red', 'Grupo', 'Predica', 'ReunionGAR', 'HistorialEstado',
+    'ReunionDiscipulado', 'AsistenciaDiscipulado',
+)
+
+
 class Red(IglesiaMixin, models.Model):
+    """Modelo para guardar las redes que tiene una iglesia."""
 
     nombre = models.CharField(max_length=100)
 
@@ -26,9 +33,9 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
     Modelo para guardar la información de los grupos de la iglesia.
     """
 
-    # opciones
     ACTIVO = 'A'
     INACTIVO = 'I'
+
     ESTADOS = (
         (ACTIVO, 'Activo'),
         (INACTIVO, 'Inactivo'),
@@ -41,6 +48,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
     VIERNES = '4'
     SABADO = '5'
     DOMINGO = '6'
+
     DIAS_SEMANA = (
         (LUNES, 'Lunes'),
         (MARTES, 'Martes'),
@@ -55,8 +63,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         'self', verbose_name=_lazy('grupo origen'), related_name='children_set', null=True, db_index=True
     )
     direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
-    # estado = models.CharField(verbose_name=_lazy('estado'), max_length=1, choices=ESTADOS)
-    fechaApertura = models.DateField(verbose_name=_lazy("fecha de apertura"))
+    fechaApertura = models.DateField(verbose_name=_lazy('fecha de apertura'))
     diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=DIAS_SEMANA)
     horaGAR = models.TimeField(verbose_name=_lazy('hora G.A.R'))
     diaDiscipulado = models.CharField(
@@ -86,7 +93,7 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             return self.get_nombre()
 
         lideres = ["{0} {1}({2})".format(
-            lider.nombre.upper(), lider.primerApellido.upper(), lider.cedula
+            lider.nombre.upper(), lider.primer_apellido.upper(), lider.cedula
         ) for lider in self.lideres.all()]
 
         return " - ".join(lideres)
@@ -160,17 +167,13 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
             discipulos = list(raiz.get_children().select_related('parent').prefetch_related('lideres'))
             while len(discipulos) > 0:
-                # print 'dis:', discipulos
                 hijo = discipulos.pop()
-                # print 'd:', d, 'hijo:', hijo
                 if hijo:
                     if act is not None:
                         pila.append(act)
                     sw = True
                     while len(pila) > 0 and sw:
                         act = pila.pop()
-                        # print 'pila:', pila
-                        # print 'act:', act
                         if act[len(act) - 1] == hijo.parent:
                             act.append([hijo])
                             bajada = True
@@ -184,13 +187,9 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
                             pila.append(act[len(act) - 1])
                         elif not isinstance(act[-1], (tuple, list)):
                             bajada = False
-                        # print '------------while pila------------'
                 hijos = hijo.get_children().select_related('parent').prefetch_related('lideres')
                 if len(hijos) > 0:
                     discipulos.extend(list(hijos))
-                #  print '----------while disci-----------'
-            #  print 'act final:', act
-            #  print 'pila final:', pila
             if pila:
                 arbol = pila[0]
             else:
@@ -477,27 +476,29 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
             self.__class__.objects.get_queryset().get_historial_model().objects.create(
                 grupo=self, estado=estado, **kwargs)
         elif estado != actual.estado:
-            from django.db import OperationalError
             if estado not in list(map(lambda x: x[0], actual.OPCIONES_ESTADO)):
                 raise OperationalError(_lazy('Estado "{}" no está permitido'.format(estado)))
             actual.__class__.objects.create(grupo=self, estado=estado, **kwargs)
 
 
 class Predica(models.Model):
+    """Modelo para guardar las predicas que se registran."""
+
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(max_length=500, blank=True)
     miembro = models.ForeignKey('miembros.Miembro')
     fecha = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.nombre
+        return self.nombre.upper()
 
 
 class ReunionGAR(models.Model):
+    """Modelo para guardar las reuniones de grupo de amistad que hace cada grupo."""
+
     fecha = models.DateField()
     grupo = models.ForeignKey(Grupo, related_name='reuniones_gar')
     predica = models.CharField(max_length=100, verbose_name='prédica')
-    asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaMiembro')
     numeroTotalAsistentes = models.PositiveIntegerField(verbose_name='Número total de asistentes')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')
     numeroVisitas = models.PositiveIntegerField(verbose_name='Número de visitas:')
@@ -507,7 +508,7 @@ class ReunionGAR(models.Model):
     digitada_por_miembro = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.grupo.nombre
+        return self.grupo.__str__()
 
     class Meta:
         permissions = (
@@ -527,27 +528,19 @@ class ReunionGAR(models.Model):
         return False
 
 
-class AsistenciaMiembro(models.Model):
-    miembro = models.ForeignKey('miembros.Miembro')
-    reunion = models.ForeignKey(ReunionGAR)
-    asistencia = models.BooleanField()
-
-    def __str__(self):
-        return self.miembro.nombre + " - " + self.reunion.grupo.nombre
-
-
 class ReunionDiscipulado(models.Model):
+    """Modelo para guardar las reuniones de discpulados por grupo."""
+
     fecha = models.DateField(auto_now_add=True)
     grupo = models.ForeignKey(Grupo, related_name='reuniones_discipulado')
     predica = models.ForeignKey(Predica, verbose_name='prédica')
-    asistentecia = models.ManyToManyField('miembros.Miembro', through='AsistenciaDiscipulado')
     numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')
     novedades = models.TextField(max_length=500)
     ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.grupo.nombre
+        return self.grupo.__str__()
 
     class Meta:
         permissions = (
@@ -556,12 +549,14 @@ class ReunionDiscipulado(models.Model):
 
 
 class AsistenciaDiscipulado(models.Model):
+    """Modelo para guardar la asistencia de los miembros a los discipulados."""
+
     miembro = models.ForeignKey('miembros.Miembro')
     reunion = models.ForeignKey(ReunionDiscipulado)
     asistencia = models.BooleanField()
 
     def __str__(self):
-        return self.miembro.nombre + " - " + self.reunion.grupo.nombre
+        return '{} - {}'.format(self.miembro, self.reunion)
 
 
 class HistorialEstado(models.Model):

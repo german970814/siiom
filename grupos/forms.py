@@ -1,20 +1,20 @@
-import logging
 # Django
-# from contextlib import suppress
 from django import forms
-from django.db.models import Q
-from django.forms.models import ModelForm
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
-from django.core.exceptions import ValidationError
 
 # Apps
-from miembros.models import CambioTipo, Miembro
-from reportes.forms import FormularioRangoFechas
-from common.forms import CustomModelForm, CustomForm
 from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado
 from .utils import convertir_lista_grupos_a_queryset
+from common.forms import CustomModelForm, CustomForm
+from miembros.models import Miembro
+from reportes.forms import FormularioRangoFechas
+
+# Python
+import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,7 @@ class FormularioReunionGARBase(forms.ModelForm):
     """
     Formulario base de validaciones para las reuniones GAR
     """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -31,8 +32,8 @@ class FormularioReunionGARBase(forms.ModelForm):
     class Meta:
         model = ReunionGAR
         fields = (
-            'fecha', 'predica', 'ofrenda',
-            'numeroTotalAsistentes', 'numeroVisitas', 'numeroLideresAsistentes'
+            'fecha', 'predica', 'ofrenda', 'numeroTotalAsistentes',
+            'numeroVisitas', 'numeroLideresAsistentes'
         )
 
     def __init__(self, *args, **kwargs):
@@ -68,7 +69,8 @@ class FormularioReunionGARBase(forms.ModelForm):
             if numero_lideres > 0:
                 if numero_lideres > numero_asistentes:
                     self.add_error(
-                        'numeroLideresAsistentes', _('Número de Líderes NO puede ser mayor a Número Total de Asistentes')
+                        'numeroLideresAsistentes',
+                        _('Número de Líderes NO puede ser mayor a Número Total de Asistentes')
                     )
             if numero_visitas > 0:
                 if numero_visitas >= numero_asistentes:
@@ -91,6 +93,10 @@ class FormularioReunionGARBase(forms.ModelForm):
 
 
 class FormularioEditarGrupo(forms.ModelForm):
+    """
+    Formulario para editar la direccion, el dia y la hora de el grupo.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -106,6 +112,10 @@ class FormularioEditarGrupo(forms.ModelForm):
 
 
 class FormularioReportarReunionGrupo(FormularioReunionGARBase):
+    """
+    Formulario para reportar las reuniones de grupo.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -116,10 +126,14 @@ class FormularioReportarReunionGrupo(FormularioReunionGARBase):
         super(FormularioReportarReunionGrupo, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
-        super(FormularioReportarReunionGrupo, self).clean(*args, **kwargs)
+        return super(FormularioReportarReunionGrupo, self).clean(*args, **kwargs)
 
 
 class FormularioReportarReunionGrupoAdmin(FormularioReunionGARBase):
+    """
+    Formulario para reportar las reuniones de grupo de amistad, desde un administrador.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -133,6 +147,8 @@ class FormularioReportarReunionGrupoAdmin(FormularioReunionGARBase):
 
 
 class FormularioReportarReunionDiscipulado(forms.ModelForm):
+    """Formulario para reportar las reuniones de discipulado."""
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
 
@@ -149,21 +165,17 @@ class FormularioReportarReunionDiscipulado(forms.ModelForm):
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in=miembro.pastores())
 
 
-REUNION_CHOICES = (('1', 'Gar'), ('2', 'Discipulado'))
-
-
-class FormularioReportesSinEnviar(forms.Form):
-    error_css_class = 'has-error'
-    required_css_class = 'requerido'
-
-    reunion = forms.TypedChoiceField(choices=REUNION_CHOICES, coerce=int, required=True, widget=forms.RadioSelect)
-    fechai = forms.DateField(label='Fecha inicial', required=True, widget=forms.DateInput(attrs={'size': 10}))
-    fechaf = forms.DateField(label='Fecha final', required=True, widget=forms.DateInput(attrs={'size': 10}))
-
-
 class FormularioCrearPredica(forms.ModelForm):
+    """
+    Formulario para crear predicas.
+    """
+
     error_css_class = 'has-error'
     required_css_class = 'requerido'
+
+    class Meta:
+        model = Predica
+        fields = ('miembro', 'descripcion', 'nombre')
 
     def __init__(self, *args, **kwargs):
         miembro = kwargs.pop('miembro', None)
@@ -183,38 +195,25 @@ class FormularioCrearPredica(forms.ModelForm):
                                                         'placeholder': 'Descripción...',
                                                         'rows': '3'})
 
-    class Meta:
-        model = Predica
-        fields = ('miembro', 'descripcion', 'nombre')
-
 
 class FormularioEditarDiscipulado(forms.ModelForm):
+    """Formulario para editar el discipulado."""
+
     error_css_class = 'has-error'
+
+    class Meta:
+        model = Grupo
+        fields = ('diaDiscipulado', 'horaDiscipulado')
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarDiscipulado, self).__init__(*args, **kwargs)
         self.fields['horaDiscipulado'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00'})
         self.fields['diaDiscipulado'].widget.attrs.update({'class': 'selectpicker'})
 
-    class Meta:
-        model = Grupo
-        fields = ('diaDiscipulado', 'horaDiscipulado')
-
-
-# class FormularioTransladarGrupo(forms.Form):  # Actualemente en desuso
-#     error_css_class = 'has-error'
-
-#     queryset = Grupo.objects.all()
-#     grupo = forms.ModelChoiceField(queryset=queryset, required=True)
-
-#     def __init__(self, red=None, grupo_id=None, *args, **kwargs):
-#         super(FormularioTransladarGrupo, self).__init__(*args, **kwargs)
-#         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-#         if red or grupo_id:
-#             self.fields['grupo'].queryset = self.fields['grupo'].queryset.filter(red=red).exclude(id=grupo_id)
-
 
 class FormularioReportesEnviados(FormularioRangoFechas):
+    """Formulario para ver los reportes enviados por un grupo."""
+
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.none())  # .filter(estado='A'))
 
     def __init__(self, *args, **kwargs):
@@ -233,26 +232,18 @@ class FormularioReportesEnviados(FormularioRangoFechas):
 
 
 class FormularioEditarReunionGAR(FormularioReunionGARBase):
+    """Formulario para editar las reuniones de grupos de amistad."""
+
+    class Meta(FormularioReunionGARBase.Meta):
+        pass
 
     def __init__(self, *args, **kwargs):
         super(FormularioEditarReunionGAR, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
-        # se comenta la linea que hacia que la fecha no fuera editable
-        # self.fields['fecha'].widget.attrs.update({'readonly': ''})
-
-    class Meta:
-        model = ReunionGAR
-        # exclude = ('grupo', 'asistentecia')
-        # se cambia el exclude por fields
-        fields = (
-            'fecha', 'predica', 'numeroTotalAsistentes',
-            'numeroLideresAsistentes', 'numeroVisitas',
-            'ofrenda'
-        )
 
 
 class FormularioSetGeoPosicionGrupo(CustomModelForm):
+    """Formulario para setear la geoposicion de los grupos."""
+
     class Meta:
         model = Grupo
         fields = ('latitud', 'longitud', )
@@ -423,11 +414,6 @@ class EditarGrupoForm(NuevoGrupoForm):
         try:
             with transaction.atomic():
                 grupo = BaseGrupoForm.save(self)
-
-                # if 'parent' in self.changed_data:
-                #     padre = self.cleaned_data['parent']
-                #     grupo.move(padre, pos='sorted-child')
-                #     self.lideres.all().update(grupo=nuevo_padre)
 
                 if 'lideres' in self.changed_data:
                     grupo.lideres.clear()

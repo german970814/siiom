@@ -91,13 +91,13 @@ def busqueda_miembro_api(request, pk):
 
             querys = (
                 Q(nombre__icontains=value) |
-                Q(primerApellido__icontains=value) |
-                Q(segundoApellido__icontains=value) |
+                Q(primer_apellido__icontains=value) |
+                Q(segundo_apellido__icontains=value) |
                 Q(cedula__icontains=value)
             )
 
             query_lideres = Miembro.objects.lideres_disponibles().red(red).only(
-                'nombre', 'cedula', 'primerApellido', 'segundoApellido'
+                'nombre', 'cedula', 'primer_apellido', 'segundo_apellido'
             )
 
             if not query_lideres.exists():
@@ -159,7 +159,7 @@ def busqueda_grupo_api(request, pk):
             q = form.cleaned_data.get('value')
             querys = (
                 Q(lideres__nombre__icontains=q) |
-                Q(lideres__primerApellido__icontains=q) |
+                Q(lideres__primer_apellido__icontains=q) |
                 Q(nombre__icontains=q) |
                 Q(lideres__cedula__icontains=q)
             )

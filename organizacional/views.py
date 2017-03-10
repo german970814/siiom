@@ -8,14 +8,12 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.utils.translation import ugettext as _
-from django.contrib.auth.models import User
 from django.db.models.functions import Lower
 
 # Third Apps
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
 # Locale Apps
-# from gestion_documental.models import Documento
 from .models import Area, Departamento, Empleado
 from .forms import AreaForm, DepartamentoForm, FormularioEditarEmpleado, NuevoEmpleadoForm
 
@@ -216,8 +214,6 @@ def editar_empleado(request, id_empleado):
     data = {'VERBO': VERBO, 'form': form}
 
     return render(request, 'organizacional/crear_empleado.html', data)
-
-# --------------------------------------------------------
 
 
 @login_required
