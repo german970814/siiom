@@ -126,6 +126,14 @@ DATABASES = {
     }
 }
 
+# Cache
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'KEY_FUNCTION': 'tenant_schemas.cache.make_key'
+    }
+}
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
