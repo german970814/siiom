@@ -303,7 +303,7 @@
         _redes_array.push(_redes_json[red])
     }
 
-    {% if DOMINIO == 'gng.com' %}
+    {% if request.tenant.schema_name == 'gng' %}
         var mapa = L.map('mapa2').setView([11.2009692, -74.227405], 15);
     {%  else %}
         var mapa = L.map('mapa2').setView([10.999236, -74.805117], 15);

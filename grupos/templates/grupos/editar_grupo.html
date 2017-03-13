@@ -47,11 +47,11 @@
                 <dd>{{ grupo.direccion|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
-                <dt>Dia del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dt>Dia del {{ request.tenant.termino_gar }}</dt>
                 <dd>{{ grupo.get_diaGAR_display|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
-                <dt>Hora del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</dt>
+                <dt>Hora del {{ request.tenant.termino_gar }}</dt>
                 <dd>{{ grupo.horaGAR|upper }}</dd>
             </dl>
             <dl class="dl-horizontal">
@@ -101,7 +101,7 @@
             <div class="input-group {{form.diaGAR.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_diaGAR" class="requerido control-label">Dia del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
+                        <label for="id_diaGAR" class="requerido control-label">Dia del {{ request.tenant.termino_gar }}*:</label>
                     </dt>
                     <dd>
                         <div class="fg-line">
@@ -116,7 +116,7 @@
             <div class="input-group {{form.horaGAR.css_classes}} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt class="p-t-10">
-                        <label for="id_horaGAR" class="control-label">Hora del {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}*:</label>
+                        <label for="id_horaGAR" class="control-label">Hora del {{ request.tenant.termino_gar }}*:</label>
                     </dt>
                     <dd>
                         <div class="dtp-container dropdown fg-line">

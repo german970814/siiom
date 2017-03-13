@@ -12,6 +12,10 @@ class Iglesia(TenantMixin):
     creada_el = models.DateTimeField(_lazy('creada el'), auto_now_add=True)
     logo = models.ImageField(_lazy('logo'), null=True, blank=True)
 
+    # Terminos especificos de una iglesia.
+    termino_gar = models.CharField(_lazy('termino GAR'), max_length=100, default='GAR')
+    termino_visitas = models.CharField(_lazy('termino visitas'), max_length=100, default='visitas')
+
     class Meta:
         verbose_name = _lazy('iglesia')
         verbose_name_plural = _lazy('iglesias')

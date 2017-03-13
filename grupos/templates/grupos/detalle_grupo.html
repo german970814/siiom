@@ -55,7 +55,7 @@
                                 <span class="input-group-addon">
                                     <i class="zmdi zmdi-calendar c-yellow"></i>
                                 </span>
-                                <h5>{% trans "Día GAR" %}:</h5>
+                                <h5>{% trans "Día" %} {{ request.tenant.termino_gar }}:</h5>
                                 <small>{{ grupo.get_diaGAR_display|upper }}</small>
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                                 <span class="input-group-addon">
                                     <i class="zmdi zmdi-watch c-gray"></i>
                                 </span>
-                                <h5>{% trans "Hora GAR" %}:</h5>
+                                <h5>{% trans "Hora" %} {{ request.tenant.termino_gar }}:</h5>
                                 <small>{{ grupo.horaGAR }}</small>
                             </div>
                         </div>
