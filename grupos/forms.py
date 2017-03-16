@@ -563,6 +563,14 @@ class ArchivarGrupoForm(CustomForm):
             if grupo is not None:
                 self.fields['seleccionados'].queryset = Miembro.objects.filter(grupo_id=grupo)
 
+    def full_clean(self, *args, **kwargs):
+        if hasattr(self.data, 'getlist'):
+            seleccionados = self.data.getlist('seleccionados') or []
+            if seleccionados:
+                if any(filter(lambda x: x == 'all', seleccionados)):
+                    del seleccionados[seleccionados.index('all')]
+        return super().full_clean(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
 
