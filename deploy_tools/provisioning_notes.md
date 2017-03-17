@@ -8,6 +8,7 @@ Provisioning a new site
 * Git
 * pip
 * virtualenv
+* ImageMagick
 
 ## Nginx Virtual Host config
 
@@ -15,7 +16,7 @@ Provisioning a new site
 * replace SITENAME with, eg. staging.my-domain.com
 
 ## Start job
-* see gunicorn_start.template.conf 
+* see gunicorn.template.conf
 * replace SITENAME with, eg. staging.my-domain.com
 
 ## Folder structure
