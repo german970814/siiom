@@ -13,6 +13,7 @@ from miembros.models import Miembro
 from reportes.forms import FormularioRangoFechas
 
 # Python
+from contextlib import suppress
 import logging
 
 
@@ -567,7 +568,7 @@ class ArchivarGrupoForm(CustomForm):
         if hasattr(self.data, 'getlist'):
             seleccionados = self.data.getlist('seleccionados') or []
             if seleccionados:
-                if any(filter(lambda x: x == 'all', seleccionados)):
+                with suppress(ValueError, IndexError):
                     del seleccionados[seleccionados.index('all')]
         return super().full_clean(*args, **kwargs)
 
