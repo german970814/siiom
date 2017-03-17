@@ -8,7 +8,6 @@ from miembros.views import login, logout, administracion, recuperar_contrasena
 
 admin.autodiscover()
 RedirectView.permanent = True
-# handler404 = 'views.custom_404'
 
 urlpatterns = patterns(
     '',
