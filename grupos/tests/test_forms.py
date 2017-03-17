@@ -586,9 +586,31 @@ class ArchivarGrupoFormTest(BaseTest):
         """
         Verifica que se lance un error cuando el grupo de destino es igual al grupo a eliminar.
         """
+
         data = self.datos_formulario
         data.update({'grupo_destino': self.datos_formulario['grupo']})
         form = self.form(self.iglesia, data=data)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('grupo_destino', code='mismo_grupo'))
+
+    def test_parametro_all_no_falle_en_el_formulario(self):
+        """
+        Verifica que cuando en el data se envia el parametro 'all' en 'seleccionados',
+        el formulario lo omita, y no arroje error. (Se sobreescribe el método full_clean).
+        """
+
+        class DictWrapper(dict):
+            """
+            Wrapper para dict, en el cual se agrega el metodo getlist,
+            para simular la peticion de Django en request.POST.
+            """
+            def getlist(self, selector):
+                return self[selector]
+
+        data = DictWrapper(self.datos_formulario)
+        data['seleccionados'] += ['all', ]
+
+        form = self.form(self.iglesia, data=data)
+
+        self.assertTrue(form.is_valid())
