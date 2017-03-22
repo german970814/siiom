@@ -63,6 +63,12 @@ def update_database():
     sed(database_path, 'PASSWORD = ""', 'PASSWORD = "%s"' % (db_settings['pass']))
 
 
+def update_source():
+    run('git fetch')
+    commit = local('git log origin/{} -n 1 --format=%H'.format(env.settings['branch'], capture=True))
+    run('git reset --hard {}'.format(commit))
+
+
 def config_services():
     CONFIG_FILES = {
         'gunicorn': '{}_start'.format(env.host),
@@ -112,6 +118,7 @@ def provision():
             run('setvirtualenvproject')
 
     with virtualenv():
+        update_source()
         create_secret_key()
         update_database()
         update_settings()
@@ -124,12 +131,6 @@ def provision():
     sudo('systemctl restart nginx')
     sudo('supervisorctl reread')
     sudo('supervisorctl update')
-
-
-def update_source():
-    run('git fetch')
-    commit = local('git log origin/{} -n 1 --format=%H'.format(env.settings['branch'], capture=True))
-    run('git reset --hard {}'.format(commit))
 
 
 @task
