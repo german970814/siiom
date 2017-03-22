@@ -1,4 +1,5 @@
 # Django Imports
+from datetime import date
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -856,7 +857,8 @@ def ver_informacion_miembro(request, pk=None):
 
     if miembro.grupo:
         lideres_miembro = miembro.grupo.lideres.all()
-
+    
+    tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
     return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 
 
