@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from fabric.contrib.files import append, sed
 from fabric.api import env, task, run, sudo, cd, prefix, local
 
-REPO_URL = 'https://taniamhn@bitbucket.org/ingeniarte/iglesia.git'
+REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 
 SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.host)
 PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
