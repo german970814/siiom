@@ -7,49 +7,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grupos', '0002_auto_20160201_0932'),
-        ('miembros', '0010_auto_20160525_1525'),
     ]
 
     operations = [
         migrations.CreateModel(
             name='Encontrista',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
                 ('primer_nombre', models.CharField(verbose_name='Primer Nombre', max_length=60)),
-                ('segundo_nombre', models.CharField(verbose_name='Segundo Nombre', max_length=60, blank=True)),
+                ('segundo_nombre', models.CharField(blank=True, max_length=60, verbose_name='Segundo Nombre')),
                 ('primer_apellido', models.CharField(verbose_name='Primer Apellido', max_length=60)),
-                ('segundo_apellido', models.CharField(verbose_name='Segundo Apellido', max_length=60, blank=True)),
-                ('talla', models.CharField(verbose_name='Talla', max_length=3, blank=True)),
-                ('genero', models.CharField(verbose_name='Género', max_length=1, choices=[('M', 'MASCULINO'), ('F', 'FEMENINO')])),
-                ('identificacion', models.IntegerField(verbose_name='Identificación')),
+                ('segundo_apellido', models.CharField(blank=True, max_length=60, verbose_name='Segundo Apellido')),
+                ('talla', models.CharField(blank=True, max_length=3, verbose_name='Talla')),
+                ('genero', models.CharField(choices=[('M', 'MASCULINO'), ('F', 'FEMENINO')], verbose_name='Género', max_length=1)),
+                ('identificacion', models.BigIntegerField(verbose_name='Identificación')),
                 ('email', models.EmailField(verbose_name='Email', max_length=254)),
-                ('asistio', models.BooleanField(verbose_name='Asistio', default=False)),
+                ('asistio', models.BooleanField(default=False, verbose_name='Asistio')),
             ],
         ),
         migrations.CreateModel(
             name='Encuentro',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
                 ('fecha_inicial', models.DateTimeField(verbose_name='Fecha Inicial')),
                 ('fecha_final', models.DateField(verbose_name='Fecha Final')),
                 ('hotel', models.CharField(verbose_name='Hotel', max_length=100)),
-                ('direccion', models.CharField(verbose_name='Direccion', max_length=100, blank=True)),
-                ('observaciones', models.TextField(verbose_name='Observaciones', blank=True)),
-                ('dificultades', models.TextField(verbose_name='Dificultades', blank=True)),
-                ('coordinador', models.ForeignKey(related_name='encuentros_coordinador', verbose_name='Coordinador', to='miembros.Miembro')),
-                ('grupos', models.ManyToManyField(verbose_name='Grupos', to='grupos.Grupo')),
-                ('tesorero', models.ForeignKey(related_name='encuentros_tesorero', verbose_name='Tesorero', to='miembros.Miembro')),
+                ('direccion', models.CharField(blank=True, max_length=100, verbose_name='Direccion')),
+                ('observaciones', models.TextField(blank=True, verbose_name='Observaciones')),
+                ('dificultades', models.TextField(blank=True, verbose_name='Dificultades')),
+                ('estado', models.CharField(choices=[('A', 'ACTIVO'), ('I', 'INACTIVO')], verbose_name='Estado', default='A', max_length=1)),
             ],
-        ),
-        migrations.AddField(
-            model_name='encontrista',
-            name='encuentro',
-            field=models.ForeignKey(to='encuentros.Encuentro', verbose_name='Encuentro'),
-        ),
-        migrations.AddField(
-            model_name='encontrista',
-            name='grupo',
-            field=models.ForeignKey(to='grupos.Grupo', verbose_name='Grupo'),
         ),
     ]

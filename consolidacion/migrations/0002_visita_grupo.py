@@ -7,13 +7,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('consolidacion', '0003_auto_20161029_1154'),
+        ('consolidacion', '0001_initial'),
+        ('grupos', '0001_initial'),
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.AddField(
             model_name='visita',
             name='grupo',
-            field=models.ForeignKey(blank=True, null=True, verbose_name='grupo', to='grupos.Grupo', related_name='visitas'),
+            field=models.ForeignKey(to='grupos.Grupo', blank=True, related_name='visitas', verbose_name='grupo', null=True),
         ),
     ]

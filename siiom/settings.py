@@ -60,7 +60,6 @@ TENANT_APPS = [
     'compras',
     'iglesias',
     'miembros',
-    'academia',
     'reportes',
     'encuentros',
     'consolidacion',
