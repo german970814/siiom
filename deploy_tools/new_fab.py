@@ -28,8 +28,11 @@ ENVIROMENT_SETTINGS = {
     }
 }
 
-SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.site)
-PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
+
+def site_dir():
+    global SITE_FOLDER, PROJECT_ROOT
+    SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.site)
+    PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
 
 
 @contextmanager
@@ -39,14 +42,14 @@ def virtualenv():
 
 
 def create_secret_key():
-    secret_key_file = PROJECT_ROOT + '/Iglesia/secret_key.py'
+    secret_key_file = PROJECT_ROOT + '/siiom/secret_key.py'
     chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
     key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
     append(secret_key_file, "SECRET_KEY = '{}'".format(key))
 
 
 def update_settings():
-    settings_path = PROJECT_ROOT + '/Iglesia/settings.py'
+    settings_path = PROJECT_ROOT + '/siiom/settings.py'
     sed(settings_path, "DEBUG = True", "DEBUG = False")
     sed(settings_path,
         'ALLOWED_HOSTS =.+$',
@@ -57,7 +60,7 @@ def update_settings():
 
 
 def update_database():
-    database_path = PROJECT_ROOT + '/Iglesia/database.py'
+    database_path = PROJECT_ROOT + '/siiom/database.py'
     db_settings = env.settings['db']
 
     sed(database_path, 'NAME = ""', 'NAME = "%s"' % (db_settings['name']))
@@ -66,9 +69,11 @@ def update_database():
 
 
 def update_source():
-    run('git fetch')
-    commit = local('git log origin2/{} -n 1 --format=%H'.format(env.settings['branch'], capture=True))
-    run('git reset --hard {}'.format(commit))
+    commit = local('git log origin2/{} -n 1 --format=%H'.format(env.settings['branch']), capture=True)
+
+    with virtualenv():
+        run('git fetch')
+        run('git reset --hard {}'.format(commit))
 
 
 def config_services():
@@ -81,21 +86,26 @@ def config_services():
     for service in ('nginx', 'gunicorn', 'supervisor'):
         with cd('/etc/{}/'.format(service)):
             sudo('cp {}/deploy_tools/{}.template.conf {}'.format(PROJECT_ROOT, service, CONFIG_FILES[service]))
-            sudo(sed(CONFIG_FILES[service], 'SITENAME', env.site))
-            sudo(sed(CONFIG_FILES[service], 'SITE_FOLDER', SITE_FOLDER))
-            sudo(sed(CONFIG_FILES[service], 'HOSTNAME', env.settings['allowed_host']))
+            sed(CONFIG_FILES[service], 'SITENAME', env.site, use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'SITE_FOLDER', SITE_FOLDER, use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'PROJECT_ROOT', PROJECT_ROOT, use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'HOSTNAME', env.settings['allowed_host'], use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'USER', env.user, use_sudo=True, shell=True)
 
     sudo('chmod u+x /etc/gunicorn/{}'.format(CONFIG_FILES['gunicorn']))
-    sudo('ln -s {nging}/{} {nginx}/sites-enabled'.format(CONFIG_FILES['nginx'], env.site, nginx='/etc/nginx'))
+    sudo('ln -s {nginx}/{} {nginx}/sites-enabled'.format(CONFIG_FILES['nginx'], env.site, nginx='/etc/nginx'))
 
 
 @task
 def staging():
     """Setting staging enviroment."""
 
-    env.hosts = ['ingeniarte@staging.siiom.net']
+    env.user = 'ingeniarte'
+    env.hosts = ['staging.siiom.net']
     env.settings = ENVIROMENT_SETTINGS['staging']
     env.site = env.settings['site']
+
+    site_dir()
 
 
 @task
@@ -111,7 +121,7 @@ def production():
 def provision():
     """Provision a new site on an already provision server."""
 
-    for subfolder in ('static, media, src, tmp/sockets tmp/logs'):
+    for subfolder in ('static', 'media', 'src', 'tmp/sockets', 'tmp/logs'):
         run("mkdir -p {}/{}".format(SITE_FOLDER, subfolder))
 
     run('git clone {} {}'.format(REPO_URL, PROJECT_ROOT))
@@ -122,11 +132,11 @@ def provision():
         with virtualenv():
             run('setvirtualenvproject')
 
+    update_source()
+    create_secret_key()
+    update_database()
+    update_settings()
     with virtualenv():
-        update_source()
-        create_secret_key()
-        update_database()
-        update_settings()
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas --shared')
         run('./manage.py collectstatic')
@@ -142,10 +152,10 @@ def provision():
 def deploy():
     """Deploy new changes to the server"""
 
+    update_source()
+    update_settings()
+    update_database()
     with virtualenv:
-        update_source()
-        update_settings()
-        update_database()
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas')
         run('./manage.py collectstatic')

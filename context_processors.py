@@ -19,18 +19,19 @@ def siiom_context_processor(request):
         'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO
     }
 
-    if request.user.is_authenticated():
-        try:
-            miembro = Miembro.objects.get(usuario=request.user)
-            draw_mapa = False
+    if request.user:
+        if request.user.is_authenticated():
+            try:
+                miembro = Miembro.objects.get(usuario=request.user)
+                draw_mapa = False
 
-            if miembro.grupo_lidera is not None:
-                if miembro.grupo_lidera.get_position() is None:
-                    draw_mapa = True
+                if miembro.grupo_lidera is not None:
+                    if miembro.grupo_lidera.get_position() is None:
+                        draw_mapa = True
 
-            data['draw_mapa'] = draw_mapa
+                data['draw_mapa'] = draw_mapa
 
-        except Miembro.DoesNotExist:
-            pass
+            except Miembro.DoesNotExist:
+                pass
 
     return data
