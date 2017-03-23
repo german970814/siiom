@@ -5,11 +5,9 @@ from fabric.api import env, task, run, sudo, cd, prefix, local
 
 REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 
-SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.host)
-PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
-
 ENVIROMENT_SETTINGS = {
     'production': {
+        'site': 'ingeniarte.siiom.net',
         'branch': 'master',
         'allowed_host': '*.siiom.net',
         'db': {
@@ -19,6 +17,7 @@ ENVIROMENT_SETTINGS = {
         }
     },
     'staging': {
+        'site': 'staging.siiom.net',
         'branch': 'tenant',
         'allowed_host': 'staging.siiom.net',
         'db': {
@@ -29,10 +28,13 @@ ENVIROMENT_SETTINGS = {
     }
 }
 
+SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.site)
+PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
+
 
 @contextmanager
 def virtualenv():
-    with prefix('workon {}'.format(env.host)):
+    with prefix('workon {}'.format(env.site)):
         yield
 
 
@@ -71,20 +73,20 @@ def update_source():
 
 def config_services():
     CONFIG_FILES = {
-        'gunicorn': '{}_start'.format(env.host),
-        'supervisor': 'conf.d/{}.conf'.format(env.host),
-        'nginx': 'sites-available/{}.conf'.format(env.host)
+        'gunicorn': '{}_start'.format(env.site),
+        'supervisor': 'conf.d/{}.conf'.format(env.site),
+        'nginx': 'sites-available/{}.conf'.format(env.site)
     }
 
     for service in ('nginx', 'gunicorn', 'supervisor'):
         with cd('/etc/{}/'.format(service)):
             sudo('cp {}/deploy_tools/{}.template.conf {}'.format(PROJECT_ROOT, service, CONFIG_FILES[service]))
-            sudo(sed(CONFIG_FILES[service], 'SITENAME', env.host))
+            sudo(sed(CONFIG_FILES[service], 'SITENAME', env.site))
             sudo(sed(CONFIG_FILES[service], 'SITE_FOLDER', SITE_FOLDER))
             sudo(sed(CONFIG_FILES[service], 'HOSTNAME', env.settings['allowed_host']))
 
     sudo('chmod u+x /etc/gunicorn/{}'.format(CONFIG_FILES['gunicorn']))
-    sudo('ln -s {nging}/{} {nginx}/sites-enabled'.format(CONFIG_FILES['nginx'], env.host, nginx='/etc/nginx'))
+    sudo('ln -s {nging}/{} {nginx}/sites-enabled'.format(CONFIG_FILES['nginx'], env.site, nginx='/etc/nginx'))
 
 
 @task
@@ -93,6 +95,7 @@ def staging():
 
     env.hosts = ['ingeniarte@staging.siiom.net']
     env.settings = ENVIROMENT_SETTINGS['staging']
+    env.site = env.settings['site']
 
 
 @task
@@ -101,6 +104,7 @@ def production():
 
     env.hosts = ['ingeniarte@ingeniarte.siiom.net']
     env.settings = ENVIROMENT_SETTINGS['staging']
+    env.site = env.settings['site']
 
 
 @task
@@ -113,7 +117,7 @@ def provision():
     run('git clone {} {}'.format(REPO_URL, PROJECT_ROOT))
 
     #  Create virtualenv
-    run('mkvirtualenv {}'.format(env.host))
+    run('mkvirtualenv {}'.format(env.site))
     with cd(PROJECT_ROOT):
         with virtualenv():
             run('setvirtualenvproject')
@@ -146,5 +150,5 @@ def deploy():
         run('./manage.py migrate_schemas')
         run('./manage.py collectstatic')
 
-    sudo('supervisorctl restart {}'.format(env.host))
-    sudo('supervisorctl status {}'.format(env.host))
+    sudo('supervisorctl restart {}'.format(env.site))
+    sudo('supervisorctl status {}'.format(env.site))
