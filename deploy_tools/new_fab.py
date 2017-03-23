@@ -14,16 +14,16 @@ ENVIROMENT_SETTINGS = {
         'allowed_host': '*.siiom.net',
         'db': {
             'name': 'siiom',
-            'pass': '1233345',
+            'pass': 'dbsiiom2017',
             'user': 'siiom'
         }
     },
     'staging': {
-        'branch': 'develop',
+        'branch': 'tenant',
         'allowed_host': 'staging.siiom.net',
         'db': {
             'name': 'siiom_staging',
-            'pass': '1233345',
+            'pass': 'dbsiiom2017',
             'user': 'siiom'
         }
     }
@@ -65,7 +65,7 @@ def update_database():
 
 def update_source():
     run('git fetch')
-    commit = local('git log origin/{} -n 1 --format=%H'.format(env.settings['branch'], capture=True))
+    commit = local('git log origin2/{} -n 1 --format=%H'.format(env.settings['branch'], capture=True))
     run('git reset --hard {}'.format(commit))
 
 
@@ -83,6 +83,7 @@ def config_services():
             sudo(sed(CONFIG_FILES[service], 'SITE_FOLDER', SITE_FOLDER))
             sudo(sed(CONFIG_FILES[service], 'HOSTNAME', env.settings['allowed_host']))
 
+    sudo('chmod u+x /etc/gunicorn/{}'.format(CONFIG_FILES['gunicorn']))
     sudo('ln -s {nging}/{} {nginx}/sites-enabled'.format(CONFIG_FILES['nginx'], env.host, nginx='/etc/nginx'))
 
 
@@ -106,7 +107,7 @@ def production():
 def provision():
     """Provision a new site on an already provision server."""
 
-    for subfolder in ('static, media, src tmp'):
+    for subfolder in ('static, media, src, tmp/sockets tmp/logs'):
         run("mkdir -p {}/{}".format(SITE_FOLDER, subfolder))
 
     run('git clone {} {}'.format(REPO_URL, PROJECT_ROOT))
@@ -128,7 +129,7 @@ def provision():
 
     config_services()
 
-    sudo('systemctl restart nginx')
+    sudo('systemctl reload nginx')
     sudo('supervisorctl reread')
     sudo('supervisorctl update')
 
