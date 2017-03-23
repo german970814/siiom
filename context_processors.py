@@ -19,7 +19,7 @@ def siiom_context_processor(request):
         'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO
     }
 
-    if request.user:
+    if hasattr(request, 'user'):
         if request.user.is_authenticated():
             try:
                 miembro = Miembro.objects.get(usuario=request.user)
