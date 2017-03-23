@@ -139,7 +139,7 @@ def provision():
     with virtualenv():
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas --shared')
-        run('./manage.py collectstatic')
+        run('./manage.py collectstatic --noinput')
 
     config_services()
 
@@ -155,10 +155,10 @@ def deploy():
     update_source()
     update_settings()
     update_database()
-    with virtualenv:
+    with virtualenv():
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas')
-        run('./manage.py collectstatic')
+        run('./manage.py collectstatic --noinput')
 
     sudo('supervisorctl restart {}'.format(env.site))
     sudo('supervisorctl status {}'.format(env.site))
