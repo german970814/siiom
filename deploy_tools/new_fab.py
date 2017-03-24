@@ -4,6 +4,7 @@ from fabric.contrib.files import append, sed
 from fabric.api import env, task, run, sudo, cd, prefix, local
 
 REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
+# psql -U postgres -h localhost siiom_tenant < ~/Desktop/staging_tenant.sql
 
 ENVIROMENT_SETTINGS = {
     'production': {
@@ -18,8 +19,8 @@ ENVIROMENT_SETTINGS = {
     },
     'staging': {
         'site': 'staging.siiom.net',
-        'branch': 'tenant',
-        'allowed_host': 'staging.siiom.net',
+        'branch': 'feature/tenants',
+        'allowed_host': '.staging.siiom.net',
         'db': {
             'name': 'siiom_staging',
             'pass': 'dbsiiom2017',
@@ -76,24 +77,35 @@ def update_source():
         run('git reset --hard {}'.format(commit))
 
 
+def config_gunicorn():
+    file_ = 'gunicorn_start'
+    with cd('{}/bin'.format(SITE_FOLDER)):
+        sudo('cp {}/deploy_tools/gunicorn.template.conf {}'.format(PROJECT_ROOT, file_))
+        sed(file_, 'PROJECT_ROOT', PROJECT_ROOT)
+        sed(file_, 'SITE_FOLDER', SITE_FOLDER)
+        sed(file_, 'SITENAME', env.site)
+        sed(file_, 'USER', env.user)
+
+        run('chmod u+x {}'.format(file_))
+
+
 def config_services():
     CONFIG_FILES = {
-        'gunicorn': '{}_start'.format(env.site),
         'supervisor': 'conf.d/{}.conf'.format(env.site),
         'nginx': 'sites-available/{}.conf'.format(env.site)
     }
 
-    for service in ('nginx', 'gunicorn', 'supervisor'):
+    for service in ('nginx', 'supervisor'):
         with cd('/etc/{}/'.format(service)):
             sudo('cp {}/deploy_tools/{}.template.conf {}'.format(PROJECT_ROOT, service, CONFIG_FILES[service]))
-            sed(CONFIG_FILES[service], 'SITENAME', env.site, use_sudo=True, shell=True)
-            sed(CONFIG_FILES[service], 'SITE_FOLDER', SITE_FOLDER, use_sudo=True, shell=True)
-            sed(CONFIG_FILES[service], 'PROJECT_ROOT', PROJECT_ROOT, use_sudo=True, shell=True)
             sed(CONFIG_FILES[service], 'HOSTNAME', env.settings['allowed_host'], use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'PROJECT_ROOT', PROJECT_ROOT, use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'SITE_FOLDER', SITE_FOLDER, use_sudo=True, shell=True)
+            sed(CONFIG_FILES[service], 'SITENAME', env.site, use_sudo=True, shell=True)
             sed(CONFIG_FILES[service], 'USER', env.user, use_sudo=True, shell=True)
 
-    sudo('chmod u+x /etc/gunicorn/{}'.format(CONFIG_FILES['gunicorn']))
     sudo('ln -s {nginx}/{} {nginx}/sites-enabled'.format(CONFIG_FILES['nginx'], env.site, nginx='/etc/nginx'))
+    config_gunicorn()
 
 
 @task
@@ -121,7 +133,7 @@ def production():
 def provision():
     """Provision a new site on an already provision server."""
 
-    for subfolder in ('static', 'media', 'src', 'tmp/sockets', 'tmp/logs'):
+    for subfolder in ('static', 'media', 'src', 'bin', 'tmp/sockets', 'tmp/logs'):
         run("mkdir -p {}/{}".format(SITE_FOLDER, subfolder))
 
     run('git clone {} {}'.format(REPO_URL, PROJECT_ROOT))
