@@ -1,3 +1,4 @@
+from contextlib import suppress
 from django.contrib.sites.models import Site
 from miembros.models import Miembro
 from grupos.models import HistorialEstado
@@ -21,7 +22,7 @@ def siiom_context_processor(request):
 
     if hasattr(request, 'user'):
         if request.user.is_authenticated():
-            try:
+            with suppress(Exception):
                 miembro = Miembro.objects.get(usuario=request.user)
                 draw_mapa = False
 
@@ -30,8 +31,5 @@ def siiom_context_processor(request):
                         draw_mapa = True
 
                 data['draw_mapa'] = draw_mapa
-
-            except Miembro.DoesNotExist:
-                pass
 
     return data

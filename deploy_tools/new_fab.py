@@ -5,12 +5,13 @@ from fabric.api import env, task, run, sudo, cd, prefix, local
 
 REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 # psql -U postgres -h localhost siiom_tenant < ~/Desktop/staging_tenant.sql
+# rsync -rv --exclude=.DS_Store media/a/ ingeniarte@staging.siiom.net:/home/ingeniarte/sites/staging.siiom.net/media/tenant.staging.siiom.net
 
 ENVIROMENT_SETTINGS = {
     'production': {
         'site': 'ingeniarte.siiom.net',
-        'branch': 'master',
-        'allowed_host': '*.siiom.net',
+        'branch': 'feature/tenants',
+        'allowed_host': '.siiom.net',
         'db': {
             'name': 'siiom',
             'pass': 'dbsiiom2017',
@@ -32,6 +33,7 @@ ENVIROMENT_SETTINGS = {
 
 def site_dir():
     global SITE_FOLDER, PROJECT_ROOT
+    env.site = env.settings['site']
     SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.site)
     PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
 
@@ -115,7 +117,6 @@ def staging():
     env.user = 'ingeniarte'
     env.hosts = ['staging.siiom.net']
     env.settings = ENVIROMENT_SETTINGS['staging']
-    env.site = env.settings['site']
 
     site_dir()
 
@@ -124,9 +125,11 @@ def staging():
 def production():
     """Setting production enviroment."""
 
-    env.hosts = ['ingeniarte@ingeniarte.siiom.net']
-    env.settings = ENVIROMENT_SETTINGS['staging']
-    env.site = env.settings['site']
+    env.user = 'ingeniarte'
+    env.hosts = ['ingeniarte.siiom.net']
+    env.settings = ENVIROMENT_SETTINGS['production']
+
+    site_dir()
 
 
 @task
