@@ -11,7 +11,6 @@ class RedFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('nombre',)
 
     nombre = 'jovenes'
-    iglesia = factory.SubFactory(IglesiaFactory)
 
 
 class HistorialEstadoFactory(factory.django.DjangoModelFactory):

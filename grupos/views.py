@@ -511,7 +511,7 @@ def crear_grupo(request, pk):
     Permite a un administrador o un cabeza de red crear un grupo de una iglesia en la red ingresada.
     """
 
-    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    red = get_object_or_404(Red, pk=pk)
 
     if not request.user.has_perm('miembros.es_administrador') and \
        request.miembro.es_cabeza_red and str(request.miembro.grupo.red_id) != str(pk):
@@ -563,7 +563,7 @@ def listar_grupos(request, pk):
     Permite a un administrador o cabeza de red listar los grupos de la red escogida.
     """
 
-    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    red = get_object_or_404(Red, pk=pk)
 
     if not request.user.has_perm('miembros.es_administrador') and \
        str(request.miembro.grupo.red_id) != str(pk):
@@ -683,7 +683,7 @@ def editar_red(request, pk):
     Permite a un administrador editar una red de su iglesia.
     """
 
-    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    red = get_object_or_404(Red, pk=pk)
     if request.method == 'POST':
         form = RedForm(data=request.POST, instance=red)
         if form.is_valid():
@@ -703,7 +703,7 @@ def listar_redes(request):
     Permite a un administrador listar redes de su iglesia.
     """
 
-    redes = Red.objects.iglesia(request.iglesia)
+    redes = Red.objects.all()
     return render(request, 'grupos/lista_redes.html', {'redes': redes})
 
 

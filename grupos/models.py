@@ -19,7 +19,7 @@ __all__ = (
 )
 
 
-class Red(IglesiaMixin, models.Model):
+class Red(models.Model):
     """Modelo para guardar las redes que tiene una iglesia."""
 
     nombre = models.CharField(max_length=100)

@@ -78,7 +78,7 @@ def busqueda_miembro_api(request, pk):
           lideres que esten en el organigrama de este grupo.
     """
 
-    red = Red.objects.iglesia(request.iglesia).get(pk=pk)
+    red = Red.objects.get(pk=pk)
 
     if request.method == 'POST':
 
