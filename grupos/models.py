@@ -28,7 +28,7 @@ class Red(models.Model):
         return self.nombre
 
 
-class Grupo(SixALNode, IglesiaMixin, AL_Node):
+class Grupo(SixALNode, AL_Node):
     """
     Modelo para guardar la información de los grupos de la iglesia.
     """
@@ -127,9 +127,6 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
         :param padre:
             El grupo inicial desde donde sa va mostrar el organigrama. Si no se indica se muestra todo el organigrama
             de la iglesia.
-
-        :param iglesia:
-            La iglesia a la cual pertenece el organigrama.
         """
 
         # TODO Mejorar en la doc que retorna con un ejemplo usar como guia el metodo get get_annotated_list de
@@ -137,10 +134,11 @@ class Grupo(SixALNode, IglesiaMixin, AL_Node):
 
         arbol = []
         if padre is None:
-            if iglesia is None:
-                return []
-            else:
-                padre = cls.objects.raiz(iglesia)
+            if iglesia is not None:
+                import warnings
+                warnings.warn('Ya no se usa el parametro iglesia')
+
+            padre = cls.objects.raiz(iglesia)
 
         if padre is not None:
             cls._obtener_arbol_recursivamente(padre, arbol)

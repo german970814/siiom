@@ -17,17 +17,15 @@ class GrupoManagerTest(BaseTest):
         raiz = GrupoRaizFactory()
         GrupoFactory(parent=raiz)
 
-        raiz_obtenida = Grupo.objects.raiz(raiz.iglesia_id)
+        raiz_obtenida = Grupo.objects.raiz()
         self.assertEqual(raiz_obtenida, raiz)
 
-    def test_no_hay_raiz_iglesia_ingresada_arbol_devuelva_none(self):
+    def test_no_hay_raiz_arbol_devuelva_none(self):
         """
-        Prueba que si no hay grupo raiz en la iglesia ingresada en el arbol de grupos, devuelva None.
+        Prueba que si no hay grupo raiz en la iglesia en el arbol de grupos, devuelva None.
         """
 
-        GrupoRaizFactory(iglesia__nombre='otra iglesia')
-
-        raiz_obtenida = Grupo.objects.raiz(IglesiaFactory())
+        raiz_obtenida = Grupo.objects.raiz()
         self.assertIsNone(raiz_obtenida)
 
     def test_red_devuelve_grupos_correctos(self):

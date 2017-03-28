@@ -540,7 +540,7 @@ def editar_grupo(request, pk):
     Permite a un administrador o cabeza de red editar un grupo de una iglesia.
     """
 
-    grupo = get_object_or_404(Grupo.objects.iglesia(request.iglesia), pk=pk)
+    grupo = get_object_or_404(Grupo, pk=pk)
     if request.method == 'POST':
         form = EditarGrupoForm(instance=grupo, data=request.POST)
         if form.is_valid():

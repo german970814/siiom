@@ -22,7 +22,7 @@ def lideres_grupo(request, pk):
         El pk de el grupo a partir del cual se quieren sacar los lideres.
     """
 
-    grupo = Grupo.objects.iglesia(request.iglesia).get(pk=pk)
+    grupo = Grupo.objects.get(pk=pk)
     response = [{'pk': lider.pk, 'nombre': str(lider)} for lider in grupo.lideres.all()]
     return HttpResponse(json.dumps(response), content_type=constants.CONTENT_TYPE_API)
 

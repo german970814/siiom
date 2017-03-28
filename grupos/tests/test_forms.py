@@ -34,14 +34,6 @@ class GrupoRaizFormTest(BaseTest):
 
         return data
 
-    def test_campo_lideres_solo_muestra_lideres_iglesia_ingresada(self):
-        """Prueba que el campo lideres solo muestren lideres de la iglesia ingresada."""
-
-        otro_lider = MiembroFactory(iglesia__nombre='otra iglesia', lider=True)
-        form = GrupoRaizForm(self.lider1.iglesia)
-
-        self.assertNotIn(otro_lider, form.fields['lideres'].queryset)
-
     def test_campo_lideres_solo_muestra_lideres(self):
         """
         Prueba que el campo lideres solo se muestren miembros que sean lideres.
@@ -70,7 +62,7 @@ class GrupoRaizFormTest(BaseTest):
         """
 
         raiz = GrupoRaizFactory()
-        form = GrupoRaizForm(raiz.iglesia, instance=raiz)
+        form = GrupoRaizForm(instance=raiz)
 
         self.assertIn(raiz.lideres.first(), form.fields['lideres'].queryset)
 
@@ -95,7 +87,7 @@ class GrupoRaizFormTest(BaseTest):
         """
 
         raiz = GrupoRaizFactory()
-        form = GrupoRaizForm(raiz.iglesia, instance=raiz, data=self.datos_formulario())
+        form = GrupoRaizForm(instance=raiz, data=self.datos_formulario())
         form.save()
 
         self.assertEqual(len(Grupo.get_root_nodes()), 1)
@@ -112,7 +104,7 @@ class GrupoRaizFormTest(BaseTest):
 
         data = self.datos_formulario()
         data['lideres'].append(lider3.id)
-        form = GrupoRaizForm(raiz.iglesia, instance=raiz, data=data)
+        form = GrupoRaizForm(instance=raiz, data=data)
         form.save()
 
         lider3.refresh_from_db()
@@ -429,10 +421,9 @@ class TrasladarLideresFormTest(BaseTest):
         Prueba que el formulario sea invalido si el nuevo grupo es descendiente del grupo escogido.
         """
 
-        iglesia = Grupo.objects.first().iglesia
         data = self.datos_formulario()
         data['nuevo_grupo'] = 600
-        form = TrasladarLideresForm(iglesia, data=data)
+        form = TrasladarLideresForm(data=data)
 
         self.assertFalse(form.is_valid(), msg="No se debe dejar trasladar lideres al grupo de un descendiente.")
         self.assertTrue(
@@ -451,7 +442,6 @@ class ArchivarGrupoFormTest(BaseTest):
 
     def setUp(self):
         self.crear_arbol()
-        self.iglesia = Grupo.objects.first().iglesia
         self.form = ArchivarGrupoForm
 
     @property
@@ -473,7 +463,7 @@ class ArchivarGrupoFormTest(BaseTest):
 
         datos = self.datos_formulario
         datos.update({'grupo_destino': None})
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('grupo_destino', code='sin_destino'))
@@ -489,7 +479,7 @@ class ArchivarGrupoFormTest(BaseTest):
             {'seleccionados': list(map(str, Grupo.objects.get(id=100).miembros.all().values_list('id', flat=1)))}
         )
 
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('seleccionados'))
@@ -499,7 +489,7 @@ class ArchivarGrupoFormTest(BaseTest):
         Verifica que el grupo escogido, sea archivado.
         """
 
-        form = self.form(self.iglesia, data=self.datos_formulario)
+        form = self.form(data=self.datos_formulario)
 
         self.assertTrue(form.is_valid())
         self.assertTrue(form.cleaned_data['grupo'].estado, HistorialEstado.ACTIVO)
@@ -514,7 +504,7 @@ class ArchivarGrupoFormTest(BaseTest):
         del grupo padre.
         """
 
-        form = self.form(self.iglesia, data=self.datos_formulario)
+        form = self.form(data=self.datos_formulario)
 
         self.assertTrue(form.is_valid())
 
@@ -533,7 +523,7 @@ class ArchivarGrupoFormTest(BaseTest):
 
         data = self.datos_formulario
         data.pop('mantener_lideres')
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertTrue(form.is_valid())
 
@@ -550,7 +540,7 @@ class ArchivarGrupoFormTest(BaseTest):
         """
 
         datos = self.datos_formulario
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -570,7 +560,7 @@ class ArchivarGrupoFormTest(BaseTest):
         datos = self.datos_formulario
         datos.pop('seleccionados')
         datos.pop('grupo_destino')
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -588,7 +578,7 @@ class ArchivarGrupoFormTest(BaseTest):
 
         data = self.datos_formulario
         data.update({'grupo_destino': self.datos_formulario['grupo']})
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('grupo_destino', code='mismo_grupo'))
@@ -610,6 +600,6 @@ class ArchivarGrupoFormTest(BaseTest):
         data = DictWrapper(self.datos_formulario)
         data['seleccionados'] += ['all', ]
 
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertTrue(form.is_valid())

@@ -15,8 +15,11 @@ class DesvincularLiderGrupoAPITest(BaseTestAPI):
     """
 
     def setUp(self):
+        from iglesias.tests.factories import IglesiaFactory
+        import warnings
+        warnings.warn('Ya no se debe usar IglesiaFactory.')
         self.crear_arbol()
-        self.iglesia = Grupo.objects.first().iglesia
+        self.iglesia = IglesiaFactory()
         self.grupo = Grupo.objects.get(id=300)
         self.miembro = MiembroFactory(lider=True, grupo=self.grupo.parent)
         self.url = reverse('miembros:desvincular_grupo_api', args=(self.grupo.lideres.first().id, ))
