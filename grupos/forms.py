@@ -294,10 +294,7 @@ class GrupoRaizForm(BaseGrupoForm):
     Formulario para la creación o edición del grupo raiz.
     """
 
-    def __init__(self, iglesia=None, *args, **kwargs):
-        if iglesia is not None:
-            import warnings
-            warnings.warn('Ya no se usa el parametro iglesia')
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         if self.instance.pk:
@@ -464,12 +461,6 @@ class RedForm(CustomModelForm):
         super().__init__(*args, **kwargs)
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-    def save(self, iglesia=None):
-        if iglesia:
-            self.instance.iglesia = iglesia
-
-        return super().save()
-
 
 class TrasladarLideresForm(CustomForm):
     """
@@ -489,11 +480,7 @@ class TrasladarLideresForm(CustomForm):
         queryset=Grupo.objects.none(), label=_lazy('Grupo destino (Nuevo grupo a liderar)')
     )
 
-    def __init__(self, iglesia=None, *args, **kwargs):
-        if iglesia is not None:
-            import warnings
-            warnings.warn('Ya no se debe usar el parametro iglesia.')
-
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
@@ -503,12 +490,9 @@ class TrasladarLideresForm(CustomForm):
         self.fields['nuevo_grupo'].queryset = Grupo.objects.prefetch_related('lideres')
 
         if self.is_bound:
-            # with suppress(Grupo.DoesNotExist, ValueError):
-            try:
+            with suppress(Grupo.DoesNotExist, ValueError):
                 grupo = Grupo.objects.get(pk=self.data.get('grupo', None))
                 self.fields['lideres'].queryset = grupo.lideres.all()
-            except:
-                pass
 
     def clean(self):
         cleaned_data = super().clean()
@@ -550,14 +534,11 @@ class ArchivarGrupoForm(CustomForm):
     )
     seleccionados = forms.ModelMultipleChoiceField(queryset=Miembro.objects.all(), required=False)
 
-    def __init__(self, iglesia=None, *args, **kwargs):
-        if iglesia is not None:
-            import warnings
-            warnings.warn('Ya no se debe usar el parametro iglesia')
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['grupo_destino'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['grupo'].queryset = Grupo.objects.hojas(iglesia).prefetch_related('lideres')
+        self.fields['grupo'].queryset = Grupo.objects.hojas().prefetch_related('lideres')
 
         if self.is_bound:
             grupo_destino = self.data.get('grupo_destino', None) or None

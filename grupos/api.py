@@ -37,7 +37,7 @@ def discipulos_miembros_grupo(request, pk):
         El pk de el grupo a partir del cual se quieren obtener los miembros y discipulos.
     """
 
-    grupo = get_object_or_404(Grupo, iglesia=request.iglesia, pk=pk)
+    grupo = get_object_or_404(Grupo, pk=pk)
 
     string = serializers.serialize(
         queryset=grupo.miembros.all().order_by('nombre'),

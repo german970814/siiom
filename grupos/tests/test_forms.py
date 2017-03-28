@@ -2,7 +2,6 @@ from unittest import mock, skip
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
-from iglesias.tests.factories import IglesiaFactory
 from ..models import Grupo, Red, HistorialEstado
 from ..forms import (
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm,
@@ -40,7 +39,7 @@ class GrupoRaizFormTest(BaseTest):
         """
 
         no_lider = MiembroFactory()
-        form = GrupoRaizForm(no_lider.iglesia)
+        form = GrupoRaizForm()
 
         self.assertNotIn(no_lider, form.fields['lideres'].queryset)
 
@@ -51,7 +50,7 @@ class GrupoRaizFormTest(BaseTest):
 
         grupo = GrupoFactory()
         lider_sin_grupo = MiembroFactory(lider=True)
-        form = GrupoRaizForm(lider_sin_grupo.iglesia_id)
+        form = GrupoRaizForm()
 
         self.assertNotIn(grupo.lideres.first(), form.fields['lideres'].queryset)
         self.assertIn(lider_sin_grupo, form.fields['lideres'].queryset)
@@ -72,7 +71,7 @@ class GrupoRaizFormTest(BaseTest):
         escogidos.
         """
 
-        form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
+        form = GrupoRaizForm(data=self.datos_formulario())
         raiz = form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
@@ -121,7 +120,7 @@ class GrupoRaizFormTest(BaseTest):
         Prueba que si ocurre un error al guardar el formulario no se guarde ni el grupo ni los lideres.
         """
 
-        form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
+        form = GrupoRaizForm(data=self.datos_formulario())
         form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
@@ -137,7 +136,7 @@ class GrupoRaizFormTest(BaseTest):
         Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
         """
 
-        form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
+        form = GrupoRaizForm(data=self.datos_formulario())
         form.save()
 
         self.assertTrue(update_mock.called)
@@ -243,7 +242,7 @@ class NuevoGrupoFormTest(BaseTest):
     @skip
     def test_campo_lideres_muestra_lideres_raiz_si_red_no_tiene_grupo(self):
         """
-        Prueba que el campo lideres muestre los lideres disponibles que asisten al grupo raiz de la iglesia si la red
+        Prueba que el campo lideres muestre los lideres disponibles que asisten al grupo raiz de una iglesia si la red
         ingresada no tiene ningún grupo.
         """
 
@@ -353,7 +352,7 @@ class EditarGrupoFormTest(BaseTest):
     @skip
     def test_campo_parent_muestra_raiz_si_padre_grupo_seleccionado_es_raiz(self):
         """
-        Prueba que el campo padre muestre el grupo raiz de la iglesia si el padre del grupo seleccionado es la raiz.
+        Prueba que el campo padre muestre el grupo raiz de una iglesia si el padre del grupo seleccionado es la raiz.
         """
 
         raiz = Grupo.objects.get(id=100)

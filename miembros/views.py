@@ -220,7 +220,7 @@ def editar_perfil_miembro(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     casado = False
     mismo = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -711,7 +711,7 @@ def ver_discipulos(request, pk=None):
     d = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -757,7 +757,7 @@ def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -857,7 +857,7 @@ def ver_informacion_miembro(request, pk=None):
 
     if miembro.grupo:
         lideres_miembro = miembro.grupo.lideres.all()
-    
+
     tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
     return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 

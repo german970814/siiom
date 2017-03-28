@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
-from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red, HistorialEstado
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
@@ -116,21 +115,6 @@ class GrupoRaizViewTest(BaseTest):
 
         self.assertEqual(self.get_context('form').instance, raiz)
 
-    def test_formulario_valido_crea_grupo_raiz_iglesia_correcta(self):
-        """
-        Prueba que cuando se haga un POST y el formulario sea valido el grupo creado pertenezca a la iglesia del usuario
-        logueado.
-        """
-
-        iglesia_correcta = self.admin.miembro_set.first().iglesia
-        otro_iglesia = IglesiaFactory(nombre='nueva iglesia')
-
-        self.login_usuario(self.admin)
-        self.post(self.URL, data=self.datos_formulario())
-
-        self.assertNotEqual(iglesia_correcta, otro_iglesia)
-        self.assertIsNotNone(Grupo.objects.raiz(iglesia_correcta))
-
     def test_post_formulario_valido_redirecciona_get(self):
         """
         Prueba que si se hace un POST y el formulario es valido redirecciona a misma página en GET.
@@ -139,6 +123,7 @@ class GrupoRaizViewTest(BaseTest):
         self.login_usuario(self.admin)
         response = self.post(self.URL, data=self.datos_formulario())
 
+        self.assertIsNotNone(Grupo.objects.raiz())
         self.assertRedirects(response, self.reverse(self.URL))
 
     def test_formulario_invalido_muestra_errores(self):

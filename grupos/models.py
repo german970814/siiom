@@ -5,7 +5,6 @@ from django.utils.translation import ugettext_lazy as _lazy
 
 # Locale Apps
 from miembros.models import CambioTipo
-from common.models import IglesiaMixin
 from consolidacion.utils import clean_direccion
 from .managers import GrupoManager, GrupoManagerStandard, HistorialManager
 from .six import SixALNode
@@ -30,7 +29,7 @@ class Red(models.Model):
 
 class Grupo(SixALNode, AL_Node):
     """
-    Modelo para guardar la información de los grupos de la iglesia.
+    Modelo para guardar la información de los grupos de una iglesia.
     """
 
     ACTIVO = 'A'
@@ -118,7 +117,7 @@ class Grupo(SixALNode, AL_Node):
             resultado.append(lista_hijos)
 
     @classmethod
-    def obtener_arbol(cls, padre=None, iglesia=None):
+    def obtener_arbol(cls, padre=None):
         """
         :returns:
             El organigrama en una lista de listas incluyendo el padre, que me indica como va el desarrollo de los
@@ -126,7 +125,7 @@ class Grupo(SixALNode, AL_Node):
 
         :param padre:
             El grupo inicial desde donde sa va mostrar el organigrama. Si no se indica se muestra todo el organigrama
-            de la iglesia.
+            de una iglesia.
         """
 
         # TODO Mejorar en la doc que retorna con un ejemplo usar como guia el metodo get get_annotated_list de
@@ -134,11 +133,7 @@ class Grupo(SixALNode, AL_Node):
 
         arbol = []
         if padre is None:
-            if iglesia is not None:
-                import warnings
-                warnings.warn('Ya no se usa el parametro iglesia')
-
-            padre = cls.objects.raiz(iglesia)
+            padre = cls.objects.raiz()
 
         if padre is not None:
             cls._obtener_arbol_recursivamente(padre, arbol)

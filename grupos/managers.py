@@ -1,4 +1,3 @@
-import warnings
 # Django
 from django.db import models
 from django.utils.module_loading import import_string
@@ -139,17 +138,11 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         """
         return self.model._objects.archivados()
 
-    def raiz(self, iglesia=None):
+    def raiz(self):
         """
         :returns:
-            La raiz del arbol de grupos de la iglesia ingresada. Si no existe retorna ``None``.
-
-        :param iglesia:
-            La iglesia de la cual se va a retornar la raíz.
+            La raiz del arbol de grupos de una iglesia. Si no existe retorna ``None``.
         """
-
-        if iglesia is not None:
-            warnings.warn('Ya no se debe usar el parametro iglesia.')
 
         nodos = self.model.get_root_nodes()
         if nodos:
@@ -173,15 +166,13 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
 
         return self.filter(reuniones_discipulado__confirmacionEntregaOfrenda=False).distinct()
 
-    def hojas(self, iglesia=None):
+    def hojas(self):
         """
         :returns:
             Un QuerySet con los grupos que no tienen descendientes (Incluye los grupos que solo tienen descendientes
             archivados).
         """
 
-        if iglesia is not None:
-            warnings.warn('Ya no se debe usar el parametro iglesia en hojas.')
         return self.exclude(children_set__in=self.model.objects.all())
 
 

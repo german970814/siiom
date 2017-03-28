@@ -21,7 +21,7 @@ def desvincular_lider_grupo_api(request, pk):
     miembro = get_object_or_404(Miembro.objects.iglesia(request.iglesia), pk=pk)
 
     if request.method == 'POST':
-        form = DesvincularLiderGrupoForm(iglesia=request.iglesia, data=request.POST)
+        form = DesvincularLiderGrupoForm(data=request.POST)
 
         if form.is_valid():
             form.desvincular_lider()

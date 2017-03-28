@@ -15,11 +15,7 @@ class DesvincularLiderGrupoAPITest(BaseTestAPI):
     """
 
     def setUp(self):
-        from iglesias.tests.factories import IglesiaFactory
-        import warnings
-        warnings.warn('Ya no se debe usar IglesiaFactory.')
         self.crear_arbol()
-        self.iglesia = IglesiaFactory()
         self.grupo = Grupo.objects.get(id=300)
         self.miembro = MiembroFactory(lider=True, grupo=self.grupo.parent)
         self.url = reverse('miembros:desvincular_grupo_api', args=(self.grupo.lideres.first().id, ))
@@ -32,7 +28,6 @@ class DesvincularLiderGrupoAPITest(BaseTestAPI):
         response = self.POST(login=True, kwargs_user={'admin': True})
 
         self.assertEqual(response[constants.RESPONSE_CODE], constants.RESPONSE_DENIED)
-
         self.assertIn('lider', response['errors'])
 
     def test_get_request_is_json(self):
@@ -50,6 +45,6 @@ class DesvincularLiderGrupoAPITest(BaseTestAPI):
         sea llamado desde la api
         """
 
-        response = self.POST(login=True, kwargs_user={'admin': True}, data={'lider': self.miembro.id})
+        self.POST(login=True, kwargs_user={'admin': True}, data={'lider': self.miembro.id})
 
         self.assertTrue(desvincular_lider.called)

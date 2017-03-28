@@ -101,7 +101,7 @@ def busqueda_miembro_api(request, pk):
             )
 
             if not query_lideres.exists():
-                query_lideres = Grupo.objects.raiz(request.iglesia).miembros.lideres_disponibles()
+                query_lideres = Grupo.objects.raiz().miembros.lideres_disponibles()
 
             if grupo is not None:
                 query_lideres |= grupo.lideres.all()
@@ -150,7 +150,7 @@ def busqueda_grupo_api(request, pk):
         Se debe enviar por GET una variable llamada 'value', a partir de la cual iniciaría la busqueda.
     """
 
-    grupo = get_object_or_404(Grupo, pk=pk, iglesia=request.iglesia)
+    grupo = get_object_or_404(Grupo, pk=pk)
 
     if request.method == 'GET' and request.is_ajax():
         form = BusquedaForm(data=request.GET)
