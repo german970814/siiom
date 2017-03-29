@@ -1,5 +1,4 @@
 from common.tests.base import BaseTest
-from iglesias.tests.factories import IglesiaFactory
 from ..models import Grupo
 from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory, ReunionDiscipuladoFactory
 

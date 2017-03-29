@@ -11,9 +11,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
     """Pruebas unitarias para el formulario de DesvincularLiderGrupoForm."""
 
     def setUp(self):
-        from iglesias.tests.factories import IglesiaFactory
         self.crear_arbol()
-        self.iglesia = IglesiaFactory()
         self.form = DesvincularLiderGrupoForm
         self.grupo = Grupo.objects.get(id=300)
         self.miembro = MiembroFactory(lider=True, grupo=self.grupo.parent)

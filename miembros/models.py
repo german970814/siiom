@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 # Django imports
 from django.db import models
 from django.conf import settings
@@ -6,11 +5,8 @@ from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _lazy
 
 # Locale imports
-from common.models import IglesiaMixin
 from .managers import MiembroManager
-
-# Python imports
-import datetime
+from common.models import UtilsModelMixin
 
 
 __all__ = (
@@ -46,7 +42,7 @@ class TipoMiembro(models.Model):
         return self.nombre.upper()
 
 
-class Miembro(IglesiaMixin, models.Model):
+class Miembro(UtilsModelMixin, models.Model):
     """
     Modelo para guardar los miembros de una iglesia.
     """

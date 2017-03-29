@@ -1,6 +1,5 @@
 import factory
 import datetime
-from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import BarrioFactory
 
 
