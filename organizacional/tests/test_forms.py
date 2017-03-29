@@ -4,7 +4,6 @@ from unittest import mock
 from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 from common.tests.base import BaseTest
-from iglesias.tests.factories import IglesiaFactory
 from ..forms import NuevoEmpleadoForm
 from .factories import DepartamentoFactory, EmpleadoFactory, AreaFactory
 
@@ -15,9 +14,6 @@ class NuevoEmpleadoFormTest(BaseTest):
     """
     Pruebas unitarias para el formulario de creación de empleados de una iglesia.
     """
-
-    def setUp(self):
-        self.iglesia = IglesiaFactory()
 
     def datos_formulario(self, **kwargs):
         """
@@ -40,7 +36,7 @@ class NuevoEmpleadoFormTest(BaseTest):
 
         data = self.datos_formulario()
         data['contrasena2'] = 'diferente'
-        form = NuevoEmpleadoForm(self.iglesia, data=data)
+        form = NuevoEmpleadoForm(data=data)
 
         self.assertFalse(
             form.is_valid(),
@@ -58,7 +54,7 @@ class NuevoEmpleadoFormTest(BaseTest):
 
         data = self.datos_formulario()
         del data['jefe_departamento']
-        form = NuevoEmpleadoForm(self.iglesia, data=data)
+        form = NuevoEmpleadoForm(data=data)
 
         self.assertFalse(form.is_valid(), msg="Los campos jefe de departamento y areas se encuentran vacíos.")
 
@@ -69,7 +65,7 @@ class NuevoEmpleadoFormTest(BaseTest):
 
         data = self.datos_formulario()
         EmpleadoFactory(usuario__email=data['email'])
-        form = NuevoEmpleadoForm(self.iglesia, data=data)
+        form = NuevoEmpleadoForm(data=data)
 
         self.assertFalse(
             form.is_valid(),
@@ -83,7 +79,7 @@ class NuevoEmpleadoFormTest(BaseTest):
 
         from ..models import Empleado
 
-        form = NuevoEmpleadoForm(self.iglesia, data=self.datos_formulario())
+        form = NuevoEmpleadoForm(data=self.datos_formulario())
         form.is_valid()
         form.save()
 
@@ -95,7 +91,7 @@ class NuevoEmpleadoFormTest(BaseTest):
         usuario.
         """
 
-        form = NuevoEmpleadoForm(self.iglesia, data=self.datos_formulario())
+        form = NuevoEmpleadoForm(data=self.datos_formulario())
         form.is_valid()
         empleado = form.save()
 
@@ -114,7 +110,7 @@ class NuevoEmpleadoFormTest(BaseTest):
         data = self.datos_formulario()
         usuario = UsuarioFactory(email=data['email'])
 
-        form = NuevoEmpleadoForm(self.iglesia, data=data)
+        form = NuevoEmpleadoForm(data=data)
         form.is_valid()
         empleado = form.save()
 
@@ -131,7 +127,7 @@ class NuevoEmpleadoFormTest(BaseTest):
         AreaFactory(nombre='Tesoreria', departamento=self.departamento)
         AreaFactory(departamento=self.departamento)
 
-        form = NuevoEmpleadoForm(self.iglesia, data=data)
+        form = NuevoEmpleadoForm(data=data)
         form.is_valid()
         empleado = form.save()
 
@@ -145,7 +141,7 @@ class NuevoEmpleadoFormTest(BaseTest):
 
         from ..models import Empleado
 
-        form = NuevoEmpleadoForm(self.iglesia, data=self.datos_formulario())
+        form = NuevoEmpleadoForm(data=self.datos_formulario())
         form.is_valid()
         form.save()
 
@@ -158,7 +154,7 @@ class NuevoEmpleadoFormTest(BaseTest):
         Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
         """
 
-        form = NuevoEmpleadoForm(self.iglesia, data=self.datos_formulario())
+        form = NuevoEmpleadoForm(data=self.datos_formulario())
         form.is_valid()
         form.save()
 

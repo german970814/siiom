@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _lazy
 
-from common.models import IglesiaMixin
 from .managers import AreaManager
 
 
@@ -46,7 +45,7 @@ class Area(models.Model):
         super(Area, self).save(*args, **kwargs)
 
 
-class Empleado(IglesiaMixin, models.Model):
+class Empleado(models.Model):
     """Modelo que guarda las personas que trabajan actualmente para una iglesia."""
 
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name=_lazy('usuario'))

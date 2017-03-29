@@ -16,7 +16,5 @@ class IglesiaMiddleware(object):
         if not request.user.is_anonymous() and not request.path.startswith(reverse('admin:index')):
             if getattr(request, 'miembro', None):
                 request.iglesia = request.miembro.iglesia
-            elif getattr(request, 'empleado', None):
-                request.iglesia = request.empleado.iglesia
             else:
                 raise Http404
