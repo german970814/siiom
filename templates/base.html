@@ -408,7 +408,7 @@
                     </li>
                     {% endif %}
                     {% switch "gestion_documental" %}
-                        {% if perms.gestion_documental or perms.organizacional %}
+                        {% if request.user.empleado %}
                             <li class="sub-menu">
                                 <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
                                 <ul>
@@ -423,11 +423,9 @@
                                         <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
                                     </li>
                                     {% endif %}
-                                    {% if request.user.empleado %}
                                     <li>
                                         <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
                                     </li>
-                                    {% endif %}
                                     {% if perms.gestion_documental.add_registro %}
                                     <li class="sub-menu">
                                         <a href="#">{% trans "Solicitudes Custodia Documentos" %}</a>
