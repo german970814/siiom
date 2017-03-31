@@ -9,12 +9,7 @@ def siiom_context_processor(request):
     Procesador de contextos para siiom.
     """
 
-    site = Site.objects.get_current()
-
     data = {
-        'sitio': site,
-        'DOMINIO': site.domain,
-        'NOMBRE_IGLESIA': site.name,
         'GRUPO_ACTIVO': HistorialEstado.ACTIVO,
         'GRUPO_INACTIVO': HistorialEstado.INACTIVO,
         'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO
