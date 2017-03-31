@@ -11,7 +11,7 @@ REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 ENVIROMENT_SETTINGS = {
     'production': {
         'site': 'ingeniarte.siiom.net',
-        'branch': 'feature/tenants',
+        'branch': 'master',
         'allowed_host': '.siiom.net',
         'db': {
             'name': 'siiom',
@@ -21,7 +21,7 @@ ENVIROMENT_SETTINGS = {
     },
     'staging': {
         'site': 'staging.siiom.net',
-        'branch': 'feature/tenants',
+        'branch': 'develop',
         'allowed_host': '.staging.siiom.net',
         'db': {
             'name': 'siiom_staging',
@@ -73,7 +73,7 @@ def update_database():
 
 
 def update_source():
-    commit = local('git log origin2/{} -n 1 --format=%H'.format(env.settings['branch']), capture=True)
+    commit = local('git log origin/{} -n 1 --format=%H'.format(env.settings['branch']), capture=True)
 
     with virtualenv():
         run('git fetch')
