@@ -8,21 +8,41 @@ Provisioning a new site
 * Git
 * pip
 * virtualenv
+* ImageMagick
+* Supervisor
 
 ## Nginx Virtual Host config
 
 * see nginx.template.conf
-* replace SITENAME with, eg. staging.my-domain.com
+* replace SITENAME
+* replace HOSTNAME
+* replace SITE_FOLDER
 
 ## Start job
-* see gunicorn_start.template.conf 
-* replace SITENAME with, eg. staging.my-domain.com
+
+# See gunicorn.template.conf
+* replace USER
+* replace SITENAME
+* replace SITE_FOLDER
+* replace PROJECT_ROOT
+# See supervisor.template.conf
+* replace SITENAME
+* replace SITE_FOLDER
+
+
+## Using Fabric to provision
+* use fab enviroment provision
+
+## Using Fabric to deploy
+* use fab enviroment deploy
 
 ## Folder structure
 Assume we have a user account at /home/username
 
-/home/username/webapps/nginx
+/home/username/sites/
 └── SITENAME
-   ├── database
-   ├── source
+   ├── src
    ├── static
+   ├── media
+   ├── tmp
+   ├── bin

@@ -14,7 +14,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% if DOMINIO == 'gng.com' %}SARA{% else %}SIIOM{% endif %}: {{ NOMBRE_IGLESIA }}</title>
+    <title>{% if request.tenant.schema_name == 'gng' %}SARA{% else %}SIIOM{% endif %}: {{ request.tenant.nombre|upper }}</title>
 
     <link href="{% static 'Template/jquery/vendors/bower_components/fullcalendar/dist/fullcalendar.min.css' %}" rel="stylesheet">
     <link href="{% static 'Template/jquery/vendors/bower_components/animate.css/animate.min.css' %}" rel="stylesheet">
@@ -164,7 +164,9 @@
             </li>
             {% endif %}
             <li class="logo hidden-xs">
-                <a href="{% if perms.miembros.es_administrador %}{% url 'administracion' %}{% else %}{% url 'miembros:miembro_inicio' %}{% endif %}">{% if DOMINIO == 'gng.com' %}SARA{% else %}SIIOM{% endif %}</a>
+                <a href="{% if perms.miembros.es_administrador %}/administracion/{% else %}/miembro/{% endif %}">
+                    {% if request.tenant.schema_name == 'gng' %}SARA{% else %}SIIOM{% endif %}
+                </a>
             </li>
             <li class="pull-right">
                 <ul class="top-menu">
@@ -251,7 +253,7 @@
         {% if request.user.is_authenticated %}
         <aside id="sidebar" class="sidebar c-overflow">
             <div class="profile-menu">
-                <a href="" style="background: url('{% get_static_prefix %}Imagenes/{{DOMINIO}}.png') !important;">
+                <a href="" style="background: url('{% if request.tenant.logo %}{{ request.tenant.logo.url }}{% endif %}') !important;">
                     <div class="profile-pic">
                         <img src="{% if request.miembro.foto_perfil %}{{ request.miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                     </div>
@@ -311,7 +313,7 @@
                     {% endif %}
                     {% if perms.miembros.es_administrador or request.miembro.es_director_red %}
                         <li>
-                            <a href="{% url 'grupos:reportar_reunion_grupo_admin' %}">{% trans 'Reportar Reunión' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'grupos:reportar_reunion_grupo_admin' %}">{% trans 'Reportar Reunión' %} {{ request.tenant.termino_gar }}</a>
                         </li>
                         <li>
                             <a href="{% url 'grupos:reportes_grupo' %}">{% trans 'Ver Reportes Enviados Por Grupos' %}</a>
@@ -325,25 +327,25 @@
                 {% endif %}
                 {% if request.miembro.grupo_lidera %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> {% trans 'Mi' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                    <a href=""><i class="zmdi zmdi-view-subtitles"></i> {% trans 'Mi' %} {{ request.tenant.termino_gar }}</a>
                     <ul>
                         {% if request.miembro.grupo_lidera.estado == GRUPO_ACTIVO %}
                         <li>
-                            <a href="{% url 'grupos:reportar_reunion_grupo' %}">{% trans 'Ingresar Sobre' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'grupos:reportar_reunion_grupo' %}">{% trans 'Ingresar Sobre' %} {{ request.tenant.termino_gar }}</a>
                         </li>
                         {% endif %}
                         <li>
-                            <a href="{% url 'miembros:editar_grupo' request.miembro.id %}">{% trans 'Editar mi' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'miembros:editar_grupo' request.miembro.id %}">{% trans 'Editar mi' %} {{ request.tenant.termino_gar }}</a>
                         </li>
                     </ul>
                 </li>
                 {% endif %}
                 {% if request.miembro.grupo_lidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
-                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                    <a href=""><i class="zmdi zmdi-assignment"></i> Informes {{ request.tenant.termino_gar }}</a>
                     <ul>
                         <li>
-                            <a href="{% url 'reportes:estadistico_reuniones_grupo' %}">Informe General de mi {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'reportes:estadistico_reuniones_grupo' %}">Informe General de mi {{ request.tenant.termino_gar }}</a>
                         </li>
                     </ul>
                 </li>
@@ -372,7 +374,7 @@
                             <a href="{% url 'reportes:estadistico_reuniones_discipulado' %}">{% trans 'Estadistico de reuniones Discupulado' %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'reportes:estadistico_totalizado_reuniones_grupo' %}">{% trans 'Estadistico totalizado de reuniones' %} {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %}</a>
+                            <a href="{% url 'reportes:estadistico_totalizado_reuniones_grupo' %}">{% trans 'Estadistico totalizado de reuniones' %} {{ request.tenant.termino_gar }}</a>
                         </li>
                     </ul>
                 </li>
@@ -406,7 +408,7 @@
                     </li>
                     {% endif %}
                     {% switch "gestion_documental" %}
-                        {% if perms.gestion_documental or perms.organizacional %}
+                        {% if request.user.empleado %}
                             <li class="sub-menu">
                                 <a href=""><i class="zmdi zmdi-collection-text"></i>{% trans "Gestión Documental" %}</a>
                                 <ul>
@@ -421,11 +423,9 @@
                                         <a href="{% url 'sgd:historial_registros' %}">{% trans "Historial de Registros" %}</a>
                                     </li>
                                     {% endif %}
-                                    {% if request.user.empleado %}
                                     <li>
                                         <a href="{% url 'sgd:busqueda_registros' %}">{% trans "Buscar Registro" %}</a>
                                     </li>
-                                    {% endif %}
                                     {% if perms.gestion_documental.add_registro %}
                                     <li class="sub-menu">
                                         <a href="#">{% trans "Solicitudes Custodia Documentos" %}</a>
@@ -720,7 +720,7 @@
         });
         {% if draw_mapa %}
             {% if request.miembro.grupo_lidera or perms.miembros.es_administrador %}
-            {% if DOMINIO == 'gng.com' %}
+            {% if request.tenant.schema_name == 'gng' %}
                 var mymap = L.map('mapa').setView([11.2009692, -74.227405], 18);
             {%  else %}
                 var mymap = L.map('mapa').setView([10.999236, -74.805117], 18);

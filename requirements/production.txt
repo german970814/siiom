@@ -1,4 +1,7 @@
 -r base.txt
 
-gunicorn==19.4.5
-setproctitle==1.1.9
+gunicorn
+setproctitle
+
+# monitoring
+newrelic

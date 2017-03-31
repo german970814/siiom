@@ -164,12 +164,11 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Reportar Reunion {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</h4>
+                <h4 class="modal-title">Reportar Reunion {{ request.tenant.termino_gar }}</h4>
             </div>
 	        <form action="" method="POST" id="form-reporte" enctype="multipart/form-data">
 	        	{% csrf_token %}
 	            <div class="modal-body">
-		            {% comment %}{{ form_reporte.as_p }}{% endcomment %}
                     <div class="row">
                         <div class="col-md-6">
                             <div class="input-group {{ form_reporte.fecha.css_classes }}">
@@ -181,7 +180,7 @@
                                     {{ form_reporte.fecha }}
                                 </div>
                                 {% for err in form_reporte.fecha.errors %}
-                                    <small class="help-block">{{err}}</small>
+                                    <small class="help-block">{{ err }}</small>
                                 {% endfor %}
                             </div>
                         </div>
