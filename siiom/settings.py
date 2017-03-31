@@ -216,6 +216,7 @@ LOGGING = {
             'level': 'INFO',
             'filters': ['tenant_context'],
             'class': 'logging.StreamHandler',
+            'formatter': 'tenant_context',
         },
     },
     'loggers': {
@@ -223,7 +224,6 @@ LOGGING = {
             'handlers': ['console'],
         },
     },
-    'root': {'level': 'INFO'},
 }
 
 AUTHENTICATION_BACKENDS = (
