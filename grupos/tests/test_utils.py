@@ -1,12 +1,12 @@
-from django.test import TestCase
+import datetime
 
+from common.tests.base import BaseTest
 from .. import utils, managers
 from .factories import ReunionGARFactory
 
-import datetime
 
 
-class UtilsModuleTest(TestCase):
+class UtilsModuleTest(BaseTest):
     """
     Pruebas unitarias para el modulo Utils.
     """
@@ -32,7 +32,7 @@ class UtilsModuleTest(TestCase):
             self.assertEqual(days_list, list(map(lambda x: x.day, fechas)))
 
 
-class UtilsReunionReportadaTest(TestCase):
+class UtilsReunionReportadaTest(BaseTest):
     """
     Pruebas unitarias para la funcion de reunion_reportada
     """

@@ -287,7 +287,7 @@
         <div class="card-header">
             <h1>
                 <legend>
-                    <h3 class="f-700 f-20">Estadistico de reuniones {% if DOMINIO == 'gng.com' %}G.A.A{% else %}G.A.R{% endif %}</h3>
+                    <h3 class="f-700 f-20">Estadistico de reuniones {{ request.tenant.termino_gar }}</h3>
                 </legend>
             </h1>
             {% if messages %}
@@ -447,7 +447,7 @@
 {% endif %}
     {% if grafico %}
     <div class="block-header">
-        <h2>Estadistico Reuniones {% if DOMINIO == 'gng.com' %}GAA{% else %}GAR{% endif %} de {% if form.cleaned_data.descendientes %}la red <strong>{{ form.cleaned_data.grupo.nombre|upper }}</strong>{% else %}el grupo <strong>{{ form.cleaned_data.grupo.nombre|upper }}</strong>{% endif %}</h2>
+        <h2>Estadistico Reuniones {{ request.tenant.termino_gar }} de {% if form.cleaned_data.descendientes %}la red <strong>{{ form.cleaned_data.grupo.nombre|upper }}</strong>{% else %}el grupo <strong>{{ form.cleaned_data.grupo.nombre|upper }}</strong>{% endif %}</h2>
     </div>
     <div id="hidden_to_print">
         <h5>GRUPOS INACTIVOS:  {{ grupos_inactivos }}</h5>

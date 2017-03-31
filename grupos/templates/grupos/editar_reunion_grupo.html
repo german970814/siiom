@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block js %}
-{# <script type="text/javascript" src="{% static 'Scripts/js/jquery-ui-1.10.4.custom.js' %}"></script> #}
 <script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
 {% include "grupos/_reportes_js.html" %}
 <script type="text/javascript">
@@ -98,7 +97,7 @@
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="{{ form.numeroTotalAsistentes.id_for_label }}" class="fg-label control-label requerido">¿Cu&aacute;l fue la asistencia total de tu grupo incluyendo visitas y l&iacute;deres?:</label>
+                                <label for="{{ form.numeroTotalAsistentes.id_for_label }}" class="fg-label control-label">¿Cu&aacute;l fue la asistencia total de tu grupo incluyendo {{ request.tenant.termino_visitas }} y l&iacute;deres?:</label>
                                 {{ form.numeroTotalAsistentes }}
                             </div>
                             {% for err in form.numeroTotalAsistentes.errors %}
@@ -113,7 +112,7 @@
                                 <i class="zmdi zmdi-star"></i>
                             </span>
                             <div class="fg-line requerido">
-                                <label for="{{ form.numeroVisitas.id_for_label }}" class="fg-label control-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran visitas?:</label>
+                                <label for="{{ form.numeroVisitas.id_for_label }}" class="fg-label control-label requerido">¿Cu&aacute;ntos de ese total de asistentes eran {{ request.tenant.termino_visitas }}?:</label>
                                 {{ form.numeroVisitas }}
                             </div>
                             {% for err in form.numeroVisitas.errors %}

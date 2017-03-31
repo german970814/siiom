@@ -28,8 +28,8 @@
         function drawChart(){
             var data = google.visualization.arrayToDataTable({{ values|safe }});
             var options = {
-                width: '100%', 
-                height: 500, 
+                width: '100%',
+                height: 500,
                 title: {{ titulo|safe }},
                 hAxis: {
                     title: 'Rango de fechas'
@@ -42,19 +42,19 @@
             chart.draw(data, options);
         }
     {% else %}
-        
+
     {% endif %}
 
     $(window).load(function() {
 
         {% if sw and not grupoDis %}
-            swal({   
-                title: "Lo Sentimos",   
-                text: "El grupo {{grupo_i.nombre}} no tiene discípulos",   
+            swal({
+                title: "Lo Sentimos",
+                text: "El grupo {{grupo_i.nombre}} no tiene discípulos",
                 type: "warning",
-                confirmButtonColor: "#DD6B55",   
-                confirmButtonText: "Aceptar",   
-                closeOnConfirm: false 
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Aceptar",
+                closeOnConfirm: false
             });
         {% endif %}
     });
@@ -121,7 +121,7 @@
         <div class="card-header">
             <h1>
                 <legend>
-                    <h3 class="f-700 f-20">Estadistico de reuniones GAR totalizado por discípulos</h3>
+                    <h3 class="f-700 f-20">Estadistico de reuniones {{ request.tenant.termino_gar }} totalizado por discípulos</h3>
                 </legend>
             </h1>
             {% if messages %}
@@ -255,12 +255,12 @@
         <div class="card-body card-padding">
             <div class="row">
                 <div class="col-md-12">
-                    <div id="out"></div>                 
+                    <div id="out"></div>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
-</div>  
+</div>
 
 {% endblock %}
