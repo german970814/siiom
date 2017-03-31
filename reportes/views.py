@@ -14,7 +14,7 @@ from .forms import (
     FormularioRangoFechas, FormularioPredicas,
     FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar
 )
-from .utils import get_date_for_report
+from .utils import fechas_reporte_generador
 from common.decorators import permisos_requeridos
 from grupos.utils import reunion_reportada
 from grupos.models import ReunionGAR, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
@@ -338,9 +338,9 @@ def estadistico_reuniones_gar(request):
         if form.is_valid():
             # se sacan los datos iniciales
             _fecha_inicial = form.cleaned_data['fecha_inicial']
-            # se hace una copia de la fecha, ya que está sera modificada
             fecha_inicial = copy.deepcopy(_fecha_inicial)
-            fecha_final = form.cleaned_data['fecha_final']
+            _fecha_final = form.cleaned_data['fecha_final']
+            fecha_final = copy.deepcopy(_fecha_final)
             grupo = form.cleaned_data['grupo']
             descendientes = form.cleaned_data.get('descendientes', False)
             ofrenda = form.cleaned_data.get('ofrenda', False)
@@ -371,19 +371,15 @@ def estadistico_reuniones_gar(request):
 
             total_grupos_inactivos = grupos.inactivos().count()
 
-            # Se sacan los datos semanales, de acuerdo a la funcion get_date_for_report
-            while fecha_inicial < fecha_final:
-                # a partir de la fecha inicial y final se obtiene un rango de fechas, y una fecha despues
-                siguiente = get_date_for_report(fecha_inicial, fecha_final)
-
+            for fecha_inicial, fecha_final in fechas_reporte_generador(_fecha_inicial, _fecha_final):
                 # esto, trae los que estuvieron activos antes de la fecha filtrada
-                _grupos_semana = grupos.filter(historiales__fecha__lte=siguiente).activos()  # .exclude(id=grupo.id)
+                _grupos_semana = grupos.filter(historiales__fecha__lte=fecha_final).activos()  # .exclude(id=grupo.id)
 
                 grupos_semana = _grupos_semana.count()
 
                 # se sacan las reuniones que han ocurrido en la semana actual de el ciclo
                 _reuniones = ReunionGAR.objects.filter(
-                    fecha__range=(fecha_inicial, siguiente),
+                    fecha__range=(fecha_inicial, fecha_final),
                     grupo__in=_grupos_semana  # solo busca los reportes de los grupos de la semana
                 ).defer(
                     'confirmacionEntregaOfrenda', 'novedades', 'predica'
@@ -409,7 +405,7 @@ def estadistico_reuniones_gar(request):
                 )
 
                 # se añaden las fechas
-                fechas_str = fecha_inicial.strftime(format_date) + date_split + siguiente.strftime(format_date)
+                fechas_str = fecha_inicial.strftime(format_date) + date_split + fecha_final.strftime(format_date)
                 labels_fecha.insert(len(labels_fecha), fechas_str)  # se agrega como pila
 
                 # si hay ofrendas
@@ -481,9 +477,6 @@ def estadistico_reuniones_gar(request):
                 # Para las barras de google, los datos deben quedar organizados de la forma
                 # arr = [['Fecha', 'CAMPO1', 'CAMPO2'], ['Fecha', value1, 'value1', value2, 'value2']]
 
-                # se añade un dia para asegurase de durar la semana y se repite el ciclo
-                fecha_inicial = siguiente + datetime.timedelta(days=1)
-
             # Grafico porcentaje Grupos Reportados
             for x, label in enumerate(labels_fecha):  # labels fecha contiene el tamaño de objetos base (No. semanas)
                 # se agrega el label como iniacial para los valores de asistencia
@@ -507,7 +500,7 @@ def estadistico_reuniones_gar(request):
                     moroso.fechas = '; '.join(_morosos[moroso.id.__str__()])
                     moroso.no_reportes = len(_morosos[moroso.id.__str__()])
                 else:
-                    morosos.pop()
+                    morosos.pop(morosos.index(moroso))
 
             data['sin_reportar'] = morosos
             data['tabla'] = data_table

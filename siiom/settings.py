@@ -200,10 +200,23 @@ EMAIL_HOST_USER = 'iglesia'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'tenant_context': {
+            '()': 'tenant_schemas.log.TenantContextFilter'
+        },
+    },
+    'formatters': {
+        'tenant_context': {
+            'format': '[%(schema_name)s:%(domain_url)s] %(levelname)-7s %(asctime)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
+            'filters': ['tenant_context'],
             'class': 'logging.StreamHandler',
+            'formatter': 'tenant_context',
         },
     },
     'loggers': {
@@ -211,7 +224,6 @@ LOGGING = {
             'handlers': ['console'],
         },
     },
-    'root': {'level': 'INFO'},
 }
 
 AUTHENTICATION_BACKENDS = (
