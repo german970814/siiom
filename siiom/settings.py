@@ -52,6 +52,7 @@ TENANT_APPS = [
     'django.contrib.messages',
     'django.contrib.contenttypes',
 
+    'waffle',
     'treebeard',
 
     'pqr',
