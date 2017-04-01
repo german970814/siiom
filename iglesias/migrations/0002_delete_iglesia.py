@@ -8,6 +8,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('iglesias', '0001_initial'),
+        ('grupos', '0004_remove_grupo_iglesia'),
+        ('miembros', '0002_remove_miembro_iglesia'),
+        ('organizacional', '0002_remove_empleado_iglesia'),
     ]
 
     operations = [
