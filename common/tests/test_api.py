@@ -23,7 +23,6 @@ class TestAPIBusquedaMiembro(BaseTestAPI):
         self.barrio = BarrioFactory()
         self.red_jovenes = Red.objects.get(nombre='jovenes')
         self.url = reverse('common:busqueda_miembro_api', args=(self.red_jovenes.id, ))
-        # self.url = '/common/api/buscar_miembro/{}/'.format(self.red_jovenes.id)
 
     def test_get_not_response(self):
         """Prueba que en GET no se obtienga la respuesta."""
@@ -70,10 +69,9 @@ class TestAPIBusquedaMiembro(BaseTestAPI):
         """
 
         grupo1 = Grupo.objects.get(id=200)
-        lider_joven = MiembroFactory(lider=True, grupo=grupo1)
+        lider_joven = MiembroFactory(lider=True, grupo=grupo1, nombre='asdfder')
 
         response = self.POST(data={'value': lider_joven.nombre[0:5]})
-
         self.assertEqual(response['miembros'].__len__(), 0)
 
     def test_campo_lideres_muestra_lideres_raiz_si_red_no_tiene_grupo(self):
