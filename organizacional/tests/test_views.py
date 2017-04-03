@@ -1,6 +1,5 @@
 import factory
 from common.tests.base import BaseTest
-from iglesias.tests.factories import IglesiaFactory
 from .factories import EmpleadoFactory, DepartamentoFactory
 
 
@@ -37,24 +36,6 @@ class CrearEmpleadoViewTest(BaseTest):
         self.get_check_200(self.URL)
         self.assertResponseContains('id_cedula', html=False)
 
-    def test_post_formulario_valido_crea_empleado_iglesia_correcta(self):
-        """
-        Prueba que cuando se haga un POST y el formulario sea valido el empleado creado pertenezca a la iglesia del
-        usuario logueado.
-        """
-        from ..models import Empleado
-
-        data = self.datos_formulario()
-        iglesia_correcta = self.admin.iglesia
-        iglesia_incorrecta = IglesiaFactory(nombre='nueva iglesia')
-
-        self.login_usuario(self.admin.usuario)
-        self.post(self.URL, data=data)
-
-        empleado = Empleado.objects.get(cedula=data['cedula'])
-        self.assertEqual(iglesia_correcta, empleado.iglesia)
-        self.assertNotEqual(iglesia_incorrecta, empleado.iglesia)
-
     def test_admin_post_formulario_invalido_muestra_errores(self):
         """
         Prueba que cuando se haga POST y el formulario esta invalido se muestren los errores.
@@ -74,7 +55,12 @@ class CrearEmpleadoViewTest(BaseTest):
         Prueba que cuando se haga POST y el formulario sea valido redireccione.
         """
 
-        response = self.post(self.URL, data=self.datos_formulario())
+        from ..models import Empleado
+
+        data = self.datos_formulario()
+        response = self.post(self.URL, data=data)
+
+        self.assertEqual(Empleado.objects.filter(cedula=data['cedula']).count(), 1, msg='Se debio crear el empleado')
         self.assertRedirects(response, self.reverse(self.URL))
 
 
@@ -87,18 +73,13 @@ class ListarEmpleadoViewTest(BaseTest):
 
     def setUp(self):
         self.empleado = EmpleadoFactory(admin=True)
-        self.iglesia = self.empleado.iglesia
 
-    def test_get_muestra_empleado_iglesia_correcta(self):
+    def test_get_muestra_empleado(self):
         """
-        Prueba que se muestren los empleados de la iglesia correcta.
+        Prueba que se muestren los empleados.
         """
-
-        iglesia_incorrecta = IglesiaFactory(nombre='CDR')
-        empleado2 = EmpleadoFactory(iglesia=iglesia_incorrecta)
 
         self.login_usuario(self.empleado.usuario)
         self.get_check_200(self.URL)
 
         self.assertResponseContains(self.empleado.cedula, html=False)
-        self.assertResponseNotContains(empleado2.cedula, html=False)

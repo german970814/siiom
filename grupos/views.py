@@ -40,7 +40,7 @@ def editar_horario_reunion_grupo(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
     draw_mapa = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     # grupo.miembros.all()
     if pk:
         try:
@@ -455,7 +455,7 @@ def organigrama_grupos(request):
 
     usuario = request.user
     if usuario.has_perm('miembros.es_administrador'):
-        arbol = Grupo.obtener_arbol(iglesia=request.iglesia)
+        arbol = Grupo.obtener_arbol()
     else:
         miembro = get_object_or_404(Miembro, usuario=usuario)
         arbol = Grupo.obtener_arbol(miembro.grupo_lidera)
@@ -471,16 +471,15 @@ def grupo_raiz(request):
     editar.
     """
 
-    iglesia = request.iglesia
-    raiz = Grupo.objects.raiz(iglesia)  # Si no existe raiz devuelve None
+    raiz = Grupo.objects.raiz()  # Si no existe raiz devuelve None
     if request.method == 'POST':
-        form = GrupoRaizForm(iglesia, instance=raiz, data=request.POST)
+        form = GrupoRaizForm(instance=raiz, data=request.POST)
         if form.is_valid():
             if form.save():
                 messages.success(request, _('El grupo fue guardado correctamente.'))
                 return redirect('grupos:raiz')
     else:
-        form = GrupoRaizForm(iglesia, instance=raiz)
+        form = GrupoRaizForm(instance=raiz)
 
     return render(request, 'grupos/grupo_raiz.html', {'form': form})
 
@@ -511,7 +510,7 @@ def crear_grupo(request, pk):
     Permite a un administrador o un cabeza de red crear un grupo de una iglesia en la red ingresada.
     """
 
-    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    red = get_object_or_404(Red, pk=pk)
 
     if not request.user.has_perm('miembros.es_administrador') and \
        request.miembro.es_cabeza_red and str(request.miembro.grupo.red_id) != str(pk):
@@ -540,7 +539,7 @@ def editar_grupo(request, pk):
     Permite a un administrador o cabeza de red editar un grupo de una iglesia.
     """
 
-    grupo = get_object_or_404(Grupo.objects.iglesia(request.iglesia), pk=pk)
+    grupo = get_object_or_404(Grupo, pk=pk)
     if request.method == 'POST':
         form = EditarGrupoForm(instance=grupo, data=request.POST)
         if form.is_valid():
@@ -563,7 +562,7 @@ def listar_grupos(request, pk):
     Permite a un administrador o cabeza de red listar los grupos de la red escogida.
     """
 
-    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    red = get_object_or_404(Red, pk=pk)
 
     if not request.user.has_perm('miembros.es_administrador') and \
        str(request.miembro.grupo.red_id) != str(pk):
@@ -667,7 +666,7 @@ def crear_red(request):
     if request.method == 'POST':
         form = RedForm(data=request.POST)
         if form.is_valid():
-            form.save(request.iglesia)
+            form.save()
             messages.success(request, _('La red se ha creado correctamente.'))
             return redirect('grupos:red_nueva')
     else:
@@ -683,7 +682,7 @@ def editar_red(request, pk):
     Permite a un administrador editar una red de su iglesia.
     """
 
-    red = get_object_or_404(Red.objects.iglesia(request.iglesia), pk=pk)
+    red = get_object_or_404(Red, pk=pk)
     if request.method == 'POST':
         form = RedForm(data=request.POST, instance=red)
         if form.is_valid():
@@ -703,7 +702,7 @@ def listar_redes(request):
     Permite a un administrador listar redes de su iglesia.
     """
 
-    redes = Red.objects.iglesia(request.iglesia)
+    redes = Red.objects.all()
     return render(request, 'grupos/lista_redes.html', {'redes': redes})
 
 
@@ -715,13 +714,13 @@ def trasladar_lideres(request):
     """
 
     if request.method == 'POST':
-        form = TrasladarLideresForm(request.iglesia, data=request.POST)
+        form = TrasladarLideresForm(data=request.POST)
         if form.is_valid():
             form.trasladar()
             messages.success(request, _('Los lideres se han trasladado correctamente.'))
             return redirect('grupos:organigrama')
     else:
-        form = TrasladarLideresForm(request.iglesia)
+        form = TrasladarLideresForm()
 
     return render(request, 'grupos/trasladar_lideres.html', {'form': form})
 
@@ -736,7 +735,7 @@ def archivar_grupo(request):
     grupo = request.GET.get('grupo', None) or None
 
     if request.method == 'POST':
-        form = ArchivarGrupoForm(data=request.POST, iglesia=request.iglesia)
+        form = ArchivarGrupoForm(data=request.POST)
 
         if form.is_valid():
             form.archiva_grupo()
@@ -751,6 +750,6 @@ def archivar_grupo(request):
                 print(form.errors)
 
     else:
-        form = ArchivarGrupoForm(iglesia=request.iglesia, initial={'grupo': grupo})
+        form = ArchivarGrupoForm(initial={'grupo': grupo})
 
     return render(request, 'grupos/archivar_grupos.html', {'form': form})

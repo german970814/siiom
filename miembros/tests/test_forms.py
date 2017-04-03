@@ -12,7 +12,6 @@ class DesvincularLiderGrupoFormTest(BaseTest):
 
     def setUp(self):
         self.crear_arbol()
-        self.iglesia = Grupo.objects.first().iglesia
         self.form = DesvincularLiderGrupoForm
         self.grupo = Grupo.objects.get(id=300)
         self.miembro = MiembroFactory(lider=True, grupo=self.grupo.parent)
@@ -31,7 +30,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
         """
 
         datos = {'grupo': 300, 'grupo_destino': 200, 'nuevo_lider': 120, 'seleccionados': ['200', '100']}
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('lider', code='required'))
@@ -49,7 +48,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
         self.assertTrue(self.grupo.lideres.count() == 1, "Asegurate que el tamaño de lideres de grupo sea igual a 1")
 
         datos = {'lider': lider.id}
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('nuevo_lider', code='required'))
@@ -63,10 +62,12 @@ class DesvincularLiderGrupoFormTest(BaseTest):
         self.grupo.lideres.clear()
         self.grupo.lideres.add(lider)
 
-        datos = {'lider': lider.id, 'seleccionados': list(map(str, Grupo.objects.get(
-                id=300).miembros.all().values_list('id', flat=1)))}
+        datos = {
+            'lider': lider.id,
+            'seleccionados': list(map(str, Grupo.objects.get(id=300).miembros.all().values_list('id', flat=1)))
+        }
 
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('grupo_destino', code='sin_destino'))
@@ -88,7 +89,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
 
         datos = {'lider': lider.id, 'nuevo_lider': miembro.id}
 
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -113,7 +114,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
 
         datos = {'lider': lider.id}
 
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -137,7 +138,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
         lider = self.grupo.lideres.first()
         lideres = self.grupo.lideres.exclude(id=lider.id)
         datos = {'lider': lider.id, 'nuevo_lider': miembro.id}
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -156,7 +157,7 @@ class DesvincularLiderGrupoFormTest(BaseTest):
 
         miembro = self.miembro
 
-        form = self.form(self.iglesia, data={'lider': miembro.id})
+        form = self.form(data={'lider': miembro.id})
 
         self.assertTrue(form.is_valid())
 

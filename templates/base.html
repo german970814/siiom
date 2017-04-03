@@ -258,11 +258,7 @@
                         <img src="{% if request.miembro.foto_perfil %}{{ request.miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
                     </div>
                     <div class="profile-info">
-                    {% if request.user.is_authenticated %}
                         {{ request.user.email }}
-                    {% else %}
-                        {{ NOMBRE_IGLESIA }}
-                    {% endif %}
                         <i class="zmdi zmdi-caret-down"></i>
                     </div>
                 </a>

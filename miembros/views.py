@@ -7,7 +7,6 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db.models.aggregates import Count
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, render, get_object_or_404, redirect
@@ -220,7 +219,7 @@ def editar_perfil_miembro(request, pk=None):
     miembro = Miembro.objects.get(usuario=request.user)
     casado = False
     mismo = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -711,7 +710,7 @@ def ver_discipulos(request, pk=None):
     d = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -757,7 +756,7 @@ def ver_informacion_miembro(request, pk=None):
     i = True
     miembro = Miembro.objects.get(usuario=request.user)
     mismo = True
-    form_desvincular = DesvincularLiderGrupoForm(iglesia=request.iglesia)
+    form_desvincular = DesvincularLiderGrupoForm()
     if pk:
         try:
             miembro = Miembro.objects.get(id=pk)
@@ -857,7 +856,7 @@ def ver_informacion_miembro(request, pk=None):
 
     if miembro.grupo:
         lideres_miembro = miembro.grupo.lideres.all()
-    
+
     tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
     return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
 
@@ -922,7 +921,7 @@ def crear_miembro(request):
     if request.method == 'POST':
         form = NuevoMiembroForm(data=request.POST)
         if form.is_valid():
-            form.save(request.iglesia)
+            form.save()
             messages.success(request, _('El miembro se ha creado correctamente'))
             return redirect('miembros:nuevo')
     else:
@@ -951,7 +950,7 @@ def trasladar(request, pk):
     Permite a un administrador trasladar un miembro que no lidere grupo a que asista a otro grupo.
     """
 
-    miembro = get_object_or_404(Miembro.objects.iglesia(request.iglesia), pk=pk)
+    miembro = get_object_or_404(Miembro, pk=pk)
     if miembro.grupo_lidera:
         return redirect(reverse('sin_permiso'))
 

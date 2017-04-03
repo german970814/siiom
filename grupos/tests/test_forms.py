@@ -2,7 +2,6 @@ from unittest import mock, skip
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
-from iglesias.tests.factories import IglesiaFactory
 from ..models import Grupo, Red, HistorialEstado
 from ..forms import (
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm,
@@ -34,21 +33,13 @@ class GrupoRaizFormTest(BaseTest):
 
         return data
 
-    def test_campo_lideres_solo_muestra_lideres_iglesia_ingresada(self):
-        """Prueba que el campo lideres solo muestren lideres de la iglesia ingresada."""
-
-        otro_lider = MiembroFactory(iglesia__nombre='otra iglesia', lider=True)
-        form = GrupoRaizForm(self.lider1.iglesia)
-
-        self.assertNotIn(otro_lider, form.fields['lideres'].queryset)
-
     def test_campo_lideres_solo_muestra_lideres(self):
         """
         Prueba que el campo lideres solo se muestren miembros que sean lideres.
         """
 
         no_lider = MiembroFactory()
-        form = GrupoRaizForm(no_lider.iglesia)
+        form = GrupoRaizForm()
 
         self.assertNotIn(no_lider, form.fields['lideres'].queryset)
 
@@ -59,7 +50,7 @@ class GrupoRaizFormTest(BaseTest):
 
         grupo = GrupoFactory()
         lider_sin_grupo = MiembroFactory(lider=True)
-        form = GrupoRaizForm(lider_sin_grupo.iglesia_id)
+        form = GrupoRaizForm()
 
         self.assertNotIn(grupo.lideres.first(), form.fields['lideres'].queryset)
         self.assertIn(lider_sin_grupo, form.fields['lideres'].queryset)
@@ -70,7 +61,7 @@ class GrupoRaizFormTest(BaseTest):
         """
 
         raiz = GrupoRaizFactory()
-        form = GrupoRaizForm(raiz.iglesia, instance=raiz)
+        form = GrupoRaizForm(instance=raiz)
 
         self.assertIn(raiz.lideres.first(), form.fields['lideres'].queryset)
 
@@ -80,7 +71,7 @@ class GrupoRaizFormTest(BaseTest):
         escogidos.
         """
 
-        form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
+        form = GrupoRaizForm(data=self.datos_formulario())
         raiz = form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
@@ -95,7 +86,7 @@ class GrupoRaizFormTest(BaseTest):
         """
 
         raiz = GrupoRaizFactory()
-        form = GrupoRaizForm(raiz.iglesia, instance=raiz, data=self.datos_formulario())
+        form = GrupoRaizForm(instance=raiz, data=self.datos_formulario())
         form.save()
 
         self.assertEqual(len(Grupo.get_root_nodes()), 1)
@@ -112,7 +103,7 @@ class GrupoRaizFormTest(BaseTest):
 
         data = self.datos_formulario()
         data['lideres'].append(lider3.id)
-        form = GrupoRaizForm(raiz.iglesia, instance=raiz, data=data)
+        form = GrupoRaizForm(instance=raiz, data=data)
         form.save()
 
         lider3.refresh_from_db()
@@ -129,7 +120,7 @@ class GrupoRaizFormTest(BaseTest):
         Prueba que si ocurre un error al guardar el formulario no se guarde ni el grupo ni los lideres.
         """
 
-        form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
+        form = GrupoRaizForm(data=self.datos_formulario())
         form.save()
         self.lider1.refresh_from_db()
         self.lider2.refresh_from_db()
@@ -145,7 +136,7 @@ class GrupoRaizFormTest(BaseTest):
         Prueba que si ocurre un error al momento de guardar el formulario, se agregue un error al formulario.
         """
 
-        form = GrupoRaizForm(IglesiaFactory(), data=self.datos_formulario())
+        form = GrupoRaizForm(data=self.datos_formulario())
         form.save()
 
         self.assertTrue(update_mock.called)
@@ -251,7 +242,7 @@ class NuevoGrupoFormTest(BaseTest):
     @skip
     def test_campo_lideres_muestra_lideres_raiz_si_red_no_tiene_grupo(self):
         """
-        Prueba que el campo lideres muestre los lideres disponibles que asisten al grupo raiz de la iglesia si la red
+        Prueba que el campo lideres muestre los lideres disponibles que asisten al grupo raiz de una iglesia si la red
         ingresada no tiene ningún grupo.
         """
 
@@ -361,7 +352,7 @@ class EditarGrupoFormTest(BaseTest):
     @skip
     def test_campo_parent_muestra_raiz_si_padre_grupo_seleccionado_es_raiz(self):
         """
-        Prueba que el campo padre muestre el grupo raiz de la iglesia si el padre del grupo seleccionado es la raiz.
+        Prueba que el campo padre muestre el grupo raiz de una iglesia si el padre del grupo seleccionado es la raiz.
         """
 
         raiz = Grupo.objects.get(id=100)
@@ -429,10 +420,9 @@ class TrasladarLideresFormTest(BaseTest):
         Prueba que el formulario sea invalido si el nuevo grupo es descendiente del grupo escogido.
         """
 
-        iglesia = Grupo.objects.first().iglesia
         data = self.datos_formulario()
         data['nuevo_grupo'] = 600
-        form = TrasladarLideresForm(iglesia, data=data)
+        form = TrasladarLideresForm(data=data)
 
         self.assertFalse(form.is_valid(), msg="No se debe dejar trasladar lideres al grupo de un descendiente.")
         self.assertTrue(
@@ -451,7 +441,6 @@ class ArchivarGrupoFormTest(BaseTest):
 
     def setUp(self):
         self.crear_arbol()
-        self.iglesia = Grupo.objects.first().iglesia
         self.form = ArchivarGrupoForm
 
     @property
@@ -473,7 +462,7 @@ class ArchivarGrupoFormTest(BaseTest):
 
         datos = self.datos_formulario
         datos.update({'grupo_destino': None})
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('grupo_destino', code='sin_destino'))
@@ -489,7 +478,7 @@ class ArchivarGrupoFormTest(BaseTest):
             {'seleccionados': list(map(str, Grupo.objects.get(id=100).miembros.all().values_list('id', flat=1)))}
         )
 
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('seleccionados'))
@@ -499,7 +488,7 @@ class ArchivarGrupoFormTest(BaseTest):
         Verifica que el grupo escogido, sea archivado.
         """
 
-        form = self.form(self.iglesia, data=self.datos_formulario)
+        form = self.form(data=self.datos_formulario)
 
         self.assertTrue(form.is_valid())
         self.assertTrue(form.cleaned_data['grupo'].estado, HistorialEstado.ACTIVO)
@@ -514,7 +503,7 @@ class ArchivarGrupoFormTest(BaseTest):
         del grupo padre.
         """
 
-        form = self.form(self.iglesia, data=self.datos_formulario)
+        form = self.form(data=self.datos_formulario)
 
         self.assertTrue(form.is_valid())
 
@@ -533,7 +522,7 @@ class ArchivarGrupoFormTest(BaseTest):
 
         data = self.datos_formulario
         data.pop('mantener_lideres')
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertTrue(form.is_valid())
 
@@ -550,7 +539,7 @@ class ArchivarGrupoFormTest(BaseTest):
         """
 
         datos = self.datos_formulario
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -570,7 +559,7 @@ class ArchivarGrupoFormTest(BaseTest):
         datos = self.datos_formulario
         datos.pop('seleccionados')
         datos.pop('grupo_destino')
-        form = self.form(self.iglesia, data=datos)
+        form = self.form(data=datos)
 
         self.assertTrue(form.is_valid())
 
@@ -588,7 +577,7 @@ class ArchivarGrupoFormTest(BaseTest):
 
         data = self.datos_formulario
         data.update({'grupo_destino': self.datos_formulario['grupo']})
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error('grupo_destino', code='mismo_grupo'))
@@ -610,6 +599,6 @@ class ArchivarGrupoFormTest(BaseTest):
         data = DictWrapper(self.datos_formulario)
         data['seleccionados'] += ['all', ]
 
-        form = self.form(self.iglesia, data=data)
+        form = self.form(data=data)
 
         self.assertTrue(form.is_valid())

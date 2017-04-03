@@ -1,6 +1,5 @@
 import factory
 from common.tests.factories import UsuarioFactory
-from iglesias.tests.factories import IglesiaFactory
 
 
 class DepartamentoFactory(factory.DjangoModelFactory):
@@ -28,7 +27,6 @@ class EmpleadoFactory(factory.DjangoModelFactory):
         model = 'organizacional.Empleado'
 
     cargo = 'Ing. de sistemas'
-    iglesia = factory.SubFactory(IglesiaFactory)
     usuario = factory.SubFactory(UsuarioFactory)
     cedula = factory.sequence(lambda n: '112343%02d' % n)
     primer_nombre = factory.Faker('first_name', locale='es')

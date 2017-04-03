@@ -1,10 +1,7 @@
-from django.db import models, transaction
-from django.utils.translation import ugettext_lazy as _lazy
-
-from .managers import IglesiaMixinQuerySet
+from django.db import transaction
 
 
-__all__ = ('IglesiaMixin', 'UtilsModelMixin', )
+__all__ = ('UtilsModelMixin', )
 
 
 class UtilsModelMixin:
@@ -26,16 +23,3 @@ class UtilsModelMixin:
                 setattr(self, key, value)
                 keys.append(key)
             self.save(update_fields=keys)
-
-
-# TODO: Al eliminar el mixin de Iglesia, se debe seguir manteniendo el modelo de UtilsModelMixin a todos los modelos
-class IglesiaMixin(UtilsModelMixin, models.Model):
-    """Modelo abstracto que indica la iglesia a la que pertenece el modelo que la hereda."""
-
-    iglesia = models.ForeignKey('iglesias.Iglesia', verbose_name=_lazy('iglesia'))
-
-    # managers
-    objects = IglesiaMixinQuerySet.as_manager()
-
-    class Meta:
-        abstract = True

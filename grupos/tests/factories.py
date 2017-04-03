@@ -1,6 +1,5 @@
 import factory
 import datetime
-from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import BarrioFactory
 
 
@@ -11,7 +10,6 @@ class RedFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('nombre',)
 
     nombre = 'jovenes'
-    iglesia = factory.SubFactory(IglesiaFactory)
 
 
 class HistorialEstadoFactory(factory.django.DjangoModelFactory):
@@ -33,7 +31,6 @@ class GrupoFactory(factory.django.DjangoModelFactory):
     red = factory.SubFactory(RedFactory)
     horaDiscipulado = factory.Faker('time')
     barrio = factory.SubFactory(BarrioFactory)
-    iglesia = factory.SubFactory(IglesiaFactory)
     fechaApertura = factory.LazyFunction(datetime.datetime.now)
     lider = factory.RelatedFactory('miembros.tests.factories.MiembroFactory', 'grupo_lidera', lider=True)
     historial = factory.RelatedFactory('grupos.tests.factories.HistorialEstadoFactory', 'grupo')

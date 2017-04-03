@@ -5,11 +5,8 @@ from django.utils.module_loading import import_string
 # Third apps
 from treebeard.al_tree import AL_NodeManager
 
-# Locale
-from common.managers import IglesiaMixinQuerySet
 
-
-class GrupoQuerySet(IglesiaMixinQuerySet, models.QuerySet):
+class GrupoQuerySet(models.QuerySet):
     """
     Queryset personalizado para los grupos.
     """
@@ -141,16 +138,13 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         """
         return self.model._objects.archivados()
 
-    def raiz(self, iglesia):
+    def raiz(self):
         """
         :returns:
-            La raiz del arbol de grupos de la iglesia ingresada. Si no existe retorna ``None``.
-
-        :param iglesia:
-            La iglesia de la cual se va a retornar la raíz.
+            La raiz del arbol de grupos de una iglesia. Si no existe retorna ``None``.
         """
 
-        nodos = self.model.get_root_nodes().iglesia(iglesia)
+        nodos = self.model.get_root_nodes()
         if nodos:
             return nodos[0]
 
@@ -172,16 +166,14 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
 
         return self.filter(reuniones_discipulado__confirmacionEntregaOfrenda=False).distinct()
 
-    def hojas(self, iglesia):
+    def hojas(self):
         """
         :returns:
-            Un QuerySet con los grupos de la iglesia especificada, que no tienen descendientes (Incluye los grupos que
-            solo tienen descendientes archivados).
-
-        :param iglesia:
-            La iglesia de la cual se van a retornar los grupos.
+            Un QuerySet con los grupos que no tienen descendientes (Incluye los grupos que solo tienen descendientes
+            archivados).
         """
-        return self.iglesia(iglesia).exclude(children_set__in=self.model.objects.all())
+
+        return self.exclude(children_set__in=self.model.objects.all())
 
 
 class GrupoManagerStandard(AL_NodeManager.from_queryset(GrupoQuerySet)):

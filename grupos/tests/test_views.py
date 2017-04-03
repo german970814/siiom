@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
-from iglesias.tests.factories import IglesiaFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from ..models import Grupo, Red, HistorialEstado
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
@@ -116,34 +115,6 @@ class GrupoRaizViewTest(BaseTest):
 
         self.assertEqual(self.get_context('form').instance, raiz)
 
-    def test_get_existe_grupo_raiz_muestra_grupo_iglesia_correcta(self):
-        """
-        Prueba que se muestre la información del grupo raiz de la iglesia del usuario logueado.
-        """
-
-        raiz_incorrecta = GrupoRaizFactory(iglesia__nombre='otra iglesia')
-        raiz_correcta = GrupoRaizFactory()
-        self.login_usuario(self.admin)
-        self.get(self.URL)
-
-        self.assertNotEqual(raiz_incorrecta.iglesia, self.admin.miembro_set.first().iglesia)
-        self.assertEqual(self.get_context('form').instance, raiz_correcta)
-
-    def test_formulario_valido_crea_grupo_raiz_iglesia_correcta(self):
-        """
-        Prueba que cuando se haga un POST y el formulario sea valido el grupo creado pertenezca a la iglesia del usuario
-        logueado.
-        """
-
-        iglesia_correcta = self.admin.miembro_set.first().iglesia
-        otro_iglesia = IglesiaFactory(nombre='nueva iglesia')
-
-        self.login_usuario(self.admin)
-        self.post(self.URL, data=self.datos_formulario())
-
-        self.assertNotEqual(iglesia_correcta, otro_iglesia)
-        self.assertIsNotNone(Grupo.objects.raiz(iglesia_correcta))
-
     def test_post_formulario_valido_redirecciona_get(self):
         """
         Prueba que si se hace un POST y el formulario es valido redirecciona a misma página en GET.
@@ -152,6 +123,7 @@ class GrupoRaizViewTest(BaseTest):
         self.login_usuario(self.admin)
         response = self.post(self.URL, data=self.datos_formulario())
 
+        self.assertIsNotNone(Grupo.objects.raiz())
         self.assertRedirects(response, self.reverse(self.URL))
 
     def test_formulario_invalido_muestra_errores(self):
@@ -217,19 +189,6 @@ class CrearGrupoViewTest(BaseTest):
 
         self.response_404()
 
-    def test_get_red_iglesia_diferente_devuelve_404(self):
-        """
-        Prueba que si el usuario intenta crear un grupo en una red que no sea de su iglesia la vista devuelva un
-        status de 404.
-        """
-
-        otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
-        self.login_usuario(self.admin)
-        self.get(self.URL, pk=otra_red.id)
-
-        self.assertNotEqual(otra_red.iglesia_id, self.red_jovenes.iglesia_id)
-        self.response_404()
-
     def test_admin_get_template(self):
         """
         Prueba que un administrador pueda ver el template.
@@ -279,13 +238,11 @@ class CrearGrupoViewTest(BaseTest):
         """
         grupo = Grupo.objects.get(id=300)
 
-        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=self.padre, iglesia=self.red_jovenes.iglesia)
-        otra_red = RedFactory(nombre='nueva red', iglesia=self.red_jovenes.iglesia)
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=self.padre)
+        otra_red = RedFactory(nombre='nueva red')
         red = self.padre.red
 
         self.assertTrue(cabeza_red.es_cabeza_red)
-
-        self.assertEqual(otra_red.iglesia.id, red.iglesia.id)
 
         self.login_usuario(cabeza_red.usuario)
         response = self.get(self.URL, pk=otra_red.id)
@@ -331,19 +288,6 @@ class EditarGrupoViewTest(BaseTest):
         self.login_usuario(self.admin)
         self.get(self.URL, pk=1000)
 
-        self.response_404()
-
-    def test_get_grupo_iglesia_diferente_devuelve_404(self):
-        """
-        Prueba que si el usuario intenta editar un grupo que no sea de su iglesia la vista devuelva un status de 404.
-        """
-
-        grupo = Grupo.objects.get(id=600)
-        otro_grupo = GrupoFactory(iglesia__nombre='nueva iglesia')
-        self.login_usuario(self.admin)
-        self.get(self.URL, pk=otro_grupo.id)
-
-        self.assertNotEqual(otro_grupo.iglesia_id, grupo.iglesia_id)
         self.response_404()
 
     def test_admin_get_template(self):
@@ -400,7 +344,6 @@ class ListarGruposRedViewTest(BaseTest):
     def setUp(self):
         self.crear_arbol()
         self.red = Red.objects.get(nombre='jovenes')
-        # self.URL = reverse('grupos:listar', args=(red_jovenes.id,))
         self.admin = UsuarioFactory(admin=True)
 
     def test_get_red_no_existe_devuelve_404(self):
@@ -410,19 +353,6 @@ class ListarGruposRedViewTest(BaseTest):
 
         self.login_usuario(self.admin)
         self.get(self.URL, pk=100)
-        self.response_404()
-
-    def test_get_red_iglesia_diferente_devuelve_404(self):
-        """
-        Prueba que si el usuario intenta listar los grupos de una red que no sea de su iglesia la vista
-        devuelva un status de 404.
-        """
-
-        otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
-        self.login_usuario(self.admin)
-        self.get(self.URL, pk=otra_red.id)
-
-        self.assertNotEqual(otra_red.iglesia_id, self.red.iglesia_id)
         self.response_404()
 
     def test_get_muestra_grupos_de_red(self):
@@ -453,15 +383,12 @@ class ListarGruposRedViewTest(BaseTest):
         """
         grupo = Grupo.objects.get(id=300)
         padre = Grupo.objects.get(id=800)
-        red_jovenes = Red.objects.get(nombre='jovenes')
 
-        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre, iglesia=red_jovenes.iglesia)
-        otra_red = RedFactory(nombre='nueva red', iglesia=red_jovenes.iglesia)
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre)
+        otra_red = RedFactory(nombre='nueva red')
         red = padre.red
 
         self.assertTrue(cabeza_red.es_cabeza_red)
-
-        self.assertEqual(otra_red.iglesia.id, red.iglesia.id)
 
         self.login_usuario(cabeza_red.usuario)
         response = self.get(self.URL, pk=otra_red.id)
@@ -478,7 +405,7 @@ class ListarGruposRedViewTest(BaseTest):
         otro_grupo = Grupo.objects.get(id=500)
         red_jovenes = Red.objects.get(nombre='jovenes')
 
-        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre, iglesia=red_jovenes.iglesia)
+        cabeza_red = MiembroFactory(lider=True, grupo=grupo, grupo_lidera=padre)
 
         self.assertTrue(cabeza_red.es_cabeza_red)
 
@@ -761,22 +688,6 @@ class CrearRedViewTest(BaseTest):
         self.get_check_200(self.URL)
         self.assertResponseContains('id_nombre', html=False)
 
-    def test_formulario_valido_crea_red_iglesia_correcta(self):
-        """
-        Prueba que cuando se haga un POST y el formulario sea valido la red creada pertenezca a la iglesia del usuario
-        logueado.
-        """
-
-        iglesia_correcta = self.admin.miembro_set.first().iglesia
-        otro_iglesia = IglesiaFactory(nombre='nueva iglesia')
-
-        self.login_usuario(self.admin)
-        self.post(self.URL, data=self.datos_formulario())
-
-        red = Red.objects.get(nombre='red')
-        self.assertEqual(iglesia_correcta, red.iglesia)
-        self.assertNotEqual(iglesia_correcta, otro_iglesia)
-
     def test_post_formulario_valido_redirecciona_get(self):
         """
         Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
@@ -785,6 +696,7 @@ class CrearRedViewTest(BaseTest):
         self.login_usuario(self.admin)
         response = self.post(self.URL, data=self.datos_formulario())
 
+        self.assertEqual(Red.objects.count(), 1, msg='Se debio crear una red.')
         self.assertRedirects(response, self.reverse(self.URL))
 
     def test_formulario_invalido_muestra_errores(self):
@@ -820,18 +732,6 @@ class EditarRedViewTest(BaseTest):
         self.login_usuario(self.admin)
         self.get('grupos:editar', pk=4000)
 
-        self.response_404()
-
-    def test_get_red_iglesia_diferente_devuelve_404(self):
-        """
-        Prueba que si el usuario intenta editar una red que no sea de su iglesia la vista devuelva un status de 404.
-        """
-
-        otra_red = RedFactory(nombre='nueva red', iglesia__nombre='nueva iglesia')
-        self.login_usuario(self.admin)
-        self.get(self.URL, pk=otra_red.id)
-
-        self.assertNotEqual(otra_red.iglesia_id, self.red.iglesia_id)
         self.response_404()
 
     def test_admin_get_template(self):
@@ -878,21 +778,19 @@ class ListarRedesViewTest(BaseTest):
     def setUp(self):
         self.admin = UsuarioFactory(admin=True)
 
-    def test_get_muestra_redes_iglesia_correcta(self):
+    def test_get_muestra_redes(self):
         """
-        Prueba que se listen las redes de la iglesia del usuario logueado.
+        Prueba que se listen las redes.
         """
 
         red1 = RedFactory()
         red2 = RedFactory(nombre='adultos jovenes')
-        red_incorrecta = RedFactory(nombre='otra red', iglesia__nombre='otra iglesia')
 
         self.login_usuario(self.admin)
         self.get_check_200(self.URL)
 
         self.assertResponseContains(red1.nombre.capitalize(), html=False)
         self.assertResponseContains(red2.nombre.capitalize(), html=False)
-        self.assertResponseNotContains(red_incorrecta.nombre.capitalize(), html=False)
 
 
 class TrasladarLideresViewTest(BaseTest):

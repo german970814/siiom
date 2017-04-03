@@ -1,6 +1,5 @@
 import factory
 from common.tests.factories import UsuarioFactory
-from iglesias.tests.factories import IglesiaFactory
 
 
 class ZonaFactory(factory.django.DjangoModelFactory):
@@ -29,7 +28,6 @@ class MiembroFactory(factory.django.DjangoModelFactory):
 
     grupo_lidera = None
     email = factory.Faker('email')
-    iglesia = factory.SubFactory(IglesiaFactory)
     nombre = factory.Faker('first_name', locale='es')
     cedula = factory.sequence(lambda n: '112343%02d' % n)
     primer_apellido = factory.Faker('last_name', locale='es')

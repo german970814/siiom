@@ -2,10 +2,8 @@ from django.db import models, transaction
 from django.db.models.query import QuerySet
 from django.contrib.auth.models import Permission
 
-from common.managers import IglesiaMixinQuerySet
 
-
-class MiembroQuerySet(IglesiaMixinQuerySet, models.QuerySet):
+class MiembroQuerySet(models.QuerySet):
     """
     Queryset personalizado para los miembros.
     """
@@ -94,7 +92,7 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
             Diccionario de argumentos que serán pasados al momento de filtrar.
         """
 
-        from .models import CambioTipo, TipoMiembro
+        from .models import TipoMiembro
 
         visita = TipoMiembro.objects.filter(nombre__iexact='visita')
 
