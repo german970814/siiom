@@ -1,5 +1,5 @@
 Utils
 =====
 
-.. automodule:: forms.utils
+.. automodule:: grupos.utils
    :members:

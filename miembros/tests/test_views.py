@@ -1,10 +1,8 @@
-from django.http import Http404
 from django.core.urlresolvers import reverse
 from grupos.models import Red, Grupo
 from grupos.tests.factories import GrupoFactory
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
-from iglesias.tests.factories import IglesiaFactory
 from .factories import MiembroFactory
 
 
@@ -142,32 +140,18 @@ class CrearMiembroViewTest(BaseTest):
         self.get_check_200(self.URL)
         self.assertResponseContains('id_nombre', html=False)
 
-    def test_post_formulario_valido_crea_miembro_iglesia_correcta(self):
-        """
-        Prueba que cuando se haga un POST y el formulario sea valido el miembro creado pertenezca a la iglesia del
-        usuario logueado.
-        """
-        from miembros.models import Miembro
-
-        data = self.datos_formulario()
-        iglesia_correcta = self.admin.iglesia
-        iglesia_incorrecta = IglesiaFactory(nombre='nueva iglesia')
-
-        self.login_usuario(self.admin.usuario)
-        self.post(self.URL, data=data)
-
-        miembro = Miembro.objects.get(cedula=data['cedula'])
-        self.assertEqual(iglesia_correcta, miembro.iglesia)
-        self.assertNotEqual(iglesia_incorrecta, miembro.iglesia)
-
     def test_post_formulario_valido_redirecciona_get(self):
         """
         Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
         """
 
-        self.login_usuario(self.admin.usuario)
-        response = self.post(self.URL, data=self.datos_formulario())
+        from ..models import Miembro
 
+        data = self.datos_formulario()
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data=data)
+
+        self.assertEqual(Miembro.objects.filter(cedula=data['cedula']).count(), 1, msg="Se debio crear el miembro")
         self.assertRedirects(response, self.reverse(self.URL))
 
     def test_post_formulario_invalido_muestra_errores(self):

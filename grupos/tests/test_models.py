@@ -21,20 +21,12 @@ class GrupoModelTest(BaseTest):
         lista_obtenida = Grupo.obtener_arbol()
         self.assertListEqual(lista_obtenida, [])
 
-    def test_obtener_arbol_completo_sin_especificar_iglesia_devuelve_vacio(self):
-        """
-        Prueba que se obtenga una lista vacia si se intenta obtener el arbol completo sin indicar una iglesia.
-        """
-
-        lista_obtenida = Grupo.obtener_arbol()
-        self.assertListEqual(lista_obtenida, [])
-
     def test_obtener_arbol_completo(self):
         """
         Prueba que la lista obtenida sea igual a la lista del arbol completo.
         """
 
-        lista_obtenida = Grupo.obtener_arbol(iglesia=Grupo.objects.first().iglesia_id)
+        lista_obtenida = Grupo.obtener_arbol()
         self.assertListEqual(lista_obtenida, self.lista_arbol_completo)
 
     def test_obtener_arbol_padre_especifico(self):
@@ -455,8 +447,7 @@ class GrupoModelTest(BaseTest):
         Verifica que el manager de hojas solo tenga grupos que esten disponibles para eliminar.
         """
 
-        iglesia = Grupo.objects.get(id=100).iglesia
-        queryset = Grupo.objects.hojas(iglesia)
+        queryset = Grupo.objects.hojas()
 
         self.assertNotIn(Grupo.objects.get(id=100), queryset)
         self.assertIn(Grupo.objects.get(id=200), queryset)
@@ -470,4 +461,4 @@ class GrupoModelTest(BaseTest):
         g = Grupo.objects.get(id=700)
         g.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
 
-        self.assertIn(Grupo.objects.get(id=400), Grupo.objects.hojas(iglesia))
+        self.assertIn(Grupo.objects.get(id=400), Grupo.objects.hojas())

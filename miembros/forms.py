@@ -468,10 +468,6 @@ class NuevoMiembroForm(CustomModelForm):
         self.fields['fecha_nacimiento'].widget.attrs.update({'class': 'form-control'})
         self.fields['barrio'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
-    def save(self, iglesia):
-        self.instance.iglesia = iglesia
-        return super().save()
-
 
 class TrasladarMiembroForm(CustomForm):
     """
@@ -504,8 +500,8 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
         help_text=_lazy('Si escoge esta opcion, el líder escogido, reemplazará al líder el cual quiere desvincular.')
     )
 
-    def __init__(self, iglesia, *args, **kwargs):
-        super().__init__(iglesia=iglesia, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.fields['lider'].widget.attrs.update({'class': 'form-control'})
         self.fields['nuevo_lider'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['grupo'].required = False

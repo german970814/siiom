@@ -283,10 +283,9 @@ class BaseGrupoForm(CustomModelForm):
         self.fields['diaGAR'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles().iglesia(self.iglesia)
+        self.fields['lideres'].queryset = Miembro.objects.lideres_disponibles()
 
     def save(self, commit=True):
-        self.instance.iglesia = self.iglesia
         return super().save(commit)
 
 
@@ -295,8 +294,7 @@ class GrupoRaizForm(BaseGrupoForm):
     Formulario para la creación o edición del grupo raiz.
     """
 
-    def __init__(self, iglesia, *args, **kwargs):
-        self.iglesia = iglesia
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         if self.instance.pk:
@@ -341,7 +339,6 @@ class NuevoGrupoForm(BaseGrupoForm):
         fields = ['parent'] + BaseGrupoForm.Meta.fields
 
     def __init__(self, red, *args, **kwargs):
-        self.iglesia = red.iglesia
         super().__init__(*args, **kwargs)
         self.red = red
 
@@ -351,7 +348,7 @@ class NuevoGrupoForm(BaseGrupoForm):
 
         if grupos_query.count() == 0:
             # grupos_query = grupos_query | Grupo.objects.prefetch_related('lideres').filter(id=Grupo.objects.raiz().id)
-            grupos_query = grupos_query | convertir_lista_grupos_a_queryset([Grupo.objects.raiz(self.iglesia)])
+            grupos_query = grupos_query | convertir_lista_grupos_a_queryset([Grupo.objects.raiz()])
 
         self.fields['parent'].queryset = grupos_query
 
@@ -394,7 +391,6 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
-        self.iglesia = kwargs['instance'].iglesia
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
@@ -465,12 +461,6 @@ class RedForm(CustomModelForm):
         super().__init__(*args, **kwargs)
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
 
-    def save(self, iglesia=None):
-        if iglesia:
-            self.instance.iglesia = iglesia
-
-        return super().save()
-
 
 class TrasladarLideresForm(CustomForm):
     """
@@ -490,22 +480,19 @@ class TrasladarLideresForm(CustomForm):
         queryset=Grupo.objects.none(), label=_lazy('Grupo destino (Nuevo grupo a liderar)')
     )
 
-    def __init__(self, iglesia, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['lideres'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['nuevo_grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
-        self.fields['grupo'].queryset = Grupo.objects.iglesia(iglesia).prefetch_related('lideres')
-        self.fields['nuevo_grupo'].queryset = Grupo.objects.iglesia(iglesia).prefetch_related('lideres')
+        self.fields['grupo'].queryset = Grupo.objects.prefetch_related('lideres')
+        self.fields['nuevo_grupo'].queryset = Grupo.objects.prefetch_related('lideres')
 
         if self.is_bound:
-            # with suppress(Grupo.DoesNotExist, ValueError):
-            try:
+            with suppress(Grupo.DoesNotExist, ValueError):
                 grupo = Grupo.objects.get(pk=self.data.get('grupo', None))
                 self.fields['lideres'].queryset = grupo.lideres.all()
-            except:
-                pass
 
     def clean(self):
         cleaned_data = super().clean()
@@ -547,11 +534,11 @@ class ArchivarGrupoForm(CustomForm):
     )
     seleccionados = forms.ModelMultipleChoiceField(queryset=Miembro.objects.all(), required=False)
 
-    def __init__(self, iglesia, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['grupo_destino'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['grupo'].queryset = Grupo.objects.hojas(iglesia).prefetch_related('lideres')
+        self.fields['grupo'].queryset = Grupo.objects.hojas().prefetch_related('lideres')
 
         if self.is_bound:
             grupo_destino = self.data.get('grupo_destino', None) or None

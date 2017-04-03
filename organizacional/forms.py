@@ -200,7 +200,7 @@ class NuevoEmpleadoForm(CustomModelForm):
             'segundo_apellido', 'cargo', 'jefe_departamento'
         ]
 
-    def __init__(self, iglesia, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['areas'].widget.attrs.update({'class': 'selectpicker'})
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
@@ -215,7 +215,6 @@ class NuevoEmpleadoForm(CustomModelForm):
         self.fields['primer_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['segundo_apellido'].widget.attrs.update({'class': 'form-control'})
         self.fields['areas'].required = False
-        self.iglesia = iglesia
 
         areas_query = Area.objects.none()
         if self.is_bound:
@@ -284,8 +283,6 @@ class NuevoEmpleadoForm(CustomModelForm):
                     usuario.groups.add(perfil)
 
                 self.instance.usuario = usuario
-                self.instance.iglesia = self.iglesia
-
                 empleado = super().save()
 
                 # Si el empleado es jefe de departamento se le asignan todas las areas del departamento.

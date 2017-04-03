@@ -225,13 +225,13 @@ def crear_empleado(request):
 
     VERBO = _('Crear')
     if request.method == 'POST':
-        form = NuevoEmpleadoForm(request.iglesia, data=request.POST)
+        form = NuevoEmpleadoForm(data=request.POST)
         if form.is_valid():
             if form.save():
                 messages.success(request, _('El empleado se ha creado correctamente.'))
                 return redirect('organizacional:empleado_nuevo')
     else:
-        form = NuevoEmpleadoForm(request.iglesia)
+        form = NuevoEmpleadoForm()
 
     return render(request, 'organizacional/empleado_form.html', {'form': form, 'VERBO': VERBO})
 
@@ -243,5 +243,5 @@ def listar_empleados(request):
     Permite a un administrador listar los empleados de su iglesia.
     """
 
-    empleados = Empleado.objects.iglesia(request.iglesia)
+    empleados = Empleado.objects.all()
     return render(request, 'organizacional/listar_empleados.html', {'empleados': empleados})
