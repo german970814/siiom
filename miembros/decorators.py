@@ -20,9 +20,9 @@ def miembro_property_test_decorator(view_func, property, *permissions, function=
         La propiedad de el objeto de miembro que será evaluada, lo recomendable es usar una propiedad
         que retorne ``True`` o ``False`` para ser evaluada como ``bool``.
 
-    :param *permissions:
+    :param \*permissions:
         Los permisos que serán evaluados para los miembros, se pueden pasar como strings independientes,
-        ya que serán tomados en *args, y enviados al decorador `permisos_requeridos`.
+        ya que serán tomados en \*args, y enviados al decorador `permisos_requeridos`.
 
     :param function:
         Una función la cual es evaluada al momento de verificar la propiedad de el miembro,
