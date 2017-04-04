@@ -36,13 +36,13 @@
         $("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
             $('.proceso').click(function(event) {
                 var $id = $(this).attr('data-row-id');
-                $('#toggleModal').click();
+                $('#toggleModalCambiarEstado').click();
                 $('input[name="solicitud"]').val($id);
             })
 
             $('.devolver').click(function(event) {
                 var $id = $(this).attr('data-row-id');
-                $('#toggleModal2').click();
+                $('#toggleModalDevolverDocumento').click();
                 $('input[name="solicitud"]').val($id);
             });
         });
@@ -111,7 +111,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrowerCambiarEstado" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -145,9 +145,9 @@
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
+<a data-toggle="modal" id="toggleModalCambiarEstado" href="#modalNarrowerCambiarEstado"></a>
 
-<div class="modal fade" id="modalNarrower2" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrowerDevolverDocumento" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -168,5 +168,5 @@
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal2" href="#modalNarrower2"></a>
+<a data-toggle="modal" id="toggleModalDevolverDocumento" href="#modalNarrowerDevolverDocumento"></a>
 {% endblock %}
