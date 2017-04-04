@@ -34,7 +34,7 @@
         $("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
             $('.proceso').click(function(event) {
                 var $id = $(this).attr('data-row-id');
-                $('#toggleModal').click();
+                $('#toggleModalCustoria').click();
                 $('input[name="id_custodia"]').val($id);
             })
         });
@@ -103,7 +103,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrowerCustodia" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -124,6 +124,6 @@
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
+<a data-toggle="modal" id="toggleModalCustoria" href="#modalNarrowerCustodia"></a>
 
 {% endblock %}

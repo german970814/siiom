@@ -7,20 +7,20 @@
 <script>
     $(document).ready(function(){
         $("#data-table-command").bootgrid({
-	        		css: {
-                        icon: 'zmdi icon',
-                        iconColumns: 'zmdi-view-module',
-                        iconDown: 'zmdi-expand-more',
-                        iconRefresh: 'zmdi-refresh',
-                        iconUp: 'zmdi-expand-less'
-	                    },
-                    caseSensitive: false,
-                    formatters: {
-                        "commands": function(column, row) {
-                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/sgd/editar_tipo_documento/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
-                        }
-                    }
-                });
+            css: {
+                icon: 'zmdi icon',
+                iconColumns: 'zmdi-view-module',
+                iconDown: 'zmdi-expand-more',
+                iconRefresh: 'zmdi-refresh',
+                iconUp: 'zmdi-expand-less'
+                },
+            caseSensitive: false,
+            formatters: {
+                "commands": function(column, row) {
+                    return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/sgd/editar_tipo_documento/" + row.id + "'\"><span class=\"zmdi zmdi-edit\"></span></button> ";
+                }
+            }
+        });
 
     })
 </script>
@@ -51,7 +51,9 @@
                     <th data-visible="false" data-identifier="true" data-column-id="id"></th>
                     <th data-column-id="nombre" data-identifier="true">Nombre</th>
                     <th data-column-id="areas" data-identifier="true">Áreas</th>
+                    {% if tipodocumento_list %}
                     <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
