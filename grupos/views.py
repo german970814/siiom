@@ -178,8 +178,9 @@ def reportar_reunion_discipulado(request):
     grupo = miembro.grupo_lidera
     if grupo:
         discipulos = grupo.discipulos
-        asistentesId = request.POST.getlist('seleccionados')
+
         if request.method == 'POST':
+            asistentesId = request.POST.getlist('seleccionados')
             form = FormularioReportarReunionDiscipulado(miembro=miembro, data=request.POST)
             if form.is_valid():
                 r = form.save(commit=False)
@@ -187,11 +188,7 @@ def reportar_reunion_discipulado(request):
                     r.grupo = grupo
                     r.save()
                     for m in discipulos:
-                        if m.id in asistentesId:
-                            am = AsistenciaDiscipulado.objects.create(miembro=m, reunion=r, asistencia=True)
-                        else:
-                            am = AsistenciaDiscipulado.objects.create(miembro=m, reunion=r, asistencia=False)
-                        am.save()
+                        AsistenciaDiscipulado.objects.create(miembro=m, reunion=r, asistencia=str(m.id) in asistentesId)
                     ok = True
                 else:
                     ya_reportada = True
