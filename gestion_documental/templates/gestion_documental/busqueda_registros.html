@@ -233,7 +233,7 @@
     {% endif %}
 </div>
 
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalNarrowerSolicitud" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -253,7 +253,7 @@
         </div>
     </div>
 </div>
-<a data-toggle="modal" id="toggleModal" href="#modalNarrower"></a>
+<a data-toggle="modal" id="toggleModalSolicitud" href="#modalNarrowerSolicitud"></a>
 
 {% endblock contenido %}
 
@@ -306,7 +306,7 @@
                         if (solicitado) {
                             return "<button class=\"btn btn-icon command-delete waves-effect waves-circle\" title=\"No se puede Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-block c-red\"></span></button>";
                         } else {
-                            return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
+                            return "<button class=\"btn btn-icon command-delete waves-effect waves-circle tomodal-solicitud\" title=\"Solicitar\" data-row-id=\"" + row.id + "\"><span class=\"zmdi zmdi-mail-reply\"></span></button>";
                         }
                     },
                     {% if perms.organizacional.es_administrador_sgd %}
@@ -407,9 +407,9 @@
 
 
         	$("#data-table-command").on('loaded.rs.jquery.bootgrid', function(evento) {
-	        	$('.tomodal').click(function(event) {
+	        	$('.tomodal-solicitud').click(function(event) {
 	        		var $id = $(this).attr('data-row-id');
-	        		$('#toggleModal').click();
+	        		$('#toggleModalSolicitud').click();
 	        		$('input[name="solicitud"]').val($id)
 	        	});
         	})
