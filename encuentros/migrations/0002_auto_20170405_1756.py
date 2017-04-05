@@ -7,16 +7,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('grupos', '0001_initial'),
         ('encuentros', '0001_initial'),
         ('miembros', '0001_initial'),
-        ('grupos', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='encuentro',
             name='coordinador',
-            field=models.ForeignKey(to='miembros.Miembro', verbose_name='Coordinador', related_name='encuentros_coordinador'),
+            field=models.ForeignKey(verbose_name='Coordinador', to='miembros.Miembro', related_name='encuentros_coordinador'),
         ),
         migrations.AddField(
             model_name='encuentro',
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='encuentro',
             name='tesorero',
-            field=models.ForeignKey(to='miembros.Miembro', verbose_name='Tesorero', related_name='encuentros_tesorero'),
+            field=models.ForeignKey(verbose_name='Tesorero', to='miembros.Miembro', related_name='encuentros_tesorero'),
         ),
         migrations.AddField(
             model_name='encontrista',
@@ -36,6 +36,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='encontrista',
             name='grupo',
-            field=models.ForeignKey(to='grupos.Grupo', verbose_name='Grupo', related_name='encontristas'),
+            field=models.ForeignKey(verbose_name='Grupo', to='grupos.Grupo', related_name='encontristas'),
         ),
     ]

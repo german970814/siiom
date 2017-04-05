@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='visita',
             name='grupo',
-            field=models.ForeignKey(to='grupos.Grupo', blank=True, related_name='visitas', verbose_name='grupo', null=True),
+            field=models.ForeignKey(related_name='visitas', verbose_name='grupo', blank=True, to='grupos.Grupo', null=True),
         ),
     ]
