@@ -7,6 +7,7 @@ REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 # psql -U siiom -h localhost siiom < ~/Desktop/staging_tenant.sql
 # rsync -nrv --exclude=.DS_Store . ingeniarte@staging.siiom.net:/home/ingeniarte/sites/ingeniarte.siiom.net/media/cdr.siiom.net/
 # return 301 $scheme://tenant.staging.siiom.net$request_uri;
+# git rev-parse master
 
 ENVIROMENT_SETTINGS = {
     'production': {
@@ -166,7 +167,7 @@ def provision():
 
 @task
 def deploy():
-    """Deploy new changes to the server"""
+    """Deploy new changes to the server."""
 
     update_source()
     update_settings()

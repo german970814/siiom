@@ -3,60 +3,58 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import grupos.six
-import common.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('iglesias', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
             name='AsistenciaDiscipulado',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('asistencia', models.BooleanField()),
             ],
         ),
         migrations.CreateModel(
             name='Grupo',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
-                ('direccion', models.CharField(verbose_name='dirección', max_length=50)),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('direccion', models.CharField(max_length=50, verbose_name='dirección')),
                 ('fechaApertura', models.DateField(verbose_name='fecha de apertura')),
-                ('diaGAR', models.CharField(choices=[('0', 'Lunes'), ('1', 'Martes'), ('2', 'Miercoles'), ('3', 'Jueves'), ('4', 'Viernes'), ('5', 'Sabado'), ('6', 'Domingo')], verbose_name='dia G.A.R', max_length=1)),
+                ('diaGAR', models.CharField(max_length=1, choices=[('0', 'Lunes'), ('1', 'Martes'), ('2', 'Miercoles'), ('3', 'Jueves'), ('4', 'Viernes'), ('5', 'Sabado'), ('6', 'Domingo')], verbose_name='dia G.A.R')),
                 ('horaGAR', models.TimeField(verbose_name='hora G.A.R')),
-                ('diaDiscipulado', models.CharField(choices=[('0', 'Lunes'), ('1', 'Martes'), ('2', 'Miercoles'), ('3', 'Jueves'), ('4', 'Viernes'), ('5', 'Sabado'), ('6', 'Domingo')], blank=True, max_length=1, null=True, verbose_name='dia discipulado')),
+                ('diaDiscipulado', models.CharField(blank=True, null=True, max_length=1, choices=[('0', 'Lunes'), ('1', 'Martes'), ('2', 'Miercoles'), ('3', 'Jueves'), ('4', 'Viernes'), ('5', 'Sabado'), ('6', 'Domingo')], verbose_name='dia discipulado')),
                 ('horaDiscipulado', models.TimeField(blank=True, null=True, verbose_name='hora discipulado')),
-                ('nombre', models.CharField(verbose_name='nombre', max_length=255)),
+                ('nombre', models.CharField(max_length=255, verbose_name='nombre')),
                 ('latitud', models.FloatField(blank=True, null=True, verbose_name='Latitud')),
                 ('longitud', models.FloatField(blank=True, null=True, verbose_name='Longitud')),
             ],
             options={
-                'verbose_name': 'grupo',
                 'verbose_name_plural': 'grupos',
+                'verbose_name': 'grupo',
             },
-            bases=(grupos.six.SixALNode, common.models.UtilsModelMixin, models.Model),
+            bases=(grupos.six.SixALNode, models.Model),
         ),
         migrations.CreateModel(
             name='HistorialEstado',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('fecha', models.DateTimeField(auto_now_add=True, verbose_name='fecha')),
-                ('estado', models.CharField(choices=[('AC', 'ACTIVO'), ('IN', 'INACTIVO'), ('SU', 'SUSPENDIDO'), ('AR', 'ARCHIVADO')], verbose_name='estado', max_length=2)),
+                ('estado', models.CharField(max_length=2, choices=[('AC', 'ACTIVO'), ('IN', 'INACTIVO'), ('SU', 'SUSPENDIDO'), ('AR', 'ARCHIVADO')], verbose_name='estado')),
             ],
             options={
-                'verbose_name': 'Historial',
                 'ordering': ['-fecha'],
                 'verbose_name_plural': 'Historiales',
+                'verbose_name': 'Historial',
             },
         ),
         migrations.CreateModel(
             name='Predica',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('nombre', models.CharField(max_length=200)),
                 ('descripcion', models.TextField(blank=True, max_length=500)),
                 ('fecha', models.DateField(auto_now_add=True)),
@@ -65,19 +63,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Red',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('nombre', models.CharField(max_length=100)),
-                ('iglesia', models.ForeignKey(to='iglesias.Iglesia', verbose_name='iglesia')),
             ],
-            options={
-                'abstract': False,
-            },
-            bases=(common.models.UtilsModelMixin, models.Model),
         ),
         migrations.CreateModel(
             name='ReunionDiscipulado',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('fecha', models.DateField(auto_now_add=True)),
                 ('numeroLideresAsistentes', models.PositiveIntegerField(verbose_name='Número de líderes asistentes')),
                 ('novedades', models.TextField(max_length=500)),
@@ -93,13 +86,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ReunionGAR',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('fecha', models.DateField()),
-                ('predica', models.CharField(verbose_name='prédica', max_length=100)),
+                ('predica', models.CharField(max_length=100, verbose_name='prédica')),
                 ('numeroTotalAsistentes', models.PositiveIntegerField(verbose_name='Número total de asistentes')),
                 ('numeroLideresAsistentes', models.PositiveIntegerField(verbose_name='Número de líderes asistentes')),
                 ('numeroVisitas', models.PositiveIntegerField(verbose_name='Número de visitas:')),
-                ('novedades', models.TextField(blank=True, default='nada', null=True, max_length=500)),
+                ('novedades', models.TextField(blank=True, null=True, max_length=500, default='nada')),
                 ('ofrenda', models.DecimalField(max_digits=19, decimal_places=2)),
                 ('confirmacionEntregaOfrenda', models.BooleanField(default=False)),
                 ('digitada_por_miembro', models.BooleanField(default=True)),

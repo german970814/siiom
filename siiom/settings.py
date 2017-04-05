@@ -59,7 +59,6 @@ TENANT_APPS = [
     'common',
     'grupos',
     'compras',
-    'iglesias',
     'miembros',
     'reportes',
     'encuentros',
@@ -85,7 +84,6 @@ MIDDLEWARE_CLASSES = (
     'waffle.middleware.WaffleMiddleware',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
-    'iglesias.middleware.IglesiaMiddleware',
 )
 
 ROOT_URLCONF = 'siiom.urls'
