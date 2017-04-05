@@ -7,9 +7,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('miembros', '0001_initial'),
-        ('iglesias', '0001_initial'),
         ('grupos', '0001_initial'),
+        ('miembros', '0001_initial'),
     ]
 
     operations = [
@@ -21,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historialestado',
             name='grupo',
-            field=models.ForeignKey(to='grupos.Grupo', verbose_name='grupo', related_name='historiales'),
+            field=models.ForeignKey(verbose_name='grupo', to='grupos.Grupo', related_name='historiales'),
         ),
         migrations.AddField(
             model_name='grupo',
@@ -30,18 +29,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='grupo',
-            name='iglesia',
-            field=models.ForeignKey(to='iglesias.Iglesia', verbose_name='iglesia'),
-        ),
-        migrations.AddField(
-            model_name='grupo',
             name='parent',
-            field=models.ForeignKey(to='grupos.Grupo', verbose_name='grupo origen', related_name='children_set', null=True),
+            field=models.ForeignKey(related_name='children_set', verbose_name='grupo origen', to='grupos.Grupo', null=True),
         ),
         migrations.AddField(
             model_name='grupo',
             name='red',
-            field=models.ForeignKey(to='grupos.Red', blank=True, verbose_name='red', null=True),
+            field=models.ForeignKey(verbose_name='red', blank=True, to='grupos.Red', null=True),
         ),
         migrations.AddField(
             model_name='asistenciadiscipulado',
