@@ -281,6 +281,15 @@ class Grupo(SixALNode, AL_Node):
             return None
 
     @property
+    def numero_celulas(self):
+        """
+        :returns:
+            El numero de grupos a cargo que tiene el grupo actual, incluyendose el mismo.
+        """
+
+        return self.get_descendant_count() + 1
+
+    @property
     def estado(self):
         """
         Retorna el estado del grupo de acuerdo a su historial.

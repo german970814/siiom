@@ -1,7 +1,7 @@
 from miembros.tests.factories import MiembroFactory
 from common.tests.base import BaseTest
 from ..models import Grupo, HistorialEstado
-from .factories import ReunionGARFactory, ReunionDiscipuladoFactory
+from .factories import ReunionGARFactory, ReunionDiscipuladoFactory, GrupoHijoFactory
 
 
 class GrupoModelTest(BaseTest):
@@ -290,7 +290,6 @@ class GrupoModelTest(BaseTest):
         """
 
         grupo = Grupo.objects.get(id=600)
-
         cabeza = grupo.cabeza_red
         self.assertEqual(cabeza.pk, 500, msg="El grupo cabeza de red no esta correcto.")
 
@@ -347,3 +346,22 @@ class GrupoModelTest(BaseTest):
 
         grupo.actualizar_estado(estado=HistorialEstado.INACTIVO)
         self.assertEqual(grupo.estado, HistorialEstado.INACTIVO)
+
+    def test_numero_celulas(self):
+        """
+        Prueba que devuelva el numero de grupos a cargo del grupo indicado.
+        """
+
+        grupo = Grupo.objects.get(id=300)
+        self.assertEqual(grupo.numero_celulas, 4)
+
+    def test_numero_celulas_con_archivados(self):
+        """
+        Prueba que si el grupo tiene descendientes archivados, estos no se cuenten dentro del numero de celulas.
+        """
+
+        grupo = Grupo.objects.get(id=300)
+        hijo = GrupoHijoFactory(parent=grupo)
+        hijo.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        self.assertEqual(grupo.numero_celulas, 4)
