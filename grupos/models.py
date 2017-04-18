@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 # Django Package
 from django.db import models, transaction, OperationalError
 from django.utils.translation import ugettext_lazy as _lazy
+from treebeard.al_tree import AL_Node
 
 # Locale Apps
 from miembros.models import CambioTipo
+from common.decorators import cache_value
 from consolidacion.utils import clean_direccion
 from .managers import GrupoManager, GrupoManagerStandard, HistorialManager
 from .six import SixALNode
-
-from treebeard.al_tree import AL_Node
-
 
 __all__ = (
     'Red', 'Grupo', 'Predica', 'ReunionGAR', 'HistorialEstado',
@@ -260,6 +258,7 @@ class Grupo(SixALNode, AL_Node):
         return convertir_lista_grupos_a_queryset(self.get_tree(self))
 
     @property
+    @cache_value(key='cabeza_red', suffix='pk')
     def cabeza_red(self):
         """
         :returns:
@@ -281,6 +280,7 @@ class Grupo(SixALNode, AL_Node):
             return None
 
     @property
+    @cache_value(key='numero_celulas', suffix='pk')
     def numero_celulas(self):
         """
         :returns:
