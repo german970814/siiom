@@ -73,9 +73,9 @@ def GET(view_func):
     return require_http_methods(['GET'])(view_func)
 
 
-def cache_value(key, timeout=120):
+def cache_value(key, timeout=120, suffix=None):
     """
-    Decorador que guarda el valor de una función en la cache.
+    Decorador que guarda el valor de una función en la cache, según la key ingresada.
 
     :param str key:
         El nombre con que se va a guardar el valor en la cache.
@@ -83,16 +83,25 @@ def cache_value(key, timeout=120):
     :param timeout:
         Tiempo en segundos el cual va a durar el valor en la cache. Para mayor información ver
         `timeout <https://docs.djangoproject.com/en/1.8/topics/cache/#basic-usage>`_.
+
+    :param str suffix:
+        Nombre de atributo del objeto a ser usado como sufijo en la llave ingresada. El objeto en el cual se va a
+        buscar el atributo, es el primer parámetro de la función que se esta decorando.
     """
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            print(args[0])
-            result = cache.get(key)
+
+            key_ = key
+            if suffix is not None:
+                suffix_value = getattr(args[0], suffix)
+                key_ = '{}_{}'.format(key, suffix_value)
+
+            result = cache.get(key_)
             if result is None:
                 result = func(*args, **kwargs)
-                cache.set(key, result, timeout=timeout)
+                cache.set(key_, result, timeout=timeout)
 
             return result
         return wrapper

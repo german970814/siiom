@@ -27,3 +27,14 @@ class CacheValueDecoratorTest(SimpleTestCase):
         cache_value(key=self.key)(self.function)()
 
         self.assertFalse(self.function.called, msg="La función no debio ser llamada.")
+
+    def test_sufijo_not_None_key_modifique(self):
+        """Prueba que si se envia un sufijo, la llave usada en la cache se modifique para usar el sufijo."""
+
+        nueva_llave = '{}_{}'.format(self.key, 2)
+        objeto = mock.Mock()
+        objeto.pk = 2
+
+        cache_value(key=self.key, suffix='pk')(self.function)(objeto)
+        self.assertIsNotNone(cache.get(nueva_llave))
+        self.assertIsNone(cache.get(self.key))
