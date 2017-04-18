@@ -7,7 +7,6 @@ REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 # psql -U siiom -h localhost siiom < ~/Desktop/staging_tenant.sql
 # rsync -nrv --exclude=.DS_Store . ingeniarte@staging.siiom.net:/home/ingeniarte/sites/ingeniarte.siiom.net/media/cdr.siiom.net/
 # return 301 $scheme://tenant.staging.siiom.net$request_uri;
-# git rev-parse master
 
 ENVIROMENT_SETTINGS = {
     'production': {
@@ -74,7 +73,7 @@ def update_database():
 
 
 def update_source():
-    commit = local('git log origin/{} -n 1 --format=%H'.format(env.settings['branch']), capture=True)
+    commit = local('git rev-parse origin/{}'.format(env.settings['branch']), capture=True)
 
     with virtualenv():
         run('git fetch')
