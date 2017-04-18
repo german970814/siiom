@@ -77,10 +77,10 @@ class LoginForm(CustomForm):
 
         :rtype bool:
 
-        :param *args:
+        :param \\*args:
             Argumentos de la funcion ``is_safe_url``.
 
-        :param **kwargs:
+        :param \\*\\*kwargs:
             Diccionario de argumentos de la funcion ``is_safe_url``.
         """
         return is_safe_url(host=self.request.get_host(), *args, **kwargs)

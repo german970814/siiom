@@ -935,10 +935,15 @@ def crear_miembro(request):
 def listar_lideres(request, pk):
     """
     Permite a un administrador listar los lideres de la red escogida.
+
+    :param pk:
+        Pk de la red escogida.
     """
 
     red = get_object_or_404(Red, pk=pk)
-    lideres = Miembro.objects.lideres_red(red).select_related('usuario', 'grupo_lidera')
+    lideres = Miembro.objects.lideres_red(red).select_related(
+        'usuario', 'grupo_lidera', 'grupo'
+    ).prefetch_related('grupo__lideres', 'grupo__historiales')
 
     return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})
 
