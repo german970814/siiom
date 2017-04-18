@@ -26,6 +26,12 @@ Welcome to Siiom's documentation!
    miembros/decorators
    miembros/utils
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Common:
+
+   common/decorators
+
 
 Indices and tables
 ==================
