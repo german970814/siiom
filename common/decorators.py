@@ -1,16 +1,12 @@
-# Django imports
-from django.contrib.auth.decorators import user_passes_test  # , login_required
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
-from django.views.decorators.http import require_http_methods
-
-# Locale imports
-from . import constants
-
-# Python imports
+import json
 from functools import wraps
 from threading import Thread
-import json
+from django.contrib.auth.decorators import user_passes_test
+from django.core.exceptions import PermissionDenied
+from django.core.cache import cache
+from django.http import HttpResponse
+from django.views.decorators.http import require_http_methods
+from . import constants
 
 
 def permisos_requeridos(*permisos):
@@ -75,3 +71,39 @@ def GET(view_func):
     Decorador para que solo pueda ser ingresada a la pagina con GET.
     """
     return require_http_methods(['GET'])(view_func)
+
+
+def cache_value(key, timeout=120, suffix=None):
+    """
+    Decorador que guarda el valor de una función en la cache, según la key ingresada.
+
+    :param str key:
+        El nombre con que se va a guardar el valor en la cache.
+
+    :param timeout:
+        Tiempo en segundos el cual va a durar el valor en la cache. Para mayor información ver
+        `timeout <https://docs.djangoproject.com/en/1.8/topics/cache/#basic-usage>`_.
+
+    :param str suffix:
+        Nombre de atributo del objeto a ser usado como sufijo en la llave ingresada. El objeto en el cual se va a
+        buscar el atributo, es el primer parámetro de la función que se esta decorando.
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+
+            key_ = key
+            if suffix is not None:
+                suffix_value = getattr(args[0], suffix)
+                key_ = '{}_{}'.format(key, suffix_value)
+
+            result = cache.get(key_)
+            if result is None:
+                result = func(*args, **kwargs)
+                cache.set(key_, result, timeout=timeout)
+
+            return result
+        return wrapper
+
+    return decorator

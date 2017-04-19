@@ -309,42 +309,6 @@ def editar_perfil_miembro(request, pk=None):
 
 
 @login_required
-@permisos_requeridos(
-    'miembros.es_administrador', 'miembros.es_lider', 'miembros.es_agente',
-    'grupos.puede_confirmar_ofrenda_discipulado', 'puede_confirmar_ofrenda_GAR'
-)
-@sensitive_post_parameters()
-@csrf_protect
-@never_cache
-def cambiar_contrasena_miembro(request):
-    """
-    Vista para cambiar la contraseña de el usuario de un miembro.
-    """
-
-    usuario = request.user
-
-    if request.method == 'POST':
-        form = FormularioCambiarContrasena(data=request.POST, request=request)
-
-        if form.is_valid():
-            if (usuario.check_password(form.cleaned_data['contrasenaAnterior']) and
-               form.cleaned_data['contrasenaNueva'] == form.cleaned_data['contrasenaNuevaVerificacion']):
-                usuario.set_password(form.cleaned_data['contrasenaNueva'])
-                usuario.save()
-                if hasattr(usuario, 'empleado') and not Miembro.objects.filter(usuario=usuario):
-                    return redirect('miembros:miembro_inicio')
-                return redirect("miembros:editar_perfil")
-            else:
-                validacionContrasena = """
-                Error al tratar de cambiar la contraseña, verifique que la contraseña\
-                anterior sea correcta, y que concuerde la contraseña nueva y la verificación.
-                """
-    else:
-        form = FormularioCambiarContrasena(request=request)
-    return render_to_response("miembros/cambiar_contrasena.html", locals(), context_instance=RequestContext(request))
-
-
-@login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_agente')
 def asignar_grupo(request, id):
     try:
@@ -935,10 +899,15 @@ def crear_miembro(request):
 def listar_lideres(request, pk):
     """
     Permite a un administrador listar los lideres de la red escogida.
+
+    :param pk:
+        Pk de la red escogida.
     """
 
     red = get_object_or_404(Red, pk=pk)
-    lideres = Miembro.objects.lideres_red(red).select_related('usuario', 'grupo_lidera')
+    lideres = Miembro.objects.lideres_red(red).select_related(
+        'usuario', 'grupo_lidera', 'grupo'
+    ).prefetch_related('grupo__lideres', 'grupo__historiales')
 
     return render(request, 'miembros/lista_lideres.html', {'red': red, 'lideres': lideres})
 
