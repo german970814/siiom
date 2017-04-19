@@ -167,3 +167,18 @@ class CrearMiembroViewTest(BaseTest):
         self.assertFormError(response, 'form', 'genero', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'cedula', self.MSJ_OBLIGATORIO)
         self.assertFormError(response, 'form', 'primer_apellido', self.MSJ_OBLIGATORIO)
+
+
+class CambiarContrasenaViewTest(BaseTest):
+    """Pruebas unitarias para la vista cambiar contraseña de un usuario logueado."""
+
+    URL = 'miembros:cambiar_contrasena'
+
+    def setUp(self):
+        self.usuario = UsuarioFactory()
+
+    def test_get_cambiar_contrasena(self):
+        """"Prueba que se puede ver el template."""
+
+        self.login_usuario(self.usuario)
+        self.get_check_200(self.URL)
