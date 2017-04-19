@@ -172,7 +172,7 @@ class CrearMiembroViewTest(BaseTest):
 class CambiarContrasenaViewTest(BaseTest):
     """Pruebas unitarias para la vista cambiar contraseña de un usuario logueado."""
 
-    URL = 'miembros:cambiar_contrasena2'
+    URL = 'miembros:cambiar_contrasena'
 
     def setUp(self):
         self.usuario = UsuarioFactory()

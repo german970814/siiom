@@ -23,7 +23,7 @@ from io import BytesIO
 
 
 __all__ = (
-    'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro', 'FormularioCambiarContrasena',
+    'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro',
     'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
     'TrasladarMiembroForm', 'DesvincularLiderGrupoForm', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
     'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
@@ -189,39 +189,6 @@ class FormularioAdminAgregarMiembro(forms.ModelForm):
             'celular', 'direccion', 'fecha_nacimiento', 'cedula', 'email',
             'profesion', 'barrio', 'genero', 'estado_civil', 'conyugue'
         )
-
-
-class FormularioCambiarContrasena(forms.Form):
-    """
-    Formulario usado para el cambio de las contraseñas de los usuarios miembros.
-    """
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    contrasenaAnterior = forms.CharField(
-        widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña anterior:')
-    contrasenaNueva = forms.CharField(
-        widget=forms.PasswordInput(render_value=False), max_length=20, label='Contraseña nueva:')
-    contrasenaNuevaVerificacion = forms.CharField(
-        widget=forms.PasswordInput(render_value=False), max_length=20, label='Verifique contraseña nueva:')
-
-    def __init__(self, request, *args, **kwargs):
-        self.request = request
-        super(FormularioCambiarContrasena, self).__init__(*args, **kwargs)
-
-    def clean(self):
-        cont_vieja = self.data['contrasenaAnterior']
-        usuario = self.request.user
-
-        if not usuario.check_password(cont_vieja):
-            self.add_error('contrasenaAnterior', "Rectifica la Contraseña")
-            raise forms.ValidationError("Contraseña Incorrecta")
-
-        if self.data['contrasenaNueva'] != self.data['contrasenaNuevaVerificacion']:
-            self.add_error('contrasenaNuevaVerificacion', "Tus contraseñas no coinciden")
-            raise forms.ValidationError("Contraseñas no coinciden")
-
-        return super(FormularioCambiarContrasena, self).clean()
 
 
 class FormularioAsignarGrupo(forms.ModelForm):

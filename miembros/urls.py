@@ -8,7 +8,6 @@ from grupos.views import editar_horario_reunion_grupo
 urlpatterns = [
     url(r'^$', views.miembro_inicio, name="miembro_inicio"),
     url(r'^perfil/(?P<pk>\d*)$', views.editar_perfil_miembro, name="editar_perfil"),
-    url(r'^cambiar_contrasena/$', views.cambiar_contrasena_miembro, name="cambiar_contrasena"),
     url(r'^grupo/(?P<pk>\d*)$', editar_horario_reunion_grupo, name="editar_grupo"),
     url(r'^asignar_grupo/(\d+)/$', views.asignar_grupo, name="asignar_grupo"),
     url(r'^crear_zona/$', views.crear_zona, name="crear_zona"),
@@ -30,13 +29,13 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/trasladar/$', views.trasladar, name='trasladar'),
     url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
     url(
-        r'^cambiar_contrasena2/$', auth_views.password_change,
+        r'^cambiar_contrasena/$', auth_views.password_change,
         {
             'post_change_redirect': 'miembros:miembro_inicio',
-            'template_name': 'miembros/cambiar_contrasena2.html',
+            'template_name': 'miembros/cambiar_contrasena.html',
             'password_change_form': forms.CambiarContrasenaForm
         },
-        name="cambiar_contrasena2"
+        name="cambiar_contrasena"
     ),
 
     url(r'^api/desvincular_lider/(?P<pk>\d+)/$', api.desvincular_lider_grupo_api, name='desvincular_grupo_api'),
