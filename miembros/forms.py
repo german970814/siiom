@@ -7,6 +7,7 @@ Created on Apr 4, 2011
 
 from django import forms
 from django.contrib import auth
+from django.contrib.auth import forms as auth_forms
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _lazy
@@ -557,3 +558,16 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
             grupo.lideres.add(nuevo_lider)
 
         lider.update(grupo=None, grupo_lidera=None, estado=Miembro.INACTIVO)
+
+
+class CambiarContrasenaForm(CustomForm, auth_forms.PasswordChangeForm):
+    """Formulario que permite a un usuario cambiar su contraseña.
+
+    Extiende del formulario PasswordChangeForm de auth.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].widget.attrs.update({'class': 'form-control'})
+        self.fields['new_password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['new_password2'].widget.attrs.update({'class': 'form-control'})

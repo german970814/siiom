@@ -1,6 +1,7 @@
 from django.conf.urls import url
+from django.contrib.auth import views as auth_views
 
-from . import views, api
+from . import views, api, forms
 from grupos.views import editar_horario_reunion_grupo
 
 
@@ -26,8 +27,17 @@ urlpatterns = [
     url(r'^eliminar_foto_perfil/(?P<pk>\d*)$', views.eliminar_foto_perfil, name="eliminar_foto"),
 
     url(r'^nuevo/$', views.crear_miembro, name='nuevo'),
-    url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
     url(r'^(?P<pk>\d+)/trasladar/$', views.trasladar, name='trasladar'),
+    url(r'^redes/(?P<pk>\d+)/lideres/$', views.listar_lideres, name='listar_lideres'),
+    url(
+        r'^cambiar_contrasena2/$', auth_views.password_change,
+        {
+            'post_change_redirect': 'miembros:miembro_inicio',
+            'template_name': 'miembros/cambiar_contrasena2.html',
+            'password_change_form': forms.CambiarContrasenaForm
+        },
+        name="cambiar_contrasena2"
+    ),
 
     url(r'^api/desvincular_lider/(?P<pk>\d+)/$', api.desvincular_lider_grupo_api, name='desvincular_grupo_api'),
 ]
