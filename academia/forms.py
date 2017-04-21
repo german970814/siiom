@@ -6,7 +6,7 @@ Created on 27/04/2011
 from django.forms import ModelForm
 from django.db.models import Q
 from academia.models import Reporte, Matricula, Curso, Modulo, Sesion
-from miembros.models import Miembro, CambioTipo, CumplimientoPasos
+from miembros.models import Miembro, CambioTipo
 
 
 class FormularioEvaluarModulo(ModelForm):
