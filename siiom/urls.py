@@ -30,7 +30,8 @@ urlpatterns = patterns(
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
     url(r'^pqr/', include("pqr.urls", namespace="pqr")),
 
-    url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar')
+    url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar'),
+    url(r'^academia/', include("academia.urls", namespace="academia")),
 )
 
 if settings.DEBUG:
