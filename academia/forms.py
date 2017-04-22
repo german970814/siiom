@@ -105,9 +105,10 @@ class FormularioMatricula(ModelForm):
         mCurso = Matricula.objects.all().values('estudiante')
         mLiderMaestro = CambioTipo.objects.filter(
             Q(nuevoTipo__nombre__iexact='lider') | Q(nuevoTipo__nombre__iexact='maestro')).values('miembro')
-        mEncuentro = CumplimientoPasos.objects.filter(paso__nombre__iexact='encuentro').values('miembro')
-        self.fields['estudiante'].queryset = Miembro.objects.filter(
-            id__in=mEncuentro).exclude(id__in=mLiderMaestro).exclude(id__in=mCurso).exclude(grupo=None)
+        # mEncuentro = CumplimientoPasos.objects.filter(paso__nombre__iexact='encuentro').values('miembro')
+        # self.fields['estudiante'].queryset = Miembro.objects.filter(
+        #     id__in=mEncuentro).exclude(id__in=mLiderMaestro).exclude(id__in=mCurso).exclude(grupo=None)
+        self.fields['estudiante'].queryset = Miembro.objects.exclude(id__in=mLiderMaestro).exclude(id__in=mCurso).exclude(grupo=None)
         self.fields['estudiante'].widget.attrs.update(
             {'class': 'form-control selectpicker', 'data-live-search': 'true'}
         )

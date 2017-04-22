@@ -46,10 +46,10 @@ def eliminar(request, modelo, lista):
 def verCursos(request, admin):
     """Permite a un maestro o a un administrador listar cursos."""
     miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        admin = True
-    else:
-        admin = False
+    # if miembro.usuario.has_perm("miembros.es_administrador"):
+    #     admin = True
+    # else:
+    #     admin = False
 
     if request.method == 'POST':
         request.session['seleccionados'] = request.POST.getlist('seleccionados')
@@ -140,8 +140,9 @@ def listarEstudiantes(request, curso):
     miembro = Miembro.objects.get(usuario=request.user)
     id = int(curso)
     curso = Curso.objects.get(id=id)
-    mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
-    estudiantes = Matricula.objects.filter(curso=curso).exclude(estudiante__id__in=mLanzados)
+    # mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
+    # estudiantes = Matricula.objects.filter(curso=curso).exclude(estudiante__id__in=mLanzados)
+    estudiantes = Matricula.objects.filter(curso=curso)
     for est in estudiantes:
         totalSesiones = Sesion.objects.filter(modulo=est.moduloActual).count()
         est.sesionesDadas = AsistenciaSesiones.objects.filter(matricula=est, sesion__modulo=est.moduloActual).count()
@@ -195,59 +196,66 @@ def maestroAsistencia(request):
             return HttpResponse(data, content_type="application/javascript")
 
         if 'verEstudiantes' in request.POST or 'aceptarAsistencia' in request.POST:
-            try:
-                c = request.POST.getlist('menuCursos')[0]
-                m = request.POST.getlist('menuModulos')[0]
-                s = request.POST.getlist('menuSesiones')[0]
+            # try:
+            c = request.POST.getlist('menuCursos')[0]
+            m = request.POST.getlist('menuModulos')[0]
+            s = request.POST.getlist('menuSesiones')[0]
 
-                curso = Curso.objects.get(id=c)
-                modulo = Modulo.objects.get(id=m)
-                sesion = Sesion.objects.get(id=s)
-                modulos = curso.modulos.all()
-                sesiones = Sesion.objects.filter(modulo=modulo)
-                mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
+            curso = Curso.objects.get(id=c)
+            modulo = Modulo.objects.get(id=m)
+            sesion = Sesion.objects.get(id=s)
+            modulos = curso.modulos.all()
+            sesiones = Sesion.objects.filter(modulo=modulo)
+            # mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
 
-                if 'aceptarAsistencia' in request.POST:
-                    estudiantes = Matricula.objects.filter(
-                        Q(curso=curso),
-                        Q(moduloActual=modulo) | Q(moduloActual=None)
-                    ).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
-                    seleccionados = request.POST.getlist('seleccionados')
-                    for est in estudiantes:
-                        if est.moduloActual is None:
-                            est.moduloActual = modulo
-                            est.save()
+            if 'aceptarAsistencia' in request.POST:
+                # estudiantes = Matricula.objects.filter(
+                #     Q(curso=curso),
+                #     Q(moduloActual=modulo) | Q(moduloActual=None)
+                # ).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
+                estudiantes = Matricula.objects.filter(
+                    Q(curso=curso),
+                    Q(moduloActual=modulo) | Q(moduloActual=None)
+                ).order_by('estudiante__nombre')
+                seleccionados = request.POST.getlist('seleccionados')
+                for est in estudiantes:
+                    if est.moduloActual is None:
+                        est.moduloActual = modulo
+                        est.save()
 
-                        if str(est.id) in seleccionados:
-                            try:
-                                a = AsistenciaSesiones.objects.get(matricula=est, sesion=sesion)
-                                a.asistencia = True
-                            except:
-                                a = AsistenciaSesiones.objects.create(
-                                    matricula=est, sesion=sesion,
-                                    asistencia=True, fecha=datetime.datetime.now())
+                    if str(est.id) in seleccionados:
+                        try:
+                            a = AsistenciaSesiones.objects.get(matricula=est, sesion=sesion)
+                            a.asistencia = True
+                        except:
+                            a = AsistenciaSesiones.objects.create(
+                                matricula=est, sesion=sesion,
+                                asistencia=True, fecha=datetime.datetime.now())
+                        a.save()
+                        ok = True
+                    else:
+                        try:
+                            a = AsistenciaSesiones.objects.get(matricula=est, sesion=sesion)
+                            a.asistencia = False
                             a.save()
                             ok = True
-                        else:
-                            try:
-                                a = AsistenciaSesiones.objects.get(matricula=est, sesion=sesion)
-                                a.asistencia = False
-                                a.save()
-                                ok = True
-                            except:
-                                pass
+                        except:
+                            pass
 
-                estudiantes = Matricula.objects.filter(
-                    Q(curso=curso), Q(moduloActual=modulo) | Q(moduloActual=None)
-                ).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
-                for est in estudiantes:
-                    try:
-                        a = AsistenciaSesiones.objects.get(sesion=sesion, matricula=est)
-                        est.asistencia = a.asistencia
-                    except:
-                        est.asistencia = False
-            except:
-                raise Http404
+            # estudiantes = Matricula.objects.filter(
+            #     Q(curso=curso), Q(moduloActual=modulo) | Q(moduloActual=None)
+            # ).exclude(estudiante__id__in=mLanzados).order_by('estudiante__nombre')
+            estudiantes = Matricula.objects.filter(
+                Q(curso=curso), Q(moduloActual=modulo) | Q(moduloActual=None)
+            ).order_by('estudiante__nombre')
+            for est in estudiantes:
+                try:
+                    a = AsistenciaSesiones.objects.get(sesion=sesion, matricula=est)
+                    est.asistencia = a.asistencia
+                except:
+                    est.asistencia = False
+            # except:
+            #     raise Http404
 
         if not estudiantes:
             nadie = True
@@ -274,40 +282,48 @@ def maestroRegistrarEntregaTareas(request):
             return HttpResponse(data, content_type="application/javascript")
 
         if 'verEstudiantes' in request.POST or 'aceptarTarea' in request.POST:
-            try:
-                c = request.POST.getlist('menuCursos')[0]
-                m = request.POST.getlist('menuModulos')[0]
-                s = request.POST.getlist('menuSesiones')[0]
+            # try:
+            c = request.POST.getlist('menuCursos')[0]
+            m = request.POST.getlist('menuModulos')[0]
+            s = request.POST.getlist('menuSesiones')[0]
 
-                curso = Curso.objects.get(id=c)
-                modulo = Modulo.objects.get(id=m)
-                sesion = Sesion.objects.get(id=s)
-                modulos = curso.modulos.all()
-                sesiones = Sesion.objects.filter(modulo=modulo)
-                mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
+            curso = Curso.objects.get(id=c)
+            modulo = Modulo.objects.get(id=m)
+            sesion = Sesion.objects.get(id=s)
+            modulos = curso.modulos.all()
+            sesiones = Sesion.objects.filter(modulo=modulo)
+            # mLanzados = CumplimientoPasos.objects.filter(paso__nombre__iexact='lanzamiento').values('miembro')
 
-                if 'aceptarTarea' in request.POST:
-                    estudiantes = AsistenciaSesiones.objects.filter(
-                        asistencia=True, matricula__curso=curso,
-                        matricula__moduloActual=modulo, sesion=sesion
-                    ).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
-                    seleccionados = request.POST.getlist('seleccionados')
-                    for est in estudiantes:
-                        if str(est.id) in seleccionados:
-                            est.tarea = True
-                        else:
-                            est.tarea = False
-                        est.save()
-                        ok = True
-
+            if 'aceptarTarea' in request.POST:
+                # estudiantes = AsistenciaSesiones.objects.filter(
+                #     asistencia=True, matricula__curso=curso,
+                #     matricula__moduloActual=modulo, sesion=sesion
+                # ).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
                 estudiantes = AsistenciaSesiones.objects.filter(
-                    asistencia=True, matricula__curso=curso, matricula__moduloActual=modulo,
-                    sesion=sesion
-                ).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
-                if len(estudiantes) == 0:
-                    nadie = True
-            except:
-                raise Http404
+                    asistencia=True, matricula__curso=curso,
+                    matricula__moduloActual=modulo, sesion=sesion
+                ).order_by('matricula__estudiante__nombre')
+                seleccionados = request.POST.getlist('seleccionados')
+                for est in estudiantes:
+                    if str(est.id) in seleccionados:
+                        est.tarea = True
+                    else:
+                        est.tarea = False
+                    est.save()
+                    ok = True
+
+            # estudiantes = AsistenciaSesiones.objects.filter(
+            #     asistencia=True, matricula__curso=curso, matricula__moduloActual=modulo,
+            #     sesion=sesion
+            # ).exclude(matricula__estudiante__id__in=mLanzados).order_by('matricula__estudiante__nombre')
+            estudiantes = AsistenciaSesiones.objects.filter(
+                asistencia=True, matricula__curso=curso, matricula__moduloActual=modulo,
+                sesion=sesion
+            ).order_by('matricula__estudiante__nombre')
+            if len(estudiantes) == 0:
+                nadie = True
+            # except:
+            #     raise Http404
 
     miembro = Miembro.objects.get(usuario=request.user)
     cursos = Curso.objects.filter(profesor=miembro, estado='A')
