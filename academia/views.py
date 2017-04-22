@@ -98,7 +98,7 @@ def editarCurso(request, admin, url, pk, template_name="academia/crear_curso.htm
             if admin:
                 return HttpResponseRedirect("/academia/listar_cursos")
             else:
-                return HttpResponseRedirect("/academia/cursos/")
+                return HttpResponseRedirect("/academia/mis-cursos/")
     else:
         if admin:
             form = FormularioCrearCurso(instance=curso)
