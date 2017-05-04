@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 import os
-from . import database
+from .. import database
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
@@ -22,7 +22,7 @@ SECRET_KEY = '@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.localhost']
 
 LOGIN_URL = '/iniciar_sesion/'
 
@@ -72,6 +72,7 @@ INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 TENANT_MODEL = 'clientes.Iglesia'
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.security.SecurityMiddleware',
     'tenant_schemas.middleware.TenantMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,7 +81,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'waffle.middleware.WaffleMiddleware',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
