@@ -54,13 +54,7 @@ def create_secret_key():
 
 
 def update_settings():
-    # settings_path = PROJECT_ROOT + '/siiom/settings.py'
     settings_path = PROJECT_ROOT + '/siiom/settings/production.py'
-    # sed(settings_path, "DEBUG = True", "DEBUG = False")
-    # sed(settings_path,
-    #     'ALLOWED_HOSTS =.+$',
-    #     'ALLOWED_HOSTS = ["{}"]'.format(env.settings['allowed_host'])
-    #     )
     append(settings_path, '\nALLOWED_HOSTS = ["{}"]'.format(env.settings['allowed_host']))
     append(settings_path, '\nfrom ..secret_key import SECRET_KEY')
 
