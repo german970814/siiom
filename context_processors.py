@@ -1,4 +1,5 @@
 from contextlib import suppress
+from django.conf import settings
 from grupos.models import HistorialEstado
 
 
@@ -10,7 +11,8 @@ def siiom_context_processor(request):
     data = {
         'GRUPO_ACTIVO': HistorialEstado.ACTIVO,
         'GRUPO_INACTIVO': HistorialEstado.INACTIVO,
-        'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO
+        'GRUPO_SUSPENDIDO': HistorialEstado.SUSPENDIDO,
+        'ANALYTICS': settings.ANALYTICS
     }
 
     if hasattr(request, 'miembro'):
