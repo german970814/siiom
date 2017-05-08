@@ -75,8 +75,8 @@ INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 TENANT_MODEL = 'clientes.Iglesia'
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.security.SecurityMiddleware',
     'tenant_schemas.middleware.TenantMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
