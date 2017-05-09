@@ -1,6 +1,7 @@
 from .base import *
 
 MIDDLEWARE_CLASSES = (
+    'siiom.middleware.LogNotAllowedHostHeaderMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'tenant_schemas.middleware.TenantMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
