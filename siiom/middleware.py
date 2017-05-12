@@ -19,4 +19,5 @@ class LogNotAllowedHostHeaderMiddleware(object):
         try:
             request.get_host()
         except DisallowedHost:
-            logger.info(request.META)
+            if not request.META['HTTP_HOST'] == '45.56.115.140':
+                logger.critical(request.META)
