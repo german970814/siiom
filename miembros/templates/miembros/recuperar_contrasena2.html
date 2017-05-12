@@ -1,0 +1,22 @@
+{% extends "base_login.html" %}
+{% load staticfiles i18n %}
+
+{% block content %}
+    <div class="lc-block toggled">
+        <form action="" method="POST">
+            {% csrf_token %}
+            {% include "_alert_non_field_errors.html" %}
+
+            <p>{% trans "Se le enviara un correo con un link donde podra resetear su contraseña" %}</p>
+            <div class="input-group m-b-20 {{ form.email.css_classes }}">
+                <span class="input-group-addon"><i class="zmdi zmdi-email"></i></span>
+                <div class="fg-line">
+                    {{ form.email }}
+                </div>
+                {{ form.email.errors }}
+            </div>
+
+            <button type="submit" class="btn btn-login btn-danger btn-float"><i class="zmdi zmdi-arrow-forward"></i></button>
+        </form>
+    </div>
+{% endblock %}

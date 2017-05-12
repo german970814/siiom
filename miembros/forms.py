@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
-'''
-Created on Apr 4, 2011
-
-@author: Migue
-'''
-
+from PIL import Image
+from io import BytesIO
 from django import forms
-from django.contrib import auth
-from django.contrib.auth import forms as auth_forms
-from django.core.urlresolvers import reverse_lazy
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _lazy
+from django.contrib import auth
 from django.utils.http import is_safe_url
+from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth import forms as auth_forms, get_user_model
+from django.utils.translation import ugettext_lazy as _lazy, ugettext as _
 
 from common.forms import CustomForm, CustomModelForm
 from grupos.models import Grupo
 from grupos.forms import ArchivarGrupoForm
 from .models import Miembro, Zona, Barrio, CambioTipo, TipoMiembro
-
-from PIL import Image
-from io import BytesIO
-
 
 __all__ = (
     'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro',
@@ -538,3 +530,27 @@ class CambiarContrasenaForm(CustomForm, auth_forms.PasswordChangeForm):
         self.fields['old_password'].widget.attrs.update({'class': 'form-control'})
         self.fields['new_password1'].widget.attrs.update({'class': 'form-control'})
         self.fields['new_password2'].widget.attrs.update({'class': 'form-control'})
+
+
+class ResetearConstrasenaForm(CustomForm, auth_forms.PasswordResetForm):
+    """Formulario que permite a un usuario resetear su contraseña.
+
+    Extendiende del formulario PasswordResetForm de auth.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        label = self.fields['email'].label
+        self.fields['email'].widget.attrs.update({'class': self.input_css_class, 'placeholder': label})
+
+    def clean_email(self):
+        """Verifica que el email pertenezca a un usuario."""
+
+        email = self.cleaned_data['email']
+        if not get_user_model()._default_manager.filter(email=email).exists():
+            raise forms.ValidationError(
+                _('No se encontro ningún usuario asociado al email ingresado.'),
+                code='invalid'
+            )
+
+        return email
