@@ -5,7 +5,7 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib import admin
 from django.conf import settings
-from miembros.views import login, logout, administracion, recuperar_contrasena
+from miembros.views import login, logout, administracion
 from miembros import forms as miembros_forms
 
 admin.autodiscover()
@@ -24,7 +24,6 @@ urlpatterns = patterns(
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
     url(r'^common/', include("common.urls", namespace="common")),
-    url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),
     url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),
 
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
@@ -34,14 +33,14 @@ urlpatterns = patterns(
 
     url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar'),
     url(
-        r'^recuperar_contrasena2/$', auth_views.password_reset,
+        r'^recuperar_contrasena/$', auth_views.password_reset,
         {
-            'template_name': 'miembros/password_reset_form.html',
+            'template_name': 'miembros/contrasena/password_reset_form.html',
             'password_reset_form': miembros_forms.PasswordResetForm,
             'subject_template_name': 'miembros/contrasena/email_subject.html',
             'email_template_name': 'miembros/contrasena/email_body.html'
         },
-        name="recuperar_contrasena2"
+        name="recuperar_contrasena"
     ),
     url(
         r'^recuperar_contrasena/enviado/$', auth_views.password_reset_done,

@@ -18,7 +18,7 @@ __all__ = (
     'FormularioLiderAgregarMiembro', 'FormularioAdminAgregarMiembro',
     'FormularioAsignarGrupo', 'FormularioCrearZona', 'FormularioCrearBarrio', 'NuevoMiembroForm',
     'TrasladarMiembroForm', 'DesvincularLiderGrupoForm', 'FormularioCrearTipoMiembro', 'FormularioCambioTipoMiembro',
-    'FormularioAsignarUsuario', 'FormularioRecuperarContrasenia', 'FormularioTipoMiembros',
+    'FormularioAsignarUsuario', 'FormularioTipoMiembros',
     'FormularioFotoPerfil', 'FormularioInformacionIglesiaMiembro', 'LoginForm'
 )
 
@@ -298,20 +298,6 @@ class FormularioAsignarUsuario(forms.Form):
         self.fields['contrasenaVerificacion'].widget.attrs.update({'class': 'form-control'})
 
 
-class FormularioRecuperarContrasenia(forms.Form):
-    """
-    Formulario usado para recuperar contraseñas
-    """
-    required_css_class = 'requerido'
-    error_css_class = 'has-error'
-
-    email = forms.EmailField(required=True)
-
-    def __init__(self, *args, **kwargs):
-        super(FormularioRecuperarContrasenia, self).__init__(*args, **kwargs)
-        self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'ejemplo@iglesia.com'})
-
-
 class FormularioFotoPerfil(forms.ModelForm):
     """
     Formulario para manejar las validaciones de la imagen de perfil de el miembro,
@@ -533,7 +519,7 @@ class CambiarContrasenaForm(CustomForm, auth_forms.PasswordChangeForm):
 
 
 class PasswordResetForm(CustomForm, auth_forms.PasswordResetForm):
-    """Formulario que permite a un usuario resetear su contraseña.
+    """Formulario que permite a un usuario ingresar su email para poder resetear su contraseña.
 
     Extendiende del formulario PasswordResetForm de auth.
     """
@@ -561,7 +547,7 @@ class PasswordResetForm(CustomForm, auth_forms.PasswordResetForm):
 
 
 class SetPasswordForm(CustomForm, auth_forms.SetPasswordForm):
-    """Formulario que permite a un usuario setear una nueva contraseña.
+    """Formulario que permite a un usuario resetear su contraseña.
 
     Extendiende del formulario PasswordResetForm de auth.
     """
