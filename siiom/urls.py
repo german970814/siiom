@@ -1,10 +1,12 @@
 import views
 
 from django.conf.urls import include, patterns, url
+from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib import admin
 from django.conf import settings
 from miembros.views import login, logout, administracion, recuperar_contrasena
+from miembros import forms as miembros_forms
 
 admin.autodiscover()
 RedirectView.permanent = True
@@ -30,7 +32,38 @@ urlpatterns = patterns(
     url(r'^sgd/', include("gestion_documental.urls", namespace="sgd")),
     url(r'^pqr/', include("pqr.urls", namespace="pqr")),
 
-    url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar')
+    url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar'),
+    url(
+        r'^recuperar_contrasena2/$', auth_views.password_reset,
+        {
+            'template_name': 'miembros/password_reset_form.html',
+            'password_reset_form': miembros_forms.PasswordResetForm,
+            'subject_template_name': 'miembros/contrasena/email_subject.html',
+            'email_template_name': 'miembros/contrasena/email_body.html'
+        },
+        name="recuperar_contrasena2"
+    ),
+    url(
+        r'^recuperar_contrasena/enviado/$', auth_views.password_reset_done,
+        {
+            'template_name': 'miembros/contrasena/password_reset_done.html'
+        },
+        name="password_reset_done"),
+    url(
+        r'^resetear_contrasena/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        auth_views.password_reset_confirm,
+        {
+            'template_name': 'miembros/contrasena/password_reset_confirm.html',
+            'set_password_form': miembros_forms.SetPasswordForm
+        },
+        name="password_reset_confirm"
+    ),
+    url(
+        r'^resetear_contrasena/done/$',
+        auth_views.password_reset_complete,
+        {'template_name': 'miembros/contrasena/password_reset_complete.html'},
+        name="password_reset_complete"
+    ),
 )
 
 if settings.DEBUG:

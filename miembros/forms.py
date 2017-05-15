@@ -532,7 +532,7 @@ class CambiarContrasenaForm(CustomForm, auth_forms.PasswordChangeForm):
         self.fields['new_password2'].widget.attrs.update({'class': 'form-control'})
 
 
-class ResetearConstrasenaForm(CustomForm, auth_forms.PasswordResetForm):
+class PasswordResetForm(CustomForm, auth_forms.PasswordResetForm):
     """Formulario que permite a un usuario resetear su contraseña.
 
     Extendiende del formulario PasswordResetForm de auth.
@@ -554,3 +554,21 @@ class ResetearConstrasenaForm(CustomForm, auth_forms.PasswordResetForm):
             )
 
         return email
+
+    def save(self, **kwargs):
+        request = kwargs['request']
+        super().save(domain_override=request.get_host())
+
+
+class SetPasswordForm(CustomForm, auth_forms.SetPasswordForm):
+    """Formulario que permite a un usuario setear una nueva contraseña.
+
+    Extendiende del formulario PasswordResetForm de auth.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        label1 = self.fields['new_password1'].label
+        label2 = self.fields['new_password2'].label
+        self.fields['new_password1'].widget.attrs.update({'class': self.input_css_class, 'placeholder': label1})
+        self.fields['new_password2'].widget.attrs.update({'class': self.input_css_class, 'placeholder': label2})

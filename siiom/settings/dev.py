@@ -27,3 +27,6 @@ INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 
 #  Debug toolbar
 INTERNAL_IPS = ['127.0.0.1']
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
