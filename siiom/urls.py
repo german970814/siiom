@@ -1,10 +1,12 @@
 import views
 
 from django.conf.urls import include, patterns, url
+from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib import admin
 from django.conf import settings
-from miembros.views import login, logout, administracion, recuperar_contrasena
+from miembros.views import login, logout, administracion
+from miembros import forms as miembros_forms
 
 admin.autodiscover()
 RedirectView.permanent = True
@@ -22,7 +24,6 @@ urlpatterns = patterns(
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
     url(r'^common/', include("common.urls", namespace="common")),
-    url(r'^recuperar_contrasena/$', recuperar_contrasena, name='recuperar_contrasena'),
     url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),
 
     url(r'^organizacional/', include("organizacional.urls", namespace="organizacional")),
@@ -32,6 +33,37 @@ urlpatterns = patterns(
 
     url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar'),
     url(r'^academia/', include("academia.urls", namespace="academia")),
+    url(
+        r'^recuperar_contrasena/$', auth_views.password_reset,
+        {
+            'subject_template_name': 'miembros/contrasena/email_subject.html',
+            'template_name': 'miembros/contrasena/password_reset_form.html',
+            'email_template_name': 'miembros/contrasena/email_body.html',
+            'password_reset_form': miembros_forms.PasswordResetForm,
+        },
+        name="recuperar_contrasena"
+    ),
+    url(
+        r'^recuperar_contrasena/enviado/$', auth_views.password_reset_done,
+        {
+            'template_name': 'miembros/contrasena/password_reset_done.html'
+        },
+        name="password_reset_done"),
+    url(
+        r'^resetear_contrasena/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        auth_views.password_reset_confirm,
+        {
+            'template_name': 'miembros/contrasena/password_reset_confirm.html',
+            'set_password_form': miembros_forms.SetPasswordForm
+        },
+        name="password_reset_confirm"
+    ),
+    url(
+        r'^resetear_contrasena/done/$',
+        auth_views.password_reset_complete,
+        {'template_name': 'miembros/contrasena/password_reset_complete.html'},
+        name="password_reset_complete"
+    ),
 )
 
 if settings.DEBUG:
