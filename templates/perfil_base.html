@@ -1,10 +1,122 @@
 {% extends "base.html" %}
 {% load staticfiles i18n %}
+
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/estilos_foto_perfil.css' %}">
 <link href="{% static 'Template/jquery/vendors/bower_components/lightgallery/light-gallery/css/lightGallery.css' %}" rel="stylesheet">
 <link href="{% static 'Template/jquery/vendors/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
 {% endblock css %}
+
+{% block contenido %}
+<div class="load_modal_archivar_grupo"></div>
+<section>
+    <section>
+        <div class="container">
+            <div class="block-header">
+                <h2>{{miembro.nombre|upper}} {{miembro.primer_apellido|upper}}<small>{% if miembro.grupo_lidera %}Lider del grupo '{{miembro.grupo_lidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
+                {% if perms.miembros.es_administrador or request.miembro.es_cabeza_red %}
+                <ul class="actions m-t-20 hidden-xs">
+                    <li class="dropdown">
+                        <a href="" data-toggle="dropdown">
+                            <i class="zmdi zmdi-more-vert"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            {% if not miembro.grupo and perms.miembros.es_administrador %}
+                            <li>
+                                <a href="{% url 'miembros:asignar_grupo' miembro.id %}">Asignar a Grupo</a>
+                            </li>
+                            {% endif %}
+                            {% if not miembro.usuario and perms.miembros.es_administrador %}
+                            <li>
+                                <a href="{% url 'miembros:asignar_usuario' miembro.id %}">Asignar Usuario</a>
+                            </li>
+                            {% endif %}
+                            {% if miembro.grupo %}
+                                {% if request.miembro.grupo_lidera == miembro.grupo.cabeza_red or perms.miembro.es_administrador %}
+                                <li>
+                                    <a href="javascript:void(0);" id="desvincular-lider">{% trans "Desvincular Lider de grupo de amistad" %}</a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                            <li>
+                                <a href="">Refrescar</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+
+            <div class="card" id="profile-main">
+                <div class="pm-overview c-overflow">
+                    <div class="pmo-pic">
+                        <div class="p-relative">
+                            {% if mismo %}
+                            <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="uploadPhotos('{% url 'miembros:editar_perfil' request.miembro.id %}')">
+                            {% endif %}
+                            <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
+
+                            {% if mismo %}
+                            <a class="pmop-edit" id="change-photo" style="width:50%; cursor:pointer;">
+                                <i class="zmdi zmdi-camera"></i> <span class="hidden-xs">Cambiar Foto de Perfil</span>
+                            </a>
+                            <a  class="pmop-edit" id="delete-photo" style="width:50%; margin-left:50%; cursor:pointer;">
+                                <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar Foto de Perfil</span>
+                            </a>
+                            {% else %}
+                                {% if perms.miembro.es_administrador and miembro.foto_perfil %}
+                                <a href="#" class="pmop-edit" id="delete-photo">
+                                    <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar foto de perfil</span>
+                                </a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="preloader pl-xxl loader-fotop" style="">
+                            <svg class="pl-circular" viewBox="25 25 50 50">
+                                <circle class="plc-path" cx="50" cy="50" r="20" />
+                            </svg>
+                        </div>
+
+
+                        <div class="pmo-stat {% if miembro.genero == 'F' %} bgm-pink{% else %} bgm-cyan{% endif %}">
+                            <h2 class="m-0 c-white">{{miembro.nombre|upper}}</h2>
+                             {{miembro.cedula}}
+                        </div>
+                    </div>
+
+                    <div class="pmo-block pmo-contact hidden-xs">
+                        <h2>Contacto</h2>
+
+                        <ul>
+                            <li><i class="zmdi zmdi-phone"></i> {% if miembro.celular %}{{miembro.celular}}{% else %}SIN DATOS{% endif %}</li>
+                            <li><i class="zmdi zmdi-email"></i> {% if miembro.email %}{{miembro.email}}{% else %}SIN DATOS{% endif %}</li>
+                            <li><i class="zmdi zmdi-pin"></i> {% if miembro.direccion %}{{miembro.direccion|upper}}{% else %}SIN DATOS{% endif %}</li>
+                            <li><i class="zmdi zmdi-facebook-box"></i> Proximamente...</li>
+                            <li><i class="zmdi zmdi-twitter"></i> Proximamente...</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="pm-body clearfix">
+                    <ul class="tab-nav tn-justified">
+                        <li class="{% if p %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:editar_perfil' pk %}{% else %}{% url 'miembros:editar_perfil' request.miembro.id %}{% endif %}">Información de Miembro</a></li>
+                        {% if miembro.grupo %}
+                        <li class="{% if g %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:editar_grupo' pk %}{% else %}{% url 'miembros:editar_grupo' request.miembro.id %}{% endif %}">Grupo</a></li>
+                        {% endif %}
+                        {% if miembro.discipulos %}
+                        <li class="{% if d %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:ver_discipulos' pk %}{% else %}{% url 'miembros:ver_discipulos' request.miembro.id %}{% endif %}">Discípulos</a></li>
+                        {% endif %}
+                        <li class="{% if i %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:ver_informacion' pk %}{% else %}{% url 'miembros:ver_informacion' request.miembro.id %}{% endif %}">Información de la Iglesia</a></li>
+                    </ul>
+                {% block card %}
+
+                {% endblock card %}
+                </div>
+            </div>
+        </div>
+
+    </section>
+</section>
+{% endblock contenido %}
 
 {% block js %}
 {% if miembro.grupo %}
@@ -306,114 +418,3 @@
 {% block js2 %}
 {% endblock js2 %}
 {% endblock %}
-
-{% block contenido %}
-<div class="load_modal_archivar_grupo"></div>
-<section>
-    <section>
-        <div class="container">
-            <div class="block-header">
-                <h2>{{miembro.nombre|upper}} {{miembro.primer_apellido|upper}}<small>{% if miembro.grupo_lidera %}Lider del grupo '{{miembro.grupo_lidera.nombre|upper}}'{% else %}{% if miembro.grupo %}Pertenece al grupo '{{miembro.grupo.nombre|upper}}'{% else %}No Pertenece a Grupo Aún{% endif %}{% endif %}</small></h2>
-                {% if perms.miembros.es_administrador or request.miembro.es_cabeza_red %}
-                <ul class="actions m-t-20 hidden-xs">
-                    <li class="dropdown">
-                        <a href="" data-toggle="dropdown">
-                            <i class="zmdi zmdi-more-vert"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                            {% if not miembro.grupo and perms.miembros.es_administrador %}
-                            <li>
-                                <a href="{% url 'miembros:asignar_grupo' miembro.id %}">Asignar a Grupo</a>
-                            </li>
-                            {% endif %}
-                            {% if not miembro.usuario and perms.miembros.es_administrador %}
-                            <li>
-                                <a href="{% url 'miembros:asignar_usuario' miembro.id %}">Asignar Usuario</a>
-                            </li>
-                            {% endif %}
-                            {% if miembro.grupo %}
-                                {% if request.miembro.grupo_lidera == miembro.grupo.cabeza_red or perms.miembro.es_administrador %}
-                                <li>
-                                    <a href="javascript:void(0);" id="desvincular-lider">{% trans "Desvincular Lider de grupo de amistad" %}</a>
-                                </li>
-                                {% endif %}
-                            {% endif %}
-                            <li>
-                                <a href="">Refrescar</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                {% endif %}
-            </div>
-
-            <div class="card" id="profile-main">
-                <div class="pm-overview c-overflow">
-                    <div class="pmo-pic">
-                        <div class="p-relative">
-                            {% if mismo %}
-                            <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="uploadPhotos('{% url 'miembros:editar_perfil' request.miembro.id %}')">
-                            {% endif %}
-                            <img id="photo-p" class="img-responsive" src="{% if miembro.foto_perfil %}{{ miembro.foto_perfil.url }}{% else %}{% static 'Imagenes/profile-none.jpg' %}{% endif%}" alt="">
-
-                            {% if mismo %}
-                            <a class="pmop-edit" id="change-photo" style="width:50%; cursor:pointer;">
-                                <i class="zmdi zmdi-camera"></i> <span class="hidden-xs">Cambiar Foto de Perfil</span>
-                            </a>
-                            <a  class="pmop-edit" id="delete-photo" style="width:50%; margin-left:50%; cursor:pointer;">
-                                <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar Foto de Perfil</span>
-                            </a>
-                            {% else %}
-                                {% if perms.miembro.es_administrador and miembro.foto_perfil %}
-                                <a href="#" class="pmop-edit" id="delete-photo">
-                                    <i class="zmdi zmdi-delete"></i> <span class="hidden-xs">Eliminar foto de perfil</span>
-                                </a>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                        <div class="preloader pl-xxl loader-fotop" style="">
-                            <svg class="pl-circular" viewBox="25 25 50 50">
-                                <circle class="plc-path" cx="50" cy="50" r="20" />
-                            </svg>
-                        </div>
-
-
-                        <div class="pmo-stat {% if miembro.genero == 'F' %} bgm-pink{% else %} bgm-cyan{% endif %}">
-                            <h2 class="m-0 c-white">{{miembro.nombre|upper}}</h2>
-                             {{miembro.cedula}}
-                        </div>
-                    </div>
-
-                    <div class="pmo-block pmo-contact hidden-xs">
-                        <h2>Contacto</h2>
-
-                        <ul>
-                            <li><i class="zmdi zmdi-phone"></i> {% if miembro.celular %}{{miembro.celular}}{% else %}SIN DATOS{% endif %}</li>
-                            <li><i class="zmdi zmdi-email"></i> {% if miembro.email %}{{miembro.email}}{% else %}SIN DATOS{% endif %}</li>
-                            <li><i class="zmdi zmdi-pin"></i> {% if miembro.direccion %}{{miembro.direccion|upper}}{% else %}SIN DATOS{% endif %}</li>
-                            <li><i class="zmdi zmdi-facebook-box"></i> Proximamente...</li>
-                            <li><i class="zmdi zmdi-twitter"></i> Proximamente...</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="pm-body clearfix">
-                    <ul class="tab-nav tn-justified">
-                        <li class="{% if p %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:editar_perfil' pk %}{% else %}{% url 'miembros:editar_perfil' request.miembro.id %}{% endif %}">Información de Miembro</a></li>
-                        {% if miembro.grupo %}
-                        <li class="{% if g %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:editar_grupo' pk %}{% else %}{% url 'miembros:editar_grupo' request.miembro.id %}{% endif %}">Grupo</a></li>
-                        {% endif %}
-                        {% if miembro.discipulos %}
-                        <li class="{% if d %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:ver_discipulos' pk %}{% else %}{% url 'miembros:ver_discipulos' request.miembro.id %}{% endif %}">Discípulos</a></li>
-                        {% endif %}
-                        <li class="{% if i %}active{% endif %} waves-effect"><a href="{% if pk %}{% url 'miembros:ver_informacion' pk %}{% else %}{% url 'miembros:ver_informacion' request.miembro.id %}{% endif %}">Información de la Iglesia</a></li>
-                    </ul>
-                {% block card %}
-
-                {% endblock card %}
-                </div>
-            </div>
-        </div>
-
-    </section>
-</section>
-{% endblock contenido %}
