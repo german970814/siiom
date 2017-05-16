@@ -617,58 +617,6 @@ def administracion(request):
     return render_to_response('miembros/administracion.html', locals(), context_instance=RequestContext(request))
 
 
-def recuperar_contrasena(request):
-    if request.user.is_authenticated():
-        return HttpResponseRedirect('/iniciar_sesion')
-
-    SUBJECT = "Recuperar Contraseña de %s" % Site.objects.get_current().name
-    MESSAGE = """Ingresa al siguiente link para cambiar tu contraseña:\n
-        http://%s/iniciar_sesion/?next=/miembro/cambiar_contrasena/\n\n\n
-        Usuario: '%s'\n
-        Nueva Contraseña: '%s' \n\n\n
-        Por favor no reenviar este correo"""
-    SENDER = "iglesia@mail.webfaction.com"
-    RECEPT = "%s"
-    ok = False
-
-    if request.method == 'POST':
-        if 'aceptar' in request.POST:
-            new_password = ''
-            form = FormularioRecuperarContrasenia(request.POST or None)
-
-            if form.is_valid():
-                email = form.cleaned_data['email']
-                try:
-                    usuario = User.objects.get(username__exact=email)
-                    new_password = generar_random_string(12)
-
-                    usuario.set_password(new_password)
-                    usuario.save()
-
-                    try:
-                        send_mail(SUBJECT,
-                                  MESSAGE % (request.META['HTTP_HOST'], usuario.username, new_password),
-                                  SENDER,
-                                  (RECEPT % email,),
-                                  fail_silently=False)
-                        ok = True
-                    except:
-                        messages.error(request, "Ha Ocurrido un problema interno...")
-
-                except User.DoesNotExist:
-                    # raise Http404
-                    messages.error(request,
-                                   "Usuario no encontrado, rectifica tu usuario para poder recuperar tu contraseña")
-
-        else:
-            form = FormularioRecuperarContrasenia()
-
-    else:
-        form = FormularioRecuperarContrasenia()
-
-    return render_to_response("miembros/recuperar_contrasena.html", locals(), context_instance=RequestContext(request))
-
-
 @login_required
 def ver_discipulos(request, pk=None):
     d = True

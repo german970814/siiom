@@ -6,7 +6,9 @@
       })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
       ga('create', 'UA-98666751-1', 'auto');
-      ga('send', 'pageview');
 
+      var page = document.location.pathname.replace(/[0-9]\/?/g, '');
+      ga('set', 'page', page);
+      ga('send', 'pageview');
     </script>
 {% endif %}
