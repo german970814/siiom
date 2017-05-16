@@ -189,9 +189,7 @@ DEFAULT_FILE_STORAGE = 'siiom.storage.TenantFileSystemStorage'
 
 # Email configuration
 
-EMAIL_HOST = 'smtp.webfaction.com'
-EMAIL_HOST_PASSWORD = '46ea33cd'
-EMAIL_HOST_USER = 'iglesia'
+DEFAULT_FROM_EMAIL = 'SIIOM <noreply@siiom.net>'
 
 # Logging
 

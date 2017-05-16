@@ -543,7 +543,7 @@ class PasswordResetForm(CustomForm, auth_forms.PasswordResetForm):
 
     def save(self, **kwargs):
         request = kwargs['request']
-        super().save(domain_override=request.get_host())
+        super().save(domain_override=request.get_host(), **kwargs)
 
 
 class SetPasswordForm(CustomForm, auth_forms.SetPasswordForm):

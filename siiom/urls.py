@@ -35,10 +35,10 @@ urlpatterns = patterns(
     url(
         r'^recuperar_contrasena/$', auth_views.password_reset,
         {
-            'template_name': 'miembros/contrasena/password_reset_form.html',
-            'password_reset_form': miembros_forms.PasswordResetForm,
             'subject_template_name': 'miembros/contrasena/email_subject.html',
-            'email_template_name': 'miembros/contrasena/email_body.html'
+            'template_name': 'miembros/contrasena/password_reset_form.html',
+            'email_template_name': 'miembros/contrasena/email_body.html',
+            'password_reset_form': miembros_forms.PasswordResetForm,
         },
         name="recuperar_contrasena"
     ),

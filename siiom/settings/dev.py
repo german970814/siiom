@@ -18,6 +18,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 #  Apps
+
 SHARED_APPS += [
     'django_extensions',
     'debug_toolbar',
@@ -26,7 +27,9 @@ SHARED_APPS += [
 INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 
 #  Debug toolbar
+
 INTERNAL_IPS = ['127.0.0.1']
 
-# Email
+# Email configuration
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
