@@ -1,9 +1,9 @@
-from django.contrib import messages
-
 import random
 import string
 import warnings
 
+from django.contrib import messages
+from django.core import mail
 
 __doc__ = '''
     Funciones utiles para el uso de la aplicación general
@@ -105,3 +105,10 @@ def generar_random_string(length=12):
     for letter in range(length):
         pswd += random.choice(string.ascii_letters + string.digits)
     return pswd
+
+
+def send_mail(subject, message, recipient_list, **kwargs):
+    """Wrapper de send_mail con la dirección de envvio ya configurada."""
+
+    from django.conf import settings
+    return mail.send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, **kwargs)
