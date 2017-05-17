@@ -2,7 +2,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.utils.translation import ugettext_lazy as _lazy
+from django.utils.translation import ugettext_lazy as _lazy, ugettext as _
 
 # Locale imports
 from .managers import MiembroManager
@@ -123,6 +123,17 @@ class Miembro(UtilsModelMixin, models.Model):
     # managers
     objects = MiembroManager()
 
+    class Meta:
+        permissions = (
+            ("es_agente", "define si un miembro es agente"),
+            ("es_lider", "indica si el usuario es lider de un GAR"),
+            ("es_administrador", "es adminisitrador"),
+            ("es_pastor", "indica si un miembro es pastor"),
+            ("es_tesorero", "indica si un miembro es tesorero"),
+            ("es_coordinador", "indica si un miembro es coordinador"),
+            ("buscar_todos", "indica si un usuario puede buscar miembros"),
+        )
+
     def __str__(self):
         return "{0} {1} ({2})".format(self.nombre.upper(), self.primer_apellido.upper(), self.cedula)
 
@@ -153,6 +164,21 @@ class Miembro(UtilsModelMixin, models.Model):
         """
 
         return self.grupo_lidera and getattr(self.grupo_lidera, 'get_depth', lambda: None)() == 3
+
+    def resetear_contrasena(self):
+        """Resetea la contreseña del miembro actual. Coloca como nueva contreseña la cedula del miembro."""
+
+        from common.utils import send_mail
+        from django.template import loader
+        from django.db import connection
+
+        if self.usuario:
+            self.usuario.set_password(self.cedula)
+
+            protocol = 'https' if settings.SECURE_SSL_REDIRECT else 'http'
+            context = {'nombre': self.nombre.upper(), 'dominio': connection.tenant.domain_url, 'protocolo': protocol}
+            message = loader.render_to_string('miembros/emails/contrasena_reseteada.html', context=context)
+            send_mail(_('Contraseña reseteada.'), message, [self.email])
 
     def trasladar(self, nuevo_grupo):
         """
@@ -212,17 +238,6 @@ class Miembro(UtilsModelMixin, models.Model):
                 sw = False
 
         return pastores
-
-    class Meta:
-        permissions = (
-            ("es_agente", "define si un miembro es agente"),
-            ("es_lider", "indica si el usuario es lider de un GAR"),
-            ("es_administrador", "es adminisitrador"),
-            ("es_pastor", "indica si un miembro es pastor"),
-            ("es_tesorero", "indica si un miembro es tesorero"),
-            ("es_coordinador", "indica si un miembro es coordinador"),
-            ("buscar_todos", "indica si un usuario puede buscar miembros"),
-        )
 
 
 class CambioTipo(models.Model):
