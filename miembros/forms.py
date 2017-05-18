@@ -461,6 +461,7 @@ class DesvincularLiderGrupoForm(ArchivarGrupoForm):
                     grupo__red_id=lider.grupo.red_id)
 
     def clean(self):
+        """Clean override. Se verifica que el usuario exista antes de enviar email."""
         cleaned_data = super().clean()
 
         lider = cleaned_data.get('lider', None)
@@ -558,3 +559,15 @@ class SetPasswordForm(CustomForm, auth_forms.SetPasswordForm):
         label2 = self.fields['new_password2'].label
         self.fields['new_password1'].widget.attrs.update({'class': self.input_css_class, 'placeholder': label1})
         self.fields['new_password2'].widget.attrs.update({'class': self.input_css_class, 'placeholder': label2})
+
+
+class ResetearContrasenaAdminForm(CustomForm):
+    """Formulario que permite resetear la contraseña de un miembro."""
+
+    miembro = forms.ModelChoiceField(queryset=Miembro.objects.all())
+
+    def resetear(self):
+        """Resetea la contraseña."""
+
+        miembro = self.cleaned_data['miembro']
+        miembro.resetear_contrasena()
