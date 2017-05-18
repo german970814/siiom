@@ -38,8 +38,11 @@
                                 </li>
                                 {% endif %}
                             {% endif %}
+                            {% if perms.miembros.es_administrador %}
+                            <li><a href="javascript:void(0);" id="resetear-contrasena">{% trans "Resetear contraseña" %}</a></li>
+                            {% endif %}
                             <li>
-                                <a href="">Refrescar</a>
+                                <a href="">{% trans "Refrescar" %}</a>
                             </li>
                         </ul>
                     </li>
@@ -414,6 +417,42 @@
             $('.page-loader').fadeOut();
         });
     });
+
+    document.querySelector('#resetear-contrasena').addEventListener('click', function() {
+        swal({
+            title: "¿Estás seguro que deseas resetear la contraseña de {{ miembro.nombre|upper }} {{ miembro.primer_apellido|upper}}?",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+            closeOnConfirm: true,
+        }, function (isConfirm) {
+            if (isConfirm) {
+                var csrf = $('input[name="csrfmiddlewaretoken"]').val()
+                $.ajax({
+                    url: '{% url "miembros:resetear_contrasena_api" %}',
+                    type: 'POST',
+                    data: {'miembro': '{{ miembro.pk }}', 'csrfmiddlewaretoken': csrf},
+                    success: function(data) {
+                        var message, nType;
+                        if (data['response_code']==200) {
+                            message = data['message'];
+                            nType = 'success';
+                        }
+                        else {
+                            message = 'Hubo un error al intentar cambiar la contraseña. Por favor intentalo de nuevo';
+                            nType = 'danger';
+                        }
+
+                        var nAnimIn = $(this).attr('data-animation-in');
+                        var nAnimOut = $(this).attr('data-animation-out');
+                        notify(message, 'top', 'center', 'fa fa-comments', nType, nAnimIn, nAnimOut);
+                    }
+                });
+            }
+        });
+    })
 </script>
 {% block js2 %}
 {% endblock js2 %}

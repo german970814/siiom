@@ -57,33 +57,30 @@ class ResetearContrasenaAPITest(BaseTestAPI):
     url = reverse('miembros:resetear_contrasena_api')
 
     def setUp(self):
-        self.admin = UsuarioFactory(admin=True)
         self.miembro = MiembroFactory(lider=True)
 
-    def test_get_resetear_contrasena_retorna_404(self):
+    def test_GET_resetear_contrasena_retorna_404(self):
         """Prueba que si se intenta hacer una petición GET retorne 404"""
 
-        self.login_usuario(self.admin)
-        response = self.GET()
+        response = self.GET(login=True, kwargs_user={'admin': True})
 
         self.assertEqual(response[constants.RESPONSE_CODE], constants.RESPONSE_DENIED)
 
     @mock.patch('miembros.models.Miembro.resetear_contrasena')
-    def test_post_resetear_contrasena(self, reset_mock):
+    def test_POST_resetear_contrasena(self, reset_mock):
         """Prueba que cuando un administrador haga POST se resetee la contraseña del miembro."""
 
-        self.login_usuario(self.admin)
-        self.POST(data={'miembro': self.miembro.pk})
+        response = self.POST(data={'miembro': self.miembro.pk}, login=True, kwargs_user={'admin': True})
 
         self.assertTrue(reset_mock.called)
+        self.assertIn('message', response)
 
     def test_form_invalid_response_es_json(self):
         """
-        Verifica que en los errores, la respuesta sea de JSON
+        Verifica que en los errores, la respuesta sea de JSON 3049821
         """
 
-        self.login_usuario(self.admin)
-        response = self.POST(data={'miembro': 345})
+        response = self.POST(data={'miembro': 345}, login=True, kwargs_user={'admin': True})
 
         self.assertEqual(response[constants.RESPONSE_CODE], constants.RESPONSE_DENIED)
         self.assertIn('miembro', response['errors'])

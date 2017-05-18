@@ -1,6 +1,7 @@
-from django.contrib.auth.decorators import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import permission_required
+from django.utils.translation import ugettext as _
 from django.shortcuts import get_object_or_404
+from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 
 from .forms import DesvincularLiderGrupoForm, ResetearContrasenaAdminForm
@@ -33,17 +34,23 @@ def desvincular_lider_grupo_api(request, pk):
     return JsonResponse({constants.RESPONSE_CODE: constants.RESPONSE_DENIED})
 
 
-# @permission_required('miembros.es_administrador', raise_exception=True)
 @login_required_api
+@permission_required('miembros.es_administrador', raise_exception=True)
 def resetear_contrasena(request):
     """Permite a un administrador resetear la contraseña de un miembro."""
+
+    msg = 'La contraseña se reseteo correctamente y se envió un email al miembro con su nueva contraseña.'
+    msg2 = 'La nueva contraseña es la cedula del miembro.'
 
     if request.method == 'POST':
         form = ResetearContrasenaAdminForm(request.POST)
 
         if form.is_valid():
             form.resetear()
-            return JsonResponse({constants.RESPONSE_CODE: constants.RESPONSE_SUCCESS})
+            return JsonResponse({
+                'message': _(msg + msg2),
+                constants.RESPONSE_CODE: constants.RESPONSE_SUCCESS
+            })
 
         errors = get_error_forms_to_json(form)
         return JsonResponse(errors, safe=False)
