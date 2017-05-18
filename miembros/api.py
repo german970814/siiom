@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
-from .forms import DesvincularLiderGrupoForm
+from .forms import DesvincularLiderGrupoForm, ResetearContrasenaAdminForm
 from .models import Miembro
 from .decorators import user_is_cabeza_red
 from common.decorators import login_required_api
@@ -29,5 +29,23 @@ def desvincular_lider_grupo_api(request, pk):
         else:
             errors = get_error_forms_to_json(form)
             return JsonResponse(errors, safe=False)
+
+    return JsonResponse({constants.RESPONSE_CODE: constants.RESPONSE_DENIED})
+
+
+# @permission_required('miembros.es_administrador', raise_exception=True)
+@login_required_api
+def resetear_contrasena(request):
+    """Permite a un administrador resetear la contraseña de un miembro."""
+
+    if request.method == 'POST':
+        form = ResetearContrasenaAdminForm(request.POST)
+
+        if form.is_valid():
+            form.resetear()
+            return JsonResponse({constants.RESPONSE_CODE: constants.RESPONSE_SUCCESS})
+
+        errors = get_error_forms_to_json(form)
+        return JsonResponse(errors, safe=False)
 
     return JsonResponse({constants.RESPONSE_CODE: constants.RESPONSE_DENIED})
