@@ -1,3 +1,11 @@
+# Third Apps
+import waffle
+
+# Python Packages
+import datetime
+import json
+import os
+
 # Django Imports
 from datetime import date
 from django.conf import settings
@@ -5,7 +13,6 @@ from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group, User
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -22,20 +29,12 @@ from .forms import *
 from .forms import TrasladarMiembroForm, NuevoMiembroForm, DesvincularLiderGrupoForm
 from .decorators import user_is_miembro_or_empleado
 from .models import Miembro, CambioTipo, TipoMiembro, Zona, Barrio
-from .utils import divorciar, calcular_grupos_miembro
+from .utils import divorciar
 from grupos.forms import FormularioEditarDiscipulado
 from grupos.models import Grupo, Red
 from common.decorators import permisos_requeridos
-from common.utils import eliminar, generar_random_string, eliminar_registros
+from common.utils import eliminar
 from compras.models import Requisicion, Parametros, DetalleRequisicion
-
-# Third Apps
-import waffle
-
-# Python Packages
-import datetime
-import json
-import os
 
 
 @sensitive_post_parameters()

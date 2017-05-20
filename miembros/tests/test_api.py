@@ -1,12 +1,13 @@
+from unittest import mock
+
 # Django imports
 from django.core.urlresolvers import reverse
 
 from common.tests.base import BaseTestAPI
+from common.tests.factories import UsuarioFactory
 from common import constants
 from grupos.models import Grupo
 from .factories import MiembroFactory
-
-from unittest import mock
 
 
 class DesvincularLiderGrupoAPITest(BaseTestAPI):
@@ -48,3 +49,38 @@ class DesvincularLiderGrupoAPITest(BaseTestAPI):
         self.POST(login=True, kwargs_user={'admin': True}, data={'lider': self.miembro.id})
 
         self.assertTrue(desvincular_lider.called)
+
+
+class ResetearContrasenaAPITest(BaseTestAPI):
+    """Pruebas unitarias para la vista que permite a un administrador resetar la contresaña de un miembro."""
+
+    url = reverse('miembros:resetear_contrasena_api')
+
+    def setUp(self):
+        self.miembro = MiembroFactory(lider=True)
+
+    def test_GET_resetear_contrasena_retorna_404(self):
+        """Prueba que si se intenta hacer una petición GET retorne 404"""
+
+        response = self.GET(login=True, kwargs_user={'admin': True})
+
+        self.assertEqual(response[constants.RESPONSE_CODE], constants.RESPONSE_DENIED)
+
+    @mock.patch('miembros.models.Miembro.resetear_contrasena')
+    def test_POST_resetear_contrasena(self, reset_mock):
+        """Prueba que cuando un administrador haga POST se resetee la contraseña del miembro."""
+
+        response = self.POST(data={'miembro': self.miembro.pk}, login=True, kwargs_user={'admin': True})
+
+        self.assertTrue(reset_mock.called)
+        self.assertIn('message', response)
+
+    def test_form_invalid_response_es_json(self):
+        """
+        Verifica que en los errores, la respuesta sea de JSON 3049821
+        """
+
+        response = self.POST(data={'miembro': 345}, login=True, kwargs_user={'admin': True})
+
+        self.assertEqual(response[constants.RESPONSE_CODE], constants.RESPONSE_DENIED)
+        self.assertIn('miembro', response['errors'])
