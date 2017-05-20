@@ -38,5 +38,6 @@ urlpatterns = [
         name="cambiar_contrasena"
     ),
 
+    url(r'^api/admin/resetear_contrasena/$', api.resetear_contrasena, name='resetear_contrasena_api'),
     url(r'^api/desvincular_lider/(?P<pk>\d+)/$', api.desvincular_lider_grupo_api, name='desvincular_grupo_api'),
 ]

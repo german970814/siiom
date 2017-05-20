@@ -1,17 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% block js %}
-<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
-<script type="text/javascript">
-	$(document).ready(function(){
-		$("#{{ form.fecha.id_for_label }}").datetimepicker({
-            format: 'DD/MM/YYYY',
-            maxDate: moment(),
-        });
-	});
-</script>
-{% include "grupos/_reportes_js.html" %}
-{% endblock %}
 
 {% block contenido %}
 <div class="container">
@@ -176,4 +164,23 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#{{ form.fecha.id_for_label }}").datetimepicker({
+            format: 'DD/MM/YYYY',
+            maxDate: moment(),
+        });
+
+		$('button[name="aceptar"]').click(function(){
+			ga('set', 'dimension1', 'Admin');
+			ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
+			document.querySelector('form').submit();
+		});
+	});
+</script>
+{% include "grupos/_reportes_js.html" %}
 {% endblock %}
