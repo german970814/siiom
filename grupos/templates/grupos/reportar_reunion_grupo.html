@@ -1,18 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% block js %}
-{# <script type="text/javascript" src="{% static 'Scripts/js/jquery-ui-1.10.4.custom.js' %}"></script> #}
-<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
-<script type="text/javascript">
-	$(document).ready(function(){
-		$("#{{ form.fecha.id_for_label }}").datetimepicker({
-            format: 'DD/MM/YYYY',
-            maxDate: moment(),
-        });
-	});
-</script>
-{% include "grupos/_reportes_js.html" %}
-{% endblock %}
 
 {% block contenido %}
 <div class="container">
@@ -36,7 +23,7 @@
         </div>
 
         {% if grupo %}
-        <form action="" method="POST" id="form-reporte" enctype="multipart/form-data">
+        <form action="" method="POST" id="form-reporte">
             {% csrf_token %}
             <div class="card-body card-padding">
                 <br>
@@ -153,7 +140,7 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <button type="submit" class="btn btn-primary btn-block" name ="aceptar">Aceptar</button>
+                        <button type="button" class="btn btn-primary btn-block" name ="aceptar">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -167,4 +154,23 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#{{ form.fecha.id_for_label }}").datetimepicker({
+            format: 'DD/MM/YYYY',
+            maxDate: moment(),
+        });
+
+		$('button[name="aceptar"]').click(function(){
+			ga('set', 'dimension1', 'Lider');
+			ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
+			document.querySelector('form').submit();
+		});
+	});
+</script>
+{% include "grupos/_reportes_js.html" %}
 {% endblock %}
