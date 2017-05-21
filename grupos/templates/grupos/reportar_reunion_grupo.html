@@ -166,9 +166,16 @@
         });
 
 		$('button[name="aceptar"]').click(function(){
-			ga('set', 'dimension1', 'Lider');
-			ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
-			document.querySelector('form').submit();
+            try {
+			    ga('set', 'dimension1', 'Lider');
+			    ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
+            }
+            catch (err) {
+                //
+            }
+            finally {
+                document.querySelector('form').submit();
+            }
 		});
 	});
 </script>
