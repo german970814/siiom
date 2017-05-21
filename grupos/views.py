@@ -1,3 +1,9 @@
+# Python Packages
+import logging
+import datetime
+import json
+import copy
+
 # Django Imports
 from django.conf import settings
 from django.contrib import messages
@@ -27,10 +33,7 @@ from miembros.models import Miembro
 from common.decorators import permisos_requeridos
 from common.utils import eliminar
 
-# Python Packages
-import datetime
-import json
-import copy
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -124,6 +127,7 @@ def reportar_reunion_grupo(request):
                     )
             else:
                 # si han ocurrido errores en el formulario, los envia
+                logger.critical("Errores en el formulario de reportar reunion GAR" + form.errors)
                 messages.error(request, _('Ha ocurrido un error con el formulario, verifica los campos'))
         else:
             # carga el formulario en get

@@ -441,9 +441,16 @@
         });
 
         $('button[name="reportar"]').click(function(){
-            ga('set', 'dimension1', 'Admin');
-			ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
-			document.querySelector('#form-reporte').submit();
+            try {
+			    ga('set', 'dimension1', 'Admin');
+			    ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
+            }
+            catch (err) {
+                //
+            }
+            finally {
+                document.querySelector('#form-reporte').submit();
+            }
         });
     });
 </script>
