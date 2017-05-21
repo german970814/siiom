@@ -97,6 +97,7 @@ def reportar_reunion_grupo(request):
     # se verifica que exista el grupo de el miembro en la sesion y que este, esté activo
     if grupo is not None and grupo.is_activo:
         if request.method == 'POST':
+            logger.critical(request.POST)
             form = FormularioReportarReunionGrupo(data=request.POST)
             if form.is_valid():
                 reunion = form.save(commit=False)
