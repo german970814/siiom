@@ -127,7 +127,8 @@ def reportar_reunion_grupo(request):
                     )
             else:
                 # si han ocurrido errores en el formulario, los envia
-                logger.critical("Errores en el formulario de reportar reunion GAR" + form.errors)
+                logger.critical(form.errors)
+                logger.critical(request.POST)
                 messages.error(request, _('Ha ocurrido un error con el formulario, verifica los campos'))
         else:
             # carga el formulario en get
