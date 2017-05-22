@@ -5,7 +5,7 @@ from .models import Encontrista, Encuentro
 class EncuentroAdmin(admin.ModelAdmin):
     list_display = ('fecha_inicial', 'fecha_final', 'hotel', 'coordinador', 'tesorero')
     list_editable = ('fecha_final', 'hotel', 'coordinador', 'tesorero')
-    list_filter = ('coordinador', 'hotel', 'fecha_final', 'fecha_inicial')
+    list_filter = ('grupos__red', )
     search_field = ('coordinador', 'hotel', 'direccion')
 
 
