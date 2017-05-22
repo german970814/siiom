@@ -74,7 +74,6 @@ def crear_miembros_con_encontristas(encontristas):
             encuentro.coordinador.usuario.save()
 
 
-@concurrente
 def avisar_tesorero_coordinador_encuentro(tesorero, coordinador):
     """
     Funcion para agregar los permisos de tesorero y coordinador de un encuentro
