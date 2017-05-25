@@ -34,7 +34,12 @@
 			            </div>
 	            	</div>
 	            	<div class="row">
-	            		{{ form_integrante.mensaje }}
+                        <div class="input-group {{ form_integrante.mensaje.css_classes }}">
+                            {{ form_integrante.mensaje }}
+                            {% for error in form_integrante.mensaje.errors %}
+                                <small class="help-block">{{error}}</small>
+                            {% endfor %}
+                        </div>
 	            	</div>
 	            </div>
 	            <div class="modal-footer">
@@ -226,12 +231,12 @@
 		                    </div>
                         </li>
                         <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá agregar a un integrante nuevo a esta discusión" title="" data-original-title="Agregar Integrante">
-                            <a data-toggle="modal" id="toggleModal" href="#modalAgregarParticipante">
+                            <a data-toggle="modal" id="toggleModalAgregarParticipante" href="#modalAgregarParticipante">
 								<i class="zmdi zmdi-plus"></i>
                             </a>
                         </li>
                         <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá eliminar a un integrante perteneciente a esta discusión" title="" data-original-title="Eliminar Integrante">
-                            <a data-toggle="modal" id="toggleModal2" href="#modalEliminarParticipante">
+                            <a data-toggle="modal" id="toggleModalEliminarParticipante" href="#modalEliminarParticipante">
 								<i class="zmdi zmdi-minus"></i>
                             </a>
                         </li>
@@ -429,14 +434,14 @@
 		});
 
 		{% if click %}
-		$('#toggleModal').click();
+		$('#toggleModalAgregarParticipante').click();
 		{% elif click2 %}
-		$('#toggleModal2').click();
+		$('#toggleModalEliminarParticipante').click();
 		{% elif click4 %}
 		$('#toggleModal4').click();
 		{% endif %}
 
-		$('#toggleModal').click(function(event) {
+		$('#toggleModalAgregarParticipante').click(function(event) {
 			$('.autocompletar').focus();
 		});
 
