@@ -15,7 +15,7 @@
 
 {% block contenido %}
 {% if mismo %}
-<div class="modal fade" id="modalNarrower" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalAgregarParticipante" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -47,7 +47,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="modalNarrower2" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="modalEliminarParticipante" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
@@ -226,12 +226,12 @@
 		                    </div>
                         </li>
                         <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá agregar a un integrante nuevo a esta discusión" title="" data-original-title="Agregar Integrante">
-                            <a data-toggle="modal" id="toggleModal" href="#modalNarrower">
+                            <a data-toggle="modal" id="toggleModal" href="#modalAgregarParticipante">
 								<i class="zmdi zmdi-plus"></i>
                             </a>
                         </li>
                         <li data-trigger="hover" data-toggle="popover" data-placement="bottom" data-content="Esta opción te permitirá eliminar a un integrante perteneciente a esta discusión" title="" data-original-title="Eliminar Integrante">
-                            <a data-toggle="modal" id="toggleModal2" href="#modalNarrower2">
+                            <a data-toggle="modal" id="toggleModal2" href="#modalEliminarParticipante">
 								<i class="zmdi zmdi-minus"></i>
                             </a>
                         </li>
