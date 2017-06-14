@@ -132,7 +132,7 @@
 	            </div>
 	            <div class="modal-footer">
                     <input type="hidden" name="grupo" value="{{ form.cleaned_data.grupo.id }}" />
-	                <button type="button" name="reportar" class="btn btn-link">Aceptar</button>
+	                <button type="submit" name="reportar" class="btn btn-link">Aceptar</button>
 	                <button type="button" class="btn btn-link" data-dismiss="modal">Cerrar</button>
 	            </div>
             </form>
@@ -440,16 +440,13 @@
             }
         });
 
-        $('button[name="reportar"]').click(function(){
+        $('#form-reporte').submit(function() {
             try {
 			    ga('set', 'dimension1', 'Admin');
 			    ga('send', 'event', 'Reuniones', 'Reportar GAR', 'Reportar reunion GAR');
             }
             catch (err) {
                 //
-            }
-            finally {
-                $('#form-reporte').submit();
             }
         });
     });
