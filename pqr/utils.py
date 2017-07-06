@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse_lazy
 
 # Locale
-from common.decorators import concurrente
+# from common.decorators import concurrente
 
 # Python Package
 import re
@@ -24,7 +24,6 @@ def dias_to_horas(dia):
     raise TypeError("variable 'dia' must be a int instance, %(var)s instance" % {'var': type(dia)})
 
 
-@concurrente
 def enviar_email_success(request, caso):
     """
     Envia un email a el responsable de el caso, cuando todo este correcto
@@ -47,7 +46,6 @@ def enviar_email_success(request, caso):
     )
 
 
-@concurrente
 def enviar_email_invitacion(request, caso, empleado, mensaje):
     """
     Envia un email a un invitado.
