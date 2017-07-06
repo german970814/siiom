@@ -6,3 +6,4 @@ htmlcov/
 .coverage
 tags
 docs/_build
+node_modules/

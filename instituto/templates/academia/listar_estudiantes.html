@@ -118,7 +118,7 @@
                                     <tr>
                                         <td>{{est.id}}</td>
                                         <td><a href="/academia/estudiante_detalle/{{est.id}}/">{{est.estudiante.nombre|capfirst}} {{est.estudiante.primerApellido|capfirst}} {{est.estudiante.segundoApellido|capfirst}}</a></td>
-                                        <td>{% if est.moduloActual %}{{ est.moduloActual.nombre }}</td>{% else %}No Asignado a Ningún Módulo Aún{% endif %}
+                                        <td>{% if est.modulo_actual %}{{ est.modulo_actual.nombre }}</td>{% else %}No Asignado a Ningún Módulo Aún{% endif %}
                                         <td>{{ est.sesionesDadas }}</td>
                                         <td>{{ est.sesionesFaltantes }}</td>                    
                                     </tr>

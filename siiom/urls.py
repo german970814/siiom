@@ -23,6 +23,7 @@ urlpatterns = patterns(
     url(r'^reportes/', include("reportes.urls", namespace='reportes')),
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
+    url(r'^instituto/', include("instituto.urls", namespace="instituto")),
     url(r'^common/', include("common.urls", namespace="common")),
     url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),
 
@@ -32,7 +33,6 @@ urlpatterns = patterns(
     url(r'^pqr/', include("pqr.urls", namespace="pqr")),
 
     url(r'^buscar/(grupo|miembro)/$', views.buscar, name='buscar'),
-    url(r'^academia/', include("academia.urls", namespace="academia")),
     url(
         r'^recuperar_contrasena/$', auth_views.password_reset,
         {
