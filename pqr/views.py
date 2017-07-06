@@ -268,7 +268,7 @@ def ver_bitacora_caso(request, id_caso):
                 invitacion.save()
                 caso.integrantes.add(receptor)
                 if not settings.DEBUG:
-                    enviar_email_invitacion(request, caso, empleado, invitacion.mensaje)
+                    enviar_email_invitacion(request, caso, receptor, invitacion.mensaje)
                 return redirect(reverse('pqr:ver_bitacora_caso', args=(caso.id, )))
             else:
                 data['click'] = True
