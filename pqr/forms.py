@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 
 # Locale Apps
 from .models import Caso, Comentario, Invitacion, Documento
+from .utils import get_sender
 
 # Apps
 from organizacional.models import Empleado
@@ -156,7 +157,7 @@ class FormularioCerrarCaso(FormularioAgregarMensaje):
                 Estamos para servirle.
                 """
             ASUNTO = 'Respuesta a Su Inquietud'
-            SENDER = 'iglesia@mail.webfaction.com'
+            SENDER = get_sender()
             _data = {
                 'id_caso': self.cleaned_data['caso'].id,
                 'descripcion': self.cleaned_data['caso'].descripcion,
