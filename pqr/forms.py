@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 
 # Locale Apps
 from .models import Caso, Comentario, Invitacion, Documento
-from .utils import concurrente
 
 # Apps
 from organizacional.models import Empleado
@@ -144,7 +143,6 @@ class FormularioCerrarCaso(FormularioAgregarMensaje):
         else:
             raise ValidationError(_('mensaje or caso not in self.cleaned_data'))
 
-    @concurrente
     def _enviar_email(self):
         if self.is_valid() and 'mensaje' in self.cleaned_data and 'caso' in self.cleaned_data:
             mensaje = \
