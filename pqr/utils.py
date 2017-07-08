@@ -1,6 +1,7 @@
 # Django Package
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse_lazy
+from django.conf import settings
 
 # Locale
 # from common.decorators import concurrente
@@ -10,7 +11,8 @@ import re
 
 
 # CONSTANTS
-SENDER = 'iglesia@mail.webfaction.com'
+def get_sender():
+    return getattr(settings, 'DEFAULT_FROM_EMAIL', 'SIIOM <noreply@siiom.net>')
 
 
 def dias_to_horas(dia):
@@ -40,7 +42,7 @@ def enviar_email_success(request, caso):
     send_mail(
         'Hemos Recibido su solicitud exitosamente',
         mensaje % {'telefono': 3688932, 'id_caso': caso.id, 'email': 'informacion@icasadelrey.org'},
-        SENDER,
+        get_sender(),
         ('{}'.format(caso.email), ),
         fail_silently=False
     )
@@ -65,7 +67,7 @@ def enviar_email_invitacion(request, caso, empleado, mensaje):
     send_mail(
         'Ha Sido invitado a Colaborar en un Caso de PQR',
         msj % data,
-        SENDER,
+        get_sender(),
         ('{}'.format(empleado.usuario.email), ),
         fail_silently=False
     )
