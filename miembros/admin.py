@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Zona, Barrio, TipoMiembro, Miembro, CambioTipo
+from .models import Zona, Barrio, TipoMiembro, Miembro, CambioTipo, Escalafon
 
 import datetime
 
@@ -105,3 +105,4 @@ admin.site.register(Barrio)
 admin.site.register(TipoMiembro)
 admin.site.register(Miembro, MiembroAdmin)
 admin.site.register(CambioTipo, CambioTipoAdmin)
+admin.site.register(Escalafon)

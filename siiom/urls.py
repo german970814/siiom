@@ -23,6 +23,7 @@ urlpatterns = patterns(
     url(r'^reportes/', include("reportes.urls", namespace='reportes')),
     url(r'^encuentro/', include("encuentros.urls", namespace='encuentros')),
     url(r'^consolidacion/', include("consolidacion.urls", namespace="consolidacion")),
+    url(r'^instituto/', include("instituto.urls", namespace="instituto")),
     url(r'^common/', include("common.urls", namespace="common")),
     url(r'^dont_have_permissions/$', views.without_perms, name="sin_permiso"),
 
