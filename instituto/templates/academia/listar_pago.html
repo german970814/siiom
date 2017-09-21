@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block js %}
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
+<script>
+    jQuery(document).ready(function($) {
+        $("#data-table-command").bootgrid({
+                    css: {
+                        icon: 'zmdi icon',
+                        iconColumns: 'zmdi-view-module',
+                        iconDown: 'zmdi-expand-more',
+                        iconRefresh: 'zmdi-refresh',
+                        iconUp: 'zmdi-expand-less'
+                        },
+                    caseSensitive: false,
+                    formatters: {
+                        "commands" : function(column, row) {
+                            return "<button type=\"button\" class=\"btn btn-icon command-edit waves-effect waves-circle\" data-row-id=\"" + row.id + "\" onClick=\"window.location.href='/academia/recibir_pago/" + row.id + "'\"><span class=\"zmdi zmdi-money\"></span></button> "
+                        },
+                    }
+                });
+    });
+</script>
+
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="f-700 f-20">
+            	<legend>
+            		<h3>Pagos de Academia</h3>
+                </legend>
+                {% for g in grupos %}
+                    {% if 'Receptor' in g.name %}
+                        <small>Haga click en un miembro para registrar un pago.</small>
+                    {% endif %}
+                {% endfor %}
+            </h1>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding table-responsive">
+                <br>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table id="data-table-command" class="table table-striped table-vmiddle">
+                            <thead>
+						       	<tr>
+                                    <th data-visible="false" data-identifier="true" data-column-id="id"></th>  
+						            <th data-identifier="true" data-column-id="estudiante">Estudiante</th>
+						            <th data-identifier="true" data-column-id="fecha">Fecha de Inicio</th>
+						            <th data-identifier="true" data-column-id="modulo">M&oacute;dulo Actual</th>
+						            <th data-identifier="true" data-column-id="pago">Pago</th>
+                                    {% if receptor %}
+                                    <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
+                                    {% endif %}
+						       	</tr>
+					    	</thead>
+					    	<tbody>
+							{% for matricula in matriculas %}
+								<tr>
+                                    <td>{{matricula.estudiante.id}}</td>
+                                    <td>{{matricula.estudiante.nombre|capfirst}} {{matricula.estudiante.primerApellido|capfirst}}</td>
+									<td>{{matricula.fecha_inicio}}</td>
+									<td>{{matricula.modulo_actual}}</td>
+									<td>${{matricula.pago}}</td>
+								</tr>
+			                {% empty %}
+			                	<tr>
+                                    <td></td>
+			                    	<td colspan="4" class="centrarTexto">No existen estudiantes matriculados</td>
+			                    </tr>
+							{% endfor %}
+							</tbody>
+                        </table>
+                        <br/>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

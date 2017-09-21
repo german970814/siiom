@@ -6,6 +6,7 @@ from treebeard.al_tree import AL_Node
 # Locale Apps
 from miembros.models import CambioTipo
 from common.decorators import cache_value
+from common.models import DiasSemanaMixin
 from consolidacion.utils import clean_direccion
 from .managers import GrupoManager, GrupoManagerStandard, HistorialManager
 from .six import SixALNode
@@ -25,7 +26,7 @@ class Red(models.Model):
         return self.nombre
 
 
-class Grupo(SixALNode, AL_Node):
+class Grupo(DiasSemanaMixin, SixALNode, AL_Node):
     """
     Modelo para guardar la información de los grupos de una iglesia.
     """
@@ -38,33 +39,15 @@ class Grupo(SixALNode, AL_Node):
         (INACTIVO, 'Inactivo'),
     )
 
-    LUNES = '0'
-    MARTES = '1'
-    MIERCOLES = '2'
-    JUEVES = '3'
-    VIERNES = '4'
-    SABADO = '5'
-    DOMINGO = '6'
-
-    DIAS_SEMANA = (
-        (LUNES, 'Lunes'),
-        (MARTES, 'Martes'),
-        (MIERCOLES, 'Miercoles'),
-        (JUEVES, 'Jueves'),
-        (VIERNES, 'Viernes'),
-        (SABADO, 'Sabado'),
-        (DOMINGO, 'Domingo'),
-    )
-
     parent = models.ForeignKey(
         'self', verbose_name=_lazy('grupo origen'), related_name='children_set', null=True, db_index=True
     )
     direccion = models.CharField(verbose_name=_lazy('dirección'), max_length=50)
     fechaApertura = models.DateField(verbose_name=_lazy('fecha de apertura'))
-    diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=DIAS_SEMANA)
+    diaGAR = models.CharField(verbose_name=_lazy('dia G.A.R'), max_length=1, choices=DiasSemanaMixin.DIAS_SEMANA)
     horaGAR = models.TimeField(verbose_name=_lazy('hora G.A.R'))
     diaDiscipulado = models.CharField(
-        verbose_name=_lazy('dia discipulado'), max_length=1, choices=DIAS_SEMANA, blank=True, null=True
+        verbose_name=_lazy('dia discipulado'), max_length=1, choices=DiasSemanaMixin.DIAS_SEMANA, blank=True, null=True
     )
     horaDiscipulado = models.TimeField(verbose_name=_lazy('hora discipulado'), blank=True, null=True)
     nombre = models.CharField(verbose_name=_lazy('nombre'), max_length=255)

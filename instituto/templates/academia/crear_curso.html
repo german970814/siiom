@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block css %}
+	<style>
+	
+		.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+			background-color: #fff;
+			opacity: 0.5;
+		}
+
+	</style>
+{% endblock css %}
+
+{% block js %}
+<script>
+	$(document).ready(function() {
+		$('#id_hora').datetimepicker({
+			format:'hh:mm:ss',
+		});
+	});
+</script>
+{% endblock %}
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            {{a}}
+            <h1 class="f-700"><legend><h3>{{accion}} Curso</h3></legend></h1>
+            {% if ok %}
+            <div class="row">
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                    <p>Se ha {% if accion == 'Crear' %}creado{% else %}editado{% endif %} el curso correctamente.<a class="alert-link" alt="Listar Cursos" href="{{ url }}">(volver a la lista de cursos.)</a></p>
+                </div>
+            </div>
+            {% endif %}
+            {% if form.errors %}
+                <div class="row">
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Aún hay campos vacios. No se puede {{accion}} el curso</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body card-padding">
+                <div class="row">
+                	<div class="col-md-12">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.nombre.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-account"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_nombre" class="control-label requerido">Nombre:</label>
+	                                {{form.nombre}}
+	                            </div>
+	                            {% for error in form.nombre.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.direccion.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-pin"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_direccion" class="control-label requerido">Direcci&oacute;n:</label>
+	                                {{form.direccion}}
+	                            </div>
+		                            {% for error in form.direccion.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-4 col-md-offset-">
+	                        <div class="input-group {{form.estado.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-refresh"></i>
+	                            </span>
+	                            <div class="fg-line">
+	                                <label for="id_estado" class="control-label">Estado:</label>
+	                                {{form.estado}}
+	                            </div>
+	                            {% for error in form.estado.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+	                <div class="col-md-12">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.dia.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-calendar-note"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_dia" class="control-label requerido">D&iacute;a:</label>
+	                                {{form.dia}}
+	                            </div>
+	                            {% for error in form.dia.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.hora.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-time"></i>
+	                            </span>
+	                            <div class="fg-line">
+	                                <label for="id_hora" class="control-label">Hora:</label>
+	                                {{form.hora}}
+	                            </div>
+	                            {% for error in form.hora.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-4">
+	                        <div class="input-group {{form.modulos.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-book"></i>
+	                            </span>
+	                            <div class="fg-line">
+	                                <label for="id_modulos" class="control-label">M&oacute;dulos:</label>
+	                                {{form.modulos}}
+	                            </div>
+	                            {% for error in form.modulos.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+                </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                	<div class="col-md-12">
+	                    <div class="col-md-6">
+	                        <div class="input-group {{form.red.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-network"></i>
+	                            </span>
+	                            <div class="fg-line requerido">
+	                                <label for="id_red" class="control-label requerido">Red:</label>
+	                                {{form.red}}
+	                            </div>
+	                            {% for error in form.red.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                    <br class="space">
+	                    <div class="col-md-6">
+	                        <div class="input-group {{form.profesor.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-pin-account"></i>
+	                            </span>
+	                            <div class="fg-line">
+	                                <label for="id_profesor" class="control-label">Profesor:</label>
+	                                {{form.profesor}}
+	                            </div>
+	                            {% for error in form.profesor.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+                <br>
+                <br class="space-down">
+                <div class="row">
+                	<div class="col-md-12">
+	                    <div class="col-md-8 col-md-offset-2">
+	                        <div class="input-group {{form.material.css_classes}}">
+	                            <span class="input-group-addon">
+	                                <i class="zmdi zmdi-layers"></i>
+	                            </span>
+	                            <div class="fg-line">
+	                                <label for="id_material" class="control-label">Material:</label>
+	                                {{form.material}}
+	                            </div>
+	                            {% for error in form.material.errors %}
+	                            <small class="help-block">{{error}}</small>
+	                            {% endfor %}
+	                        </div>
+	                    </div>
+	                </div>
+                </div>
+                <br>
+                <br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <button type="submit" name="aceptar" value="Aceptar" class="btn btn-primary btn-block" {% if ok %} data-trigger="hover" data-toggle="popover" data-placement="top" data-content="Si vuelves a presionar este boton crearas otro curso igual" title="" data-original-title="Ayuda" {% endif %}>Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

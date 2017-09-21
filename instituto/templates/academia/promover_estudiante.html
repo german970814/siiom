@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div class="container">
+	<div class="card">
+		<div class="card-header">
+			<h1>
+				<legend><h3>Promover Estudiante {{est.modulo_reportado}} {{est.modulo_actual}} {{est.nombre}}</h3></legend>
+			</h1>
+		</div>
+		<div class="card-body card-padding">
+			{% if ok %}
+				<div class="row">
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <button class="close" aria-label="close" data-dismiss="alert" type="button"><span aria-hidden="true">x</span></button>
+                        <p>Se ha editado correctamente el registro anterior.</p>
+                    </div>
+                </div>
+			{% endif %}	
+			<form action="" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+				<div class="row">
+					<div class="col-md-12">
+						<div class="">
+							<h4>Seleccione el m&oacute;dulo al que se va a promover el estudiante {{estudiante.estudiante.nombre|capfirst}} {{estudiante.estudiante.primerApellido|capfirst}}</h4>
+						</div>
+					</div>
+				{% if not puedeVer %}
+					<div class="col-md-12" role="alert">
+						<div class="alert alert-warning">
+							<div class="">
+								<h5 style="text-align:center; color:#fff;">El estudiante actual no ha asistido a todas las sesiones.</h5>
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endif %}
+				{% if puedeVer %}
+				<div class="row">
+					<div class="col-md-6 col-md-offset-3">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="zmdi zmdi-layers"></i>
+                            </span>
+                            <div class="fg-line requerido">
+                                <label for="id_modulo_actual" class="fg-label requerido">M&oacute;dulo:</label>
+                                {{form.modulo_actual}}
+                            </div>
+                        </div>
+                    </div>
+				</div>
+				<br>
+				<br>
+				{% endif %}
+				<div class="row">
+					<div class="col-md-4 col-md-offset-4">
+						<button name="aceptar" class="btn btn-info btn-block" type="submit">
+							{% if not puedeVer %}Siguiente {% else %}Aceptar{% endif %}
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
