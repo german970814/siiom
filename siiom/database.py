@@ -2,11 +2,11 @@
 
 __author__ = 'tania'
 
-NAME = "siiom"
+NAME = ""
 
-USER = "german1234"
+USER = ""
 
-PASSWORD = "1234"
+PASSWORD = ""
 
 HOST = '127.0.0.1'
 

@@ -1,16 +1,13 @@
 from django.contrib import admin
 
-from .models import (
-    Modulo, Sesion, Curso, Matricula,
-    Estudiante, Materia, Salon, Abono
-)
+from . import models
 
 
-admin.site.register(Modulo)
-admin.site.register(Sesion)
-admin.site.register(Curso)
-admin.site.register(Matricula)
-admin.site.register(Estudiante)
-admin.site.register(Materia)
-admin.site.register(Salon)
-admin.site.register(Abono)
+admin.site.register(models.Modulo)
+admin.site.register(models.Sesion)
+admin.site.register(models.Curso)
+admin.site.register(models.Matricula)
+admin.site.register(models.Estudiante)
+admin.site.register(models.Materia)
+admin.site.register(models.Salon)
+admin.site.register(models.Abono)

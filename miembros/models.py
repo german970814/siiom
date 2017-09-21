@@ -14,6 +14,18 @@ __all__ = (
 )
 
 
+class Escalafon(models.Model):
+    """
+    Modelo para crear las carreras del lider.
+    """
+
+    nombre = models.CharField(_lazy('nombre'), max_length=200)
+    cantidad_grupos = models.IntegerField(_lazy('cantidad grupos'))
+
+    def __str__(self):
+        return self.nombre.upper()
+
+
 class Zona(models.Model):
     """Modelo para guardar las zonas."""
 
@@ -92,6 +104,7 @@ class Miembro(UtilsModelMixin, models.Model):
     genero = models.CharField(_lazy('género'), max_length=1, choices=GENEROS)
     telefono = models.CharField(_lazy('teléfono'), max_length=50, null=True, blank=True)
     celular = models.CharField(_lazy('celular'), max_length=50, null=True, blank=True)
+    talla = models.CharField(_lazy('talla'), max_length=5, blank=True)
     fecha_nacimiento = models.DateField(_lazy('fecha de nacimiento'), null=True, blank=True)
     cedula = models.CharField(
         _lazy('cédula'), max_length=25, unique=True, validators=[RegexValidator(r'^[0-9]+$', "Se aceptan solo numeros")]
@@ -116,6 +129,10 @@ class Miembro(UtilsModelMixin, models.Model):
     )  # grupo al que pertenece
     grupo_lidera = models.ForeignKey(
         'grupos.Grupo', verbose_name=_lazy('grupo que lidera'),
+        related_name='lideres', null=True, blank=True
+    )
+    escalafon = models.ForeignKey(
+        Escalafon, verbose_name=_lazy('escalafon'),
         related_name='lideres', null=True, blank=True
     )
     fecha_registro = models.DateField(_lazy('fecha de registro'), auto_now_add=True)
