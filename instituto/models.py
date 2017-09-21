@@ -45,6 +45,9 @@ class Sesion(models.Model):
     nombre = models.CharField(max_length=255, verbose_name=_('Nombre'))
     modulo = models.ForeignKey(Modulo, verbose_name=_('Módulo'), related_name='sesiones')
 
+    class Meta:
+        verbose_name_plural = _('Sesiones')
+
     def __str__(self):
         return '({self.modulo.nombre}) {self.prioridad}. {self.nombre}'.format(self=self)
 
@@ -54,6 +57,9 @@ class Salon(models.Model):
 
     nombre = models.CharField(max_length=100, verbose_name=_('Nombre'))
     capacidad = models.IntegerField(verbose_name=_('Capacidad'))
+
+    class Meta:
+        verbose_name_plural = _('Salones')
 
     def __str__(self):
         return 'Salón "{self.nombre}" ({self.capacidad} cupos)'

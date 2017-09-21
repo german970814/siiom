@@ -22,6 +22,9 @@ class Escalafon(models.Model):
     nombre = models.CharField(_lazy('nombre'), max_length=200)
     cantidad_grupos = models.IntegerField(_lazy('cantidad grupos'))
 
+    class Meta:
+        verbose_name_plural = _lazy('Escalafones')
+
     def __str__(self):
         return self.nombre.upper()
 
