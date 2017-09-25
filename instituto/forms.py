@@ -1,7 +1,8 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from common.forms import CustomModelForm
+from grupos.models import Grupo
+from common.forms import CustomModelForm, CustomForm
 from .models import Materia, Modulo, Sesion
 
 
@@ -56,3 +57,14 @@ class FormularioSesion(PrioridadMixin, CustomModelForm):
     class Meta:
         model = Sesion
         fields = ('nombre', 'prioridad', 'modulo')
+
+
+class ReporteInstitutoForm(CustomForm):
+    
+    grupo = forms.ModelChoiceField(queryset=Grupo.objects.prefetch_related('lideres').all(), label=_('Grupo'))
+    materias = forms.ModelMultipleChoiceField(queryset=Materia.objects.all(), label=_('Materias'), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['grupo'].widget.attrs.update({'class': self.select_css_class, 'data-live-search': 'true'})
+        self.fields['materias'].widget.attrs.update({'class': 'chosen', 'placeholder': 'Escoge algunas materias'})

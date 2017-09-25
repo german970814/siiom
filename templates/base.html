@@ -339,6 +339,18 @@
                     </ul>
                 </li>
                 {% endif %}
+                {% switch "instituto" %}
+                    {% if perms.miembros.es_administrador %}
+                    <li class="sub-menu">
+                        <a href=""><i class="zmdi zmdi-assignment-o"></i> {% trans 'Instituto Life' %}</a>
+                        <ul>
+                            <li>
+                                <a href="{% url 'instituto:reporte_instituto' %}">{% trans 'Reporte Instituo' %}</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                {% endswitch %}
                 {% if request.miembro.grupo_lidera or perms.miembro.es_administrador %}
                 <li class="sub-menu">
                     <a href=""><i class="zmdi zmdi-assignment"></i> Informes {{ request.tenant.termino_gar }}</a>
