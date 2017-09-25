@@ -2,8 +2,10 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from grupos.models import Grupo
-from common.forms import CustomModelForm, CustomForm
+from miembros.models import Miembro
 from .models import Materia, Modulo, Sesion
+from common.forms import CustomModelForm, CustomForm
+from . import resources
 
 
 class FormularioMateria(CustomModelForm):
@@ -68,3 +70,24 @@ class ReporteInstitutoForm(CustomForm):
         super().__init__(*args, **kwargs)
         self.fields['grupo'].widget.attrs.update({'class': self.select_css_class, 'data-live-search': 'true'})
         self.fields['materias'].widget.attrs.update({'class': 'chosen', 'placeholder': 'Escoge algunas materias'})
+
+    def get_lideres(self):
+        if self.is_bound and not bool(self._errors):
+            grupo = self.cleaned_data.get('grupo')
+            grupos = grupo._grupos_red.prefetch_related('lideres')
+            lideres = Miembro.objects.filter(id__in=grupos.values_list('lideres__id', flat=True))
+            return lideres
+        return Miembro.objects.none()
+
+    def get_materias(self):
+        if self.is_bound and not bool(self._errors):
+            materias = self.cleaned_data.get('materias')
+            if not materias.exists():
+                materias = Materia.objects.all()
+            return materias
+        return Materia.objects.none()
+
+    def get_excel(self):
+        lideres = self.get_lideres()
+        materias = self.get_materias()
+        return resources.ReporteInstituto(data=lideres, materias=materias)

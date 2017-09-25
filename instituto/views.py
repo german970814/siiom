@@ -8,8 +8,7 @@ from django.db.models import Case, Value, F, Count, When, CharField
 
 from waffle.decorators import waffle_switch
 
-from . import models, resources
-from miembros.models import Miembro
+from . import models
 from .forms import (
     FormularioMateria, FormularioModulo, FormularioSesion, ReporteInstitutoForm
 )
@@ -56,18 +55,9 @@ def reporte_instituto(request):
     if request.method == 'POST':
         form = ReporteInstitutoForm(data=request.POST)
         if form.is_valid():
-            grupo = form.cleaned_data.get('grupo')
-            materias = form.cleaned_data.get('materias', models.Materia.objects.all())
-
-            grupos = grupo._grupos_red.prefetch_related('lideres')
-            lideres = Miembro.objects.filter(id__in=grupos.values_list('lideres__id', flat=True))
-
-            if not materias.exists():
-                materias = models.Materia.objects.all()
-
+            excel = form.get_excel()
             response = HttpResponse(content_type='application/vnd.ms-excel')
             response['Content-Disposition'] = 'attachment; filename=reporte.xlsx'
-            excel = resources.ReporteInstituto(data=lideres, materias=materias)
             response.write(excel.read())
             return response
 
