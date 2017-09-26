@@ -1,13 +1,16 @@
 from django.forms import inlineformset_factory
 from django.contrib import messages
 from django.core import serializers
+from django.http import HttpResponse
+from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Case, Value, F, Count, When, CharField
 
-from .models import (
-    Curso, Matricula, Modulo, Sesion
-)
+from waffle.decorators import waffle_switch
+
+from . import models
 from .forms import (
-    FormularioMateria, FormularioModulo, FormularioSesion
+    FormularioMateria, FormularioModulo, FormularioSesion, ReporteInstitutoForm
 )
 
 __author__ = 'German Alzate'
@@ -21,7 +24,7 @@ def crear_materia(request):
     data = {}
 
     ModuloFormSet = inlineformset_factory(
-        Materia, Modulo, fk_name='materia',
+        models.Materia, models.Modulo, fk_name='materia',
         form=FormularioModulo, min_num=1, extra=1,
         validate_min=True, can_delete=False
     )
@@ -43,3 +46,21 @@ def crear_materia(request):
 def lista_estudiantes_sesion(request):
     from django.shortcuts import render
     return render(request, 'academia/lista_estudiantes_sesion.html', {})
+
+
+@waffle_switch('instituto')
+@permission_required('miembros.es_administrador', raise_exception=True)
+def reporte_instituto(request):
+
+    if request.method == 'POST':
+        form = ReporteInstitutoForm(data=request.POST)
+        if form.is_valid():
+            excel = form.get_excel()
+            response = HttpResponse(content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename=reporte.xlsx'
+            response.write(excel.read())
+            return response
+
+    else:
+        form = ReporteInstitutoForm()
+    return render(request, 'instituto/reporte_instituto.html', {'form': form})

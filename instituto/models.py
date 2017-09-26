@@ -62,7 +62,7 @@ class Salon(models.Model):
         verbose_name_plural = _('Salones')
 
     def __str__(self):
-        return 'Salón "{self.nombre}" ({self.capacidad} cupos)'
+        return 'Salón "{self.nombre}" ({self.capacidad} cupos)'.format(self=self)
 
     def cupo_disponible_curso(self, curso):
         """
@@ -122,7 +122,10 @@ class Estudiante(models.Model):
     nombres = models.CharField(max_length=255, verbose_name=_('Nombres'))
     apellidos = models.CharField(max_length=255, verbose_name=_('Apellidos'))
     identificacion = models.CharField(max_length=100, verbose_name=_('Identificación'))
-    grupo = models.ForeignKey('grupos.Grupo', related_name='estudiantes', verbose_name=_('Grupo'))
+    grupo = models.ForeignKey(
+        'grupos.Grupo', related_name='estudiantes', verbose_name=_('Grupo'),
+        help_text=_('Grupo al que asiste el estudiante')
+    )
     miembro = models.OneToOneField(
         'miembros.Miembro', related_name='estudiante', verbose_name=_('Líder'), blank=True, null=True)
 
@@ -130,6 +133,17 @@ class Estudiante(models.Model):
         if getattr(self, 'miembro', None):
             return self.miembro.__str__()
         return '{self.nombres} {self.apellidos} ({self.identificacion})'.format(self=self)
+
+    def __getattr__(self, attr):
+        if attr.startswith('nota_materia_'):
+            pk = attr[len('nota_materia_'):]
+            matriculas = self.matriculas.filter(curso__materia__id=pk)
+            matricula = matriculas.order_by('-fecha').first()
+            if matricula:
+                if matricula.paso or matricula.asistencias.exists():
+                    return 'X'
+            return ''
+        raise AttributeError('Estudiante has not attribute `{}`'.format(attr))
 
 
 class Matricula(models.Model):

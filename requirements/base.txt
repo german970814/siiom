@@ -9,3 +9,4 @@ Django==1.8.17
 Wand==0.4.4
 requests==2.13
 django-environ==0.4.3
+XlsxWriter==1.0.0
