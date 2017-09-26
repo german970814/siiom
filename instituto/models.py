@@ -140,7 +140,7 @@ class Estudiante(models.Model):
             matriculas = self.matriculas.filter(curso__materia__id=pk)
             matricula = matriculas.order_by('-fecha').first()
             if matricula:
-                if matricula.asistencias.exists() or matricula.paso:
+                if matricula.paso or matricula.asistencias.exists():
                     return 'X'
             return ''
         raise AttributeError('Estudiante has not attribute `{}`'.format(attr))
