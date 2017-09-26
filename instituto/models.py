@@ -138,8 +138,8 @@ class Estudiante(models.Model):
         if attr.startswith('nota_materia_'):
             pk = attr[len('nota_materia_'):]
             matriculas = self.matriculas.filter(curso__materia__id=pk)
-            if matriculas.exists():
-                matricula = matriculas.order_by('-fecha').first()
+            matricula = matriculas.order_by('-fecha').first()
+            if matricula:
                 if matricula.asistencias.exists() or matricula.paso:
                     return 'X'
             return ''
