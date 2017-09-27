@@ -13,22 +13,12 @@ ENVIROMENT_SETTINGS = {
     'production': {
         'site': 'ingeniarte.siiom.net',
         'branch': 'master',
-        'allowed_host': '.siiom.net',
-        'db': {
-            'name': 'siiom',
-            'pass': 'dbsiiom2017',
-            'user': 'siiom'
-        }
+        'allowed_host': '.siiom.net'
     },
     'staging': {
         'site': 'staging.siiom.net',
         'branch': 'develop',
-        'allowed_host': '.staging.siiom.net',
-        'db': {
-            'name': 'siiom_staging',
-            'pass': 'dbsiiom2017',
-            'user': 'siiom'
-        }
+        'allowed_host': '.staging.siiom.net'
     }
 }
 
@@ -57,15 +47,6 @@ def update_settings():
     settings_path = PROJECT_ROOT + '/siiom/settings/production.py'
     append(settings_path, '\nALLOWED_HOSTS = ["{}"]'.format(env.settings['allowed_host']))
     append(settings_path, '\nfrom ..secret_key import SECRET_KEY')
-
-
-def update_database():
-    database_path = PROJECT_ROOT + '/siiom/database.py'
-    db_settings = env.settings['db']
-
-    sed(database_path, 'NAME = ""', 'NAME = "%s"' % (db_settings['name']))
-    sed(database_path, 'USER = ""', 'USER = "%s"' % (db_settings['user']))
-    sed(database_path, 'PASSWORD = ""', 'PASSWORD = "%s"' % (db_settings['pass']))
 
 
 def update_source():
@@ -129,9 +110,24 @@ def production():
     site_dir()
 
 
+def config_database(database_url):
+    """Setting database enviroment variables."""
+
+    ENV_FILE = '/home/{user}/.envs/{site}/bin/postactivate'.format(user=env.user, site=env.site)
+    append(ENV_FILE, 'export DATABASE_URL=//{}'.format(database_url))
+
+
 @task
 def provision():
     """Provision a new site on an already provision server."""
+
+    import getpass
+
+    name = input('Nombre de la base de datos: ')
+    username = input('Usuario de la base de datos: ')
+    password = getpass.getpass()
+
+    database_url = '{}:{}@127.0.0.1:5432/{}'.format(username, password, name)
 
     for subfolder in ('static', 'media', 'src', 'bin', 'tmp/sockets', 'tmp/logs'):
         run("mkdir -p {}/{}".format(SITE_FOLDER, subfolder))
@@ -144,9 +140,9 @@ def provision():
         with virtualenv():
             run('setvirtualenvproject')
 
+    config_database(database_url)
     update_source()
     create_secret_key()
-    update_database()
     update_settings()
     with virtualenv():
         run('pip install -r requirements/production.txt')
@@ -166,7 +162,6 @@ def deploy():
 
     update_source()
     update_settings()
-    update_database()
     with virtualenv():
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas')

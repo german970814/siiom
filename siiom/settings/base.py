@@ -11,11 +11,11 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 import environ
-from .. import database
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
 env = environ.Env()
+env.read_env()
 
 
 # Make this unique, and don't share it with anybody.
@@ -129,14 +129,7 @@ WSGI_APPLICATION = 'siiom.wsgi.application'
 DATABASE_ROUTERS = ('tenant_schemas.routers.TenantSyncRouter',)
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'tenant_schemas.postgresql_backend',
-        'NAME': database.NAME,
-        'USER': database.USER,
-        'PASSWORD': database.PASSWORD,
-        'HOST': database.HOST,
-        'PORT': database.PORT,
-    }
+    'default': env.db(engine='tenant_schemas.postgresql_backend')
 }
 
 # Cache
