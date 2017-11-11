@@ -8,7 +8,7 @@ from common.forms import CustomModelForm, CustomForm
 from . import resources
 
 
-class FormularioMateria(CustomModelForm):
+class MateriaForm(CustomModelForm):
     """
     Formulario para crear las Materias.
     """
@@ -16,6 +16,12 @@ class FormularioMateria(CustomModelForm):
     class Meta:
         model = Materia
         fields = ('nombre', 'grupos_minimo', 'dependencia', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['grupos_minimo'].widget.attrs.update({'class': 'form-control'})
+        self.fields['dependencia'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
 
 class PrioridadMixin:
@@ -26,7 +32,7 @@ class PrioridadMixin:
     }
 
 
-class FormularioModulo(PrioridadMixin, CustomModelForm):
+class ModuloForm(PrioridadMixin, CustomModelForm):
     """
     Formulario para crear los módulos de cada materia.
     """
@@ -35,21 +41,39 @@ class FormularioModulo(PrioridadMixin, CustomModelForm):
 
     class Meta:
         model = Modulo
-        fields = ('nombre', 'prioridad', 'materia', )
+        fields = ('nombre', 'prioridad', )
+
+    def __init__(self, materia=None, *args, **kwargs):
+        self.materia = materia
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['prioridad'].widget.attrs.update({'class': 'form-control'})
 
     def clean(self, *args, **kwargs):
         cleaned_data = super().clean(*args, **kwargs)
 
-        if 'materia' in cleaned_data and 'prioridad' in cleaned_data:
-            if cleaned_data.get('materia').modulos.filter(prioridad=cleaned_data.get('prioridad')).exists():
+        if self.materia is not None:
+            if 'prioridad' in cleaned_data and self.materia.modulos.filter(prioridad=cleaned_data.get('prioridad')).exists():
+                self.add_error(
+                    'prioridad',
+                    forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
+                )
+        else:
+            if self.instance.materia.modulos.filter(
+               prioridad=cleaned_data.get('prioridad')).exclude(id=self.instance.id).exists():
                 self.add_error(
                     'prioridad',
                     forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
                 )
         return cleaned_data
 
+    def save(self, commit=True, *args, **kwargs):
+        if commit and self.materia is not None:
+            self.instance.materia = self.materia
+        return super().save(commit=commit, *args, **kwargs)
 
-class FormularioSesion(PrioridadMixin, CustomModelForm):
+
+class SesionForm(PrioridadMixin, CustomModelForm):
     """
     Formulario para crear una sesión.
     """
@@ -58,7 +82,36 @@ class FormularioSesion(PrioridadMixin, CustomModelForm):
 
     class Meta:
         model = Sesion
-        fields = ('nombre', 'prioridad', 'modulo')
+        fields = ('nombre', 'prioridad', )
+
+    def __init__(self, modulo=None, *args, **kwargs):
+        self.modulo = modulo
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['prioridad'].widget.attrs.update({'class': 'form-control'})
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean(*args, **kwargs)
+
+        if self.modulo is not None:
+            if 'prioridad' in cleaned_data and self.modulo.sesiones.filter(prioridad=cleaned_data.get('prioridad')).exists():
+                self.add_error(
+                    'prioridad',
+                    forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
+                )
+        else:
+            if self.instance.modulo.sesiones.filter(
+               prioridad=cleaned_data.get('prioridad')).exclude(id=self.instance.id).exists():
+                self.add_error(
+                    'prioridad',
+                    forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
+                )
+        return cleaned_data
+
+    def save(self, commit=True, *args, **kwargs):
+        if commit and self.modulo is not None:
+            self.instance.modulo = self.modulo
+        return super().save(commit=commit, *args, **kwargs)
 
 
 class ReporteInstitutoForm(CustomForm):

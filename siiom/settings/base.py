@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 import environ
+from django.contrib.messages import constants as messages
+
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger'
+}
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
