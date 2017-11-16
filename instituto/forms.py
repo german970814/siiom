@@ -1,21 +1,26 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
+from . import resources, models
 from grupos.models import Grupo
 from miembros.models import Miembro
-from .models import Materia, Modulo, Sesion
 from common.forms import CustomModelForm, CustomForm
-from . import resources
 
 
-class FormularioMateria(CustomModelForm):
+class MateriaForm(CustomModelForm):
     """
     Formulario para crear las Materias.
     """
 
     class Meta:
-        model = Materia
+        model = models.Materia
         fields = ('nombre', 'grupos_minimo', 'dependencia', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['grupos_minimo'].widget.attrs.update({'class': 'form-control'})
+        self.fields['dependencia'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
 
 
 class PrioridadMixin:
@@ -26,7 +31,7 @@ class PrioridadMixin:
     }
 
 
-class FormularioModulo(PrioridadMixin, CustomModelForm):
+class ModuloForm(PrioridadMixin, CustomModelForm):
     """
     Formulario para crear los módulos de cada materia.
     """
@@ -34,22 +39,40 @@ class FormularioModulo(PrioridadMixin, CustomModelForm):
     OBJETO = _('módulo')
 
     class Meta:
-        model = Modulo
-        fields = ('nombre', 'prioridad', 'materia', )
+        model = models.Modulo
+        fields = ('nombre', 'prioridad', )
+
+    def __init__(self, materia=None, *args, **kwargs):
+        self.materia = materia
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['prioridad'].widget.attrs.update({'class': 'form-control'})
 
     def clean(self, *args, **kwargs):
         cleaned_data = super().clean(*args, **kwargs)
 
-        if 'materia' in cleaned_data and 'prioridad' in cleaned_data:
-            if cleaned_data.get('materia').modulos.filter(prioridad=cleaned_data.get('prioridad')).exists():
+        if self.materia is not None:
+            if 'prioridad' in cleaned_data and self.materia.modulos.filter(prioridad=cleaned_data.get('prioridad')).exists():
+                self.add_error(
+                    'prioridad',
+                    forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
+                )
+        else:
+            if self.instance.materia.modulos.filter(
+               prioridad=cleaned_data.get('prioridad')).exclude(id=self.instance.id).exists():
                 self.add_error(
                     'prioridad',
                     forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
                 )
         return cleaned_data
 
+    def save(self, commit=True, *args, **kwargs):
+        if commit and self.materia is not None:
+            self.instance.materia = self.materia
+        return super().save(commit=commit, *args, **kwargs)
 
-class FormularioSesion(PrioridadMixin, CustomModelForm):
+
+class SesionForm(PrioridadMixin, CustomModelForm):
     """
     Formulario para crear una sesión.
     """
@@ -57,14 +80,56 @@ class FormularioSesion(PrioridadMixin, CustomModelForm):
     OBJETO = _('sesión')
 
     class Meta:
-        model = Sesion
-        fields = ('nombre', 'prioridad', 'modulo')
+        model = models.Sesion
+        fields = ('nombre', 'prioridad', )
+
+    def __init__(self, modulo=None, *args, **kwargs):
+        self.modulo = modulo
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['prioridad'].widget.attrs.update({'class': 'form-control'})
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean(*args, **kwargs)
+
+        if self.modulo is not None:
+            if 'prioridad' in cleaned_data and self.modulo.sesiones.filter(prioridad=cleaned_data.get('prioridad')).exists():
+                self.add_error(
+                    'prioridad',
+                    forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
+                )
+        else:
+            if self.instance.modulo.sesiones.filter(
+               prioridad=cleaned_data.get('prioridad')).exclude(id=self.instance.id).exists():
+                self.add_error(
+                    'prioridad',
+                    forms.ValidationError(self.error_messages['prioridad_exists'], code='prioridad_exists')
+                )
+        return cleaned_data
+
+    def save(self, commit=True, *args, **kwargs):
+        if commit and self.modulo is not None:
+            self.instance.modulo = self.modulo
+        return super().save(commit=commit, *args, **kwargs)
+
+
+class SalonForm(CustomModelForm):
+    """Formulario de creación de salones."""
+
+    class Meta:
+        model = models.Salon
+        fields = ['nombre', 'capacidad', ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['capacidad'].widget.attrs.update({'class': 'form-control'})
 
 
 class ReporteInstitutoForm(CustomForm):
     
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.prefetch_related('lideres').all(), label=_('Grupo'))
-    materias = forms.ModelMultipleChoiceField(queryset=Materia.objects.all(), label=_('Materias'), required=False)
+    materias = forms.ModelMultipleChoiceField(queryset=models.Materia.objects.all(), label=_('Materias'), required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -83,9 +148,9 @@ class ReporteInstitutoForm(CustomForm):
         if self.is_bound and not bool(self._errors):
             materias = self.cleaned_data.get('materias')
             if not materias.exists():
-                materias = Materia.objects.all()
+                materias = models.Materia.objects.all()
             return materias
-        return Materia.objects.none()
+        return models.Materia.objects.none()
 
     def get_excel(self):
         lideres = self.get_lideres()

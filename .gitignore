@@ -7,3 +7,5 @@ htmlcov/
 tags
 docs/_build
 node_modules/
+.env
+.vscode
