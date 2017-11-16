@@ -182,9 +182,42 @@ class SesionListView(WaffleSwitchMixin, LoginRequiredMixin, ListView):
         return super().get_context_data(**kwargs)
 
 
+class SalonCreateView(WaffleSwitchMixin, LoginRequiredMixin, ViewMessagesMixin, CreateView):
+    """CreateView for salones."""
+
+    model = models.Salon
+    form_class = forms.SalonForm
+    success_url = reverse_lazy('instituto:crear-salon')
+    template_name = 'instituto/crear_salon.html'
+    waffle_switch = 'instituto'
+    message_success = _('Se ha creado el salón con exito')
+
+
+class SalonUpdateView(WaffleSwitchMixin, LoginRequiredMixin, ViewMessagesMixin, UpdateView):
+    """UpdateView for salones."""
+
+    model = models.Salon
+    form_class = forms.SalonForm
+    template_name = 'instituto/crear_salon.html'
+    waffle_switch = 'instituto'
+    message_success = _('Se ha editado la salón con exito')
+
+    def form_valid(self, form):
+        self.success_url = reverse_lazy('instituto:editar-sesion', args=(form.instance.id, ))
+        return super().form_valid(form)
+
+
+class SalonListView(WaffleSwitchMixin, LoginRequiredMixin, ListView):
+    """ListView for Salon."""
+
+    model = models.Salon
+    template_name = 'instituto/salones.html'
+    waffle_switch = 'instituto'
+
+
 def lista_estudiantes_sesion(request):
     from django.shortcuts import render
-    return render(request, 'academia/lista_estudiantes_sesion.html', {})
+    return render(request, 'lista_estudiantes_sesion.html', {})
 
 
 @waffle_switch('instituto')

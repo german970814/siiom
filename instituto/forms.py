@@ -1,11 +1,10 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
+from . import resources, models
 from grupos.models import Grupo
 from miembros.models import Miembro
-from .models import Materia, Modulo, Sesion
 from common.forms import CustomModelForm, CustomForm
-from . import resources
 
 
 class MateriaForm(CustomModelForm):
@@ -14,7 +13,7 @@ class MateriaForm(CustomModelForm):
     """
 
     class Meta:
-        model = Materia
+        model = models.Materia
         fields = ('nombre', 'grupos_minimo', 'dependencia', )
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +39,7 @@ class ModuloForm(PrioridadMixin, CustomModelForm):
     OBJETO = _('módulo')
 
     class Meta:
-        model = Modulo
+        model = models.Modulo
         fields = ('nombre', 'prioridad', )
 
     def __init__(self, materia=None, *args, **kwargs):
@@ -81,7 +80,7 @@ class SesionForm(PrioridadMixin, CustomModelForm):
     OBJETO = _('sesión')
 
     class Meta:
-        model = Sesion
+        model = models.Sesion
         fields = ('nombre', 'prioridad', )
 
     def __init__(self, modulo=None, *args, **kwargs):
@@ -114,10 +113,23 @@ class SesionForm(PrioridadMixin, CustomModelForm):
         return super().save(commit=commit, *args, **kwargs)
 
 
+class SalonForm(CustomModelForm):
+    """Formulario de creación de salones."""
+
+    class Meta:
+        model = models.Salon
+        fields = ['nombre', 'capacidad', ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
+        self.fields['capacidad'].widget.attrs.update({'class': 'form-control'})
+
+
 class ReporteInstitutoForm(CustomForm):
     
     grupo = forms.ModelChoiceField(queryset=Grupo.objects.prefetch_related('lideres').all(), label=_('Grupo'))
-    materias = forms.ModelMultipleChoiceField(queryset=Materia.objects.all(), label=_('Materias'), required=False)
+    materias = forms.ModelMultipleChoiceField(queryset=models.Materia.objects.all(), label=_('Materias'), required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,9 +148,9 @@ class ReporteInstitutoForm(CustomForm):
         if self.is_bound and not bool(self._errors):
             materias = self.cleaned_data.get('materias')
             if not materias.exists():
-                materias = Materia.objects.all()
+                materias = models.Materia.objects.all()
             return materias
-        return Materia.objects.none()
+        return models.Materia.objects.none()
 
     def get_excel(self):
         lideres = self.get_lideres()
