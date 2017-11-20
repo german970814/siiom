@@ -15,8 +15,10 @@ def miembro_middleware_check(app_configs, **kwargs):
     """
 
     errors = []
+    # support for Django 2.0
+    MIDDLEWARE_CLASSES = settings.MIDDLEWARE + getattr(settings, 'MIDDLEWARE_CLASSES', [])
 
-    if MIDDLEWARE_DOTTED_STRING not in settings.MIDDLEWARE_CLASSES:
+    if MIDDLEWARE_DOTTED_STRING not in MIDDLEWARE_CLASSES:
         errors.append(
             checks.Error(
                 'No se encontró el middleware de miembros.',

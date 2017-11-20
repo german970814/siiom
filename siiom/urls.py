@@ -1,6 +1,6 @@
 import views
 
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.contrib import admin
@@ -11,8 +11,7 @@ from miembros import forms as miembros_forms
 admin.autodiscover()
 RedirectView.permanent = True
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
     url(r'^iniciar_sesion/$', login, name="inicio"),
@@ -64,18 +63,12 @@ urlpatterns = patterns(
         {'template_name': 'miembros/contrasena/password_reset_complete.html'},
         name="password_reset_complete"
     ),
-)
+]
 
 if settings.DEBUG:
-    urlpatterns += patterns(
-        '',
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, }),
-    )
-    try:
-        import debug_toolbar
-        urlpatterns += patterns(
-            '',
-            url(r'^__debug__/', include(debug_toolbar.urls)),
-        )
-    except ImportError:
-        pass
+    import debug_toolbar
+    from django.conf.urls.static import static
+
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -2,7 +2,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^/$', views.lista_estudiantes_sesion, name="a"),
+    # url(r'^/$', views.lista_estudiantes_sesion, name="a"),
     url(r'^materia/$', views.MateriaListView.as_view(), name='materias'),
     url(r'^materia/new/$', views.MateriaCreateView.as_view(), name='crear-materia'),
     url(r'^materia/(?P<pk>\d+)/$', views.MateriaUpdateView.as_view(), name='editar-materia'),
