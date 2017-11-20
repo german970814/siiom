@@ -80,7 +80,7 @@ INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 
 TENANT_MODEL = 'clientes.Iglesia'
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'siiom.middleware.LogNotAllowedHostHeaderMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'tenant_schemas.middleware.TenantMiddleware',
@@ -91,10 +91,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'waffle.middleware.WaffleMiddleware',
+    # 'waffle.middleware.WaffleMiddleware',
+    'common.middleware.WaffleMiddleWareCompat',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
-)
+]
 
 ROOT_URLCONF = 'siiom.urls'
 
@@ -186,6 +187,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR('../media')
 
 DEFAULT_FILE_STORAGE = 'siiom.storage.TenantFileSystemStorage'
+
+AUTH_PASSWORD_VALIDATORS = []
 
 # Email configuration
 

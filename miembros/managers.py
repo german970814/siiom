@@ -53,7 +53,7 @@ class MiembroManager(models.Manager.from_queryset(MiembroQuerySet)):
         if not isinstance(lideres, QuerySet):
             raise TypeError("lideres debe ser un QuerySet pero es un {}".format(lideres.__class__.__name__))
 
-        grupos = list(Grupo.objects.filter(lideres=lideres).distinct())
+        grupos = list(Grupo.objects.filter(lideres__in=lideres).distinct())
         if len(grupos) == 0:
             raise ValueError("Los lideres ingresados deben liderar grupo")
 

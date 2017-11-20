@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
@@ -143,7 +143,7 @@ def listar_encuentros(request):
     elif miembro.usuario.has_perm('miembros.es_tesorero'):
         encuentros = miembro.encuentros_tesorero.activos()
 
-    return render_to_response('encuentros/listar_encuentros.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'encuentros/listar_encuentros.html', locals())
 
 
 @login_required
@@ -251,7 +251,7 @@ def listar_encontristas(request, id_encuentro):
         return mismo
 
     encontristas = encuentro.encontrista_set.all()
-    return render_to_response('encuentros/listar_encontristas.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'encuentros/listar_encontristas.html', locals())
 
 
 @transaction.atomic
@@ -295,6 +295,4 @@ def asistencia_encuentro(request, id_encuentro):
                     encontrista.asistio = False
                 encontrista.save()
 
-    return render_to_response(
-        'encuentros/asistencia_encuentro.html', locals(), context_instance=RequestContext(request)
-    )
+    return render(request, 'encuentros/asistencia_encuentro.html', locals())
