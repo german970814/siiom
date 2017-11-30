@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from . import resources, models
 from grupos.models import Grupo
 from miembros.models import Miembro
-from common.forms import CustomModelForm, CustomForm
+from common.forms import CustomModelForm, CustomForm, ArrayFieldSelectMultiple
 
 
 class MateriaForm(CustomModelForm):
@@ -124,6 +124,65 @@ class SalonForm(CustomModelForm):
         super().__init__(*args, **kwargs)
         self.fields['nombre'].widget.attrs.update({'class': 'form-control'})
         self.fields['capacidad'].widget.attrs.update({'class': 'form-control'})
+
+
+class CursoForm(CustomModelForm):
+    """Formulario para cursos."""
+
+    error_messages = {
+        'current_curso': _('Ya existe un curso en este horario.')
+    }
+
+    # cambio el queryset a lideres, en teoria debe salir una lista larga de lideres
+    profesor = forms.ModelMultipleChoiceField(
+        queryset=Miembro.objects.maestros(), label=_('Profesores'))
+    # fecha_inicio = forms.DateField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = models.Curso
+        fields = [
+            'precio', 'hora_inicio', 'hora_fin', 'fecha_inicio',
+            'fecha_fin', 'salon', 'materia', 'dia', 'profesor', 'color',
+        ]
+        widgets = {
+            'dia': ArrayFieldSelectMultiple(
+                choices=models.Curso.DIAS_SEMANA, attrs={'class': 'selectpicker'}),
+            'color': forms.HiddenInput()
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['precio'].widget.attrs.update({'class': 'form-control'})
+        self.fields['hora_inicio'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00'})
+        self.fields['hora_fin'].widget.attrs.update({'class': 'form-control', 'data-mask': '00:00'})
+        self.fields['fecha_inicio'].widget.attrs.update({'class': 'form-control', 'data-mask': '0000-00-00'})
+        self.fields['fecha_fin'].widget.attrs.update({'class': 'form-control', 'data-mask': '0000-00-00'})
+        self.fields['salon'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['materia'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['profesor'].widget.attrs.update({'class': 'selectpicker'})
+        self.fields['profesor'].queryset = Miembro.objects.maestros()
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean(*args, **kwargs)
+        hora_inicio = cleaned_data.get('hora_inicio', '') or None
+        hora_fin = cleaned_data.get('hora_fin', '') or None
+        fecha_inicio = cleaned_data.get('fecha_inicio') or None
+        fecha_fin = cleaned_data.get('fecha_fin', '') or None
+        salon = cleaned_data.get('salon', '') or None
+        dias = cleaned_data.get('dia', '')
+
+        if fecha_inicio is not None and fecha_fin is not None and salon is not None:
+            if hora_inicio is not None and hora_fin is not None:
+                dia = dias
+                current = models.Curso.objects.filter(
+                    salon=salon, fecha_inicio__lte=fecha_fin,
+                    fecha_fin__gte=fecha_inicio, dia__overlap=dia).activos().filter(
+                        hora_inicio__lte=hora_fin, hora_fin__gte=hora_inicio
+                    )
+                if current.exists():
+                    raise forms.ValidationError(self.error_messages['current_curso'], code='current_curso')
+
+        return cleaned_data
 
 
 class ReporteInstitutoForm(CustomForm):

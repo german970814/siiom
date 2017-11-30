@@ -18,6 +18,17 @@ class MiembroQuerySet(models.QuerySet):
         permiso = Permission.objects.get(codename='es_lider')
         return self.filter(models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso))
 
+    def maestros(self):
+        """
+        :returns:
+            Un queryset con los maestros de una iglesia.
+            Los maestros son los miembros que tengan el permiso de maestro.
+        """
+
+        permiso = Permission.objects.get(codename='es_maestro')
+        return self.filter(
+            models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso)).distinct()
+
     def red(self, red):
         """
         :returns:

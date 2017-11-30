@@ -151,6 +151,7 @@ class Miembro(UtilsModelMixin, models.Model):
             ("es_pastor", "indica si un miembro es pastor"),
             ("es_tesorero", "indica si un miembro es tesorero"),
             ("es_coordinador", "indica si un miembro es coordinador"),
+            ("es_maestro", "indica si un miembro es maestro"),
             ("buscar_todos", "indica si un usuario puede buscar miembros"),
         )
 
