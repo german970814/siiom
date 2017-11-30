@@ -9,7 +9,7 @@ class ReporteInstitutoTestView(BaseTest):
     def setUp(self):
         self.crear_arbol()
         self.admin = UsuarioFactory(user_permissions=('es_administrador',))
-        self.URL = reverse('instituto:reporte_instituto')
+        self.URL = reverse('instituto:reporte-instituto')
 
     @override_switch('instituto', active=True)
     def test_retorne_html_con_formulario_invalido(self):

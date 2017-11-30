@@ -63,3 +63,12 @@ class ReporteInstitutoFormTest(BaseTest):
         self.assertEquals(lideres.count(), len(miembros))
         for lider in lideres:
             self.assertIn(lider.id, miembros)
+
+
+class CursoFormTest(BaseTest):
+
+    def setUp(self):
+        self.crear_arbol()
+
+    def test():
+        pass

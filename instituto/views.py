@@ -215,6 +215,21 @@ class SalonListView(WaffleSwitchMixin, LoginRequiredMixin, ListView):
     waffle_switch = 'instituto'
 
 
+class CursoCreateView(WaffleSwitchMixin, LoginRequiredMixin, ViewMessagesMixin, CreateView):
+    """CreateView for cursos."""
+
+    model = models.Curso
+    form_class = forms.CursoForm
+    success_url = reverse_lazy('instituto:crear-curso')
+    template_name = 'instituto/crear_curso.html'
+    waffle_switch = 'instituto'
+    message_success = _('Se ha creado el curso con éxito')
+
+    def form_valid(self, form):
+        form.instance.estado = models.Curso.ABIERTO
+        return super().form_valid(form)
+
+
 def lista_estudiantes_sesion(request):
     from django.shortcuts import render
     return render(request, 'lista_estudiantes_sesion.html', {})

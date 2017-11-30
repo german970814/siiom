@@ -15,8 +15,25 @@ class MiembroQuerySet(models.QuerySet):
             Los lideres son los miembros que tengan permiso de lider.
         """
 
-        permiso = Permission.objects.get(codename='es_lider')
-        return self.filter(models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso))
+        try:
+            permiso = Permission.objects.get(codename='es_lider')
+            return self.filter(models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso))
+        except Permission.DoesNotExists:
+            return self.none()
+
+    def maestros(self):
+        """
+        :returns:
+            Un queryset con los maestros de una iglesia.
+            Los maestros son los miembros que tengan el permiso de maestro.
+        """
+
+        try:
+            permiso = Permission.objects.get(codename='es_maestro')
+            return self.filter(
+                models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso)).distinct()
+        except Permission.DoesNotExists:
+            return self.none()
 
     def red(self, red):
         """

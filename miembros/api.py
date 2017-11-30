@@ -39,7 +39,7 @@ def desvincular_lider_grupo_api(request, pk):
 def resetear_contrasena(request):
     """Permite a un administrador resetear la contraseña de un miembro."""
 
-    msg = 'La contraseña se reseteo correctamente y se envió un email al miembro con su nueva contraseña.'
+    msg = 'La contraseña se reseteó correctamente y se envió un email al miembro con su nueva contraseña.'
     msg2 = 'La nueva contraseña es la cedula del miembro.'
 
     if request.method == 'POST':

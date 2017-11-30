@@ -2,8 +2,9 @@ from django import forms
 from django.forms.utils import ErrorList
 from django.utils.encoding import force_text
 from django.utils.html import format_html_join
-from django.utils.translation import ugettext_lazy as _lazy
 from django.utils.module_loading import import_string
+from django.utils.datastructures import MultiValueDict
+from django.utils.translation import ugettext_lazy as _lazy
 
 
 class CustomErrorList(ErrorList):
@@ -16,6 +17,34 @@ class CustomErrorList(ErrorList):
             return ''
 
         return format_html_join('', '<small class="help-block">{}</small>', ((force_text(e),) for e in self))
+
+
+class ArrayFieldSelectMultiple(forms.SelectMultiple):
+    """
+    This is a Form Widget for use with a Postgres ArrayField. It implements
+    a multi-select interface that can be given a set of `choices`.
+
+    You can provide a `delimiter` keyword argument to specify the delimeter used.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super(ArrayFieldSelectMultiple, self).__init__(*args, **kwargs)
+
+    def render_options(self, choices, value):
+        if isinstance(value, str):
+            value = value.split(self.delimiter)
+        return super(ArrayFieldSelectMultiple, self).render_options(choices, value)
+
+    def format_value(self, value):
+        if isinstance(value, str):
+            value = value.split(self.delimiter)
+        return super(ArrayFieldSelectMultiple, self).format_value(value)
+
+    def value_from_datadict(self, data, files, name):
+        if isinstance(data, MultiValueDict):
+            return self.delimiter.join(data.getlist(name))
+        return data.get(name, None)
 
 
 class CustomModelForm(forms.ModelForm):
