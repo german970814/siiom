@@ -4,12 +4,15 @@ from rest_framework import permissions, generics, status
 from rest_framework.decorators import api_view
 
 from . import models, serializers
+from common.mixins import WaffleSwitchMixin
+
+from waffle.decorators import waffle_switch
 
 
-# TODO: add support for waffle instituto
-class CursoListAPIView(generics.ListAPIView):
+class CursoListAPIView(WaffleSwitchMixin, generics.ListAPIView):
     queryset = models.Curso.objects.all()
     serializer_class = serializers.CursoSerializer
+    waffle_switch = 'instituto'
 
     def get_queryset(self, *args, **kwargs):
         salon_id = self.kwargs.get('pk')
@@ -20,30 +23,37 @@ class CursoListAPIView(generics.ListAPIView):
         return super().get_serializer(*args, **kwargs)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
+@waffle_switch('instituto')
 def curso_by_month(request, pk):
-    if request.method == 'GET':
-        salon = get_object_or_404(models.Salon, pk=pk)
+    """
+    Retorna los cursos que tienen eventos en un rango de fecha específico.
+    """
+    salon = get_object_or_404(models.Salon, pk=pk)
 
-        _serializer = serializers.CursoEventoSerializer(data=request.GET)
-        if _serializer.is_valid():
-            cursos = models.Curso.objects.filter(
-                fecha_inicio__lte=_serializer.data['end'],
-                fecha_fin__gte=_serializer.data['start'], salon=salon)
-            serializer = serializers.CursoSerializer(cursos, many=True, expand=['materia', ])
-            response = Response(serializer.data)
-        else:
-            response = Response(_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    _serializer = serializers.CursoEventoSerializer(data=request.GET)
+    if _serializer.is_valid():
+        cursos = models.Curso.objects.filter(
+            fecha_inicio__lte=_serializer.data['end'],
+            fecha_fin__gte=_serializer.data['start'], salon=salon)
+        serializer = serializers.CursoSerializer(cursos, many=True, expand=['materia', ])
+        response = Response(serializer.data)
+    else:
+        response = Response(_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     return response
 
 
-@api_view(['GET', ])
+@api_view(['GET'])
+@waffle_switch('instituto')
 def verifica_disponibilidad_curso(request, pk):
+    """
+    Verifica que un curso pueda añadirse en un horario disponible, y no tenga
+    interferencia con otro curso
+    """
     salon = get_object_or_404(models.Salon, pk=pk)
 
     serializer = serializers.CursoEventoSerializer(data=request.GET)
-    # dias = request.GET.getlist('dias[]')
 
     if serializer.is_valid():
         cursos = models.Curso.objects.filter(
