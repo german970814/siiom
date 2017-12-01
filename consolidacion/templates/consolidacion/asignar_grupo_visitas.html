@@ -288,14 +288,22 @@
     });
 
     {% for red in redes %}
-    _redes_json['{{ red.nombre }}'] = new Array();
+        _redes_json['{{ red.nombre }}'] = new Array();
     {% endfor %}
-    {% for grupo in grupos %}
-    {% if grupo.get_position %}
-    _redes_json['{{ grupo.red.nombre }}'].push(
-        L.marker({{ grupo.get_position }}, {icon: yellowIcon}).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}</ br><button type='button' val='{{ grupo.id }}' class='asignar-grupo btn btn-block btn-primary'>Asignar A este grupo</button>") //.openPopup();
-    )
-    {% endif %}
+        {% for grupo in grupos %}
+            {% if grupo.get_position %}
+                {% if grupo.red %}
+                _redes_json['{{ grupo.red.nombre }}'].push(
+                    L.marker({{ grupo.get_position }}, {icon: yellowIcon}).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}</ br><button type='button' val='{{ grupo.id }}' class='asignar-grupo btn btn-block btn-primary'>Asignar A este grupo</button>") //.openPopup();
+                )
+                {% else %}
+                for (let red in _redes_json) {
+                    _redes_json[red].push(
+                        L.marker({{ grupo.get_position }}, { icon: yellowIcon }).bindPopup("<b>{{ grupo.get_nombre }} ({{ grupo.red.nombre|upper}})</b><br />{{ grupo.direccion }}</ br><button type='button' val='{{ grupo.id }}' class='asignar-grupo btn btn-block btn-primary'>Asignar A este grupo</button>") //.openPopup();
+                    )
+                }
+                {% endif %}
+            {% endif %}
     {% endfor %}
 
     for (var red in _redes_json) {
