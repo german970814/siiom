@@ -18,7 +18,7 @@ class MiembroQuerySet(models.QuerySet):
         try:
             permiso = Permission.objects.get(codename='es_lider')
             return self.filter(models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso))
-        except Permission.DoesNotExists:
+        except Permission.DoesNotExist:
             return self.none()
 
     def maestros(self):
@@ -32,7 +32,7 @@ class MiembroQuerySet(models.QuerySet):
             permiso = Permission.objects.get(codename='es_maestro')
             return self.filter(
                 models.Q(usuario__groups__permissions=permiso) | models.Q(usuario__user_permissions=permiso)).distinct()
-        except Permission.DoesNotExists:
+        except Permission.DoesNotExist:
             return self.none()
 
     def red(self, red):
