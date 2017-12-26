@@ -4,6 +4,7 @@ from fabric.contrib.files import append, sed
 from fabric.api import env, task, run, sudo, cd, prefix, local
 
 REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
+# pg_dump -U siiom -h localhost siiom > 13112017_siiom.sql
 # psql -U siiom -h localhost siiom < ~/Desktop/staging_tenant.sql
 # rsync -nrv --exclude=.DS_Store . ingeniarte@staging.siiom.net:/home/ingeniarte/sites/ingeniarte.siiom.net/media/cdr.siiom.net/
 # return 301 $scheme://tenant.staging.siiom.net$request_uri;
