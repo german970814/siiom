@@ -4,6 +4,8 @@ from fabric.contrib.files import append, sed
 from fabric.api import env, task, run, sudo, cd, prefix, local
 
 REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
+PROJECT = 'siiom'  # nombre de carpeta donde esta wsgi 
+# pg_dump -U siiom -h localhost siiom > 13112017_siiom.sql
 # psql -U siiom -h localhost siiom < ~/Desktop/staging_tenant.sql
 # rsync -nrv --exclude=.DS_Store . ingeniarte@staging.siiom.net:/home/ingeniarte/sites/ingeniarte.siiom.net/media/cdr.siiom.net/
 # return 301 $scheme://tenant.staging.siiom.net$request_uri;
@@ -24,10 +26,11 @@ ENVIROMENT_SETTINGS = {
 
 
 def site_dir():
-    global SITE_FOLDER, PROJECT_ROOT
+    global SITE_FOLDER, PROJECT_ROOT, ENV_FILE
     env.site = env.settings['site']
     SITE_FOLDER = '/home/{user}/sites/{site}'.format(user=env.user, site=env.site)
     PROJECT_ROOT = '{}/src'.format(SITE_FOLDER)
+    ENV_FILE = '/home/{user}/.envs/{site}/bin/postactivate'.format(user=env.user, site=env.site)
 
 
 @contextmanager
@@ -37,10 +40,33 @@ def virtualenv():
 
 
 def create_secret_key():
-    secret_key_file = PROJECT_ROOT + '/siiom/secret_key.py'
+    # secret_key_file = PROJECT_ROOT + '/siiom/secret_key.py'
     chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
     key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
-    append(secret_key_file, "SECRET_KEY = '{}'".format(key))
+    # append(secret_key_file, "SECRET_KEY = '{}'".format(key))
+    return key
+
+
+def get_database_url():
+    """Constructs the db url from user input."""
+
+    import getpass
+
+    name = input('Nombre de la base de datos: ')
+    username = input('Usuario de la base de datos: ')
+    password = getpass.getpass()
+
+    database_url = '{}:{}@127.0.0.1:5432/{}'.format(username, password, name)
+    return database_url
+
+
+def set_env_variables():
+    """Sets the enviroment variables."""
+
+    append(ENV_FILE, 'export DATABASE_URL=//{}'.format(get_database_url()))
+    append(ENV_FILE, "export SECRET_KEY='{}'".format(create_secret_key()))
+    append(ENV_FILE, 'export DJANGO_SETTINGS_MODULE={}.settings.production'.format(PROJECT))
+    append(ENV_FILE, 'export ALLOWED_HOSTS={}'.format(env.settings['allowed_host']))
 
 
 def update_settings():
@@ -93,7 +119,7 @@ def staging():
     """Setting staging enviroment."""
 
     env.user = 'ingeniarte'
-    env.hosts = ['staging.siiom.net']
+    env.hosts = ['siiom.net']
     env.settings = ENVIROMENT_SETTINGS['staging']
 
     site_dir()
@@ -104,30 +130,15 @@ def production():
     """Setting production enviroment."""
 
     env.user = 'ingeniarte'
-    env.hosts = ['ingeniarte.siiom.net']
+    env.hosts = ['siiom.net']
     env.settings = ENVIROMENT_SETTINGS['production']
 
     site_dir()
 
 
-def config_database(database_url):
-    """Setting database enviroment variables."""
-
-    ENV_FILE = '/home/{user}/.envs/{site}/bin/postactivate'.format(user=env.user, site=env.site)
-    append(ENV_FILE, 'export DATABASE_URL=//{}'.format(database_url))
-
-
 @task
 def provision():
     """Provision a new site on an already provision server."""
-
-    import getpass
-
-    name = input('Nombre de la base de datos: ')
-    username = input('Usuario de la base de datos: ')
-    password = getpass.getpass()
-
-    database_url = '{}:{}@127.0.0.1:5432/{}'.format(username, password, name)
 
     for subfolder in ('static', 'media', 'src', 'bin', 'tmp/sockets', 'tmp/logs'):
         run("mkdir -p {}/{}".format(SITE_FOLDER, subfolder))
@@ -140,10 +151,9 @@ def provision():
         with virtualenv():
             run('setvirtualenvproject')
 
-    config_database(database_url)
+    set_env_variables()
     update_source()
-    create_secret_key()
-    update_settings()
+    # update_settings()
     with virtualenv():
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas --shared')
@@ -161,11 +171,25 @@ def deploy():
     """Deploy new changes to the server."""
 
     update_source()
-    update_settings()
+    # update_settings()
     with virtualenv():
         run('pip install -r requirements/production.txt')
         run('./manage.py migrate_schemas')
         run('./manage.py collectstatic --noinput')
 
+    restart_server()
+
+
+@task
+def set_env_var():
+    """Creates an enviroment variable."""
+
+    key = input('Nombre de la variable de entorno: ')
+    value = input('Valor: ')
+
+    append(ENV_FILE, 'export {key}={value}'.format(key=key, value=value))
+
+@task
+def restart_server():
     sudo('supervisorctl restart {}'.format(env.site))
     sudo('supervisorctl status {}'.format(env.site))
