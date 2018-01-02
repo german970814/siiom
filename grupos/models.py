@@ -28,7 +28,21 @@ class Red(models.Model):
 
 class Grupo(DiasSemanaMixin, SixALNode, AL_Node):
     """
-    Modelo para guardar la información de los grupos de una iglesia.
+    Representa los grupos de una iglesia.
+
+    Los grupos se categorizan se clasifican según su estado.
+
+        * ``ACTIVO`` Este estado es aplicado a grupos que realicen todas las funciones
+            que un grupo hace, es decir: reunion de G.A.R, reunion de discipulado, etc.
+
+        * ``INACTIVO`` Este estado es aplicado a grupos que en la actualidad no se
+            encuentran realizando reuniones de G.A.R, pero realizan encuentros, reuniones
+            de dicipulado, etc.
+
+        * ``SUSPENDIDO`` Este estado es aplicado a grupos que en la actualidad no realizan
+            ninguna acción de grupos, pero no quiere ser archivado.
+
+        * ``ARCHIVADO`` Este estado es aplicado a grupos que serán eliminados.
     """
 
     ACTIVO = 'A'

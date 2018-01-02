@@ -1,3 +1,4 @@
+import datetime
 # Django
 from django.db import models
 from django.utils.module_loading import import_string
@@ -174,6 +175,33 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         """
 
         return self.exclude(children_set__in=self.model.objects.all())
+
+    def declarar_vacaciones(self, inicio, fin):
+        """
+        Ingresa los sobres de amistad de los grupos activos en el rango de fecha con el estado de no realizo grupo.
+        Los limites del rango son incluyentes.
+        """
+
+        reuniones = []
+        ReunionGAR = import_string('grupos.models.ReunionGAR')
+        grupos = self.model.objects.activos()
+        fecha = inicio - datetime.timedelta(days=inicio.isoweekday() - 1)
+
+        while fecha < fin:
+            fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
+            grupos_sin_reunion = grupos.exclude(
+                id__in=ReunionGAR.objects.filter(fecha__range=(fecha, fin_semana)).values_list('grupo', flat=True)
+            )
+
+            for grupo in grupos_sin_reunion:
+                reuniones.append(ReunionGAR(
+                    fecha=fecha, grupo=grupo, predica='No se hizo grupo', ofrenda=0, numeroTotalAsistentes=0,
+                    numeroLideresAsistentes=0, numeroVisitas=0, digitada_por_miembro=False, confirmacionEntregaOfrenda=True
+                ))
+
+            fecha = fecha + datetime.timedelta(days=8 - fecha.isoweekday())
+        
+        ReunionGAR.objects.bulk_create(reuniones)
 
 
 class GrupoManagerStandard(AL_NodeManager.from_queryset(GrupoQuerySet)):

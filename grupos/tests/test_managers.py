@@ -1,6 +1,11 @@
+import datetime
+from django.test import tag
+from freezegun import freeze_time
 from common.tests.base import BaseTest
-from ..models import Grupo, HistorialEstado
-from .factories import GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory, ReunionDiscipuladoFactory
+from ..models import Grupo, HistorialEstado, ReunionGAR
+from .factories import (
+    GrupoRaizFactory, GrupoFactory, RedFactory, ReunionGARFactory, ReunionDiscipuladoFactory, HistorialEstadoFactory
+)
 
 
 class GrupoManagerTest(BaseTest):
@@ -203,7 +208,6 @@ class GrupoManagerTest(BaseTest):
         Prueba que los grupos en estado archivado no esten saliendo en queryset de objects
         """
 
-        import datetime
         self.crear_arbol()
         grupo = Grupo.objects.get(id=500)
 
@@ -215,3 +219,90 @@ class GrupoManagerTest(BaseTest):
 
         self.assertNotIn(grupo, Grupo.objects.all())
         self.assertIn(grupo, Grupo._objects.all())
+
+    @tag('actual')
+    def test_declarar_vacaciones_crea_reuniones_como_realizada(self):
+        """Prueba que cuando se declaren los grupos en vacaciones se coloquen las reuniones en las fechas escogidas como
+        que no realizo grupo."""
+
+        with freeze_time("2017-12-15"):
+            now = datetime.datetime.now()
+            grupo1 = GrupoFactory(fechaApertura=now, historial__fecha=now)
+        with freeze_time("2017-12-18"):
+            dic_18 = datetime.date.today()
+        with freeze_time("2017-12-31"):
+            dic_31 = datetime.date.today()
+        
+        Grupo.objects.declarar_vacaciones(dic_18, dic_31)
+        self.assertFalse(
+            all([r.realizada for r in grupo1.reuniones_gar.all()]),
+            msg="Las reuniones debieron ser creadas como no realizadas."
+        )
+
+    @tag('actual')
+    def test_declarar_vacaciones_crea_todas_reuniones_dentro_rango_fechas(self):
+        """
+        Prueba que cuando se declaren los grupos en vacaciones se coloquen todas las reuniones dentro del rango de
+        fechas dadas.
+        """
+
+        with freeze_time("2017-12-15"):
+            now = datetime.datetime.now()
+            grupo1 = GrupoFactory(fechaApertura=now, historial__fecha=now)
+        
+        with freeze_time("2017-12-18"):
+            dic_18 = datetime.date.today()
+        with freeze_time("2017-12-31"):
+            dic_31 = datetime.date.today()
+        
+        Grupo.objects.declarar_vacaciones(dic_18, dic_31)
+        self.assertEqual(
+            grupo1.reuniones_gar.count(), 2,
+            msg="Debido al que el rango de fechas son dos semanas, solo deben haber reuniones."
+        )
+    
+    @tag('actual')
+    def test_declarar_vacaciones_solo_grupos_activos(self):
+        """
+        Prueba que solo se creen reuniones para grupos activos.
+        """
+
+        with freeze_time("2017-12-13"):
+            now = datetime.datetime.now()
+            grupo1 = GrupoFactory(fechaApertura=now)
+            grupo2 = GrupoFactory(fechaApertura=now)
+            grupo3 = GrupoFactory(fechaApertura=now)
+        
+        with freeze_time("2017-12-14"):
+            grupo1.actualizar_estado('IN')
+            grupo2.actualizar_estado('SU')
+            grupo3.actualizar_estado('AR')
+        
+        with freeze_time("2017-12-18"):
+            dic_18 = datetime.date.today()
+        with freeze_time("2017-12-31"):
+            dic_31 = datetime.date.today()
+        
+        Grupo.objects.declarar_vacaciones(dic_18, dic_31)
+        self.assertEqual(ReunionGAR.objects.count(), 0, msg="No debe haber ninguna reunion creada")
+    
+    @tag('actual')
+    def test_declarar_vacaciones_no_cree_reporte_si_grupo_ya_reporto(self):
+        """
+        Prueba que no se cree un reporte si el grupo ya reporto.
+        """
+
+        with freeze_time("2017-12-13"):
+            grupo = GrupoFactory(fechaApertura=datetime.datetime.now())
+        
+        with freeze_time("2017-12-20"):
+            reunion = ReunionGARFactory(grupo=grupo, fecha=datetime.datetime.now())
+        
+        with freeze_time("2017-12-18"):
+            dic_18 = datetime.date.today()
+        with freeze_time("2017-12-31"):
+            dic_31 = datetime.date.today()
+        
+        Grupo.objects.declarar_vacaciones(dic_18, dic_31)
+        self.assertEqual(ReunionGAR.objects.exclude(id=reunion.id).count(), 1, msg="Solo se debio crear una sola reunion")
+
