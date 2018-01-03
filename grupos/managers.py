@@ -20,6 +20,15 @@ class GrupoQuerySet(models.QuerySet):
         """
 
         return import_string('grupos.models.HistorialEstado')
+    
+    @classmethod
+    def get_reunionGAR_model(cls):
+        """
+        :returns:
+            Modelo de ReunionGAR.
+        """
+
+        return import_string('grupos.models.ReunionGAR')
 
     def red(self, red):
         """
@@ -112,7 +121,20 @@ class GrupoQuerySet(models.QuerySet):
         """
 
         return self._exclude_queryset_by_estado(self.get_historial_model().SUSPENDIDO)
+    
+    def sin_reportar_reunion_GAR(self, inicial, final):
+        """
+        :returns:
+            Un queryset con los grupos que no han reportado reunión GAR en el rango de fechas ingresado.
 
+        :param date inicial: Fecha inicial en la cual se va a buscar los grupos.
+        :param date final: Fecha final en la cual se va a buscar los grupos.
+        """
+
+        grupos_que_reportaron = self.get_reunionGAR_model().objects.filter(
+            fecha__range=(inicial, final)
+        ).values_list('grupo', flat=True)
+        return self.activos().exclude(id__in=grupos_que_reportaron)
 
 class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     """
@@ -187,15 +209,12 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         """
 
         reuniones = []
-        ReunionGAR = import_string('grupos.models.ReunionGAR')
-        grupos = self.model.objects.activos()
+        ReunionGAR = GrupoQuerySet.get_reunionGAR_model()
         fecha = inicio - datetime.timedelta(days=inicio.isoweekday() - 1)
 
         while fecha < fin:
             fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
-            grupos_sin_reunion = grupos.exclude(
-                id__in=ReunionGAR.objects.filter(fecha__range=(fecha, fin_semana)).values_list('grupo', flat=True)
-            )
+            grupos_sin_reunion = self.model.objects.sin_reportar_reunion_GAR(fecha, fin_semana)
 
             for grupo in grupos_sin_reunion:
                 reuniones.append(ReunionGAR.no_realizada(fecha=fecha, grupo=grupo, digitada_por_miembro=False))

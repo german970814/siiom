@@ -373,7 +373,6 @@ class GrupoModelTest(BaseTest):
 class ReunionGARModelTest(BaseTest):
     """Pruebas unitarias para el modelo ReunionGAR."""
 
-    @tag('actual')
     def test_reunion_no_realizada_ofrenda_cero(self):
         """Prueba que me devuelva una instancia de una reunion GAR con ofrenda=0."""
 
@@ -382,7 +381,6 @@ class ReunionGARModelTest(BaseTest):
         reunion = ReunionGAR.no_realizada(grupo, datetime.date.today())
         self.assertEqual(reunion.ofrenda, 0)
 
-    @tag('actual')
     def test_reunion_no_realizada_numero_tota_asistentes_cero(self):
         """Prueba que me devuelva una instancia de una reunion GAR con numeroTotalAsistentes=0."""
 
@@ -391,7 +389,6 @@ class ReunionGARModelTest(BaseTest):
         reunion = ReunionGAR.no_realizada(grupo, datetime.date.today())
         self.assertEqual(reunion.numeroTotalAsistentes, 0)
 
-    @tag('actual')
     def test_reunion_no_realizada_numero_lideres_asistentes_cero(self):
         """Prueba que me devuelva una instancia de una reunion GAR con numeroLideresAsistentes=0."""
 
