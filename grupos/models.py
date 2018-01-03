@@ -514,10 +514,29 @@ class ReunionGAR(models.Model):
             ("puede_confirmar_ofrenda_GAR", "puede confirmar la entrega de dinero GAR"),
         )
 
+    @classmethod
+    def no_realizada(cls, grupo, fecha, digitada_por_miembro=True):
+        """
+        Crea una reunionGAR no guardada en la base de datos.
+
+        :param grupo: Grupo al cual se le va a crear la reunión.
+        :param date fecha: Fecha de la reunión.
+        :param bool digitada_por_miembro: Indica si la reunión es ingresada por un miembro. Por defecto es ``True``.
+
+        :rtype: :py:class:`ReunionGAR`
+        """
+
+        return cls(
+            fecha=fecha, grupo=grupo, digitada_por_miembro=digitada_por_miembro,
+            predica='No se hizo grupo', ofrenda=0, numeroTotalAsistentes=0,
+            numeroLideresAsistentes=0, numeroVisitas=0, confirmacionEntregaOfrenda=True,
+        )
+
     @property
     def realizada(self):
         """
-        Retorna True si la ReunionGAR fue realizada, de lo contrario retorna False
+        :returns:
+            ``True`` si la reunionGAR fue realizada.
         """
         if self.numeroLideresAsistentes > 0:
             return True

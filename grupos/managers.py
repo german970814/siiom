@@ -178,8 +178,12 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
 
     def declarar_vacaciones(self, inicio, fin):
         """
-        Ingresa los sobres de amistad de los grupos activos en el rango de fecha con el estado de no realizo grupo.
+        Ingresa los sobres de amistad de los grupos activos en el rango de fecha escogido con un estado
+        de no realizo grupo.
         Los limites del rango son incluyentes.
+
+        :param date inicio: Fecha inicial de la vaciones (inclusive).
+        :param date fin: Fecha final de la vaciones (inclusive).
         """
 
         reuniones = []
@@ -194,10 +198,7 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
             )
 
             for grupo in grupos_sin_reunion:
-                reuniones.append(ReunionGAR(
-                    fecha=fecha, grupo=grupo, predica='No se hizo grupo', ofrenda=0, numeroTotalAsistentes=0,
-                    numeroLideresAsistentes=0, numeroVisitas=0, digitada_por_miembro=False, confirmacionEntregaOfrenda=True
-                ))
+                reuniones.append(ReunionGAR.no_realizada(fecha=fecha, grupo=grupo, digitada_por_miembro=False))
 
             fecha = fecha + datetime.timedelta(days=8 - fecha.isoweekday())
         

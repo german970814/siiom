@@ -1,6 +1,6 @@
 import datetime
-from django.test import tag
 from freezegun import freeze_time
+from django.test import tag
 from common.tests.base import BaseTest
 from ..models import Grupo, HistorialEstado, ReunionGAR
 from .factories import (
@@ -305,4 +305,3 @@ class GrupoManagerTest(BaseTest):
         
         Grupo.objects.declarar_vacaciones(dic_18, dic_31)
         self.assertEqual(ReunionGAR.objects.exclude(id=reunion.id).count(), 1, msg="Solo se debio crear una sola reunion")
-
