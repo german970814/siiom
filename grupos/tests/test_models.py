@@ -1,7 +1,10 @@
+import datetime
+from freezegun import freeze_time
+from django.test import tag
 from miembros.tests.factories import MiembroFactory
 from common.tests.base import BaseTest
-from ..models import Grupo, HistorialEstado
-from .factories import ReunionGARFactory, ReunionDiscipuladoFactory, GrupoHijoFactory
+from ..models import Grupo, HistorialEstado, ReunionGAR
+from .factories import ReunionGARFactory, ReunionDiscipuladoFactory, GrupoHijoFactory, GrupoFactory
 
 
 class GrupoModelTest(BaseTest):
@@ -365,3 +368,31 @@ class GrupoModelTest(BaseTest):
         hijo.actualizar_estado(estado=HistorialEstado.ARCHIVADO)
 
         self.assertEqual(grupo.numero_celulas, 4)
+
+
+class ReunionGARModelTest(BaseTest):
+    """Pruebas unitarias para el modelo ReunionGAR."""
+
+    def test_reunion_no_realizada_ofrenda_cero(self):
+        """Prueba que me devuelva una instancia de una reunion GAR con ofrenda=0."""
+
+        grupo = GrupoFactory()
+
+        reunion = ReunionGAR.no_realizada(grupo, datetime.date.today())
+        self.assertEqual(reunion.ofrenda, 0)
+
+    def test_reunion_no_realizada_numero_tota_asistentes_cero(self):
+        """Prueba que me devuelva una instancia de una reunion GAR con numeroTotalAsistentes=0."""
+
+        grupo = GrupoFactory()
+
+        reunion = ReunionGAR.no_realizada(grupo, datetime.date.today())
+        self.assertEqual(reunion.numeroTotalAsistentes, 0)
+
+    def test_reunion_no_realizada_numero_lideres_asistentes_cero(self):
+        """Prueba que me devuelva una instancia de una reunion GAR con numeroLideresAsistentes=0."""
+
+        grupo = GrupoFactory()
+
+        reunion = ReunionGAR.no_realizada(grupo, datetime.date.today())
+        self.assertEqual(reunion.numeroLideresAsistentes, 0)
