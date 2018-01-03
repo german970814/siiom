@@ -21,9 +21,13 @@ import os
 import sys
 import sphinx_rtd_theme
 import django
+from django.conf import settings
 
 sys.path.insert(0, os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'siiom.settings'
+settings.configure(
+    SECRET_KEY='@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
+)
 django.setup()
 
 
