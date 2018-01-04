@@ -37,7 +37,7 @@ class CursoFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = 'instituto.Curso'
 
-    dia = '0'
+    dia = ['0']
     precio = 0
     estado = 'A'
     hora_fin = factory.Faker('time')
