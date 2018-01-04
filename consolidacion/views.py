@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -8,7 +9,7 @@ from django.utils.translation import ugettext as _
 from django.views.generic.edit import CreateView, UpdateView
 
 from .models import Visita
-from .forms import FormularioVisita, FormularioAsignarGrupoVisita
+from .forms import VisitaForm, FormularioAsignarGrupoVisita
 from common.forms import FormularioRangoFechas
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
@@ -16,7 +17,7 @@ from grupos.models import Grupo, Red
 import json
 
 
-class VisitasCBVMixxing(object):
+class VisitasCBVMixin(object):
     """
     Base de clases para visitas
     """
@@ -24,27 +25,27 @@ class VisitasCBVMixxing(object):
 
     def form_invalid(self, form):
         messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
-        return super(VisitasCBVMixxing, self).form_invalid(form)
+        return super(VisitasCBVMixin, self).form_invalid(form)
 
     def form_valid(self, form):
         messages.success(self.request, _("Visita guardada con exito"))
-        return super(VisitasCBVMixxing, self).form_valid(form)
+        return super(VisitasCBVMixin, self).form_valid(form)
 
 
-class CrearVisita(VisitasCBVMixxing, CreateView):
+class CrearVisita(LoginRequiredMixin, VisitasCBVMixin, CreateView):
     """
     CBV para crear visitas
     """
-    form_class = FormularioVisita
+    form_class = VisitaForm
     template_name = 'consolidacion/crear_visita.html'
     success_url = reverse_lazy('consolidacion:crear_visita')
 
 
-class EditarVisita(VisitasCBVMixxing, UpdateView):
+class EditarVisita(LoginRequiredMixin, VisitasCBVMixin, UpdateView):
     """
     CBV para editar Visitas
     """
-    form_class = FormularioVisita
+    form_class = VisitaForm
     template_name = 'consolidacion/crear_visita.html'
 
     def form_valid(self, form):
