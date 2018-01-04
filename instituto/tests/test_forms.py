@@ -69,6 +69,3 @@ class CursoFormTest(BaseTest):
 
     def setUp(self):
         self.crear_arbol()
-
-    def test():
-        pass
