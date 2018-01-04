@@ -37,7 +37,7 @@ class CrearVisita(LoginRequiredMixin, VisitasCBVMixin, CreateView):
     CBV para crear visitas
     """
     form_class = VisitaForm
-    template_name = 'consolidacion/crear_visita.html'
+    template_name = 'consolidacion/visita_form.html'
     success_url = reverse_lazy('consolidacion:crear_visita')
 
 
@@ -46,7 +46,7 @@ class EditarVisita(LoginRequiredMixin, VisitasCBVMixin, UpdateView):
     CBV para editar Visitas
     """
     form_class = VisitaForm
-    template_name = 'consolidacion/crear_visita.html'
+    template_name = 'consolidacion/visita_form.html'
 
     def form_valid(self, form):
         self.success_url = reverse_lazy('consolidacion:editar_visita', args=(form.instance.id,))
