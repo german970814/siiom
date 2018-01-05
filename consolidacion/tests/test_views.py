@@ -10,7 +10,7 @@ class CrearVisitaViewTest(BaseTest):
     URL = 'consolidacion:crear_visita'
 
     def setUp(self):
-        self.usuario = UsuarioFactory()
+        self.usuario = UsuarioFactory(user_permissions=('es_administrador',))
     
     def datos_formulario(self):
         """
@@ -25,7 +25,6 @@ class CrearVisitaViewTest(BaseTest):
 
         return data
     
-    @tag('actual')
     def test_get(self):
         """Prueba que se pueda ver el template."""
 
@@ -33,7 +32,6 @@ class CrearVisitaViewTest(BaseTest):
         self.get_check_200(self.URL)
         self.assertResponseContains('Visita', html=False)
     
-    @tag('actual')
     def test_post_formulario_valido_redirecciona_get(self):
         """
         Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
@@ -46,7 +44,6 @@ class CrearVisitaViewTest(BaseTest):
         self.assertEqual(Visita.objects.count(), 1, msg="Se debio crear la visita")
         self.assertRedirects(response, self.reverse(self.URL))
 
-    @tag('actual')
     def test_post_formulario_invalido_muestra_errores(self):
         """
         Prueba que si se hace un POST y el formulario es invalido se muestren los errores.

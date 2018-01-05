@@ -21,7 +21,14 @@ class VisitasCBVMixin(object):
     """
     Base de clases para visitas
     """
+
     model = Visita
+
+    def has_permission(self):
+        is_agent = self.request.user.has_perm('miembros.es_agente')
+        is_admin = self.request.user.has_perm('miembros.es_administrador')
+
+        return is_agent or is_admin
 
     def form_invalid(self, form):
         messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
@@ -32,7 +39,7 @@ class VisitasCBVMixin(object):
         return super(VisitasCBVMixin, self).form_valid(form)
 
 
-class CrearVisita(LoginRequiredMixin, VisitasCBVMixin, CreateView):
+class CrearVisitaView(LoginRequiredMixin, VisitasCBVMixin, PermissionRequiredMixin, CreateView):
     """
     CBV para crear visitas
     """
@@ -41,7 +48,7 @@ class CrearVisita(LoginRequiredMixin, VisitasCBVMixin, CreateView):
     success_url = reverse_lazy('consolidacion:crear_visita')
 
 
-class EditarVisita(LoginRequiredMixin, VisitasCBVMixin, UpdateView):
+class EditarVisitaView(LoginRequiredMixin, VisitasCBVMixin, PermissionRequiredMixin, UpdateView):
     """
     CBV para editar Visitas
     """
