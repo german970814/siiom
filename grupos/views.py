@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 
@@ -81,7 +81,7 @@ def editar_horario_reunion_grupo(request, pk=None):
     else:
         form = FormularioEditarGrupo(instance=grupo)
 
-    return render_to_response('grupos/editar_grupo.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'grupos/editar_grupo.html', locals())
 
 
 @login_required
@@ -135,7 +135,7 @@ def reportar_reunion_grupo(request):
             form = FormularioReportarReunionGrupo()
     else:
         raise PermissionDenied('Grupo no se encuentra o está inactivo.')
-    return render_to_response('grupos/reportar_reunion_grupo.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'grupos/reportar_reunion_grupo.html', locals())
 
 
 @login_required
@@ -171,9 +171,7 @@ def reportar_reunion_grupo_admin(request):
         init = request.GET.get('grupo', None)
         initial = {'grupo': init}
         form = FormularioReportarReunionGrupoAdmin(initial=initial)
-    return render_to_response(
-        'grupos/reportar_reunion_grupo_admin.html', locals(), context_instance=RequestContext(request)
-    )
+    return render(request, 'grupos/reportar_reunion_grupo_admin.html', locals())
 
 
 @login_required
@@ -199,9 +197,7 @@ def reportar_reunion_discipulado(request):
                     ya_reportada = True
         else:
             form = FormularioReportarReunionDiscipulado(miembro=miembro)
-    return render_to_response(
-        'grupos/reportar_reunion_discipulado.html', locals(), context_instance=RequestContext(request)
-    )
+    return render(request, 'grupos/reportar_reunion_discipulado.html', locals())
 
 
 @login_required
@@ -217,7 +213,7 @@ def listar_predicas(request):
 
     if Group.objects.get(name__iexact='Administrador') in request.user.groups.all():
         predicas = list(Predica.objects.all())
-    return render_to_response('grupos/listar_predicas.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'grupos/listar_predicas.html', locals())
 
 
 @login_required
@@ -232,7 +228,7 @@ def crear_predica(request):
             ok = True
     else:
         form = FormularioCrearPredica(miembro=miembro)
-    return render_to_response('grupos/crear_predica.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'grupos/crear_predica.html', locals())
 
 
 @login_required
@@ -255,7 +251,7 @@ def editar_predica(request, pk):
     else:
         form = FormularioCrearPredica(instance=predica, miembro=miembro)
 
-    return render_to_response("grupos/crear_predica.html", locals(), context_instance=RequestContext(request))
+    return render(request, "grupos/crear_predica.html", locals())
 
 
 @login_required
@@ -358,7 +354,7 @@ def ver_reportes_grupo(request):
         form_reporte = FormularioReportarReunionGrupoAdmin()
         request.session.pop('valid_post', None)
 
-    return render_to_response("grupos/ver_reportes_grupo.html", locals(), context_instance=RequestContext(request))
+    return render(request, "grupos/ver_reportes_grupo.html", locals())
 
 
 @login_required
@@ -420,7 +416,7 @@ def editar_runion_grupo(request, pk):
     else:
         form = FormularioEditarReunionGAR(instance=reunion)
 
-    return render_to_response("grupos/editar_reunion_grupo.html", locals(), context_instance=RequestContext(request))
+    return render(request, "grupos/editar_reunion_grupo.html", locals())
 
 
 def set_position_grupo(request, id_grupo):

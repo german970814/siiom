@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from common.models import DiasSemanaMixin
+from . import managers
 
 
 __author__ = 'German Alzate'
@@ -34,6 +36,9 @@ class Modulo(models.Model):
     nombre = models.CharField(max_length=255, verbose_name=_('Nombre'))
     materia = models.ForeignKey(Materia, verbose_name=_('Materia'), related_name='modulos')
 
+    class Meta:
+        unique_together = (('materia', 'prioridad'), )
+
     def __str__(self):
         return '({self.materia}) {self.prioridad}. {self.nombre}'.format(self=self)
 
@@ -47,6 +52,7 @@ class Sesion(models.Model):
 
     class Meta:
         verbose_name_plural = _('Sesiones')
+        unique_together = (('modulo', 'prioridad'), )
 
     def __str__(self):
         return '({self.modulo.nombre}) {self.prioridad}. {self.nombre}'.format(self=self)
@@ -62,7 +68,7 @@ class Salon(models.Model):
         verbose_name_plural = _('Salones')
 
     def __str__(self):
-        return 'Salón "{self.nombre}" ({self.capacidad} cupos)'
+        return 'Salón "{self.nombre}" ({self.capacidad} cupos)'.format(self=self)
 
     def cupo_disponible_curso(self, curso):
         """
@@ -92,15 +98,22 @@ class Curso(DiasSemanaMixin, models.Model):
 
     precio = models.IntegerField(verbose_name=_('Precio'))
     hora_fin = models.TimeField(verbose_name=_('Hora Fin'))
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_fin = models.DateField(verbose_name=_('Fecha Fin'))
     hora_inicio = models.TimeField(verbose_name=_('Hora Inicio'))
     fecha_inicio = models.DateField(verbose_name=_('Fecha Inicio'))
+    color = models.CharField(max_length=100, verbose_name=_('Color'))
     salon = models.ForeignKey(Salon, related_name='cursos', verbose_name=_('Salón'))
     materia = models.ForeignKey(Materia, related_name='cursos', verbose_name=_('Materia'))
     estado = models.CharField(max_length=1, choices=OPCIONES_ESTADO, verbose_name=_('Estado'))
-    dia = models.CharField(max_length=1, choices=DiasSemanaMixin.DIAS_SEMANA, verbose_name=_('Día'))
+    dia = ArrayField(models.CharField(max_length=1, choices=DiasSemanaMixin.DIAS_SEMANA, verbose_name=_('Día')))
     profesor = models.ManyToManyField(
         'miembros.Miembro', verbose_name=_('Profesor'), related_name='cursos_como_profesor')
+
+    objects = managers.CursoManager()
+
+    class Meta:
+        ordering = ('fecha_inicio', )
 
     def __str__(self):
         return '{self.materia} - Salon {self.salon.nombre}'.format(self=self)
@@ -122,7 +135,10 @@ class Estudiante(models.Model):
     nombres = models.CharField(max_length=255, verbose_name=_('Nombres'))
     apellidos = models.CharField(max_length=255, verbose_name=_('Apellidos'))
     identificacion = models.CharField(max_length=100, verbose_name=_('Identificación'))
-    grupo = models.ForeignKey('grupos.Grupo', related_name='estudiantes', verbose_name=_('Grupo'))
+    grupo = models.ForeignKey(
+        'grupos.Grupo', related_name='estudiantes', verbose_name=_('Grupo'),
+        help_text=_('Grupo al que asiste el estudiante')
+    )
     miembro = models.OneToOneField(
         'miembros.Miembro', related_name='estudiante', verbose_name=_('Líder'), blank=True, null=True)
 
@@ -130,6 +146,17 @@ class Estudiante(models.Model):
         if getattr(self, 'miembro', None):
             return self.miembro.__str__()
         return '{self.nombres} {self.apellidos} ({self.identificacion})'.format(self=self)
+
+    def __getattr__(self, attr):
+        if attr.startswith('nota_materia_'):
+            pk = attr[len('nota_materia_'):]
+            matriculas = self.matriculas.filter(curso__materia__id=pk)
+            matricula = matriculas.order_by('-fecha').first()
+            if matricula:
+                if matricula.paso or matricula.asistencias.exists():
+                    return 'X'
+            return ''
+        raise AttributeError('Estudiante has not attribute `{}`'.format(attr))
 
 
 class Matricula(models.Model):

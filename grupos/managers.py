@@ -1,3 +1,4 @@
+import datetime
 # Django
 from django.db import models
 from django.utils.module_loading import import_string
@@ -19,6 +20,15 @@ class GrupoQuerySet(models.QuerySet):
         """
 
         return import_string('grupos.models.HistorialEstado')
+    
+    @classmethod
+    def get_reunionGAR_model(cls):
+        """
+        :returns:
+            Modelo de ReunionGAR.
+        """
+
+        return import_string('grupos.models.ReunionGAR')
 
     def red(self, red):
         """
@@ -111,7 +121,20 @@ class GrupoQuerySet(models.QuerySet):
         """
 
         return self._exclude_queryset_by_estado(self.get_historial_model().SUSPENDIDO)
+    
+    def sin_reportar_reunion_GAR(self, inicial, final):
+        """
+        :returns:
+            Un queryset con los grupos que no han reportado reunión GAR en el rango de fechas ingresado.
 
+        :param date inicial: Fecha inicial en la cual se va a buscar los grupos.
+        :param date final: Fecha final en la cual se va a buscar los grupos.
+        """
+
+        grupos_que_reportaron = self.get_reunionGAR_model().objects.filter(
+            fecha__range=(inicial, final)
+        ).values_list('grupo', flat=True)
+        return self.activos().exclude(id__in=grupos_que_reportaron)
 
 class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     """
@@ -174,6 +197,31 @@ class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
         """
 
         return self.exclude(children_set__in=self.model.objects.all())
+
+    def declarar_vacaciones(self, inicio, fin):
+        """
+        Ingresa los sobres de amistad de los grupos activos en el rango de fecha escogido con un estado
+        de no realizo grupo.
+        Los limites del rango son incluyentes.
+
+        :param date inicio: Fecha inicial de la vaciones (inclusive).
+        :param date fin: Fecha final de la vaciones (inclusive).
+        """
+
+        reuniones = []
+        ReunionGAR = GrupoQuerySet.get_reunionGAR_model()
+        fecha = inicio - datetime.timedelta(days=inicio.isoweekday() - 1)
+
+        while fecha < fin:
+            fin_semana = fecha + datetime.timedelta(days=7 - fecha.isoweekday())
+            grupos_sin_reunion = self.model.objects.sin_reportar_reunion_GAR(fecha, fin_semana)
+
+            for grupo in grupos_sin_reunion:
+                reuniones.append(ReunionGAR.no_realizada(fecha=fecha, grupo=grupo, digitada_por_miembro=False))
+
+            fecha = fecha + datetime.timedelta(days=8 - fecha.isoweekday())
+        
+        ReunionGAR.objects.bulk_create(reuniones)
 
 
 class GrupoManagerStandard(AL_NodeManager.from_queryset(GrupoQuerySet)):

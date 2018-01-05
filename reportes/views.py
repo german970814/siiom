@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail, send_mass_mail
 from django.db.models import Sum, Count
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 
@@ -115,9 +115,7 @@ def estadistico_reuniones_discipulado(request):
         form = FormularioPredicas(miembro=miembro)
         sw = False
 
-    return render_to_response(
-        'reportes/estadistico_discipulado.html', locals(), context_instance=RequestContext(request)
-    )
+    return render(request, 'reportes/estadistico_discipulado.html', locals())
 
 
 @login_required
@@ -215,7 +213,7 @@ def estadistico_totalizado_reuniones_gar(request):
         form = FormularioRangoFechas()
         sw = False
 
-    return render_to_response('reportes/estadistico_total_gar.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'reportes/estadistico_total_gar.html', locals())
 
 
 @login_required
@@ -303,9 +301,7 @@ def estadistico_totalizado_reuniones_discipulado(request):
             form = FormularioPredicas(miembro=miembro)
             sw = False
 
-    return render_to_response(
-        'reportes/estadistico_total_discipulado.html', locals(), context_instance=RequestContext(request)
-    )
+    return render(request, 'reportes/estadistico_total_discipulado.html', locals())
 
 
 @login_required

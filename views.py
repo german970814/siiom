@@ -6,7 +6,7 @@ Created on 4/04/2011
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response, render
+from django.shortcuts import render
 from django.template.context import RequestContext
 
 from grupos.models import Grupo
@@ -15,14 +15,14 @@ from common.decorators import permisos_requeridos
 
 
 def custom_404(request):
-    return render_to_response('404.html')
+    return render(request, '404.html')
 
 
 def without_perms(request):
     if not request.user.is_authenticated():
         request.session['next'] = request.GET.get('next', '')
         return HttpResponseRedirect('/iniciar_sesion/')
-    return render_to_response("without_perms.html", locals(), context_instance=RequestContext(request))
+    return render(request, "without_perms.html", locals())
 
 
 @login_required

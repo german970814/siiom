@@ -10,6 +10,15 @@ class LogNotAllowedHostHeaderMiddleware(object):
     permitido.
     """
 
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.process_request(request)
+        if response is None:
+            return self.get_response(request)
+        return response
+
     def process_request(self, request):
         """
         Loguea en consola los headers del request si el host desde el que se envia el request no se encuentra

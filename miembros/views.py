@@ -16,7 +16,7 @@ from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils import timezone
 from django.utils.translation import ugettext as _
@@ -205,7 +205,7 @@ def miembro_inicio(request):
 
                 salida_efectivo = DetalleRequisicion.objects.salida_efectivo_mes()['total_aprobado__sum'] or 0
 
-    return render_to_response("miembros/miembro.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/miembro.html", locals())
 
 
 @login_required
@@ -304,7 +304,7 @@ def editar_perfil_miembro(request, pk=None):
             admin = True
         else:
             form = FormularioLiderAgregarMiembro(instance=miembro, g=miembro.genero, c=miembro.conyugue)
-    return render_to_response("miembros/editar_perfil.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/editar_perfil.html", locals())
 
 
 @login_required
@@ -332,7 +332,7 @@ def asignar_grupo(request, id):
                         Admin" % Site.objects.get_current().name, receptores]
             nuevoMiembro.save()
             ok = True
-    return render_to_response("miembros/asignar_grupo.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/asignar_grupo.html", locals())
 
 
 @login_required
@@ -347,7 +347,7 @@ def crear_zona(request):
             ok = True
     else:
         form = FormularioCrearZona()
-    return render_to_response('miembros/crear_zona.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/crear_zona.html', locals())
 
 
 @login_required
@@ -371,7 +371,7 @@ def editar_zona(request, pk):
     else:
         form = FormularioCrearZona(instance=zona)
 
-    return render_to_response("miembros/crear_zona.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/crear_zona.html", locals())
 
 
 @login_required
@@ -386,7 +386,7 @@ def listar_zonas(request):
                 messages.success(request, "Se eliminaron las zonas seleccionadas")
                 return HttpResponseRedirect('')
     zonas = list(Zona.objects.all())
-    return render_to_response('miembros/listar_zonas.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/listar_zonas.html', locals())
 
 
 @login_required
@@ -429,7 +429,7 @@ def crear_barrio(request, id):
             ok = True
     else:
         form = FormularioCrearBarrio()
-    return render_to_response('miembros/crear_barrio.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/crear_barrio.html', locals())
 
 
 @login_required
@@ -437,25 +437,18 @@ def crear_barrio(request, id):
 def editar_barrio(request, id, pk):
     accion = 'Editar'
     # miembro = Miembro.objects.get(usuario=request.user)
-    try:
-        zona = Zona.objects.get(id=int(id))
-    except Zona.DoesNotExis:
-        raise Http404
-    try:
-        barrio = Barrio.objects.get(pk=pk)
-    except Barrio.DoesNotExist:
-        raise Http404
+    zona = get_object_or_404(Zona, id=id)
+    barrio = get_object_or_404(Barrio, pk=pk)
 
     if request.method == "POST":
-        form = FormularioCrearBarrio(request.POST or None, instance=barrio)
+        form = FormularioCrearBarrio(request.POST, instance=barrio)
         if form.is_valid():
-            nuevoBarrio = form.save()
+            form.save()
             ok = True
-
     else:
         form = FormularioCrearBarrio(instance=barrio)
 
-    return render_to_response("miembros/crear_barrio.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/crear_barrio.html", locals())
 
 
 @login_required
@@ -470,7 +463,7 @@ def crear_tipo_miembro(request):
             ok = True
     else:
         form = FormularioCrearTipoMiembro()
-    return render_to_response('miembros/crear_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/crear_tipo_miembro.html', locals())
 
 
 @login_required
@@ -484,7 +477,7 @@ def listar_tipos_miembro(request):
         if 'eliminar' in request.POST:
             okElim = eliminar(request, TipoMiembro, request.POST.getlist('seleccionados'))
     tipos = list(TipoMiembro.objects.all().order_by('nombre'))
-    return render_to_response('miembros/listar_tipo_miembro.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/listar_tipo_miembro.html', locals())
 
 
 @login_required
@@ -507,7 +500,7 @@ def editar_tipo_miembro(request, pk):
     else:
         form = FormularioCrearTipoMiembro(instance=tipo)
 
-    return render_to_response("miembros/crear_tipo_miembro.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/crear_tipo_miembro.html", locals())
 
 
 @login_required
@@ -553,7 +546,7 @@ def crear_usuario_miembro(request, id):
     else:
         form = FormularioAsignarUsuario()
     form.email = miembroCambio.email
-    return render_to_response('miembros/asignar_usuario.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/asignar_usuario.html', locals())
 
 
 @login_required
@@ -613,7 +606,7 @@ def administracion(request):
     totalLideres = CambioTipo.objects.filter(nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Lider")).count()
     totalMaestros = CambioTipo.objects.filter(nuevoTipo=TipoMiembro.objects.get(nombre__iexact="Maestro")).count()
     # visitantes = request.session['visitantes']
-    return render_to_response('miembros/administracion.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'miembros/administracion.html', locals())
 
 
 @login_required
@@ -658,7 +651,7 @@ def ver_discipulos(request, pk=None):
         else:
             no_discipulos = True
 
-    return render_to_response("miembros/discipulos_perfil.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/discipulos_perfil.html", locals())
 
 
 @login_required
@@ -769,7 +762,7 @@ def ver_informacion_miembro(request, pk=None):
         lideres_miembro = miembro.grupo.lideres.all()
 
     tipos = CambioTipo.objects.filter(miembro=miembro).order_by('-fecha')
-    return render_to_response("miembros/informacion_perfil.html", locals(), context_instance=RequestContext(request))
+    return render(request, "miembros/informacion_perfil.html", locals())
 
 
 @login_required

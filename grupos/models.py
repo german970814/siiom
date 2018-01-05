@@ -28,7 +28,21 @@ class Red(models.Model):
 
 class Grupo(DiasSemanaMixin, SixALNode, AL_Node):
     """
-    Modelo para guardar la información de los grupos de una iglesia.
+    Representa los grupos de una iglesia.
+
+    Los grupos se categorizan se clasifican según su estado.
+
+        * ``ACTIVO`` Este estado es aplicado a grupos que realicen todas las funciones
+            que un grupo hace, es decir: reunion de G.A.R, reunion de discipulado, etc.
+
+        * ``INACTIVO`` Este estado es aplicado a grupos que en la actualidad no se
+            encuentran realizando reuniones de G.A.R, pero realizan encuentros, reuniones
+            de dicipulado, etc.
+
+        * ``SUSPENDIDO`` Este estado es aplicado a grupos que en la actualidad no realizan
+            ninguna acción de grupos, pero no quiere ser archivado.
+
+        * ``ARCHIVADO`` Este estado es aplicado a grupos que serán eliminados.
     """
 
     ACTIVO = 'A'
@@ -500,10 +514,29 @@ class ReunionGAR(models.Model):
             ("puede_confirmar_ofrenda_GAR", "puede confirmar la entrega de dinero GAR"),
         )
 
+    @classmethod
+    def no_realizada(cls, grupo, fecha, digitada_por_miembro=True):
+        """
+        Crea una reunionGAR no guardada en la base de datos.
+
+        :param grupo: Grupo al cual se le va a crear la reunión.
+        :param date fecha: Fecha de la reunión.
+        :param bool digitada_por_miembro: Indica si la reunión es ingresada por un miembro. Por defecto es ``True``.
+
+        :rtype: :py:class:`ReunionGAR`
+        """
+
+        return cls(
+            fecha=fecha, grupo=grupo, digitada_por_miembro=digitada_por_miembro,
+            predica='No se hizo grupo', ofrenda=0, numeroTotalAsistentes=0,
+            numeroLideresAsistentes=0, numeroVisitas=0, confirmacionEntregaOfrenda=True,
+        )
+
     @property
     def realizada(self):
         """
-        Retorna True si la ReunionGAR fue realizada, de lo contrario retorna False
+        :returns:
+            ``True`` si la reunionGAR fue realizada.
         """
         if self.numeroLideresAsistentes > 0:
             return True

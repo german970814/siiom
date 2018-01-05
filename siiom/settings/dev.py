@@ -1,6 +1,6 @@
 from .base import *
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'siiom.middleware.LogNotAllowedHostHeaderMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'tenant_schemas.middleware.TenantMiddleware',
@@ -12,10 +12,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'waffle.middleware.WaffleMiddleware',
+    # 'waffle.middleware.WaffleMiddleware',
+    'common.middleware.WaffleMiddleWareCompat',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
-)
+]
 
 #  Apps
 

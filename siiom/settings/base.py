@@ -11,20 +11,23 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 import environ
-from .. import database
+from django.contrib.messages import constants as messages
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
-env = environ.Env()
+ENV = environ.Env()
+ENV.read_env()
 
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '@0j2z97_*im(6i-+w5@8gc03l8+2$290k2#bby99-ltjl#m878'
+SECRET_KEY = ENV('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.localhost']
+# ALLOWED_HOSTS = ['.localhost']
+ALLOWED_HOSTS = ENV.list('ALLOWED_HOSTS', default=['.localhost'])
 
 LOGIN_URL = '/iniciar_sesion/'
 
@@ -74,7 +77,7 @@ INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 
 TENANT_MODEL = 'clientes.Iglesia'
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'siiom.middleware.LogNotAllowedHostHeaderMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'tenant_schemas.middleware.TenantMiddleware',
@@ -85,10 +88,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'waffle.middleware.WaffleMiddleware',
+    # 'waffle.middleware.WaffleMiddleware',
+    'common.middleware.WaffleMiddleWareCompat',
     'miembros.middleware.MiembroMiddleWare',
     'organizacional.middleware.EmpleadoMiddleWare',
-)
+]
 
 ROOT_URLCONF = 'siiom.urls'
 
@@ -129,14 +133,7 @@ WSGI_APPLICATION = 'siiom.wsgi.application'
 DATABASE_ROUTERS = ('tenant_schemas.routers.TenantSyncRouter',)
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'tenant_schemas.postgresql_backend',
-        'NAME': database.NAME,
-        'USER': database.USER,
-        'PASSWORD': database.PASSWORD,
-        'HOST': database.HOST,
-        'PORT': database.PORT,
-    }
+    'default': ENV.db(engine='tenant_schemas.postgresql_backend')
 }
 
 # Cache
@@ -169,10 +166,6 @@ TIME_INPUT_FORMATS = (
     '%I:%M %p',     # '06:30 AM'
 )
 
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-# MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'static').replace('\\','/')
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -185,8 +178,9 @@ STATICFILES_DIRS = (BASE_DIR('static'),)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR('../media')
-
 DEFAULT_FILE_STORAGE = 'siiom.storage.TenantFileSystemStorage'
+
+AUTH_PASSWORD_VALIDATORS = []
 
 # Email configuration
 
@@ -229,4 +223,10 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Google analytics
-ANALYTICS = env.bool('ANALYTICS', default=False)
+ANALYTICS = ENV.bool('ANALYTICS', default=False)
+
+# Messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger'
+}
