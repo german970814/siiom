@@ -127,6 +127,8 @@
                             <th data-column-id="nombre" data-identifier="true">Nombre</th>
                             <th data-column-id="predica" data-identifier="true">Telefono</th>
                             <th data-column-id="asistencia" data-identifier="true">Dirección</th>
+                            <th data-column-id="edad" data-identifier="true">Edad</th>
+                            <th data-column-id="estado_civil" data-identifier="true">Estado Civil</th>
                             <th data-column-id="commands" data-formatter="commands" data-sortable="false">Comandos</th>
                         </tr>
                     </thead>
@@ -137,6 +139,8 @@
                                 <td>{{ visita.get_nombre|upper }}</td>
                                 <td>{{ visita.telefono }}</td>
                                 <td class="direccion">{{ visita.direccion }}</td>
+                                <td>{{ visita.edad }}</td>
+                                <td>{{ visita.get_estado_civil_display }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

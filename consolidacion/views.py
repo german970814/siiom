@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -8,7 +9,7 @@ from django.utils.translation import ugettext as _
 from django.views.generic.edit import CreateView, UpdateView
 
 from .models import Visita
-from .forms import FormularioVisita, FormularioAsignarGrupoVisita
+from .forms import VisitaForm, FormularioAsignarGrupoVisita
 from common.forms import FormularioRangoFechas
 from miembros.models import Miembro
 from grupos.models import Grupo, Red
@@ -16,36 +17,43 @@ from grupos.models import Grupo, Red
 import json
 
 
-class VisitasCBVMixxing(object):
+class VisitasCBVMixin(object):
     """
     Base de clases para visitas
     """
+
     model = Visita
+
+    def has_permission(self):
+        is_agent = self.request.user.has_perm('miembros.es_agente')
+        is_admin = self.request.user.has_perm('miembros.es_administrador')
+
+        return is_agent or is_admin
 
     def form_invalid(self, form):
         messages.error(self.request, _("Ha ocurrido un error al enviar el formulario"))
-        return super(VisitasCBVMixxing, self).form_invalid(form)
+        return super(VisitasCBVMixin, self).form_invalid(form)
 
     def form_valid(self, form):
         messages.success(self.request, _("Visita guardada con exito"))
-        return super(VisitasCBVMixxing, self).form_valid(form)
+        return super(VisitasCBVMixin, self).form_valid(form)
 
 
-class CrearVisita(VisitasCBVMixxing, CreateView):
+class CrearVisitaView(LoginRequiredMixin, VisitasCBVMixin, PermissionRequiredMixin, CreateView):
     """
     CBV para crear visitas
     """
-    form_class = FormularioVisita
-    template_name = 'consolidacion/crear_visita.html'
+    form_class = VisitaForm
+    template_name = 'consolidacion/visita_form.html'
     success_url = reverse_lazy('consolidacion:crear_visita')
 
 
-class EditarVisita(VisitasCBVMixxing, UpdateView):
+class EditarVisitaView(LoginRequiredMixin, VisitasCBVMixin, PermissionRequiredMixin, UpdateView):
     """
     CBV para editar Visitas
     """
-    form_class = FormularioVisita
-    template_name = 'consolidacion/crear_visita.html'
+    form_class = VisitaForm
+    template_name = 'consolidacion/visita_form.html'
 
     def form_valid(self, form):
         self.success_url = reverse_lazy('consolidacion:editar_visita', args=(form.instance.id,))
