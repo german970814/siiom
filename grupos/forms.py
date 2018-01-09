@@ -160,7 +160,6 @@ class FormularioReportarReunionDiscipulado(forms.ModelForm):
     def __init__(self, miembro, *args, **kwargs):
         super(FormularioReportarReunionDiscipulado, self).__init__(*args, **kwargs)
         self.fields['predica'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class': 'form-control'})
         self.fields['novedades'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Novedades...'})
         self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in=miembro.pastores())
@@ -254,6 +253,7 @@ class FormularioSetGeoPosicionGrupo(CustomModelForm):
         self.fields['latitud'].required = True
         self.fields['longitud'].required = True
 
+# ------------------
 
 class BaseGrupoForm(CustomModelForm):
     """
