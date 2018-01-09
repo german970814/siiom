@@ -228,7 +228,6 @@ def estadistico_totalizado_reuniones_discipulado(request):
     else:
         listaGrupo_i = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
     ofrenda = False
-    lid_asis = False
     asis_reg = False
 
     if miembro.discipulos() or miembro.usuario.has_perm("miembros.es_administrador"):
@@ -263,27 +262,13 @@ def estadistico_totalizado_reuniones_discipulado(request):
                             suma = sum_ofrenda['ofrenda__sum']
                         l.append(float(suma))
                     else:
-                        if 'opcion' in request.POST and request.POST['opcion'] == 'L':
-                            lid_asis = True
-                            opciones['opt'] = 'Lideres Asistentes'
-                            titulo = "'Lideres Asistentes'"
-
-                            numlid = ReunionDiscipulado.objects.filter(predica=predica,
-                                                                       grupo__in=grupos).aggregate(
-                                                                           Sum('numeroLideresAsistentes'))
-                            if numlid['numeroLideresAsistentes__sum'] is None:
-                                sumLid = 0
-                            else:
-                                sumLid = numlid['numeroLideresAsistentes__sum']
-                            l.append(sumLid)
-                        else:
-                            if 'opcion' in request.POST and request.POST['opcion'] == 'A':  # discipulos
-                                asis_reg = True
-                                opciones['opt'] = 'Asistentes Regulares'
-                                titulo = "'Asistentes Regulares'"
-                                reg = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos)
-                                numAsis = AsistenciaDiscipulado.objects.filter(reunion__in=reg, asistencia=True).count()
-                                l.append(numAsis)
+                        if 'opcion' in request.POST and request.POST['opcion'] == 'A':  # discipulos
+                            asis_reg = True
+                            opciones['opt'] = 'Asistentes Regulares'
+                            titulo = "'Asistentes Regulares'"
+                            reg = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos)
+                            numAsis = AsistenciaDiscipulado.objects.filter(reunion__in=reg, asistencia=True).count()
+                            l.append(numAsis)
                 values.append(l)
 
                 # se agrega un condicional que indique que l (la cual es la lista que contiene los valores)
