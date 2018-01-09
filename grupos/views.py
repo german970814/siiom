@@ -442,6 +442,7 @@ def set_position_grupo(request, id_grupo):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+# --------------------------------
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
