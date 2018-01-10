@@ -1,3 +1,5 @@
+import logging
+from contextlib import suppress
 # Django
 from django import forms
 from django.contrib.auth.models import Group
@@ -11,10 +13,6 @@ from .utils import convertir_lista_grupos_a_queryset
 from common.forms import CustomModelForm, CustomForm
 from miembros.models import Miembro
 from reportes.forms import FormularioRangoFechas
-
-# Python
-from contextlib import suppress
-import logging
 
 
 logger = logging.getLogger(__name__)
@@ -601,3 +599,20 @@ class ArchivarGrupoForm(CustomForm):
             else:
                 query_miembros |= grupo.lideres.all()
             query_miembros.update(grupo=None, grupo_lidera=None)
+
+
+class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
+    """Formulario para que un administrador pueda reportar una reunión de discipulado."""
+
+    asistencia = forms.ModelMultipleChoiceField(queryset=Miembro.objects.all())
+
+    class Meta:
+        model = ReunionDiscipulado
+        fields = ['grupo', 'predica', 'novedades', 'ofrenda', 'asistencia']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['predica'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['novedades'].widget.attrs.update({'class': 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})

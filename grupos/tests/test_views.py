@@ -1,4 +1,5 @@
 from unittest import mock
+from django.test import tag
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import Permission
@@ -900,3 +901,20 @@ class ArchivarGrupoViewTest(BaseTest):
 
         response = self.post(self.URL, data={})
         self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)
+
+
+class AdminReportarReunionDiscipuladoViewTest(BaseTest):
+    """Pruebas unitarias para la vista reportar reunión discipulado para un administrador."""
+
+    URL = 'grupos:admin_reportar_reunion_discipulado'
+
+    def setUp(self):
+        self.admin = MiembroFactory(admin=True)
+
+    @tag('actual')
+    def test_admin_get(self):
+        """Prueba que un administrador pueda ver el formulario."""
+
+        self.assertLoginRequired(self.URL)
+        self.login_usuario(self.admin.usuario)
+        self.get_check_200(self.URL)

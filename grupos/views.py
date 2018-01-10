@@ -25,7 +25,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioCrearPredica, ArchivarGrupoForm, FormularioReportarReunionGrupoAdmin,
     FormularioReportesEnviados, FormularioEditarReunionGAR, GrupoRaizForm, NuevoGrupoForm,
-    EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
+    EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm, ReportarReunionDiscipuladoAdminForm
 )
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.forms import DesvincularLiderGrupoForm
@@ -728,7 +728,7 @@ def trasladar_lideres(request):
 @permission_required('miembros.es_administrador', raise_exception=True)
 def archivar_grupo(request):
     """
-    Permite archivar un grupo.
+    Permite a un administrador archivar un grupo.
     """
 
     grupo = request.GET.get('grupo', None) or None
@@ -752,3 +752,12 @@ def archivar_grupo(request):
         form = ArchivarGrupoForm(initial={'grupo': grupo})
 
     return render(request, 'grupos/archivar_grupos.html', {'form': form})
+
+
+@login_required
+@user_is_director_red
+def admin_reportar_reunion_discipulado(request):
+    """Permite a un administrador o director de red reportar reunion de discipulado de un grupo."""
+
+    form = ReportarReunionDiscipuladoAdminForm()
+    return render(request, 'grupos/reportar_reunion_discipulado_admin.html', {'form': form})

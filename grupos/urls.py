@@ -34,6 +34,10 @@ urlpatterns = [
         r'^(?P<pk>\d+)/confirmar_ofrenda_discipulado/$', views.confirmar_ofrenda_discipulado,
         name='confirmar_ofrenda_discipulado'
     ),
+    url(
+        r'^reportar_reunion_discipulado_admin/$', views.admin_reportar_reunion_discipulado,
+        name='admin_reportar_reunion_discipulado'
+    ),
 
     url(r'^api/set_position_grupo/(?P<id_grupo>\d+)/$', views.set_position_grupo, name="posicion_grupo"),
     url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api'),
