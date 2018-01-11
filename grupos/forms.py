@@ -604,7 +604,7 @@ class ArchivarGrupoForm(CustomForm):
 class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
     """Formulario para que un administrador pueda reportar una reunión de discipulado."""
 
-    asistencia = forms.ModelMultipleChoiceField(queryset=Miembro.objects.all())
+    asistencia = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none())
 
     class Meta:
         model = ReunionDiscipulado
@@ -616,3 +616,5 @@ class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
         self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
         self.fields['novedades'].widget.attrs.update({'class': 'form-control'})
         self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
+
+        self.fields['grupo'].queryset = Grupo.objects.pueden_reportar_discipulado()

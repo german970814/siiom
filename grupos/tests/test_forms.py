@@ -1,11 +1,12 @@
 from unittest import mock, skip
+from django.test import tag
 from django.db import IntegrityError
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
 from ..models import Grupo, Red, HistorialEstado
 from ..forms import (
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm,
-    ArchivarGrupoForm
+    ArchivarGrupoForm, ReportarReunionDiscipuladoAdminForm
 )
 from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
 
@@ -602,3 +603,16 @@ class ArchivarGrupoFormTest(BaseTest):
         form = self.form(data=data)
 
         self.assertTrue(form.is_valid())
+
+
+class ReportarReunionDiscipuladoAdminFormTest(BaseTest):
+    """Pruebas unitarias para el formulario de ingreso de sobres de discipulado por parte de un admin."""
+
+    @tag('actual')
+    @mock.patch('grupos.managers.GrupoQuerySet.pueden_reportar_discipulado') 
+    def test_campo_grupo_solo_muestra_grupos_que_pueden_reportar_discipulado(self, pueden_reportar_discipulado_mock):
+        """Prueba que solo haya grupos que puedan dictar discipulado."""
+
+        self.crear_arbol()
+        form = ReportarReunionDiscipuladoAdminForm()
+        self.assertTrue(pueden_reportar_discipulado_mock.called)
