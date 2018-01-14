@@ -745,8 +745,7 @@ def archivar_grupo(request):
                 form.nombre_grupo = str(form.cleaned_data['grupo'])
             except:
                 form.nombre_grupo = _('escogido')
-            if settings.DEBUG:
-                print(form.errors)
+            logger.critical(form.errors)
 
     else:
         form = ArchivarGrupoForm(initial={'grupo': grupo})
@@ -759,5 +758,14 @@ def archivar_grupo(request):
 def admin_reportar_reunion_discipulado(request):
     """Permite a un administrador o director de red reportar reunion de discipulado de un grupo."""
 
-    form = ReportarReunionDiscipuladoAdminForm()
+    if request.method == 'POST':
+        form = ReportarReunionDiscipuladoAdminForm(data=request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('Se ha creado la reunion satisfactoriamente.'))
+            return redirect('grupos:admin_reportar_reunion_discipulado')
+    else:
+        form = ReportarReunionDiscipuladoAdminForm()
+
     return render(request, 'grupos/reportar_reunion_discipulado_admin.html', {'form': form})

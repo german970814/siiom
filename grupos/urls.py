@@ -42,4 +42,5 @@ urlpatterns = [
     url(r'^api/set_position_grupo/(?P<id_grupo>\d+)/$', views.set_position_grupo, name="posicion_grupo"),
     url(r'^api/(?P<pk>\d+)/lideres/$', api.lideres_grupo, name='lideres_api'),
     url(r'^api/(?P<pk>\d+)/miembros/$', api.discipulos_miembros_grupo, name='discipulos_miembros_api'),
+    url(r'^api/(?P<pk>\d+)/discipulos/$', api.discipulos_grupo, name='discipulos_api'),
 ]

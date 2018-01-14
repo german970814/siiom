@@ -6,9 +6,12 @@ from django.contrib.auth.models import Permission
 from common.tests.base import BaseTest
 from common.tests.factories import UsuarioFactory
 from miembros.tests.factories import MiembroFactory, BarrioFactory
-from ..models import Grupo, Red, HistorialEstado
+from ..models import Grupo, Red, HistorialEstado, ReunionDiscipulado, AsistenciaDiscipulado
 from ..forms import GrupoRaizForm, NuevoGrupoForm, TrasladarGrupoForm
-from .factories import GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory
+from .factories import (
+    GrupoRaizFactory, ReunionGARFactory, GrupoFactory, ReunionDiscipuladoFactory, RedFactory, PredicaFactory,
+    GrupoHijoFactory
+)
 
 
 class OrganigramaGruposViewTest(BaseTest):
@@ -911,10 +914,60 @@ class AdminReportarReunionDiscipuladoViewTest(BaseTest):
     def setUp(self):
         self.admin = MiembroFactory(admin=True)
 
-    @tag('actual')
+    def datos_formulario(self):
+        predica = PredicaFactory()
+        grupo = GrupoFactory()
+        hijo = GrupoHijoFactory(parent=grupo)
+        return {
+            'ofrenda': 10000, 'novedades': 'novedades', 'predica': predica.pk,
+            'grupo': grupo.pk, 'asistencia': grupo.discipulos.values_list('id', flat=True)
+        }
+
     def test_admin_get(self):
         """Prueba que un administrador pueda ver el formulario."""
 
         self.assertLoginRequired(self.URL)
         self.login_usuario(self.admin.usuario)
         self.get_check_200(self.URL)
+    
+    def test_post_formulario_valido_redirecciona_get(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido redirecciona a la misma página.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data=self.datos_formulario())
+
+        self.assertRedirects(response, self.reverse(self.URL))
+    
+    def test_post_formulario_valido_crea_reunion(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido crea la reunion.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data=self.datos_formulario())
+        self.assertEqual(ReunionDiscipulado.objects.count(), 1, msg='Se debio crear un reporte discipulado.')
+
+    def test_post_formulario_valido_crea_asistencia(self):
+        """
+        Prueba que si se hace un POST y el formulario es valido crea la asistencia.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data=self.datos_formulario())
+        self.assertEqual(AsistenciaDiscipulado.objects.count(), 1, msg='Se debio crear la asistencia.')
+
+    def test_formulario_invalido_muestra_errores(self):
+        """
+        prueba que si se hace POST y el formulario es invalido se muestren los errores correctamente.
+        """
+
+        self.login_usuario(self.admin.usuario)
+        response = self.post(self.URL, data={})
+
+        self.assertFormError(response, 'form', 'grupo', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'predica', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'ofrenda', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'novedades', self.MSJ_OBLIGATORIO)
+        self.assertFormError(response, 'form', 'asistencia', self.MSJ_OBLIGATORIO)

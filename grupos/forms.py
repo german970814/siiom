@@ -8,7 +8,7 @@ from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 # Apps
-from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado, AsistenciaDiscipulado
 from .utils import convertir_lista_grupos_a_queryset
 from common.forms import CustomModelForm, CustomForm
 from miembros.models import Miembro
@@ -604,6 +604,10 @@ class ArchivarGrupoForm(CustomForm):
 class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
     """Formulario para que un administrador pueda reportar una reunión de discipulado."""
 
+    error_messages = {
+        'reunion_reportada': _lazy('La reunión para la predica escogida ya fue reportada.')
+    }
+
     asistencia = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none())
 
     class Meta:
@@ -618,3 +622,33 @@ class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
         self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
 
         self.fields['grupo'].queryset = Grupo.objects.pueden_reportar_discipulado()
+
+        query = Miembro.objects.none()
+        if self.is_bound:
+            grupo = self.data.get('grupo', None)
+            if grupo:
+                query = Grupo.objects.get(id=grupo).discipulos
+        
+        self.fields['asistencia'].queryset = query
+    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        grupo = cleaned_data.get('grupo', None)
+        predica = cleaned_data.get('predica', None)
+
+        if grupo and predica:
+            if grupo.reunion_discipulado_reportada(predica):
+                error_code = 'reunion_reportada'
+                self.add_error(None, forms.ValidationError(self.error_messages[error_code], code=error_code))
+        return cleaned_data
+
+    def save(self):
+        with transaction.atomic():
+            reunion = super().save()
+            asistencias = [self._asistencia_instance(miembro, reunion) for miembro in self.cleaned_data['asistencia']]
+            AsistenciaDiscipulado.objects.bulk_create(asistencias)
+            return reunion
+
+    def _asistencia_instance(self, miembro, reunion):
+        return AsistenciaDiscipulado(miembro=miembro, reunion=reunion, asistencia=True)

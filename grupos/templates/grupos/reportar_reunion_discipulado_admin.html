@@ -69,26 +69,22 @@
                     </div>
                 </div>
                 <h2>Asistencia</h2>
+                {{ form.asistencia.value }}
                 <div class="table-responsive">
                     <table id="data-table-selection" class="table table-striped">
                         <thead>
                             <tr>
-                                <th data-column-id="id" data-identifier="true" data-visible="false"></th>
+                                <th data-column-id="id" data-identifier="true" data-type="numeric" data-visible="false"></th>
                                 <th data-column-id="nombre" data-identifier="true">{% trans 'Nombre' %}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for id, nombre in form.asistencia.field.choices %}
+                            <!-- {% for id, nombre in form.asistencia.field.choices %}
                             <tr>
                                 <td>{{ id }}</td>
                                 <td>{{ nombre }}</td>
                             </tr>
-                            {% empty %}
-                            <tr>
-                                <td></td>
-                                <td>{% trans 'No tiene discipulos' %}</td>
-                            </tr>
-                            {% endfor %}
+                            {% endfor %} -->
                         </tbody>
                     </table>
                 </div>
@@ -107,6 +103,7 @@
 
 {% block js %}
 <script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+
 <script>
     $(document).ready(function() {
         $("#data-table-selection").bootgrid({ 
@@ -116,12 +113,96 @@
                 iconDown: 'zmdi-expand-more',
                 iconRefresh: 'zmdi-refresh',
                 iconUp: 'zmdi-expand-less' 
-            }, 
+            },
+            labels: {
+                noResults: "No tiene discipulos"
+            },
             selection: true, 
             multiSelect: true, 
             rowSelect: true, 
             keepSelection: true 
         });
+
+        $("#id_grupo").change(function() {
+            console.log('selected');
+            let val = $(this).val();
+            if (val) {
+                getDiscipulos(val);
+            }
+            else {
+                fillAsistenciaTable([]);
+            }
+        });
+
+        $('button[name="aceptar"]').click(function(e) {
+            if (!$('#id_grupo').val()) {
+                swal("Alerta", "Debes escoger un grupo.");
+                return false;
+            }
+
+            if (!$('#id_predica').val()) {
+                swal("Alerta", "Debes escoger una predica.");
+                return false;
+            }
+
+            let seleccionados = getAsistentesSeleccionados();
+            if (seleccionados.length > 0) {
+                addSelectedAsistentesToForm(seleccionados);
+                return true;
+            }
+            else {
+                swal("Alerta", "Debes escoger algun miembro asistente");
+                return false;
+            }
+
+            return false;
+        });
+
+        {% if form.is_bound %}
+        console.log('bound');
+        if ($("#id_grupo").val()) {
+            $("#id_grupo").trigger('change');
+        }
+        console.log($("#id_grupo").val());
+        {% endif %}
     });
+
+    function getDiscipulos(grupo) {
+        $.get(
+            "{% url 'grupos:discipulos_api' 0 %}".replace(0, grupo),
+            function (data) {
+                fillAsistenciaTable(data);
+                selectAsistentesForm(getAsistenciaFromDjango);
+            },
+            "json"
+        );
+    }
+
+    function fillAsistenciaTable(discipulos) {
+        $("#data-table-selection").bootgrid("clear").bootgrid("append", discipulos);
+    }
+
+    function getAsistentesSeleccionados() {
+        return $("#data-table-selection").bootgrid("getSelectedRows");
+    }
+
+    function addSelectedAsistentesToForm(asistentes) {        
+        const form = $('form');
+        asistentes.forEach(asistente => {
+            form.append(`<input type="hidden" name="asistencia" value="${asistente}">`);
+        });
+    }
+
+    function selectAsistentesForm(asistentes) {
+        $("#data-table-selection").bootgrid("select", asistentes);
+    }
+
+    function getAsistenciaFromDjango() {
+        let asistencia = [];
+        {% for asistente in form.asistencia.value %}
+        asistencia.push({{ asistente }});
+        {% endfor %}
+        return asistencia;
+    }
 </script>
 {% endblock %} 

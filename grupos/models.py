@@ -479,6 +479,17 @@ class Grupo(DiasSemanaMixin, SixALNode, AL_Node):
                 raise OperationalError(_lazy('Estado "{}" no está permitido'.format(estado)))
             actual.__class__.objects.create(grupo=self, estado=estado, **kwargs)
 
+    def reunion_discipulado_reportada(self, predica):
+        """
+        :returns:
+            ``True`` si la reunión ya fue reportada
+        
+        :param :class:`Predica` predica: Predica a partir de la cual se buscara la reunión.
+
+        :rtype: bool
+        """
+
+        return self.reuniones_discipulado.filter(predica=predica).exists()
 
 class Predica(models.Model):
     """Modelo para guardar las predicas que se registran."""

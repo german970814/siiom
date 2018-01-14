@@ -1,10 +1,10 @@
 import datetime
-from freezegun import freeze_time
 from django.test import tag
+from freezegun import freeze_time
 from miembros.tests.factories import MiembroFactory
 from common.tests.base import BaseTest
 from ..models import Grupo, HistorialEstado, ReunionGAR
-from .factories import ReunionGARFactory, ReunionDiscipuladoFactory, GrupoHijoFactory, GrupoFactory
+from .factories import ReunionGARFactory, ReunionDiscipuladoFactory, GrupoHijoFactory, GrupoFactory, PredicaFactory
 
 
 class GrupoModelTest(BaseTest):
@@ -369,6 +369,22 @@ class GrupoModelTest(BaseTest):
 
         self.assertEqual(grupo.numero_celulas, 4)
 
+    def test_devuelve_true_si_reunion_discipulado_reportada(self):
+        """Prueba que devuelva True si el grupo ya reporto la reunion discipulado con la predica ingresada."""
+
+        predica = PredicaFactory()
+        grupo = Grupo.objects.get(id=300)
+        ReunionDiscipuladoFactory(grupo=grupo, predica=predica)
+
+        self.assertTrue(grupo.reunion_discipulado_reportada(predica))
+
+    def test_devuelve_false_si_reunion_discipulado_no_sido_reportada(self):
+        """Prueba que devuelva False si el grupo no reporto la reunion discipulado con la predica ingresada."""
+
+        predica = PredicaFactory()
+        grupo = Grupo.objects.get(id=300)
+
+        self.assertFalse(grupo.reunion_discipulado_reportada(predica))
 
 class ReunionGARModelTest(BaseTest):
     """Pruebas unitarias para el modelo ReunionGAR."""
