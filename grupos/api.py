@@ -46,3 +46,16 @@ def discipulos_miembros_grupo(request, pk):
 
     serialized = json.loads(string)
     return HttpResponse(json.dumps(serialized), content_type=constants.CONTENT_TYPE_API)
+
+@login_required_api
+def discipulos_grupo(request, pk):
+    """
+    :returns:
+        Un JSON con los discipulos del grupo ingresado.
+    
+    :param pk: Pk del grupo del cual se van a obtener los discipulos.
+    """
+
+    grupo = get_object_or_404(Grupo, pk=pk)
+    response = [{'id': discipulo.id, 'nombre': str(discipulo)} for discipulo in grupo.discipulos]
+    return HttpResponse(json.dumps(response), content_type=constants.CONTENT_TYPE_API)

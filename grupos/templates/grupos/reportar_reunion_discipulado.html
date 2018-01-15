@@ -148,19 +148,16 @@
 
         $seleccionados = [];
         bootgrid_table_solution("#data-table-selection", $seleccionados);
-        var $predica = $('#id_predica'), $lid_asis = $('#id_numeroLideresAsistentes'), $ofrenda = $('#id_ofrenda'), $novedades = $('#id_novedades');
+        var $predica = $('#id_predica'), $ofrenda = $('#id_ofrenda'), $novedades = $('#id_novedades');
 
         $('button[name="aceptar"]').click(function (event) {
             if ($predica.val() == '') {
                 swal("Alerta!", "Debes escoger una prédica!")
                 return false;
-            } else if ($predica.val() != '' && $lid_asis.val() == '') {
-                swal("Alerta!", "Debes especificar el numero de lideres asistentes");
-                return false;
-            } else if ($predica.val() != '' && $lid_asis.val() != '' && $ofrenda.val() == '') {
+            } else if ($predica.val() != '' && $ofrenda.val() == '') {
                 swal("Alerta!", "Debes especificar la ofrenda recogida");
                 return false;
-            } else if ($predica.val() != '' && $lid_asis.val() != '' && $ofrenda.val() != '' && $novedades.val() == '') {
+            } else if ($predica.val() != '' && $ofrenda.val() != '' && $novedades.val() == '') {
                 swal("Alerta!", "Debes especificar si ocurrió alguna novedad");
                 return false;
             } else {

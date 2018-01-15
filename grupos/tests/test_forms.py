@@ -1,13 +1,17 @@
 from unittest import mock, skip
+from django.test import tag
 from django.db import IntegrityError
+from django.core.exceptions import NON_FIELD_ERRORS
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from common.tests.base import BaseTest
 from ..models import Grupo, Red, HistorialEstado
 from ..forms import (
     GrupoRaizForm, NuevoGrupoForm, EditarGrupoForm, TrasladarLideresForm,
-    ArchivarGrupoForm
+    ArchivarGrupoForm, ReportarReunionDiscipuladoAdminForm
 )
-from .factories import GrupoFactory, GrupoRaizFactory, RedFactory
+from .factories import (
+    GrupoFactory, GrupoRaizFactory, RedFactory, PredicaFactory, GrupoHijoFactory, ReunionDiscipuladoFactory
+)
 
 
 class GrupoRaizFormTest(BaseTest):
@@ -602,3 +606,39 @@ class ArchivarGrupoFormTest(BaseTest):
         form = self.form(data=data)
 
         self.assertTrue(form.is_valid())
+
+
+class ReportarReunionDiscipuladoAdminFormTest(BaseTest):
+    """Pruebas unitarias para el formulario de ingreso de sobres de discipulado por parte de un admin."""
+
+    def datos_formulario(self):
+        self.predica = PredicaFactory()
+        self.grupo = GrupoFactory()
+        hijo = GrupoHijoFactory(parent=self.grupo)
+        return {
+            'ofrenda': 10000, 'novedades': 'novedades', 'predica': self.predica.pk,
+            'grupo': self.grupo.pk, 'asistencia': self.grupo.discipulos.values_list('id', flat=True)
+        }
+
+    @mock.patch('grupos.managers.GrupoQuerySet.pueden_reportar_discipulado') 
+    def test_campo_grupo_solo_muestra_grupos_que_pueden_reportar_discipulado(self, pueden_reportar_discipulado_mock):
+        """Prueba que solo haya grupos que puedan dictar discipulado."""
+
+        form = ReportarReunionDiscipuladoAdminForm()
+        self.assertTrue(pueden_reportar_discipulado_mock.called)
+    
+    def test_campo_grupo_no_vacio_asistencia_permita_discipulos_del_grupo_escogido(self):
+        """Prueba que si el campo grupo no se encuentra vacio, el campo asistencia permita los discipulos
+        del grupo escogido."""
+
+        form = ReportarReunionDiscipuladoAdminForm(data=self.datos_formulario())
+        self.assertTrue(form.is_valid())
+    
+    def test_formulario_invalido_si_grupo_reporto_discipulado_predica_escogida(self):
+        """prueba que el formulario sea invalido si el grupo escogido ya habia reportado la predica."""
+
+        data = self.datos_formulario()
+        ReunionDiscipuladoFactory(predica=self.predica, grupo=self.grupo)
+        form = ReportarReunionDiscipuladoAdminForm(data=data)
+        
+        self.assertTrue(form.has_error(NON_FIELD_ERRORS, code='reunion_reportada'))
