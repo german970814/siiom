@@ -69,7 +69,6 @@
                     </div>
                 </div>
                 <h2>Asistencia</h2>
-                {{ form.asistencia.value }}
                 <div class="table-responsive">
                     <table id="data-table-selection" class="table table-striped">
                         <thead>
@@ -79,12 +78,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- {% for id, nombre in form.asistencia.field.choices %}
-                            <tr>
-                                <td>{{ id }}</td>
-                                <td>{{ nombre }}</td>
-                            </tr>
-                            {% endfor %} -->
                         </tbody>
                     </table>
                 </div>
@@ -159,11 +152,9 @@
         });
 
         {% if form.is_bound %}
-        console.log('bound');
         if ($("#id_grupo").val()) {
             $("#id_grupo").trigger('change');
         }
-        console.log($("#id_grupo").val());
         {% endif %}
     });
 
