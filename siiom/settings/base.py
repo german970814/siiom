@@ -45,6 +45,7 @@ SHARED_APPS = [
     'django.contrib.contenttypes',
 
     'waffle',
+    'pwa',
 
     'clientes',  # Maneja las iglesias
 ]
@@ -230,3 +231,65 @@ ANALYTICS = ENV.bool('ANALYTICS', default=False)
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }
+
+# PWA
+
+PWA_APP_NAME = 'Siiom'
+PWA_APP_DESCRIPTION = ''
+PWA_APP_THEME_COLOR = '#0277BD'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_START_URL = '/'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-57x57.png',
+        'sizes': '57x57'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-60x60.png',
+        'sizes': '60x60'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-72x72.png',
+        'sizes': '72x72'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-76x76.png',
+        'sizes': '76x76'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-114x114.png',
+        'sizes': '114x114'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-120x120.png',
+        'sizes': '120x120'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-144x144.png',
+        'sizes': '144x144'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-152x152.png',
+        'sizes': '152x152'
+    },
+    {
+        'src': '/static/Imagenes/favicons/apple-icon-180x180.png',
+        'sizes': '180x180'
+    },
+    {
+        'src': '/static/Imagenes/favicons/android-icon-192x192.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/Imagenes/favicons/favicon-16x16.png',
+        'sizes': '16x16'
+    },
+    {
+        'src': '/static/Imagenes/favicons/favicon-32x32.png',
+        'sizes': '32x32'
+    },
+    {
+        'src': '/static/Imagenes/favicons/favicon-96x96.png',
+        'sizes': '96x96'
+    }
+]
