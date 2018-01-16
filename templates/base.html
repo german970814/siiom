@@ -40,9 +40,6 @@
             height: 500px;
         }
     </style>
-    <script src="{% static 'leaflet/leaflet.js' %}"></script>
-    <script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
-    <srcipt src="{% static 'leaflet/icons/js/leaflet-color-markers.js' %}"></srcipt>
 
     <style>
         @media screen and (min-width: 991px) {
@@ -642,6 +639,10 @@
     <script src="{% static 'Template/jquery/js/flot-charts/line-chart.js' %}"></script>
     <script src="{% static 'Template/jquery/js/charts.js' %}"></script>
     <script src="{% static 'Template/jquery/js/functions.js' %}"></script>
+
+    <script src="{% static 'leaflet/leaflet.js' %}"></script>
+    <script src="{% static 'leaflet-control-geocoder-1.5.3/dist/Control.Geocoder.js' %}"></script>
+    <srcipt src="{% static 'leaflet/icons/js/leaflet-color-markers.js' %}"></srcipt>
     <script>
         function notify(ms, from, align, icon, type, animIn, animOut){
             $.growl({
