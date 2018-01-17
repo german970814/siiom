@@ -31,6 +31,10 @@ INSTALLED_APPS = SHARED_APPS + list(set(TENANT_APPS) - set(SHARED_APPS))
 
 INTERNAL_IPS = ['127.0.0.1']
 
+import socket
+ip = socket.gethostbyname(socket.gethostname())
+INTERNAL_IPS += [ip[:-1] + "1"]
+
 # Email configuration
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

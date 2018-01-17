@@ -12,6 +12,7 @@ admin.autodiscover()
 RedirectView.permanent = True
 
 urlpatterns = [
+    url('', include('pwa.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', RedirectView.as_view(url="/iniciar_sesion/")),
     url(r'^iniciar_sesion/$', login, name="inicio"),

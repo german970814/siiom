@@ -4,4 +4,4 @@ gunicorn
 setproctitle
 
 # monitoring
-newrelic
+opbeat

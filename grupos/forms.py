@@ -621,7 +621,8 @@ class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
         self.fields['novedades'].widget.attrs.update({'class': 'form-control'})
         self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
 
-        self.fields['grupo'].queryset = Grupo.objects.pueden_reportar_discipulado()
+        grupos_query = Grupo.objects.pueden_reportar_discipulado().prefetch_related('lideres', 'historiales')
+        self.fields['grupo'].queryset = grupos_query
 
         query = Miembro.objects.none()
         if self.is_bound:
