@@ -389,17 +389,15 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
+        self.parent = kwargs['instance'].parent
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
-        if self.instance:
-            choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
-            self.fields['estado'] = forms.ChoiceField(
-                choices=choices, initial=self.instance.estado, label=_lazy('Estado')
-            )
-            self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
-        else:
-            raise NotImplementedError('No se implementó la instancia para el formulario')
+        choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
+        self.fields['estado'] = forms.ChoiceField(
+            choices=choices, initial=self.instance.estado, label=_lazy('Estado')
+        )
+        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
 
         if not self.is_bound:
             # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
@@ -409,14 +407,16 @@ class EditarGrupoForm(NuevoGrupoForm):
         try:
             with transaction.atomic():
                 grupo = BaseGrupoForm.save(self)
+                grupo.parent = self.parent
+                grupo.save()
 
                 if 'lideres' in self.changed_data:
                     grupo.lideres.clear()
                     # padre = self.cleaned_data['parent']
                     lideres = self.cleaned_data['lideres']
-                    lideres.update(grupo_lidera=grupo, grupo=self.instance.parent)
+                    lideres.update(grupo_lidera=grupo, grupo=self.parent)
 
-                if 'estado' in self.cleaned_data and self.cleaned_data['estado'] != self.instance.estado:
+                if 'estado' in self.changed_data:
                     self.instance.actualizar_estado(estado=self.cleaned_data.get('estado'))
 
                 return grupo
