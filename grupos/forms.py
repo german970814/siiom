@@ -1,3 +1,5 @@
+import logging
+from contextlib import suppress
 # Django
 from django import forms
 from django.contrib.auth.models import Group
@@ -6,15 +8,11 @@ from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 # Apps
-from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado
+from .models import Grupo, ReunionGAR, ReunionDiscipulado, Red, Predica, HistorialEstado, AsistenciaDiscipulado
 from .utils import convertir_lista_grupos_a_queryset
 from common.forms import CustomModelForm, CustomForm
 from miembros.models import Miembro
 from reportes.forms import FormularioRangoFechas
-
-# Python
-from contextlib import suppress
-import logging
 
 
 logger = logging.getLogger(__name__)
@@ -160,7 +158,6 @@ class FormularioReportarReunionDiscipulado(forms.ModelForm):
     def __init__(self, miembro, *args, **kwargs):
         super(FormularioReportarReunionDiscipulado, self).__init__(*args, **kwargs)
         self.fields['predica'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
-        self.fields['numeroLideresAsistentes'].widget.attrs.update({'class': 'form-control'})
         self.fields['novedades'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Novedades...'})
         self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
         self.fields['predica'].queryset = Predica.objects.filter(miembro__id__in=miembro.pastores())
@@ -254,6 +251,7 @@ class FormularioSetGeoPosicionGrupo(CustomModelForm):
         self.fields['latitud'].required = True
         self.fields['longitud'].required = True
 
+# ------------------
 
 class BaseGrupoForm(CustomModelForm):
     """
@@ -391,17 +389,15 @@ class EditarGrupoForm(NuevoGrupoForm):
     """
 
     def __init__(self, *args, **kwargs):
+        self.parent = kwargs['instance'].parent
         super().__init__(kwargs['instance'].red, *args, **kwargs)
         self.fields['parent'].required = False
 
-        if self.instance:
-            choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
-            self.fields['estado'] = forms.ChoiceField(
-                choices=choices, initial=self.instance.estado, label=_lazy('Estado')
-            )
-            self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
-        else:
-            raise NotImplementedError('No se implementó la instancia para el formulario')
+        choices = tuple(filter(lambda x: x[0] not in [HistorialEstado.ARCHIVADO], HistorialEstado.OPCIONES_ESTADO))
+        self.fields['estado'] = forms.ChoiceField(
+            choices=choices, initial=self.instance.estado, label=_lazy('Estado')
+        )
+        self.fields['estado'].widget.attrs.update({'class': 'selectpicker'})
 
         if not self.is_bound:
             # si no esta bound, se agrega el queryset de acuerdo a los lideres actuales, y se marcan como initial
@@ -411,14 +407,16 @@ class EditarGrupoForm(NuevoGrupoForm):
         try:
             with transaction.atomic():
                 grupo = BaseGrupoForm.save(self)
+                grupo.parent = self.parent
+                grupo.save()
 
                 if 'lideres' in self.changed_data:
                     grupo.lideres.clear()
                     # padre = self.cleaned_data['parent']
                     lideres = self.cleaned_data['lideres']
-                    lideres.update(grupo_lidera=grupo, grupo=self.instance.parent)
+                    lideres.update(grupo_lidera=grupo, grupo=self.parent)
 
-                if 'estado' in self.cleaned_data and self.cleaned_data['estado'] != self.instance.estado:
+                if 'estado' in self.changed_data:
                     self.instance.actualizar_estado(estado=self.cleaned_data.get('estado'))
 
                 return grupo
@@ -601,3 +599,57 @@ class ArchivarGrupoForm(CustomForm):
             else:
                 query_miembros |= grupo.lideres.all()
             query_miembros.update(grupo=None, grupo_lidera=None)
+
+
+class ReportarReunionDiscipuladoAdminForm(CustomModelForm):
+    """Formulario para que un administrador pueda reportar una reunión de discipulado."""
+
+    error_messages = {
+        'reunion_reportada': _lazy('La reunión para la predica escogida ya fue reportada.')
+    }
+
+    asistencia = forms.ModelMultipleChoiceField(queryset=Miembro.objects.none())
+
+    class Meta:
+        model = ReunionDiscipulado
+        fields = ['grupo', 'predica', 'novedades', 'ofrenda', 'asistencia']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['predica'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['grupo'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+        self.fields['novedades'].widget.attrs.update({'class': 'form-control'})
+        self.fields['ofrenda'].widget.attrs.update({'class': 'form-control'})
+
+        grupos_query = Grupo.objects.pueden_reportar_discipulado().prefetch_related('lideres', 'historiales')
+        self.fields['grupo'].queryset = grupos_query
+
+        query = Miembro.objects.none()
+        if self.is_bound:
+            grupo = self.data.get('grupo', None)
+            if grupo:
+                query = Grupo.objects.get(id=grupo).discipulos
+        
+        self.fields['asistencia'].queryset = query
+    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        grupo = cleaned_data.get('grupo', None)
+        predica = cleaned_data.get('predica', None)
+
+        if grupo and predica:
+            if grupo.reunion_discipulado_reportada(predica):
+                error_code = 'reunion_reportada'
+                self.add_error(None, forms.ValidationError(self.error_messages[error_code], code=error_code))
+        return cleaned_data
+
+    def save(self):
+        with transaction.atomic():
+            reunion = super().save()
+            asistencias = [self._asistencia_instance(miembro, reunion) for miembro in self.cleaned_data['asistencia']]
+            AsistenciaDiscipulado.objects.bulk_create(asistencias)
+            return reunion
+
+    def _asistencia_instance(self, miembro, reunion):
+        return AsistenciaDiscipulado(miembro=miembro, reunion=reunion, asistencia=True)

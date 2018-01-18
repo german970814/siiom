@@ -358,3 +358,39 @@ class GrupoManagerTest(BaseTest):
 
         grupos = Grupo.objects.sin_reportar_reunion_GAR(ene_01, ene_07)
         self.assertEqual(grupos.count(), 0)
+    
+    def test_pueden_reportar_discipulado_devuelve_grupos_con_hijos(self):
+        """Prueba que me devuelva grupos que tengan por lo menos un hijo."""
+
+        self.crear_arbol()
+        
+        grupos = Grupo.objects.pueden_reportar_discipulado()
+        self.assertIn(Grupo.objects.get(id=100), grupos)
+        self.assertIn(Grupo.objects.get(id=500), grupos)
+    
+    def test_pueden_reportar_discipulado_no_devuelve_grupos_sin_hijos(self):
+        """Prueba que no devuelva grupos que no tengan hijos."""
+
+        self.crear_arbol()
+
+        grupos = Grupo.objects.pueden_reportar_discipulado()
+        self.assertNotIn(Grupo.objects.get(id=700), grupos)
+    
+    def test_pueden_reportar_discipulado_no_devuelve_grupos_suspendidos(self):
+        """Prueba que no devuelva grupos que tengan hijos pero que se encuentran en estado suspendido."""
+
+        self.crear_arbol()
+        suspendido = Grupo.objects.get(id=500)
+        suspendido.actualizar_estado(estado=HistorialEstado.SUSPENDIDO)
+
+        grupos = Grupo.objects.pueden_reportar_discipulado()
+        self.assertNotIn(suspendido, grupos)
+    
+    def test_pueden_reportar_discipulado_no_duvuelve_grupos_con_un_solo_hijo_archivado(self):
+        """Prueba que no devuelva grupos que tengan un solo hijo y este se encuentre archivado."""
+
+        self.crear_arbol()
+        Grupo.objects.get(id=700).actualizar_estado(estado=HistorialEstado.ARCHIVADO)
+
+        grupos = Grupo.objects.pueden_reportar_discipulado()
+        self.assertNotIn(Grupo.objects.get(id=400), grupos)

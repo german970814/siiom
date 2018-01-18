@@ -136,9 +136,17 @@ class GrupoQuerySet(models.QuerySet):
         ).values_list('grupo', flat=True)
         return self.activos().exclude(id__in=grupos_que_reportaron)
 
+    def pueden_reportar_discipulado(self):
+        """
+        :returns:
+            Un queryset con los grupos que pueden reportar reunión de discipulado.
+        """
+
+        return self._suspendidos().exclude(id__in=self.model.objects.hojas())
+
 class GrupoManager(AL_NodeManager.from_queryset(GrupoQuerySet)):
     """
-    Manager personalizado para los grupos.
+    Manager personalizado para los grupos. Se excluyen los grupos archivados por defecto.
     """
 
     def get_super_queryset(self):

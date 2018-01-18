@@ -83,5 +83,4 @@ class ReunionDiscipuladoFactory(factory.django.DjangoModelFactory):
     fecha = factory.LazyFunction(datetime.datetime.now)
     predica = factory.SubFactory(PredicaFactory)
     grupo = factory.SubFactory(GrupoFactory)
-    numeroLideresAsistentes = 2
     ofrenda = 100000

@@ -1,80 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% block js %}
-<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
-<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
-<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
-<script>
-    jQuery(document).ready(function($) {
-        $("#data-table-selection").bootgrid({
-            css: {
-                icon: 'zmdi icon',
-                iconColumns: 'zmdi-view-module',
-                iconDown: 'zmdi-expand-more',
-                iconRefresh: 'zmdi-refresh',
-                iconUp: 'zmdi-expand-less'
-            },
-            selection: true,
-            multiSelect: true,
-            rowSelect: true,
-            keepSelection: true
-        });
-
-        $seleccionados = [];
-        bootgrid_table_solution("#data-table-selection", $seleccionados);
-        var $predica = $('#id_predica'), $lid_asis = $('#id_numeroLideresAsistentes'), $ofrenda = $('#id_ofrenda'), $novedades = $('#id_novedades');
-
-        $('button[name="aceptar"]').click(function(event) {
-            if ($predica.val() == '') {
-                swal("Alerta!", "Debes escoger una prédica!")
-                return false;
-            } else if ($predica.val() != '' && $lid_asis.val() == '') {
-                swal("Alerta!", "Debes especificar el numero de lideres asistentes");
-                return false;
-            } else if ($predica.val() != '' && $lid_asis.val() != '' && $ofrenda.val() == '') {
-                swal("Alerta!", "Debes especificar la ofrenda recogida");
-                return false;
-            } else if ($predica.val() != '' && $lid_asis.val() != '' && $ofrenda.val() != '' && $novedades.val() == '') {
-                swal("Alerta!", "Debes especificar si ocurrió alguna novedad");
-                return false;
-            } else {
-                // return true;
-                if (!$('tr').hasClass('active')) {
-                    if ($seleccionados.length == 0) {
-                        swal("Alerta","Debes escoger algun miembro asistente");
-                        event.preventDefault();
-                    } else {
-                        var $undef = [];
-                        var $str = [];
-                        for (var i = 0; i < $seleccionados.length; i++) {
-                            if ($seleccionados[i] === undefined) {
-                                $undef.push($seleccionados[i]);
-                            }
-                            if (typeof $seleccionados[i] === 'string') {
-                                $str.push($seleccionados[i]);
-                            }
-                        }
-                        if ($str.length > 0) {
-                            return true;
-                        } else if ($str.length == 0 && $undef.length >= 0) {
-                            swal("Alerta","Debes escoger algun miembro asistente");
-                            return false;
-                        }
-                    }
-                } else {
-                    return true;
-                }
-            }
-        });
-
-           
-        send_form("#form", $seleccionados);
-
-
-    });
-</script>
-
-{% endblock %}
 
 {% block contenido %}
 <div class="container">
@@ -108,7 +33,7 @@
             <div class="card-body card-padding table-responsive">
                 <br>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-thumb-up"></i>
@@ -116,18 +41,6 @@
                             <div class="fg-line requerido">
                                 <label for="id_predica" class="fg-label requerido">Pr&eacute;dica:</label>
                                 {{form.predica}}
-                            </div>
-                        </div>
-                    </div>
-                    <br class="space">
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-addon">
-                                <i class="zmdi zmdi-accounts"></i>
-                            </span>
-                            <div class="fg-line requerido">
-                                <label for="id_numeroLideresAsistentes" class="fg-label requerido">Numero de Lideres Asistentes:</label>
-                                {{form.numeroLideresAsistentes}}
                             </div>
                         </div>
                     </div>
@@ -213,4 +126,72 @@
 </div>
 {% endblock %}
 
+{% block js %}
+<script type="text/javascript" src="{% static 'Scripts/funciones.js' %}"></script>
+<script src="{% static 'Template/jquery/vendors/bootgrid/jquery.bootgrid.updated.js' %}"></script>
+<script src="{% static 'Scripts/funciones_bootgrid.js' %}"></script>
+<script>
+    jQuery(document).ready(function ($) {
+        $("#data-table-selection").bootgrid({
+            css: {
+                icon: 'zmdi icon',
+                iconColumns: 'zmdi-view-module',
+                iconDown: 'zmdi-expand-more',
+                iconRefresh: 'zmdi-refresh',
+                iconUp: 'zmdi-expand-less'
+            },
+            selection: true,
+            multiSelect: true,
+            rowSelect: true,
+            keepSelection: true
+        });
+
+        $seleccionados = [];
+        bootgrid_table_solution("#data-table-selection", $seleccionados);
+        var $predica = $('#id_predica'), $ofrenda = $('#id_ofrenda'), $novedades = $('#id_novedades');
+
+        $('button[name="aceptar"]').click(function (event) {
+            if ($predica.val() == '') {
+                swal("Alerta!", "Debes escoger una prédica!")
+                return false;
+            } else if ($predica.val() != '' && $ofrenda.val() == '') {
+                swal("Alerta!", "Debes especificar la ofrenda recogida");
+                return false;
+            } else if ($predica.val() != '' && $ofrenda.val() != '' && $novedades.val() == '') {
+                swal("Alerta!", "Debes especificar si ocurrió alguna novedad");
+                return false;
+            } else {
+                // return true;
+                if (!$('tr').hasClass('active')) {
+                    if ($seleccionados.length == 0) {
+                        swal("Alerta", "Debes escoger algun miembro asistente");
+                        event.preventDefault();
+                    } else {
+                        var $undef = [];
+                        var $str = [];
+                        for (var i = 0; i < $seleccionados.length; i++) {
+                            if ($seleccionados[i] === undefined) {
+                                $undef.push($seleccionados[i]);
+                            }
+                            if (typeof $seleccionados[i] === 'string') {
+                                $str.push($seleccionados[i]);
+                            }
+                        }
+                        if ($str.length > 0) {
+                            return true;
+                        } else if ($str.length == 0 && $undef.length >= 0) {
+                            swal("Alerta", "Debes escoger algun miembro asistente");
+                            return false;
+                        }
+                    }
+                } else {
+                    return true;
+                }
+            }
+        });
+
+        send_form("#form", $seleccionados);
+    });
+</script> 
+{% endblock %}
 

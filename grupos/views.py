@@ -25,7 +25,7 @@ from .forms import (
     FormularioReportarReunionDiscipulado, FormularioSetGeoPosicionGrupo,
     FormularioCrearPredica, ArchivarGrupoForm, FormularioReportarReunionGrupoAdmin,
     FormularioReportesEnviados, FormularioEditarReunionGAR, GrupoRaizForm, NuevoGrupoForm,
-    EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm,
+    EditarGrupoForm, TrasladarGrupoForm, RedForm, TrasladarLideresForm, ReportarReunionDiscipuladoAdminForm
 )
 from miembros.decorators import user_is_cabeza_red, user_is_director_red
 from miembros.forms import DesvincularLiderGrupoForm
@@ -442,6 +442,7 @@ def set_position_grupo(request, id_grupo):
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
+# --------------------------------
 
 @login_required
 @permisos_requeridos('miembros.es_administrador', 'miembros.es_lider')
@@ -727,7 +728,7 @@ def trasladar_lideres(request):
 @permission_required('miembros.es_administrador', raise_exception=True)
 def archivar_grupo(request):
     """
-    Permite archivar un grupo.
+    Permite a un administrador archivar un grupo.
     """
 
     grupo = request.GET.get('grupo', None) or None
@@ -744,10 +745,27 @@ def archivar_grupo(request):
                 form.nombre_grupo = str(form.cleaned_data['grupo'])
             except:
                 form.nombre_grupo = _('escogido')
-            if settings.DEBUG:
-                print(form.errors)
+            logger.critical(form.errors)
 
     else:
         form = ArchivarGrupoForm(initial={'grupo': grupo})
 
     return render(request, 'grupos/archivar_grupos.html', {'form': form})
+
+
+@login_required
+@user_is_director_red
+def admin_reportar_reunion_discipulado(request):
+    """Permite a un administrador o director de red reportar reunion de discipulado de un grupo."""
+
+    if request.method == 'POST':
+        form = ReportarReunionDiscipuladoAdminForm(data=request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('Se ha creado la reunion satisfactoriamente.'))
+            return redirect('grupos:admin_reportar_reunion_discipulado')
+    else:
+        form = ReportarReunionDiscipuladoAdminForm()
+
+    return render(request, 'grupos/reportar_reunion_discipulado_admin.html', {'form': form})

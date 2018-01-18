@@ -479,6 +479,17 @@ class Grupo(DiasSemanaMixin, SixALNode, AL_Node):
                 raise OperationalError(_lazy('Estado "{}" no está permitido'.format(estado)))
             actual.__class__.objects.create(grupo=self, estado=estado, **kwargs)
 
+    def reunion_discipulado_reportada(self, predica):
+        """
+        :returns:
+            ``True`` si la reunión ya fue reportada
+        
+        :param :class:`Predica` predica: Predica a partir de la cual se buscara la reunión.
+
+        :rtype: bool
+        """
+
+        return self.reuniones_discipulado.filter(predica=predica).exists()
 
 class Predica(models.Model):
     """Modelo para guardar las predicas que se registran."""
@@ -552,7 +563,6 @@ class ReunionDiscipulado(models.Model):
     fecha = models.DateField(auto_now_add=True)
     grupo = models.ForeignKey(Grupo, related_name='reuniones_discipulado')
     predica = models.ForeignKey(Predica, verbose_name='prédica')
-    numeroLideresAsistentes = models.PositiveIntegerField(verbose_name='Número de líderes asistentes')
     novedades = models.TextField(max_length=500)
     ofrenda = models.DecimalField(max_digits=19, decimal_places=2)
     confirmacionEntregaOfrenda = models.BooleanField(default=False)
