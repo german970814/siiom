@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
+import re
 import environ
 from django.contrib.messages import constants as messages
 
@@ -96,6 +97,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'siiom.urls'
+
+IGNORABLE_404_URLS = [re.compile(r'^/robots\.txt$')]
 
 TEMPLATES = [
     {

@@ -326,43 +326,12 @@ class EditarGrupoFormTest(BaseTest):
         """
 
         data = {
-            'direccion': 'Calle 34 N 74 - 23', 'estado': 'AC', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
+            'direccion': 'Calle 34 N 74 - 23', 'estado': 'IN', 'fechaApertura': '2012-03-03', 'diaGAR': '1',
             'horaGAR': '12:00', 'diaDiscipulado': '3', 'horaDiscipulado': '16:00', 'nombre': 'Pastor presidente',
-            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id], 'parent': '300'
+            'barrio': self.barrio.id, 'lideres': [self.lider1.id, self.lider2.id]
         }
 
         return data
-
-    def test_campo_parent_muestra_padre_del_grupo_seleccionado(self):
-        """
-        Prueba que en el campo parent se muestre el padre del grupo que se esta editando.
-        """
-
-        form = EditarGrupoForm(instance=self.grupo)
-        self.assertIn(self.grupo.parent, form.fields['parent'].queryset)
-
-    @skip
-    def test_campo_parent_no_muestra_grupos_esten_debajo_de_grupo_seleccionado(self):
-        """
-        Prueba que en el campo parent no se muestren los grupos que se encuentren debajo del grupo seleccionado ni el
-        grupo seleccionado.
-        """
-
-        descendiente = Grupo.objects.get(id=600)
-        form = EditarGrupoForm(instance=self.grupo)
-        self.assertNotIn(self.grupo, form.fields['parent'].queryset)
-        self.assertNotIn(descendiente, form.fields['parent'].queryset)
-
-    @skip
-    def test_campo_parent_muestra_raiz_si_padre_grupo_seleccionado_es_raiz(self):
-        """
-        Prueba que el campo padre muestre el grupo raiz de una iglesia si el padre del grupo seleccionado es la raiz.
-        """
-
-        raiz = Grupo.objects.get(id=100)
-        seleccionado = Grupo.objects.get(id=300)
-        form = EditarGrupoForm(instance=seleccionado)
-        self.assertIn(raiz, form.fields['parent'].queryset)
 
     def test_campo_lideres_muestra_lideres_del_grupo_escogido(self):
         """
@@ -406,6 +375,14 @@ class EditarGrupoFormTest(BaseTest):
         self.assertTrue(update_mock.called)
         self.assertEqual(len(form.non_field_errors()), 1)
 
+    def test_grupo_no_cambia_grupo_padre(self):
+        """"Prueba que el padre del grupo a editar no se modifique."""
+
+        parent = self.grupo.parent_id
+        form = EditarGrupoForm(instance=self.grupo, data=self.datos_formulario())
+        grupo = form.save()
+
+        self.assertEqual(grupo.parent_id, parent)
 
 class TrasladarLideresFormTest(BaseTest):
     """
