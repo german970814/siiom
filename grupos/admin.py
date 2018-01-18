@@ -6,6 +6,7 @@ Created on Apr 1, 2011
 # Django imports
 from django import forms
 from django.contrib import admin
+from treebeard.admin import TreeAdmin
 from .models import Red, Grupo, ReunionGAR, ReunionDiscipulado, Predica
 
 
@@ -26,10 +27,18 @@ class GrupoAdmin(admin.ModelAdmin):
         
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-
 @admin.register(ReunionGAR)
 class ReunionGARAdmin(admin.ModelAdmin):
     search_fields = ['grupo__nombre']
+
+
+class GrupoTree(Grupo):
+    class Meta:
+        proxy = True
+
+@admin.register(GrupoTree)
+class GrupoTreeAdmin(TreeAdmin):
+    pass
 
 
 admin.site.register(Red)
