@@ -98,7 +98,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'siiom.urls'
 
-IGNORABLE_404_URLS = [re.compile(r'^/robots\.txt$')]
+IGNORABLE_404_URLS = [re.compile(r'^/robots\.txt$'), re.compile(r'^/favicon\.ico$')]
 
 TEMPLATES = [
     {
