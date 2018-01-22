@@ -33,7 +33,7 @@ from miembros.models import Miembro
 from common.decorators import permisos_requeridos
 from common.utils import eliminar
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('siiom.{}'.format(__name__))
 
 
 @login_required
@@ -284,7 +284,6 @@ def ver_reportes_grupo(request):
                     form_reporte.add_error('fecha', 'Ya hay un reporte en esta semana')
                     click = True
                     if data_from_session is not None:
-                        request.POST.update(data_from_session)
                         request.session['post'] = request.session['post']
                         # request.session['post'] = request.POST
                 else:
@@ -296,18 +295,16 @@ def ver_reportes_grupo(request):
                     messages.success(request, "Se Ha Reportado el Sobre Correctamente")
                     # request.session['post'] = request.POST
                     if data_from_session is not None:
-                        request.POST.update(data_from_session)
                         request.session['post'] = request.session['post']
                         # request.session['post'] = request.POST
                         request.session['valid_post'] = True
                     return redirect('grupos:reportes_grupo')
             else:
                 if data_from_session is not None:
-                    request.POST.update(data_from_session)
                     request.session['post'] = request.session['post']
                     # request.session['post'] = request.POST
                 if settings.DEBUG:
-                    print(form_reporte.errors)
+                    logger.info(form_reporte.errors)
                 click = True
 
         else:
@@ -322,13 +319,17 @@ def ver_reportes_grupo(request):
                 pass
             finally:
                 if data_from_session is not None:
-                    request.POST.update(data_from_session)
                     request.session['post'] = request.session['post']
                     # request.session['post'] = request.POST
                     request.session['valid_post'] = True
                 return redirect('grupos:reportes_grupo')
 
-        form = FormularioReportesEnviados(data=request.POST or data_from_session)
+        if data_from_session and 'fechai' not in request.POST:
+            data = data_from_session
+        else:
+            data = request.POST
+
+        form = FormularioReportesEnviados(data=data)
 
         if form.is_valid():
             grupo = form.cleaned_data['grupo']  # get_object_or_404(Grupo, id=request.POST['grupo'])
