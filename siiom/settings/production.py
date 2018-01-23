@@ -32,7 +32,13 @@ LOGGING['handlers']['opbeat'] = {
 
 LOGGING['loggers']['django'] = {
     'level': 'WARNING',
-    'handlers': ['opbeat'],
+    'handlers': ['console', 'opbeat'],
+    'propagate': False,
+}
+
+LOGGING['loggers']['siiom'] = {
+    'level': 'INFO',
+    'handlers': ['console', 'opbeat'],
     'propagate': False,
 }
 

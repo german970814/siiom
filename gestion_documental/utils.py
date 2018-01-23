@@ -1,21 +1,21 @@
-from wand.image import Image
-
 import os
 import glob
-
+import logging
+from contextlib import suppress
+from wand.image import Image
 
 CARPETA_PDF_TO_IMAGE = '/pdf2img/'
-
+logger = logging.getLogger('siiom.{}'.format(__name__))
 
 def get_route(archivo):
     """
     Devuelve la ruta completa de un archivo hasta el directorio que compone el archivo
     """
 
-    if os.path.exists(archivo._get_path()):
+    if os.path.exists(archivo.path):
 
         ruta = '/'
-        _rutas = archivo._get_path().split('/')
+        _rutas = archivo.path.split('/')
 
         while ruta == '/':
             if os.path.isdir(ruta.join(_rutas)):
@@ -35,8 +35,12 @@ def get_filenames(archivo):
     file_especifications = archivo.name.split('/')
     file_name = file_especifications[len(file_especifications) - 1]
     ruta = get_route(archivo)
-    os.chdir(ruta + CARPETA_PDF_TO_IMAGE)
-    return glob.glob(file_name.split('.')[0] + '*')
+    try:
+        os.chdir('{}{}'.format(ruta, CARPETA_PDF_TO_IMAGE))
+        return glob.glob(file_name.split('.')[0] + '*')
+    except FileNotFoundError:
+        logger.exception("Archivo no encontrado para la ruta %s.", archivo.url)
+        return []
 
 
 def pdf_to_png(archivo, extencion='jpg', _ruta=False, save=False):
@@ -49,7 +53,7 @@ def pdf_to_png(archivo, extencion='jpg', _ruta=False, save=False):
     if len(extencion.split('.')) > 1:
         extencion = extencion.split('.')[len(extencion) - 1]
 
-    if os.path.exists(archivo._get_path()):
+    if os.path.exists(archivo.path):
 
         file_especifications = archivo.name.split('/')
         # area = file_especifications[1]
@@ -60,7 +64,7 @@ def pdf_to_png(archivo, extencion='jpg', _ruta=False, save=False):
 
         if save:
             if file_name.split('.')[len(file_name.split('.')) - 1] not in __accepted__:
-                imagen = Image(filename=archivo._get_path())
+                imagen = Image(filename=archivo.path)
                 if not os.path.exists(ruta + CARPETA_PDF_TO_IMAGE):
                     os.mkdir(ruta + CARPETA_PDF_TO_IMAGE)
                     if not os.path.exists(ruta + CARPETA_PDF_TO_IMAGE):
@@ -70,7 +74,7 @@ def pdf_to_png(archivo, extencion='jpg', _ruta=False, save=False):
         if _ruta:
             _return_ruta = ruta + CARPETA_PDF_TO_IMAGE
             return _return_ruta
-        os.chdir(ruta + CARPETA_PDF_TO_IMAGE)
+        os.chdir('{}{}'.format(ruta, CARPETA_PDF_TO_IMAGE))
         return ruta + CARPETA_PDF_TO_IMAGE  # , glob.glob(file_name.split('.')[0] + '*')
 
     return None

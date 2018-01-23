@@ -168,10 +168,8 @@
                 <legend>
                     <h3 class="f-700 f-20">Ver Reportes Enviados Por Grupo Especifico</h3>
                 </legend>
-                {% if reuniones %}
-                {% if reuniones.first.grupo.id %}
+                {% if form.grupo.value %}
                 <small><a data-toggle="modal" id="toggleModalCrearReporte" href="#modalNarrowerCrearReporte">Crear Reporte Para Este Grupo</a></small>
-                {% endif %}
                 {% endif %}
                 {% if messages %}
                     {% for message in messages %}

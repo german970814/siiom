@@ -1,3 +1,4 @@
+import json
 # Django Package
 from django.contrib import messages
 from django.db import transaction
@@ -15,8 +16,10 @@ from django.utils import timezone
 
 # Third Apps
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
+from waffle.decorators import waffle_switch
 
 # Locale Apps
+from organizacional.models import Area, Empleado
 from common.decorators import POST, GET
 from .models import (
     Registro, Documento, PalabraClave, TipoDocumento,
@@ -27,13 +30,6 @@ from .forms import (
     FormularioBusquedaRegistro, TipoDocumentoForm, PalabraClaveForm, FormularioComentario,
     FormularioEditarRegistroDocumento, FormularioEdicionDocumentos
 )
-
-# Apps
-from waffle.decorators import waffle_switch
-from organizacional.models import Area, Empleado
-
-# Python Package
-import json
 
 
 @waffle_switch('gestion_documental')

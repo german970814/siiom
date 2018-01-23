@@ -1,7 +1,7 @@
 import random
 from contextlib import contextmanager
 from fabric.contrib.files import append, sed
-from fabric.api import env, task, run, sudo, cd, prefix, local
+from fabric.api import env, task, run, sudo, cd, prefix, local, runs_once
 
 REPO_URL = 'git@bitbucket.org:ingeniarte/siiom.git'
 PROJECT = 'siiom'  # nombre de carpeta donde esta wsgi 
@@ -178,6 +178,7 @@ def deploy():
         run('./manage.py collectstatic --noinput')
 
     restart_server()
+    register_deployment()
 
 
 @task
@@ -193,3 +194,16 @@ def set_env_var():
 def restart_server():
     sudo('supervisorctl restart {}'.format(env.site))
     sudo('supervisorctl status {}'.format(env.site))
+
+
+@task
+@runs_once
+def register_deployment():
+    # commit = local('git rev-parse origin/{}'.format(env.settings['branch']), capture=True)
+    revision = local('git rev-parse origin/{}'.format(env.settings['branch']), capture=True)
+    branch = local('git rev-parse --abbrev-ref origin/{}'.format(env.settings['branch']), capture=True)
+    local('curl https://intake.opbeat.com/api/v1/organizations/{}/apps/{}/releases/'
+            ' -H "Authorization: Bearer {}"'
+            ' -d rev="{}"'
+            ' -d branch="{}"'
+            ' -d status=completed'.format(env.settings['o_oid'], env.settings['o_aid'], env.settings['s_t'], revision, branch))
