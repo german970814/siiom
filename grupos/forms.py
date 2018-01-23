@@ -14,8 +14,7 @@ from common.forms import CustomModelForm, CustomForm
 from miembros.models import Miembro
 from reportes.forms import FormularioRangoFechas
 
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('siiom.{}'.format(__name__))
 
 
 class FormularioReunionGARBase(forms.ModelForm):

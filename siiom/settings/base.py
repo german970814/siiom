@@ -218,6 +218,10 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
         },
+        'siiom': {
+            'handlers': ['console'],
+            'propagate': False
+        }
     },
 }
 
