@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
 from grupos.models import Predica, Grupo
-from common.forms import FormularioRangoFechas as CommonFormFechas
+from common.forms import (FormularioRangoFechas as CommonFormFechas, CustomForm)
 
 
 __author__ = 'Tania'
@@ -91,3 +91,28 @@ class FormularioReportesSinConfirmar(CommonFormFechas):
         })
         if queryset is not None:
             self.fields['grupo'].queryset = queryset
+
+
+class TotalizadoReunionDiscipuladoForm(FormularioPredicas, CustomForm):
+    """
+    Formulario para ver el reporte del totalizado de reuniones de discipulado.
+    """
+
+    OPCIONES = (
+        ('A', _('Número de asistentes regulares')),
+        ('O', _('Ofrenda'))
+    )
+
+    grupo_inicial = forms.ModelChoiceField(queryset=Grupo.objects.none(), empty_label=None)
+    opcion = forms.ChoiceField(choices=OPCIONES, widget=forms.RadioSelect())
+
+    def __init__(self, miembro, *args, **kwargs):
+        super().__init__(miembro, *args, **kwargs)
+        self.fields['grupo_inicial'].widget.attrs.update({'class': 'selectpicker', 'data-live-search': 'true'})
+
+        if miembro.usuario.has_perm("miembros.es_administrador"):
+            grupo_queryset = Grupo.objects.prefetch_related('lideres', 'historiales').all()
+        else:
+            grupo_queryset = miembro.grupo_lidera.grupos_red.prefetch_related('lideres', 'historiales')
+        self.fields['grupo_inicial'].queryset = grupo_queryset
+

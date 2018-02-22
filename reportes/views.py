@@ -12,7 +12,8 @@ from django.utils.translation import ugettext as _
 from .charts import PdfTemplate
 from .forms import (
     FormularioRangoFechas, FormularioPredicas,
-    FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar
+    FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar,
+    TotalizadoReunionDiscipuladoForm
 )
 from .utils import fechas_reporte_generador
 from common.decorators import permisos_requeridos
@@ -222,11 +223,12 @@ def estadistico_totalizado_reuniones_discipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado
     totalizado por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
 
-    miembro = Miembro.objects.get(usuario=request.user)
+    # miembro = Miembro.objects.get(usuario=request.user)
+    miembro = request.miembro
     if miembro.usuario.has_perm("miembros.es_administrador"):
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres').all()
+        listaGrupo_i = Grupo.objects.prefetch_related('lideres', 'historiales').all()
     else:
-        listaGrupo_i = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
+        listaGrupo_i = miembro.grupo_lidera.grupos_red.prefetch_related('lideres', 'historiales')
     ofrenda = False
     asis_reg = False
 
@@ -286,6 +288,7 @@ def estadistico_totalizado_reuniones_discipulado(request):
             form = FormularioPredicas(miembro=miembro)
             sw = False
 
+    form2 = TotalizadoReunionDiscipuladoForm(request.miembro)
     return render(request, 'reportes/estadistico_total_discipulado.html', locals())
 
 
