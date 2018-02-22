@@ -254,7 +254,8 @@ class Documento(models.Model):
         """
         Retorna el nombre de el archivo
         """
-        path = self.archivo._get_path().split('/')
+
+        path = self.archivo.path.split('/')
         return path[len(path) - 1]
 
     def get_absolute_url(self):
