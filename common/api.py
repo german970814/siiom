@@ -100,8 +100,7 @@ def busqueda_miembro_api(request, pk):
                 'nombre', 'cedula', 'primer_apellido', 'segundo_apellido'
             )
 
-            if not query_lideres.exists():
-                query_lideres = Grupo.objects.raiz().miembros.lideres_disponibles()
+            query_lideres |= Grupo.objects.raiz().miembros.lideres_disponibles()
 
             if grupo is not None:
                 query_lideres |= grupo.lideres.all()

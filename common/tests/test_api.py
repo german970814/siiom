@@ -1,12 +1,12 @@
 # Django imports
 from django.core.urlresolvers import reverse
+from django.test import tag
 
 from .base import BaseTestAPI
 from miembros.tests.factories import MiembroFactory, BarrioFactory
 from grupos.tests.factories import RedFactory
 from grupos.models import Grupo, Red
 from .. import constants
-
 
 class TestAPIBusquedaMiembro(BaseTestAPI):
     """
@@ -114,3 +114,12 @@ class TestAPIBusquedaMiembro(BaseTestAPI):
         response = self.POST(data={'value': lider_disponible_2.nombre[0:5], 'grupo_by': grupo.id})
 
         self.assertIn(str(lider_disponible_2.id), [x['id'] for x in response['miembros']])
+
+    def test_busqueda_muestre_discipulos_grupo_raiz(self):
+        """Prueba que en la busqueda se muestren los discipulos de grupo raiz que se encuentren disponibles."""
+
+        raiz = Grupo.objects.get(id=100)
+        lider = MiembroFactory(lider=True, grupo=raiz, nombre='ASDFGHJER')
+
+        response = self.POST(data={'value': lider.nombre[0:5]})
+        self.assertIn(str(lider.id), [x['id'] for x in response['miembros']])
