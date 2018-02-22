@@ -227,11 +227,11 @@ def estadistico_totalizado_reuniones_discipulado(request):
     miembro = request.miembro
     if miembro.discipulos() or miembro.usuario.has_perm("miembros.es_administrador"):
         if request.method == 'POST':
-            form2 = TotalizadoReunionDiscipuladoForm(request.miembro, data=request.POST)
+            form = TotalizadoReunionDiscipuladoForm(request.miembro, data=request.POST)
 
-            if form2.is_valid():
+            if form.is_valid():
                 sw = True
-                opciones, values, titulo, tiene_discipulos = form2.obtener_totalizado()
+                opciones, values, titulo, tiene_discipulos = form.obtener_totalizado()
 
                 # se agrega un condicional que indique que l (la cual es la lista que contiene los valores)
                 # de las respuestas de acuerdo a cada opcion, siempre y cuenta esta lista tenga mas dee un
@@ -246,7 +246,7 @@ def estadistico_totalizado_reuniones_discipulado(request):
                                 opciones, values, 2)
                     return response
         else:
-            form2 = TotalizadoReunionDiscipuladoForm(request.miembro)
+            form = TotalizadoReunionDiscipuladoForm(request.miembro)
             sw = False
 
     return render(request, 'reportes/estadistico_total_discipulado.html', locals())

@@ -20,28 +20,28 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group {{ form2.predica.css_classes }}">
+                        <div class="input-group {{ form.predica.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-book"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="{{ form2.predica.id_for_label }}" class="fg-label">{{ form2.predica.label }}*:</label>
-                                {{ form2.predica }}
+                                <label for="{{ form.predica.id_for_label }}" class="fg-label">{{ form.predica.label }}*:</label>
+                                {{ form.predica }}
                             </div>
-                            {{ form2.predica.errors }}
+                            {{ form.predica.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group {{ form2.grupo_inicial.css_classes }}">
+                        <div class="input-group {{ form.grupo_inicial.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
                             <div class="fg-line">
-                                <label for="{{ form2.grupo_inicial.id_for_label }}" class="fg-label">{{ form2.grupo_inicial.label }}*:</label>
-                                {{ form2.grupo_inicial }}
+                                <label for="{{ form.grupo_inicial.id_for_label }}" class="fg-label">{{ form.grupo_inicial.label }}*:</label>
+                                {{ form.grupo_inicial }}
                             </div>
-                            {{ form2.grupo_inicial.errors }}
+                            {{ form.grupo_inicial.errors }}
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                     <div class="col-md-8 col-md-offset-2">
                         <div class="input-group">
                             <div class="fg-line">
-                                {% for opcion in form2.opcion %}
+                                {% for opcion in form.opcion %}
                                 <label for="{{ opcion.id_for_label }}" class="radio radio-inline m-r-20">
                                     {{ opcion.tag }}
                                     <i class="input-helper m-r-20"></i>
@@ -59,7 +59,7 @@
                                 </label>
                                 {% endfor %}
                             </div>
-                            {{ form2.opcion.errors }}
+                            {{ form.opcion.errors }}
                         </div>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
         {% endif %}
 
     </div>
-    {% if sw and grupoDis %}
+    {% if sw and tiene_discipulos %}
     <div class="card">
         <div class="card-body card-padding">
             <div id="out">

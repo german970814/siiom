@@ -2,6 +2,7 @@
 
 # Django Package
 from django import forms
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
