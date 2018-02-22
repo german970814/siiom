@@ -12,7 +12,8 @@ from django.utils.translation import ugettext as _
 from .charts import PdfTemplate
 from .forms import (
     FormularioRangoFechas, FormularioPredicas,
-    FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar
+    FormularioEstadisticoReunionesGAR, FormularioReportesSinConfirmar,
+    TotalizadoReunionDiscipuladoForm
 )
 from .utils import fechas_reporte_generador
 from common.decorators import permisos_requeridos
@@ -222,59 +223,21 @@ def estadistico_totalizado_reuniones_discipulado(request):
     """Muestra un estadistico de los reportes de reunion discipulado
     totalizado por discipulo segun el grupo, las opciones y el rango de fecha escogidos."""
 
-    miembro = Miembro.objects.get(usuario=request.user)
-    if miembro.usuario.has_perm("miembros.es_administrador"):
-        listaGrupo_i = Grupo.objects.prefetch_related('lideres').all()
-    else:
-        listaGrupo_i = miembro.grupo_lidera.grupos_red.prefetch_related('lideres')
-    ofrenda = False
-    asis_reg = False
-
+    # miembro = Miembro.objects.get(usuario=request.user)
+    miembro = request.miembro
     if miembro.discipulos() or miembro.usuario.has_perm("miembros.es_administrador"):
         if request.method == 'POST':
-            form = FormularioPredicas(miembro=miembro, data=request.POST)
+            form = TotalizadoReunionDiscipuladoForm(request.miembro, data=request.POST)
+
             if form.is_valid():
-                predica = form.cleaned_data['predica']
-                grupo_i = Grupo.objects.get(id=request.POST['menuGrupo_i'])
-                grupoDis = grupo_i.get_children()
-                opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_i.nombre.capitalize()}
                 sw = True
-
-                n = ['Predica']
-                n.extend(grupoDis.values_list('nombre', flat=True))
-                values = [n]
-                sw_while = True
-                l = [predica.nombre.upper()]
-
-                for g in grupoDis:
-                    grupos = Grupo.get_tree(g)
-
-                    if 'opcion' in request.POST and request.POST['opcion'] == 'O':
-                        ofrenda = True
-                        opciones['opt'] = 'Ofrendas'
-                        titulo = "'Ofrendas'"
-
-                        sum_ofrenda = ReunionDiscipulado.objects.filter(predica=predica,
-                                                                        grupo__in=grupos).aggregate(Sum('ofrenda'))
-                        if sum_ofrenda['ofrenda__sum'] is None:
-                            suma = 0
-                        else:
-                            suma = sum_ofrenda['ofrenda__sum']
-                        l.append(float(suma))
-                    else:
-                        if 'opcion' in request.POST and request.POST['opcion'] == 'A':  # discipulos
-                            asis_reg = True
-                            opciones['opt'] = 'Asistentes Regulares'
-                            titulo = "'Asistentes Regulares'"
-                            reg = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=grupos)
-                            numAsis = AsistenciaDiscipulado.objects.filter(reunion__in=reg, asistencia=True).count()
-                            l.append(numAsis)
-                values.append(l)
+                opciones, values, titulo, tiene_discipulos = form.obtener_totalizado()
 
                 # se agrega un condicional que indique que l (la cual es la lista que contiene los valores)
                 # de las respuestas de acuerdo a cada opcion, siempre y cuenta esta lista tenga mas dee un
                 # valor, se puede hacer el reporte, de otro modo llegan campos vacios al PdfTemplate y lanza un error
-                if 'reportePDF' in request.POST and len(l) > 1:
+                if 'reportePDF' in request.POST and len(values[1]) > 1:
+                # if 'reportePDF' in request.POST and len(l) > 1:
                     response = HttpResponse(content_type='application/pdf')
                     response['Content-Disposition'] = 'attachment; filename=report.pdf'
 
@@ -283,7 +246,7 @@ def estadistico_totalizado_reuniones_discipulado(request):
                                 opciones, values, 2)
                     return response
         else:
-            form = FormularioPredicas(miembro=miembro)
+            form = TotalizadoReunionDiscipuladoForm(request.miembro)
             sw = False
 
     return render(request, 'reportes/estadistico_total_discipulado.html', locals())

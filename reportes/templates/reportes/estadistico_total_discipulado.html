@@ -20,57 +20,46 @@
                 <br>
                 <div class="row">
                     <div class="col-md-4 col-md-offset-2">
-                        <div class="input-group form-group">
+                        <div class="input-group {{ form.predica.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-book"></i>
                             </span>
-                            <div class="fg-line requerido">
-                                <label for="id_predica" class="fg-label requerido">Pr&eacute;dica:</label>
-                                {{form.predica}}
+                            <div class="fg-line">
+                                <label for="{{ form.predica.id_for_label }}" class="fg-label">{{ form.predica.label }}*:</label>
+                                {{ form.predica }}
                             </div>
+                            {{ form.predica.errors }}
                         </div>
                     </div>
                     <br class="space">
                     <div class="col-md-4">
-                        <div class="input-group">
+                        <div class="input-group {{ form.grupo_inicial.css_classes }}">
                             <span class="input-group-addon">
                                 <i class="zmdi zmdi-accounts"></i>
                             </span>
-                            <div class="fg-line requerido">
-                                <label for="idGrupo_i" class="fg-label requerido">Grupo Inicial:</label>
-                                <select class="selectpicker" name="menuGrupo_i" id="idGrupo_i" data-live-search="true">
-                                    <option value="-1" {% if not grupo_i %} selected="selected" {% endif %}>Selecciona un grupo</option>
-                                    {% for g_i in listaGrupo_i %}
-                                        <option value="{{ g_i.id }}" {% if g_i == grupo_i %} selected="selected" {% endif %}>{{ g_i }}</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="fg-line">
+                                <label for="{{ form.grupo_inicial.id_for_label }}" class="fg-label">{{ form.grupo_inicial.label }}*:</label>
+                                {{ form.grupo_inicial }}
                             </div>
+                            {{ form.grupo_inicial.errors }}
                         </div>
                     </div>
                 </div>
                 <br>
                 <br class="space-down">
                 <div class="row">
-                    <div class="col-md-4 col-md-offset-2">
+                    <div class="col-md-8 col-md-offset-2">
                         <div class="input-group">
                             <div class="fg-line">
-                                <label for="asis_reg" class="radio m-r-20">
-                                    <input id="asis_reg" type="radio" name="opcion" value="A" {% if asis_reg %} checked="checked" {% endif %}>
+                                {% for opcion in form.opcion %}
+                                <label for="{{ opcion.id_for_label }}" class="radio radio-inline m-r-20">
+                                    {{ opcion.tag }}
                                     <i class="input-helper m-r-20"></i>
-                                    N&uacute;mero de Asistentes Regulares
+                                    {{ opcion.choice_label }}
                                 </label>
+                                {% endfor %}
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <div class="fg-line">
-                                <label for="ofrenda" class="radio m-r-20">
-                                    <input id="ofrenda" type="radio" name="opcion" value="O" {% if ofrenda %} checked="checked" {% endif %}>
-                                    <i class="input-helper m-r-20"></i>
-                                    Ofrenda
-                                </label>
-                            </div>
+                            {{ form.opcion.errors }}
                         </div>
                     </div>
                 </div>
@@ -96,7 +85,7 @@
         {% endif %}
 
     </div>
-    {% if sw and grupoDis %}
+    {% if sw and tiene_discipulos %}
     <div class="card">
         <div class="card-body card-padding">
             <div id="out">
@@ -113,7 +102,7 @@
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
     //dibujando el grafico
-    {% if sw and grupoDis %}
+    {% if sw and tiene_discipulos %}
     google.load("visualization", "1", { packages: ["corechart"], language: 'es' });
     google.setOnLoadCallback(drawChart);
 
@@ -125,18 +114,18 @@
             width: '100%',
             title: {{ titulo| safe }},
             vAxis: {
-                title: { { titulo | safe }},
+                title: {{ titulo | safe }},
             },
         };
         var chart = new google.visualization.ColumnChart(document.getElementById('out'));
         chart.draw(data, options);
     }
     {% else %}
-        {% if sw and not grupoDis %}
+        {% if sw and not tiene_discipulos %}
         $(window).load(function () {
             swal({
                 title: "Lo Sentimos",
-                text: "El grupo {{ grupo_i.nombre|capfirst }} no tiene discipulos",
+                text: "El grupo no tiene discipulos",
                 type: "warning",
                 confirmButtonColor: "#DD6B55",
                 confirmButtonText: "Aceptar",
@@ -148,27 +137,27 @@
 
     $(document).ready(function () {
 
-        $("#form_totalGAR").submit(function () {
-            if ($("#idGrupo_i").val() == -1) {
-                swal("Alerta!!!", "Por favor seleccione un grupo inicial.");
-            }
-            else {
-                return true;
-            }
-            return false;
-        });
+        // $("#form_totalGAR").submit(function () {
+        //     if ($("#idGrupo_i").val() == -1) {
+        //         swal("Alerta!!!", "Por favor seleccione un grupo inicial.");
+        //     }
+        //     else {
+        //         return true;
+        //     }
+        //     return false;
+        // });
 
-        var $lid_asis = $("#idCheck"); var $asis_reg = $("#asis_reg"); var $ofrenda = $("#ofrenda");
+        // var $lid_asis = $("#idCheck"); var $asis_reg = $("#asis_reg"); var $ofrenda = $("#ofrenda");
 
-        $("button[name='verReporte'], button[name='reportePDF']").click(function (event) {
-            if ($lid_asis.is(':checked') || $asis_reg.is(':checked') || $ofrenda.is(':checked')) {
-                return true;
-            }
-            else {
-                swal("Alerta!!!", "Asegurate de escoger una opcion");
-                return false;
-            }
-        });
+        // $("button[name='verReporte'], button[name='reportePDF']").click(function (event) {
+        //     if ($lid_asis.is(':checked') || $asis_reg.is(':checked') || $ofrenda.is(':checked')) {
+        //         return true;
+        //     }
+        //     else {
+        //         swal("Alerta!!!", "Asegurate de escoger una opcion");
+        //         return false;
+        //     }
+        // });
 
     });
 </script> 
