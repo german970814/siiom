@@ -5,7 +5,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 # Locale Apps
-from grupos.models import Predica, Grupo
+from grupos.models import Predica, Grupo, ReunionDiscipulado, AsistenciaDiscipulado
 from common.forms import (FormularioRangoFechas as CommonFormFechas, CustomForm)
 
 
@@ -98,9 +98,11 @@ class TotalizadoReunionDiscipuladoForm(FormularioPredicas, CustomForm):
     Formulario para ver el reporte del totalizado de reuniones de discipulado.
     """
 
+    OFRENDA = 'O'
+    ASISTENTES_REGULARES = 'A'
     OPCIONES = (
-        ('A', _('Número de asistentes regulares')),
-        ('O', _('Ofrenda'))
+        (ASISTENTES_REGULARES, _('Número de asistentes regulares')),
+        (OFRENDA, _('Ofrenda'))
     )
 
     grupo_inicial = forms.ModelChoiceField(queryset=Grupo.objects.none(), empty_label=None)
@@ -115,4 +117,44 @@ class TotalizadoReunionDiscipuladoForm(FormularioPredicas, CustomForm):
         else:
             grupo_queryset = miembro.grupo_lidera.grupos_red.prefetch_related('lideres', 'historiales')
         self.fields['grupo_inicial'].queryset = grupo_queryset
+    
+    def obtener_totalizado(self):
+        opcion = self.cleaned_data['opcion']
+        predica = self.cleaned_data['predica']
+        grupo_inicial = self.cleaned_data['grupo_inicial']
+
+        titulo = ''
+        tiene_discipulos = False
+        discipulos = grupo_inicial.get_children()
+        opciones = {'predica': predica.nombre.capitalize(), 'gi': grupo_inicial.nombre.capitalize()}
+
+        n = ['Predica']
+        n.extend(discipulos.values_list('nombre', flat=True))
+        values = [n]
+        l = [predica.nombre.upper()]
+        for discipulo in discipulos:
+            tiene_discipulos = True
+            arbol = Grupo.get_tree(discipulo)
+
+            reuniones = ReunionDiscipulado.objects.filter(predica=predica, grupo__in=arbol)
+            if opcion == self.OFRENDA:
+                opciones['opt'] = 'Ofrendas'
+                titulo = "'Ofrendas'"
+
+                sum_ofrenda = reuniones.aggregate(Sum('ofrenda'))
+
+                if sum_ofrenda['ofrenda__sum'] is None:
+                    suma = 0
+                else:
+                    suma = sum_ofrenda['ofrenda__sum']
+                
+                l.append(float(suma))
+            else: # opcion es asistentes regulares
+                opciones['opt'] = 'Asistentes Regulares'
+                titulo = "'Asistentes Regulares'"
+                numAsis = AsistenciaDiscipulado.objects.filter(reunion__in=reuniones, asistencia=True).count()
+                l.append(numAsis)
+
+        values.append(l)
+        return opciones, values, titulo, tiene_discipulos
 
