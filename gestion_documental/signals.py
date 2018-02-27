@@ -31,5 +31,5 @@ def model_post_delete(sender, **kwargs):
             for file in get_filenames(instance.archivo):
                 if os.path.exists(ruta + file) and os.path.isfile(ruta + file):
                     os.remove(ruta + file)
-    if os.path.exists(instance.archivo._get_path()) and os.path.isfile(instance.archivo._get_path()):
-        os.remove(instance.archivo._get_path())
+    if os.path.exists(instance.archivo.path) and os.path.isfile(instance.archivo.path):
+        os.remove(instance.archivo.path)
